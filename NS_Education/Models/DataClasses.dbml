@@ -1,0 +1,802 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="db_NS_Education" Class="DataClassesDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Table Name="dbo.B_Category" Member="B_Category">
+    <Type Name="B_Category">
+      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CategoryType" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ParentID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="TitleC" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="TitleE" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="SortNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_Category_B_Device" Member="B_Device" ThisKey="BCID" OtherKey="BCID" Type="B_Device" />
+      <Association Name="B_Category_B_Partner" Member="B_Partner" ThisKey="BCID" OtherKey="BCID" Type="B_Partner" />
+      <Association Name="B_Category_B_SiteData" Member="B_SiteData" ThisKey="BCID" OtherKey="BCID" Type="B_SiteData" />
+      <Association Name="B_Category_D_Company" Member="D_Company" ThisKey="BCID" OtherKey="BCID" Type="D_Company" />
+      <Association Name="B_Category_M_Customer_Category" Member="M_Customer_Category" ThisKey="BCID" OtherKey="BCID" Type="M_Customer_Category" />
+      <Association Name="B_Category_M_Department_Category" Member="M_Department_Category" ThisKey="BCID" OtherKey="BCID" Type="M_Department_Category" />
+      <Association Name="B_Category_M_Partner_Category" Member="M_Partner_Category" ThisKey="BCID" OtherKey="BCID" Type="M_Partner_Category" />
+      <Association Name="B_Category_Resver_Bill_Header" Member="Resver_Bill_Header" ThisKey="BCID" OtherKey="BCID" Type="Resver_Bill_Header" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserLog" Member="UserLog">
+    <Type Name="UserLog">
+      <Column Name="ULID" Type="System.Int64" DbType="BigInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="UID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TargetTable" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="TargetID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ControlType" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="UserData_UserLog" Member="UserData" ThisKey="UID" OtherKey="UID" Type="UserData" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.B_Device" Member="B_Device">
+    <Type Name="B_Device">
+      <Column Name="BDID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BOCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="DHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
+      <Column Name="Ct" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="InPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="OutPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SupplierTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="SupplierName" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="SupplierPhone" Type="System.String" DbType="NVarChar(30)" CanBeNull="true" />
+      <Column Name="Repair" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_Device_Resver_Device" Member="Resver_Device" ThisKey="BDID" OtherKey="BDID" Type="Resver_Device" />
+      <Association Name="B_Category_B_Device" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
+      <Association Name="B_OrderCode_B_Device" Member="B_OrderCode" ThisKey="BOCID" OtherKey="BOCID" Type="B_OrderCode" IsForeignKey="true" />
+      <Association Name="B_StaticCode_B_Device" Member="B_StaticCode" ThisKey="BSCID" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="D_Hall_B_Device" Member="D_Hall" ThisKey="DHID" OtherKey="DHID" Type="D_Hall" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.B_OrderCode" Member="B_OrderCode">
+    <Type Name="B_OrderCode">
+      <Column Name="BOCID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CodeType" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
+      <Column Name="PrintTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="PrintNote" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="SortNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_OrderCode_B_Device" Member="B_Device" ThisKey="BOCID" OtherKey="BOCID" Type="B_Device" />
+      <Association Name="B_OrderCode_B_PartnerItem" Member="B_PartnerItem" ThisKey="BOCID" OtherKey="BOCID" Type="B_PartnerItem" />
+      <Association Name="B_OrderCode_B_SiteData" Member="B_SiteData" ThisKey="BOCID" OtherKey="BOCID" Type="B_SiteData" />
+    </Type>
+  </Table>
+  <Table Name="dbo.B_Partner" Member="B_Partner">
+    <Type Name="B_Partner">
+      <Column Name="BPID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
+      <Column Name="Compilation" Type="System.String" DbType="VarChar(8)" CanBeNull="true" />
+      <Column Name="BSCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Email" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="CleanFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CleanPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="CleanSDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CleanEDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_Partner_B_PartnerItem" Member="B_PartnerItem" ThisKey="BPID" OtherKey="BPID" Type="B_PartnerItem" />
+      <Association Name="B_Partner_M_Partner_Category" Member="M_Partner_Category" ThisKey="BPID" OtherKey="BPID" Type="M_Partner_Category" />
+      <Association Name="B_Partner_Resver_Throw_Food" Member="Resver_Throw_Food" ThisKey="BPID" OtherKey="BPID" Type="Resver_Throw_Food" />
+      <Association Name="B_Category_B_Partner" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
+      <Association Name="B_StaticCode_B_Partner" Member="B_StaticCode" ThisKey="BSCID" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.B_PartnerItem" Member="B_PartnerItem">
+    <Type Name="B_PartnerItem">
+      <Column Name="BPIID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BPID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BOCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="DHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Ct" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Price" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="InPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="OutPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SortNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_OrderCode_B_PartnerItem" Member="B_OrderCode" ThisKey="BOCID" OtherKey="BOCID" Type="B_OrderCode" IsForeignKey="true" />
+      <Association Name="B_Partner_B_PartnerItem" Member="B_Partner" ThisKey="BPID" OtherKey="BPID" Type="B_Partner" IsForeignKey="true" />
+      <Association Name="B_StaticCode_B_PartnerItem" Member="B_StaticCode" ThisKey="BSCID" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="D_Hall_B_PartnerItem" Member="D_Hall" ThisKey="DHID" OtherKey="DHID" Type="D_Hall" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.B_SiteData" Member="B_SiteData">
+    <Type Name="B_SiteData">
+      <Column Name="BSID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
+      <Column Name="BasicSize" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="MaxSize" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="InPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="OutPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="CubicleFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID1" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID5" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="DHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BOCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PhoneExt1" Type="System.String" DbType="VarChar(6)" CanBeNull="true" />
+      <Column Name="PhoneExt2" Type="System.String" DbType="VarChar(6)" CanBeNull="true" />
+      <Column Name="PhoneExt3" Type="System.String" DbType="VarChar(6)" CanBeNull="true" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_SiteData_Resver_Device" Member="Resver_Device" ThisKey="BSID" OtherKey="BSID" Type="Resver_Device" />
+      <Association Name="B_SiteData_Resver_Other" Member="Resver_Other" ThisKey="BSID" OtherKey="BSID" Type="Resver_Other" />
+      <Association Name="B_SiteData_Resver_Site" Member="Resver_Site" ThisKey="BSID" OtherKey="BSID" Type="Resver_Site" />
+      <Association Name="B_SiteData_Resver_Throw" Member="Resver_Throw" ThisKey="BSID" OtherKey="BSID" Type="Resver_Throw" />
+      <Association Name="B_Category_B_SiteData" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
+      <Association Name="B_OrderCode_B_SiteData" Member="B_OrderCode" ThisKey="BOCID" OtherKey="BOCID" Type="B_OrderCode" IsForeignKey="true" />
+      <Association Name="B_StaticCode_B_SiteData" Member="B_StaticCode" ThisKey="BSCID1" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="B_StaticCode_B_SiteData1" Member="B_StaticCode1" ThisKey="BSCID5" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="D_Hall_B_SiteData" Member="D_Hall" ThisKey="DHID" OtherKey="DHID" Type="D_Hall" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.B_StaticCode" Member="B_StaticCode">
+    <Type Name="B_StaticCode">
+      <Column Name="BSCID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CodeType" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="SortNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_StaticCode_B_Device" Member="B_Device" ThisKey="BSCID" OtherKey="BSCID" Type="B_Device" />
+      <Association Name="B_StaticCode_B_Partner" Member="B_Partner" ThisKey="BSCID" OtherKey="BSCID" Type="B_Partner" />
+      <Association Name="B_StaticCode_B_PartnerItem" Member="B_PartnerItem" ThisKey="BSCID" OtherKey="BSCID" Type="B_PartnerItem" />
+      <Association Name="B_StaticCode_B_SiteData" Member="B_SiteData" ThisKey="BSCID" OtherKey="BSCID1" Type="B_SiteData" />
+      <Association Name="B_StaticCode_B_SiteData1" Member="B_SiteData1" ThisKey="BSCID" OtherKey="BSCID5" Type="B_SiteData" />
+      <Association Name="B_StaticCode_Customer" Member="Customer" ThisKey="BSCID" OtherKey="BSCID4" Type="Customer" />
+      <Association Name="B_StaticCode_Customer1" Member="Customer1" ThisKey="BSCID" OtherKey="BSCID6" Type="Customer" />
+      <Association Name="B_StaticCode_CustomerVisit" Member="CustomerVisit" ThisKey="BSCID" OtherKey="BSCID" Type="CustomerVisit" />
+      <Association Name="B_StaticCode_Resver_Head" Member="Resver_Head" ThisKey="BSCID" OtherKey="BSCID11" Type="Resver_Head" />
+      <Association Name="B_StaticCode_Resver_Head1" Member="Resver_Head1" ThisKey="BSCID" OtherKey="BSCID12" Type="Resver_Head" />
+      <Association Name="B_StaticCode_Resver_Site" Member="Resver_Site" ThisKey="BSCID" OtherKey="BSCID" Type="Resver_Site" />
+      <Association Name="B_StaticCode_Resver_Throw" Member="Resver_Throw" ThisKey="BSCID" OtherKey="BSCID" Type="Resver_Throw" />
+      <Association Name="B_StaticCode_Resver_Throw_Food" Member="Resver_Throw_Food" ThisKey="BSCID" OtherKey="BSCID" Type="Resver_Throw_Food" />
+    </Type>
+  </Table>
+  <Table Name="dbo.BusinessUser" Member="BusinessUser">
+    <Type Name="BusinessUser">
+      <Column Name="BUID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Name" Type="System.String" DbType="NVarChar(30)" CanBeNull="true" />
+      <Column Name="Phone" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="MKsalesFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="OPsalesFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="BusinessUser_CustomerVisit" Member="CustomerVisit" ThisKey="BUID" OtherKey="BUID" Type="CustomerVisit" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Customer" Member="Customer">
+    <Type Name="Customer">
+      <Column Name="CID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BSCID6" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID4" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Compilation" Type="System.String" DbType="VarChar(8)" CanBeNull="true" />
+      <Column Name="TitleC" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="TitleE" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="Email" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="InvoiceTitle" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="ContectName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="ContectPhone" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="Website" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="BillFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="InFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="PotentialFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Customer_CustomerGift" Member="CustomerGift" ThisKey="CID" OtherKey="CID" Type="CustomerGift" />
+      <Association Name="Customer_CustomerQuestion" Member="CustomerQuestion" ThisKey="CID" OtherKey="CID" Type="CustomerQuestion" />
+      <Association Name="Customer_CustomerVisit" Member="CustomerVisit" ThisKey="CID" OtherKey="CID" Type="CustomerVisit" />
+      <Association Name="Customer_M_Customer_Category" Member="M_Customer_Category" ThisKey="CID" OtherKey="CID" Type="M_Customer_Category" />
+      <Association Name="B_StaticCode_Customer" Member="B_StaticCode" ThisKey="BSCID4" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="B_StaticCode_Customer1" Member="B_StaticCode1" ThisKey="BSCID6" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CustomerGift" Member="CustomerGift">
+    <Type Name="CustomerGift">
+      <Column Name="CGID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Year" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SendDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="Ct" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Customer_CustomerGift" Member="Customer" ThisKey="CID" OtherKey="CID" Type="Customer" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CustomerQuestion" Member="CustomerQuestion">
+    <Type Name="CustomerQuestion">
+      <Column Name="CQID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="AskDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="AskTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="AskArea" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="AskDescription" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="ResponseFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="ResponseUser" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="ResponseDestriotion" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="ResponseDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Customer_CustomerQuestion" Member="Customer" ThisKey="CID" OtherKey="CID" Type="Customer" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CustomerVisit" Member="CustomerVisit">
+    <Type Name="CustomerVisit">
+      <Column Name="CVID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TargetTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="VisitDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="AfterNote" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_StaticCode_CustomerVisit" Member="B_StaticCode" ThisKey="BSCID" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="BusinessUser_CustomerVisit" Member="BusinessUser" ThisKey="BUID" OtherKey="BUID" Type="BusinessUser" IsForeignKey="true" />
+      <Association Name="Customer_CustomerVisit" Member="Customer" ThisKey="CID" OtherKey="CID" Type="Customer" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.D_Company" Member="D_Company">
+    <Type Name="D_Company">
+      <Column Name="DCID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="TitleC" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="TitleE" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="D_Company_D_Department" Member="D_Department" ThisKey="DCID" OtherKey="DCID" Type="D_Department" />
+      <Association Name="B_Category_D_Company" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.D_Department" Member="D_Department">
+    <Type Name="D_Department">
+      <Column Name="DDID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="DCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="NChar(10)" CanBeNull="true" />
+      <Column Name="TitleC" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="TitleE" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="PeopleCt" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="D_Department_D_Hall" Member="D_Hall" ThisKey="DDID" OtherKey="DDID" Type="D_Hall" />
+      <Association Name="D_Department_M_Department_Category" Member="M_Department_Category" ThisKey="DDID" OtherKey="DDID" Type="M_Department_Category" />
+      <Association Name="D_Company_D_Department" Member="D_Company" ThisKey="DCID" OtherKey="DCID" Type="D_Company" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.D_FoodCategory" Member="D_FoodCategory">
+    <Type Name="D_FoodCategory">
+      <Column Name="DFCID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Price" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="D_FoodCategory_Resver_Throw_Food" Member="Resver_Throw_Food" ThisKey="DFCID" OtherKey="DFCID" Type="Resver_Throw_Food" />
+    </Type>
+  </Table>
+  <Table Name="dbo.D_Hall" Member="D_Hall">
+    <Type Name="D_Hall">
+      <Column Name="DHID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="TitleC" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="TitleE" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="DDID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="DiscountFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CheckoutNowFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="PrintCheckFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="Invoice3Flag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CheckType" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BusinessTaxRate" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="D_Hall_B_Device" Member="B_Device" ThisKey="DHID" OtherKey="DHID" Type="B_Device" />
+      <Association Name="D_Hall_B_PartnerItem" Member="B_PartnerItem" ThisKey="DHID" OtherKey="DHID" Type="B_PartnerItem" />
+      <Association Name="D_Hall_B_SiteData" Member="B_SiteData" ThisKey="DHID" OtherKey="DHID" Type="B_SiteData" />
+      <Association Name="D_Department_D_Hall" Member="D_Department" ThisKey="DDID" OtherKey="DDID" Type="D_Department" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.D_OtherPayItem" Member="D_OtherPayItem">
+    <Type Name="D_OtherPayItem">
+      <Column Name="DOPIID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
+      <Column Name="Ct" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="InPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="OutPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PaidType" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="D_OtherPayItem_Resver_Other" Member="Resver_Other" ThisKey="DOPIID" OtherKey="DOPIID" Type="Resver_Other" />
+    </Type>
+  </Table>
+  <Table Name="dbo.D_PayType" Member="D_PayType">
+    <Type Name="D_PayType">
+      <Column Name="DPTID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
+      <Column Name="AccountingNo" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="CustormerNo" Type="System.String" DbType="VarChar(20)" CanBeNull="true" />
+      <Column Name="InvoiceFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DepositFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="RestaurantFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="SimpleCheckoutFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="SimpleDepositFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="D_PayType_Resver_Bill_Header" Member="Resver_Bill_Header" ThisKey="DPTID" OtherKey="DPTID" Type="Resver_Bill_Header" />
+    </Type>
+  </Table>
+  <Table Name="dbo.D_TimeSpan" Member="D_TimeSpan">
+    <Type Name="D_TimeSpan">
+      <Column Name="DTSID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
+      <Column Name="HourS" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="MinuteS" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="HourE" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="MinuteE" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="D_TimeSpan_Resver_Device" Member="Resver_Device" ThisKey="DTSID" OtherKey="DTSIDE" Type="Resver_Device" />
+      <Association Name="D_TimeSpan_Resver_Device1" Member="Resver_Device1" ThisKey="DTSID" OtherKey="DTSIDS" Type="Resver_Device" />
+      <Association Name="D_TimeSpan_Resver_Site" Member="Resver_Site" ThisKey="DTSID" OtherKey="DTSIDE" Type="Resver_Site" />
+      <Association Name="D_TimeSpan_Resver_Site1" Member="Resver_Site1" ThisKey="DTSID" OtherKey="DTSIDS" Type="Resver_Site" />
+    </Type>
+  </Table>
+  <Table Name="dbo.D_Zip" Member="D_Zip">
+    <Type Name="D_Zip">
+      <Column Name="DZID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ParentID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="GroupName" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.GroupData" Member="GroupData">
+    <Type Name="GroupData">
+      <Column Name="GID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="GroupData_M_Group_Menu" Member="M_Group_Menu" ThisKey="GID" OtherKey="GID" Type="M_Group_Menu" />
+      <Association Name="GroupData_M_Group_User" Member="M_Group_User" ThisKey="GID" OtherKey="GID" Type="M_Group_User" />
+    </Type>
+  </Table>
+  <Table Name="dbo.M_Customer_Category" Member="M_Customer_Category">
+    <Type Name="M_Customer_Category">
+      <Column Name="MID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="CID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_Category_M_Customer_Category" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
+      <Association Name="Customer_M_Customer_Category" Member="Customer" ThisKey="CID" OtherKey="CID" Type="Customer" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.M_Department_Category" Member="M_Department_Category">
+    <Type Name="M_Department_Category">
+      <Column Name="MID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="DDID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_Category_M_Department_Category" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
+      <Association Name="D_Department_M_Department_Category" Member="D_Department" ThisKey="DDID" OtherKey="DDID" Type="D_Department" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.M_Group_Menu" Member="M_Group_Menu">
+    <Type Name="M_Group_Menu">
+      <Column Name="MID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="GID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="MDID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ShowFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="AddFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="EditFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="PringFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="GroupData_M_Group_Menu" Member="GroupData" ThisKey="GID" OtherKey="GID" Type="GroupData" IsForeignKey="true" />
+      <Association Name="MenuData_M_Group_Menu" Member="MenuData" ThisKey="MDID" OtherKey="MDID" Type="MenuData" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.M_Group_User" Member="M_Group_User">
+    <Type Name="M_Group_User">
+      <Column Name="MID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="GID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="GroupData_M_Group_User" Member="GroupData" ThisKey="GID" OtherKey="GID" Type="GroupData" IsForeignKey="true" />
+      <Association Name="UserData_M_Group_User" Member="UserData" ThisKey="UID" OtherKey="UID" Type="UserData" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.M_Partner_Category" Member="M_Partner_Category">
+    <Type Name="M_Partner_Category">
+      <Column Name="MID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BPID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_Category_M_Partner_Category" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
+      <Association Name="B_Partner_M_Partner_Category" Member="B_Partner" ThisKey="BPID" OtherKey="BPID" Type="B_Partner" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.MenuData" Member="MenuData">
+    <Type Name="MenuData">
+      <Column Name="MDID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ParentID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="URL" Type="System.String" DbType="NVarChar(300)" CanBeNull="true" />
+      <Column Name="SortNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="MenuData_M_Group_Menu" Member="M_Group_Menu" ThisKey="MDID" OtherKey="MDID" Type="M_Group_Menu" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Resver_Bill_Detail" Member="Resver_Bill_Detail">
+    <Type Name="Resver_Bill_Detail">
+      <Column Name="RBDID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="RBHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TargetTable" Type="System.String" DbType="VarChar(30)" CanBeNull="true" />
+      <Column Name="TargetID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Price" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Resver_Bill_Header_Resver_Bill_Detail" Member="Resver_Bill_Header" ThisKey="RBHID" OtherKey="RBHID" Type="Resver_Bill_Header" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Resver_Bill_Header" Member="Resver_Bill_Header">
+    <Type Name="Resver_Bill_Header">
+      <Column Name="RBHID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="RHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="DPTID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Price" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PayFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="PayDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CheckUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Resver_Bill_Header_Resver_Bill_Detail" Member="Resver_Bill_Detail" ThisKey="RBHID" OtherKey="RBHID" Type="Resver_Bill_Detail" />
+      <Association Name="B_Category_Resver_Bill_Header" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
+      <Association Name="D_PayType_Resver_Bill_Header" Member="D_PayType" ThisKey="DPTID" OtherKey="DPTID" Type="D_PayType" IsForeignKey="true" />
+      <Association Name="Resver_Head_Resver_Bill_Header" Member="Resver_Head" ThisKey="RHID" OtherKey="RHID" Type="Resver_Head" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Resver_Device" Member="Resver_Device">
+    <Type Name="Resver_Device">
+      <Column Name="RDID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="RHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TargetDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="DTSIDS" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="DTSIDE" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BDID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BOCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PrintTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="PrintNote" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Pricing" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Ct" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TotalPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SortNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_Device_Resver_Device" Member="B_Device" ThisKey="BDID" OtherKey="BDID" Type="B_Device" IsForeignKey="true" />
+      <Association Name="B_SiteData_Resver_Device" Member="B_SiteData" ThisKey="BSID" OtherKey="BSID" Type="B_SiteData" IsForeignKey="true" />
+      <Association Name="D_TimeSpan_Resver_Device" Member="D_TimeSpan" ThisKey="DTSIDE" OtherKey="DTSID" Type="D_TimeSpan" IsForeignKey="true" />
+      <Association Name="D_TimeSpan_Resver_Device1" Member="D_TimeSpan1" ThisKey="DTSIDS" OtherKey="DTSID" Type="D_TimeSpan" IsForeignKey="true" />
+      <Association Name="Resver_Head_Resver_Device" Member="Resver_Head" ThisKey="RHID" OtherKey="RHID" Type="Resver_Head" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Resver_GiveBack" Member="Resver_GiveBack">
+    <Type Name="Resver_GiveBack">
+      <Column Name="RGBID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="RHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="Point" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Resver_Head_Resver_GiveBack" Member="Resver_Head" ThisKey="RHID" OtherKey="RHID" Type="Resver_Head" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Resver_Head" Member="Resver_Head">
+    <Type Name="Resver_Head">
+      <Column Name="RHID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="SDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="EDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID12" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID11" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="CID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="CustomerTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="ContactName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="PeopleCt" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NChar(10)" CanBeNull="true" />
+      <Column Name="MK_BUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="MK_Phone" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="OP_BUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="OP_Phone" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="CheckFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CheckInFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Resver_Head_Resver_Bill_Header" Member="Resver_Bill_Header" ThisKey="RHID" OtherKey="RHID" Type="Resver_Bill_Header" />
+      <Association Name="Resver_Head_Resver_Device" Member="Resver_Device" ThisKey="RHID" OtherKey="RHID" Type="Resver_Device" />
+      <Association Name="Resver_Head_Resver_GiveBack" Member="Resver_GiveBack" ThisKey="RHID" OtherKey="RHID" Type="Resver_GiveBack" />
+      <Association Name="Resver_Head_Resver_Other" Member="Resver_Other" ThisKey="RHID" OtherKey="RHID" Type="Resver_Other" />
+      <Association Name="Resver_Head_Resver_Site" Member="Resver_Site" ThisKey="RHID" OtherKey="RHID" Type="Resver_Site" />
+      <Association Name="Resver_Head_Resver_Throw" Member="Resver_Throw" ThisKey="RHID" OtherKey="RHID" Type="Resver_Throw" />
+      <Association Name="B_StaticCode_Resver_Head" Member="B_StaticCode" ThisKey="BSCID11" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="B_StaticCode_Resver_Head1" Member="B_StaticCode1" ThisKey="BSCID12" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Resver_Other" Member="Resver_Other">
+    <Type Name="Resver_Other">
+      <Column Name="ROID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="RHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TargetDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="BSID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="DOPIID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BOCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PrintTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="PrintNote" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Pricing" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Ct" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TotalPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SortNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_SiteData_Resver_Other" Member="B_SiteData" ThisKey="BSID" OtherKey="BSID" Type="B_SiteData" IsForeignKey="true" />
+      <Association Name="D_OtherPayItem_Resver_Other" Member="D_OtherPayItem" ThisKey="DOPIID" OtherKey="DOPIID" Type="D_OtherPayItem" IsForeignKey="true" />
+      <Association Name="Resver_Head_Resver_Other" Member="Resver_Head" ThisKey="RHID" OtherKey="RHID" Type="Resver_Head" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Resver_Site" Member="Resver_Site">
+    <Type Name="Resver_Site">
+      <Column Name="RSID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="RHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TargetDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="DTSIDS" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="DTSIDE" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BOCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PrintTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="PrintNote" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Pricing" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Ct" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TotalPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SortNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_SiteData_Resver_Site" Member="B_SiteData" ThisKey="BSID" OtherKey="BSID" Type="B_SiteData" IsForeignKey="true" />
+      <Association Name="B_StaticCode_Resver_Site" Member="B_StaticCode" ThisKey="BSCID" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="D_TimeSpan_Resver_Site" Member="D_TimeSpan" ThisKey="DTSIDE" OtherKey="DTSID" Type="D_TimeSpan" IsForeignKey="true" />
+      <Association Name="D_TimeSpan_Resver_Site1" Member="D_TimeSpan1" ThisKey="DTSIDS" OtherKey="DTSID" Type="D_TimeSpan" IsForeignKey="true" />
+      <Association Name="Resver_Head_Resver_Site" Member="Resver_Head" ThisKey="RHID" OtherKey="RHID" Type="Resver_Head" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Resver_Throw" Member="Resver_Throw">
+    <Type Name="Resver_Throw">
+      <Column Name="RTID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="RHID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TargetDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BOCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="PrintTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="PrintNote" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Pricing" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Ct" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TotalPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SortNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Resver_Throw_Resver_Throw_Food" Member="Resver_Throw_Food" ThisKey="RTID" OtherKey="RTID" Type="Resver_Throw_Food" />
+      <Association Name="B_SiteData_Resver_Throw" Member="B_SiteData" ThisKey="BSID" OtherKey="BSID" Type="B_SiteData" IsForeignKey="true" />
+      <Association Name="B_StaticCode_Resver_Throw" Member="B_StaticCode" ThisKey="BSCID" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="Resver_Head_Resver_Throw" Member="Resver_Head" ThisKey="RHID" OtherKey="RHID" Type="Resver_Head" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Resver_Throw_Food" Member="Resver_Throw_Food">
+    <Type Name="Resver_Throw_Food">
+      <Column Name="RTFID" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="RTID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="DFCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BSCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="BPID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Ct" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UnitPrice" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Price" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="B_Partner_Resver_Throw_Food" Member="B_Partner" ThisKey="BPID" OtherKey="BPID" Type="B_Partner" IsForeignKey="true" />
+      <Association Name="B_StaticCode_Resver_Throw_Food" Member="B_StaticCode" ThisKey="BSCID" OtherKey="BSCID" Type="B_StaticCode" IsForeignKey="true" />
+      <Association Name="D_FoodCategory_Resver_Throw_Food" Member="D_FoodCategory" ThisKey="DFCID" OtherKey="DFCID" Type="D_FoodCategory" IsForeignKey="true" />
+      <Association Name="Resver_Throw_Resver_Throw_Food" Member="Resver_Throw" ThisKey="RTID" OtherKey="RTID" Type="Resver_Throw" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserData" Member="UserData">
+    <Type Name="UserData">
+      <Column Name="UID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="UserName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="LoginAccount" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="LoginPassword" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="Note" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="LoginDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="UserData_UserLog" Member="UserLog" ThisKey="UID" OtherKey="UID" Type="UserLog" />
+      <Association Name="UserData_M_Group_User" Member="M_Group_User" ThisKey="UID" OtherKey="UID" Type="M_Group_User" />
+    </Type>
+  </Table>
+</Database>

@@ -5,6 +5,17 @@ using System.Web;
 
 namespace NS_Education.Models
 {
+    public class D_Hall_List
+    {
+        public D_Hall_List() { }
+        public bool SuccessFlag { get; set; }
+        public string Message { get; set; }
+        public int NowPage { get; set; }
+        public int CutPage { get; set; }
+        public int AllItemCt { get; set; }
+        public int AllPageCt { get; set; }
+        public List<D_Hall_APIItem> Items { get; set; }
+    }
     public class D_Hall_APIItem
     {
         public int DDID { get; set; }

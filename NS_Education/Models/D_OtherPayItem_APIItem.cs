@@ -5,29 +5,29 @@ using System.Web;
 
 namespace NS_Education.Models
 {
-    public class D_Department_List
+    public class D_OtherPayItem_List
     {
-        public D_Department_List() { }
+        public D_OtherPayItem_List() { }
         public bool SuccessFlag { get; set; }
         public string Message { get; set; }
         public int NowPage { get; set; }
         public int CutPage { get; set; }
         public int AllItemCt { get; set; }
         public int AllPageCt { get; set; }
-        public List<D_Department_APIItem> Items { get; set; }
+        public List<D_OtherPayItem_APIItem> Items { get; set; }
     }
-    public class D_Department_APIItem
+    public class D_OtherPayItem_APIItem
     {
-        public int DDID { get; set; }
-        public int DCID { get; set; }
-        public string DC_TitleC { get; set; }
-        public string DC_TitleE { get; set; }
-        public List<cSelectItem> CompanyList { get; set; }
+        public int DOPIID { get; set; }
+        
         public string Code { get; set; }
-        public string TitleC { get; set; }
-        public string TitleE { get; set; }
-        public int PeopleCt { get; set; }
-        public int HallCt { get; set; }
+        public string Title { get; set; }
+        public int Ct { get; set; }
+        public int UnitPrice { get; set; }
+        public int InPrice { get; set; }
+        public int OutPrice { get; set; }
+        public int PaidType { get; set; }
+        
         public bool ActiveFlag { get; set; }
         public string CreDate { get; set; }
         public string CreUser { get; set; }

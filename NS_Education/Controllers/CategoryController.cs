@@ -25,12 +25,23 @@ namespace NS_Education.Controllers
         [HttpGet]
         public string GetList(string KeyWord = "", int CategoryType = -1, int NowPage = 1, int CutPage = 10)
         {
-            List<B_Category_APIItem> items = new List<B_Category_APIItem>();
+            
+
             var Ns = DC.B_Category.Where(q => !q.DeleteFlag);
             if (CategoryType >= 0)
                 Ns = Ns.Where(q => q.CategoryType == CategoryType);
             if (KeyWord != "")
                 Ns = Ns.Where(q => q.TitleC.Contains(KeyWord) || q.TitleC.Contains(KeyWord) || q.Code.Contains(KeyWord));
+
+            B_Category_List ListData = new B_Category_List();
+            ListData.Items = new List<B_Category_APIItem>();
+            ListData.SuccessFlag = Ns.Count() > 0;
+            ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
+            ListData.NowPage = NowPage;
+            ListData.CutPage = CutPage;
+            ListData.AllItemCt = Ns.Count();
+            ListData.AllPageCt = NowPage == 0 ? 0 : (ListData.AllItemCt % CutPage == 0 ? ListData.AllItemCt / CutPage : (ListData.AllItemCt / CutPage) + 1);
+
             if (NowPage == 0)
                 Ns = Ns.Where(q => q.ActiveFlag).OrderBy(q => q.SortNo);
             else
@@ -42,7 +53,7 @@ namespace NS_Education.Controllers
                 {
                     BC_P = DC.B_Category.FirstOrDefault(q => q.BCID == N.ParentID && !q.DeleteFlag);
                 }
-                items.Add(new B_Category_APIItem()
+                ListData.Items.Add(new B_Category_APIItem()
                 {
                     BCID = N.BCID,
                     iCategoryType = N.CategoryType,
@@ -65,7 +76,7 @@ namespace NS_Education.Controllers
                     UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
                 });
             }
-            return ChangeJson(items);
+            return ChangeJson(ListData);
         }
         //取得分類的內容
         [HttpGet]
@@ -171,8 +182,8 @@ namespace NS_Education.Controllers
             if (N.BCID == 0)//新增
             {
                 if (N.TitleC == "")
-                    Error+= "名稱必須輸入;";
-                if(Error=="")
+                    Error += "名稱必須輸入;";
+                if (Error == "")
                 {
                     var BCs = DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == N.CategoryType);
                     if (BCs.Count() > 0)

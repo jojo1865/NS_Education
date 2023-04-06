@@ -159,6 +159,8 @@
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\DepartmentController.cs" />
     <Compile Include="Controllers\CompanyController.cs" />
+    <Compile Include="Controllers\OtherPayItemController.cs" />
+    <Compile Include="Controllers\FoodCategoryController.cs" />
     <Compile Include="Controllers\HallController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\UserController.cs" />
@@ -172,6 +174,8 @@
       <DependentUpon>DataClasses.dbml</DependentUpon>
     </Compile>
     <Compile Include="Models\D_Company_APIItem.cs" />
+    <Compile Include="Models\D_OtherPayItem_APIItem.cs" />
+    <Compile Include="Models\D_FoodCategory_APIItem.cs" />
     <Compile Include="Models\D_Hall_APIItem.cs" />
     <Compile Include="Models\D_Department_APIItem.cs" />
     <Compile Include="Models\PublicModel.cs" />

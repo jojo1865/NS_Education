@@ -1,11 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Web;
 
 namespace NS_Education.Models
 {
-    
+    public class B_Category_List
+    {
+        public B_Category_List() { }
+        public bool SuccessFlag { get; set; }
+        public string Message { get; set; }
+        public int NowPage { get; set; }
+        public int CutPage { get; set; }
+        public int AllItemCt { get; set; }
+        public int AllPageCt { get; set; }
+        public List<B_Category_APIItem> Items { get; set; }
+    }
     public class B_Category_APIItem
     {
         public int BCID { get; set; }

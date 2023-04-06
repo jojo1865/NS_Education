@@ -14,12 +14,21 @@ namespace NS_Education.Controllers
         [HttpGet]
         public string GetList(string KeyWord = "", int DDID = 0, int NowPage = 1, int CutPage = 10)
         {
-            List<D_Hall_APIItem> Items = new List<D_Hall_APIItem>();
             var Ns = DC.D_Hall.Where(q => !q.DeleteFlag);
             if (DDID > 0)
                 Ns = Ns.Where(q => q.DDID == DDID);
             if (KeyWord != "")
                 Ns = Ns.Where(q => q.TitleC.Contains(KeyWord) || q.TitleC.Contains(KeyWord) || q.Code.Contains(KeyWord));
+
+            D_Hall_List ListData = new D_Hall_List();
+            ListData.Items = new List<D_Hall_APIItem>();
+            ListData.SuccessFlag = Ns.Count() > 0;
+            ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
+            ListData.NowPage = NowPage;
+            ListData.CutPage = CutPage;
+            ListData.AllItemCt = Ns.Count();
+            ListData.AllPageCt = NowPage == 0 ? 0 : (ListData.AllItemCt % CutPage == 0 ? ListData.AllItemCt / CutPage : (ListData.AllItemCt / CutPage) + 1);
+
             if (NowPage == 0)
                 Ns = Ns.Where(q => q.ActiveFlag).OrderBy(q => q.TitleC);
             else
@@ -27,7 +36,7 @@ namespace NS_Education.Controllers
 
             foreach (var N in Ns)
             {
-                Items.Add(new D_Hall_APIItem
+                ListData.Items.Add(new D_Hall_APIItem
                 {
                     DHID = N.DHID,
                     DDID = N.DDID,
@@ -59,7 +68,7 @@ namespace NS_Education.Controllers
                 });
             }
 
-            return ChangeJson(Items);
+            return ChangeJson(ListData);
         }
 
         [HttpGet]

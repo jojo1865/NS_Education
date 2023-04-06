@@ -1,28 +1,26 @@
-﻿using Antlr.Runtime.Tree;
-using NS_Education.Models;
+﻿using NS_Education.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Runtime.Serialization;
+using System.Security.Policy;
 using System.Web;
 using System.Web.Mvc;
 
 namespace NS_Education.Controllers
 {
-    public class CompanyController : PublicClass
+    public class FoodCategoryController : PublicClass
     {
         [HttpGet]
-        public string GetList(string KeyWord = "", int BCID = 0, int NowPage = 1, int CutPage = 10)
+        public string GetList(string KeyWord = "", int NowPage = 1, int CutPage = 10)
         {
-            var Ns = DC.D_Company.Where(q => !q.DeleteFlag);
-            if (BCID > 0)
-                Ns = Ns.Where(q => q.BCID == BCID);
+            var Ns = DC.D_FoodCategory.Where(q => !q.DeleteFlag);
+            
             if (KeyWord != "")
-                Ns = Ns.Where(q => q.TitleC.Contains(KeyWord) || q.TitleC.Contains(KeyWord) || q.Code.Contains(KeyWord));
+                Ns = Ns.Where(q => q.Title.Contains(KeyWord) || q.Code.Contains(KeyWord));
 
-            D_Company_List ListData = new D_Company_List();
-            ListData.Items = new List<D_Company_APIItem>();
+            D_FoodCategory_List ListData = new D_FoodCategory_List();
+            ListData.Items = new List<D_FoodCategory_APIItem>();
             ListData.SuccessFlag = Ns.Count() > 0;
             ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
             ListData.NowPage = NowPage;
@@ -31,23 +29,21 @@ namespace NS_Education.Controllers
             ListData.AllPageCt = NowPage == 0 ? 0 : (ListData.AllItemCt % CutPage == 0 ? ListData.AllItemCt / CutPage : (ListData.AllItemCt / CutPage) + 1);
 
             if (NowPage == 0)
-                Ns = Ns.Where(q=>q.ActiveFlag).OrderBy(q => q.TitleC);
+                Ns = Ns.Where(q => q.ActiveFlag).OrderBy(q => q.Title);
             else
-                Ns = Ns.OrderBy(q => q.TitleC).Skip((NowPage - 1) * CutPage).Take(CutPage);
-           
+                Ns = Ns.OrderBy(q => q.Title).Skip((NowPage - 1) * CutPage).Take(CutPage);
+
             foreach (var N in Ns)
             {
-                ListData.Items.Add(new D_Company_APIItem
+                ListData.Items.Add(new D_FoodCategory_APIItem
                 {
-                    DCID = N.DCID,
-                    BCID = N.BCID,
-                    BC_TitleC = N.B_Category.TitleC,
-                    BC_TitleE = N.B_Category.TitleE,
-                    CategoryList = null,
+                    DFCID = N.DFCID,
                     Code = N.Code,
-                    TitleC = N.TitleC,
-                    TitleE = N.TitleE,
-                    DepartmentCt = N.D_Department.Count(),
+                    Title = N.Title,
+
+                    UnitPrice = N.UnitPrice,
+                    Price = N.Price,
+                    
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
                     CreUser = GetUserNameByID(N.CreUID),
@@ -55,34 +51,28 @@ namespace NS_Education.Controllers
                     UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
                     UpdUser = (N.CreDate != N.UpdDate ? GetUserNameByID(N.UpdUID) : ""),
                     UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                }); ; ;
+                });
             }
 
             return ChangeJson(ListData);
         }
 
         [HttpGet]
-        public D_Company_APIItem GetInfoByID(int ID = 0)
+        public D_FoodCategory_APIItem GetInfoByID(int ID = 0)
         {
-            var N = DC.D_Company.FirstOrDefault(q => q.DCID == ID && !q.DeleteFlag);
-            D_Company_APIItem Item = null;
+            var N = DC.D_FoodCategory.FirstOrDefault(q => q.DFCID == ID && !q.DeleteFlag);
+            D_FoodCategory_APIItem Item = null;
             if (N != null)
             {
-                List<cSelectItem> SIs = new List<cSelectItem>();
-                var Cats = DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == 1).OrderBy(q => q.SortNo);
-                foreach (var Cat in Cats)
-                    SIs.Add(new cSelectItem { ID = Cat.BCID, Title = Cat.TitleC, SelectFlag = N.BCID == Cat.BCID });
-                Item = new D_Company_APIItem
+                Item = new D_FoodCategory_APIItem
                 {
-                    DCID = N.DCID,
-                    BCID = N.BCID,
-                    BC_TitleC = N.B_Category.TitleC,
-                    BC_TitleE = N.B_Category.TitleE,
-                    CategoryList = SIs,
+                    DFCID = N.DFCID,
                     Code = N.Code,
-                    TitleC = N.TitleC,
-                    TitleE = N.TitleE,
-                    DepartmentCt = N.D_Department.Count(),
+                    Title = N.Title,
+
+                    UnitPrice = N.UnitPrice,
+                    Price = N.Price,
+
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
                     CreUser = GetUserNameByID(N.CreUID),
@@ -103,7 +93,7 @@ namespace NS_Education.Controllers
                 Error += "缺少更新者ID,無法更新;";
             else
             {
-                var N_ = DC.D_Company.FirstOrDefault(q => q.DCID == ID && !q.DeleteFlag);
+                var N_ = DC.D_FoodCategory.FirstOrDefault(q => q.DFCID == ID && !q.DeleteFlag);
                 if (N_ != null)
                 {
                     N_.ActiveFlag = ActiveFlag;
@@ -125,7 +115,7 @@ namespace NS_Education.Controllers
                 Error += "缺少更新者ID,無法更新;";
             else
             {
-                var N_ = DC.D_Company.FirstOrDefault(q => q.DCID == ID);
+                var N_ = DC.D_FoodCategory.FirstOrDefault(q => q.DFCID == ID);
                 if (N_ != null)
                 {
                     N_.DeleteFlag = true;
@@ -141,42 +131,51 @@ namespace NS_Education.Controllers
         }
 
         [HttpPost]
-        public string Submit(D_Company N)
+        public string Submit(D_FoodCategory N)
         {
             Error = "";
-            if (N.DCID == 0)
+            if (N.DFCID == 0)
             {
                 if (N.CreUID == 0)
                     Error += "缺少建立者ID,無法更新;";
-                if (N.BCID <= 0)
-                    Error += "請選擇公司所屬分類;";
-                if (N.TitleC == "")
+               
+                if (N.Title == "")
                     Error += "名稱必須輸入;";
+                if (N.UnitPrice < 0)
+                    Error += "請輸入成本的數字;";
+                if (N.Price < 0)
+                    Error += "請輸入價格的數字;";
                 if (Error == "")
                 {
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
-                    DC.D_Company.InsertOnSubmit(N);
+                    DC.D_FoodCategory.InsertOnSubmit(N);
                     DC.SubmitChanges();
                 }
             }
             else
             {
-                var N_ = DC.D_Company.FirstOrDefault(q => q.DCID == N.DCID && !q.DeleteFlag);
+                var N_ = DC.D_FoodCategory.FirstOrDefault(q => q.DFCID == N.DFCID && !q.DeleteFlag);
                 if (N.CreUID == 0)
                     Error += "缺少更新者ID,無法更新;";
-                if (N.BCID <= 0)
-                    Error += "請選擇公司所屬分類;";
-                if (N.TitleC == "")
+                
+                if (N.Title == "")
                     Error += "名稱必須輸入;";
+                if (N.UnitPrice < 0)
+                    Error += "請輸入成本的數字;";
+                if (N.Price < 0)
+                    Error += "請輸入價格的數字;";
+
                 if (N_ == null)
                     Error += "查無資料,無法更新";
                 if (Error == "")
                 {
-                    N_.BCID = N.BCID;
+                    
                     N_.Code = N.Code;
-                    N_.TitleC = N.TitleC;
-                    N_.TitleE = N.TitleE;
+                    N_.Title = N.Title;
+                    N_.UnitPrice = N.UnitPrice;
+                    N_.Price = N.Price;
+                    
                     N_.ActiveFlag = N.ActiveFlag;
                     N_.DeleteFlag = N.DeleteFlag;
                     N_.UpdUID = N.UpdUID;

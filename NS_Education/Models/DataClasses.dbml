@@ -454,7 +454,7 @@
   <Table Name="dbo.D_Zip" Member="D_Zip">
     <Type Name="D_Zip">
       <Column Name="DZID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="ParentID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="ParentID" Type="System.Int32" DbType="Int" CanBeNull="false" />
       <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
       <Column Name="Title" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
       <Column Name="GroupName" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />

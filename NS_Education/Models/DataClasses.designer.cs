@@ -10813,7 +10813,7 @@ namespace NS_Education.Models
 		
 		private int _DZID;
 		
-		private System.Nullable<int> _ParentID;
+		private int _ParentID;
 		
 		private string _Code;
 		
@@ -10841,7 +10841,7 @@ namespace NS_Education.Models
     partial void OnCreated();
     partial void OnDZIDChanging(int value);
     partial void OnDZIDChanged();
-    partial void OnParentIDChanging(System.Nullable<int> value);
+    partial void OnParentIDChanging(int value);
     partial void OnParentIDChanged();
     partial void OnCodeChanging(string value);
     partial void OnCodeChanged();
@@ -10891,7 +10891,7 @@ namespace NS_Education.Models
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ParentID", DbType="Int")]
-		public System.Nullable<int> ParentID
+		public int ParentID
 		{
 			get
 			{

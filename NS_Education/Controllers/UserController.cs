@@ -86,7 +86,7 @@ namespace NS_Education.Controllers
                 CreUID = input.UID,
                 UpdDate = DateTime.Now,
                 UpdUID = 0,
-                LoginDate = DateTime.MinValue
+                LoginDate = DateTime.Now
             };
 
             // doesn't write to db if any error raised

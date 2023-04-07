@@ -12,7 +12,7 @@
         public static bool IsIncorrectUid(this int uid)
         {
             // TODO: 加上驗證資料庫？
-            return uid > 0;
+            return uid <= 0;
         }
     }
 }

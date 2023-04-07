@@ -43,7 +43,7 @@ namespace NS_Education.Controllers
                     Code = N.Code,
                     Title = N.Title,
                     GroupName = N.GroupName,
-
+                    Note = N.Note,
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
                     CreUser = GetUserNameByID(N.CreUID),
@@ -72,7 +72,7 @@ namespace NS_Education.Controllers
                     Code = N.Code,
                     Title = N.Title,
                     GroupName = N.GroupName,
-
+                    Note = N.Note,
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
                     CreUser = GetUserNameByID(N.CreUID),

@@ -23,6 +23,7 @@ namespace NS_Education.Models
         public string Code { get; set; }
         public string Title { get; set; }
         public string GroupName { get; set; }
+        public string Note { get; set; }
         public bool ActiveFlag { get; set; }
         public string CreDate { get; set; }
         public string CreUser { get; set; }

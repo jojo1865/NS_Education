@@ -58,16 +58,18 @@ namespace NS_Education.Controllers
                 AddError(UidIncorrect);
             if (input.LoginPassword.IsNullOrWhiteSpace())
                 AddError(EmptyNotAllowed("使用者密碼"));
-            
-            // check and encrypt pw
-            try
+            else
             {
-                input.LoginPassword = EncryptPassword(input.LoginPassword);
-            }
-            catch (ValidationException)
-            {
-                AddError(PasswordAlphanumericOnly);
-                // 這裡不做提早返回，方便一次顯示更多錯誤訊息給使用者
+                // check and encrypt pw
+                try
+                {
+                    input.LoginPassword = EncryptPassword(input.LoginPassword);
+                }
+                catch (ValidationException)
+                {
+                    AddError(PasswordAlphanumericOnly);
+                    // 這裡不做提早返回，方便一次顯示更多錯誤訊息給使用者
+                }
             }
 
             // create UserData object, validate the columns along

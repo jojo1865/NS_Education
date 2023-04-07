@@ -5,25 +5,32 @@ using System.Web;
 
 namespace NS_Education.Models
 {
-    public class D_Zip_List
+    public class D_TimeSpan_List
     {
-        public D_Zip_List() { }
+        public D_TimeSpan_List() { }
         public bool SuccessFlag { get; set; }
         public string Message { get; set; }
         public int NowPage { get; set; }
         public int CutPage { get; set; }
         public int AllItemCt { get; set; }
         public int AllPageCt { get; set; }
-        public List<D_Zip_APIItem> Items { get; set; }
+        public List<D_TimeSpan_APIItem> Items { get; set; }
     }
-    public class D_Zip_APIItem
+    public class D_TimeSpan_APIItem
     {
-        public int DZID { get; set; }
-        public int ParentID { get; set; }
+        public int DTSID { get; set; }
         public string Code { get; set; }
         public string Title { get; set; }
-        public string GroupName { get; set; }
-        public string Note { get; set; }
+        public int HourS { get; set; }
+        public int MinuteS { get; set; }
+        public int HourE { get; set; }
+        public int MinuteE { get; set; }
+
+        public string TimeS { get; set; }
+        public string TimeE { get; set; }
+
+        public string GetTimeSpan { get; set; }
+
         public bool ActiveFlag { get; set; }
         public string CreDate { get; set; }
         public string CreUser { get; set; }

@@ -22,6 +22,7 @@
       <Association Name="B_Category_M_Department_Category" Member="M_Department_Category" ThisKey="BCID" OtherKey="BCID" Type="M_Department_Category" />
       <Association Name="B_Category_M_Partner_Category" Member="M_Partner_Category" ThisKey="BCID" OtherKey="BCID" Type="M_Partner_Category" />
       <Association Name="B_Category_Resver_Bill_Header" Member="Resver_Bill_Header" ThisKey="BCID" OtherKey="BCID" Type="Resver_Bill_Header" />
+      <Association Name="B_Category_D_PayType" Member="D_PayType" ThisKey="BCID" OtherKey="BCID" Type="D_PayType" />
     </Type>
   </Table>
   <Table Name="dbo.UserLog" Member="UserLog">
@@ -408,28 +409,6 @@
       <Association Name="D_OtherPayItem_Resver_Other" Member="Resver_Other" ThisKey="DOPIID" OtherKey="DOPIID" Type="Resver_Other" />
     </Type>
   </Table>
-  <Table Name="dbo.D_PayType" Member="D_PayType">
-    <Type Name="D_PayType">
-      <Column Name="DPTID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
-      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
-      <Column Name="AccountingNo" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
-      <Column Name="CustormerNo" Type="System.String" DbType="VarChar(20)" CanBeNull="true" />
-      <Column Name="InvoiceFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="DepositFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="RestaurantFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="SimpleCheckoutFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="SimpleDepositFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Association Name="D_PayType_Resver_Bill_Header" Member="Resver_Bill_Header" ThisKey="DPTID" OtherKey="DPTID" Type="Resver_Bill_Header" />
-    </Type>
-  </Table>
   <Table Name="dbo.D_TimeSpan" Member="D_TimeSpan">
     <Type Name="D_TimeSpan">
       <Column Name="DTSID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -597,8 +576,8 @@
       <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Association Name="Resver_Bill_Header_Resver_Bill_Detail" Member="Resver_Bill_Detail" ThisKey="RBHID" OtherKey="RBHID" Type="Resver_Bill_Detail" />
       <Association Name="B_Category_Resver_Bill_Header" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
-      <Association Name="D_PayType_Resver_Bill_Header" Member="D_PayType" ThisKey="DPTID" OtherKey="DPTID" Type="D_PayType" IsForeignKey="true" />
       <Association Name="Resver_Head_Resver_Bill_Header" Member="Resver_Head" ThisKey="RHID" OtherKey="RHID" Type="Resver_Head" IsForeignKey="true" />
+      <Association Name="D_PayType_Resver_Bill_Header" Member="D_PayType" ThisKey="DPTID" OtherKey="DPTID" Type="D_PayType" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="dbo.Resver_Device" Member="Resver_Device">
@@ -797,6 +776,29 @@
       <Column Name="LoginDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Association Name="UserData_UserLog" Member="UserLog" ThisKey="UID" OtherKey="UID" Type="UserLog" />
       <Association Name="UserData_M_Group_User" Member="M_Group_User" ThisKey="UID" OtherKey="UID" Type="M_Group_User" />
+    </Type>
+  </Table>
+  <Table Name="dbo.D_PayType" Member="D_PayType">
+    <Type Name="D_PayType">
+      <Column Name="DPTID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="BCID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="Title" Type="System.String" DbType="NVarChar(60)" CanBeNull="true" />
+      <Column Name="AccountingNo" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="CustormerNo" Type="System.String" DbType="VarChar(20)" CanBeNull="true" />
+      <Column Name="InvoiceFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DepositFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="RestaurantFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="SimpleCheckoutFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="SimpleDepositFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="ActiveFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="DeleteFlag" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CreUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UpdDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UpdUID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="D_PayType_Resver_Bill_Header" Member="Resver_Bill_Header" ThisKey="DPTID" OtherKey="DPTID" Type="Resver_Bill_Header" />
+      <Association Name="B_Category_D_PayType" Member="B_Category" ThisKey="BCID" OtherKey="BCID" Type="B_Category" IsForeignKey="true" />
     </Type>
   </Table>
 </Database>

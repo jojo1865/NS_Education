@@ -120,6 +120,10 @@ namespace NS_Education.Controllers
         {
             InitializeResponse();
 
+            // sanitize
+            if (input.UID.IsIncorrectUid())
+                AddError(UidIncorrect);
+            
             // 若密碼有輸入且有變時，驗證 OriginalPassword。
             if (IsChangingPassword(input.LoginPassword, original.LoginPassword))
             {
@@ -159,6 +163,9 @@ namespace NS_Education.Controllers
 
             // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
             if (IsATestUpdate(input))
+                return;
+
+            if (HasError())
                 return;
             
             DC.SubmitChanges();

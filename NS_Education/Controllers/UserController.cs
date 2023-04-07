@@ -106,7 +106,7 @@ namespace NS_Education.Controllers
         // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
         private static bool IsATestRegister(UserData_Submit_Input_APIItem input)
         {
-            return input.Note.ToLower().Equals("newregistertest");
+            return input.Note?.ToLower().Equals("newregistertest") ?? false;
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace NS_Education.Controllers
         // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
         private static bool IsATestUpdate(UserData_Submit_Input_APIItem input)
         {
-            return input.Note.ToLower().Equals("updatetest");
+            return input.Note?.ToLower().Equals("updatetest") ?? false;
         }
         
         /// <summary>

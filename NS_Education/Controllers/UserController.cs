@@ -93,8 +93,18 @@ namespace NS_Education.Controllers
             if (HasError())
                 return;
             
+            // For postman testing: 若備註欄為特殊值時，不真正寫入資料。
+            // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
+            if (IsATestRegister(input))
+                return;
+            
             DC.UserData.InsertOnSubmit(newUser);
             DC.SubmitChanges();
+        }
+
+        private static bool IsATestRegister(UserData_Submit_Input_APIItem input)
+        {
+            return input.Note.ToLower().Equals("newregistertest");
         }
 
         /// <summary>

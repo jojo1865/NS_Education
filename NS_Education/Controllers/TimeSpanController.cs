@@ -32,13 +32,16 @@ namespace NS_Education.Controllers
                 Ns = Ns.Where(q => q.ActiveFlag).OrderBy(q => q.Code);
             else
                 Ns = Ns.OrderBy(q => q.Title).Skip((NowPage - 1) * CutPage).Take(CutPage);
-
+            
             foreach (var N in Ns)
             {
+                DateTime DT_S = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourS + ":" + N.MinuteS + ":00");
+                DateTime DT_E = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourE + ":" + N.MinuteE + ":00");
+                TimeSpan TS = DT_E - DT_S;
                 ListData.Items.Add(new D_TimeSpan_APIItem
                 {
                     DTSID = N.DTSID,
-                    
+
                     Code = N.Code,
                     Title = N.Title,
 
@@ -48,7 +51,7 @@ namespace NS_Education.Controllers
                     MinuteE = N.MinuteE,
                     TimeS = N.HourS.ToString().PadLeft(2, '0') + ":" + N.MinuteS.ToString().PadLeft(2, '0'),
                     TimeE = N.HourE.ToString().PadLeft(2, '0') + ":" + N.MinuteE.ToString().PadLeft(2, '0'),
-
+                    GetTimeSpan = (TS.Hours > 0 ? TS.Hours + "小時" : "") + TS.Minutes.ToString() + "分鐘",
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
                     CreUser = GetUserNameByID(N.CreUID),
@@ -56,7 +59,7 @@ namespace NS_Education.Controllers
                     UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
                     UpdUser = (N.CreDate != N.UpdDate ? GetUserNameByID(N.UpdUID) : ""),
                     UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                });
+                }); ;
             }
 
             return ChangeJson(ListData);
@@ -69,7 +72,11 @@ namespace NS_Education.Controllers
             D_TimeSpan_APIItem Item = null;
             if (N != null)
             {
-                List<cSelectItem> SIs = new List<cSelectItem>();
+                DateTime DT_S = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourS + ":" + N.MinuteS + ":00");
+                DateTime DT_E = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourE + ":" + N.MinuteE + ":00");
+                TimeSpan TS = DT_E - DT_S;
+
+
                 Item = new D_TimeSpan_APIItem
                 {
                     DTSID = N.DTSID,
@@ -83,6 +90,7 @@ namespace NS_Education.Controllers
                     MinuteE = N.MinuteE,
                     TimeS = N.HourS.ToString().PadLeft(2, '0') + ":" + N.MinuteS.ToString().PadLeft(2, '0'),
                     TimeE = N.HourE.ToString().PadLeft(2, '0') + ":" + N.MinuteE.ToString().PadLeft(2, '0'),
+                    GetTimeSpan = (TS.Hours > 0 ? TS.Hours + "小時" : "") + TS.Minutes.ToString() + "分鐘",
 
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),

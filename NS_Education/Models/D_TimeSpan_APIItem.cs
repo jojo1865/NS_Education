@@ -29,6 +29,8 @@ namespace NS_Education.Models
         public string TimeS { get; set; }
         public string TimeE { get; set; }
 
+        public string GetTimeSpan { get; set; }
+
         public bool ActiveFlag { get; set; }
         public string CreDate { get; set; }
         public string CreUser { get; set; }

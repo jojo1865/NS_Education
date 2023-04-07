@@ -32,7 +32,8 @@ namespace NS_Education.Controllers
         public string Submit(UserData_Submit_Input_APIItem input)
         {
             UserData checkedUser = DC.UserData.FirstOrDefault(u => u.LoginAccount == input.LoginAccount);
-            bool isRegister = checkedUser == null;
+            // TODO: 在確保單元測試方式之後，將此處的 IsATestRegister 邏輯刪除。
+            bool isRegister = checkedUser == null || IsATestRegister(input);
             
             if (isRegister)
                 Register(input);
@@ -102,6 +103,7 @@ namespace NS_Education.Controllers
             DC.SubmitChanges();
         }
 
+        // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
         private static bool IsATestRegister(UserData_Submit_Input_APIItem input)
         {
             return input.Note.ToLower().Equals("newregistertest");
@@ -155,7 +157,17 @@ namespace NS_Education.Controllers
                 return;
             }
 
+            // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
+            if (IsATestUpdate(input))
+                return;
+            
             DC.SubmitChanges();
+        }
+
+        // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
+        private static bool IsATestUpdate(UserData_Submit_Input_APIItem input)
+        {
+            return input.Note.ToLower().Equals("updatetest");
         }
         
         /// <summary>

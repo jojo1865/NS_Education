@@ -32,8 +32,8 @@ namespace NS_Education.Controllers
         public string Submit(UserData_Submit_Input_APIItem input)
         {
             UserData checkedUser = DC.UserData.FirstOrDefault(u => u.LoginAccount == input.LoginAccount);
-            // TODO: 在確保單元測試方式之後，將此處的 IsATestRegister 邏輯刪除。
-            bool isRegister = checkedUser == null || IsATestRegister(input);
+            // TODO: 在確保單元測試方式之後，將此處的測試相關邏輯刪除。
+            bool isRegister = !IsATestUpdate(input) && checkedUser == null || IsATestRegister(input);
             
             if (isRegister)
                 Register(input);

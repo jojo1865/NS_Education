@@ -10,6 +10,7 @@ namespace NS_Education.Controllers
 {
     public class UserController : PublicClass
     {
+        #region 錯誤訊息 - 通用
         /// <summary>
         /// 回傳「請填入{columnName}！」
         /// </summary>
@@ -17,10 +18,18 @@ namespace NS_Education.Controllers
         /// <returns>錯誤訊息字串</returns>
         private static string EmptyNotAllowed(string columnName)
             => $"請填入{columnName}！";
+        #endregion
+        
+        #region 錯誤訊息 - 註冊
+        private const string OriginalPasswordEmptyOrIncorrect = "原密碼未輸入或不正確！";
+        private const string PasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
+        private const string UidIncorrect = "缺少 UID，無法寫入！";
+        #endregion
 
-        private static string OriginalPasswordEmptyOrIncorrect => "原密碼未輸入或不正確！";
-        private static string PasswordAlphanumericOnly => "使用者密碼只允許半形英文字母、數字！";
-        private static string UidIncorrect => "缺少 UID，無法寫入！";
+        #region 錯誤訊息 - 登入
+        private const string LoginAccountNotFound = "查無此使用者帳號，請重新確認！";
+        private const string LoginPasswordIncorrect = "使用者密碼錯誤！";
+        #endregion
         
         /// <summary>
         /// 註冊、更新使用者資料。<br/>
@@ -241,6 +250,28 @@ namespace NS_Education.Controllers
             {
                 return false;
             }
+        }
+
+        [HttpPost]
+        public string Login(UserData_Login_Input_APIItem input)
+        {
+            InitializeResponse();
+            UserData_Login_Output_APIItem output = new UserData_Login_Output_APIItem();
+
+            UserData queried = DC.UserData.FirstOrDefault(u => u.LoginAccount == input.LoginAccount);
+            if (queried == null)
+            {
+                AddError(LoginAccountNotFound);
+                return GetResponseJson(output);
+            }
+
+            if (!ValidatePassword(input.LoginPassword, queried.LoginPassword))
+            {
+                AddError(LoginPasswordIncorrect);
+                return GetResponseJson(output);
+            }
+
+            return GetResponseJson(output);
         }
     }
 }

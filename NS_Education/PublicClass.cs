@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Data.Linq;
-using System.Data.Linq.SqlClient;
 using NS_Education.Models;
-using System.Web.Http;
 using System.Web.Mvc;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Ajax.Utilities;
+using NS_Education.Tools;
 
 namespace NS_Education
 {
@@ -41,6 +37,13 @@ namespace NS_Education
         public string GetResponseJson()
         {
             return ChangeJson(GetMsgClass(Error));
+        }
+        
+        public string GetResponseJson<T>(T infusable) where T : cReturnMessageInfusableAbstract
+        {
+            // TODO: 這裡多餘的 cReturnMessage 應該可以避免。可重構此處 Flow
+            infusable.Infuse(GetMsgClass(Error));
+            return ChangeJson(infusable);
         }
 
         /// <summary>

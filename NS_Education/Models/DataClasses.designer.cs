@@ -84,9 +84,6 @@ namespace NS_Education.Models
     partial void InsertD_OtherPayItem(D_OtherPayItem instance);
     partial void UpdateD_OtherPayItem(D_OtherPayItem instance);
     partial void DeleteD_OtherPayItem(D_OtherPayItem instance);
-    partial void InsertD_PayType(D_PayType instance);
-    partial void UpdateD_PayType(D_PayType instance);
-    partial void DeleteD_PayType(D_PayType instance);
     partial void InsertD_TimeSpan(D_TimeSpan instance);
     partial void UpdateD_TimeSpan(D_TimeSpan instance);
     partial void DeleteD_TimeSpan(D_TimeSpan instance);
@@ -144,6 +141,9 @@ namespace NS_Education.Models
     partial void InsertUserData(UserData instance);
     partial void UpdateUserData(UserData instance);
     partial void DeleteUserData(UserData instance);
+    partial void InsertD_PayType(D_PayType instance);
+    partial void UpdateD_PayType(D_PayType instance);
+    partial void DeleteD_PayType(D_PayType instance);
     #endregion
 		
 		public DataClassesDataContext(string connection) : 
@@ -314,14 +314,6 @@ namespace NS_Education.Models
 			}
 		}
 		
-		public System.Data.Linq.Table<D_PayType> D_PayType
-		{
-			get
-			{
-				return this.GetTable<D_PayType>();
-			}
-		}
-		
 		public System.Data.Linq.Table<D_TimeSpan> D_TimeSpan
 		{
 			get
@@ -473,6 +465,14 @@ namespace NS_Education.Models
 				return this.GetTable<UserData>();
 			}
 		}
+		
+		public System.Data.Linq.Table<D_PayType> D_PayType
+		{
+			get
+			{
+				return this.GetTable<D_PayType>();
+			}
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.B_Category")]
@@ -523,6 +523,8 @@ namespace NS_Education.Models
 		
 		private EntitySet<Resver_Bill_Header> _Resver_Bill_Header;
 		
+		private EntitySet<D_PayType> _D_PayType;
+		
     #region 擴充性方法定義
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -565,6 +567,7 @@ namespace NS_Education.Models
 			this._M_Department_Category = new EntitySet<M_Department_Category>(new Action<M_Department_Category>(this.attach_M_Department_Category), new Action<M_Department_Category>(this.detach_M_Department_Category));
 			this._M_Partner_Category = new EntitySet<M_Partner_Category>(new Action<M_Partner_Category>(this.attach_M_Partner_Category), new Action<M_Partner_Category>(this.detach_M_Partner_Category));
 			this._Resver_Bill_Header = new EntitySet<Resver_Bill_Header>(new Action<Resver_Bill_Header>(this.attach_Resver_Bill_Header), new Action<Resver_Bill_Header>(this.detach_Resver_Bill_Header));
+			this._D_PayType = new EntitySet<D_PayType>(new Action<D_PayType>(this.attach_D_PayType), new Action<D_PayType>(this.detach_D_PayType));
 			OnCreated();
 		}
 		
@@ -932,6 +935,19 @@ namespace NS_Education.Models
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="B_Category_D_PayType", Storage="_D_PayType", ThisKey="BCID", OtherKey="BCID")]
+		public EntitySet<D_PayType> D_PayType
+		{
+			get
+			{
+				return this._D_PayType;
+			}
+			set
+			{
+				this._D_PayType.Assign(value);
+			}
+		}
+		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -1043,6 +1059,18 @@ namespace NS_Education.Models
 		}
 		
 		private void detach_Resver_Bill_Header(Resver_Bill_Header entity)
+		{
+			this.SendPropertyChanging();
+			entity.B_Category = null;
+		}
+		
+		private void attach_D_PayType(D_PayType entity)
+		{
+			this.SendPropertyChanging();
+			entity.B_Category = this;
+		}
+		
+		private void detach_D_PayType(D_PayType entity)
 		{
 			this.SendPropertyChanging();
 			entity.B_Category = null;
@@ -9869,480 +9897,6 @@ namespace NS_Education.Models
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.D_PayType")]
-	public partial class D_PayType : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _DPTID;
-		
-		private int _BCID;
-		
-		private string _Code;
-		
-		private string _Title;
-		
-		private string _AccountingNo;
-		
-		private string _CustormerNo;
-		
-		private bool _InvoiceFlag;
-		
-		private bool _DepositFlag;
-		
-		private bool _RestaurantFlag;
-		
-		private bool _SimpleCheckoutFlag;
-		
-		private bool _SimpleDepositFlag;
-		
-		private bool _ActiveFlag;
-		
-		private bool _DeleteFlag;
-		
-		private System.DateTime _CreDate;
-		
-		private int _CreUID;
-		
-		private System.DateTime _UpdDate;
-		
-		private int _UpdUID;
-		
-		private EntitySet<Resver_Bill_Header> _Resver_Bill_Header;
-		
-    #region 擴充性方法定義
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnDPTIDChanging(int value);
-    partial void OnDPTIDChanged();
-    partial void OnBCIDChanging(int value);
-    partial void OnBCIDChanged();
-    partial void OnCodeChanging(string value);
-    partial void OnCodeChanged();
-    partial void OnTitleChanging(string value);
-    partial void OnTitleChanged();
-    partial void OnAccountingNoChanging(string value);
-    partial void OnAccountingNoChanged();
-    partial void OnCustormerNoChanging(string value);
-    partial void OnCustormerNoChanged();
-    partial void OnInvoiceFlagChanging(bool value);
-    partial void OnInvoiceFlagChanged();
-    partial void OnDepositFlagChanging(bool value);
-    partial void OnDepositFlagChanged();
-    partial void OnRestaurantFlagChanging(bool value);
-    partial void OnRestaurantFlagChanged();
-    partial void OnSimpleCheckoutFlagChanging(bool value);
-    partial void OnSimpleCheckoutFlagChanged();
-    partial void OnSimpleDepositFlagChanging(bool value);
-    partial void OnSimpleDepositFlagChanged();
-    partial void OnActiveFlagChanging(bool value);
-    partial void OnActiveFlagChanged();
-    partial void OnDeleteFlagChanging(bool value);
-    partial void OnDeleteFlagChanged();
-    partial void OnCreDateChanging(System.DateTime value);
-    partial void OnCreDateChanged();
-    partial void OnCreUIDChanging(int value);
-    partial void OnCreUIDChanged();
-    partial void OnUpdDateChanging(System.DateTime value);
-    partial void OnUpdDateChanged();
-    partial void OnUpdUIDChanging(int value);
-    partial void OnUpdUIDChanged();
-    #endregion
-		
-		public D_PayType()
-		{
-			this._Resver_Bill_Header = new EntitySet<Resver_Bill_Header>(new Action<Resver_Bill_Header>(this.attach_Resver_Bill_Header), new Action<Resver_Bill_Header>(this.detach_Resver_Bill_Header));
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DPTID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int DPTID
-		{
-			get
-			{
-				return this._DPTID;
-			}
-			set
-			{
-				if ((this._DPTID != value))
-				{
-					this.OnDPTIDChanging(value);
-					this.SendPropertyChanging();
-					this._DPTID = value;
-					this.SendPropertyChanged("DPTID");
-					this.OnDPTIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_BCID", DbType="Int NOT NULL")]
-		public int BCID
-		{
-			get
-			{
-				return this._BCID;
-			}
-			set
-			{
-				if ((this._BCID != value))
-				{
-					this.OnBCIDChanging(value);
-					this.SendPropertyChanging();
-					this._BCID = value;
-					this.SendPropertyChanged("BCID");
-					this.OnBCIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Code", DbType="VarChar(10)")]
-		public string Code
-		{
-			get
-			{
-				return this._Code;
-			}
-			set
-			{
-				if ((this._Code != value))
-				{
-					this.OnCodeChanging(value);
-					this.SendPropertyChanging();
-					this._Code = value;
-					this.SendPropertyChanged("Code");
-					this.OnCodeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Title", DbType="NVarChar(60)")]
-		public string Title
-		{
-			get
-			{
-				return this._Title;
-			}
-			set
-			{
-				if ((this._Title != value))
-				{
-					this.OnTitleChanging(value);
-					this.SendPropertyChanging();
-					this._Title = value;
-					this.SendPropertyChanged("Title");
-					this.OnTitleChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_AccountingNo", DbType="VarChar(10)")]
-		public string AccountingNo
-		{
-			get
-			{
-				return this._AccountingNo;
-			}
-			set
-			{
-				if ((this._AccountingNo != value))
-				{
-					this.OnAccountingNoChanging(value);
-					this.SendPropertyChanging();
-					this._AccountingNo = value;
-					this.SendPropertyChanged("AccountingNo");
-					this.OnAccountingNoChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CustormerNo", DbType="VarChar(20)")]
-		public string CustormerNo
-		{
-			get
-			{
-				return this._CustormerNo;
-			}
-			set
-			{
-				if ((this._CustormerNo != value))
-				{
-					this.OnCustormerNoChanging(value);
-					this.SendPropertyChanging();
-					this._CustormerNo = value;
-					this.SendPropertyChanged("CustormerNo");
-					this.OnCustormerNoChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceFlag", DbType="Bit NOT NULL")]
-		public bool InvoiceFlag
-		{
-			get
-			{
-				return this._InvoiceFlag;
-			}
-			set
-			{
-				if ((this._InvoiceFlag != value))
-				{
-					this.OnInvoiceFlagChanging(value);
-					this.SendPropertyChanging();
-					this._InvoiceFlag = value;
-					this.SendPropertyChanged("InvoiceFlag");
-					this.OnInvoiceFlagChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DepositFlag", DbType="Bit NOT NULL")]
-		public bool DepositFlag
-		{
-			get
-			{
-				return this._DepositFlag;
-			}
-			set
-			{
-				if ((this._DepositFlag != value))
-				{
-					this.OnDepositFlagChanging(value);
-					this.SendPropertyChanging();
-					this._DepositFlag = value;
-					this.SendPropertyChanged("DepositFlag");
-					this.OnDepositFlagChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RestaurantFlag", DbType="Bit NOT NULL")]
-		public bool RestaurantFlag
-		{
-			get
-			{
-				return this._RestaurantFlag;
-			}
-			set
-			{
-				if ((this._RestaurantFlag != value))
-				{
-					this.OnRestaurantFlagChanging(value);
-					this.SendPropertyChanging();
-					this._RestaurantFlag = value;
-					this.SendPropertyChanged("RestaurantFlag");
-					this.OnRestaurantFlagChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SimpleCheckoutFlag", DbType="Bit NOT NULL")]
-		public bool SimpleCheckoutFlag
-		{
-			get
-			{
-				return this._SimpleCheckoutFlag;
-			}
-			set
-			{
-				if ((this._SimpleCheckoutFlag != value))
-				{
-					this.OnSimpleCheckoutFlagChanging(value);
-					this.SendPropertyChanging();
-					this._SimpleCheckoutFlag = value;
-					this.SendPropertyChanged("SimpleCheckoutFlag");
-					this.OnSimpleCheckoutFlagChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SimpleDepositFlag", DbType="Bit NOT NULL")]
-		public bool SimpleDepositFlag
-		{
-			get
-			{
-				return this._SimpleDepositFlag;
-			}
-			set
-			{
-				if ((this._SimpleDepositFlag != value))
-				{
-					this.OnSimpleDepositFlagChanging(value);
-					this.SendPropertyChanging();
-					this._SimpleDepositFlag = value;
-					this.SendPropertyChanged("SimpleDepositFlag");
-					this.OnSimpleDepositFlagChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ActiveFlag", DbType="Bit NOT NULL")]
-		public bool ActiveFlag
-		{
-			get
-			{
-				return this._ActiveFlag;
-			}
-			set
-			{
-				if ((this._ActiveFlag != value))
-				{
-					this.OnActiveFlagChanging(value);
-					this.SendPropertyChanging();
-					this._ActiveFlag = value;
-					this.SendPropertyChanged("ActiveFlag");
-					this.OnActiveFlagChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DeleteFlag", DbType="Bit NOT NULL")]
-		public bool DeleteFlag
-		{
-			get
-			{
-				return this._DeleteFlag;
-			}
-			set
-			{
-				if ((this._DeleteFlag != value))
-				{
-					this.OnDeleteFlagChanging(value);
-					this.SendPropertyChanging();
-					this._DeleteFlag = value;
-					this.SendPropertyChanged("DeleteFlag");
-					this.OnDeleteFlagChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreDate", DbType="DateTime NOT NULL")]
-		public System.DateTime CreDate
-		{
-			get
-			{
-				return this._CreDate;
-			}
-			set
-			{
-				if ((this._CreDate != value))
-				{
-					this.OnCreDateChanging(value);
-					this.SendPropertyChanging();
-					this._CreDate = value;
-					this.SendPropertyChanged("CreDate");
-					this.OnCreDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreUID", DbType="Int NOT NULL")]
-		public int CreUID
-		{
-			get
-			{
-				return this._CreUID;
-			}
-			set
-			{
-				if ((this._CreUID != value))
-				{
-					this.OnCreUIDChanging(value);
-					this.SendPropertyChanging();
-					this._CreUID = value;
-					this.SendPropertyChanged("CreUID");
-					this.OnCreUIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UpdDate", DbType="DateTime NOT NULL")]
-		public System.DateTime UpdDate
-		{
-			get
-			{
-				return this._UpdDate;
-			}
-			set
-			{
-				if ((this._UpdDate != value))
-				{
-					this.OnUpdDateChanging(value);
-					this.SendPropertyChanging();
-					this._UpdDate = value;
-					this.SendPropertyChanged("UpdDate");
-					this.OnUpdDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UpdUID", DbType="Int NOT NULL")]
-		public int UpdUID
-		{
-			get
-			{
-				return this._UpdUID;
-			}
-			set
-			{
-				if ((this._UpdUID != value))
-				{
-					this.OnUpdUIDChanging(value);
-					this.SendPropertyChanging();
-					this._UpdUID = value;
-					this.SendPropertyChanged("UpdUID");
-					this.OnUpdUIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="D_PayType_Resver_Bill_Header", Storage="_Resver_Bill_Header", ThisKey="DPTID", OtherKey="DPTID")]
-		public EntitySet<Resver_Bill_Header> Resver_Bill_Header
-		{
-			get
-			{
-				return this._Resver_Bill_Header;
-			}
-			set
-			{
-				this._Resver_Bill_Header.Assign(value);
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_Resver_Bill_Header(Resver_Bill_Header entity)
-		{
-			this.SendPropertyChanging();
-			entity.D_PayType = this;
-		}
-		
-		private void detach_Resver_Bill_Header(Resver_Bill_Header entity)
-		{
-			this.SendPropertyChanging();
-			entity.D_PayType = null;
-		}
-	}
-	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.D_TimeSpan")]
 	public partial class D_TimeSpan : INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -13592,9 +13146,9 @@ namespace NS_Education.Models
 		
 		private EntityRef<B_Category> _B_Category;
 		
-		private EntityRef<D_PayType> _D_PayType;
-		
 		private EntityRef<Resver_Head> _Resver_Head;
+		
+		private EntityRef<D_PayType> _D_PayType;
 		
     #region 擴充性方法定義
     partial void OnLoaded();
@@ -13634,8 +13188,8 @@ namespace NS_Education.Models
 		{
 			this._Resver_Bill_Detail = new EntitySet<Resver_Bill_Detail>(new Action<Resver_Bill_Detail>(this.attach_Resver_Bill_Detail), new Action<Resver_Bill_Detail>(this.detach_Resver_Bill_Detail));
 			this._B_Category = default(EntityRef<B_Category>);
-			this._D_PayType = default(EntityRef<D_PayType>);
 			this._Resver_Head = default(EntityRef<Resver_Head>);
+			this._D_PayType = default(EntityRef<D_PayType>);
 			OnCreated();
 		}
 		
@@ -13978,40 +13532,6 @@ namespace NS_Education.Models
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="D_PayType_Resver_Bill_Header", Storage="_D_PayType", ThisKey="DPTID", OtherKey="DPTID", IsForeignKey=true)]
-		public D_PayType D_PayType
-		{
-			get
-			{
-				return this._D_PayType.Entity;
-			}
-			set
-			{
-				D_PayType previousValue = this._D_PayType.Entity;
-				if (((previousValue != value) 
-							|| (this._D_PayType.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._D_PayType.Entity = null;
-						previousValue.Resver_Bill_Header.Remove(this);
-					}
-					this._D_PayType.Entity = value;
-					if ((value != null))
-					{
-						value.Resver_Bill_Header.Add(this);
-						this._DPTID = value.DPTID;
-					}
-					else
-					{
-						this._DPTID = default(int);
-					}
-					this.SendPropertyChanged("D_PayType");
-				}
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Resver_Head_Resver_Bill_Header", Storage="_Resver_Head", ThisKey="RHID", OtherKey="RHID", IsForeignKey=true)]
 		public Resver_Head Resver_Head
 		{
@@ -14042,6 +13562,40 @@ namespace NS_Education.Models
 						this._RHID = default(int);
 					}
 					this.SendPropertyChanged("Resver_Head");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="D_PayType_Resver_Bill_Header", Storage="_D_PayType", ThisKey="DPTID", OtherKey="DPTID", IsForeignKey=true)]
+		public D_PayType D_PayType
+		{
+			get
+			{
+				return this._D_PayType.Entity;
+			}
+			set
+			{
+				D_PayType previousValue = this._D_PayType.Entity;
+				if (((previousValue != value) 
+							|| (this._D_PayType.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._D_PayType.Entity = null;
+						previousValue.Resver_Bill_Header.Remove(this);
+					}
+					this._D_PayType.Entity = value;
+					if ((value != null))
+					{
+						value.Resver_Bill_Header.Add(this);
+						this._DPTID = value.DPTID;
+					}
+					else
+					{
+						this._DPTID = default(int);
+					}
+					this.SendPropertyChanged("D_PayType");
 				}
 			}
 		}
@@ -18791,6 +18345,521 @@ namespace NS_Education.Models
 		{
 			this.SendPropertyChanging();
 			entity.UserData = null;
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.D_PayType")]
+	public partial class D_PayType : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _DPTID;
+		
+		private int _BCID;
+		
+		private string _Code;
+		
+		private string _Title;
+		
+		private string _AccountingNo;
+		
+		private string _CustormerNo;
+		
+		private bool _InvoiceFlag;
+		
+		private bool _DepositFlag;
+		
+		private bool _RestaurantFlag;
+		
+		private bool _SimpleCheckoutFlag;
+		
+		private bool _SimpleDepositFlag;
+		
+		private bool _ActiveFlag;
+		
+		private bool _DeleteFlag;
+		
+		private System.DateTime _CreDate;
+		
+		private int _CreUID;
+		
+		private System.DateTime _UpdDate;
+		
+		private int _UpdUID;
+		
+		private EntitySet<Resver_Bill_Header> _Resver_Bill_Header;
+		
+		private EntityRef<B_Category> _B_Category;
+		
+    #region 擴充性方法定義
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnDPTIDChanging(int value);
+    partial void OnDPTIDChanged();
+    partial void OnBCIDChanging(int value);
+    partial void OnBCIDChanged();
+    partial void OnCodeChanging(string value);
+    partial void OnCodeChanged();
+    partial void OnTitleChanging(string value);
+    partial void OnTitleChanged();
+    partial void OnAccountingNoChanging(string value);
+    partial void OnAccountingNoChanged();
+    partial void OnCustormerNoChanging(string value);
+    partial void OnCustormerNoChanged();
+    partial void OnInvoiceFlagChanging(bool value);
+    partial void OnInvoiceFlagChanged();
+    partial void OnDepositFlagChanging(bool value);
+    partial void OnDepositFlagChanged();
+    partial void OnRestaurantFlagChanging(bool value);
+    partial void OnRestaurantFlagChanged();
+    partial void OnSimpleCheckoutFlagChanging(bool value);
+    partial void OnSimpleCheckoutFlagChanged();
+    partial void OnSimpleDepositFlagChanging(bool value);
+    partial void OnSimpleDepositFlagChanged();
+    partial void OnActiveFlagChanging(bool value);
+    partial void OnActiveFlagChanged();
+    partial void OnDeleteFlagChanging(bool value);
+    partial void OnDeleteFlagChanged();
+    partial void OnCreDateChanging(System.DateTime value);
+    partial void OnCreDateChanged();
+    partial void OnCreUIDChanging(int value);
+    partial void OnCreUIDChanged();
+    partial void OnUpdDateChanging(System.DateTime value);
+    partial void OnUpdDateChanged();
+    partial void OnUpdUIDChanging(int value);
+    partial void OnUpdUIDChanged();
+    #endregion
+		
+		public D_PayType()
+		{
+			this._Resver_Bill_Header = new EntitySet<Resver_Bill_Header>(new Action<Resver_Bill_Header>(this.attach_Resver_Bill_Header), new Action<Resver_Bill_Header>(this.detach_Resver_Bill_Header));
+			this._B_Category = default(EntityRef<B_Category>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DPTID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int DPTID
+		{
+			get
+			{
+				return this._DPTID;
+			}
+			set
+			{
+				if ((this._DPTID != value))
+				{
+					this.OnDPTIDChanging(value);
+					this.SendPropertyChanging();
+					this._DPTID = value;
+					this.SendPropertyChanged("DPTID");
+					this.OnDPTIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_BCID", DbType="Int NOT NULL")]
+		public int BCID
+		{
+			get
+			{
+				return this._BCID;
+			}
+			set
+			{
+				if ((this._BCID != value))
+				{
+					if (this._B_Category.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnBCIDChanging(value);
+					this.SendPropertyChanging();
+					this._BCID = value;
+					this.SendPropertyChanged("BCID");
+					this.OnBCIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Code", DbType="VarChar(10)")]
+		public string Code
+		{
+			get
+			{
+				return this._Code;
+			}
+			set
+			{
+				if ((this._Code != value))
+				{
+					this.OnCodeChanging(value);
+					this.SendPropertyChanging();
+					this._Code = value;
+					this.SendPropertyChanged("Code");
+					this.OnCodeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Title", DbType="NVarChar(60)")]
+		public string Title
+		{
+			get
+			{
+				return this._Title;
+			}
+			set
+			{
+				if ((this._Title != value))
+				{
+					this.OnTitleChanging(value);
+					this.SendPropertyChanging();
+					this._Title = value;
+					this.SendPropertyChanged("Title");
+					this.OnTitleChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_AccountingNo", DbType="VarChar(10)")]
+		public string AccountingNo
+		{
+			get
+			{
+				return this._AccountingNo;
+			}
+			set
+			{
+				if ((this._AccountingNo != value))
+				{
+					this.OnAccountingNoChanging(value);
+					this.SendPropertyChanging();
+					this._AccountingNo = value;
+					this.SendPropertyChanged("AccountingNo");
+					this.OnAccountingNoChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CustormerNo", DbType="VarChar(20)")]
+		public string CustormerNo
+		{
+			get
+			{
+				return this._CustormerNo;
+			}
+			set
+			{
+				if ((this._CustormerNo != value))
+				{
+					this.OnCustormerNoChanging(value);
+					this.SendPropertyChanging();
+					this._CustormerNo = value;
+					this.SendPropertyChanged("CustormerNo");
+					this.OnCustormerNoChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceFlag", DbType="Bit NOT NULL")]
+		public bool InvoiceFlag
+		{
+			get
+			{
+				return this._InvoiceFlag;
+			}
+			set
+			{
+				if ((this._InvoiceFlag != value))
+				{
+					this.OnInvoiceFlagChanging(value);
+					this.SendPropertyChanging();
+					this._InvoiceFlag = value;
+					this.SendPropertyChanged("InvoiceFlag");
+					this.OnInvoiceFlagChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DepositFlag", DbType="Bit NOT NULL")]
+		public bool DepositFlag
+		{
+			get
+			{
+				return this._DepositFlag;
+			}
+			set
+			{
+				if ((this._DepositFlag != value))
+				{
+					this.OnDepositFlagChanging(value);
+					this.SendPropertyChanging();
+					this._DepositFlag = value;
+					this.SendPropertyChanged("DepositFlag");
+					this.OnDepositFlagChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RestaurantFlag", DbType="Bit NOT NULL")]
+		public bool RestaurantFlag
+		{
+			get
+			{
+				return this._RestaurantFlag;
+			}
+			set
+			{
+				if ((this._RestaurantFlag != value))
+				{
+					this.OnRestaurantFlagChanging(value);
+					this.SendPropertyChanging();
+					this._RestaurantFlag = value;
+					this.SendPropertyChanged("RestaurantFlag");
+					this.OnRestaurantFlagChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SimpleCheckoutFlag", DbType="Bit NOT NULL")]
+		public bool SimpleCheckoutFlag
+		{
+			get
+			{
+				return this._SimpleCheckoutFlag;
+			}
+			set
+			{
+				if ((this._SimpleCheckoutFlag != value))
+				{
+					this.OnSimpleCheckoutFlagChanging(value);
+					this.SendPropertyChanging();
+					this._SimpleCheckoutFlag = value;
+					this.SendPropertyChanged("SimpleCheckoutFlag");
+					this.OnSimpleCheckoutFlagChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SimpleDepositFlag", DbType="Bit NOT NULL")]
+		public bool SimpleDepositFlag
+		{
+			get
+			{
+				return this._SimpleDepositFlag;
+			}
+			set
+			{
+				if ((this._SimpleDepositFlag != value))
+				{
+					this.OnSimpleDepositFlagChanging(value);
+					this.SendPropertyChanging();
+					this._SimpleDepositFlag = value;
+					this.SendPropertyChanged("SimpleDepositFlag");
+					this.OnSimpleDepositFlagChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ActiveFlag", DbType="Bit NOT NULL")]
+		public bool ActiveFlag
+		{
+			get
+			{
+				return this._ActiveFlag;
+			}
+			set
+			{
+				if ((this._ActiveFlag != value))
+				{
+					this.OnActiveFlagChanging(value);
+					this.SendPropertyChanging();
+					this._ActiveFlag = value;
+					this.SendPropertyChanged("ActiveFlag");
+					this.OnActiveFlagChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DeleteFlag", DbType="Bit NOT NULL")]
+		public bool DeleteFlag
+		{
+			get
+			{
+				return this._DeleteFlag;
+			}
+			set
+			{
+				if ((this._DeleteFlag != value))
+				{
+					this.OnDeleteFlagChanging(value);
+					this.SendPropertyChanging();
+					this._DeleteFlag = value;
+					this.SendPropertyChanged("DeleteFlag");
+					this.OnDeleteFlagChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreDate", DbType="DateTime NOT NULL")]
+		public System.DateTime CreDate
+		{
+			get
+			{
+				return this._CreDate;
+			}
+			set
+			{
+				if ((this._CreDate != value))
+				{
+					this.OnCreDateChanging(value);
+					this.SendPropertyChanging();
+					this._CreDate = value;
+					this.SendPropertyChanged("CreDate");
+					this.OnCreDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreUID", DbType="Int NOT NULL")]
+		public int CreUID
+		{
+			get
+			{
+				return this._CreUID;
+			}
+			set
+			{
+				if ((this._CreUID != value))
+				{
+					this.OnCreUIDChanging(value);
+					this.SendPropertyChanging();
+					this._CreUID = value;
+					this.SendPropertyChanged("CreUID");
+					this.OnCreUIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UpdDate", DbType="DateTime NOT NULL")]
+		public System.DateTime UpdDate
+		{
+			get
+			{
+				return this._UpdDate;
+			}
+			set
+			{
+				if ((this._UpdDate != value))
+				{
+					this.OnUpdDateChanging(value);
+					this.SendPropertyChanging();
+					this._UpdDate = value;
+					this.SendPropertyChanged("UpdDate");
+					this.OnUpdDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UpdUID", DbType="Int NOT NULL")]
+		public int UpdUID
+		{
+			get
+			{
+				return this._UpdUID;
+			}
+			set
+			{
+				if ((this._UpdUID != value))
+				{
+					this.OnUpdUIDChanging(value);
+					this.SendPropertyChanging();
+					this._UpdUID = value;
+					this.SendPropertyChanged("UpdUID");
+					this.OnUpdUIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="D_PayType_Resver_Bill_Header", Storage="_Resver_Bill_Header", ThisKey="DPTID", OtherKey="DPTID")]
+		public EntitySet<Resver_Bill_Header> Resver_Bill_Header
+		{
+			get
+			{
+				return this._Resver_Bill_Header;
+			}
+			set
+			{
+				this._Resver_Bill_Header.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="B_Category_D_PayType", Storage="_B_Category", ThisKey="BCID", OtherKey="BCID", IsForeignKey=true)]
+		public B_Category B_Category
+		{
+			get
+			{
+				return this._B_Category.Entity;
+			}
+			set
+			{
+				B_Category previousValue = this._B_Category.Entity;
+				if (((previousValue != value) 
+							|| (this._B_Category.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._B_Category.Entity = null;
+						previousValue.D_PayType.Remove(this);
+					}
+					this._B_Category.Entity = value;
+					if ((value != null))
+					{
+						value.D_PayType.Add(this);
+						this._BCID = value.BCID;
+					}
+					else
+					{
+						this._BCID = default(int);
+					}
+					this.SendPropertyChanged("B_Category");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_Resver_Bill_Header(Resver_Bill_Header entity)
+		{
+			this.SendPropertyChanging();
+			entity.D_PayType = this;
+		}
+		
+		private void detach_Resver_Bill_Header(Resver_Bill_Header entity)
+		{
+			this.SendPropertyChanging();
+			entity.D_PayType = null;
 		}
 	}
 }

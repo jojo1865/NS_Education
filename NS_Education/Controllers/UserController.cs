@@ -79,7 +79,7 @@ namespace NS_Education.Controllers
                 LoginPassword = input.LoginPassword,
                 Note = input.Note,
                 ActiveFlag = true,
-                DeleteFlag = true,
+                DeleteFlag = false,
                 CreDate = DateTime.Now,
                 CreUID = input.UID,
                 UpdDate = DateTime.Now,

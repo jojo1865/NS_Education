@@ -6,6 +6,9 @@ using System.Linq;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using NS_Education.Models;
+using NS_Education.Models.APIItems.UserData.DeleteItem;
+using NS_Education.Models.APIItems.UserData.Login;
+using NS_Education.Models.APIItems.UserData.Submit;
 using NS_Education.Tools;
 using NS_Education.Tools.BeingValidated;
 
@@ -23,10 +26,10 @@ namespace NS_Education.Controllers
             => $"請填入{columnName}！";
         #endregion
         
-        #region 錯誤訊息 - 註冊
-        private const string OriginalPasswordEmptyOrIncorrect = "原密碼未輸入或不正確！";
-        private const string PasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
-        private const string UidIncorrect = "缺少 UID，無法寫入！";
+        #region 錯誤訊息 - 註冊/更新
+        private const string SubmitOriginalPasswordEmptyOrIncorrect = "原密碼未輸入或不正確！";
+        private const string SubmitPasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
+        private const string SubmitUidIncorrect = "缺少 UID，無法寫入！";
         #endregion
 
         #region 錯誤訊息 - 登入
@@ -34,6 +37,17 @@ namespace NS_Education.Controllers
         private const string LoginPasswordIncorrect = "使用者密碼錯誤！";
         private static string LoginDateUpdateFailed(Exception e)
             => $"上次登入時間更新失敗，錯誤訊息：{e.Message}！";
+        #endregion
+
+        #region 錯誤訊息 - 刪除
+
+        private const string DeleteItemOperatorUidIncorrect = "未提供操作者的 UID，無法寫入！";
+        private const string DeleteItemTargetUidIncorrect = "未提供欲刪除的 UID 或格式不正確！";
+        private const string DeleteItemTargetUidNotFound = "查無對應的欲刪除 UID，請檢查輸入是否正確！";
+        private const string DeleteItemTargetAlreadyDeleted = "指定使用者已為刪除狀態！";
+        private static string DeleteItemFailed(Exception e)
+            => $"刪除使用者時失敗，錯誤訊息：{e.Message}！";
+        
         #endregion
         
         #region Submit
@@ -71,7 +85,7 @@ namespace NS_Education.Controllers
 
             // sanitize
             if (input.UID.IsIncorrectUid())
-                AddError(UidIncorrect);
+                AddError(SubmitUidIncorrect);
             if (input.LoginPassword.IsNullOrWhiteSpace())
                 AddError(EmptyNotAllowed("使用者密碼"));
             else
@@ -83,7 +97,7 @@ namespace NS_Education.Controllers
                 }
                 catch (ValidationException)
                 {
-                    AddError(PasswordAlphanumericOnly);
+                    AddError(SubmitPasswordAlphanumericOnly);
                     // 這裡不做提早返回，方便一次顯示更多錯誤訊息給使用者
                 }
             }
@@ -137,7 +151,7 @@ namespace NS_Education.Controllers
 
             // sanitize
             if (input.UID.IsIncorrectUid())
-                AddError(UidIncorrect);
+                AddError(SubmitUidIncorrect);
             
             // 若密碼有輸入且有變時，驗證 OriginalPassword。
             if (IsChangingPassword(input.LoginPassword, original.LoginPassword))
@@ -145,7 +159,7 @@ namespace NS_Education.Controllers
                 // 如果輸入的 OriginalPassword 和資料庫密碼不相符，跳錯。
                 if (!HasCorrectOriginalPassword(input.OriginalPassword, original.LoginPassword))
                 {
-                    AddError(OriginalPasswordEmptyOrIncorrect);
+                    AddError(SubmitOriginalPasswordEmptyOrIncorrect);
                     // 這裡不做提早返回，方便一次顯示更多錯誤訊息給使用者
                 }
             }
@@ -172,7 +186,7 @@ namespace NS_Education.Controllers
             catch (ValidationException)
             {
                 // 密碼錯誤時報錯並提早返回。
-                AddError(PasswordAlphanumericOnly);
+                AddError(SubmitPasswordAlphanumericOnly);
                 return;
             }
 
@@ -232,7 +246,7 @@ namespace NS_Education.Controllers
             // 目前使用的加密方法只允許英數字
             // sanitize
             if (password.Any(c => !Char.IsLetterOrDigit(c)))
-                throw new ValidationException(PasswordAlphanumericOnly);
+                throw new ValidationException(SubmitPasswordAlphanumericOnly);
 
             return HSM.Enc_1(password);
         }
@@ -343,6 +357,60 @@ namespace NS_Education.Controllers
             return result;
         }
         
+        #endregion
+        
+        #region DeleteItem
+
+        /// <summary>
+        /// 將指定的 UID 的使用者資料改為刪除狀態。
+        /// </summary>
+        /// <param name="input">輸入資料</param>
+        /// <returns>通用回傳訊息格式</returns>
+        [HttpPost]
+        public string DeleteItem(UserData_DeleteItem_Input_APIItem input)
+        {
+            // TODO: 影響大的端點，但後端目前沒有執行權限的驗證手段。
+
+            // 驗證輸入。
+            // 1. 操作者 UID 是否正確。
+            // 2. 刪除對象 UID 是否正確。
+            bool isInputValid = input.StartValidate(true)
+                .Validate(i => !i.OperatorUID.IsIncorrectUid(), () => AddError(DeleteItemOperatorUidIncorrect))
+                .Validate(i => !i.TargetUID.IsIncorrectUid(), () => AddError(DeleteItemTargetUidIncorrect))
+                .Result();
+
+            if (!isInputValid)
+                return GetResponseJson();
+
+            // 查詢資料並驗證。
+            UserData queried = DC.UserData.FirstOrDefault(u => u.UID == input.TargetUID);
+            // 1. 進行查詢後，是否有查到資料。
+            // 2. 該筆資料是否並非刪除狀態。
+            bool isDataValid = queried.StartValidate(true)
+                .Validate(q => q != null, () => AddError(DeleteItemTargetUidNotFound))
+                .Validate(q => q.DeleteFlag == false, () => AddError(DeleteItemTargetAlreadyDeleted))
+                .Result();
+            
+            if (!isDataValid)
+                return GetResponseJson();
+
+            try
+            {
+                // 更新資料。
+                // ReSharper disable once PossibleNullReferenceException
+                queried.DeleteFlag = true;
+                queried.UpdDate = DateTime.Now;
+                queried.UpdUID = input.OperatorUID;
+                DC.SubmitChanges();
+            }
+            catch (Exception e)
+            {
+                AddError(DeleteItemFailed(e));
+            }
+
+            return GetResponseJson();
+        }
+
         #endregion
     }
 }

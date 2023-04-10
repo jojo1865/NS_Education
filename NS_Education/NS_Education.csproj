@@ -170,6 +170,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\APIItems\UserData\DeleteItem\UserData_DeleteItem_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\Login\UserData_Login_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\Login\UserData_Login_Output_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\Login\User_Privilege_Output_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\Submit\UserData_Submit_Input_APIItem.cs" />
     <Compile Include="Models\B_Category_APIItem.cs" />
     <Compile Include="Models\DataClasses.designer.cs">
       <AutoGen>True</AutoGen>
@@ -185,10 +190,6 @@
     <Compile Include="Models\D_Hall_APIItem.cs" />
     <Compile Include="Models\D_Department_APIItem.cs" />
     <Compile Include="Models\PublicModel.cs" />
-    <Compile Include="Models\UserData\Login\UserData_Login_Input_APIItem.cs" />
-    <Compile Include="Models\UserData\Login\UserData_Login_Output_APIItem.cs" />
-    <Compile Include="Models\UserData\Login\User_Privilege_Output_APIItem.cs" />
-    <Compile Include="Models\UserData\Submit\UserData_Submit_Input_APIItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicClass.cs" />
     <Compile Include="Tools\BeingValidated\BeingValidated.cs" />
@@ -275,7 +276,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\UserData\DeleteItem" />
+    <Folder Include="Models\APIItems" />
     <Folder Include="Views\Category\" />
     <Folder Include="Views\GetInfo\" />
     <Folder Include="Views\Hall\" />

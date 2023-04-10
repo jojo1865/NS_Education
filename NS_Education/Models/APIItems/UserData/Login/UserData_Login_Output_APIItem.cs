@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NS_Education.Tools;
 
-namespace NS_Education.Models
+namespace NS_Education.Models.APIItems.UserData.Login
 {
     public class UserData_Login_Output_APIItem : cReturnMessageInfusableAbstract
     {

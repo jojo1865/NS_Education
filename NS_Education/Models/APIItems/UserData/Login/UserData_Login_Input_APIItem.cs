@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace NS_Education.Models
+﻿namespace NS_Education.Models.APIItems.UserData.Login
 {
     public class UserData_Login_Input_APIItem
     {

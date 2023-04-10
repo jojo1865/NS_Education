@@ -1,4 +1,4 @@
-﻿namespace NS_Education.Models
+﻿namespace NS_Education.Models.APIItems.UserData.Login
 {
     public class User_Privilege_Output_APIItem
     {

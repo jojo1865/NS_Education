@@ -2,7 +2,7 @@
 
 namespace NS_Education.Tools
 {
-    public class BeingValidated<T>
+    public class BeingValidated<T> : IBeingValidated<T>
     {
         private readonly T _target;
         private bool _isInvalid;

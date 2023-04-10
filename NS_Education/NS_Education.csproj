@@ -191,8 +191,9 @@
     <Compile Include="Models\User_Privilege_Output_APIItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicClass.cs" />
-    <Compile Include="Tools\BeingValidated.cs" />
-    <Compile Include="Tools\ChainValidateHelperExtensionMethods.cs" />
+    <Compile Include="Tools\BeingValidated\BeingValidated.cs" />
+    <Compile Include="Tools\BeingValidated\ChainValidateHelperExtensionMethods.cs" />
+    <Compile Include="Tools\BeingValidated\IBeingValidated.cs" />
     <Compile Include="Tools\cReturnMessageInfusableAbstract.cs" />
     <Compile Include="Tools\StandardColumnExtensionMethods.cs" />
     <Compile Include="Tools\StringExtensionMethods.cs" />

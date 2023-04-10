@@ -14,20 +14,34 @@ namespace NS_Education.Tools.BeingValidated
             _lazy = lazy;
         }
 
-        public BeingValidated<T> Validate(Func<T, bool> validation)
+        public IBeingValidated<T> Validate(Func<T, bool> validation, Action onFail = null, Action<Exception> onException = null)
         {
             if (_lazy && _isInvalid)
                 return this;
-            
-            if (!validation.Invoke(_target))
+
+            try
+            {
+                // 驗證，並且在遇到失敗時執行 onFail。
+                if (!validation.Invoke(_target))
+                {
+                    onFail?.Invoke();
+                    _isInvalid = true;
+                }
+            }
+            catch (Exception e)
+            {
                 _isInvalid = true;
+
+                if (onException == null) throw;
+                onException.Invoke(e);
+            }
 
             return this;
         }
 
         public bool Result()
         {
-            return _isInvalid;
+            return !_isInvalid;
         }
     }
 }

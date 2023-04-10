@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using NS_Education.Models;
 using NS_Education.Tools;
+using NS_Education.Tools.BeingValidated;
 
 namespace NS_Education.Controllers
 {
@@ -29,8 +32,11 @@ namespace NS_Education.Controllers
         #region 錯誤訊息 - 登入
         private const string LoginAccountNotFound = "查無此使用者帳號，請重新確認！";
         private const string LoginPasswordIncorrect = "使用者密碼錯誤！";
+        private static string LoginDateUpdateFailed(Exception e)
+            => $"上次登入時間更新失敗，錯誤訊息：{e.Message}！";
         #endregion
         
+        #region Submit
         /// <summary>
         /// 註冊、更新使用者資料。<br/>
         /// 會依據 LoginAccount 是否已經存在於資料庫，判定是註冊還是更新。
@@ -211,7 +217,9 @@ namespace NS_Education.Controllers
         {
             return ValidatePassword(inputOriginalPassword, dataPassword);
         }
+        #endregion
 
+        #region 密碼驗證
         /// <summary>
         /// 針對使用者密碼進行加密。<br/>
         /// 當使用者密碼為空白、空格、null，或包含非英數字時，回傳 (false, null)。
@@ -251,7 +259,9 @@ namespace NS_Education.Controllers
                 return false;
             }
         }
+        #endregion
 
+        #region Login
         /// <summary>
         /// 驗證使用者登入，無誤則會回傳使用者的權限資訊。
         /// </summary>
@@ -261,22 +271,76 @@ namespace NS_Education.Controllers
         public string Login(UserData_Login_Input_APIItem input)
         {
             InitializeResponse();
-            UserData_Login_Output_APIItem output = new UserData_Login_Output_APIItem();
 
+            // 驗證
             UserData queried = DC.UserData.FirstOrDefault(u => u.LoginAccount == input.LoginAccount);
-            if (queried == null)
-            {
-                AddError(LoginAccountNotFound);
-                return GetResponseJson(output);
-            }
+            
+            // 1. 先查詢是否確實有這個帳號
+            // 2. 有帳號，才驗證登入密碼
+            // 3. 更新使用者的上次登入時間，需更新成功才算登入成功
+            bool isValidated = queried.StartValidate(true)
+                .Validate(q => q != null, () => AddError(LoginAccountNotFound))
+                .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
+                    () => AddError(LoginPasswordIncorrect))
+                .Validate(UpdateUserLoginDate)
+                .Result();
 
-            if (!ValidatePassword(input.LoginPassword, queried.LoginPassword))
+            if (!isValidated)
+                return GetResponseJson();
+
+            // 登入都成功後，回傳部分使用者資訊，以及使用者的權限資訊。
+            UserData_Login_Output_APIItem output = new UserData_Login_Output_APIItem
             {
-                AddError(LoginPasswordIncorrect);
-                return GetResponseJson(output);
-            }
+                // queried 已經在上面驗證為非 null。目前專案使用 C# 版本不支援 !，所以以此代替。 
+                // ReSharper disable once PossibleNullReferenceException
+                UID = queried.UID,
+                Username = queried.UserName,
+
+                // TODO: 完成權限群組模組後，將此處實作
+                Privileges = new List<User_Privilege_Output_APIItem>
+                {
+                    new User_Privilege_Output_APIItem
+                    {
+                        // dummy
+                        MenuUrl = "*",
+                        AddFlag = true,
+                        DeleteFlag = true,
+                        EditFlag = true,
+                        ShowFlag = true,
+                        PrintFlag = true
+                    }
+                }
+            };
 
             return GetResponseJson(output);
         }
+
+        /// <summary>
+        /// 更新使用者的登入日期時間。
+        /// </summary>
+        /// <param name="user">使用者資料</param>
+        /// <returns>
+        /// true：更新成功。<br/>
+        /// false：更新失敗。
+        /// </returns>
+        private bool UpdateUserLoginDate(UserData user)
+        {
+            bool result = true;
+            
+            try
+            {
+                user.LoginDate = DateTime.Now;
+                DC.SubmitChanges();
+            }
+            catch (Exception e)
+            {
+                AddError(LoginDateUpdateFailed(e));
+                result = false;
+            }
+
+            return result;
+        }
+        
+        #endregion
     }
 }

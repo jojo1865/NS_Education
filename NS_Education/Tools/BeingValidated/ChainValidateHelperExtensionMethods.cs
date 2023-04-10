@@ -9,7 +9,7 @@
         /// <param name="lazy">是否啟用 lazy 模式：若為 true，則當有任一驗證未通過時，後續驗證就不會再實際執行。</param>
         /// <typeparam name="T">Generic Type</typeparam>
         /// <returns>此物件的 BeingValidated。</returns>
-        public static IBeingValidated<T> StartValidate<T>(T target, bool lazy = false)
+        public static IBeingValidated<T> StartValidate<T>(this T target, bool lazy = false)
         {
             return new BeingValidated<T>(target, lazy);
         }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NS_Education.Tools
+namespace NS_Education.Tools.BeingValidated
 {
     public class BeingValidated<T> : IBeingValidated<T>
     {

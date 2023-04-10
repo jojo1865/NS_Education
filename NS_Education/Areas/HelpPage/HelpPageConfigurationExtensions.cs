@@ -13,6 +13,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using NS_Education.Areas.HelpPage.ModelDescriptions;
 using NS_Education.Areas.HelpPage.Models;
+using NS_Education.Areas.HelpPage.SampleGeneration;
 
 namespace NS_Education.Areas.HelpPage
 {

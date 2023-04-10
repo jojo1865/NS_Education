@@ -252,6 +252,11 @@ namespace NS_Education.Controllers
             }
         }
 
+        /// <summary>
+        /// 驗證使用者登入，無誤則會回傳使用者的權限資訊。
+        /// </summary>
+        /// <param name="input">輸入資料</param>
+        /// <returns>部分使用者資訊與權限資訊。格式參照 UserData_Login_Output_APIItem。</returns>
         [HttpPost]
         public string Login(UserData_Login_Input_APIItem input)
         {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NS_Education.Tools
+﻿namespace NS_Education.Tools.BeingValidated
 {
     public static class ChainValidateHelperExtensionMethods
     {

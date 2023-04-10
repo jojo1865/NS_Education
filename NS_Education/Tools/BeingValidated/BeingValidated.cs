@@ -6,17 +6,17 @@ namespace NS_Education.Tools.BeingValidated
     {
         private readonly T _target;
         private bool _isInvalid;
-        private readonly bool _lazy;
+        private readonly bool _skipIfInvalid;
 
-        public BeingValidated(T target, bool lazy = false)
+        public BeingValidated(T target, bool skipIfInvalid = false)
         {
             _target = target;
-            _lazy = lazy;
+            _skipIfInvalid = skipIfInvalid;
         }
 
         public IBeingValidated<T> Validate(Func<T, bool> validation, Action onFail = null, Action<Exception> onException = null)
         {
-            if (_lazy && _isInvalid)
+            if (_skipIfInvalid && _isInvalid)
                 return this;
 
             try

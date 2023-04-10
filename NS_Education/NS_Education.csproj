@@ -185,10 +185,10 @@
     <Compile Include="Models\D_Hall_APIItem.cs" />
     <Compile Include="Models\D_Department_APIItem.cs" />
     <Compile Include="Models\PublicModel.cs" />
-    <Compile Include="Models\UserData_Login_Input_APIItem.cs" />
-    <Compile Include="Models\UserData_Login_Output_APIItem.cs" />
-    <Compile Include="Models\UserData_Submit_Input_APIItem.cs" />
-    <Compile Include="Models\User_Privilege_Output_APIItem.cs" />
+    <Compile Include="Models\UserData\Login\UserData_Login_Input_APIItem.cs" />
+    <Compile Include="Models\UserData\Login\UserData_Login_Output_APIItem.cs" />
+    <Compile Include="Models\UserData\Login\User_Privilege_Output_APIItem.cs" />
+    <Compile Include="Models\UserData\Submit\UserData_Submit_Input_APIItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicClass.cs" />
     <Compile Include="Tools\BeingValidated\BeingValidated.cs" />
@@ -275,6 +275,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Models\UserData\DeleteItem" />
     <Folder Include="Views\Category\" />
     <Folder Include="Views\GetInfo\" />
     <Folder Include="Views\Hall\" />

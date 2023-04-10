@@ -273,7 +273,9 @@ namespace NS_Education.Controllers
             InitializeResponse();
 
             // 驗證
-            UserData queried = DC.UserData.FirstOrDefault(u => u.LoginAccount == input.LoginAccount);
+            UserData queried = !input.LoginAccount.IsNullOrWhiteSpace()
+                ? DC.UserData.FirstOrDefault(u => u.LoginAccount == input.LoginAccount)
+                : null;
             
             // 1. 先查詢是否確實有這個帳號
             // 2. 有帳號，才驗證登入密碼

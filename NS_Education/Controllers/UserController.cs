@@ -275,7 +275,7 @@ namespace NS_Education.Controllers
                 AddError(LoginPasswordIncorrect);
                 return GetResponseJson(output);
             }
-
+            
             return GetResponseJson(output);
         }
     }

@@ -292,10 +292,12 @@ namespace NS_Education.Controllers
                 : null;
             
             // 1. 先查詢是否確實有這個帳號
-            // 2. 有帳號，才驗證登入密碼
-            // 3. 更新使用者的上次登入時間，需更新成功才算登入成功
+            // 2. 確認帳號的啟用 Flag 與刪除 Flag 
+            // 3. 有帳號，才驗證登入密碼
+            // 4. 更新使用者的上次登入時間，需更新成功才算登入成功
             bool isValidated = queried.StartValidate(true)
                 .Validate(q => q != null, () => AddError(LoginAccountNotFound))
+                .Validate(q => q.ActiveFlag && !q.DeleteFlag, () => AddError(LoginAccountNotFound))
                 .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
                     () => AddError(LoginPasswordIncorrect))
                 .Validate(UpdateUserLoginDate)

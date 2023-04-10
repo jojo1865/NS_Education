@@ -1,5 +1,6 @@
 using System.Web.Http;
 using System.Web.Mvc;
+using NS_Education.Areas.HelpPage.App_Start;
 
 namespace NS_Education.Areas.HelpPage
 {

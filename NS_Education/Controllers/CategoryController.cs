@@ -80,7 +80,7 @@ namespace NS_Education.Controllers
         }
         //取得分類的內容
         [HttpGet]
-        public B_Category_APIItem GetInfoByID(int ID = 0)
+        public string GetInfoByID(int ID = 0)
         {
             var N = DC.B_Category.FirstOrDefault(q => !q.DeleteFlag && q.BCID == ID);
             List<cSelectItem> TIs = new List<cSelectItem>();
@@ -129,7 +129,7 @@ namespace NS_Education.Controllers
             {
                 Item.CategoryTypeList = TIs;
             }
-            return Item;
+            return ChangeJson(Item);
         }
         [HttpGet]
         public string ChangeActive(int ID, bool ActiveFlag, int UID)

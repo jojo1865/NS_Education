@@ -64,7 +64,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        public D_Department_APIItem GetInfoByID(int ID = 0)
+        public string GetInfoByID(int ID = 0)
         {
             var N = DC.D_Department.FirstOrDefault(q => q.DDID == ID && !q.DeleteFlag);
             D_Department_APIItem Item = null;
@@ -96,7 +96,7 @@ namespace NS_Education.Controllers
                 };
             }
 
-            return Item;
+            return ChangeJson(Item);
         }
         [HttpGet]
         public string ChangeActive(int ID, bool ActiveFlag, int UID)

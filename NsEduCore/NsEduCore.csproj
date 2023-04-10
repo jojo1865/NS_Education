@@ -15,10 +15,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Responses" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\NsEduCore_DAL\NsEduCore_DAL.csproj" />
     </ItemGroup>
 

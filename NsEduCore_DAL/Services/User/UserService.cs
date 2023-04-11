@@ -21,20 +21,20 @@ namespace NsEduCore_DAL.Services.User
             _context = nsDataContext;
         }
         
-        public async Task<User> SelectByLoginAccount(string loggingAccount)
+        public async Task<Domains.User> SelectByLoginAccount(string loggingAccount)
         {
             UserData queried = await _context.UserData.FirstOrDefaultAsync(u => u.LoginAccount == loggingAccount);
             return queried == null ? null : ToUser(queried);
         }
         
-        public async Task<bool> ValidateLoginPassword(User user, string inputPassword)
+        public async Task<bool> ValidateLoginPassword(Domains.User user, string inputPassword)
         {
             return await Task.Run(() => ValidatePassword(inputPassword, user.UserData.LoginPassword));
         }
 
-        private static User ToUser(UserData queried)
+        private static Domains.User ToUser(UserData queried)
         {
-            User result = new User
+            Domains.User result = new Domains.User
             {
                 UID = queried.UID,
                 UserName = queried.UserName,
@@ -94,7 +94,7 @@ namespace NsEduCore_DAL.Services.User
         }
         #endregion
         
-        public async Task UpdateLoginDate(User user)
+        public async Task UpdateLoginDate(Domains.User user)
         {
             user.UserData.LoginDate = DateTime.Now;
             await _context.SaveChangesAsync();

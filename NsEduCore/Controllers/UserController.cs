@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using NsEduCore.Controllers.Messages;
-using NsEduCore.Requests;
 using NsEduCore.Requests.User;
 using NsEduCore.Responses.User;
 using NsEduCore.Variables;
+using NsEduCore_DAL.Domains;
 using NsEduCore_DAL.Services.User;
 using NsEduCore_Tools.BeingValidated;
 using NsEduCore_Tools.Encryption;
@@ -130,11 +130,17 @@ namespace NsEduCore.Controllers
         }
         #endregion
 
+        #if DEBUG
+        /// <summary>
+        /// 測試 JWT 用端點。
+        /// </summary>
+        /// <returns>200，如果驗證正常。</returns>
         [HttpGet]
         [Authorize]
         public IActionResult TestJWT()
         {
             return Ok();
         }
+        #endif
     }
 }

@@ -11,6 +11,18 @@ namespace NsEduCore.Controllers
     public abstract class BaseController : Controller
     {
         private readonly List<string> errors = new();
+        private string ErrorMessage => String.Join(";", errors);
+        
+        /// <summary>
+        /// 回傳目前是否有任何錯誤訊息。
+        /// </summary>
+        /// <returns>
+        /// true：有<br/>
+        /// false：沒有
+        /// </returns>
+        protected bool HasError => errors.Count != 0;
+
+        private bool IsSuccess => !HasError;
 
         /// <summary>
         /// 新增一筆錯誤訊息。
@@ -29,8 +41,8 @@ namespace NsEduCore.Controllers
         {
             return new BaseResponse
             {
-                Success = HasError(),
-                Message = CreateErrorMessage()
+                Success = IsSuccess,
+                Message = ErrorMessage
             };
         }
 
@@ -42,18 +54,8 @@ namespace NsEduCore.Controllers
         /// <returns>設定好標準回傳訊息欄位的原物件</returns>
         protected T GetReturnMessage<T>(T response) where T : BaseResponseAbstract
         {
-            response.SetBaseMessage(HasError(), CreateErrorMessage());
+            response.SetBaseMessage(IsSuccess, ErrorMessage);
             return response;
-        }
-
-        private string CreateErrorMessage()
-        {
-            return String.Join(";", errors);
-        }
-
-        private bool HasError()
-        {
-            return errors.Count == 0;
         }
     }
 }

@@ -99,5 +99,13 @@ namespace NsEduCore_DAL.Services.User
             user.UserData.LoginDate = DateTime.Now;
             await _context.SaveChangesAsync();
         }
+
+        public string GetUsername(int uid)
+        {
+            if (!uid.IsValidId())
+                return null;
+
+            return _context.UserData.FirstOrDefault(u => u.UID == uid)?.UserName;
+        }
     }
 }

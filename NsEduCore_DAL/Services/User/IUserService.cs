@@ -27,5 +27,12 @@ namespace NsEduCore_DAL.Services.User
         /// </summary>
         /// <param name="user">使用者</param>
         Task UpdateLoginDate(Domains.User user);
+
+        /// <summary>
+        /// 依據輸入的 UID，查詢對應使用者資料，並回傳使用者名稱。
+        /// </summary>
+        /// <param name="uid">對象 UID</param>
+        /// <returns>使用者名稱。查無資料或格式不正確時，回傳 null。</returns>
+        string GetUsername(int uid);
     }
 }

@@ -44,6 +44,7 @@ namespace NsEduCore_DAL.Models.Data
         public virtual DbSet<M_Group_Menu> M_Group_Menu { get; set; }
         public virtual DbSet<M_Group_User> M_Group_User { get; set; }
         public virtual DbSet<M_Partner_Category> M_Partner_Category { get; set; }
+        public virtual DbSet<MenuAPI> MenuAPI { get; set; }
         public virtual DbSet<MenuData> MenuData { get; set; }
         public virtual DbSet<Resver_Bill_Detail> Resver_Bill_Detail { get; set; }
         public virtual DbSet<Resver_Bill_Header> Resver_Bill_Header { get; set; }
@@ -61,7 +62,7 @@ namespace NsEduCore_DAL.Models.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Name=NsEduCore:ConnectionString");
+                optionsBuilder.UseSqlServer("Name=ConnectionStrings:NsEduCore");
             }
         }
 
@@ -693,6 +694,21 @@ namespace NsEduCore_DAL.Models.Data
                     .HasForeignKey(d => d.BPID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_M_Partner_Category_B_Partner");
+            });
+
+            modelBuilder.Entity<MenuAPI>(entity =>
+            {
+                entity.HasKey(e => e.SeqNo);
+
+                entity.Property(e => e.APIURL).HasMaxLength(100);
+
+                entity.Property(e => e.CreDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.MD)
+                    .WithMany(p => p.MenuAPI)
+                    .HasForeignKey(d => d.MDID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_MenuAPI_MenuData");
             });
 
             modelBuilder.Entity<MenuData>(entity =>

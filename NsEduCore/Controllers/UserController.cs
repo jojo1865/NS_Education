@@ -95,13 +95,13 @@ namespace NsEduCore.Controllers
             }
 
             // 5. 回傳
-            UserLoginResponse response = new()
+            UserLoginResponseAbstract responseAbstract = new()
             {
                 Username = queried.UserName,
                 JwtToken = jwtToken 
             };
             
-            return Ok(GetReturnMessage(response));
+            return Ok(GetReturnMessage(responseAbstract));
         }
 
         /// <summary>

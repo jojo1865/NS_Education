@@ -25,7 +25,7 @@ namespace NsEduCore.Controllers
         /// 取得此 Controller 當下狀態的本專案的標準回傳訊息類型。
         /// </summary>
         /// <returns>cReturnMessage</returns>
-        protected IBaseResponse GetReturnMessage()
+        protected BaseResponseAbstract GetReturnMessage()
         {
             return new BaseResponse
             {
@@ -40,7 +40,7 @@ namespace NsEduCore.Controllers
         /// <param name="response">繼承 BaseResponse 的回傳物件</param>
         /// <typeparam name="T">Generic Type</typeparam>
         /// <returns>設定好標準回傳訊息欄位的原物件</returns>
-        protected T GetReturnMessage<T>(T response) where T : IBaseResponse
+        protected T GetReturnMessage<T>(T response) where T : BaseResponseAbstract
         {
             response.SetBaseMessage(HasError(), CreateErrorMessage());
             return response;

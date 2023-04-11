@@ -95,7 +95,7 @@ namespace NsEduCore.Controllers
             }
 
             // 5. 回傳
-            UserLoginResponseAbstract responseAbstract = new()
+            UserLoginResponse responseAbstract = new()
             {
                 Username = queried.UserName,
                 JwtToken = jwtToken 

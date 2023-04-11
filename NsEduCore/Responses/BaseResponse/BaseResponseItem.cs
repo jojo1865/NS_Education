@@ -8,7 +8,7 @@ namespace NsEduCore.Responses.BaseResponse
         /// <summary>
         /// 此 Item 的編號。
         /// </summary>
-        public int ID { get; set; }
+        public int Id { get; set; }
         
         /// <summary>
         /// 此 Item 的名稱。

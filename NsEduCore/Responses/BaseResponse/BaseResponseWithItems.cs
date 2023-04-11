@@ -7,6 +7,9 @@ namespace NsEduCore.Responses.BaseResponse
     /// </summary>
     public class BaseResponseWithItems : BaseResponseAbstract
     {
+        /// <summary>
+        /// 此回傳訊息的物件清單。
+        /// </summary>
         public List<BaseResponseItem> Items { get; } = new();
     }
 }

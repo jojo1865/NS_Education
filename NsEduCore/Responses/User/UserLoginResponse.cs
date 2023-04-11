@@ -1,11 +1,9 @@
-using NsEduCore.Responses.cReturnMessage;
-
 namespace NsEduCore.Responses.User
 {
     /// <summary>
     /// 使用者登入的回傳物件。
     /// </summary>
-    public class UserLoginResponse : cReturnMessageInfusableAbstract
+    public class UserLoginResponse : BaseResponse.BaseResponse
     {
         /// <summary>
         /// 使用者名稱。

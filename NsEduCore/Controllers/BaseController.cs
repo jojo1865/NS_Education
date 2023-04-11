@@ -50,7 +50,7 @@ namespace NsEduCore.Controllers
 
         private string CreateErrorMessage()
         {
-            return String.Concat(errors, ";");
+            return String.Join(";", errors);
         }
 
         private bool HasError()

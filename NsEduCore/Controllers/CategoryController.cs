@@ -85,8 +85,7 @@ namespace NsEduCore.Controllers
                 TitleC = input.TitleC,
                 TitleE = input.TitleE,
                 SortNo = input.SortNo,
-                ActiveFlag = input.ActiveFlag,
-                DeleteFlag = false
+                ActiveFlag = input.ActiveFlag
             };
         }
 

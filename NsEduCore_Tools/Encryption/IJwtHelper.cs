@@ -13,17 +13,5 @@ namespace NsEduCore_Tools.Encryption
         /// <param name="claims">Payload 參數</param>
         /// <returns>JWT Token 字串</returns>
         string GenerateToken(string secretKey, int expireMinutes, IEnumerable<Claim> claims);
-        
-        /// <summary>
-        /// 嘗試解密一組輸入的 JWT Token。失敗時，拋出 SecurityTokenValidationException。
-        /// </summary>
-        /// <param name="token">JWT Token</param>
-        /// <param name="secretKey">JWT 密鑰</param>
-        /// <param name="claimsPrincipal">解密成功時，此欄位會有 Payloads。</param>
-        /// <returns>
-        /// true：解密成功。<br/>
-        /// false：解密失敗。
-        /// </returns>
-        bool TryDecodeToken(string token, string secretKey, out ClaimsPrincipal claimsPrincipal);
     }
 }

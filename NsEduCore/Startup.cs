@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NsEduCore.Variables;
 using NsEduCore_DAL.Models.Data;
 using NsEduCore_DAL.Services.User;
 using NsEduCore_Tools.Encryption;
@@ -44,11 +45,37 @@ namespace NsEduCore
                 // 要讓這個可以正確執行，請在專案 build 的選項中勾選產生 XML。
                 string filePath = Path.Combine(AppContext.BaseDirectory, "NsEduCore.xml");
                 c.IncludeXmlComments(filePath);
+                
+                // 加上提供放 JWT Token 的按鈕
+                c.AddSecurityDefinition("Bearer"
+                , new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT 驗證，請在前方加上「Bearer」，然後空一格，再貼上 Token"
+                });
+                
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
             });
             #endif
 
             // JWT
-            string secret = Configuration.GetSection("NsEduCore:JWT:SecretKey")?.Value;
+            string secret = Configuration.GetSection(JwtConstants.Key)?.Value;
 
             if (secret == null)
                 throw new NullReferenceException("JWT secret key not set!");
@@ -70,7 +97,7 @@ namespace NsEduCore
                         IssuerSigningKey = new SymmetricSecurityKey(secretKey),
                         ValidateIssuer = false,
                         ValidateAudience = false,
-                        ValidateLifetime = true,
+                        ValidateLifetime = true, // JWT Token 的有效時間會存在於其中的 exp 值，所以在驗證時，不需要指定有效時間要多長。
                         ClockSkew = TimeSpan.Zero
                     };
                 });

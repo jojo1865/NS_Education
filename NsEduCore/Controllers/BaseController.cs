@@ -16,7 +16,7 @@ namespace NsEduCore.Controllers
         /// 新增一筆錯誤訊息。
         /// </summary>
         /// <param name="s">錯誤訊息</param>
-        public void AddError(string s)
+        protected void AddError(string s)
         {
             errors.Add(s);
         }
@@ -25,7 +25,7 @@ namespace NsEduCore.Controllers
         /// 取得此 Controller 當下狀態的本專案的標準回傳訊息類型。
         /// </summary>
         /// <returns>cReturnMessage</returns>
-        public cReturnMessage GetReturnMessage()
+        protected cReturnMessage GetReturnMessage()
         {
             return new cReturnMessage
             {
@@ -40,7 +40,7 @@ namespace NsEduCore.Controllers
         /// <param name="infusable">繼承 cReturnMessageInfusableAbstract 的輸出物件</param>
         /// <typeparam name="T">Generic Type</typeparam>
         /// <returns>設定好標準回傳訊息欄位的原物件</returns>
-        public T GetReturnMessage<T>(T infusable) where T : cReturnMessageInfusableAbstract
+        protected T GetReturnMessage<T>(T infusable) where T : cReturnMessageInfusableAbstract
         {
             infusable.Success = HasError();
             infusable.Message = CreateErrorMessage();

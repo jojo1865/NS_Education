@@ -62,7 +62,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        public D_Company_APIItem GetInfoByID(int ID = 0)
+        public string GetInfoByID(int ID = 0)
         {
             var N = DC.D_Company.FirstOrDefault(q => q.DCID == ID && !q.DeleteFlag);
             D_Company_APIItem Item = null;
@@ -93,7 +93,7 @@ namespace NS_Education.Controllers
                 };
             }
 
-            return Item;
+            return ChangeJson(Item);
         }
         [HttpGet]
         public string ChangeActive(int ID, bool ActiveFlag, int UID)

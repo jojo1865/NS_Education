@@ -69,7 +69,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        public D_PayType_APIItem GetInfoByID(int ID = 0)
+        public string GetInfoByID(int ID = 0)
         {
             var N = DC.D_PayType.FirstOrDefault(q => q.DPTID == ID && !q.DeleteFlag);
             D_PayType_APIItem Item = null;
@@ -107,7 +107,7 @@ namespace NS_Education.Controllers
                 };
             }
 
-            return Item;
+            return ChangeJson(Item);
         }
         [HttpGet]
         public string ChangeActive(int ID, bool ActiveFlag, int UID)

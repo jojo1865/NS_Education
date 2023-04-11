@@ -58,7 +58,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        public D_Zip_APIItem GetInfoByID(int ID = 0)
+        public string GetInfoByID(int ID = 0)
         {
             var N = DC.D_Zip.FirstOrDefault(q => q.DZID == ID && !q.DeleteFlag);
             D_Zip_APIItem Item = null;
@@ -83,7 +83,7 @@ namespace NS_Education.Controllers
                 };
             }
 
-            return Item;
+            return ChangeJson(Item);
         }
         [HttpGet]
         public string ChangeActive(int ID, bool ActiveFlag, int UID)

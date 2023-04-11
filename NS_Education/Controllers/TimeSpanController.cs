@@ -66,7 +66,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        public D_TimeSpan_APIItem GetInfoByID(int ID = 0)
+        public string GetInfoByID(int ID = 0)
         {
             var N = DC.D_TimeSpan.FirstOrDefault(q => q.DTSID == ID && !q.DeleteFlag);
             D_TimeSpan_APIItem Item = null;
@@ -102,7 +102,7 @@ namespace NS_Education.Controllers
                 };
             }
 
-            return Item;
+            return ChangeJson(Item);
         }
         [HttpGet]
         public string ChangeActive(int ID, bool ActiveFlag, int UID)

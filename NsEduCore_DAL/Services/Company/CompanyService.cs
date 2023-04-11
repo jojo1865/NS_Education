@@ -56,6 +56,11 @@ namespace NsEduCore_DAL.Services.Company
             return company.Departments.Count;
         }
 
+        public Domains.Company SelectById(int id)
+        {
+            throw new System.NotImplementedException();
+        }
+
         private static IEnumerable<Domains.Company> ConvertToDomain(List<D_Company> queried)
         {
             return queried.Select(q => new Domains.Company

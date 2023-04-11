@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NsEduCore.Controllers.Messages;
 using NsEduCore.Requests.Company;
 using NsEduCore.Responses.Company;
-using NsEduCore.Variables;
 using NsEduCore_DAL.Domains;
 using NsEduCore_DAL.Services.Company;
 using NsEduCore_DAL.Services.User;
@@ -40,6 +41,7 @@ namespace NsEduCore.Controllers
         /// <param name="input">輸入資料</param>
         /// <returns>通用訊息回傳格式。若查詢成功時，另會包含 Items。</returns>
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetList(
             #if DEBUG
             [FromQuery] // 避免 Swagger UI 誤解這是 body request
@@ -93,7 +95,33 @@ namespace NsEduCore.Controllers
         #endregion
 
         #region GetInfoById
+        /// <summary>
+        /// 查詢單筆公司資料。
+        /// </summary>
+        /// <returns>
+        /// 成功時：公司資料<br/>
+        /// 無資料或輸入有誤時：通用訊息回傳格式。
+        /// </returns>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetInfoById(CompanyGetRequest input)
+        {
+            if (input.Id.IsValidId())
+            {
+                AddError(CompanyControllerMessages.GetIdIsInvalid);
+                return Ok(GetReturnMessage());
+            }
 
+            Company queried = _companyService.SelectById(input.Id);
+
+            if (queried == null)
+            {
+                AddError(CompanyControllerMessages.GetNotFound);
+                return Ok(GetReturnMessage());
+            }
+
+            return Ok();
+        }
         #endregion
 
         #region Submit

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace NS_Education.Tools.BeingValidated
 {
@@ -39,7 +40,32 @@ namespace NS_Education.Tools.BeingValidated
             return this;
         }
 
-        public bool Result()
+        public async Task<IBeingValidated<T>> ValidateAsync(Func<T, Task<bool>> validation, Action onFail = null, Action<Exception> onException = null)
+        {
+            if (_skipIfInvalid && _isInvalid)
+                return this;
+
+            try
+            {
+                // 驗證，並且在遇到失敗時執行 onFail。
+                if (!await validation.Invoke(_target))
+                {
+                    onFail?.Invoke();
+                    _isInvalid = true;
+                }
+            }
+            catch (Exception e)
+            {
+                _isInvalid = true;
+
+                if (onException == null) throw;
+                onException.Invoke(e);
+            }
+
+            return this;
+        }
+
+        public bool IsValid()
         {
             return !_isInvalid;
         }

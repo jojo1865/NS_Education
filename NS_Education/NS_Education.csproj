@@ -273,7 +273,6 @@
     <Compile Include="Models\APIItems\UserData\DeleteItem\UserData_DeleteItem_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\UserData\Login\UserData_Login_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\UserData\Login\UserData_Login_Output_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\Login\User_Privilege_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\UserData\Submit\UserData_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\D_Zip_APIItem.cs" />
     <Compile Include="Models\Entities\BusinessUser.cs" />

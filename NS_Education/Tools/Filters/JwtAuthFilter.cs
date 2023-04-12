@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Web.Mvc;
 using NS_Education.Tools.Encryption;
 using NS_Education.Variables;

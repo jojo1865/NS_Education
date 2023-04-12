@@ -1,11 +1,10 @@
-﻿using NS_Education.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Controllers.BaseClass;
-using NS_Education.Models.APIItems;
+using NS_Education.Models;
 using NS_Education.Models.APIItems.Department;
 using NS_Education.Models.Entities;
 

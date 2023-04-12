@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -266,7 +266,7 @@ namespace NS_Education.Controllers.BaseClass
                     int j = 0;
                     for (int i = 0; i < hexString.Length / 2; i++)
                     {
-                        s[i] = Byte.Parse(hexString[j].ToString() + hexString[j + 1].ToString(), System.Globalization.NumberStyles.HexNumber);
+                        s[i] = Byte.Parse(hexString[j].ToString() + hexString[j + 1].ToString(), NumberStyles.HexNumber);
                         j += 2;
                     }
                     ICryptoTransform desencrypt = des.CreateDecryptor();

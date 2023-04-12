@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using NS_Education.Tools;
+﻿using NS_Education.Tools;
 
 namespace NS_Education.Models.APIItems.UserData.Login
 {

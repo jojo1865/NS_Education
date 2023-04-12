@@ -46,8 +46,7 @@ namespace NsEduCore_DAL.Services.User
                 CreUID = queried.CreUID,
                 UpdUID = queried.UpdUID,
                 UpdDate = queried.UpdDate,
-                LoginDate = queried.LoginDate,
-                UserData = queried
+                LoginDate = queried.LoginDate
             };
             return result;
         }

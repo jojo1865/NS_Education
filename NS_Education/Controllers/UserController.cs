@@ -54,14 +54,14 @@ namespace NS_Education.Controllers
         
         #endregion
         
-        #region SignIn
+        #region SignUp
         /// <summary>
         /// 註冊使用者資料。過程中會驗證使用者輸入，並在回傳時一併報錯。<br/>
         /// 如果過程驗證都通過，才寫入資料庫。
         /// </summary>
         /// <param name="input">輸入資料</param>
         [HttpPost]
-        public async Task<string> SignIn(UserData_Submit_Input_APIItem input)
+        public async Task<string> SignUp(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();
             

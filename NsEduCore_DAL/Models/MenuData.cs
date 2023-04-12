@@ -10,7 +10,6 @@ namespace NsEduCore_DAL.Models
         public MenuData()
         {
             M_Group_Menu = new HashSet<M_Group_Menu>();
-            MenuAPI = new HashSet<MenuAPI>();
         }
 
         public int MDID { get; set; }
@@ -26,6 +25,5 @@ namespace NsEduCore_DAL.Models
         public int UpdUID { get; set; }
 
         public virtual ICollection<M_Group_Menu> M_Group_Menu { get; set; }
-        public virtual ICollection<MenuAPI> MenuAPI { get; set; }
     }
 }

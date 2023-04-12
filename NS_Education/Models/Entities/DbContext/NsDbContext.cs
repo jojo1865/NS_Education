@@ -1077,6 +1077,11 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.UserName)
                     .IsRequired()
                     .HasMaxLength(50);
+
+                entity.HasOne(d => d.DD)
+                    .WithMany(p => p.UserData)
+                    .HasForeignKey(d => d.DDID)
+                    .HasConstraintName("FK_UserData_D_Department");
             });
 
             modelBuilder.Entity<UserLog>(entity =>

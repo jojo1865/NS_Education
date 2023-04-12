@@ -27,7 +27,9 @@ namespace NS_Education.Models.Entities
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
         public DateTime LoginDate { get; set; }
+        public int? DDID { get; set; }
 
+        public virtual D_Department DD { get; set; }
         public virtual ICollection<M_Group_User> M_Group_User { get; set; }
         public virtual ICollection<UserLog> UserLog { get; set; }
     }

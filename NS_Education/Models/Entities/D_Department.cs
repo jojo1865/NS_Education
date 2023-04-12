@@ -13,6 +13,7 @@ namespace NS_Education.Models.Entities
         {
             D_Hall = new HashSet<D_Hall>();
             M_Department_Category = new HashSet<M_Department_Category>();
+            UserData = new HashSet<UserData>();
         }
 
         public int DDID { get; set; }
@@ -31,5 +32,6 @@ namespace NS_Education.Models.Entities
         public virtual D_Company DC { get; set; }
         public virtual ICollection<D_Hall> D_Hall { get; set; }
         public virtual ICollection<M_Department_Category> M_Department_Category { get; set; }
+        public virtual ICollection<UserData> UserData { get; set; }
     }
 }

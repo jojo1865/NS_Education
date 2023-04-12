@@ -67,7 +67,7 @@ namespace NS_Education.Tools.Encryption
         }
 
         /// <summary>
-        /// 解密一組輸入的 JWT Token。失敗時，拋出 SecurityTokenValidationException。
+        /// 解密一組輸入的 JWT Token。失敗時不做 try-catch。
         /// </summary>
         /// <param name="token">JWT Token</param>
         /// <param name="secretKey">JWT 密鑰</param>

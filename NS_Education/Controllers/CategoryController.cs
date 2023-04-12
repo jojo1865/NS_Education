@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.Filters;
 
 
 namespace NS_Education.Controllers
@@ -23,8 +24,6 @@ namespace NS_Education.Controllers
         [HttpGet]
         public string GetList(string KeyWord = "", int CategoryType = -1, int NowPage = 1, int CutPage = 10)
         {
-            
-
             var Ns = DC.B_Category.Where(q => !q.DeleteFlag);
             if (CategoryType >= 0)
                 Ns = Ns.Where(q => q.CategoryType == CategoryType);
@@ -81,6 +80,7 @@ namespace NS_Education.Controllers
         }
         //取得分類的內容
         [HttpGet]
+        [JwtAuthFilter]
         public string GetInfoByID(int ID = 0)
         {
             var N = DC.B_Category.FirstOrDefault(q => !q.DeleteFlag && q.BCID == ID);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using NS_Education.Models.APIItems.UserData.DeleteItem;
@@ -10,6 +11,9 @@ using NS_Education.Models.APIItems.UserData.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools;
 using NS_Education.Tools.BeingValidated;
+using NS_Education.Tools.Encryption;
+using NS_Education.Tools.Filters;
+using NS_Education.Variables;
 
 namespace NS_Education.Controllers
 {
@@ -276,10 +280,10 @@ namespace NS_Education.Controllers
 
         #region Login
         /// <summary>
-        /// 驗證使用者登入，無誤則會回傳使用者的權限資訊。
+        /// 驗證使用者登入，無誤則會回傳使用者的 Username 和 JWT Token。
         /// </summary>
         /// <param name="input">輸入資料</param>
-        /// <returns>部分使用者資訊與權限資訊。格式參照 UserData_Login_Output_APIItem。</returns>
+        /// <returns>UserData_Login_Output_APIItem</returns>
         [HttpPost]
         public string Login(UserData_Login_Input_APIItem input)
         {
@@ -312,21 +316,10 @@ namespace NS_Education.Controllers
                 // ReSharper disable once PossibleNullReferenceException
                 UID = queried.UID,
                 Username = queried.UserName,
-
-                // TODO: 完成權限群組模組後，將此處實作
-                Privileges = new List<User_Privilege_Output_APIItem>
+                JwtToken = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, new []
                 {
-                    new User_Privilege_Output_APIItem
-                    {
-                        // dummy
-                        MenuUrl = "*",
-                        AddFlag = true,
-                        DeleteFlag = true,
-                        EditFlag = true,
-                        ShowFlag = true,
-                        PrintFlag = true
-                    }
-                }
+                    new Claim("uid", queried.UID.ToString())
+                })
             };
 
             return GetResponseJson(output);

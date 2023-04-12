@@ -34,12 +34,5 @@ namespace NsEduCore_DAL.Services.Company
         /// <param name="company">資料</param>
         /// <returns>所屬部門數量</returns>
         int GetDepartmentCount(Domains.Company company);
-
-        /// <summary>
-        /// 依據 ID 查詢一筆資料。
-        /// </summary>
-        /// <param name="id">id</param>
-        /// <returns>查詢結果。查無資料時為 null。</returns>
-        Domains.Company SelectById(int id);
     }
 }

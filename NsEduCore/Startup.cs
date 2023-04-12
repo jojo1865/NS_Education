@@ -32,6 +32,7 @@ namespace NsEduCore
             services.AddDbContext<NsDataContext>();
             
             // IoC
+            services.AddScoped<NsDataContext, NsDataContext>();
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<IJwtHelper, JwtHelper>();
 

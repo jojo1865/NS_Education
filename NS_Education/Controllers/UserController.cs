@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
+using Microsoft.EntityFrameworkCore;
 using NS_Education.Controllers.BaseClass;
 using NS_Education.Models.APIItems.UserData.DeleteItem;
 using NS_Education.Models.APIItems.UserData.Login;
@@ -63,16 +65,16 @@ namespace NS_Education.Controllers
         /// <param name="input">輸入資料。如果為更新，且 LoginPassword 如有輸入且與資料庫不同時，則會多驗證 OriginalPassword。</param>
         /// <returns>通用回傳訊息格式。當註冊時 Note 欄位以外有任何空白，或密碼驗證錯誤時，回傳錯誤。</returns>
         [HttpPost]
-        public string Submit(UserData_Submit_Input_APIItem input)
+        public async Task<string> Submit(UserData_Submit_Input_APIItem input)
         {
-            UserData checkedUser = DC.UserData.FirstOrDefault(u => u.LoginAccount == input.LoginAccount);
+            UserData checkedUser = await DC.UserData.FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount);
             // TODO: 在確保單元測試方式之後，將此處的測試相關邏輯刪除。
             bool isRegister = !IsATestUpdate(input) && checkedUser == null || IsATestRegister(input);
             
             if (isRegister)
-                Register(input);
+                await Register(input);
             else
-                Update(input, checkedUser);
+                await Update(input, checkedUser);
 
             return GetResponseJson();
         }
@@ -82,7 +84,7 @@ namespace NS_Education.Controllers
         /// 如果過程驗證都通過，才寫入資料庫。
         /// </summary>
         /// <param name="input">輸入資料</param>
-        private void Register(UserData_Submit_Input_APIItem input)
+        private async Task Register(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();
             
@@ -133,8 +135,8 @@ namespace NS_Education.Controllers
             if (IsATestRegister(input))
                 return;
             
-            DC.UserData.Add(newUser);
-            DC.SaveChanges();
+            await DC.UserData.AddAsync(newUser);
+            await DC.SaveChangesAsync();
         }
 
         // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
@@ -150,7 +152,7 @@ namespace NS_Education.Controllers
         /// </summary>
         /// <param name="input">輸入資料</param>
         /// <param name="original">呼叫此方法前，應已先取得原始使用者資料，並在此傳入。</param>
-        private void Update(UserData_Submit_Input_APIItem input, UserData original)
+        private async Task Update(UserData_Submit_Input_APIItem input, UserData original)
         {
             InitializeResponse();
 
@@ -202,7 +204,7 @@ namespace NS_Education.Controllers
             if (HasError())
                 return;
             
-            DC.SaveChanges();
+            await DC.SaveChangesAsync();
         }
 
         // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
@@ -287,26 +289,26 @@ namespace NS_Education.Controllers
         /// <param name="input">輸入資料</param>
         /// <returns>UserData_Login_Output_APIItem</returns>
         [HttpPost]
-        public string Login(UserData_Login_Input_APIItem input)
+        public async Task<string> Login(UserData_Login_Input_APIItem input)
         {
             InitializeResponse();
 
             // 驗證
             UserData queried = !input.LoginAccount.IsNullOrWhiteSpace()
-                ? DC.UserData.FirstOrDefault(u => u.LoginAccount == input.LoginAccount)
+                ? await DC.UserData.FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount)
                 : null;
             
             // 1. 先查詢是否確實有這個帳號
             // 2. 確認帳號的啟用 Flag 與刪除 Flag 
             // 3. 有帳號，才驗證登入密碼
             // 4. 更新使用者的上次登入時間，需更新成功才算登入成功
-            bool isValidated = queried.StartValidate(true)
+            bool isValidated = await queried.StartValidate(true)
                 .Validate(q => q != null, () => AddError(LoginAccountNotFound))
                 .Validate(q => q.ActiveFlag && !q.DeleteFlag, () => AddError(LoginAccountNotFound))
                 .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
                     () => AddError(LoginPasswordIncorrect))
-                .Validate(UpdateUserLoginDate)
-                .Result();
+                .ValidateAsync(UpdateUserLoginDate)
+                .IsValid();
 
             if (!isValidated)
                 return GetResponseJson();
@@ -335,14 +337,14 @@ namespace NS_Education.Controllers
         /// true：更新成功。<br/>
         /// false：更新失敗。
         /// </returns>
-        private bool UpdateUserLoginDate(UserData user)
+        private async Task<bool> UpdateUserLoginDate(UserData user)
         {
             bool result = true;
             
             try
             {
                 user.LoginDate = DateTime.Now;
-                DC.SaveChanges();
+                await DC.SaveChangesAsync();
             }
             catch (Exception e)
             {
@@ -363,7 +365,7 @@ namespace NS_Education.Controllers
         /// <param name="input">輸入資料</param>
         /// <returns>通用回傳訊息格式</returns>
         [HttpPost]
-        public string DeleteItem(UserData_DeleteItem_Input_APIItem input)
+        public async Task<string> DeleteItem(UserData_DeleteItem_Input_APIItem input)
         {
             // TODO: 影響大的端點，但後端目前沒有執行權限的驗證手段。
 
@@ -373,7 +375,7 @@ namespace NS_Education.Controllers
             bool isInputValid = input.StartValidate(true)
                 .Validate(i => !i.OperatorUID.IsIncorrectUid(), () => AddError(DeleteItemOperatorUidIncorrect))
                 .Validate(i => !i.TargetUID.IsIncorrectUid(), () => AddError(DeleteItemTargetUidIncorrect))
-                .Result();
+                .IsValid();
 
             if (!isInputValid)
                 return GetResponseJson();
@@ -385,7 +387,7 @@ namespace NS_Education.Controllers
             bool isDataValid = queried.StartValidate(true)
                 .Validate(q => q != null, () => AddError(DeleteItemTargetUidNotFound))
                 .Validate(q => q.DeleteFlag == false, () => AddError(DeleteItemTargetAlreadyDeleted))
-                .Result();
+                .IsValid();
             
             if (!isDataValid)
                 return GetResponseJson();
@@ -397,7 +399,7 @@ namespace NS_Education.Controllers
                 queried.DeleteFlag = true;
                 queried.UpdDate = DateTime.Now;
                 queried.UpdUID = input.OperatorUID;
-                DC.SaveChanges();
+                await DC.SaveChangesAsync();
             }
             catch (Exception e)
             {

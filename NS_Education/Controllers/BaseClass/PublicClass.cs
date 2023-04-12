@@ -2,8 +2,10 @@
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NS_Education.Models;
 using NS_Education.Models.Entities.DbContext;
@@ -80,12 +82,12 @@ namespace NS_Education.Controllers.BaseClass
         /// </summary>
         /// <param name="UID">使用者ID</param>
         /// <returns>使用者名稱</returns>
-        public string GetUserNameByID(int UID)
+        public async Task<string> GetUserNameByID(int UID)
         {
             string Name = "";
             if (UID > 0)
             {
-                var U = DC.UserData.FirstOrDefault(q => q.UID == UID);
+                var U = await DC.UserData.FirstOrDefaultAsync(q => q.UID == UID);
                 if (U != null)
                     Name = U.UserName;
             }

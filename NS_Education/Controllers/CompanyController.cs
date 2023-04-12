@@ -1,6 +1,7 @@
 ﻿using NS_Education.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Controllers.BaseClass;
@@ -13,7 +14,7 @@ namespace NS_Education.Controllers
     public class CompanyController : PublicClass
     {
         [HttpGet]
-        public string GetList(string KeyWord = "", int BCID = 0, int NowPage = 1, int CutPage = 10)
+        public async Task<string> GetList(string KeyWord = "", int BCID = 0, int NowPage = 1, int CutPage = 10)
         {
             var Ns = DC.D_Company.Where(q => !q.DeleteFlag);
             if (BCID > 0)
@@ -33,7 +34,7 @@ namespace NS_Education.Controllers
 
             Ns = Ns.Include(q => q.BC);
             
-            var NsList = Ns.ToList();
+            var NsList = await Ns.ToListAsync();
             ListData.SuccessFlag = NsList.Any();
             ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
             ListData.AllItemCt = NsList.Count;
@@ -51,13 +52,13 @@ namespace NS_Education.Controllers
                     Code = N.Code,
                     TitleC = N.TitleC,
                     TitleE = N.TitleE,
-                    DepartmentCt = N.D_Department.Count(),
+                    DepartmentCt = N.D_Department.Count,
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = GetUserNameByID(N.CreUID),
+                    CreUser = await GetUserNameByID(N.CreUID),
                     CreUID = N.CreUID,
                     UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? GetUserNameByID(N.UpdUID) : ""),
+                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
                     UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
                 }); ; ;
             }
@@ -66,15 +67,15 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        public string GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoByID(int ID = 0)
         {
-            var N = DC.D_Company.Include(q => q.BC).FirstOrDefault(q => q.DCID == ID && !q.DeleteFlag);
+            var N = await DC.D_Company.Include(q => q.BC).FirstOrDefaultAsync(q => q.DCID == ID && !q.DeleteFlag);
             D_Company_APIItem Item = null;
             if (N != null)
             {
                 List<cSelectItem> SIs = new List<cSelectItem>();
                 var Cats = DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == 1).OrderBy(q => q.SortNo);
-                foreach (var Cat in Cats)
+                foreach (var Cat in await Cats.ToListAsync())
                     SIs.Add(new cSelectItem { ID = Cat.BCID, Title = Cat.TitleC, SelectFlag = N.BCID == Cat.BCID });
                 Item = new D_Company_APIItem
                 {
@@ -86,13 +87,13 @@ namespace NS_Education.Controllers
                     Code = N.Code,
                     TitleC = N.TitleC,
                     TitleE = N.TitleE,
-                    DepartmentCt = N.D_Department.Count(),
+                    DepartmentCt = N.D_Department.Count,
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = GetUserNameByID(N.CreUID),
+                    CreUser = await GetUserNameByID(N.CreUID),
                     CreUID = N.CreUID,
                     UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? GetUserNameByID(N.UpdUID) : ""),
+                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
                     UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
                 };
             }
@@ -100,20 +101,20 @@ namespace NS_Education.Controllers
             return ChangeJson(Item);
         }
         [HttpGet]
-        public string ChangeActive(int ID, bool ActiveFlag, int UID)
+        public async Task<string> ChangeActive(int ID, bool ActiveFlag, int UID)
         {
             Error = "";
             if (UID == 0)
                 Error += "缺少更新者ID,無法更新;";
             else
             {
-                var N_ = DC.D_Company.FirstOrDefault(q => q.DCID == ID && !q.DeleteFlag);
+                var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == ID && !q.DeleteFlag);
                 if (N_ != null)
                 {
                     N_.ActiveFlag = ActiveFlag;
                     N_.UpdDate = DT;
                     N_.UpdUID = UID;
-                    DC.SaveChanges();
+                    await DC.SaveChangesAsync();
                 }
                 else
                     Error += "查無資料,無法更新;";
@@ -122,20 +123,20 @@ namespace NS_Education.Controllers
             return ChangeJson(GetMsgClass(Error));
         }
         [HttpGet]
-        public string DeleteItem(int ID, int UID)
+        public async Task<string> DeleteItem(int ID, int UID)
         {
             Error = "";
             if (UID == 0)
                 Error += "缺少更新者ID,無法更新;";
             else
             {
-                var N_ = DC.D_Company.FirstOrDefault(q => q.DCID == ID);
+                var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == ID);
                 if (N_ != null)
                 {
                     N_.DeleteFlag = true;
                     N_.UpdDate = DT;
                     N_.UpdUID = UID;
-                    DC.SaveChanges();
+                    await DC.SaveChangesAsync();
                 }
                 else
                     Error += "查無資料,無法更新;";
@@ -145,7 +146,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpPost]
-        public string Submit(D_Company N)
+        public async Task<string> Submit(D_Company N)
         {
             Error = "";
             if (N.DCID == 0)
@@ -160,13 +161,13 @@ namespace NS_Education.Controllers
                 {
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
-                    DC.D_Company.Add(N);
-                    DC.SaveChanges();
+                    await DC.D_Company.AddAsync(N);
+                    await DC.SaveChangesAsync();
                 }
             }
             else
             {
-                var N_ = DC.D_Company.FirstOrDefault(q => q.DCID == N.DCID && !q.DeleteFlag);
+                var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == N.DCID && !q.DeleteFlag);
                 if (N.CreUID == 0)
                     Error += "缺少更新者ID,無法更新;";
                 if (N.BCID <= 0)
@@ -185,7 +186,7 @@ namespace NS_Education.Controllers
                     N_.DeleteFlag = N.DeleteFlag;
                     N_.UpdUID = N.UpdUID;
                     N_.UpdDate = DT;
-                    DC.SaveChanges();
+                    await DC.SaveChangesAsync();
                 }
             }
             return ChangeJson(GetMsgClass(Error));

@@ -1,9 +1,10 @@
 ﻿using NS_Education.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NS_Education.Controllers.BaseClass;
-using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Category;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.Filters;
@@ -15,17 +16,17 @@ namespace NS_Education.Controllers
     {
         //取得分類的類別列表
         [HttpGet]
-        public string GetTypeList()
+        public async Task<string> GetTypeList()
         {
             List<cSelectItem> TIs = new List<cSelectItem>();
-            for (int i = 0; i < sCategoryTypes.Length; i++)
-                TIs.Add(new cSelectItem { ID = i, Title = sCategoryTypes[i] });
+            await Task.Run(() =>
+                TIs.AddRange(sCategoryTypes.Select((t, i) => new cSelectItem { ID = i, Title = t })));
             return ChangeJson(TIs);
         }
 
         //取得分類列表
         [HttpGet]
-        public string GetList(string KeyWord = "", int CategoryType = -1, int NowPage = 1, int CutPage = 10)
+        public async Task<string> GetList(string KeyWord = "", int CategoryType = -1, int NowPage = 1, int CutPage = 10)
         {
             var Ns = DC.B_Category.Where(q => !q.DeleteFlag);
             if (CategoryType >= 0)
@@ -43,7 +44,7 @@ namespace NS_Education.Controllers
             else
                 Ns = Ns.OrderBy(q => q.SortNo).Skip((NowPage - 1) * CutPage).Take(CutPage);
 
-            var NsList = Ns.ToList();
+            var NsList = await Ns.ToListAsync();
             ListData.SuccessFlag = NsList.Any();
             ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
             ListData.AllItemCt = NsList.Count;
@@ -54,7 +55,7 @@ namespace NS_Education.Controllers
                 B_Category BC_P = null;
                 if (N.ParentID > 0)
                 {
-                    BC_P = DC.B_Category.FirstOrDefault(q => q.BCID == N.ParentID && !q.DeleteFlag);
+                    BC_P = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == N.ParentID && !q.DeleteFlag);
                 }
                 ListData.Items.Add(new B_Category_APIItem()
                 {
@@ -72,10 +73,10 @@ namespace NS_Education.Controllers
                     SortNo = N.SortNo,
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = GetUserNameByID(N.CreUID),
+                    CreUser = await GetUserNameByID(N.CreUID),
                     CreUID = N.CreUID,
                     UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? GetUserNameByID(N.UpdUID) : ""),
+                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
                     UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
                 });
             }
@@ -84,9 +85,9 @@ namespace NS_Education.Controllers
         //取得分類的內容
         [HttpGet]
         [JwtAuthFilter]
-        public string GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoByID(int ID = 0)
         {
-            var N = DC.B_Category.FirstOrDefault(q => !q.DeleteFlag && q.BCID == ID);
+            var N = await DC.B_Category.FirstOrDefaultAsync(q => !q.DeleteFlag && q.BCID == ID);
             List<cSelectItem> TIs = new List<cSelectItem>();
             for (int i = 0; i < sCategoryTypes.Length; i++)
                 TIs.Add(new cSelectItem { ID = i, Title = sCategoryTypes[i], SelectFlag = (N == null ? i == 0 : i == N.CategoryType) });
@@ -97,12 +98,12 @@ namespace NS_Education.Controllers
                 List<cSelectItem> BC_Ps = null;
                 if (N.ParentID > 0)
                 {
-                    BC_P = DC.B_Category.FirstOrDefault(q => q.BCID == N.ParentID && !q.DeleteFlag);
+                    BC_P = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == N.ParentID && !q.DeleteFlag);
                     if (BC_P != null)
                     {
                         BC_Ps = new List<cSelectItem>();
                         var _BC_Ps = DC.B_Category.Where(q => q.ParentID == BC_P.ParentID && !q.DeleteFlag).OrderBy(q => q.SortNo);
-                        foreach (var _BC in _BC_Ps)
+                        foreach (var _BC in await _BC_Ps.ToListAsync())
                             BC_Ps.Add(new cSelectItem { ID = _BC.BCID, Title = _BC.TitleC, SelectFlag = _BC.BCID == BC_P.BCID });
                     }
                 }
@@ -122,10 +123,10 @@ namespace NS_Education.Controllers
                     SortNo = N.SortNo,
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = GetUserNameByID(N.CreUID),
+                    CreUser = await GetUserNameByID(N.CreUID),
                     CreUID = N.CreUID,
                     UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? GetUserNameByID(N.UpdUID) : ""),
+                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
                     UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
                 };
             }
@@ -136,20 +137,20 @@ namespace NS_Education.Controllers
             return ChangeJson(Item);
         }
         [HttpGet]
-        public string ChangeActive(int ID, bool ActiveFlag, int UID)
+        public async Task<string> ChangeActive(int ID, bool ActiveFlag, int UID)
         {
             Error = "";
             if (UID == 0)
                 Error += "缺少更新者ID,無法更新;";
             else
             {
-                var N_ = DC.B_Category.FirstOrDefault(q => q.BCID == ID && !q.DeleteFlag);
+                var N_ = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == ID && !q.DeleteFlag);
                 if (N_ != null)
                 {
                     N_.ActiveFlag = ActiveFlag;
                     N_.UpdDate = DT;
                     N_.UpdUID = UID;
-                    DC.SaveChanges();
+                    await DC.SaveChangesAsync();
                 }
                 else
                     Error += "查無資料,無法更新;";
@@ -158,20 +159,20 @@ namespace NS_Education.Controllers
             return ChangeJson(GetMsgClass(Error));
         }
         [HttpGet]
-        public string DeleteItem(int ID, int UID)
+        public async Task<string> DeleteItem(int ID, int UID)
         {
             Error = "";
             if (UID == 0)
                 Error += "缺少更新者ID,無法更新;";
             else
             {
-                var N_ = DC.B_Category.FirstOrDefault(q => q.BCID == ID);
+                var N_ = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == ID);
                 if (N_ != null)
                 {
                     N_.DeleteFlag = true;
                     N_.UpdDate = DT;
                     N_.UpdUID = UID;
-                    DC.SaveChanges();
+                    await DC.SaveChangesAsync();
                 }
                 else
                     Error += "查無資料,無法更新;";
@@ -180,7 +181,7 @@ namespace NS_Education.Controllers
             return ChangeJson(GetMsgClass(Error));
         }
         [HttpPost]
-        public string Submit(B_Category N)
+        public async Task<string> Submit(B_Category N)
         {
             string Error = "";
             if (N.BCID == 0)//新增
@@ -189,18 +190,18 @@ namespace NS_Education.Controllers
                     Error += "名稱必須輸入;";
                 if (Error == "")
                 {
-                    var BCs = DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == N.CategoryType);
+                    var BCs = await DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == N.CategoryType).ToListAsync();
                     if (BCs.Any())
                         N.SortNo = BCs.Max(q => q.SortNo) + 1;
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
-                    DC.B_Category.Add(N);
-                    DC.SaveChanges();
+                    await DC.B_Category.AddAsync(N);
+                    await DC.SaveChangesAsync();
                 }
             }
             else//更新
             {
-                var N_ = DC.B_Category.FirstOrDefault(q => q.BCID == N.BCID && !q.DeleteFlag);
+                var N_ = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == N.BCID && !q.DeleteFlag);
                 if (N.TitleC == "")
                     Error += "名稱必須輸入;";
                 if (N_ == null)
@@ -215,7 +216,7 @@ namespace NS_Education.Controllers
                     N_.DeleteFlag = N.DeleteFlag;
                     N_.UpdUID = N.UpdUID;
                     N_.UpdDate = DT;
-                    DC.SaveChanges();
+                    await DC.SaveChangesAsync();
                 }
             }
             return ChangeJson(GetMsgClass(Error));

@@ -2,6 +2,7 @@
 {
     public class UserData_Submit_Input_APIItem
     {
+        public int DDID { get; set; }
         public int UID { get; set; }
         public string Username { get; set; }
         public string LoginAccount { get; set; }

@@ -100,7 +100,8 @@ namespace NS_Education.Controllers
                 CreUID = input.UID,
                 UpdDate = DateTime.Now,
                 UpdUID = 0,
-                LoginDate = DateTime.Now
+                LoginDate = DateTime.Now,
+                DDID = input.DDID
             };
 
             // doesn't write to db if any error raised
@@ -241,6 +242,8 @@ namespace NS_Education.Controllers
                 
                 original.UpdDate = DateTime.Now;
                 original.UpdUID = input.UID;
+
+                original.DDID = input.DDID;
             }
             catch (ValidationException)
             {

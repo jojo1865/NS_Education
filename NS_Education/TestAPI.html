@@ -10,6 +10,7 @@
             var CP = document.getElementById("CutPage").value;
             var CT = document.getElementById("CategoryType_List").value;
             var Table = document.getElementById("TableList");
+            var Items = document.getElementById("TableList").value;
             Table.innerHTML = "<tr class='TopRow'><td><input type='checkbox' onclick='SelectAllCheck()' /></td><td>ID</td><td>類別</td><td>中文名稱</td><td>英文名稱</td><td>啟用狀態</td><td>控制項目</td></tr>";
             $.ajax({
                 url: "/Category/GetList",
@@ -17,10 +18,11 @@
                 data: {
                     CategoryType: CT,
                     NowPage: NP,
-                    CutPage: CP
+                    CutPage: CP,
+                    Items: Items
                 },
                 success: function (data) {
-                    var List = JSON.parse(data);
+                    var List = JSON.parse(data).Items;
                     
                     for (var i = 0; i < List.length; i++) {
                         Table.innerHTML += "<tr><td><input type='checkbox' id='cbox_" + i + "' /></td><td>" + List[i].BCID + "</td><td>" + List[i].sCategoryType + "</td><td>" + List[i].TitleC + "</td><td>" + List[i].TitleE + "</td><td>" + List[i].ActiveFlag +"</td><td><button onclick='alert(\"尚未建置\")'>編輯</button></td></tr>"

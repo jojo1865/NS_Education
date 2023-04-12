@@ -8,8 +8,7 @@ namespace NS_Education.Tools.Encryption
 {
     public static class JwtHelper
     {
-        // JwtSecurityTokenHandler 不保證多線程安全，
-        // 所以不做成 singleton。
+        private static JwtSecurityTokenHandler TokenHandler { get; } = new JwtSecurityTokenHandler(); 
         
         /// <summary>
         /// 依據輸入的參數，產生 JWT Token。
@@ -29,10 +28,9 @@ namespace NS_Education.Tools.Encryption
                 SigningCredentials = signingCredentials,
                 Subject = new ClaimsIdentity(claims)
             };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            
+            var token = TokenHandler.CreateToken(tokenDescriptor);
+            return TokenHandler.WriteToken(token);
         }
 
         /// <summary>
@@ -46,8 +44,6 @@ namespace NS_Education.Tools.Encryption
         /// </returns>
         public static bool ValidateToken(string token, string secretKey)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-
             try
             {
                 var validationParameters = new TokenValidationParameters
@@ -60,7 +56,7 @@ namespace NS_Education.Tools.Encryption
                     ClockSkew = TimeSpan.Zero
                 };
 
-                tokenHandler.ValidateToken(token, validationParameters, out _);
+                TokenHandler.ValidateToken(token, validationParameters, out _);
                 return true;
             }
             catch (Exception e)
@@ -78,7 +74,6 @@ namespace NS_Education.Tools.Encryption
         /// <returns>ClaimsPrincipal。</returns>
         public static ClaimsPrincipal DecodeToken(string token, string secretKey)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -89,7 +84,7 @@ namespace NS_Education.Tools.Encryption
                 ClockSkew = TimeSpan.Zero
             };
 
-            return tokenHandler.ValidateToken(token, validationParameters, out _);
+            return TokenHandler.ValidateToken(token, validationParameters, out _);
         }
     }
 }

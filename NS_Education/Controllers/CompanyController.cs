@@ -1,12 +1,9 @@
-﻿using Antlr.Runtime.Tree;
-using NS_Education.Models;
-using System;
+﻿using NS_Education.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Runtime.Serialization;
-using System.Web;
 using System.Web.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.Entities;
 
 namespace NS_Education.Controllers
 {
@@ -23,26 +20,30 @@ namespace NS_Education.Controllers
 
             D_Company_List ListData = new D_Company_List();
             ListData.Items = new List<D_Company_APIItem>();
-            ListData.SuccessFlag = Ns.Count() > 0;
-            ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
             ListData.NowPage = NowPage;
             ListData.CutPage = CutPage;
-            ListData.AllItemCt = Ns.Count();
-            ListData.AllPageCt = NowPage == 0 ? 0 : (ListData.AllItemCt % CutPage == 0 ? ListData.AllItemCt / CutPage : (ListData.AllItemCt / CutPage) + 1);
 
             if (NowPage == 0)
                 Ns = Ns.Where(q=>q.ActiveFlag).OrderBy(q => q.TitleC);
             else
                 Ns = Ns.OrderBy(q => q.TitleC).Skip((NowPage - 1) * CutPage).Take(CutPage);
-           
-            foreach (var N in Ns)
+
+            Ns = Ns.Include(q => q.BC);
+            
+            var NsList = Ns.ToList();
+            ListData.SuccessFlag = NsList.Any();
+            ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
+            ListData.AllItemCt = NsList.Count;
+            ListData.AllPageCt = NowPage == 0 ? 0 : (ListData.AllItemCt % CutPage == 0 ? ListData.AllItemCt / CutPage : (ListData.AllItemCt / CutPage) + 1);
+            
+            foreach (var N in NsList)
             {
                 ListData.Items.Add(new D_Company_APIItem
                 {
                     DCID = N.DCID,
                     BCID = N.BCID,
-                    BC_TitleC = N.B_Category.TitleC,
-                    BC_TitleE = N.B_Category.TitleE,
+                    BC_TitleC = N.BC.TitleC,
+                    BC_TitleE = N.BC.TitleE,
                     CategoryList = null,
                     Code = N.Code,
                     TitleC = N.TitleC,
@@ -64,7 +65,7 @@ namespace NS_Education.Controllers
         [HttpGet]
         public string GetInfoByID(int ID = 0)
         {
-            var N = DC.D_Company.FirstOrDefault(q => q.DCID == ID && !q.DeleteFlag);
+            var N = DC.D_Company.Include(q => q.BC).FirstOrDefault(q => q.DCID == ID && !q.DeleteFlag);
             D_Company_APIItem Item = null;
             if (N != null)
             {
@@ -76,8 +77,8 @@ namespace NS_Education.Controllers
                 {
                     DCID = N.DCID,
                     BCID = N.BCID,
-                    BC_TitleC = N.B_Category.TitleC,
-                    BC_TitleE = N.B_Category.TitleE,
+                    BC_TitleC = N.BC.TitleC,
+                    BC_TitleE = N.BC.TitleE,
                     CategoryList = SIs,
                     Code = N.Code,
                     TitleC = N.TitleC,
@@ -109,7 +110,7 @@ namespace NS_Education.Controllers
                     N_.ActiveFlag = ActiveFlag;
                     N_.UpdDate = DT;
                     N_.UpdUID = UID;
-                    DC.SubmitChanges();
+                    DC.SaveChanges();
                 }
                 else
                     Error += "查無資料,無法更新;";
@@ -131,7 +132,7 @@ namespace NS_Education.Controllers
                     N_.DeleteFlag = true;
                     N_.UpdDate = DT;
                     N_.UpdUID = UID;
-                    DC.SubmitChanges();
+                    DC.SaveChanges();
                 }
                 else
                     Error += "查無資料,無法更新;";
@@ -156,8 +157,8 @@ namespace NS_Education.Controllers
                 {
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
-                    DC.D_Company.InsertOnSubmit(N);
-                    DC.SubmitChanges();
+                    DC.D_Company.Add(N);
+                    DC.SaveChanges();
                 }
             }
             else
@@ -181,7 +182,7 @@ namespace NS_Education.Controllers
                     N_.DeleteFlag = N.DeleteFlag;
                     N_.UpdUID = N.UpdUID;
                     N_.UpdDate = DT;
-                    DC.SubmitChanges();
+                    DC.SaveChanges();
                 }
             }
             return ChangeJson(GetMsgClass(Error));

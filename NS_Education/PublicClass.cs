@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Ajax.Utilities;
+using NS_Education.Models.Entities.DbContext;
 using NS_Education.Tools;
 
 namespace NS_Education
@@ -13,14 +14,14 @@ namespace NS_Education
     public class PublicClass : Controller
     {
         public DateTime DT = DateTime.Now;
-        public DataClassesDataContext DC;
+        protected NsDbContext DC { get; }
         public string[] sCategoryTypes = new string[] { "通用", "公司", "部門", "場地", "備忘", "服務", "設備", "客戶", "付款類", "合作廠商" };
         public string DateFormat = "yyyy/MM/dd";
         public string DateTimeFormat = "yyyy/MM/dd HH:mm";
         public string Error = "";
         public PublicClass()
         {
-            DC = new DataClassesDataContext("Data Source=LAPTOP-RUU8RF7Q\\NS_EDUCATION;Initial Catalog=ns;Integrated Security=True");
+            DC = new NsDbContext();
         }
 
         public cReturnMessage GetMsgClass(string sError)

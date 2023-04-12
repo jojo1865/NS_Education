@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
-using NS_Education.Models;
 using NS_Education.Models.APIItems.UserData.DeleteItem;
 using NS_Education.Models.APIItems.UserData.Login;
 using NS_Education.Models.APIItems.UserData.Submit;
+using NS_Education.Models.Entities;
 using NS_Education.Tools;
 using NS_Education.Tools.BeingValidated;
 
@@ -127,8 +127,8 @@ namespace NS_Education.Controllers
             if (IsATestRegister(input))
                 return;
             
-            DC.UserData.InsertOnSubmit(newUser);
-            DC.SubmitChanges();
+            DC.UserData.Add(newUser);
+            DC.SaveChanges();
         }
 
         // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
@@ -196,7 +196,7 @@ namespace NS_Education.Controllers
             if (HasError())
                 return;
             
-            DC.SubmitChanges();
+            DC.SaveChanges();
         }
 
         // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
@@ -347,7 +347,7 @@ namespace NS_Education.Controllers
             try
             {
                 user.LoginDate = DateTime.Now;
-                DC.SubmitChanges();
+                DC.SaveChanges();
             }
             catch (Exception e)
             {
@@ -402,7 +402,7 @@ namespace NS_Education.Controllers
                 queried.DeleteFlag = true;
                 queried.UpdDate = DateTime.Now;
                 queried.UpdUID = input.OperatorUID;
-                DC.SubmitChanges();
+                DC.SaveChanges();
             }
             catch (Exception e)
             {

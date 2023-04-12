@@ -1,10 +1,8 @@
 ﻿using NS_Education.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
+using NS_Education.Models.Entities;
 
 
 namespace NS_Education.Controllers
@@ -35,18 +33,21 @@ namespace NS_Education.Controllers
 
             B_Category_List ListData = new B_Category_List();
             ListData.Items = new List<B_Category_APIItem>();
-            ListData.SuccessFlag = Ns.Count() > 0;
-            ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
             ListData.NowPage = NowPage;
             ListData.CutPage = CutPage;
-            ListData.AllItemCt = Ns.Count();
-            ListData.AllPageCt = NowPage == 0 ? 0 : (ListData.AllItemCt % CutPage == 0 ? ListData.AllItemCt / CutPage : (ListData.AllItemCt / CutPage) + 1);
 
             if (NowPage == 0)
                 Ns = Ns.Where(q => q.ActiveFlag).OrderBy(q => q.SortNo);
             else
                 Ns = Ns.OrderBy(q => q.SortNo).Skip((NowPage - 1) * CutPage).Take(CutPage);
-            foreach (var N in Ns)
+
+            var NsList = Ns.ToList();
+            ListData.SuccessFlag = NsList.Any();
+            ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
+            ListData.AllItemCt = NsList.Count;
+            ListData.AllPageCt = NowPage == 0 ? 0 : (ListData.AllItemCt % CutPage == 0 ? ListData.AllItemCt / CutPage : (ListData.AllItemCt / CutPage) + 1);
+            
+            foreach (var N in NsList)
             {
                 B_Category BC_P = null;
                 if (N.ParentID > 0)
@@ -145,7 +146,7 @@ namespace NS_Education.Controllers
                     N_.ActiveFlag = ActiveFlag;
                     N_.UpdDate = DT;
                     N_.UpdUID = UID;
-                    DC.SubmitChanges();
+                    DC.SaveChanges();
                 }
                 else
                     Error += "查無資料,無法更新;";
@@ -167,7 +168,7 @@ namespace NS_Education.Controllers
                     N_.DeleteFlag = true;
                     N_.UpdDate = DT;
                     N_.UpdUID = UID;
-                    DC.SubmitChanges();
+                    DC.SaveChanges();
                 }
                 else
                     Error += "查無資料,無法更新;";
@@ -186,12 +187,12 @@ namespace NS_Education.Controllers
                 if (Error == "")
                 {
                     var BCs = DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == N.CategoryType);
-                    if (BCs.Count() > 0)
+                    if (BCs.Any())
                         N.SortNo = BCs.Max(q => q.SortNo) + 1;
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
-                    DC.B_Category.InsertOnSubmit(N);
-                    DC.SubmitChanges();
+                    DC.B_Category.Add(N);
+                    DC.SaveChanges();
                 }
             }
             else//更新
@@ -211,7 +212,7 @@ namespace NS_Education.Controllers
                     N_.DeleteFlag = N.DeleteFlag;
                     N_.UpdUID = N.UpdUID;
                     N_.UpdDate = DT;
-                    DC.SubmitChanges();
+                    DC.SaveChanges();
                 }
             }
             return ChangeJson(GetMsgClass(Error));

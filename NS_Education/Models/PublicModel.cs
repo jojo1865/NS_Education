@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace NS_Education.Models
+﻿namespace NS_Education.Models
 {
 
     public class PublicModel

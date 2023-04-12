@@ -54,34 +54,14 @@ namespace NS_Education.Controllers
         
         #endregion
         
-        #region Submit
-        /// <summary>
-        /// 註冊、更新使用者資料。<br/>
-        /// 會依據 LoginAccount 是否已經存在於資料庫，判定是註冊還是更新。
-        /// </summary>
-        /// <param name="input">輸入資料。如果為更新，且 LoginPassword 如有輸入且與資料庫不同時，則會多驗證 OriginalPassword。</param>
-        /// <returns>通用回傳訊息格式。當註冊時 Note 欄位以外有任何空白，或密碼驗證錯誤時，回傳錯誤。</returns>
-        [HttpPost]
-        public async Task<string> Submit(UserData_Submit_Input_APIItem input)
-        {
-            UserData checkedUser = await DC.UserData.FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount);
-            // TODO: 在確保單元測試方式之後，將此處的測試相關邏輯刪除。
-            bool isRegister = !IsATestUpdate(input) && checkedUser == null || IsATestRegister(input);
-            
-            if (isRegister)
-                await Register(input);
-            else
-                await Update(input, checkedUser);
-
-            return GetResponseJson();
-        }
-
+        #region SignIn
         /// <summary>
         /// 註冊使用者資料。過程中會驗證使用者輸入，並在回傳時一併報錯。<br/>
         /// 如果過程驗證都通過，才寫入資料庫。
         /// </summary>
         /// <param name="input">輸入資料</param>
-        private async Task Register(UserData_Submit_Input_APIItem input)
+        [HttpPost]
+        public async Task<string> SignIn(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();
             
@@ -124,16 +104,13 @@ namespace NS_Education.Controllers
             };
 
             // doesn't write to db if any error raised
-            if (HasError())
-                return;
-            
             // For postman testing: 若備註欄為特殊值時，不真正寫入資料。
-            // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
-            if (IsATestRegister(input))
-                return;
+            if (HasError() || IsATestRegister(input)) return GetResponseJson();
             
             await DC.UserData.AddAsync(newUser);
             await DC.SaveChangesAsync();
+
+            return GetResponseJson();
         }
 
         // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
@@ -141,7 +118,84 @@ namespace NS_Education.Controllers
         {
             return input.Note?.ToLower().Equals("newregistertest") ?? false;
         }
+        #endregion
 
+        #region Login
+        /// <summary>
+        /// 驗證使用者登入，無誤則會回傳使用者的 Username 和 JWT Token。
+        /// </summary>
+        /// <param name="input">輸入資料</param>
+        /// <returns>UserData_Login_Output_APIItem</returns>
+        [HttpPost]
+        public async Task<string> Login(UserData_Login_Input_APIItem input)
+        {
+            InitializeResponse();
+
+            // 驗證
+            UserData queried = !input.LoginAccount.IsNullOrWhiteSpace()
+                ? await DC.UserData.FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount)
+                : null;
+            
+            // 1. 先查詢是否確實有這個帳號
+            // 2. 確認帳號的啟用 Flag 與刪除 Flag 
+            // 3. 有帳號，才驗證登入密碼
+            // 4. 更新使用者的上次登入時間，需更新成功才算登入成功
+            bool isValidated = await queried.StartValidate(true)
+                .Validate(q => q != null, () => AddError(LoginAccountNotFound))
+                .Validate(q => q.ActiveFlag && !q.DeleteFlag, () => AddError(LoginAccountNotFound))
+                .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
+                    () => AddError(LoginPasswordIncorrect))
+                .ValidateAsync(UpdateUserLoginDate)
+                .IsValid();
+
+            if (!isValidated)
+                return GetResponseJson();
+
+            // 登入都成功後，回傳部分使用者資訊，以及使用者的權限資訊。
+            UserData_Login_Output_APIItem output = new UserData_Login_Output_APIItem
+            {
+                // queried 已經在上面驗證為非 null。目前專案使用 C# 版本不支援 !，所以以此代替。 
+                // ReSharper disable once PossibleNullReferenceException
+                UID = queried.UID,
+                Username = queried.UserName,
+                JwtToken = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, new []
+                {
+                    new Claim("uid", queried.UID.ToString())
+                })
+            };
+
+            return GetResponseJson(output);
+        }
+
+        /// <summary>
+        /// 更新使用者的登入日期時間。
+        /// </summary>
+        /// <param name="user">使用者資料</param>
+        /// <returns>
+        /// true：更新成功。<br/>
+        /// false：更新失敗。
+        /// </returns>
+        private async Task<bool> UpdateUserLoginDate(UserData user)
+        {
+            bool result = true;
+            
+            try
+            {
+                user.LoginDate = DateTime.Now;
+                await DC.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                AddError(LoginDateUpdateFailed(e));
+                result = false;
+            }
+
+            return result;
+        }
+        
+        #endregion
+        
+        #region Submit
         /// <summary>
         /// 更新使用者資料。<br/>
         /// 如果 LoginPassword 有輸入且與資料庫不同時，則會多驗證 OriginalPassword。<br/>
@@ -149,7 +203,8 @@ namespace NS_Education.Controllers
         /// </summary>
         /// <param name="input">輸入資料</param>
         /// <param name="original">呼叫此方法前，應已先取得原始使用者資料，並在此傳入。</param>
-        private async Task Update(UserData_Submit_Input_APIItem input, UserData original)
+        [HttpPost]
+        public async Task Submit(UserData_Submit_Input_APIItem input, UserData original)
         {
             InitializeResponse();
 
@@ -279,81 +334,6 @@ namespace NS_Education.Controllers
         }
         #endregion
 
-        #region Login
-        /// <summary>
-        /// 驗證使用者登入，無誤則會回傳使用者的 Username 和 JWT Token。
-        /// </summary>
-        /// <param name="input">輸入資料</param>
-        /// <returns>UserData_Login_Output_APIItem</returns>
-        [HttpPost]
-        public async Task<string> Login(UserData_Login_Input_APIItem input)
-        {
-            InitializeResponse();
-
-            // 驗證
-            UserData queried = !input.LoginAccount.IsNullOrWhiteSpace()
-                ? await DC.UserData.FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount)
-                : null;
-            
-            // 1. 先查詢是否確實有這個帳號
-            // 2. 確認帳號的啟用 Flag 與刪除 Flag 
-            // 3. 有帳號，才驗證登入密碼
-            // 4. 更新使用者的上次登入時間，需更新成功才算登入成功
-            bool isValidated = await queried.StartValidate(true)
-                .Validate(q => q != null, () => AddError(LoginAccountNotFound))
-                .Validate(q => q.ActiveFlag && !q.DeleteFlag, () => AddError(LoginAccountNotFound))
-                .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
-                    () => AddError(LoginPasswordIncorrect))
-                .ValidateAsync(UpdateUserLoginDate)
-                .IsValid();
-
-            if (!isValidated)
-                return GetResponseJson();
-
-            // 登入都成功後，回傳部分使用者資訊，以及使用者的權限資訊。
-            UserData_Login_Output_APIItem output = new UserData_Login_Output_APIItem
-            {
-                // queried 已經在上面驗證為非 null。目前專案使用 C# 版本不支援 !，所以以此代替。 
-                // ReSharper disable once PossibleNullReferenceException
-                UID = queried.UID,
-                Username = queried.UserName,
-                JwtToken = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, new []
-                {
-                    new Claim("uid", queried.UID.ToString())
-                })
-            };
-
-            return GetResponseJson(output);
-        }
-
-        /// <summary>
-        /// 更新使用者的登入日期時間。
-        /// </summary>
-        /// <param name="user">使用者資料</param>
-        /// <returns>
-        /// true：更新成功。<br/>
-        /// false：更新失敗。
-        /// </returns>
-        private async Task<bool> UpdateUserLoginDate(UserData user)
-        {
-            bool result = true;
-            
-            try
-            {
-                user.LoginDate = DateTime.Now;
-                await DC.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                AddError(LoginDateUpdateFailed(e));
-                result = false;
-            }
-
-            return result;
-        }
-        
-        #endregion
-        
         #region DeleteItem
 
         /// <summary>
@@ -405,6 +385,21 @@ namespace NS_Education.Controllers
 
             return GetResponseJson();
         }
+
+        #endregion
+        
+        #region ChangeActive
+        #endregion
+
+        #region GetList
+
+        
+
+        #endregion
+
+        #region GetInfoById
+
+        
 
         #endregion
     }

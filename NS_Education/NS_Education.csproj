@@ -326,6 +326,7 @@
     <Compile Include="Tools\Extensions\StringExtensionMethods.cs" />
     <Compile Include="Tools\Filters\JwtAuthFilter.cs" />
     <Compile Include="Variables\JwtConstants.cs" />
+    <Compile Include="Variables\RoleConstants.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />

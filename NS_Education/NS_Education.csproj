@@ -319,6 +319,7 @@
     <Compile Include="Tools\BeingValidated\ChainValidateHelperExtensionMethods.cs" />
     <Compile Include="Tools\BeingValidated\IBeingValidated.cs" />
     <Compile Include="Tools\cReturnMessageInfusableAbstract.cs" />
+    <Compile Include="Tools\Encryption\JwtHelper.cs" />
     <Compile Include="Tools\StandardColumnExtensionMethods.cs" />
     <Compile Include="Tools\StringExtensionMethods.cs" />
   </ItemGroup>

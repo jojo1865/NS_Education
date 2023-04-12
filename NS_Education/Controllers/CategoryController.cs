@@ -11,6 +11,7 @@ namespace NS_Education.Controllers
     {
         //取得分類的類別列表
         [HttpGet]
+        [Authorize]
         public string GetTypeList()
         {
             List<cSelectItem> TIs = new List<cSelectItem>();

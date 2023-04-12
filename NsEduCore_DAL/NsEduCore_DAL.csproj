@@ -19,8 +19,4 @@
       <Folder Include="Models\Data" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\NsEduCore_Tools\NsEduCore_Tools.csproj" />
-    </ItemGroup>
-
 </Project>

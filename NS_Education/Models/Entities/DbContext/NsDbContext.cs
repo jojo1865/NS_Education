@@ -476,6 +476,8 @@ namespace NS_Education.Models.Entities.DbContext
             {
                 entity.HasKey(e => e.DFCID);
 
+                entity.Property(e => e.BOCID).HasDefaultValueSql("((1))");
+
                 entity.Property(e => e.Code)
                     .HasMaxLength(10)
                     .IsUnicode(false);
@@ -485,6 +487,12 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.Title).HasMaxLength(60);
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.BOC)
+                    .WithMany(p => p.D_FoodCategory)
+                    .HasForeignKey(d => d.BOCID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_D_FoodCategory_B_OrderCode");
             });
 
             modelBuilder.Entity<D_Hall>(entity =>
@@ -513,6 +521,10 @@ namespace NS_Education.Models.Entities.DbContext
             modelBuilder.Entity<D_OtherPayItem>(entity =>
             {
                 entity.HasKey(e => e.DOPIID);
+
+                entity.Property(e => e.BOCID).HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.BSCID).HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.Code)
                     .HasMaxLength(10)
@@ -790,6 +802,12 @@ namespace NS_Education.Models.Entities.DbContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Device_B_Device");
 
+                entity.HasOne(d => d.BOC)
+                    .WithMany(p => p.Resver_Device)
+                    .HasForeignKey(d => d.BOCID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Resver_Device_B_OrderCode");
+
                 entity.HasOne(d => d.BS)
                     .WithMany(p => p.Resver_Device)
                     .HasForeignKey(d => d.BSID)
@@ -889,6 +907,12 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
+                entity.HasOne(d => d.BOC)
+                    .WithMany(p => p.Resver_Other)
+                    .HasForeignKey(d => d.BOCID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Resver_Other_B_OrderCode");
+
                 entity.HasOne(d => d.BS)
                     .WithMany(p => p.Resver_Other)
                     .HasForeignKey(d => d.BSID)
@@ -921,6 +945,12 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.TargetDate).HasColumnType("datetime");
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.BOC)
+                    .WithMany(p => p.Resver_Site)
+                    .HasForeignKey(d => d.BOCID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Resver_Site_B_OrderCode");
 
                 entity.HasOne(d => d.BSC)
                     .WithMany(p => p.Resver_Site)
@@ -968,6 +998,12 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.Title).HasMaxLength(100);
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.BOC)
+                    .WithMany(p => p.Resver_Throw)
+                    .HasForeignKey(d => d.BOCID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Resver_Throw_B_OrderCode");
 
                 entity.HasOne(d => d.BSC)
                     .WithMany(p => p.Resver_Throw)

@@ -28,6 +28,7 @@ namespace NS_Education.Models.Entities
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
 
+        public virtual B_OrderCode BOC { get; set; }
         public virtual B_SiteData BS { get; set; }
         public virtual D_OtherPayItem DOPI { get; set; }
         public virtual Resver_Head RH { get; set; }

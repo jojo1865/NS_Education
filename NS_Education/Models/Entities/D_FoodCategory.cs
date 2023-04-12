@@ -19,6 +19,7 @@ namespace NS_Education.Models.Entities
         public string Title { get; set; }
         public int UnitPrice { get; set; }
         public int Price { get; set; }
+        public int BOCID { get; set; }
         public bool ActiveFlag { get; set; }
         public bool DeleteFlag { get; set; }
         public DateTime CreDate { get; set; }
@@ -26,6 +27,7 @@ namespace NS_Education.Models.Entities
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
 
+        public virtual B_OrderCode BOC { get; set; }
         public virtual ICollection<Resver_Throw_Food> Resver_Throw_Food { get; set; }
     }
 }

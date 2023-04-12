@@ -31,6 +31,7 @@ namespace NS_Education.Models.Entities
         public int UpdUID { get; set; }
 
         public virtual B_Device BD { get; set; }
+        public virtual B_OrderCode BOC { get; set; }
         public virtual B_SiteData BS { get; set; }
         public virtual D_TimeSpan DTSIDENavigation { get; set; }
         public virtual D_TimeSpan DTSIDSNavigation { get; set; }

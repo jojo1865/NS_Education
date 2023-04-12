@@ -30,6 +30,7 @@ namespace NS_Education.Models.Entities
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
 
+        public virtual B_OrderCode BOC { get; set; }
         public virtual B_SiteData BS { get; set; }
         public virtual B_StaticCode BSC { get; set; }
         public virtual D_TimeSpan DTSIDENavigation { get; set; }

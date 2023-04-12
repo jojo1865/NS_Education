@@ -10,3 +10,4 @@
 ```sh
 dotnet ef dbcontext scaffold "Data Source=LAPTOP-RUU8RF7Q\NS_EDUCATION;Initial Catalog=ns;Integrated Security=True" Microsoft.EntityFrameworkCore.SqlServer --use-database-names --context-dir ..\NS_Education\Models\Entities\DbContext --output-dir ..\NS_Education\Models\Entities --context NsDbContext
 ```         
+* 執行後，將所有物件的 namespace 調正確

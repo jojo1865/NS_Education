@@ -11,13 +11,13 @@ namespace NsEduCore.Controllers
 {
     public class UserController : BaseController
     {
-        private readonly IUserService _userService;
+        private readonly UserService _userService;
 
-        public UserController(IUserService userService)
+        public UserController(UserService userService)
         {
             _userService = userService;
         }
-
+        
         [HttpPost]
         public async Task<IActionResult> Login(UserLoginRequest input)
         {
@@ -41,15 +41,12 @@ namespace NsEduCore.Controllers
                     () => AddError(UserControllerMessages.LoginPasswordIncorrect))
                 .ValidateAsync(UpdateUserLoginDate)
                 .IsValid();
-
-            if (!isValid)
-                return Ok(GetReturnMessage());
-
+            
             // 4. 建立並回傳 JWT
             await Task.Run(() => Console.WriteLine("Hello World!"));
             return Ok();
         }
-
+        
         /// <summary>
         /// 更新使用者的登入日期時間。
         /// </summary>

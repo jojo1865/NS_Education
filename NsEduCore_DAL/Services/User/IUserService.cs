@@ -21,11 +21,5 @@ namespace NsEduCore_DAL.Services.User
         /// false：不符合
         /// </returns>
         Task<bool> ValidateLoginPassword(User user, string inputPassword);
-
-        /// <summary>
-        /// 更新使用者的上次登入時間至呼叫當下。
-        /// </summary>
-        /// <param name="user">使用者</param>
-        Task UpdateLoginDate(User user);
     }
 }

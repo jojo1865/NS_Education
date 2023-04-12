@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NsEduCore_DAL.Models.Data;
-using NsEduCore_DAL.Services.User;
 
 namespace NsEduCore
 {
@@ -27,12 +26,8 @@ namespace NsEduCore
         {
             services.AddControllers();
 
-            // Db
-            services.AddDbContext<NsDataContext>();
-            
             // IoC
             services.AddScoped<NsDataContext, NsDataContext>();
-            services.AddScoped<IUserService, UserService>();
 
             #if DEBUG
             services.AddSwaggerGen(c =>

@@ -92,7 +92,11 @@ namespace NsEduCore_DAL.Services.User
             }
         }
         #endregion
-        
+
+        /// <summary>
+        /// 更新使用者的上次登入時間至呼叫當下。
+        /// </summary>
+        /// <param name="user">使用者</param>
         public async Task UpdateLoginDate(User user)
         {
             user.UserData.LoginDate = DateTime.Now;

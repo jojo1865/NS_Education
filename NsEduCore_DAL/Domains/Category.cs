@@ -13,7 +13,9 @@ namespace NsEduCore_DAL.Domains
         public int SortNo { get; set; }
         public bool ActiveFlag { get; set; }
         public bool DeleteFlag { get; set; }
+        public DateTime CreDate { get; set; }
         public int CreUID { get; set; }
+        public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
     }
 }

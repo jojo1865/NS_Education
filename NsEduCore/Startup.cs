@@ -10,7 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NsEduCore.Variables;
 using NsEduCore_DAL.Models.Data;
-using NsEduCore_DAL.Services.Category;
 using NsEduCore_DAL.Services.Company;
 using NsEduCore_DAL.Services.User;
 using NsEduCore_Tools.Encryption;
@@ -37,7 +36,6 @@ namespace NsEduCore
             // IoC
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICompanyService, CompanyService>();
-            services.AddScoped<ICategoryService, CategoryService>();
             services.AddSingleton<IJwtHelper, JwtHelper>();
             
             #if DEBUG

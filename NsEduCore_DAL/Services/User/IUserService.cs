@@ -7,9 +7,9 @@ namespace NsEduCore_DAL.Services.User
         /// <summary>
         /// 透過使用者帳號，查詢使用者。
         /// </summary>
-        /// <param name="loggingAccount">輸入帳號</param>
+        /// <param name="LoggingAccount">輸入帳號</param>
         /// <returns>查詢結果。有可能為 null。</returns>
-        Task<Domains.User> SelectByLoginAccount(string loggingAccount);
+        Task<User> SelectByLoginAccount(string loggingAccount);
 
         /// <summary>
         /// 驗證登入密碼是否符合一筆使用者資料。
@@ -20,12 +20,12 @@ namespace NsEduCore_DAL.Services.User
         /// true：符合。<br/>
         /// false：不符合
         /// </returns>
-        Task<bool> ValidateLoginPassword(Domains.User user, string inputPassword);
+        Task<bool> ValidateLoginPassword(User user, string inputPassword);
 
         /// <summary>
         /// 更新使用者的上次登入時間至呼叫當下。
         /// </summary>
         /// <param name="user">使用者</param>
-        Task UpdateLoginDate(Domains.User user);
+        Task UpdateLoginDate(User user);
     }
 }

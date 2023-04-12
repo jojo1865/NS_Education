@@ -1,7 +1,7 @@
 using System;
 using NsEduCore_DAL.Models;
 
-namespace NsEduCore_DAL.Domains
+namespace NsEduCore_DAL.Services.User
 {
     public class User
     {

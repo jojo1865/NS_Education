@@ -1,4 +1,4 @@
-namespace NsEduCore.Requests.User
+namespace NsEduCore.Requests
 {
     /// <summary>
     /// 登入的要求物件。

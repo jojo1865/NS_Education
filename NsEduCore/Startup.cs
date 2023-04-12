@@ -10,7 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NsEduCore_DAL.Models.Data;
 using NsEduCore_DAL.Services.User;
-using NsEduCore_Tools.Encryption;
 
 namespace NsEduCore
 {
@@ -34,7 +33,6 @@ namespace NsEduCore
             // IoC
             services.AddScoped<NsDataContext, NsDataContext>();
             services.AddScoped<IUserService, UserService>();
-            services.AddSingleton<IJwtHelper, JwtHelper>();
 
             #if DEBUG
             services.AddSwaggerGen(c =>

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
-using NS_Education.Models;
-using System.Web.Mvc;
-using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
+using Newtonsoft.Json;
+using NS_Education.Models;
 using NS_Education.Models.Entities.DbContext;
 using NS_Education.Tools;
 
-namespace NS_Education
+namespace NS_Education.Controllers.BaseClass
 {
     public class PublicClass : Controller
     {

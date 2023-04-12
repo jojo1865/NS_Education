@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NS_Education.Models
+namespace NS_Education.Models.APIItems.FoodCategory
 {
     public class D_FoodCategory_List
     {

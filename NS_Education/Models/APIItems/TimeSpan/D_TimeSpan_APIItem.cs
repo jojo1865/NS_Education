@@ -1,39 +1,32 @@
 ﻿using System.Collections.Generic;
 
-namespace NS_Education.Models
+namespace NS_Education.Models.APIItems.TimeSpan
 {
-    public class D_PayType_List
+    public class D_TimeSpan_List
     {
-        public D_PayType_List() { }
+        public D_TimeSpan_List() { }
         public bool SuccessFlag { get; set; }
         public string Message { get; set; }
         public int NowPage { get; set; }
         public int CutPage { get; set; }
         public int AllItemCt { get; set; }
         public int AllPageCt { get; set; }
-        public List<D_PayType_APIItem> Items { get; set; }
+        public List<D_TimeSpan_APIItem> Items { get; set; }
     }
-    public class D_PayType_APIItem
+    public class D_TimeSpan_APIItem
     {
-        public int DPTID { get; set; }
-        public int BCID { get; set; }
-        public string BC_TitleC { get; set; }
-        public string BC_TitleE { get; set; }
-        public List<cSelectItem> CategoryList { get; set; }
-
+        public int DTSID { get; set; }
         public string Code { get; set; }
         public string Title { get; set; }
-        public string AccountingNo { get; set; }
-        public string CustormerNo { get; set; }
-
+        public int HourS { get; set; }
+        public int MinuteS { get; set; }
         public int HourE { get; set; }
         public int MinuteE { get; set; }
 
-        public bool InvoiceFlag { get; set; }
-        public bool DepositFlag { get; set; }
-        public bool RestaurantFlag { get; set; }
-        public bool SimpleCheckoutFlag { get; set; }
-        public bool SimpleDepositFlag { get; set; }
+        public string TimeS { get; set; }
+        public string TimeE { get; set; }
+
+        public string GetTimeSpan { get; set; }
 
         public bool ActiveFlag { get; set; }
         public string CreDate { get; set; }

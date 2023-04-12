@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Ajax.Utilities;
 
-namespace NS_Education.Tools
+namespace NS_Education.Tools.Extensions
 {
     public static class StringExtensionMethods
     {

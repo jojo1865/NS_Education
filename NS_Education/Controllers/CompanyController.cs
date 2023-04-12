@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Controllers.BaseClass;
+using NS_Education.Models.APIItems;
+using NS_Education.Models.APIItems.Company;
 using NS_Education.Models.Entities;
 
 namespace NS_Education.Controllers

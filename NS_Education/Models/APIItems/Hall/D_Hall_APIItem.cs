@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NS_Education.Models
+namespace NS_Education.Models.APIItems.Hall
 {
     public class D_Hall_List
     {

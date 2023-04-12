@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
+using NS_Education.Controllers.BaseClass;
 using NS_Education.Models.APIItems.UserData.DeleteItem;
 using NS_Education.Models.APIItems.UserData.Login;
 using NS_Education.Models.APIItems.UserData.Submit;
@@ -12,6 +13,7 @@ using NS_Education.Models.Entities;
 using NS_Education.Tools;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.Encryption;
+using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters;
 using NS_Education.Variables;
 

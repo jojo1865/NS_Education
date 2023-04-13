@@ -258,7 +258,7 @@
     <Compile Include="Controllers\FoodCategoryController.cs" />
     <Compile Include="Controllers\HallController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Controllers\UserDataController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -324,9 +324,18 @@
     <Compile Include="Tools\Encryption\JwtHelper.cs" />
     <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StringExtensionMethods.cs" />
-    <Compile Include="Tools\Filters\JwtAuthFilter.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeBy.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeTypeSingletonFactory.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AdminRole.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AnyRole.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\IAuthorizeType.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\RoleConstants.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\UserRole.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\JwtAuthFilter.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequiredPrivileges.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequirePrivilege.cs" />
+    <Compile Include="Variables\IOConstants.cs" />
     <Compile Include="Variables\JwtConstants.cs" />
-    <Compile Include="Variables\RoleConstants.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />

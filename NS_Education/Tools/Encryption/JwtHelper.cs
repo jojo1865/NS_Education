@@ -33,40 +33,7 @@ namespace NS_Education.Tools.Encryption
             var token = TokenHandler.CreateToken(tokenDescriptor);
             return TokenHandler.WriteToken(token);
         }
-
-        /// <summary>
-        /// 驗證一組輸入的 JWT Token。
-        /// </summary>
-        /// <param name="token">JWT Token</param>
-        /// <param name="secretKey">JWT 密鑰</param>
-        /// <returns>
-        /// true：解密成功。<br/>
-        /// false：解密失敗，或是過程拋錯時。
-        /// </returns>
-        public static bool ValidateToken(string token, string secretKey)
-        {
-            try
-            {
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true, // JWT 在加密時會自動把時間設為 exp 值，所以這裡不需要再提供有效時間為幾分鐘。
-                    ClockSkew = TimeSpan.Zero
-                };
-
-                TokenHandler.ValidateToken(token, validationParameters, out _);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
-        }
-
+        
         /// <summary>
         /// 解密一組輸入的 JWT Token。失敗時不做 try-catch。
         /// </summary>
@@ -86,6 +53,41 @@ namespace NS_Education.Tools.Encryption
             };
 
             return TokenHandler.ValidateToken(token, validationParameters, out _);
+        }
+
+        /// <summary>
+        /// 嘗試解密一組輸入的 JWT Token。
+        /// </summary>
+        /// <param name="token">JWT Token</param>
+        /// <param name="secretKey">JWT 密鑰</param>
+        /// <param name="claimsPrincipal">成功時，提供 claimsPrincipal。</param>
+        /// <returns>
+        /// true：解密成功。<br/>
+        /// false：解密失敗。
+        /// </returns>
+        public static bool TryDecodeToken(string token, string secretKey, out ClaimsPrincipal claimsPrincipal)
+        {
+            try
+            {
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true, // JWT 在加密時會自動把時間設為 exp 值，所以這裡不需要再提供有效時間為幾分鐘。
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                claimsPrincipal = TokenHandler.ValidateToken(token, validationParameters, out _);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"TryDecodeToken failed: {e}");
+                claimsPrincipal = null;
+                return false;
+            }
         }
     }
 }

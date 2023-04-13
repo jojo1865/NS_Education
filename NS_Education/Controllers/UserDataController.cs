@@ -14,11 +14,12 @@ using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters.JwtAuthFilter.AuthorizeType;
 using NS_Education.Variables;
 
 namespace NS_Education.Controllers
 {
-    public class UserController : PublicClass
+    public class UserDataController : PublicClass
     {
         #region 錯誤訊息 - 通用
         /// <summary>
@@ -161,7 +162,8 @@ namespace NS_Education.Controllers
                 Username = queried.UserName,
                 JwtToken = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, new []
                 {
-                    new Claim("uid", queried.UID.ToString())
+                    new Claim(JwtConstants.UidClaimType, queried.UID.ToString()),
+                    new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.User.GetRoleValue())
                 })
             };
 
@@ -354,8 +356,7 @@ namespace NS_Education.Controllers
             // 2. 刪除對象 UID 是否正確。
             bool isInputValid = input.StartValidate(true)
                 .Validate(i => !i.OperatorUID.IsIncorrectUid(), () => AddError(DeleteItemOperatorUidIncorrect))
-                .Validate(i => !i.TargetUID.IsIncorrectUid(), () => AddError(DeleteItemTargetUidIncorrect))
-                .IsValid();
+                .Validate(i => !i.TargetUID.IsIncorrectUid(), () => AddError(DeleteItemTargetUidIncorrect)).IsValid();
 
             if (!isInputValid)
                 return GetResponseJson();
@@ -366,8 +367,7 @@ namespace NS_Education.Controllers
             // 2. 該筆資料是否並非刪除狀態。
             bool isDataValid = queried.StartValidate(true)
                 .Validate(q => q != null, () => AddError(DeleteItemTargetUidNotFound))
-                .Validate(q => q.DeleteFlag == false, () => AddError(DeleteItemTargetAlreadyDeleted))
-                .IsValid();
+                .Validate(q => q.DeleteFlag == false, () => AddError(DeleteItemTargetAlreadyDeleted)).IsValid();
             
             if (!isDataValid)
                 return GetResponseJson();

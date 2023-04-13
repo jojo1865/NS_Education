@@ -7,7 +7,9 @@ using NS_Education.Controllers.BaseClass;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Category;
 using NS_Education.Models.Entities;
-using NS_Education.Tools.Filters;
+using NS_Education.Tools.Filters.JwtAuthFilter;
+using NS_Education.Tools.Filters.JwtAuthFilter.AuthorizeType;
+using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controllers
 {
@@ -83,7 +85,7 @@ namespace NS_Education.Controllers
         }
         //取得分類的內容
         [HttpGet]
-        [JwtAuthFilter]
+        [JwtAuthFilter(privileges: RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoByID(int ID = 0)
         {
             var N = await DC.B_Category.FirstOrDefaultAsync(q => !q.DeleteFlag && q.BCID == ID);

@@ -207,13 +207,28 @@ namespace NS_Education.Controllers
         /// <param name="input">輸入資料</param>
         /// <param name="original">呼叫此方法前，應已先取得原始使用者資料，並在此傳入。</param>
         [HttpPost]
-        public async Task Submit(UserData_Submit_Input_APIItem input, UserData original)
+        public async Task<string> Submit(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();
 
             // sanitize
             if (input.UID.IsIncorrectUid())
                 AddError(SubmitUidIncorrect);
+            
+            if (input.LoginAccount.IsNullOrWhiteSpace())
+                AddError(EmptyNotAllowed("使用者帳號"));
+            
+            // 如果輸入就錯了，提早返回。
+            if (HasError())
+                return GetResponseJson();
+            
+            UserData original = await DC.UserData.FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount);
+            
+            if (original == null)
+            {
+                AddError(LoginAccountNotFound);
+                return GetResponseJson();
+            }
             
             // 若密碼有輸入且有變時，驗證 OriginalPassword。
             if (IsChangingPassword(input.LoginPassword, original.LoginPassword))
@@ -251,17 +266,18 @@ namespace NS_Education.Controllers
             {
                 // 密碼錯誤時報錯並提早返回。
                 AddError(SubmitPasswordAlphanumericOnly);
-                return;
+                return GetResponseJson();
             }
 
             // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
             if (IsATestUpdate(input))
-                return;
+                return GetResponseJson();
 
             if (HasError())
-                return;
+                return GetResponseJson();
             
             await DC.SaveChangesAsync();
+            return GetResponseJson();
         }
 
         // TODO: 在確保單元測試方式之後，將此處邏輯刪除。

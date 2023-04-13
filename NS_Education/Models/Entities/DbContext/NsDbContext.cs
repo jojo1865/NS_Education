@@ -43,6 +43,7 @@ namespace NS_Education.Models.Entities.DbContext
         public virtual DbSet<M_Group_Menu> M_Group_Menu { get; set; }
         public virtual DbSet<M_Group_User> M_Group_User { get; set; }
         public virtual DbSet<M_Partner_Category> M_Partner_Category { get; set; }
+        public virtual DbSet<M_ResverSiteTimeSpan> M_ResverSiteTimeSpan { get; set; }
         public virtual DbSet<MenuAPI> MenuAPI { get; set; }
         public virtual DbSet<MenuData> MenuData { get; set; }
         public virtual DbSet<Resver_Bill_Detail> Resver_Bill_Detail { get; set; }
@@ -706,6 +707,27 @@ namespace NS_Education.Models.Entities.DbContext
                     .HasConstraintName("FK_M_Partner_Category_B_Partner");
             });
 
+            modelBuilder.Entity<M_ResverSiteTimeSpan>(entity =>
+            {
+                entity.HasKey(e => e.MID);
+
+                entity.Property(e => e.CreDate).HasColumnType("datetime");
+
+                entity.Property(e => e.UpdDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.DTS)
+                    .WithMany(p => p.M_ResverSiteTimeSpan)
+                    .HasForeignKey(d => d.DTSID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_M_ResverSiteTimeSpan_D_TimeSpan");
+
+                entity.HasOne(d => d.RS)
+                    .WithMany(p => p.M_ResverSiteTimeSpan)
+                    .HasForeignKey(d => d.RSID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_M_ResverSiteTimeSpan_Resver_Site");
+            });
+
             modelBuilder.Entity<MenuAPI>(entity =>
             {
                 entity.HasKey(e => e.SeqNo);
@@ -964,18 +986,6 @@ namespace NS_Education.Models.Entities.DbContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Site_B_SiteData");
 
-                entity.HasOne(d => d.DTSIDENavigation)
-                    .WithMany(p => p.Resver_SiteDTSIDENavigation)
-                    .HasForeignKey(d => d.DTSIDE)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Site_D_TimeSpanE");
-
-                entity.HasOne(d => d.DTSIDSNavigation)
-                    .WithMany(p => p.Resver_SiteDTSIDSNavigation)
-                    .HasForeignKey(d => d.DTSIDS)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Site_D_TimeSpanS");
-
                 entity.HasOne(d => d.RH)
                     .WithMany(p => p.Resver_Site)
                     .HasForeignKey(d => d.RHID)
@@ -1062,6 +1072,8 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
 
+                entity.Property(e => e.DDID).HasDefaultValueSql("((1))");
+
                 entity.Property(e => e.LoginAccount)
                     .IsRequired()
                     .HasMaxLength(50);
@@ -1081,6 +1093,7 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.DD)
                     .WithMany(p => p.UserData)
                     .HasForeignKey(d => d.DDID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserData_D_Department");
             });
 

@@ -3,10 +3,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web.Http.Results;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Controllers.BaseClass;
+using NS_Education.Models.APIItems.UserData.ChangeActive;
 using NS_Education.Models.APIItems.UserData.DeleteItem;
 using NS_Education.Models.APIItems.UserData.Login;
 using NS_Education.Models.APIItems.UserData.Submit;
@@ -52,6 +54,12 @@ namespace NS_Education.Controllers
         private const string DeleteItemTargetAlreadyDeleted = "指定使用者已為刪除狀態！";
         private static string DeleteItemFailed(Exception e)
             => $"刪除使用者時失敗，錯誤訊息：{e.Message}！";
+        
+        #endregion
+        
+        #region 錯誤訊息 - 啟用/停用
+
+        private const string ChangeActiveUidIncorrect = "未提供欲修改的 UID 或格式不正確！";
         
         #endregion
         
@@ -163,6 +171,7 @@ namespace NS_Education.Controllers
                 JwtToken = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, new []
                 {
                     new Claim(JwtConstants.UidClaimType, queried.UID.ToString()),
+                    // TODO: 等權限群組相關設計確認後，這裡加上 Admin 判定
                     new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.User.GetRoleValue())
                 })
             };
@@ -199,13 +208,13 @@ namespace NS_Education.Controllers
         #endregion
         
         #region Submit
+
         /// <summary>
         /// 更新使用者資料。<br/>
         /// 如果 LoginPassword 有輸入且與資料庫不同時，則會多驗證 OriginalPassword。<br/>
         /// Note 欄位無論有無輸入都會更新，因此呼叫者輸入時需要自行維持 Note 的內容。
         /// </summary>
         /// <param name="input">輸入資料</param>
-        /// <param name="original">呼叫此方法前，應已先取得原始使用者資料，並在此傳入。</param>
         [HttpPost]
         public async Task<string> Submit(UserData_Submit_Input_APIItem input)
         {
@@ -408,6 +417,27 @@ namespace NS_Education.Controllers
         #endregion
         
         #region ChangeActive
+
+        
+        [HttpPost]
+        public async Task<string> ChangeActive(UserData_ChangeActive_Input_APIItem input)
+        {
+            // 1. 驗證 input 的 TargetUid 格式正確
+            // 2. 查資料, 確定有此 UserData
+            // 3. 更新 UserData
+            // 4. 回傳通用 Response
+
+            UserData userData = null;
+
+            input.StartValidate()
+                .Validate(i => !i.TargetUid.IsIncorrectUid(),
+                    onFail: () => AddError(ChangeActiveUidIncorrect));
+
+            return GetResponseJson();
+        }
+
+        private async Task<UserData> TryGetUserDataById(int uid) => await DC.UserData.FirstOrDefaultAsync(u => u.UID == uid);
+
         #endregion
 
         #region GetList

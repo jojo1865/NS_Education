@@ -19,6 +19,7 @@ namespace NS_Education.Models.Entities
         public string UserName { get; set; }
         public string LoginAccount { get; set; }
         public string LoginPassword { get; set; }
+        public int DDID { get; set; }
         public string Note { get; set; }
         public bool ActiveFlag { get; set; }
         public bool DeleteFlag { get; set; }
@@ -27,7 +28,6 @@ namespace NS_Education.Models.Entities
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
         public DateTime LoginDate { get; set; }
-        public int? DDID { get; set; }
 
         public virtual D_Department DD { get; set; }
         public virtual ICollection<M_Group_User> M_Group_User { get; set; }

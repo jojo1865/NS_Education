@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 // Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
 // If you have enabled NRTs for your project, then un-comment the following line:
@@ -8,11 +9,14 @@ namespace NS_Education.Models.Entities
 {
     public partial class Resver_Site
     {
+        public Resver_Site()
+        {
+            M_ResverSiteTimeSpan = new HashSet<M_ResverSiteTimeSpan>();
+        }
+
         public int RSID { get; set; }
         public int RHID { get; set; }
         public DateTime TargetDate { get; set; }
-        public int DTSIDS { get; set; }
-        public int DTSIDE { get; set; }
         public int BSID { get; set; }
         public int BSCID { get; set; }
         public int BOCID { get; set; }
@@ -33,8 +37,7 @@ namespace NS_Education.Models.Entities
         public virtual B_OrderCode BOC { get; set; }
         public virtual B_SiteData BS { get; set; }
         public virtual B_StaticCode BSC { get; set; }
-        public virtual D_TimeSpan DTSIDENavigation { get; set; }
-        public virtual D_TimeSpan DTSIDSNavigation { get; set; }
         public virtual Resver_Head RH { get; set; }
+        public virtual ICollection<M_ResverSiteTimeSpan> M_ResverSiteTimeSpan { get; set; }
     }
 }

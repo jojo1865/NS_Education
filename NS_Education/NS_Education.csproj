@@ -304,6 +304,7 @@
     <Compile Include="Models\Entities\M_Group_Menu.cs" />
     <Compile Include="Models\Entities\M_Group_User.cs" />
     <Compile Include="Models\Entities\M_Partner_Category.cs" />
+    <Compile Include="Models\Entities\M_ResverSiteTimeSpan.cs" />
     <Compile Include="Models\Entities\Resver_Bill_Detail.cs" />
     <Compile Include="Models\Entities\Resver_Bill_Header.cs" />
     <Compile Include="Models\Entities\Resver_Device.cs" />

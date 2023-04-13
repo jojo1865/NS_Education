@@ -101,6 +101,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 return false;
 
             // 3. 依據 uid 查詢所有權限。
+            // User -> M_Group_User -> GroupData -> M_Group_Menu -> MenuData -> MenuAPI
             NsDbContext context = new NsDbContext();
             var queried = context.UserData
                     .Include(u => u.M_Group_User)
@@ -111,7 +112,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                     .Where(u => u.UID == uid && u.ActiveFlag && !u.DeleteFlag)
                     .SelectMany(u => u.M_Group_User)
                     .Select(groupUser => groupUser.G)
-                    .SelectMany(group => @group.M_Group_Menu)
+                    .SelectMany(group => group.M_Group_Menu)
                     .FirstOrDefault(groupMenu => groupMenu.G.ActiveFlag == true
                                                  && !groupMenu.G.DeleteFlag
                                                  && groupMenu.MD.ActiveFlag == true

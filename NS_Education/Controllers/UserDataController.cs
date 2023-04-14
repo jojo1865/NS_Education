@@ -462,7 +462,7 @@ namespace NS_Education.Controllers
             
             try
             {
-                queried = await DC.UserData.FirstOrDefaultAsync();
+                queried = await GetUserDataById(inputTargetUid);
             }
             catch (Exception e)
             {

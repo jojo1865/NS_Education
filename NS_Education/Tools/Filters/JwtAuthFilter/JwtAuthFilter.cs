@@ -89,7 +89,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             // 3. 依據 uid 查詢所有權限。
             // User -> M_Group_User -> GroupData -> M_Group_Menu -> MenuData -> MenuAPI
             NsDbContext context = new NsDbContext();
-            var queried = context.UserData
+            var query = context.UserData
                     .Include(u => u.M_Group_User)
                     .ThenInclude(groupUser => groupUser.G)
                     .ThenInclude(group => group.M_Group_Menu)
@@ -99,7 +99,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                     .SelectMany(u => u.M_Group_User)
                     .Select(groupUser => groupUser.G)
                     .SelectMany(group => group.M_Group_Menu)
-                    .FirstOrDefault(groupMenu => groupMenu.G.ActiveFlag == true
+                    .Where(groupMenu => groupMenu.G.ActiveFlag == true
                                                  && !groupMenu.G.DeleteFlag
                                                  && groupMenu.MD.ActiveFlag == true
                                                  && !groupMenu.MD.DeleteFlag
@@ -107,21 +107,43 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                                                      GetEndpointFromRequestUrl(actionContext).Contains(menuApi.APIURL)).Any()
                                                  )
                 ;
+            
+            if (_privileges.RequireShowFlag)
+                query = query.Where(groupMenu => groupMenu.ShowFlag);
+            if (_privileges.RequireAddFlag)
+                query = query.Where(groupMenu => groupMenu.AddFlag);
+            if (_privileges.RequireEditFlag)
+                query = query.Where(groupMenu => groupMenu.EditFlag);
+            if (_privileges.RequireDeleteFlag)
+                query = query.Where(groupMenu => groupMenu.DeleteFlag);
+            if (_privileges.RequirePrintFlag)
+                query = query.Where(groupMenu => groupMenu.PringFlag);
 
-            // 4. 有資料時，且 flag 都符合時，才正確。
-            return queried != null && HasAllFlagsInDb(queried);
+            // 4. 具備所有所需 Flags 時，才回傳 true。
+            return HasAllFlagsInDb(query);
         }
 
-        private bool HasAllFlagsInDb(M_Group_Menu queried)
+        private bool HasAllFlagsInDb(IQueryable<M_Group_Menu> queried)
         {
-            // 五種 flag 都需符合以下任一情況:
-            //   a. 當 Require 為 false 時
-            //   b. 當 Require 為 true, 且 DB Flag 為 true 時
-            return (!_privileges.RequireShowFlag || queried.ShowFlag)
-                   && (!_privileges.RequireAddFlag || queried.AddFlag)
-                   && (!_privileges.RequireEditFlag || queried.EditFlag)
-                   && (!_privileges.RequireDeleteFlag || queried.DeleteFlag)
-                   && (!_privileges.RequirePrintFlag || queried.PringFlag);
+            bool showFlagOk = !_privileges.RequireShowFlag;
+            bool addFlagOk = !_privileges.RequireAddFlag;
+            bool editFlagOk = !_privileges.RequireEditFlag;
+            bool deleteFlagOk = !_privileges.RequireDeleteFlag;
+            bool printFlagOk = !_privileges.RequirePrintFlag;
+
+            foreach (M_Group_Menu gm in queried)
+            {
+                showFlagOk |= gm.ShowFlag;
+                addFlagOk |= gm.AddFlag;
+                editFlagOk |= gm.EditFlag;
+                deleteFlagOk |= gm.DeleteFlag;
+                printFlagOk |= gm.PringFlag;
+
+                if (showFlagOk && addFlagOk && editFlagOk && deleteFlagOk && printFlagOk)
+                    return true;
+            }
+
+            return false;
         }
 
         private static string GetEndpointFromRequestUrl(ControllerContext context)

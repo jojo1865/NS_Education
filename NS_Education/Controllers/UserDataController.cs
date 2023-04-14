@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Web.Http.Results;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +18,6 @@ using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
-using NS_Education.Tools.Filters.JwtAuthFilter.AuthorizeType;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
 
@@ -41,7 +39,6 @@ namespace NS_Education.Controllers
         #endregion
 
         #region 錯誤訊息 - 註冊/更新
-        private const string SubmitOriginalPasswordEmptyOrIncorrect = "原密碼未輸入或不正確！";
         private const string SubmitPasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
         private const string SubmitUidIncorrect = "缺少 UID，無法寫入！";
         #endregion
@@ -306,32 +303,6 @@ namespace NS_Education.Controllers
         private static bool IsATestUpdate(UserData_Submit_Input_APIItem input)
         {
             return input.Note?.ToLower().Equals("updatetest") ?? false;
-        }
-        
-        /// <summary>
-        /// 回傳輸入的密碼是否與資料庫密碼不同（表示使用者在改密碼）。
-        /// </summary>
-        /// <param name="inputPassword">原始輸入的 LoginPassword</param>
-        /// <param name="dataPassword">資料的已加密密碼</param>
-        /// <returns>true：符合<br/>
-        /// false：不符合
-        /// </returns>
-        private static bool IsChangingPassword(string inputPassword, string dataPassword)
-        {
-            return !inputPassword.IsNullOrWhiteSpace() && !ValidatePassword(inputPassword, dataPassword);
-        }
-
-        /// <summary>
-        /// 回傳輸入的原始密碼是否符合資料庫密碼。
-        /// </summary>
-        /// <param name="inputOriginalPassword">原始輸入的 OriginalPassword</param>
-        /// <param name="dataPassword">資料庫的已加密密碼</param>
-        /// <returns>true：符合<br/>
-        /// false：不符合
-        /// </returns>
-        private static bool HasCorrectOriginalPassword(string inputOriginalPassword, string dataPassword)
-        {
-            return ValidatePassword(inputOriginalPassword, dataPassword);
         }
         #endregion
 

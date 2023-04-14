@@ -92,6 +92,7 @@ namespace NS_Education.Controllers
         /// </summary>
         /// <param name="input">輸入資料</param>
         [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin)]
         public async Task<string> SignUp(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();
@@ -238,6 +239,7 @@ namespace NS_Education.Controllers
         /// </summary>
         /// <param name="input">輸入資料</param>
         [HttpPost]
+        [JwtAuthFilter(new [] { AuthorizeBy.Admin, AuthorizeBy.UserSelf }, RequirePrivilege.EditFlag, nameof(UserData_Submit_Input_APIItem.UID))]
         public async Task<string> Submit(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();

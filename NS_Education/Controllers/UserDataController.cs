@@ -89,7 +89,7 @@ namespace NS_Education.Controllers
         /// </summary>
         /// <param name="input">輸入資料</param>
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin)]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddFlag)]
         public async Task<string> SignUp(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();
@@ -361,7 +361,7 @@ namespace NS_Education.Controllers
         /// <param name="input">輸入資料</param>
         /// <returns>通用回傳訊息格式</returns>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin)]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(UserData_DeleteItem_Input_APIItem input)
         {
             // 驗證輸入。
@@ -412,7 +412,7 @@ namespace NS_Education.Controllers
         /// <param name="input">輸入資料。</param>
         /// <returns>通用訊息回傳格式。</returns>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin)]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(UserData_ChangeActive_Input_APIItem input)
         {
             // 1. 驗證 input 的 TargetUid 格式正確

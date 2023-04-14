@@ -389,7 +389,7 @@ namespace NS_Education.Controllers
         /// </summary>
         /// <param name="input">輸入資料</param>
         /// <returns>通用回傳訊息格式</returns>
-        [HttpPost]
+        [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin)]
         public async Task<string> DeleteItem(UserData_DeleteItem_Input_APIItem input)
         {
@@ -530,8 +530,6 @@ namespace NS_Education.Controllers
         #endregion
         
         #region GetList
-
-        
 
         #endregion
 

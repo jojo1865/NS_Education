@@ -251,17 +251,6 @@ namespace NS_Education.Controllers
                 AddError(LoginAccountNotFound);
                 return GetResponseJson();
             }
-            
-            // 若密碼有輸入且有變時，驗證 OriginalPassword。
-            if (IsChangingPassword(input.LoginPassword, original.LoginPassword))
-            {
-                // 如果輸入的 OriginalPassword 和資料庫密碼不相符，跳錯。
-                if (!HasCorrectOriginalPassword(input.OriginalPassword, original.LoginPassword))
-                {
-                    AddError(SubmitOriginalPasswordEmptyOrIncorrect);
-                    // 這裡不做提早返回，方便一次顯示更多錯誤訊息給使用者
-                }
-            }
 
             // 更新資料
             // TODO: 引用靜態參數檔，完整驗證使用者欄位 

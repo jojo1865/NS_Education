@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Web;
@@ -38,29 +37,14 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         /// 包含 UserSelf 時，會針對 Request JSON 中的欄位比對是否與 JWT Payload 相符。<br/>
         /// 可以透過 uidFieldName 指定欄位名稱。
         /// </summary>
-        /// <param name="roles">允許的 roles</param>
+        /// <param name="roles">允許的 roles。（可選）忽略時，不驗證 Roles。</param>
         /// <param name="privileges">所需的群組 Flag。（可選）忽略時，不驗證群組 Flag。</param>
         /// <param name="uidFieldName">Request JSON 中的 UID 欄位名稱。（可選）預設值為「<see cref="IoConstants.IdFieldName"/>」。</param>
         // ReSharper 可能會建議 roles 改用 IEnumerable, 但 C# Attribute 並不支援該類型的 constructor argument。
         // ReSharper disable once ParameterTypeCanBeEnumerable.Local
-        public JwtAuthFilter(AuthorizeBy[] roles, RequirePrivilege privileges = RequirePrivilege.None, string uidFieldName = IoConstants.IdFieldName)
+        public JwtAuthFilter(AuthorizeBy roles = AuthorizeBy.Any, RequirePrivilege privileges = RequirePrivilege.None, string uidFieldName = IoConstants.IdFieldName)
         {
-            _roles = roles.Select(AuthorizeTypeSingletonFactory.GetByType).ToArray();
-            _privileges = new RequiredPrivileges(privileges);
-            _uidFieldName = uidFieldName;
-        }
-        
-        /// <summary>
-        /// 套用 JWT 驗證，並且需符合指定的 Role。<br/>
-        /// 包含 UserSelf 時，會針對 Request JSON 中的欄位比對是否與 JWT Payload 相符。<br/>
-        /// 可以透過 uidFieldName 指定欄位名稱。
-        /// </summary>
-        /// <param name="role">允許的 role。（可選）忽略時，允許任何 Role。</param>
-        /// <param name="privileges">所需的群組 Flag。（可選）忽略時，不驗證群組 Flag。</param>
-        /// <param name="uidFieldName">Request JSON 中的 UID 欄位名稱。（可選）預設值為「<see cref="IoConstants.IdFieldName"/>」。</param>
-        public JwtAuthFilter(AuthorizeBy role = AuthorizeBy.Any, RequirePrivilege privileges = RequirePrivilege.None, string uidFieldName = IoConstants.IdFieldName)
-        {
-            _roles = new[] { AuthorizeTypeSingletonFactory.GetByType(role) };
+            _roles = AuthorizeTypeSingletonFactory.GetEnumerableByEnum(roles).ToArray();
             _privileges = new RequiredPrivileges(privileges);
             _uidFieldName = uidFieldName;
         }

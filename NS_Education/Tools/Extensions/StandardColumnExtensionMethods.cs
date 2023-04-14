@@ -30,7 +30,7 @@ namespace NS_Education.Tools.Extensions
         /// </returns>
         public static bool IsEncryptablePassword(this string password)
         {
-            return !password.IsNullOrWhiteSpace() && password.All(c => !Char.IsLetterOrDigit(c));
+            return !password.IsNullOrWhiteSpace() && password.All(Char.IsLetterOrDigit);
         }
     }
 }

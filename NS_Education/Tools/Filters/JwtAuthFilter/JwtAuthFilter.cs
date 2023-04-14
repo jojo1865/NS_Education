@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Web;
@@ -99,31 +100,20 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                     .SelectMany(u => u.M_Group_User)
                     .Select(groupUser => groupUser.G)
                     .SelectMany(group => group.M_Group_Menu)
-                    .Where(groupMenu => groupMenu.G.ActiveFlag == true
-                                                 && !groupMenu.G.DeleteFlag
-                                                 && groupMenu.MD.ActiveFlag == true
-                                                 && !groupMenu.MD.DeleteFlag
-                                                 && groupMenu.MD.MenuAPI.Select(menuApi =>
-                                                     GetEndpointFromRequestUrl(actionContext).Contains(menuApi.APIURL)).Any()
-                                                 )
+                    .Where(groupMenu => groupMenu.G.ActiveFlag
+                                        && !groupMenu.G.DeleteFlag
+                                        && groupMenu.MD.ActiveFlag
+                                        && !groupMenu.MD.DeleteFlag
+                                        && groupMenu.MD.MenuAPI.Select(menuApi =>
+                                            GetEndpointFromRequestUrl(actionContext).Contains(menuApi.APIURL)).Any()
+                    )
                 ;
-            
-            if (_privileges.RequireShowFlag)
-                query = query.Where(groupMenu => groupMenu.ShowFlag);
-            if (_privileges.RequireAddFlag)
-                query = query.Where(groupMenu => groupMenu.AddFlag);
-            if (_privileges.RequireEditFlag)
-                query = query.Where(groupMenu => groupMenu.EditFlag);
-            if (_privileges.RequireDeleteFlag)
-                query = query.Where(groupMenu => groupMenu.DeleteFlag);
-            if (_privileges.RequirePrintFlag)
-                query = query.Where(groupMenu => groupMenu.PringFlag);
 
             // 4. 具備所有所需 Flags 時，才回傳 true。
-            return HasAllFlagsInDb(query);
+            return HasAllFlagsInDb(query.ToList());
         }
 
-        private bool HasAllFlagsInDb(IQueryable<M_Group_Menu> queried)
+        private bool HasAllFlagsInDb(List<M_Group_Menu> queried)
         {
             bool showFlagOk = !_privileges.RequireShowFlag;
             bool addFlagOk = !_privileges.RequireAddFlag;

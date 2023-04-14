@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.AuthorizeType;
 using NS_Education.Variables;
 
@@ -60,6 +62,17 @@ namespace NS_Education.Controllers
         #region 錯誤訊息 - 啟用/停用
 
         private const string ChangeActiveUidIncorrect = "未提供欲修改的 UID 或格式不正確！";
+        private const string ChangeActiveUserNotFound = "這筆使用者不存在或已被刪除！";
+
+        private static string ChangeActiveUpdateFailed(Exception e)
+        {
+            return $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}";
+        }
+
+        private static string ChangeActiveQueryFailed(Exception e)
+        {
+            return $"查詢 DB 時出錯，請確認伺服器狀態：{e.Message}";
+        }
         
         #endregion
         
@@ -372,10 +385,9 @@ namespace NS_Education.Controllers
         /// <param name="input">輸入資料</param>
         /// <returns>通用回傳訊息格式</returns>
         [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin)]
         public async Task<string> DeleteItem(UserData_DeleteItem_Input_APIItem input)
         {
-            // TODO: 影響大的端點，但後端目前沒有執行權限的驗證手段。
-
             // 驗證輸入。
             // 1. 操作者 UID 是否正確。
             // 2. 刪除對象 UID 是否正確。
@@ -394,6 +406,7 @@ namespace NS_Education.Controllers
                 .Validate(q => q != null, () => AddError(DeleteItemTargetUidNotFound))
                 .Validate(q => q.DeleteFlag == false, () => AddError(DeleteItemTargetAlreadyDeleted)).IsValid();
             
+            // 資料未通過驗證時，提早返回。
             if (!isDataValid)
                 return GetResponseJson();
 
@@ -417,29 +430,62 @@ namespace NS_Education.Controllers
         #endregion
         
         #region ChangeActive
-
-        
-        [HttpPost]
+        /// <summary>
+        /// 啟用 / 停止使用者帳號。
+        /// </summary>
+        /// <param name="input">輸入資料。</param>
+        /// <returns>通用訊息回傳格式。</returns>
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin)]
         public async Task<string> ChangeActive(UserData_ChangeActive_Input_APIItem input)
         {
             // 1. 驗證 input 的 TargetUid 格式正確
-            // 2. 查資料, 確定有此 UserData
-            // 3. 更新 UserData
-            // 4. 回傳通用 Response
-
-            UserData userData = null;
-
-            input.StartValidate()
-                .Validate(i => !i.TargetUid.IsIncorrectUid(),
-                    onFail: () => AddError(ChangeActiveUidIncorrect));
+            // 2. 更新 UserData
+            // 3. 回傳通用 Response
+            await input.StartValidate(true)
+                .Validate(i => !i.ID.IsIncorrectUid(),
+                    onFail: () => AddError(ChangeActiveUidIncorrect))
+                .ValidateAsync(async i => await ChangeActiveFlagForUserData(input.ID, input.ActiveFlag),
+                    onException: e => AddError(e.Message));
 
             return GetResponseJson();
         }
 
-        private async Task<UserData> TryGetUserDataById(int uid) => await DC.UserData.FirstOrDefaultAsync(u => u.UID == uid);
+        private async Task ChangeActiveFlagForUserData(int inputTargetUid, bool newValue)
+        {
+            UserData queried;
+            
+            try
+            {
+                queried = await DC.UserData.FirstOrDefaultAsync();
+            }
+            catch (Exception e)
+            {
+                throw new DataException(ChangeActiveQueryFailed(e));
+            }
+
+            if (queried == null || queried.DeleteFlag)
+                throw new NullReferenceException(ChangeActiveUserNotFound);
+
+            try
+            {
+                queried.ActiveFlag = newValue;
+                await DC.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw new NullReferenceException(ChangeActiveUpdateFailed(e));
+            }
+        }
+
+        private async Task<UserData> GetUserDataById(int uid) => await DC.UserData.FirstOrDefaultAsync(u => u.UID == uid);
 
         #endregion
 
+        #region UpdatePW
+
+        #endregion
+        
         #region GetList
 
         

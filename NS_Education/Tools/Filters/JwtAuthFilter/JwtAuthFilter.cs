@@ -41,7 +41,9 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         /// <param name="roles">允許的 roles</param>
         /// <param name="privileges">所需的群組 Flag。（可選）忽略時，不驗證群組 Flag。</param>
         /// <param name="uidFieldName">Request JSON 中的 UID 欄位名稱。（可選）預設值為「<see cref="IoConstants.IdFieldName"/>」。</param>
-        public JwtAuthFilter(IEnumerable<AuthorizeBy> roles, RequirePrivilege privileges = RequirePrivilege.None, string uidFieldName = IoConstants.IdFieldName)
+        // ReSharper 可能會建議 roles 改用 IEnumerable, 但 C# Attribute 並不支援該類型的 constructor argument。
+        // ReSharper disable once ParameterTypeCanBeEnumerable.Local
+        public JwtAuthFilter(AuthorizeBy[] roles, RequirePrivilege privileges = RequirePrivilege.None, string uidFieldName = IoConstants.IdFieldName)
         {
             _roles = roles.Select(AuthorizeTypeSingletonFactory.GetByType).ToArray();
             _privileges = new RequiredPrivileges(privileges);

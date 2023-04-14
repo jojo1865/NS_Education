@@ -13,12 +13,14 @@ using NS_Education.Models.APIItems.UserData.ChangeActive;
 using NS_Education.Models.APIItems.UserData.DeleteItem;
 using NS_Education.Models.APIItems.UserData.Login;
 using NS_Education.Models.APIItems.UserData.Submit;
+using NS_Education.Models.APIItems.UserData.UpdatePW;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.AuthorizeType;
+using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
 
 namespace NS_Education.Controllers
@@ -33,8 +35,11 @@ namespace NS_Education.Controllers
         /// <returns>錯誤訊息字串</returns>
         private static string EmptyNotAllowed(string columnName)
             => $"請填入{columnName}！";
-        #endregion
         
+        private const string UpdateUidIncorrect = "未提供欲修改的 UID 或格式不正確！";
+        private const string UserDataNotFound = "這筆使用者不存在或已被刪除！";
+        #endregion
+
         #region 錯誤訊息 - 註冊/更新
         private const string SubmitOriginalPasswordEmptyOrIncorrect = "原密碼未輸入或不正確！";
         private const string SubmitPasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
@@ -61,9 +66,6 @@ namespace NS_Education.Controllers
         
         #region 錯誤訊息 - 啟用/停用
 
-        private const string ChangeActiveUidIncorrect = "未提供欲修改的 UID 或格式不正確！";
-        private const string ChangeActiveUserNotFound = "這筆使用者不存在或已被刪除！";
-
         private static string ChangeActiveUpdateFailed(Exception e)
         {
             return $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}";
@@ -74,6 +76,13 @@ namespace NS_Education.Controllers
             return $"查詢 DB 時出錯，請確認伺服器狀態：{e.Message}";
         }
         
+        #endregion
+        
+        #region 錯誤訊息 - 更新密碼
+        
+        private static string UpdatePWDbFailed(Exception e) => $"更新密碼時失敗，請確認伺服器狀態：{e.Message}！";
+        private const string UpdatePWPasswordNotEncryptable = "密碼只允許英數字！";
+            
         #endregion
         
         #region SignUp
@@ -90,7 +99,7 @@ namespace NS_Education.Controllers
             // TODO: 引用靜態參數檔，完整驗證使用者密碼
 
             // sanitize
-            if (input.UID.IsIncorrectUid())
+            if (!input.UID.IsCorrectUid())
                 AddError(SubmitUidIncorrect);
             if (input.LoginPassword.IsNullOrWhiteSpace())
                 AddError(EmptyNotAllowed("使用者密碼"));
@@ -234,7 +243,7 @@ namespace NS_Education.Controllers
             InitializeResponse();
 
             // sanitize
-            if (input.UID.IsIncorrectUid())
+            if (!input.UID.IsCorrectUid())
                 AddError(SubmitUidIncorrect);
             
             if (input.LoginAccount.IsNullOrWhiteSpace())
@@ -336,10 +345,15 @@ namespace NS_Education.Controllers
         {
             // 目前使用的加密方法只允許英數字
             // sanitize
-            if (password.Any(c => !Char.IsLetterOrDigit(c)))
-                throw new ValidationException(SubmitPasswordAlphanumericOnly);
+            ThrowIfPasswordIsNotEncryptable(password);
 
             return HSM.Enc_1(password);
+        }
+
+        private static void ThrowIfPasswordIsNotEncryptable(string password)
+        {
+            if (!password.IsEncryptablePassword())
+                throw new ValidationException(SubmitPasswordAlphanumericOnly);
         }
 
         /// <summary>
@@ -352,7 +366,7 @@ namespace NS_Education.Controllers
         /// </returns>
         private static bool ValidatePassword(string input, string data)
         {
-            if (input.IsNullOrWhiteSpace())
+            if (input.IsEncryptablePassword())
                 return false;
             
             try
@@ -381,8 +395,8 @@ namespace NS_Education.Controllers
             // 1. 操作者 UID 是否正確。
             // 2. 刪除對象 UID 是否正確。
             bool isInputValid = input.StartValidate(true)
-                .Validate(i => !i.OperatorUID.IsIncorrectUid(), () => AddError(DeleteItemOperatorUidIncorrect))
-                .Validate(i => !i.TargetUID.IsIncorrectUid(), () => AddError(DeleteItemTargetUidIncorrect)).IsValid();
+                .Validate(i => i.OperatorUID.IsCorrectUid(), () => AddError(DeleteItemOperatorUidIncorrect))
+                .Validate(i => i.TargetUID.IsCorrectUid(), () => AddError(DeleteItemTargetUidIncorrect)).IsValid();
 
             if (!isInputValid)
                 return GetResponseJson();
@@ -417,7 +431,7 @@ namespace NS_Education.Controllers
         }
 
         #endregion
-        
+
         #region ChangeActive
         /// <summary>
         /// 啟用 / 停止使用者帳號。
@@ -432,8 +446,8 @@ namespace NS_Education.Controllers
             // 2. 更新 UserData
             // 3. 回傳通用 Response
             await input.StartValidate(true)
-                .Validate(i => !i.ID.IsIncorrectUid(),
-                    onFail: () => AddError(ChangeActiveUidIncorrect))
+                .Validate(i => i.ID.IsCorrectUid(),
+                    onFail: () => AddError(UpdateUidIncorrect))
                 .ValidateAsync(async i => await ChangeActiveFlagForUserData(input.ID, input.ActiveFlag),
                     onException: e => AddError(e.Message));
 
@@ -454,7 +468,7 @@ namespace NS_Education.Controllers
             }
 
             if (queried == null || queried.DeleteFlag)
-                throw new NullReferenceException(ChangeActiveUserNotFound);
+                throw new NullReferenceException(UserDataNotFound);
 
             try
             {
@@ -473,6 +487,44 @@ namespace NS_Education.Controllers
 
         #region UpdatePW
 
+        [HttpPost]
+        [JwtAuthFilter(new[] { AuthorizeBy.Admin, AuthorizeBy.UserSelf }, RequirePrivilege.EditFlag)]
+        public async Task<string> UpdatePW(UserData_UpdatePW_Input_APIItem input)
+        {
+            // 1. 驗證。
+            // |- a. 驗證所有輸入均有值
+            // |- b. 驗證新密碼可加密
+            // +- c. 成功更新資料庫
+            await input.StartValidate()
+                .Validate(i => i.ID.IsCorrectUid(), () => AddError(UpdateUidIncorrect))
+                .Validate(i => !i.NewPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("新密碼")))
+                .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(UpdatePWPasswordNotEncryptable))
+                .ValidateAsync(async i => await UpdatePasswordForUserData(i.ID, i.NewPassword),
+                    onException: e => AddError(e.Message));
+            
+            // 2. 回傳通用訊息格式。
+            return GetResponseJson();
+        }
+
+        public async Task UpdatePasswordForUserData(int id, string inputPassword)
+        {
+            // 1. 查詢資料。無資料時拋錯
+            UserData queried = await GetUserDataById(id);
+            if (queried == null)
+                throw new NullReferenceException(UserDataNotFound);
+            
+            // 2. 更新資料，更新失敗時拋錯
+            try
+            {
+                queried.LoginPassword = EncryptPassword(inputPassword);
+                await DC.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw new DbUpdateException(UpdatePWDbFailed(e));
+            }
+        }
+        
         #endregion
         
         #region GetList

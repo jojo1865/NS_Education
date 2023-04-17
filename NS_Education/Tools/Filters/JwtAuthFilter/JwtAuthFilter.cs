@@ -190,8 +190,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
         private static string GetToken(ControllerContext actionContext)
         {
-            // 跳過開頭的 [Bearer ] 共 7 個字元
-            return actionContext.HttpContext.Request.Headers["Authorization"]?.Substring(7);
+            return FilterStaticTools.GetJwtTokenInHeader(actionContext.HttpContext.Request);
         }
 
         private static bool HasBearerAuthorization(ControllerContext actionContext)

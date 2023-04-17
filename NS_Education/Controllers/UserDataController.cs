@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Controllers.BaseClass;
 using NS_Education.Models.APIItems.UserData.ChangeActive;
 using NS_Education.Models.APIItems.UserData.DeleteItem;
+using NS_Education.Models.APIItems.UserData.GetInfoById;
 using NS_Education.Models.APIItems.UserData.GetList;
 using NS_Education.Models.APIItems.UserData.Login;
 using NS_Education.Models.APIItems.UserData.Submit;
@@ -38,6 +39,13 @@ namespace NS_Education.Controllers
         
         private const string UpdateUidIncorrect = "未提供欲修改的 UID 或格式不正確！";
         private const string UserDataNotFound = "這筆使用者不存在或已被刪除！";
+        
+        private static string QueryFailed(Exception e)
+        {
+            return $"查詢 DB 時出錯，請確認伺服器狀態：{e.Message}";
+        }
+
+        
         #endregion
 
         #region 錯誤訊息 - 註冊/更新
@@ -69,11 +77,6 @@ namespace NS_Education.Controllers
         {
             return $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}";
         }
-
-        private static string ChangeActiveQueryFailed(Exception e)
-        {
-            return $"查詢 DB 時出錯，請確認伺服器狀態：{e.Message}";
-        }
         
         #endregion
         
@@ -82,6 +85,13 @@ namespace NS_Education.Controllers
         private static string UpdatePWDbFailed(Exception e) => $"更新密碼時失敗，請確認伺服器狀態：{e.Message}！";
         private const string UpdatePWPasswordNotEncryptable = "密碼只允許英數字！";
             
+        #endregion
+
+        #region 錯誤訊息 - 查詢
+
+        private const string GetUidIncorrect = "缺少 UID，無法寫入！";
+        private const string GetUserNotFound = "查無此使用者帳號，請重新確認！";
+        
         #endregion
         
         #region SignUp
@@ -440,7 +450,7 @@ namespace NS_Education.Controllers
             }
             catch (Exception e)
             {
-                throw new DataException(ChangeActiveQueryFailed(e));
+                throw new DataException(QueryFailed(e));
             }
 
             if (queried == null || queried.DeleteFlag)
@@ -463,6 +473,11 @@ namespace NS_Education.Controllers
 
         #region UpdatePW
 
+        /// <summary>
+        /// 更新使用者密碼。
+        /// </summary>
+        /// <param name="input"><see cref="UserData_UpdatePW_Input_APIItem"/></param>
+        /// <returns>通用回傳訊息格式</returns>
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.EditFlag)]
         public async Task<string> UpdatePW(UserData_UpdatePW_Input_APIItem input)
@@ -505,6 +520,11 @@ namespace NS_Education.Controllers
         
         #region GetList
 
+        /// <summary>
+        /// 取得使用者列表。
+        /// </summary>
+        /// <param name="input">輸入資料。請參照 <see cref="UserData_GetList_Input_APIItem"/>。</param>
+        /// <returns>回傳結果。請參照 <see cref="UserData_GetList_Output_APIItem"/>，以及 <see cref="UserData_GetList_Output_Row_APIItem"/>。</returns>
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
         [ResponsePrivilegeWrapperFilter]
@@ -512,23 +532,8 @@ namespace NS_Education.Controllers
         {
             // 1. 查詢所有 UserData 並逐一套用條件
             
-            IQueryable<UserData> query = DC.UserData.AsQueryable()
-                .Include(u => u.DD)
-                .ThenInclude(dd => dd.DC)
-                .Include(u => u.M_Group_User)
-                .ThenInclude(gu => gu.G);
-            
-            query = query.Where(u => u.ActiveFlag && !u.DeleteFlag);
+            var query = GetListMakeQuery(input);
 
-            if (!input.Keyword.IsNullOrWhiteSpace())
-                query = query.Where(u => u.UserName.Contains(input.Keyword));
-
-            if (input.DCID.IsValidId())
-                query = query.Where(u => u.DD.DCID == input.DCID);
-
-            if (input.DDID.IsValidId())
-                query = query.Where(u => u.DDID == input.DDID);
-            
             // 2. 先取得總筆數
             UserData_GetList_Output_APIItem output = new UserData_GetList_Output_APIItem
             {
@@ -541,7 +546,15 @@ namespace NS_Education.Controllers
                 .Take(input.GetTakeRowCount());
 
             output.SetByInput(input);
-            output.Items = await query.Select(u => new UserData_GetList_Output_Row_APIItem
+            output.Items = await query.Select(u => UserDataToGetListOutput(u)).ToListAsync();
+            
+            // 4. 以通用的 List 型格式回傳
+            return GetResponseJson(output);
+        }
+
+        private static UserData_GetList_Output_Row_APIItem UserDataToGetListOutput(UserData u)
+        {
+            return new UserData_GetList_Output_Row_APIItem
             {
                 Uid = u.UID,
                 Username = u.UserName,
@@ -552,17 +565,78 @@ namespace NS_Education.Controllers
                     .First()
                     .G.Title,
                 ActiveFlag = u.ActiveFlag
-            }).ToListAsync();
-            
-            // 4. 以通用的 List 型格式回傳
-            return GetResponseJson(output);
+            };
+        }
+
+        private IQueryable<UserData> GetListMakeQuery(UserData_GetList_Input_APIItem input)
+        {
+            IQueryable<UserData> query = DC.UserData.AsQueryable()
+                .Include(u => u.DD)
+                .ThenInclude(dd => dd.DC)
+                .Include(u => u.M_Group_User)
+                .ThenInclude(gu => gu.G);
+
+            // 這個列表會顯示使用者的啟用狀態，所以不檢查 ActiveFlag
+            query = query.Where(u => !u.DeleteFlag);
+
+            if (!input.Keyword.IsNullOrWhiteSpace())
+                query = query.Where(u => u.UserName.Contains(input.Keyword));
+
+            if (input.DCID.IsValidId())
+                query = query.Where(u => u.DD.DCID == input.DCID);
+
+            if (input.DDID.IsValidId())
+                query = query.Where(u => u.DDID == input.DDID);
+            return query;
         }
 
         #endregion
 
         #region GetInfoById
 
-        
+        /// <summary>
+        /// 查詢單筆使用者資料。
+        /// </summary>
+        /// <param name="input">輸入資訊。請參照 <see cref="UserData_GetInfoById_Input_APIItem"/>。</param>
+        /// <returns><see cref="UserData_GetInfoById_Output_APIItem"/></returns>
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.ShowFlag, "UID")]
+        [ResponsePrivilegeWrapperFilter]
+        public async Task<string> GetInfoById(UserData_GetInfoById_Input_APIItem input)
+        {
+            UserData userData = null;
+
+            bool isValid = await input.StartValidate(true)
+                .Validate(i => i.UID.IsValidId(), () => AddError(GetUidIncorrect))
+                .ValidateAsync(async i => userData = await GetMakeQuery(i), e => AddError(QueryFailed(e)))
+                .Validate(i => userData != null, () => AddError(GetUserNotFound))
+                .IsValid();
+
+            return isValid ? GetResponseJson(UserDataToGetInfoByIdOutput(userData)) : GetResponseJson();
+        }
+
+        private static UserData_GetInfoById_Output_APIItem UserDataToGetInfoByIdOutput(UserData userData)
+        {
+            return new UserData_GetInfoById_Output_APIItem
+            {
+                UID = userData.UID,
+                Username = userData.UserName,
+                LoginAccount = userData.LoginAccount,
+                LoginPassword = HSM.Des_1(userData.LoginPassword),
+                DDID = userData.DDID,
+                GID = userData.M_Group_User.OrderBy(gu => gu.GID).FirstOrDefault()?.GID ?? 0,
+                ActiveFlag = userData.ActiveFlag,
+                Note = userData.Note
+            };
+        }
+
+        private async Task<UserData> GetMakeQuery(UserData_GetInfoById_Input_APIItem input)
+        {
+            UserData userData = await DC.UserData
+                .Include(u => u.M_Group_User)
+                .FirstOrDefaultAsync(u => !u.DeleteFlag && u.UID == input.UID);
+            return userData;
+        }
 
         #endregion
     }

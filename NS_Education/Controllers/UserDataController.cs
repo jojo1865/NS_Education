@@ -194,7 +194,8 @@ namespace NS_Education.Controllers
                 {
                     new Claim(JwtConstants.UidClaimType, queried.UID.ToString()),
                     // TODO: 等權限群組相關設計確認後，這裡加上 Admin 判定
-                    new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.User.GetRoleValue())
+                    new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.User.GetRoleValue()),
+                    new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.Admin.GetRoleValue())
                 })
             };
 

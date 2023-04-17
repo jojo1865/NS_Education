@@ -508,7 +508,7 @@ namespace NS_Education.Controllers
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
         [ResponsePrivilegeWrapperFilter]
-        public string GetList(UserData_GetList_Input_APIItem input)
+        public async Task<string> GetList(UserData_GetList_Input_APIItem input)
         {
             // 1. 查詢所有 UserData 並逐一套用條件
             
@@ -532,10 +532,25 @@ namespace NS_Education.Controllers
             // 2. 套用分頁數及筆數限制
             query = query.OrderBy(u => u.UID)
                 .Skip(input.GetStartIndex())
-                .Take(input.CutPage);
+                .Take(input.GetTakeRowCount());
 
+            UserData_GetList_Output_APIItem output = new UserData_GetList_Output_APIItem();
+            output.SetByInput(input);
+            output.Items = await query.Select(u => new UserData_GetList_Output_Row_APIItem
+            {
+                Uid = u.UID,
+                Username = u.UserName,
+                Department = u.DD.TitleC,
+                Role = u.M_Group_User
+                    .Where(groupUser => groupUser.G.ActiveFlag && !groupUser.G.DeleteFlag)
+                    .OrderBy(groupUser => groupUser.GID)
+                    .First()
+                    .G.Title,
+                ActiveFlag = u.ActiveFlag
+            }).ToListAsync();
+            
             // 3. 以通用的 List 型格式回傳
-            return GetResponseJson(input);
+            return GetResponseJson(output);
         }
 
         #endregion

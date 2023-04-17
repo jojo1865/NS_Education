@@ -101,11 +101,15 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
         {
             // 取得此次 action 完整的 HTTP Response 並轉成 JObject
             JObject modify = JObject.FromObject(filterContext.Result);
-
+            
+            // 如果沒有 Content, 不做包裝以免出錯
+            if (modify["Content"] == null)
+                return;
+            
             // 修改 Content 結構，多套一層
             modify["Content"] = JToken.FromObject(new
                 {
-                    ApiResponse = JToken.Parse(modify["Content"].Value<string>()),
+                    ApiResponse = JToken.Parse(modify["Content"]?.Value<string>()),
                     Privileges = privileges
                 }
             ).ToString();

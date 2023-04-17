@@ -20,5 +20,10 @@ namespace NS_Education.Tools.Extensions
 
             return s;
         }
+
+        public static string SanitizeForResponseStatusMessage(this string s)
+        {
+            return s.Replace("\r", "").Replace("\n", "");
+        }
     }
 }

@@ -9,6 +9,7 @@ using NS_Education.Models.Entities;
 using NS_Education.Models.Entities.DbContext;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.Encryption;
+using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter.AuthorizeType;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
@@ -74,7 +75,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 .IsValid();
 
             if (!isValid)
-                actionContext.Result = new HttpUnauthorizedResult($"JWT 驗證失敗。{errorMessage}");
+                actionContext.Result = new HttpUnauthorizedResult($"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
         }
 
         private bool ValidatePrivileges(ActionExecutingContext actionContext, ClaimsPrincipal claims)

@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using NS_Education.Models.Entities.DbContext;
+using NS_Education.Tools.Extensions;
 using NS_Education.Variables;
 
 namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
@@ -36,7 +37,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
             }
             catch (Exception e)
             {
-                filterContext.Result = new HttpUnauthorizedResult($"JWT 驗證失敗。{e.Message}");
+                filterContext.Result = new HttpUnauthorizedResult($"JWT 驗證失敗。{e.Message}".SanitizeForResponseStatusMessage());
             }
 
             if (claims == null) return;

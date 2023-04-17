@@ -347,6 +347,7 @@
     <Compile Include="Tools\Filters\ResponsePrivilegeWrapper\ResponsePrivilegeWrapperFilter.cs" />
     <Compile Include="Variables\IOConstants.cs" />
     <Compile Include="Variables\JwtConstants.cs" />
+    <Compile Include="Variables\PrivilegeConstants.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />

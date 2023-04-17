@@ -55,7 +55,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
             // Query 2: 將 menuAPI 對應回 m_group_menu, 確認 user 有無權限
             var queryResult  = context.M_Group_Menu
                 .Include(groupMenu => groupMenu.G)
-                .ThenInclude(group => @group.M_Group_User)
+                .ThenInclude(group => group.M_Group_User)
                 .ThenInclude(groupUser => groupUser.U)
                 .Include(groupMenu => groupMenu.MD)
                 // 選出所有此 user 擁有權限的 groupMenu
@@ -79,21 +79,52 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
                         PrintFlag = groupMenu.PringFlag
                     })
                 .ToList();
-                
-            // 以 URL 為單位，做 grouping 並彙整此 user 所有 group 的權限
-            // 意思是只要使用者所屬的任一 group 有權限就是有權限
-            var privileges = queryResult.GroupBy(privilege => privilege.Url)
+            
+            // 特殊處理：
+            // 當擁有包含 / 為 URL 的權限時，讓所有其他權限也考量此權限的 flags
+            var rootPrivileges = queryResult
+                .Where(p => p.Url == PrivilegeConstants.RootAccessUrl)
+            // 整合此 user 所有 / 為 URL 的權限
+                .GroupBy(p => p.Url)
                 .Select(g => new Privilege
                 {
                     Url = g.Key,
-                    ShowFlag = g.Aggregate(false, (acc, curr) => acc || curr.ShowFlag),
-                    AddFlag = g.Aggregate(false, (acc, curr) => acc || curr.AddFlag),
-                    EditFlag = g.Aggregate(false, (acc, curr) => acc || curr.EditFlag),
-                    DeleteFlag = g.Aggregate(false, (acc, curr) => acc || curr.DeleteFlag),
-                    PrintFlag = g.Aggregate(false, (acc, curr) => acc || curr.PrintFlag),
+                    ShowFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.ShowFlag),
+                    AddFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.AddFlag),
+                    EditFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.EditFlag),
+                    DeleteFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.DeleteFlag),
+                    PrintFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.PrintFlag)
+                })
+                // 只會有一筆
+                .FirstOrDefault();            
+            
+            // 以 URL 為單位，做 grouping 並彙整此 user 所有 group 的權限
+            // 意思是只要使用者所屬的任一 group 有權限就是有權限
+            // 在最終回傳給前端的回覆中，避免包含最高權限
+            var privileges = queryResult
+                .Where(p => p.Url != PrivilegeConstants.RootAccessUrl)
+                .GroupBy(privilege => privilege.Url)
+                .Select(g => new Privilege
+                {
+                    Url = g.Key,
+                    ShowFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.ShowFlag || (rootPrivileges?.ShowFlag ?? false)),
+                    AddFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.AddFlag || (rootPrivileges?.AddFlag ?? false)),
+                    EditFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.EditFlag || (rootPrivileges?.EditFlag ?? false)),
+                    DeleteFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.DeleteFlag || (rootPrivileges?.DeleteFlag ?? false)),
+                    PrintFlag = g.Aggregate(false,
+                        (acc, curr) => acc || curr.PrintFlag || (rootPrivileges?.PrintFlag ?? false)),
                 });
-                    
-            // 2. 和 Response wrap
+
+            // 和 Response wrap
             WrapResponse(filterContext, privileges);
         }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 
 // Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
 // If you have enabled NRTs for your project, then un-comment the following line:
@@ -60,9 +61,20 @@ namespace NS_Education.Models.Entities.DbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
+            if (optionsBuilder.IsConfigured) return;
+            
+            var connectionStrings = System.Web.Configuration.WebConfigurationManager.ConnectionStrings;
+            string connectionString =
+                Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString);
+
+            try
             {
-                optionsBuilder.UseSqlServer(System.Web.Configuration.WebConfigurationManager.ConnectionStrings["db_NS_EducationConnectionString"].ConnectionString);
+                optionsBuilder.UseSqlServer(connectionString);
+            }
+            catch
+            {
+                connectionString = connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
+                optionsBuilder.UseSqlServer(connectionString);
             }
         }
 

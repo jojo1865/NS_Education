@@ -19,7 +19,7 @@ namespace NS_Education.Models.APIItems.Hall
         public int DHID { get; set; }
         public string DD_TitleC { get; set; }
         public string DD_TitleE { get; set; }
-        public List<cSelectItem> DepartmentList { get; set; }
+        public List<cSelectItem> DD_List { get; set; }
         public string Code { get; set; }
         public string TitleC { get; set; }
         public string TitleE { get; set; }

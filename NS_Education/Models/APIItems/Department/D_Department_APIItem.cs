@@ -19,7 +19,7 @@ namespace NS_Education.Models.APIItems.Department
         public int DCID { get; set; }
         public string DC_TitleC { get; set; }
         public string DC_TitleE { get; set; }
-        public List<cSelectItem> CompanyList { get; set; }
+        public List<cSelectItem> DC_List { get; set; }
         public string Code { get; set; }
         public string TitleC { get; set; }
         public string TitleE { get; set; }

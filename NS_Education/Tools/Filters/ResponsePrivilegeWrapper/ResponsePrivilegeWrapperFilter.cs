@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NS_Education.Models.Entities.DbContext;
 using NS_Education.Variables;
@@ -99,20 +98,18 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
 
         private static void WrapResponse(ActionExecutedContext filterContext, IEnumerable<Privilege> privileges)
         {
-            string responseJson = JsonConvert.SerializeObject(filterContext.Result);
+            // 取得此次 action 完整的 HTTP Response 並轉成 JObject
+            JObject modify = JObject.FromObject(filterContext.Result);
 
-            Console.WriteLine(responseJson);
-
-            JObject modify = JsonConvert.DeserializeObject<JObject>(responseJson);
-
+            // 修改 Content 結構，多套一層
             modify["Content"] = JToken.FromObject(new
                 {
-                    ApiResponse = modify["Content"],
+                    ApiResponse = JToken.Parse(modify["Content"].Value<string>()),
                     Privileges = privileges
                 }
-            );
-            
-            Console.WriteLine(JsonConvert.SerializeObject(modify));
+            ).ToString();
+
+            filterContext.Result = (ActionResult)modify.ToObject(filterContext.Result.GetType());
         }
     }
 }

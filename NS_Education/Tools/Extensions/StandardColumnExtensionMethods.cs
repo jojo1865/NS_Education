@@ -7,16 +7,16 @@ namespace NS_Education.Tools.Extensions
     public static class StandardColumnExtensionMethods
     {
         /// <summary>
-        /// 驗證 UID 是否正確。
+        /// 驗證輸入是否符合 ID 值的規則。
         /// </summary>
-        /// <param name="uid">uid</param>
-        /// <returns>true：UID 正確。<br/>
-        /// false：UID 錯誤。
+        /// <param name="id">id</param>
+        /// <returns>true：ID 正確。<br/>
+        /// false：ID 錯誤。
         /// </returns>
-        public static bool IsCorrectUid(this int uid)
+        public static bool IsValidId(this int id)
         {
             // TODO: 加上驗證資料庫？
-            return uid > 0;
+            return id > 0;
         }
 
         /// <summary>

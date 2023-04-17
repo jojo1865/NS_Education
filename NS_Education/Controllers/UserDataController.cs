@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Controllers.BaseClass;
 using NS_Education.Models.APIItems.UserData.ChangeActive;
 using NS_Education.Models.APIItems.UserData.DeleteItem;
+using NS_Education.Models.APIItems.UserData.GetList;
 using NS_Education.Models.APIItems.UserData.Login;
 using NS_Education.Models.APIItems.UserData.Submit;
 using NS_Education.Models.APIItems.UserData.UpdatePW;
@@ -19,6 +20,7 @@ using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 using NS_Education.Variables;
 
 namespace NS_Education.Controllers
@@ -97,7 +99,7 @@ namespace NS_Education.Controllers
             // TODO: 引用靜態參數檔，完整驗證使用者密碼
 
             // sanitize
-            if (!input.UID.IsCorrectUid())
+            if (!input.UID.IsValidId())
                 AddError(SubmitUidIncorrect);
             if (input.LoginPassword.IsNullOrWhiteSpace())
                 AddError(EmptyNotAllowed("使用者密碼"));
@@ -242,7 +244,7 @@ namespace NS_Education.Controllers
             InitializeResponse();
 
             // sanitize
-            if (!input.UID.IsCorrectUid())
+            if (!input.UID.IsValidId())
                 AddError(SubmitUidIncorrect);
             
             if (input.LoginAccount.IsNullOrWhiteSpace())
@@ -368,8 +370,8 @@ namespace NS_Education.Controllers
             // 1. 操作者 UID 是否正確。
             // 2. 刪除對象 UID 是否正確。
             bool isInputValid = input.StartValidate(true)
-                .Validate(i => i.OperatorUID.IsCorrectUid(), () => AddError(DeleteItemOperatorUidIncorrect))
-                .Validate(i => i.TargetUID.IsCorrectUid(), () => AddError(DeleteItemTargetUidIncorrect)).IsValid();
+                .Validate(i => i.OperatorUID.IsValidId(), () => AddError(DeleteItemOperatorUidIncorrect))
+                .Validate(i => i.TargetUID.IsValidId(), () => AddError(DeleteItemTargetUidIncorrect)).IsValid();
 
             if (!isInputValid)
                 return GetResponseJson();
@@ -419,7 +421,7 @@ namespace NS_Education.Controllers
             // 2. 更新 UserData
             // 3. 回傳通用 Response
             await input.StartValidate(true)
-                .Validate(i => i.ID.IsCorrectUid(),
+                .Validate(i => i.ID.IsValidId(),
                     onFail: () => AddError(UpdateUidIncorrect))
                 .ValidateAsync(async i => await ChangeActiveFlagForUserData(input.ID, input.ActiveFlag),
                     onException: e => AddError(e.Message));
@@ -469,7 +471,7 @@ namespace NS_Education.Controllers
             // |- b. 驗證新密碼可加密
             // +- c. 成功更新資料庫
             await input.StartValidate()
-                .Validate(i => i.ID.IsCorrectUid(), () => AddError(UpdateUidIncorrect))
+                .Validate(i => i.ID.IsValidId(), () => AddError(UpdateUidIncorrect))
                 .Validate(i => !i.NewPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("新密碼")))
                 .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(UpdatePWPasswordNotEncryptable))
                 .ValidateAsync(async i => await UpdatePasswordForUserData(i.ID, i.NewPassword),
@@ -501,6 +503,39 @@ namespace NS_Education.Controllers
         #endregion
         
         #region GetList
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        [ResponsePrivilegeWrapperFilter]
+        public string GetList(UserData_GetList_Input_APIItem input)
+        {
+            // 1. 查詢所有 UserData 並逐一套用條件
+            
+            IQueryable<UserData> query = DC.UserData.AsQueryable()
+                .Include(u => u.DD)
+                .ThenInclude(dd => dd.DC)
+                .Include(u => u.M_Group_User)
+                .ThenInclude(gu => gu.G);
+            
+            query = query.Where(u => u.ActiveFlag && !u.DeleteFlag);
+
+            if (!input.Keyword.IsNullOrWhiteSpace())
+                query = query.Where(u => u.UserName.Contains(input.Keyword));
+
+            if (input.DCID.IsValidId())
+                query = query.Where(u => u.DD.DCID == input.DCID);
+
+            if (input.DDID.IsValidId())
+                query = query.Where(u => u.DDID == input.DDID);
+            
+            // 2. 套用分頁數及筆數限制
+            query = query.OrderBy(u => u.UID)
+                .Skip(input.GetStartIndex())
+                .Take(input.CutPage);
+
+            // 3. 以通用的 List 型格式回傳
+            return GetResponseJson(input);
+        }
 
         #endregion
 

@@ -497,7 +497,7 @@ namespace NS_Education.Controllers
             return GetResponseJson();
         }
 
-        public async Task UpdatePasswordForUserData(int id, string inputPassword)
+        private async Task UpdatePasswordForUserData(int id, string inputPassword)
         {
             // 1. 查詢資料。無資料時拋錯
             UserData queried = await GetUserDataById(id);

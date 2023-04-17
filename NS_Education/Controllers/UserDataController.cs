@@ -529,12 +529,17 @@ namespace NS_Education.Controllers
             if (input.DDID.IsValidId())
                 query = query.Where(u => u.DDID == input.DDID);
             
-            // 2. 套用分頁數及筆數限制
+            // 2. 先取得總筆數
+            UserData_GetList_Output_APIItem output = new UserData_GetList_Output_APIItem
+            {
+                AllItemCt = await query.CountAsync()
+            };
+
+            // 3. 套用分頁數及筆數限制
             query = query.OrderBy(u => u.UID)
                 .Skip(input.GetStartIndex())
                 .Take(input.GetTakeRowCount());
 
-            UserData_GetList_Output_APIItem output = new UserData_GetList_Output_APIItem();
             output.SetByInput(input);
             output.Items = await query.Select(u => new UserData_GetList_Output_Row_APIItem
             {
@@ -549,7 +554,7 @@ namespace NS_Education.Controllers
                 ActiveFlag = u.ActiveFlag
             }).ToListAsync();
             
-            // 3. 以通用的 List 型格式回傳
+            // 4. 以通用的 List 型格式回傳
             return GetResponseJson(output);
         }
 

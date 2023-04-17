@@ -84,7 +84,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 return true;
 
             // 2. 從 claims 取得 UID，無 UID 時提早返回。
-            if (!int.TryParse(GetUidInClaim(claims), out int uid))
+            if (!int.TryParse(FilterStaticTools.GetUidInClaim(claims), out int uid))
                 return false;
 
             // 3. 依據 uid 查詢所有權限。
@@ -104,8 +104,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                                         && !groupMenu.G.DeleteFlag
                                         && groupMenu.MD.ActiveFlag
                                         && !groupMenu.MD.DeleteFlag
-                                        && groupMenu.MD.MenuAPI.Select(menuApi =>
-                                            GetEndpointFromRequestUrl(actionContext).Contains(menuApi.APIURL)).Any()
+                                        && FilterStaticTools.GetContextUri(actionContext).Contains(groupMenu.MD.URL)
                     )
                 ;
 
@@ -136,11 +135,6 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             return false;
         }
 
-        private static string GetEndpointFromRequestUrl(ControllerContext context)
-        {
-            return context.HttpContext.Request.Url?.AbsoluteUri;
-        }
-
         private bool ValidateClaimRole(ControllerContext context, ClaimsPrincipal claims)
         {
             return _roles.Any(t => IsRoleValid(context, claims, t));
@@ -169,17 +163,12 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private bool ValidateUserIdInRequest(ControllerContext context, ClaimsPrincipal claims)
         {
             string uidInResponse = context.HttpContext.Request[_uidFieldName]?.Trim();
-            string uidInClaim = GetUidInClaim(claims);
+            string uidInClaim = FilterStaticTools.GetUidInClaim(claims);
 
             return String.Equals(uidInClaim, uidInResponse);
         }
 
-        private static string GetUidInClaim(ClaimsPrincipal claims)
-        {
-            return claims.FindFirst(JwtConstants.UidClaimType)?.Value.Trim();
-        }
-
-        private static void ValidateToken(ControllerContext actionContext, string secret, out ClaimsPrincipal claims)
+        public static void ValidateToken(ControllerContext actionContext, string secret, out ClaimsPrincipal claims)
         {
             claims = null;
 

@@ -327,6 +327,7 @@
     <Compile Include="Tools\Encryption\JwtHelper.cs" />
     <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StringExtensionMethods.cs" />
+    <Compile Include="Tools\Filters\FilterStaticTools.cs" />
     <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeBy.cs" />
     <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeTypeSingletonFactory.cs" />
     <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AdminRole.cs" />
@@ -337,6 +338,8 @@
     <Compile Include="Tools\Filters\JwtAuthFilter\JwtAuthFilter.cs" />
     <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequiredPrivileges.cs" />
     <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequirePrivilege.cs" />
+    <Compile Include="Tools\Filters\ResponsePrivilegeWrapper\Privilege.cs" />
+    <Compile Include="Tools\Filters\ResponsePrivilegeWrapper\ResponsePrivilegeWrapperFilter.cs" />
     <Compile Include="Variables\IOConstants.cs" />
     <Compile Include="Variables\JwtConstants.cs" />
   </ItemGroup>

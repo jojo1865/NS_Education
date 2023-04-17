@@ -62,8 +62,7 @@ namespace NS_Education.Models.Entities.DbContext
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=LAPTOP-RUU8RF7Q\\NS_EDUCATION;Initial Catalog=ns;Integrated Security=True");
+                optionsBuilder.UseSqlServer(System.Web.Configuration.WebConfigurationManager.ConnectionStrings["db_NS_EducationConnectionString"].ConnectionString);
             }
         }
 

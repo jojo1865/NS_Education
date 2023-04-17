@@ -19,7 +19,7 @@ namespace NS_Education.Models.APIItems.Company
         public int BCID { get; set; }
         public string BC_TitleC { get; set; }
         public string BC_TitleE { get; set; }
-        public List<cSelectItem> CategoryList { get; set; }
+        public List<cSelectItem> BC_List { get; set; }
         public string Code { get; set; }
         public string TitleC { get; set; }
         public string TitleE { get; set; }

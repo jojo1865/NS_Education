@@ -47,7 +47,7 @@ namespace NS_Education.Controllers
                     BCID = N.BCID,
                     BC_TitleC = N.BC.TitleC,
                     BC_TitleE = N.BC.TitleE,
-                    CategoryList = null,
+                    BC_List = null,
                     Code = N.Code,
                     Title = N.Title,
 
@@ -89,7 +89,7 @@ namespace NS_Education.Controllers
                     BCID = N.BCID,
                     BC_TitleC = N.BC.TitleC,
                     BC_TitleE = N.BC.TitleE,
-                    CategoryList = SIs,
+                    BC_List = SIs,
                     Code = N.Code,
                     Title = N.Title,
 

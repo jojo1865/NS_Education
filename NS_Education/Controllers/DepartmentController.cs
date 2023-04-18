@@ -7,12 +7,15 @@ using NS_Education.Controllers.BaseClass;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Department;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.Filters.JwtAuthFilter;
+using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controllers
 {
     public class DepartmentController : PublicClass
     {
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(string KeyWord = "", int DCID = 0, int NowPage = 1, int CutPage = 10)
         {
 
@@ -68,6 +71,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoByID(int ID = 0)
         {
             var N = await DC.D_Department.Include(q => q.DC).FirstOrDefaultAsync(q => q.DDID == ID && !q.DeleteFlag);
@@ -103,6 +107,7 @@ namespace NS_Education.Controllers
             return ChangeJson(Item);
         }
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int ID, bool ActiveFlag, int UID)
         {
             Error = "";
@@ -125,6 +130,7 @@ namespace NS_Education.Controllers
             return ChangeJson(GetMsgClass(Error));
         }
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int ID, int UID)
         {
             Error = "";
@@ -148,6 +154,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, addOrEditKeyFieldName: "DDID")]
         public async Task<string> Submit(D_Department N)
         {
             Error = "";

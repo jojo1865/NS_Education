@@ -279,13 +279,13 @@ namespace NS_Education.Controllers
 
             UserData original = null;
 
-            // 進行驗證與處理。
+            // 進行驗證。
             // |- a. 驗證輸入的 UID 是否符合格式。
-            // |- b. 驗證輸入的使用者帳號是否有內容。
-            // |- c. 查詢資料。
-            // |- d. 驗證確實有查到資料。
-            // |- e. 覆寫資料，包含加密密碼。
-            // +- f. 實際更新 DB。
+            // |- b. 驗證輸入的使用者名稱是否有內容。
+            // |- c. 驗證輸入的使用者帳號是否有內容。
+            // |- d. 驗證輸入的使用者密碼是否有內容。
+            // |- e. 驗證輸入的部門 ID 是否有內容。
+            // +- f. 驗證輸入的身分 ID 是否有內容。
             bool isValid = input
                 .StartValidate()
                 .Validate(i => i.UID.IsValidId(), () => AddError(SignUpUidIncorrect))
@@ -296,6 +296,11 @@ namespace NS_Education.Controllers
                 .Validate(i => i.GID.IsValidId(), () => AddError(EmptyNotAllowed("身分 ID")))
                 .IsValid();
             
+            // 進行處理。
+            // |- a. 查詢資料。
+            // |- b. 驗證確實有查到資料。
+            // |- c. 覆寫資料，包含加密密碼。
+            // +- d. 實際更新 DB。
             await input.StartValidate(true)
                 .Validate(i => isValid)
                 .ValidateAsync(

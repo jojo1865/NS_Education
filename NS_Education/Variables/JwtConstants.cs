@@ -9,6 +9,8 @@ namespace NS_Education.Variables
 
         public const int ExpireMinutes = 120;
         
-        public const string UidClaimType = ClaimTypes.Actor;
+        public static string UidClaimType => ClaimTypes.Actor;
+
+        public const int AdminGid = 1;
     }
 }

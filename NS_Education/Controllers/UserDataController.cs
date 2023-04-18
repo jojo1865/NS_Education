@@ -187,7 +187,9 @@ namespace NS_Education.Controllers
 
             // 驗證
             UserData queried = !input.LoginAccount.IsNullOrWhiteSpace()
-                ? await DC.UserData.FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount)
+                ? await DC.UserData
+                    .Include(u => u.M_Group_User)
+                    .FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount)
                 : null;
             
             // 1. 先查詢是否確實有這個帳號
@@ -206,19 +208,24 @@ namespace NS_Education.Controllers
                 return GetResponseJson();
 
             // 登入都成功後，回傳部分使用者資訊，以及使用者的權限資訊。
-            UserData_Login_Output_APIItem output = new UserData_Login_Output_APIItem
+            // 先建立 claims
+            var claims = new List<Claim>
             {
                 // queried 已經在上面驗證為非 null。目前專案使用 C# 版本不支援 !，所以以此代替。 
                 // ReSharper disable once PossibleNullReferenceException
+                new Claim(JwtConstants.UidClaimType, queried.UID.ToString()),
+                new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.User.GetRoleValue()),
+            };
+            
+            // 特殊規格：如果擁有特殊 GID 的權限，則認識為管理員
+            if (queried.M_Group_User.Any(groupUser => groupUser.GID == JwtConstants.AdminGid))
+                claims.Add(new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.Admin.GetRoleValue()));
+                
+            UserData_Login_Output_APIItem output = new UserData_Login_Output_APIItem
+            {
                 UID = queried.UID,
                 Username = queried.UserName,
-                JwtToken = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, new []
-                {
-                    new Claim(JwtConstants.UidClaimType, queried.UID.ToString()),
-                    // TODO: 等權限群組相關設計確認後，這裡加上 Admin 判定
-                    new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.User.GetRoleValue()),
-                    new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.Admin.GetRoleValue())
-                })
+                JwtToken = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims)
             };
 
             return GetResponseJson(output);

@@ -43,21 +43,21 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         /// </summary>
         /// <param name="roles">允許的 roles。（可選）忽略時，不驗證 Roles。</param>
         /// <param name="privileges">所需的群組 Flag。（可選）忽略時，不驗證群組 Flag。</param>
-        /// <param name="addOrEditKeyFieldName">Request JSON 中，用於判定需要新增還是修改權限的欄位名稱。通常對應某種 ID 欄位，值為 0 時視為新增。（可選）忽略時，在啟動時報錯。</param>
         /// <param name="uidFieldName">Request JSON 中的 UID 欄位名稱。（可選）預設值為「<see cref="IoConstants.IdFieldName"/>」。</param>
+        /// <param name="addOrEditKeyFieldName">Request JSON 中，用於判定需要新增還是修改權限的欄位名稱。通常對應某種 ID 欄位，值為 0 時視為新增。（可選）忽略時，在啟動時報錯。</param>
         // ReSharper 可能會建議 roles 改用 IEnumerable, 但 C# Attribute 並不支援該類型的 constructor argument。
         // ReSharper disable once ParameterTypeCanBeEnumerable.Local
-        public JwtAuthFilter(AuthorizeBy roles = AuthorizeBy.Any
-            , RequirePrivilege privileges = RequirePrivilege.None
-            , string uidFieldName = IoConstants.IdFieldName
-            , string addOrEditKeyFieldName = null)
+        public JwtAuthFilter(AuthorizeBy roles
+            , RequirePrivilege privileges
+            , string uidFieldName
+            , string addOrEditKeyFieldName)
         {
             if (privileges.HasFlag(RequirePrivilege.AddOrEdit) && addOrEditKeyFieldName.IsNullOrWhiteSpace())
                 throw new ArgumentException("RequirePrivilege 指定 AddOrEdit，卻沒有提供 addOrEditKeyFieldName！");
                     
             _roles = AuthorizeTypeSingletonFactory.GetEnumerableByEnum(roles).ToArray();
             _privileges = new RequiredPrivileges(privileges);
-            _uidFieldName = uidFieldName;
+            _uidFieldName = uidFieldName ?? IoConstants.IdFieldName;
             _addOrEditKeyFieldName = addOrEditKeyFieldName;
             
         }

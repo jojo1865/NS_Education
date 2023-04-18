@@ -42,7 +42,7 @@ namespace NS_Education.Tools.Filters
 
         public static string GetFieldInRequest(HttpRequestBase request, string fieldName)
         {
-            return request[fieldName];
+            return fieldName == null ? null : request[fieldName];
         }
     }
 }

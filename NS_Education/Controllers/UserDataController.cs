@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
@@ -19,9 +20,9 @@ using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
-using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 using NS_Education.Variables;
 
 namespace NS_Education.Controllers
@@ -40,17 +41,16 @@ namespace NS_Education.Controllers
         private const string UpdateUidIncorrect = "未提供欲修改的 UID 或格式不正確！";
         private const string UserDataNotFound = "這筆使用者不存在或已被刪除！";
         
-        private static string QueryFailed(Exception e)
-        {
-            return $"查詢 DB 時出錯，請確認伺服器狀態：{e.Message}";
-        }
+        private static string QueryFailed(Exception e) => $"查詢 DB 時出錯，請確認伺服器狀態：{e.Message}！";
 
-        
+        private static string UpdateFailed(Exception e)
+            => $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}！";
         #endregion
 
         #region 錯誤訊息 - 註冊/更新
-        private const string SubmitPasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
-        private const string SubmitUidIncorrect = "缺少 UID，無法寫入！";
+        private const string PasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
+        private const string SignUpUidIncorrect = "缺少 UID，無法寫入！";
+        private const string SignUpGidIncorrect = "缺少 GID 或 GID 查無資料，無法寫入！";
         #endregion
 
         #region 錯誤訊息 - 登入
@@ -110,7 +110,9 @@ namespace NS_Education.Controllers
 
             // sanitize
             if (!input.UID.IsValidId())
-                AddError(SubmitUidIncorrect);
+                AddError(SignUpUidIncorrect);
+            if (!input.GID.IsValidId() || !DC.GroupData.Any(g => g.GID == input.GID))
+                AddError(SignUpGidIncorrect);
             if (input.LoginPassword.IsNullOrWhiteSpace())
                 AddError(EmptyNotAllowed("使用者密碼"));
             else
@@ -122,13 +124,14 @@ namespace NS_Education.Controllers
                 }
                 catch (ValidationException)
                 {
-                    AddError(SubmitPasswordAlphanumericOnly);
+                    AddError(PasswordAlphanumericOnly);
                     // 這裡不做提早返回，方便一次顯示更多錯誤訊息給使用者
                 }
             }
 
             // create UserData object, validate the columns along
             // TODO: 引用靜態參數檔，完整驗證使用者欄位
+            int requestUid = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
             UserData newUser = new UserData
             {
                 UserName = input.Username.ExecuteIfNullOrWhiteSpace(() => AddError(EmptyNotAllowed("使用者名稱"))),
@@ -138,11 +141,22 @@ namespace NS_Education.Controllers
                 ActiveFlag = true,
                 DeleteFlag = false,
                 CreDate = DateTime.Now,
-                CreUID = input.UID,
+                CreUID = requestUid,
                 UpdDate = DateTime.Now,
                 UpdUID = 0,
                 LoginDate = DateTime.Now,
-                DDID = input.DDID
+                DDID = input.DDID,
+                M_Group_User = new List<M_Group_User>
+                {
+                    new M_Group_User
+                    {
+                        GID = input.GID,
+                        CreDate = DateTime.Now,
+                        CreUID = requestUid,
+                        UpdDate = DateTime.Now,
+                        UpdUID = 0
+                    }
+                }
             };
 
             // doesn't write to db if any error raised
@@ -249,67 +263,103 @@ namespace NS_Education.Controllers
         /// </summary>
         /// <param name="input">輸入資料</param>
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.EditFlag, nameof(UserData_Submit_Input_APIItem.UID))]
+        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.EditFlag,
+            nameof(UserData_Submit_Input_APIItem.UID))]
         public async Task<string> Submit(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();
 
-            // sanitize
-            if (!input.UID.IsValidId())
-                AddError(SubmitUidIncorrect);
-            
-            if (input.LoginAccount.IsNullOrWhiteSpace())
-                AddError(EmptyNotAllowed("使用者帳號"));
-            
-            // 如果輸入就錯了，提早返回。
-            if (HasError())
-                return GetResponseJson();
-            
-            UserData original = await DC.UserData.FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount);
-            
-            if (original == null)
-            {
-                AddError(LoginAccountNotFound);
-                return GetResponseJson();
-            }
+            UserData original = null;
 
-            // 更新資料
-            // TODO: 引用靜態參數檔，完整驗證使用者欄位 
-            try
-            {
-                // 只在欄位有輸入任何資料時，才更新對應欄位
-                original.UserName = input.Username.IsNullOrWhiteSpace() ? original.UserName : input.Username;
-                original.LoginAccount =
-                    input.LoginAccount.IsNullOrWhiteSpace() ? original.LoginAccount : input.LoginAccount;
-                original.LoginPassword =
-                    input.LoginPassword.IsNullOrWhiteSpace()
-                        ? original.LoginPassword
-                        : EncryptPassword(input.LoginPassword);
-                
-                // Note 是可選欄位，因此呼叫者應該保持原始內容
-                original.Note = input.Note;
-                
-                original.UpdDate = DateTime.Now;
-                original.UpdUID = input.UID;
+            // 進行驗證與處理。
+            // |- a. 驗證輸入的 UID 是否符合格式。
+            // |- b. 驗證輸入的使用者帳號是否有內容。
+            // |- c. 查詢資料。
+            // |- d. 驗證確實有查到資料。
+            // |- e. 覆寫資料，包含加密密碼。
+            // +- f. 實際更新 DB。
+            await input
+                .StartValidate(true)
+                .Validate(i => i.UID.IsValidId(), () => AddError(SignUpUidIncorrect))
+                .Validate(i => !i.LoginAccount.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者帳號")))
+                .ValidateAsync(
+                    async i => original =
+                        await DC.UserData.FirstOrDefaultAsync(u => u.UID == input.UID),
+                    e => QueryFailed(e))
+                .Validate(i => original != null, () => AddError(LoginAccountNotFound))
+                .ValidateAsync(async i => await SubmitPrepareData(i, original), e => AddError(PasswordAlphanumericOnly))
+                .ValidateAsync(async i => await SubmitDoUpdate(i), e => AddError(UpdateFailed(e)));
 
-                original.DDID = input.DDID;
-            }
-            catch (ValidationException)
-            {
-                // 密碼錯誤時報錯並提早返回。
-                AddError(SubmitPasswordAlphanumericOnly);
-                return GetResponseJson();
-            }
-
-            // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
-            if (IsATestUpdate(input))
-                return GetResponseJson();
-
-            if (HasError())
-                return GetResponseJson();
-            
-            await DC.SaveChangesAsync();
             return GetResponseJson();
+        }
+
+        private async Task SubmitPrepareData(UserData_Submit_Input_APIItem input, UserData original)
+        {
+            // 只在欄位有輸入任何資料時，才更新對應欄位
+            original.UserName = input.Username.IsNullOrWhiteSpace() ? original.UserName : input.Username;
+            original.LoginAccount =
+                input.LoginAccount.IsNullOrWhiteSpace() ? original.LoginAccount : input.LoginAccount;
+            original.LoginPassword =
+                input.LoginPassword.IsNullOrWhiteSpace()
+                    ? original.LoginPassword
+                    : EncryptPassword(input.LoginPassword);
+
+            // Note 是可選欄位，因此呼叫者應該保持原始內容
+            original.Note = input.Note;
+
+            original.UpdDate = DateTime.Now;
+            original.UpdUID = input.UID;
+
+            original.DDID = input.DDID;
+            
+            // 如果是管理員，才允許更新權限資訊
+            if (FilterStaticTools.HasRoleInRequest(HttpContext.Request, AuthorizeBy.Admin))
+            {
+                int requesterUID = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
+                // 資料庫建模是 User 一對多 Group，但現在看到的 Wireframe 似乎規劃為每位使用者僅一個權限組
+                // 所以在這裡
+                // 1. 在 M_Group_User 中查詢此使用者有幾筆權限，如果有多筆就先清空至唯一一筆。
+                // 2. 如果沒有資料就建一筆。
+                // 3. 將唯一一筆 M_Group_User 指向 input 指定的 GID。
+
+                var groupUsers = await DC.M_Group_User.Where(gu => gu.UID == original.UID).ToListAsync();
+
+                if (!groupUsers.Any())
+                {
+                    // 新增一筆權限資料並返回
+                    M_Group_User groupUser = new M_Group_User
+                    {
+                        GID = input.GID,
+                        UID = original.UID,
+                        CreDate = DateTime.Now,
+                        CreUID = requesterUID,
+                        UpdDate = DateTime.Now,
+                        UpdUID = 0
+                    };
+
+                    await DC.M_Group_User.AddAsync(groupUser);
+                    return;
+                }
+                
+                // 只保留一筆
+                if (groupUsers.Count > 1)
+                    DC.M_Group_User.RemoveRange(groupUsers.Skip(1));
+
+                // 更新權限資料
+                M_Group_User data = groupUsers.First();
+                data.GID = input.GID;
+                data.UpdUID = requesterUID;
+                data.UpdDate = DateTime.Now;
+
+                await DC.SaveChangesAsync();
+            }
+        }
+
+        private async Task SubmitDoUpdate(UserData_Submit_Input_APIItem input)
+        {
+            // TODO: 在確保單元測試方式之後，將此處條件刪除。
+            if (!IsATestUpdate(input))
+                await DC.SaveChangesAsync();
         }
 
         // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
@@ -339,7 +389,7 @@ namespace NS_Education.Controllers
         private static void ThrowIfPasswordIsNotEncryptable(string password)
         {
             if (!password.IsEncryptablePassword())
-                throw new ValidationException(SubmitPasswordAlphanumericOnly);
+                throw new ValidationException(PasswordAlphanumericOnly);
         }
 
         /// <summary>
@@ -527,7 +577,6 @@ namespace NS_Education.Controllers
         /// <returns>回傳結果。請參照 <see cref="UserData_GetList_Output_APIItem"/>，以及 <see cref="UserData_GetList_Output_Row_APIItem"/>。</returns>
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
-        [ResponsePrivilegeWrapperFilter]
         public async Task<string> GetList(UserData_GetList_Input_APIItem input)
         {
             // 1. 查詢所有 UserData 並逐一套用條件
@@ -601,7 +650,6 @@ namespace NS_Education.Controllers
         /// <returns><see cref="UserData_GetInfoById_Output_APIItem"/></returns>
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.ShowFlag, "UID")]
-        [ResponsePrivilegeWrapperFilter]
         public async Task<string> GetInfoById(UserData_GetInfoById_Input_APIItem input)
         {
             UserData userData = null;
@@ -624,7 +672,11 @@ namespace NS_Education.Controllers
                 LoginAccount = userData.LoginAccount,
                 LoginPassword = HSM.Des_1(userData.LoginPassword),
                 DDID = userData.DDID,
-                GID = userData.M_Group_User.OrderBy(gu => gu.GID).FirstOrDefault()?.GID ?? 0,
+                GID = userData.M_Group_User
+                    .Where(gu => gu.G.ActiveFlag && !gu.G.DeleteFlag)
+                    .OrderBy(gu => gu.GID)
+                    .FirstOrDefault()?
+                    .GID ?? 0,
                 ActiveFlag = userData.ActiveFlag,
                 Note = userData.Note
             };
@@ -634,6 +686,7 @@ namespace NS_Education.Controllers
         {
             UserData userData = await DC.UserData
                 .Include(u => u.M_Group_User)
+                .ThenInclude(gu => gu.G)
                 .FirstOrDefaultAsync(u => !u.DeleteFlag && u.UID == input.UID);
             return userData;
         }

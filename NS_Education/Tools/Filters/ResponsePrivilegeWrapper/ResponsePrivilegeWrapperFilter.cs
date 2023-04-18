@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -6,13 +5,12 @@ using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using NS_Education.Models.Entities.DbContext;
-using NS_Education.Tools.Extensions;
 using NS_Education.Variables;
 
 namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
 {
     /// <summary>
-    /// 在此 Action 執行完之後，依據 JWT Token Claims 的 UID 與現在的選單，查詢所有子目錄節點權限，在 Response 外面多包一層後回傳。
+    /// 在 Action 執行完之後，依據 JWT Token Claims 的 UID 與現在的選單，查詢所有子目錄節點權限，在 Response 外面多包一層後回傳。
     /// </summary>
     public class ResponsePrivilegeWrapperFilter : ActionFilterAttribute
     {
@@ -29,19 +27,16 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
 
         private static void WrapResponseWithPrivilege(ActionExecutedContext filterContext)
         {
-            ClaimsPrincipal claims = null;
+            ClaimsPrincipal claims;
             try
             {
-                JwtAuthFilter.JwtAuthFilter.ValidateToken(filterContext, JwtConstants.Secret,
-                    out claims);
+                JwtAuthFilter.JwtAuthFilter.ValidateToken(filterContext, JwtConstants.Secret, out claims);
             }
-            catch (Exception e)
-            {
-                filterContext.Result = new HttpUnauthorizedResult($"JWT 驗證失敗。{e.Message}".SanitizeForResponseStatusMessage());
+            catch {
+                // 解密失敗或取不到 JWT 時，不回傳任何權限資訊
+                return;
             }
 
-            if (claims == null) return;
-            
             NsDbContext context = new NsDbContext();
             // Query 1: 找出目前所在的 MenuData 底下所有 MenuAPI
             var menuApis = context.MenuData

@@ -26,7 +26,7 @@ namespace NS_Education.Models.APIItems
         /// <summary>
         /// 查詢結果全部總共幾分頁。 
         /// </summary>
-        public int AllPageCt => CutPage == 0 || AllItemCt == 0 ? 0 : (AllItemCt / CutPage + (AllItemCt % CutPage == 0 ? 0 : 1)); 
+        public int AllPageCt => NowPage == 0 || AllItemCt == 0 ? 0 : (AllItemCt / CutPage + (AllItemCt % CutPage == 0 ? 0 : 1)); 
 
         /// <summary>
         /// 實際每行資料內容。

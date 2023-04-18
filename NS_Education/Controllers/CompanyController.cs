@@ -143,7 +143,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, addOrEditKeyFieldName: nameof(D_Company.DCID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Company.DCID))]
         // 因為 submit 是新增和修改寫在一起，但權限不應兩種都同時需要，所以此類端點權限驗證寫在 action 中。 
         public async Task<string> Submit(D_Company N)
         {

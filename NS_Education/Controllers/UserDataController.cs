@@ -510,12 +510,12 @@ namespace NS_Education.Controllers
             // 3. 回傳通用 Response
             await input.StartValidate(true)
                 .Validate(i => i.ID.IsValidId(),
-                    onFail: () => AddError(UpdateUidIncorrect))
+                    () => AddError(UpdateUidIncorrect))
                 .Validate(i => i.ActiveFlag != null, 
-                    onFail: () => AddError(EmptyNotAllowed("ActiveFlag")))
+                    () => AddError(EmptyNotAllowed("ActiveFlag")))
                 // ReSharper disable once PossibleInvalidOperationException
                 .ValidateAsync(async i => await ChangeActiveFlagForUserData(input.ID, (bool)input.ActiveFlag),
-                    onException: e => AddError(e.Message));
+                    e => AddError(e.Message));
 
             return GetResponseJson();
         }
@@ -579,7 +579,7 @@ namespace NS_Education.Controllers
                 await input
                     .StartValidate(true)
                     .ValidateAsync(async i => await UpdatePasswordForUserData(i.ID, i.NewPassword),
-                        onException: e => AddError(e.Message));
+                        e => AddError(e.Message));
             }
 
             // 2. 回傳通用訊息格式。

@@ -131,7 +131,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, addOrEditKeyFieldName: nameof(D_Zip.DZID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Zip.DZID))]
         public async Task<string> Submit(D_Zip N)
         {
             Error = "";

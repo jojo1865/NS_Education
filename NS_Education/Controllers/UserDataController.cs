@@ -496,7 +496,10 @@ namespace NS_Education.Controllers
             await input.StartValidate(true)
                 .Validate(i => i.ID.IsValidId(),
                     onFail: () => AddError(UpdateUidIncorrect))
-                .ValidateAsync(async i => await ChangeActiveFlagForUserData(input.ID, input.ActiveFlag),
+                .Validate(i => i.ActiveFlag != null, 
+                    onFail: () => AddError(EmptyNotAllowed("ActiveFlag")))
+                // ReSharper disable once PossibleInvalidOperationException
+                .ValidateAsync(async i => await ChangeActiveFlagForUserData(input.ID, (bool)input.ActiveFlag),
                     onException: e => AddError(e.Message));
 
             return GetResponseJson();

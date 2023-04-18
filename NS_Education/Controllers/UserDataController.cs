@@ -109,8 +109,6 @@ namespace NS_Education.Controllers
             // TODO: 引用靜態參數檔，完整驗證使用者密碼
 
             // sanitize
-            if (!input.UID.IsValidId())
-                AddError(SignUpUidIncorrect);
             if (!input.GID.IsValidId() || !DC.GroupData.Any(g => g.GID == input.GID))
                 AddError(SignUpGidIncorrect);
             if (input.LoginPassword.IsNullOrWhiteSpace())

@@ -675,7 +675,11 @@ namespace NS_Education.Controllers
                 LoginAccount = userData.LoginAccount,
                 LoginPassword = HSM.Des_1(userData.LoginPassword),
                 DDID = userData.DDID,
-                GID = userData.M_Group_User.OrderBy(gu => gu.GID).FirstOrDefault()?.GID ?? 0,
+                GID = userData.M_Group_User
+                    .Where(gu => gu.G.ActiveFlag && !gu.G.DeleteFlag)
+                    .OrderBy(gu => gu.GID)
+                    .FirstOrDefault()?
+                    .GID ?? 0,
                 ActiveFlag = userData.ActiveFlag,
                 Note = userData.Note
             };

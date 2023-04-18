@@ -9,5 +9,28 @@
 ---
 ```sh
 dotnet ef dbcontext scaffold "Data Source=LAPTOP-RUU8RF7Q\NS_EDUCATION;Initial Catalog=ns;Integrated Security=True" Microsoft.EntityFrameworkCore.SqlServer --use-database-names --context-dir ..\NS_Education\Models\Entities\DbContext --output-dir ..\NS_Education\Models\Entities --context NsDbContext
-```         
-* 執行後，將所有物件的 namespace 調正確
+```
+
+# 跑完後所須處理
+* 將所有物件的 namespace 調正確
+* 將 DbContext 的 OnConfiguring 改為以下內容
+```c#
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (optionsBuilder.IsConfigured) return;
+            
+            var connectionStrings = System.Web.Configuration.WebConfigurationManager.ConnectionStrings;
+            string connectionString =
+                Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString);
+
+            try
+            {
+                optionsBuilder.UseSqlServer(connectionString);
+            }
+            catch
+            {
+                connectionString = connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
+                optionsBuilder.UseSqlServer(connectionString);
+            }
+        } 
+```

@@ -363,8 +363,6 @@ namespace NS_Education.Controllers
                 data.GID = input.GID;
                 data.UpdUID = requesterUID;
                 data.UpdDate = DateTime.Now;
-
-                await DC.SaveChangesAsync();
             }
         }
 

@@ -442,9 +442,11 @@ namespace NS_Education.Controllers
             // 驗證輸入。
             // 1. 操作者 UID 是否正確。
             // 2. 刪除對象 UID 是否正確。
-            bool isInputValid = input.StartValidate(true)
+            bool isInputValid = input
+                .StartValidate(true)
                 .Validate(i => requesterId.IsValidId(), () => AddError(DeleteItemOperatorUidIncorrect))
-                .Validate(i => i.UID.IsValidId(), () => AddError(DeleteItemTargetUidIncorrect)).IsValid();
+                .Validate(i => i.UID.IsValidId(), () => AddError(DeleteItemTargetUidIncorrect))
+                .IsValid();
 
             if (!isInputValid)
                 return GetResponseJson();
@@ -453,9 +455,11 @@ namespace NS_Education.Controllers
             UserData queried = DC.UserData.FirstOrDefault(u => u.UID == input.UID);
             // 1. 進行查詢後，是否有查到資料。
             // 2. 該筆資料是否並非刪除狀態。
-            bool isDataValid = queried.StartValidate(true)
+            bool isDataValid = queried
+                .StartValidate(true)
                 .Validate(q => q != null, () => AddError(DeleteItemTargetUidNotFound))
-                .Validate(q => q.DeleteFlag == false, () => AddError(DeleteItemTargetAlreadyDeleted)).IsValid();
+                .Validate(q => q.DeleteFlag == false, () => AddError(DeleteItemTargetAlreadyDeleted))
+                .IsValid();
             
             // 資料未通過驗證時，提早返回。
             if (!isDataValid)

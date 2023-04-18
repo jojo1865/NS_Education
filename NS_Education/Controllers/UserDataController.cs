@@ -686,6 +686,7 @@ namespace NS_Education.Controllers
         {
             UserData userData = await DC.UserData
                 .Include(u => u.M_Group_User)
+                .ThenInclude(gu => gu.G)
                 .FirstOrDefaultAsync(u => !u.DeleteFlag && u.UID == input.UID);
             return userData;
         }

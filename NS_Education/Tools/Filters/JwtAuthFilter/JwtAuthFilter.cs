@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.Ajax.Utilities;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.Entities;
 using NS_Education.Models.Entities.DbContext;
@@ -33,6 +34,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private readonly IAuthorizeType[] _roles;
         private readonly RequiredPrivileges _privileges;
         private readonly string _uidFieldName;
+        private readonly string _addOrEditKeyFieldName;
 
         /// <summary>
         /// 套用 JWT 驗證，並且需符合指定的 Roles。<br/>
@@ -41,14 +43,21 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         /// </summary>
         /// <param name="roles">允許的 roles。（可選）忽略時，不驗證 Roles。</param>
         /// <param name="privileges">所需的群組 Flag。（可選）忽略時，不驗證群組 Flag。</param>
+        /// <param name="addOrEditKeyFieldName">Request JSON 中，用於判定需要新增還是修改權限的欄位名稱。通常對應某種 ID 欄位，值為 0 時視為新增。（可選）忽略時，在啟動時報錯。</param>
         /// <param name="uidFieldName">Request JSON 中的 UID 欄位名稱。（可選）預設值為「<see cref="IoConstants.IdFieldName"/>」。</param>
         // ReSharper 可能會建議 roles 改用 IEnumerable, 但 C# Attribute 並不支援該類型的 constructor argument。
         // ReSharper disable once ParameterTypeCanBeEnumerable.Local
-        public JwtAuthFilter(AuthorizeBy roles = AuthorizeBy.Any, RequirePrivilege privileges = RequirePrivilege.None, string uidFieldName = IoConstants.IdFieldName)
+        public JwtAuthFilter(AuthorizeBy roles = AuthorizeBy.Any, RequirePrivilege privileges = RequirePrivilege.None,
+            string addOrEditKeyFieldName = null, string uidFieldName = IoConstants.IdFieldName)
         {
+            if (privileges.HasFlag(RequirePrivilege.AddOrEdit) && addOrEditKeyFieldName.IsNullOrWhiteSpace())
+                throw new ArgumentException("RequirePrivilege 指定 AddOrEdit，卻沒有提供 addOrEditKeyFieldName！");
+                    
             _roles = AuthorizeTypeSingletonFactory.GetEnumerableByEnum(roles).ToArray();
             _privileges = new RequiredPrivileges(privileges);
             _uidFieldName = uidFieldName;
+            _addOrEditKeyFieldName = addOrEditKeyFieldName;
+            
         }
 
         public override void OnActionExecuting(ActionExecutingContext actionContext)
@@ -110,16 +119,23 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 ;
 
             // 4. 具備所有所需 Flags 時，才回傳 true。
-            return HasAllFlagsInDb(query.ToList());
+            return HasAllFlagsInDb(actionContext, query.ToList());
         }
 
-        private bool HasAllFlagsInDb(List<M_Group_Menu> queried)
+        private bool HasAllFlagsInDb(ActionExecutingContext actionContext, List<M_Group_Menu> queried)
         {
             bool showFlagOk = !_privileges.RequireShowFlag;
-            bool addFlagOk = !_privileges.RequireAddFlag;
+            bool addFlagOk = !_privileges.RequireAddFlag; 
             bool editFlagOk = !_privileges.RequireEditFlag;
             bool deleteFlagOk = !_privileges.RequireDeleteFlag;
             bool printFlagOk = !_privileges.RequirePrintFlag;
+            
+            // 當有 AddOrEditFlag 時, 特別處理 addFlag/editFlag 和 request 欄位
+            if (_privileges.RequireAddOrEditFlag)
+            {
+                addFlagOk = addFlagOk && !AddOrEditNeedsAddFlag(actionContext);
+                editFlagOk = editFlagOk && !AddOrEditNeedsEditFlag(actionContext);
+            }
 
             foreach (M_Group_Menu gm in queried)
             {
@@ -134,6 +150,23 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             }
 
             return false;
+        }
+
+        private bool AddOrEditNeedsAddFlag(ActionExecutingContext actionContext)
+        {
+            return FilterStaticTools
+                .GetFieldInRequest(actionContext.HttpContext.Request, _addOrEditKeyFieldName)?
+                .Trim() 
+                   == IoConstants.IdValueWhenSubmit;
+        }
+
+        private bool AddOrEditNeedsEditFlag(ActionExecutingContext actionContext)
+        {
+            string fieldValue = FilterStaticTools
+                .GetFieldInRequest(actionContext.HttpContext.Request, _addOrEditKeyFieldName)?
+                .Trim();
+            return fieldValue != null
+                   && fieldValue != IoConstants.IdValueWhenSubmit;
         }
 
         private bool ValidateClaimRole(ControllerContext context, ClaimsPrincipal claims)
@@ -163,7 +196,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         /// <exception cref="NotImplementedException"></exception>
         private bool ValidateUserIdInRequest(ControllerContext context, ClaimsPrincipal claims)
         {
-            string uidInRequest = context.HttpContext.Request[_uidFieldName]?.Trim();
+            string uidInRequest = FilterStaticTools.GetFieldInRequest(context.HttpContext.Request, _uidFieldName)?.Trim();
             string uidInClaim = FilterStaticTools.GetUidInClaim(claims);
 
             return String.Equals(uidInClaim, uidInRequest);

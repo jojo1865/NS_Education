@@ -4,5 +4,6 @@ namespace NS_Education.Variables
     {
         public const string IdFieldName = "ID";
         public const int DefaultCutPage = 10;
+        public const string IdValueWhenSubmit = "0";
     }
 }

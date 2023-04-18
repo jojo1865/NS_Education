@@ -1,6 +1,3 @@
-using System;
-using Microsoft.Ajax.Utilities;
-
 namespace NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType
 {
     public class RequiredPrivileges
@@ -11,6 +8,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType
         public bool RequireEditFlag { get; }
         public bool RequireDeleteFlag { get; }
         public bool RequirePrintFlag { get; }
+        public bool RequireAddOrEditFlag { get; }
 
         public RequiredPrivileges(RequirePrivilege aggregate)
         {
@@ -21,10 +19,11 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType
             }
             
             RequireShowFlag = aggregate.HasFlag(RequirePrivilege.ShowFlag);
-            RequireAddFlag = (aggregate & RequirePrivilege.AddFlag) != 0;
-            RequireEditFlag = (aggregate & RequirePrivilege.EditFlag) != 0;
-            RequireDeleteFlag = (aggregate & RequirePrivilege.DeleteFlag) != 0;
-            RequirePrintFlag = (aggregate & RequirePrivilege.PrintFlag) != 0;
+            RequireAddFlag = aggregate.HasFlag(RequirePrivilege.AddFlag);
+            RequireEditFlag = aggregate.HasFlag(RequirePrivilege.EditFlag);
+            RequireDeleteFlag = aggregate.HasFlag(RequirePrivilege.DeleteFlag);
+            RequirePrintFlag = aggregate.HasFlag(RequirePrivilege.PrintFlag);
+            RequireAddOrEditFlag = aggregate.HasFlag(RequirePrivilege.AddOrEdit);
         }
     }
 }

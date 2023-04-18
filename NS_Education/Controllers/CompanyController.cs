@@ -7,12 +7,16 @@ using NS_Education.Controllers.BaseClass;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Company;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.Filters;
+using NS_Education.Tools.Filters.JwtAuthFilter;
+using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controllers
 {
     public class CompanyController : PublicClass
     {
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(string KeyWord = "", int BCID = 0, int NowPage = 1, int CutPage = 10)
         {
             var Ns = DC.D_Company.Where(q => !q.DeleteFlag);
@@ -66,6 +70,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoByID(int ID = 0)
         {
             var N = await DC.D_Company.Include(q => q.BC).FirstOrDefaultAsync(q => q.DCID == ID && !q.DeleteFlag);
@@ -100,6 +105,7 @@ namespace NS_Education.Controllers
             return ChangeJson(Item);
         }
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int ID, bool ActiveFlag, int UID)
         {
             Error = "";
@@ -122,6 +128,7 @@ namespace NS_Education.Controllers
             return ChangeJson(GetMsgClass(Error));
         }
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int ID, int UID)
         {
             Error = "";
@@ -145,19 +152,20 @@ namespace NS_Education.Controllers
         }
 
         [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, addOrEditKeyFieldName: "DCID")]
+        // 因為 submit 是新增和修改寫在一起，但權限不應兩種都同時需要，所以此類端點權限驗證寫在 action 中。 
         public async Task<string> Submit(D_Company N)
         {
             Error = "";
             if (N.DCID == 0)
             {
-                if (N.CreUID == 0)
-                    Error += "缺少建立者ID,無法更新;";
                 if (N.BCID <= 0)
                     Error += "請選擇公司所屬分類;";
                 if (N.TitleC == "")
                     Error += "名稱必須輸入;";
                 if (Error == "")
                 {
+                    N.CreUID = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
                     await DC.D_Company.AddAsync(N);
@@ -167,8 +175,6 @@ namespace NS_Education.Controllers
             else
             {
                 var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == N.DCID && !q.DeleteFlag);
-                if (N.CreUID == 0)
-                    Error += "缺少更新者ID,無法更新;";
                 if (N.BCID <= 0)
                     Error += "請選擇公司所屬分類;";
                 if (N.TitleC == "")
@@ -183,7 +189,7 @@ namespace NS_Education.Controllers
                     N_.TitleE = N.TitleE;
                     N_.ActiveFlag = N.ActiveFlag;
                     N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = N.UpdUID;
+                    N_.UpdUID = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
                     N_.UpdDate = DT;
                     await DC.SaveChangesAsync();
                 }

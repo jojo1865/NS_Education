@@ -39,5 +39,10 @@ namespace NS_Education.Tools.Filters
         {
             return GetUidInClaimInt(JwtHelper.DecodeToken(GetJwtTokenInHeader(request), JwtConstants.Secret));
         }
+
+        public static string GetFieldInRequest(HttpRequestBase request, string uidFieldName)
+        {
+            return request[uidFieldName];
+        }
     }
 }

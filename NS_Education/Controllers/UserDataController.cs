@@ -283,14 +283,18 @@ namespace NS_Education.Controllers
             // |- d. 驗證確實有查到資料。
             // |- e. 覆寫資料，包含加密密碼。
             // +- f. 實際更新 DB。
-            await input
-                .StartValidate(true)
+            bool isValid = input
+                .StartValidate()
                 .Validate(i => i.UID.IsValidId(), () => AddError(SignUpUidIncorrect))
                 .Validate(i => !i.Username.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者名稱")))
                 .Validate(i => !i.LoginAccount.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者帳號")))
                 .Validate(i => !i.LoginPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者密碼")))
                 .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
                 .Validate(i => i.GID.IsValidId(), () => AddError(EmptyNotAllowed("身分 ID")))
+                .IsValid();
+            
+            await input.StartValidate(true)
+                .Validate(i => isValid)
                 .ValidateAsync(
                     async i => original =
                         await DC.UserData.FirstOrDefaultAsync(u => u.UID == input.UID),

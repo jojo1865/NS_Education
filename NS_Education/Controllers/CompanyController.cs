@@ -104,49 +104,41 @@ namespace NS_Education.Controllers
 
             return ChangeJson(Item);
         }
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag, int UID)
+        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
         {
             Error = "";
-            if (UID == 0)
-                Error += "缺少更新者ID,無法更新;";
-            else
+            var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == ID && !q.DeleteFlag);
+            if (N_ != null)
             {
-                var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == ID && !q.DeleteFlag);
-                if (N_ != null)
-                {
-                    N_.ActiveFlag = ActiveFlag;
-                    N_.UpdDate = DT;
-                    N_.UpdUID = UID;
-                    await DC.SaveChangesAsync();
-                }
-                else
-                    Error += "查無資料,無法更新;";
+                N_.ActiveFlag = ActiveFlag;
+                N_.UpdDate = DT;
+                N_.UpdUID = FilterStaticTools.GetUidInRequestInt(Request);
+                await DC.SaveChangesAsync();
             }
+            else
+                Error += "查無資料,無法更新;";
 
             return ChangeJson(GetMsgClass(Error));
         }
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
-        public async Task<string> DeleteItem(int ID, int UID)
+        public async Task<string> DeleteItem(int ID)
         {
             Error = "";
-            if (UID == 0)
-                Error += "缺少更新者ID,無法更新;";
-            else
+            var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == ID);
+            if (N_ != null)
             {
-                var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == ID);
-                if (N_ != null)
-                {
-                    N_.DeleteFlag = true;
-                    N_.UpdDate = DT;
-                    N_.UpdUID = UID;
-                    await DC.SaveChangesAsync();
-                }
-                else
-                    Error += "查無資料,無法更新;";
+                N_.DeleteFlag = true;
+                N_.UpdDate = DT;
+                N_.UpdUID = FilterStaticTools.GetUidInRequestInt(Request);
+                await DC.SaveChangesAsync();
             }
+            else
+                Error += "查無資料,無法更新;";
 
             return ChangeJson(GetMsgClass(Error));
         }

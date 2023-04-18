@@ -50,7 +50,8 @@ namespace NS_Education.Controllers
         #region 錯誤訊息 - 註冊/更新
         private const string PasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
         private const string SignUpUidIncorrect = "缺少 UID，無法寫入！";
-        private const string SignUpGidIncorrect = "缺少 GID 或 GID 查無資料，無法寫入！";
+        private const string SignUpGidIncorrect = "缺少身分 ID 或查無身分資料，無法寫入！";
+        private const string SignUpDdidIncorrect = "缺少部門 ID 或查無部門資料，無法寫入！";
         #endregion
 
         #region 錯誤訊息 - 登入
@@ -111,6 +112,8 @@ namespace NS_Education.Controllers
             // sanitize
             if (!input.GID.IsValidId() || !DC.GroupData.Any(g => g.GID == input.GID))
                 AddError(SignUpGidIncorrect);
+            if (!input.DDID.IsValidId() || !DC.D_Department.Any(d => d.DDID == input.DDID))
+                AddError(SignUpDdidIncorrect);
             if (input.LoginPassword.IsNullOrWhiteSpace())
                 AddError(EmptyNotAllowed("使用者密碼"));
             else

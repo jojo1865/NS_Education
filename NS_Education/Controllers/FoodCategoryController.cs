@@ -6,12 +6,16 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Controllers.BaseClass;
 using NS_Education.Models.APIItems.FoodCategory;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.Filters;
+using NS_Education.Tools.Filters.JwtAuthFilter;
+using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controllers
 {
     public class FoodCategoryController : PublicClass
     {
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(string KeyWord = "", int NowPage = 1, int CutPage = 10)
         {
             var Ns = DC.D_FoodCategory.Where(q => !q.DeleteFlag);
@@ -60,6 +64,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoByID(int ID = 0)
         {
             var N = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID && !q.DeleteFlag);
@@ -87,60 +92,52 @@ namespace NS_Education.Controllers
 
             return ChangeJson(Item);
         }
+
         [HttpGet]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag, int UID)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
         {
             Error = "";
-            if (UID == 0)
-                Error += "缺少更新者ID,無法更新;";
-            else
+            var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID && !q.DeleteFlag);
+            if (N_ != null)
             {
-                var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID && !q.DeleteFlag);
-                if (N_ != null)
-                {
-                    N_.ActiveFlag = ActiveFlag;
-                    N_.UpdDate = DT;
-                    N_.UpdUID = UID;
-                    await DC.SaveChangesAsync();
-                }
-                else
-                    Error += "查無資料,無法更新;";
+                N_.ActiveFlag = ActiveFlag;
+                N_.UpdDate = DT;
+                N_.UpdUID = FilterStaticTools.GetUidInRequestInt(Request);
+                await DC.SaveChangesAsync();
             }
+            else
+                Error += "查無資料,無法更新;";
 
             return ChangeJson(GetMsgClass(Error));
         }
+
         [HttpGet]
-        public async Task<string> DeleteItem(int ID, int UID)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
+        public async Task<string> DeleteItem(int ID)
         {
             Error = "";
-            if (UID == 0)
-                Error += "缺少更新者ID,無法更新;";
-            else
+            var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID);
+            if (N_ != null)
             {
-                var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID);
-                if (N_ != null)
-                {
-                    N_.DeleteFlag = true;
-                    N_.UpdDate = DT;
-                    N_.UpdUID = UID;
-                    await DC.SaveChangesAsync();
-                }
-                else
-                    Error += "查無資料,無法更新;";
+                N_.DeleteFlag = true;
+                N_.UpdDate = DT;
+                N_.UpdUID = FilterStaticTools.GetUidInRequestInt(Request);
+                await DC.SaveChangesAsync();
             }
+            else
+                Error += "查無資料,無法更新;";
 
             return ChangeJson(GetMsgClass(Error));
         }
 
         [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, "DFCID")]
         public async Task<string> Submit(D_FoodCategory N)
         {
             Error = "";
             if (N.DFCID == 0)
             {
-                if (N.CreUID == 0)
-                    Error += "缺少建立者ID,無法更新;";
-               
                 if (N.Title == "")
                     Error += "名稱必須輸入;";
                 if (N.UnitPrice < 0)
@@ -149,6 +146,7 @@ namespace NS_Education.Controllers
                     Error += "請輸入價格的數字;";
                 if (Error == "")
                 {
+                    N.CreUID = FilterStaticTools.GetUidInRequestInt(Request);
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
                     await DC.D_FoodCategory.AddAsync(N);
@@ -158,9 +156,6 @@ namespace NS_Education.Controllers
             else
             {
                 var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == N.DFCID && !q.DeleteFlag);
-                if (N.CreUID == 0)
-                    Error += "缺少更新者ID,無法更新;";
-                
                 if (N.Title == "")
                     Error += "名稱必須輸入;";
                 if (N.UnitPrice < 0)
@@ -180,7 +175,7 @@ namespace NS_Education.Controllers
                     
                     N_.ActiveFlag = N.ActiveFlag;
                     N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = N.UpdUID;
+                    N_.UpdUID = FilterStaticTools.GetUidInRequestInt(Request);
                     N_.UpdDate = DT;
                     await DC.SaveChangesAsync();
                 }

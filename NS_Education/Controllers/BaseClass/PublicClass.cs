@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using NS_Education.Models;
 using NS_Education.Models.Entities.DbContext;
 using NS_Education.Tools;
+using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 
 namespace NS_Education.Controllers.BaseClass
@@ -77,6 +78,16 @@ namespace NS_Education.Controllers.BaseClass
         protected bool HasError()
         {
             return !Error.IsNullOrWhiteSpace();
+        }
+
+        /// <summary>
+        /// 取得目前 Request header JWT Token 中的 UID（送來請求的使用者 UID）。<br/>
+        /// 找不到值時拋錯。
+        /// </summary>
+        /// <returns>UID</returns>
+        protected int GetUid()
+        {
+            return FilterStaticTools.GetUidInRequestInt(Request);
         }
 
         /// <summary>

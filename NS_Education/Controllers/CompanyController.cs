@@ -115,7 +115,7 @@ namespace NS_Education.Controllers
             {
                 N_.ActiveFlag = ActiveFlag;
                 N_.UpdDate = DT;
-                N_.UpdUID = FilterStaticTools.GetUidInRequestInt(Request);
+                N_.UpdUID = GetUid();
                 await DC.SaveChangesAsync();
             }
             else
@@ -134,7 +134,7 @@ namespace NS_Education.Controllers
             {
                 N_.DeleteFlag = true;
                 N_.UpdDate = DT;
-                N_.UpdUID = FilterStaticTools.GetUidInRequestInt(Request);
+                N_.UpdUID = GetUid();
                 await DC.SaveChangesAsync();
             }
             else

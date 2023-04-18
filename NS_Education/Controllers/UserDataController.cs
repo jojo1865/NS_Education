@@ -548,13 +548,22 @@ namespace NS_Education.Controllers
             // |- a. 驗證所有輸入均有值
             // |- b. 驗證新密碼可加密
             // +- c. 成功更新資料庫
-            await input.StartValidate()
+            bool isValid = input
+                .StartValidate()
                 .Validate(i => i.ID.IsValidId(), () => AddError(UpdateUidIncorrect))
                 .Validate(i => !i.NewPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("新密碼")))
                 .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(UpdatePWPasswordNotEncryptable))
-                .ValidateAsync(async i => await UpdatePasswordForUserData(i.ID, i.NewPassword),
-                    onException: e => AddError(e.Message));
-            
+                .IsValid();
+
+            // 只在輸入都驗證過後才允許更新 DB
+            if (isValid)
+            {
+                await input
+                    .StartValidate(true)
+                    .ValidateAsync(async i => await UpdatePasswordForUserData(i.ID, i.NewPassword),
+                        onException: e => AddError(e.Message));
+            }
+
             // 2. 回傳通用訊息格式。
             return GetResponseJson();
         }

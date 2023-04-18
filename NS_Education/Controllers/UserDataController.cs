@@ -425,18 +425,19 @@ namespace NS_Education.Controllers
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(UserData_DeleteItem_Input_APIItem input)
         {
+            int requesterId = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
             // 驗證輸入。
             // 1. 操作者 UID 是否正確。
             // 2. 刪除對象 UID 是否正確。
             bool isInputValid = input.StartValidate(true)
-                .Validate(i => i.OperatorUID.IsValidId(), () => AddError(DeleteItemOperatorUidIncorrect))
-                .Validate(i => i.TargetUID.IsValidId(), () => AddError(DeleteItemTargetUidIncorrect)).IsValid();
+                .Validate(i => requesterId.IsValidId(), () => AddError(DeleteItemOperatorUidIncorrect))
+                .Validate(i => i.UID.IsValidId(), () => AddError(DeleteItemTargetUidIncorrect)).IsValid();
 
             if (!isInputValid)
                 return GetResponseJson();
 
             // 查詢資料並驗證。
-            UserData queried = DC.UserData.FirstOrDefault(u => u.UID == input.TargetUID);
+            UserData queried = DC.UserData.FirstOrDefault(u => u.UID == input.UID);
             // 1. 進行查詢後，是否有查到資料。
             // 2. 該筆資料是否並非刪除狀態。
             bool isDataValid = queried.StartValidate(true)
@@ -453,7 +454,7 @@ namespace NS_Education.Controllers
                 // ReSharper disable once PossibleNullReferenceException
                 queried.DeleteFlag = true;
                 queried.UpdDate = DateTime.Now;
-                queried.UpdUID = input.OperatorUID;
+                queried.UpdUID = requesterId;
                 await DC.SaveChangesAsync();
             }
             catch (Exception e)

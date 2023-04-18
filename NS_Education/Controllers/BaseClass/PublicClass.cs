@@ -10,9 +10,11 @@ using Newtonsoft.Json;
 using NS_Education.Models;
 using NS_Education.Models.Entities.DbContext;
 using NS_Education.Tools;
+using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 
 namespace NS_Education.Controllers.BaseClass
 {
+    [ResponsePrivilegeWrapperFilter]
     public class PublicClass : Controller
     {
         public DateTime DT = DateTime.Now;

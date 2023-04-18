@@ -23,7 +23,6 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
-using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 using NS_Education.Variables;
 
 namespace NS_Education.Controllers
@@ -578,7 +577,6 @@ namespace NS_Education.Controllers
         /// <returns>回傳結果。請參照 <see cref="UserData_GetList_Output_APIItem"/>，以及 <see cref="UserData_GetList_Output_Row_APIItem"/>。</returns>
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
-        [ResponsePrivilegeWrapperFilter]
         public async Task<string> GetList(UserData_GetList_Input_APIItem input)
         {
             // 1. 查詢所有 UserData 並逐一套用條件
@@ -652,7 +650,6 @@ namespace NS_Education.Controllers
         /// <returns><see cref="UserData_GetInfoById_Output_APIItem"/></returns>
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.ShowFlag, "UID")]
-        [ResponsePrivilegeWrapperFilter]
         public async Task<string> GetInfoById(UserData_GetInfoById_Input_APIItem input)
         {
             UserData userData = null;

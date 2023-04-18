@@ -155,7 +155,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         }
 
         /// <summary>
-        /// 對照 Request JSON 中的 ID 欄位和
+        /// 對照 Request JSON 中的 ID 欄位和 JWT Claim 中的 UID
         /// </summary>
         /// <param name="context"></param>
         /// <param name="claims"></param>
@@ -163,10 +163,10 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         /// <exception cref="NotImplementedException"></exception>
         private bool ValidateUserIdInRequest(ControllerContext context, ClaimsPrincipal claims)
         {
-            string uidInResponse = context.HttpContext.Request[_uidFieldName]?.Trim();
+            string uidInRequest = context.HttpContext.Request[_uidFieldName]?.Trim();
             string uidInClaim = FilterStaticTools.GetUidInClaim(claims);
 
-            return String.Equals(uidInClaim, uidInResponse);
+            return String.Equals(uidInClaim, uidInRequest);
         }
 
         public static void ValidateToken(ControllerContext actionContext, string secret, out ClaimsPrincipal claims)

@@ -17,6 +17,7 @@ namespace NS_Education.Controllers
     {
         //取得分類的類別列表
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetTypeList()
         {
             List<cSelectItem> TIs = new List<cSelectItem>();
@@ -27,6 +28,7 @@ namespace NS_Education.Controllers
 
         //取得分類列表
         [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(string KeyWord = "", int CategoryType = -1, int NowPage = 1, int CutPage = 10)
         {
             var Ns = DC.B_Category.Where(q => !q.DeleteFlag);
@@ -85,7 +87,7 @@ namespace NS_Education.Controllers
         }
         //取得分類的內容
         [HttpGet]
-        [JwtAuthFilter(privileges: RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         [ResponsePrivilegeWrapperFilter]
         public async Task<string> GetInfoByID(int ID = 0)
         {
@@ -138,51 +140,47 @@ namespace NS_Education.Controllers
             }
             return ChangeJson(Item);
         }
+
         [HttpGet]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag, int UID)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
         {
             Error = "";
-            if (UID == 0)
-                Error += "缺少更新者ID,無法更新;";
-            else
+            var N_ = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == ID && !q.DeleteFlag);
+            if (N_ != null)
             {
-                var N_ = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == ID && !q.DeleteFlag);
-                if (N_ != null)
-                {
-                    N_.ActiveFlag = ActiveFlag;
-                    N_.UpdDate = DT;
-                    N_.UpdUID = UID;
-                    await DC.SaveChangesAsync();
-                }
-                else
-                    Error += "查無資料,無法更新;";
+                N_.ActiveFlag = ActiveFlag;
+                N_.UpdDate = DT;
+                N_.UpdUID = GetUid();
+                await DC.SaveChangesAsync();
             }
+            else
+                Error += "查無資料,無法更新;";
 
             return ChangeJson(GetMsgClass(Error));
         }
+
         [HttpGet]
-        public async Task<string> DeleteItem(int ID, int UID)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
+        public async Task<string> DeleteItem(int ID)
         {
             Error = "";
-            if (UID == 0)
-                Error += "缺少更新者ID,無法更新;";
-            else
+            var N_ = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == ID);
+            if (N_ != null)
             {
-                var N_ = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == ID);
-                if (N_ != null)
-                {
-                    N_.DeleteFlag = true;
-                    N_.UpdDate = DT;
-                    N_.UpdUID = UID;
-                    await DC.SaveChangesAsync();
-                }
-                else
-                    Error += "查無資料,無法更新;";
+                N_.DeleteFlag = true;
+                N_.UpdDate = DT;
+                N_.UpdUID = GetUid();
+                await DC.SaveChangesAsync();
             }
+            else
+                Error += "查無資料,無法更新;";
 
             return ChangeJson(GetMsgClass(Error));
         }
+
         [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, addOrEditKeyFieldName: nameof(B_Category.BCID))]
         public async Task<string> Submit(B_Category N)
         {
             string Error = "";
@@ -195,6 +193,7 @@ namespace NS_Education.Controllers
                     var BCs = await DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == N.CategoryType).ToListAsync();
                     if (BCs.Any())
                         N.SortNo = BCs.Max(q => q.SortNo) + 1;
+                    N.CreUID = GetUid();
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
                     await DC.B_Category.AddAsync(N);
@@ -210,13 +209,13 @@ namespace NS_Education.Controllers
                     Error += "查無資料,無法更新;";
                 if (Error == "")
                 {
+                    N_.ParentID = N.ParentID;
                     N_.CategoryType = N.CategoryType;
                     N_.Code = N.Code;
                     N_.TitleC = N.TitleC;
                     N_.TitleE = N.TitleE;
                     N_.ActiveFlag = N.ActiveFlag;
-                    N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = N.UpdUID;
+                    N_.UpdUID = GetUid();
                     N_.UpdDate = DT;
                     await DC.SaveChangesAsync();
                 }

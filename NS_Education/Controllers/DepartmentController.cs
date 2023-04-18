@@ -109,7 +109,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int ID, bool ActiveFlag)
         {
             Error = "";
@@ -128,7 +128,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int ID)
         {
             Error = "";
@@ -147,7 +147,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, addOrEditKeyFieldName: "DDID")]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, addOrEditKeyFieldName: "DDID")]
         public async Task<string> Submit(D_Department N)
         {
             Error = "";

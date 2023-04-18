@@ -106,7 +106,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int ID, bool ActiveFlag)
         {
             Error = "";
@@ -125,7 +125,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int ID)
         {
             Error = "";
@@ -144,7 +144,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, addOrEditKeyFieldName: "DCID")]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, addOrEditKeyFieldName: "DCID")]
         // 因為 submit 是新增和修改寫在一起，但權限不應兩種都同時需要，所以此類端點權限驗證寫在 action 中。 
         public async Task<string> Submit(D_Company N)
         {

@@ -286,7 +286,11 @@ namespace NS_Education.Controllers
             await input
                 .StartValidate(true)
                 .Validate(i => i.UID.IsValidId(), () => AddError(SignUpUidIncorrect))
+                .Validate(i => !i.Username.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者名稱")))
                 .Validate(i => !i.LoginAccount.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者帳號")))
+                .Validate(i => !i.LoginPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者密碼")))
+                .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
+                .Validate(i => i.GID.IsValidId(), () => AddError(EmptyNotAllowed("身分 ID")))
                 .ValidateAsync(
                     async i => original =
                         await DC.UserData.FirstOrDefaultAsync(u => u.UID == input.UID),

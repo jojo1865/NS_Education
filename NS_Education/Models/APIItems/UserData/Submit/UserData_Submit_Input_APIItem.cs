@@ -12,6 +12,8 @@
         public string LoginAccount { get; set; }
         public string LoginPassword { get; set; }
         public string Note { get; set; }
+        
+        public bool? ActiveFlag { get; set; }
 
         public int GID { get; set; }
     }

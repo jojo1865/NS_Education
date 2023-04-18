@@ -327,6 +327,9 @@ namespace NS_Education.Controllers
 
             // Note 是可選欄位，因此呼叫者應該保持原始內容
             original.Note = input.Note;
+            
+            // 只在 input 確實有 ActiveFlag 時才更新啟用狀態
+            original.ActiveFlag = input.ActiveFlag ?? original.ActiveFlag;
 
             original.UpdDate = DateTime.Now;
             original.UpdUID = input.UID;

@@ -132,7 +132,7 @@ namespace NS_Education.Controllers
 
             // create UserData object, validate the columns along
             // TODO: 引用靜態參數檔，完整驗證使用者欄位
-            int requestUid = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
+            int requestUid = GetUid();
             UserData newUser = new UserData
             {
                 UserName = input.Username.ExecuteIfNullOrWhiteSpace(() => AddError(EmptyNotAllowed("使用者名稱"))),
@@ -331,7 +331,7 @@ namespace NS_Education.Controllers
             // 如果是管理員，才允許更新權限資訊
             if (FilterStaticTools.HasRoleInRequest(HttpContext.Request, AuthorizeBy.Admin))
             {
-                int requesterUID = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
+                int requesterUID = GetUid();
                 // 資料庫建模是 User 一對多 Group，但現在看到的 Wireframe 似乎規劃為每位使用者僅一個權限組
                 // 所以在這裡
                 // 1. 在 M_Group_User 中查詢此使用者有幾筆權限，如果有多筆就先清空至唯一一筆。
@@ -441,7 +441,7 @@ namespace NS_Education.Controllers
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(UserData_DeleteItem_Input_APIItem input)
         {
-            int requesterId = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
+            int requesterId = GetUid();
             // 驗證輸入。
             // 1. 操作者 UID 是否正確。
             // 2. 刪除對象 UID 是否正確。

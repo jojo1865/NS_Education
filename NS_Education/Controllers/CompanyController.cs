@@ -7,7 +7,6 @@ using NS_Education.Controllers.BaseClass;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Company;
 using NS_Education.Models.Entities;
-using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
@@ -157,7 +156,7 @@ namespace NS_Education.Controllers
                     Error += "名稱必須輸入;";
                 if (Error == "")
                 {
-                    N.CreUID = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
+                    N.CreUID = GetUid();
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
                     await DC.D_Company.AddAsync(N);
@@ -181,7 +180,7 @@ namespace NS_Education.Controllers
                     N_.TitleE = N.TitleE;
                     N_.ActiveFlag = N.ActiveFlag;
                     N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = FilterStaticTools.GetUidInRequestInt(HttpContext.Request);
+                    N_.UpdUID = GetUid();
                     N_.UpdDate = DT;
                     await DC.SaveChangesAsync();
                 }

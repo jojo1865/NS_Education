@@ -19,7 +19,7 @@ namespace NS_Education.Controllers.BaseClass
     public class PublicClass : Controller
     {
         public DateTime DT = DateTime.Now;
-        protected NsDbContext DC { get; }
+        protected internal NsDbContext DC { get; }
         public string[] sCategoryTypes = new string[] { "通用", "公司", "部門", "場地", "備忘", "服務", "設備", "客戶", "付款類", "合作廠商" };
         public string DateFormat = "yyyy/MM/dd";
         public string DateTimeFormat = "yyyy/MM/dd HH:mm";
@@ -75,7 +75,7 @@ namespace NS_Education.Controllers.BaseClass
         /// <returns>true：有<br/>
         /// false：沒有
         /// </returns>
-        protected bool HasError()
+        public bool HasError()
         {
             return !Error.IsNullOrWhiteSpace();
         }
@@ -85,7 +85,7 @@ namespace NS_Education.Controllers.BaseClass
         /// 找不到值時拋錯。
         /// </summary>
         /// <returns>UID</returns>
-        protected int GetUid()
+        protected internal int GetUid()
         {
             return FilterStaticTools.GetUidInRequestInt(Request);
         }

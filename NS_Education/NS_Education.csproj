@@ -247,7 +247,18 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Controllers\BaseClass\BaseController.cs" />
+    <Compile Include="Controllers\BaseClass\FunctionInterface\IChangeActive.cs" />
+    <Compile Include="Controllers\BaseClass\FunctionInterface\IDeleteItem.cs" />
+    <Compile Include="Controllers\BaseClass\FunctionInterface\IGetInfoByID.cs" />
+    <Compile Include="Controllers\BaseClass\FunctionInterface\IGetList.cs" />
+    <Compile Include="Controllers\BaseClass\FunctionInterface\ISubmit.cs" />
+    <Compile Include="Controllers\BaseClass\Helper\ChangeActiveHelper.cs" />
+    <Compile Include="Controllers\BaseClass\Helper\CommonControllerHelper.cs" />
+    <Compile Include="Controllers\BaseClass\Helper\CommonEntityHelper.cs" />
+    <Compile Include="Controllers\BaseClass\Helper\DeleteItemHelper.cs" />
+    <Compile Include="Controllers\BaseClass\Helper\GetInfoByIdHelper.cs" />
+    <Compile Include="Controllers\BaseClass\Helper\GetListHelper.cs" />
+    <Compile Include="Controllers\BaseClass\Helper\SubmitHelper.cs" />
     <Compile Include="Controllers\BaseClass\PublicClass.cs" />
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\PayTypeController.cs" />
@@ -348,6 +359,7 @@
     <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequirePrivilege.cs" />
     <Compile Include="Tools\Filters\ResponsePrivilegeWrapper\Privilege.cs" />
     <Compile Include="Tools\Filters\ResponsePrivilegeWrapper\ResponsePrivilegeWrapperFilter.cs" />
+    <Compile Include="Variables\DbConstants.cs" />
     <Compile Include="Variables\IOConstants.cs" />
     <Compile Include="Variables\JwtConstants.cs" />
     <Compile Include="Variables\PrivilegeConstants.cs" />

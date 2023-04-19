@@ -401,8 +401,9 @@ namespace NS_Education.Controllers.BaseClass
         /// 修改，但查無資料，或 DB 連線異常時：包含錯誤訊息的通用訊息回傳格式。<br/>
         /// 其他錯誤時：拋錯。
         /// </returns>
+        /// <remarks>若未覆寫 JwtAuthFilter，則在權限判定時，會要求同時具備 Add 與 Edit 的權限。</remarks>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, DefaultAddOrEditKeyFieldName)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddFlag | RequirePrivilege.EditFlag, null, null)]
         public virtual async Task<string> Submit(TSubmitRequest input)
         {
             // 1. 依據實作內容判定此次 Submit 為新增還是更新。

@@ -17,6 +17,7 @@ using NS_Education.Variables;
 
 namespace NS_Education.Tools.Filters.JwtAuthFilter
 {
+    [AttributeUsage(AttributeTargets.Method)]
     public class JwtAuthFilter : ActionFilterAttribute
     {
         #region 錯誤訊息

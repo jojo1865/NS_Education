@@ -5,41 +5,47 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Controllers.BaseClass;
 using NS_Education.Models.APIItems;
 using NS_Education.Tools;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controllers.ApiAbstractions
+namespace NS_Education.Controllers.BaseClass
 {
-    public abstract class BaseController<TEntity, TGetListInput, TGetListRow, TGetResponse, TSubmitInput> : PublicClass
+    public abstract class
+        BaseController<TEntity, TGetListRequest, TGetListRow, TGetResponse, TSubmitRequest> : PublicClass
         where TEntity : class
-        where TGetListInput : BaseRequestForList
+        where TGetListRequest : BaseRequestForList
         where TGetListRow : class
         where TGetResponse : cReturnMessageInfusableAbstract
-        where TSubmitInput : class
+        where TSubmitRequest : class
     {
         #region 通用
 
         private static string UpdateFailed(Exception e)
-            => $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}！";
+            => $"寫入或更新 DB 時出錯，請確認伺服器狀態：{e.Message}！";
 
         private const string DefaultAddOrEditKeyFieldName = "ID";
-        
+
         private const string ActiveFlag = "ActiveFlag";
         private const string DeleteFlag = "DeleteFlag";
+        private const string CreUid = "CreUID";
+        private const string CreDate = "CreDate";
         private const string UpdUid = "UpdUID";
         private const string UpdDate = "UpdDate";
 
         private static bool HasActiveFlag { get; } = HasProperty(typeof(TEntity), ActiveFlag);
         private static bool HasDeleteFlag { get; } = HasProperty(typeof(TEntity), DeleteFlag);
+
+        private static bool HasCreUid { get; } = HasProperty(typeof(TEntity), CreUid);
+        private static bool HasCreDate { get; } = HasProperty(typeof(TEntity), CreDate);
         private static bool HasUpdUid { get; } = HasProperty(typeof(TEntity), UpdUid);
         private static bool HasUpdDate { get; } = HasProperty(typeof(TEntity), UpdDate);
 
         private static void SetProperty<T>(T t, string propertyName, object value) =>
             GetProperty<T>(propertyName).SetValue(t, value);
+
         private static PropertyInfo GetProperty<T>(string propertyName) => typeof(T).GetProperty(propertyName);
         private static PropertyInfo GetProperty(Type type, string propertyName) => type.GetProperty(propertyName);
         private static bool HasProperty(Type type, string propertyName) => !(GetProperty(type, propertyName) is null);
@@ -51,21 +57,36 @@ namespace NS_Education.Controllers.ApiAbstractions
             return query;
         }
 
-        private void UpdateUpdaterInfoIfNeeded(TEntity t)
+        private void SetInfosOnUpdate(TEntity t)
         {
             if (HasUpdUid)
                 SetProperty(t, UpdUid, GetUid());
-            
+
             if (HasUpdDate)
                 SetProperty(t, UpdDate, DateTime.Now);
         }
-        
+
+        private void SetInfosOnCreate(TEntity t)
+        {
+            if (HasCreUid)
+                SetProperty(t, CreUid, GetUid());
+
+            if (HasCreDate)
+                SetProperty(t, CreDate, DateTime.Now);
+
+            if (HasUpdUid)
+                SetProperty(t, UpdUid, 0);
+
+            if (HasCreDate)
+                SetProperty(t, UpdDate, DateTime.Now);
+        }
+
         #endregion
-        
+
         #region GetList
-        
+
         private static string GetListNotFound => $"{typeof(TEntity).Name} GetList 時查無資料！";
-        
+
         /// <summary>
         /// 取得列表。
         /// </summary>
@@ -77,7 +98,7 @@ namespace NS_Education.Controllers.ApiAbstractions
         /// </returns>
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
-        public virtual async Task<string> GetList(TGetListInput input)
+        public virtual async Task<string> GetList(TGetListRequest input)
         {
             // 1. 驗證輸入
             bool inputValidated = await GetListValidateInput(input);
@@ -88,7 +109,7 @@ namespace NS_Education.Controllers.ApiAbstractions
             // 2. 執行查詢
             var response = new BaseResponseForList<TGetListRow>();
             response.SetByInput(input);
-            
+
             var queryResult = await _GetListQueryResult(input, response);
 
             // 3. 按照格式回傳結果
@@ -102,7 +123,7 @@ namespace NS_Education.Controllers.ApiAbstractions
 
             return GetResponseJson(response);
         }
-        
+
         /// <summary>
         /// 驗證取得列表的輸入資料。<br/>
         /// 當此方法回傳 false 時，回到主方法後就會提早回傳。
@@ -112,14 +133,12 @@ namespace NS_Education.Controllers.ApiAbstractions
         /// true：驗證通過。<br/>
         /// false：驗證不通過。
         /// </returns>
-        protected abstract Task<bool> GetListValidateInput(TGetListInput i);
+        protected abstract Task<bool> GetListValidateInput(TGetListRequest i);
 
-        private async Task<IList<TEntity>> _GetListQueryResult(TGetListInput t,
+        private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest t,
             BaseResponseForList<TGetListRow> response)
         {
-            IQueryable<TEntity> query = GetListOrderedQuery(t);
-
-            query = FilterDeletedIfHasFlag(query);
+            IQueryable<TEntity> query = FilterDeletedIfHasFlag(GetListOrderedQuery(t));
 
             // 1. 先取得總筆數
 
@@ -127,7 +146,7 @@ namespace NS_Education.Controllers.ApiAbstractions
             response.AllItemCt = totalRows;
 
             // 2. 再回傳實際資料
-            
+
             return await query
                 .Skip(t.GetStartIndex())
                 .Take(t.GetTakeRowCount())
@@ -140,8 +159,8 @@ namespace NS_Education.Controllers.ApiAbstractions
         /// </summary>
         /// <returns>具備排序的查詢。</returns>
         /// <remarks>若此方法是藉由預設的 GetList 方法被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
-        protected abstract IOrderedQueryable<TEntity> GetListOrderedQuery(TGetListInput t);
-        
+        protected abstract IOrderedQueryable<TEntity> GetListOrderedQuery(TGetListRequest t);
+
         /// <summary>
         /// 將取得列表的查詢結果轉換成 Response 所需的子物件類型。。<br/>
         /// 時作者可以在這個方法中進行 AddError，最後回傳結果仍會包含資料，但會告知前端結果並不成功。（Success = false）
@@ -149,14 +168,14 @@ namespace NS_Education.Controllers.ApiAbstractions
         /// <param name="t">單筆查詢結果</param>
         /// <returns>Response 所需類型的單筆資料</returns>
         protected abstract TGetListRow GetListEntityToRow(TEntity t);
-        
+
         #endregion
-        
+
         #region GetInfoByID
 
         private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或是值不正確！";
         private const string GetInfoByIdNotFound = "查無欲查詢的資料！";
-        
+
         /// <summary>
         /// 取得單筆資料。
         /// </summary>
@@ -176,14 +195,14 @@ namespace NS_Education.Controllers.ApiAbstractions
                 AddError(GetInfoByIdInputIncorrect);
                 return GetResponseJson();
             }
-            
+
             // 2. 取得單筆資料
             TEntity t = await _GetInfoByIdQueryResult(id);
 
             // 3. 有資料時, 轉換成指定格式並回傳
-            if (t != null) 
+            if (t != null)
                 return GetResponseJson(GetInfoByIdConvertEntityToResponse(t));
-            
+
             // 4. 無資料時, 回傳錯誤
             AddError(GetInfoByIdNotFound);
             return GetResponseJson();
@@ -191,13 +210,8 @@ namespace NS_Education.Controllers.ApiAbstractions
 
         private async Task<TEntity> _GetInfoByIdQueryResult(int id)
         {
-            // 取得實作者的查詢
-            IQueryable<TEntity> query = GetInfoByIdQuery(id);
-            
-            // 檢查 DeleteFlag
-            query = FilterDeletedIfHasFlag(query);
-
-            return await query.FirstOrDefaultAsync();
+            // 取得實作者的查詢，並檢查刪除狀態
+            return await FilterDeletedIfHasFlag(GetInfoByIdQuery(id)).FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -207,7 +221,7 @@ namespace NS_Education.Controllers.ApiAbstractions
         /// <returns>查詢。</returns>
         /// <remarks>若此方法是藉由預設的 GetInfoById 方法被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
         protected abstract IQueryable<TEntity> GetInfoByIdQuery(int id);
-        
+
         /// <summary>
         /// 將單筆查詢的結果轉換成 Response 所需類型的物件。
         /// </summary>
@@ -216,7 +230,7 @@ namespace NS_Education.Controllers.ApiAbstractions
         protected abstract TGetResponse GetInfoByIdConvertEntityToResponse(TEntity entity);
 
         #endregion
-        
+
         #region ChangeActive
 
         private const string ChangeActiveNotSupported = "此 Controller 的資料型態不支援啟用/停用功能！";
@@ -241,17 +255,17 @@ namespace NS_Education.Controllers.ApiAbstractions
         {
             if (!HasActiveFlag)
                 throw new NotSupportedException(ChangeActiveNotSupported);
-            
+
             // 1. 驗證輸入。
             if (!id.IsValidId())
                 AddError(ChangeActiveInputIdIncorrect);
-            
+
             if (activeFlag is null)
                 AddError(ChangeActiveInputFlagNotFound);
-            
+
             // ReSharper disable once PossibleInvalidOperationException
             bool activeFlagValue = activeFlag.Value;
-            
+
             if (HasError())
                 return GetResponseJson();
 
@@ -268,7 +282,7 @@ namespace NS_Education.Controllers.ApiAbstractions
             try
             {
                 SetProperty(t, ActiveFlag, activeFlagValue);
-                UpdateUpdaterInfoIfNeeded(t);
+                SetInfosOnUpdate(t);
                 await DC.SaveChangesAsync();
             }
             catch (Exception e)
@@ -279,7 +293,7 @@ namespace NS_Education.Controllers.ApiAbstractions
             // 4. 回傳。
             return GetResponseJson();
         }
-        
+
         private async Task<TEntity> _ChangeActiveQueryResult(int id)
         {
             return await FilterDeletedIfHasFlag(ChangeActiveQuery(id)).FirstOrDefaultAsync();
@@ -297,13 +311,13 @@ namespace NS_Education.Controllers.ApiAbstractions
         }
 
         #endregion
-        
+
         #region DeleteItem
 
         private const string DeleteItemNotSupported = "此 Controller 的資料型態不支援刪除功能！";
         private const string DeleteItemInputIncorrect = "未輸入欲刪除的 ID 或是不正確！";
         private const string DeleteItemNotFound = "查無欲刪除的資料！";
-        
+
         /// <summary>
         /// 刪除單筆資料。
         /// </summary>
@@ -319,7 +333,7 @@ namespace NS_Education.Controllers.ApiAbstractions
         {
             if (!HasDeleteFlag)
                 throw new NotSupportedException(DeleteItemNotSupported);
-            
+
             // 1. 驗證輸入。
             if (id.IsValidId())
             {
@@ -328,7 +342,7 @@ namespace NS_Education.Controllers.ApiAbstractions
             }
 
             // 2. 查詢資料並確認刪除狀態。
-            TEntity t = await FilterDeletedIfHasFlag(DeleteItemQuery(id)).FirstOrDefaultAsync();
+            TEntity t = await _DeleteItemQueryResult(id);
 
             if (t == null)
             {
@@ -340,7 +354,7 @@ namespace NS_Education.Controllers.ApiAbstractions
             try
             {
                 SetProperty(t, DeleteFlag, true);
-                UpdateUpdaterInfoIfNeeded(t);
+                SetInfosOnUpdate(t);
                 await DC.SaveChangesAsync();
             }
             catch (Exception e)
@@ -350,6 +364,11 @@ namespace NS_Education.Controllers.ApiAbstractions
 
             // 3. 回傳通用回傳訊息格式。
             return GetResponseJson();
+        }
+
+        private async Task<TEntity> _DeleteItemQueryResult(int id)
+        {
+            return await FilterDeletedIfHasFlag(DeleteItemQuery(id)).FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -362,6 +381,89 @@ namespace NS_Education.Controllers.ApiAbstractions
         {
             return GetInfoByIdQuery(id);
         }
+
+        #endregion
+
+        #region Submit
+
+        private const string SubmitEditNotFound = "查無欲更新的資料！";
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, DefaultAddOrEditKeyFieldName)]
+        public virtual async Task<string> Submit(TSubmitRequest input)
+        {
+            if (SubmitIsAdd(input) && await SubmitAddValidateInput(input))
+            {
+                await _SubmitAdd(input);
+            }
+            else if (await SubmitEditValidateInput(input))
+            {
+                await _SubmitEdit(input);
+            }
+
+            return GetResponseJson();
+        }
+
+        protected abstract bool SubmitIsAdd(TSubmitRequest input);
+
+        #region Submit - Add
+
+        private async Task _SubmitAdd(TSubmitRequest input)
+        {
+            // 1. 建立資料
+            TEntity t = SubmitCreateData(input);
+            SetInfosOnCreate(t);
+
+            // 2. 儲存至 DB
+            try
+            {
+                await DC.AddAsync(t);
+                await DC.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateFailed(e));
+            }
+        }
+
+        protected abstract Task<bool> SubmitAddValidateInput(TSubmitRequest input);
+        protected abstract TEntity SubmitCreateData(TSubmitRequest input);
+
+        #endregion
+
+        #region Submit - Edit
+
+        private async Task _SubmitEdit(TSubmitRequest input)
+        {
+            // 1. 查詢資料並確認刪除狀態
+            TEntity data = await FilterDeletedIfHasFlag(SubmitEditQuery(input)).FirstOrDefaultAsync();
+
+            if (data == null)
+            {
+                AddError(SubmitEditNotFound);
+                return;
+            }
+
+            // 2. 覆寫資料
+            SubmitEditUpdateDataFields(data, input);
+            SetInfosOnUpdate(data);
+
+            // 3. 儲存至 DB
+            try
+            {
+                await DC.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateFailed(e));
+            }
+        }
+
+        protected abstract Task<bool> SubmitEditValidateInput(TSubmitRequest input);
+        protected abstract void SubmitEditUpdateDataFields(TEntity data, TSubmitRequest input);
+        protected abstract IQueryable<TEntity> SubmitEditQuery(TSubmitRequest input);
+
+        #endregion
 
         #endregion
     }

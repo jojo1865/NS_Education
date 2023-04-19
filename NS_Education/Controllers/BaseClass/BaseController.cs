@@ -26,8 +26,6 @@ namespace NS_Education.Controllers.BaseClass
         private static string UpdateFailed(Exception e)
             => $"寫入或更新 DB 時出錯，請確認伺服器狀態：{e.Message}！";
 
-        private const string DefaultAddOrEditKeyFieldName = "ID";
-
         private const string ActiveFlag = "ActiveFlag";
         private const string DeleteFlag = "DeleteFlag";
         private const string CreUid = "CreUID";
@@ -119,7 +117,8 @@ namespace NS_Education.Controllers.BaseClass
                 return GetResponseJson();
             }
 
-            response.Items = queryResult.Select(GetListEntityToRow).ToList();
+            TGetListRow[] rows = await Task.WhenAll(queryResult.Select(async c => await GetListEntityToRow(c)));
+            response.Items = rows.ToList();
 
             return GetResponseJson(response);
         }
@@ -128,12 +127,12 @@ namespace NS_Education.Controllers.BaseClass
         /// 驗證取得列表的輸入資料。<br/>
         /// 當此方法回傳 false 時，回到主方法後就會提早回傳。
         /// </summary>
-        /// <param name="i">輸入資料</param>
+        /// <param name="input">輸入資料</param>
         /// <returns>
         /// true：驗證通過。<br/>
         /// false：驗證不通過。
         /// </returns>
-        protected abstract Task<bool> GetListValidateInput(TGetListRequest i);
+        protected abstract Task<bool> GetListValidateInput(TGetListRequest input);
 
         private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest t,
             BaseResponseForList<TGetListRow> response)
@@ -159,15 +158,15 @@ namespace NS_Education.Controllers.BaseClass
         /// </summary>
         /// <returns>具備排序的查詢。</returns>
         /// <remarks>若此方法是藉由預設的 GetList 方法被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
-        protected abstract IOrderedQueryable<TEntity> GetListOrderedQuery(TGetListRequest t);
+        protected abstract IOrderedQueryable<TEntity> GetListOrderedQuery(TGetListRequest input);
 
         /// <summary>
         /// 將取得列表的查詢結果轉換成 Response 所需的子物件類型。。<br/>
         /// 時作者可以在這個方法中進行 AddError，最後回傳結果仍會包含資料，但會告知前端結果並不成功。（Success = false）
         /// </summary>
-        /// <param name="t">單筆查詢結果</param>
+        /// <param name="entity">單筆查詢結果</param>
         /// <returns>Response 所需類型的單筆資料</returns>
-        protected abstract TGetListRow GetListEntityToRow(TEntity t);
+        protected abstract Task<TGetListRow> GetListEntityToRow(TEntity entity);
 
         #endregion
 
@@ -215,7 +214,7 @@ namespace NS_Education.Controllers.BaseClass
         }
 
         /// <summary>
-        /// 取得單筆的查詢。
+        /// 取得單筆資料時的查詢。
         /// </summary>
         /// <param name="id">使用者輸入的查詢用索引鍵</param>
         /// <returns>查詢。</returns>
@@ -223,7 +222,7 @@ namespace NS_Education.Controllers.BaseClass
         protected abstract IQueryable<TEntity> GetInfoByIdQuery(int id);
 
         /// <summary>
-        /// 將單筆查詢的結果轉換成 Response 所需類型的物件。
+        /// 將取得單筆資料時的查詢結果轉換成 Response 所需類型的物件。
         /// </summary>
         /// <param name="entity">原查詢結果</param>
         /// <returns>Response 所需類型的物件</returns>

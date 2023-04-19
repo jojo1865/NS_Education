@@ -32,5 +32,15 @@ namespace NS_Education.Tools.Extensions
         {
             return !password.IsNullOrWhiteSpace() && password.All(Char.IsLetterOrDigit);
         }
+        
+        /// <summary>
+        /// 將日期轉換為 yyyy/MM/dd HH:mm 格式
+        /// </summary>
+        /// <param name="datetime">日期（可包含時間）。</param>
+        /// <returns>格式化的日期字串</returns>
+        public static string ToFormattedString(this DateTime datetime)
+        {
+            return datetime.ToString("yyyy/MM/dd HH:mm");
+        }
     }
 }

@@ -64,7 +64,7 @@ namespace NS_Education.Controllers.BaseClass
         /// 加入錯誤訊息。
         /// </summary>
         /// <param name="errorMessage">錯誤訊息</param>
-        protected void AddError(string errorMessage)
+        protected internal void AddError(string errorMessage)
         {
             Error += errorMessage + ";";
         }

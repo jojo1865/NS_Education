@@ -6,7 +6,7 @@ namespace NS_Education.Models.APIItems
     /// <summary>
     /// 包含 List 的通用訊息回傳格式。
     /// </summary>
-    public abstract class BaseRequestForList<T> : cReturnMessageInfusableAbstract
+    public class BaseResponseForList<T> : cReturnMessageInfusableAbstract
     {
         /// <summary>
         /// 目前所在頁數。全部顯示時，此值為 0。
@@ -31,7 +31,7 @@ namespace NS_Education.Models.APIItems
         /// <summary>
         /// 實際每行資料內容。
         /// </summary>
-        public List<T> Items { get; set; } = new List<T>();
+        public IList<T> Items { get; set; } = new List<T>();
 
         /// <summary>
         /// 將一些來自於輸入資料的值帶入本物件。

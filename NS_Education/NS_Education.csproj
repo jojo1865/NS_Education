@@ -247,6 +247,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\ApiAbstractions\BaseController.cs" />
     <Compile Include="Controllers\BaseClass\PublicClass.cs" />
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\PayTypeController.cs" />

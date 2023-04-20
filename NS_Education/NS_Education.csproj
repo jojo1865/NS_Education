@@ -265,6 +265,7 @@
     <Compile Include="Models\APIItems\BaseRequestForList.cs" />
     <Compile Include="Models\APIItems\BaseResponseForList.cs" />
     <Compile Include="Models\APIItems\BaseResponseForPagedList.cs" />
+    <Compile Include="Models\APIItems\BaseResponseRowForType.cs" />
     <Compile Include="Models\APIItems\Category\B_Category_APIItem.cs" />
     <Compile Include="Models\APIItems\Company\D_Company_APIItem.cs" />
     <Compile Include="Models\APIItems\ContactType\GetList\ContactType_GetList_Output_Row_APIItem.cs" />
@@ -340,14 +341,17 @@
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetInfoByIdHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListLocalHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListPagedHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetTypeListHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListLocalHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListPagedHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetTypeListHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\SubmitHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IChangeActive.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItem.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetInfoByID.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListLocal.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListPaged.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetTypeList.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs" />
     <Compile Include="Tools\cReturnMessageInfusableAbstract.cs" />
     <Compile Include="Tools\Encryption\JwtHelper.cs" />

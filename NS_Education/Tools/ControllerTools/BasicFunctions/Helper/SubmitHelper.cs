@@ -7,8 +7,14 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
+    /// <summary>
+    /// Submit 功能的預設處理工具。
+    /// </summary>
+    /// <typeparam name="TController">Controller 類型</typeparam>
+    /// <typeparam name="TEntity">掌管資料類型</typeparam>
+    /// <typeparam name="TSubmitRequest">傳入物件類型</typeparam>
     public class SubmitHelper<TController, TEntity, TSubmitRequest>
-        where TController : PublicClass, ISubmit<TSubmitRequest, TEntity>
+        where TController : PublicClass, ISubmit<TEntity, TSubmitRequest>
         where TEntity : class
         where TSubmitRequest : cReturnMessageInfusableAbstract
     {

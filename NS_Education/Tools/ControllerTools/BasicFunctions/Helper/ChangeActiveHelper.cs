@@ -8,6 +8,11 @@ using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
+    /// <summary>
+    /// ChangeActive 功能的預設處理工具。
+    /// </summary>
+    /// <typeparam name="TController">Controller 類型</typeparam>
+    /// <typeparam name="TEntity">掌管資料類型</typeparam>
     public class ChangeActiveHelper<TController, TEntity>
         where TController : PublicClass, IChangeActive<TEntity>
         where TEntity : class

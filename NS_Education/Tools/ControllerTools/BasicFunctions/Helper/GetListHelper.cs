@@ -12,6 +12,13 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
+    /// <summary>
+    /// GetList 功能的預設處理工具。
+    /// </summary>
+    /// <typeparam name="TController">Controller 類型</typeparam>
+    /// <typeparam name="TEntity">掌管資料類型</typeparam>
+    /// <typeparam name="TGetListRequest">傳入物件類型</typeparam>
+    /// <typeparam name="TGetListRow">回傳時，List 中子物件的類型</typeparam>
     public class GetListHelper<TController, TEntity, TGetListRequest, TGetListRow>
         where TController : PublicClass, IGetList<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class

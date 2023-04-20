@@ -3,6 +3,10 @@ using System.Threading.Tasks;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
+    /// <summary>
+    /// DeleteItem 功能 API 端點的介面。
+    /// </summary>
+    /// <typeparam name="TEntity">掌管資料的類型</typeparam>
     public interface IDeleteItem<out TEntity>
         where TEntity : class
     {

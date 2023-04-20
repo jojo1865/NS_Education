@@ -3,7 +3,12 @@ using System.Threading.Tasks;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
-    public interface ISubmit<in TSubmitRequest, TEntity>
+    /// <summary>
+    /// Submit 功能 API 端點的介面。
+    /// </summary>
+    /// <typeparam name="TEntity">掌管資料的類型</typeparam>
+    /// <typeparam name="TSubmitRequest">傳入要求的類型</typeparam>
+    public interface ISubmit<TEntity, in TSubmitRequest>
     {
         /// <summary>
         /// 新增或更新一筆資料。

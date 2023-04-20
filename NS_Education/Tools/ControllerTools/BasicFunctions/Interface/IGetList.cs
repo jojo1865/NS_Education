@@ -4,6 +4,12 @@ using NS_Education.Models.APIItems;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
+    /// <summary>
+    /// GetList 功能 API 端點的介面。
+    /// </summary>
+    /// <typeparam name="TEntity">掌管資料的類型</typeparam>
+    /// <typeparam name="TGetListRequest">傳入要求的類型</typeparam>
+    /// <typeparam name="TGetListRow">回傳時，List 中子物件的類型</typeparam>
     public interface IGetList<TEntity, in TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForList

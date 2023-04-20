@@ -3,6 +3,11 @@ using System.Threading.Tasks;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
+    /// <summary>
+    /// GetInfoByID 功能 API 端點的介面。
+    /// </summary>
+    /// <typeparam name="TEntity">掌管資料的類型</typeparam>
+    /// <typeparam name="TGetResponse">回傳類型</typeparam>
     public interface IGetInfoById<TEntity, out TGetResponse>
         where TEntity : class
         where TGetResponse : cReturnMessageInfusableAbstract

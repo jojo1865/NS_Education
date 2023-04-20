@@ -7,6 +7,12 @@ using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
+    /// <summary>
+    /// GetInfoById 功能的預設處理工具。
+    /// </summary>
+    /// <typeparam name="TController">Controller 類型</typeparam>
+    /// <typeparam name="TEntity">掌管資料類型</typeparam>
+    /// <typeparam name="TGetResponse">回傳物件類型</typeparam>
     public class GetInfoByIdHelper<TController, TEntity, TGetResponse>
         where TController : PublicClass, IGetInfoById<TEntity, TGetResponse>
         where TEntity : class

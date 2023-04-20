@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
     /// <summary>
-    /// ChangeActive。
+    /// ChangeActive 功能 API 端點的介面。
     /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TEntity">掌管資料的類型</typeparam>
     public interface IChangeActive<out TEntity>
         where TEntity : class
     {

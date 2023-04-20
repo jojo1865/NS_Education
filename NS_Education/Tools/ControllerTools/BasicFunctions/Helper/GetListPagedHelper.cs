@@ -58,6 +58,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson();
 
             // 4. 按指定格式回傳結果
+            // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。（如：取得 Username）
             response.Items = queryResult.Select(c => Task.Run(() => _controller.GetListPagedEntityToRow(c)).Result).ToList();
 
             return _controller.GetResponseJson(response);

@@ -28,14 +28,12 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             if (!queryResult.Any() || _controller.HasError())
                 return _controller.GetResponseJson();
-            
-            BaseResponseRowForType[] rows = 
-                await Task.WhenAll(queryResult.Select(async entity => await _controller.GetTypeListEntityToRow(entity)));
-            
+
             // 2. 轉換為 BaseResponseForList
             BaseResponseForList<BaseResponseRowForType> response = new BaseResponseForList<BaseResponseRowForType>
             {
-                Items = rows.ToList()
+                // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。
+                Items = queryResult.Select(entity => Task.Run(() => _controller.GetTypeListEntityToRow(entity)).Result).ToList()
             };
             
             // 3. 回傳

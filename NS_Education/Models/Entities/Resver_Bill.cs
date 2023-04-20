@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 // Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
 // If you have enabled NRTs for your project, then un-comment the following line:
@@ -7,14 +6,9 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.Entities
 {
-    public partial class Resver_Bill_Header
+    public partial class Resver_Bill
     {
-        public Resver_Bill_Header()
-        {
-            Resver_Bill_Detail = new HashSet<Resver_Bill_Detail>();
-        }
-
-        public int RBHID { get; set; }
+        public int RBID { get; set; }
         public int RHID { get; set; }
         public int BCID { get; set; }
         public int DPTID { get; set; }
@@ -32,6 +26,5 @@ namespace NS_Education.Models.Entities
         public virtual B_Category BC { get; set; }
         public virtual D_PayType DPT { get; set; }
         public virtual Resver_Head RH { get; set; }
-        public virtual ICollection<Resver_Bill_Detail> Resver_Bill_Detail { get; set; }
     }
 }

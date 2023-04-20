@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
@@ -11,10 +10,9 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
-    public class GetTypeListHelper<TController, TEntity, TGetTypeListResponseRow> : IGetTypeListHelper
-      where TController : PublicClass, IGetTypeList<TEntity, TGetTypeListResponseRow>
+    public class GetTypeListHelper<TController, TEntity> : IGetTypeListHelper
+      where TController : PublicClass, IGetTypeList<TEntity>
       where TEntity : class
-      where TGetTypeListResponseRow : BaseResponseRowForType
     {
         private readonly TController _controller;
 
@@ -31,11 +29,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             if (!queryResult.Any() || _controller.HasError())
                 return _controller.GetResponseJson();
             
-            TGetTypeListResponseRow[] rows = 
+            BaseResponseRowForType[] rows = 
                 await Task.WhenAll(queryResult.Select(async entity => await _controller.GetTypeListEntityToRow(entity)));
             
             // 2. 轉換為 BaseResponseForList
-            BaseResponseForList<TGetTypeListResponseRow> response = new BaseResponseForList<TGetTypeListResponseRow>
+            BaseResponseForList<BaseResponseRowForType> response = new BaseResponseForList<BaseResponseRowForType>
             {
                 Items = rows.ToList()
             };

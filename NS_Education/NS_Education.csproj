@@ -252,6 +252,7 @@
     <Compile Include="Controllers\PayTypeController.cs" />
     <Compile Include="Controllers\DepartmentController.cs" />
     <Compile Include="Controllers\CompanyController.cs" />
+    <Compile Include="Controllers\StaticCodeController.cs" />
     <Compile Include="Controllers\TimeSpanController.cs" />
     <Compile Include="Controllers\ZipController.cs" />
     <Compile Include="Controllers\OtherPayItemController.cs" />

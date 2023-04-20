@@ -7,7 +7,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     /// GetList 功能 API 端點的介面。傳入時單純只執行 GET 而無其他參數，不與 DB 互動，回傳所有掌管資料。
     /// </summary>
     /// <typeparam name="TGetListRow">回傳時，List 中子物件的類型</typeparam>
-    public interface IGetList<TGetListRow>
+    public interface IGetListLocal<TGetListRow>
         where TGetListRow : class
     {
         /// <summary>
@@ -22,10 +22,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 
         /// <summary>
         /// 將取得列表的查詢結果轉換成 Response 所需的子物件類型。。<br/>
-        /// 時作者可以在這個方法中進行 AddError，最後回傳結果仍會包含資料，但會告知前端結果並不成功。（Success = false）
+        /// 實作者可以在這個方法中進行 AddError，最後回傳結果仍會包含資料，但會告知前端結果並不成功。（Success = false）
         /// </summary>
         /// <param name="entity">單筆查詢結果</param>
         /// <returns>Response 所需類型的單筆資料</returns>
-        Task<ICollection<TGetListRow>> GetListResults();
+        Task<ICollection<TGetListRow>> GetListLocalResults();
     }
 }

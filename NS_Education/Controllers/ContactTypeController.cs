@@ -13,13 +13,13 @@ namespace NS_Education.Controllers
 {
     public class ContactTypeController : 
         PublicClass, 
-        IGetList<ContactType_GetList_Output_Row_APIItem>
+        IGetListLocal<ContactType_GetList_Output_Row_APIItem>
     {
-        private IGetListHelper _getListHelper;
+        private IGetListLocalHelper _getListLocalHelper;
 
         public ContactTypeController()
         {
-            _getListHelper = new GetListHelper<ContactTypeController, ContactType_GetList_Output_Row_APIItem>(this);
+            _getListLocalHelper = new GetListLocalHelper<ContactTypeController, ContactType_GetList_Output_Row_APIItem>(this);
         }
         
         #region GetList
@@ -53,10 +53,10 @@ namespace NS_Education.Controllers
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList()
         {
-            return await _getListHelper.GetList();
+            return await _getListLocalHelper.GetListLocal();
         }
 
-        public async Task<ICollection<ContactType_GetList_Output_Row_APIItem>> GetListResults()
+        public async Task<ICollection<ContactType_GetList_Output_Row_APIItem>> GetListLocalResults()
         {
             return await Task.FromResult(ContactTypes);
         }

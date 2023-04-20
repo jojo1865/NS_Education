@@ -5,18 +5,18 @@ using NS_Education.Models.APIItems;
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
     /// <summary>
-    /// GetList 功能 API 端點的介面。
+    /// GetList 功能 API 端點的介面。提供分頁過的回傳。
     /// </summary>
     /// <typeparam name="TEntity">掌管資料的類型</typeparam>
-    /// <typeparam name="TGetListRequest">傳入要求的類型</typeparam>
-    /// <typeparam name="TGetListRow">回傳時，List 中子物件的類型</typeparam>
-    public interface IGetPagedList<TEntity, in TGetListRequest, TGetListRow>
+    /// <typeparam name="TGetListPagedRequest">傳入要求的類型</typeparam>
+    /// <typeparam name="TGetListPagedRow">回傳時，List 中子物件的類型</typeparam>
+    public interface IGetListPaged<TEntity, in TGetListPagedRequest, TGetListPagedRow>
         where TEntity : class
-        where TGetListRequest : BaseRequestForList
-        where TGetListRow : class
+        where TGetListPagedRequest : BaseRequestForList
+        where TGetListPagedRow : class
     {
         /// <summary>
-        /// 取得列表。
+        /// 取得分頁過的列表。
         /// </summary>
         /// <param name="input">輸入資料</param>
         /// <returns>
@@ -24,7 +24,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// 驗證失敗，或找不到資料時：不包含列表的通用訊息回傳格式。<br/>
         /// 意外錯誤時：拋錯。
         /// </returns>
-        Task<string> GetPagedList(TGetListRequest input);
+        Task<string> GetList(TGetListPagedRequest input);
         
         /// <summary>
         /// 驗證取得列表的輸入資料。<br/>
@@ -35,7 +35,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// true：驗證通過。<br/>
         /// false：驗證不通過。
         /// </returns>
-        Task<bool> GetListValidateInput(TGetListRequest input);
+        Task<bool> GetListPagedValidateInput(TGetListPagedRequest input);
 
         /// <summary>
         /// 依據取得列表的輸入資料，取得查詢。<br/>
@@ -43,7 +43,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <returns>具備排序的查詢。</returns>
         /// <remarks>若此方法是藉由 Helper 被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
-        IOrderedQueryable<TEntity> GetListOrderedQuery(TGetListRequest input);
+        IOrderedQueryable<TEntity> GetListPagedOrderedQuery(TGetListPagedRequest input);
 
         /// <summary>
         /// 將取得列表的查詢結果轉換成 Response 所需的子物件類型。。<br/>
@@ -51,6 +51,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <param name="entity">單筆查詢結果</param>
         /// <returns>Response 所需類型的單筆資料</returns>
-        Task<TGetListRow> GetListEntityToRow(TEntity entity);
+        Task<TGetListPagedRow> GetListPagedEntityToRow(TEntity entity);
     }
 }

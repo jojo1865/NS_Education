@@ -6,22 +6,22 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
-    public class GetListHelper<TController, TGetListRow> : IGetListHelper
-        where TController : PublicClass, IGetList<TGetListRow>
+    public class GetListLocalHelper<TController, TGetListRow> : IGetListLocalHelper
+        where TController : PublicClass, IGetListLocal<TGetListRow>
         where TGetListRow : class
     {
         private readonly TController _controller;
 
-        public GetListHelper(TController controller)
+        public GetListLocalHelper(TController controller)
         {
             _controller = controller;
         }
 
-        public async Task<string> GetList()
+        public async Task<string> GetListLocal()
         {
             BaseResponseForList<TGetListRow> response = new BaseResponseForList<TGetListRow>
             {
-                Items = await _controller.GetListResults()
+                Items = await _controller.GetListLocalResults()
             };
 
             return _controller.GetResponseJson(response);

@@ -20,15 +20,15 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     /// <typeparam name="TEntity">掌管資料類型</typeparam>
     /// <typeparam name="TGetListRequest">傳入物件類型</typeparam>
     /// <typeparam name="TGetListRow">回傳時，List 中子物件的類型</typeparam>
-    public class GetPagedListHelper<TController, TEntity, TGetListRequest, TGetListRow> : IGetPagedListHelper<TGetListRequest>
-        where TController : PublicClass, IGetPagedList<TEntity, TGetListRequest, TGetListRow>
+    public class GetListPagedHelper<TController, TEntity, TGetListRequest, TGetListRow> : IGetListPagedHelper<TGetListRequest>
+        where TController : PublicClass, IGetListPaged<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForList
         where TGetListRow : class
     {
         private readonly TController _controller;
 
-        public GetPagedListHelper(TController controller)
+        public GetListPagedHelper(TController controller)
         {
             _controller = controller;
         }
@@ -42,7 +42,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         public async Task<string> GetPagedList(TGetListRequest input)
         {
             // 1. 驗證輸入
-            bool inputValidated = await _controller.GetListValidateInput(input);
+            bool inputValidated = await _controller.GetListPagedValidateInput(input);
 
             if (!inputValidated)
                 return _controller.GetResponseJson();
@@ -61,7 +61,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             }
 
             TGetListRow[] rows =
-                await Task.WhenAll(queryResult.Select(async c => await _controller.GetListEntityToRow(c)));
+                await Task.WhenAll(queryResult.Select(async c => await _controller.GetListPagedEntityToRow(c)));
             response.Items = rows.ToList();
 
             return _controller.GetResponseJson(response);
@@ -70,7 +70,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest t
             , BaseResponseForPagedList<TGetListRow> response)
         {
-            IQueryable<TEntity> query = FlagHelper.FilterDeletedIfHasFlag(_controller.GetListOrderedQuery(t));
+            IQueryable<TEntity> query = FlagHelper.FilterDeletedIfHasFlag(_controller.GetListPagedOrderedQuery(t));
 
             // 1. 先取得總筆數
 

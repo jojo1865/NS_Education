@@ -3,14 +3,14 @@ using System.Threading.Tasks;
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface
 {
     /// <summary>
-    /// GetList 功能的預設處理工具介面。
+    /// GetList 功能的預設處理工具介面。針對需要分頁的 GetList 提供。
     /// </summary>
     /// <typeparam name="TGetListRequest">傳入物件類型</typeparam>
-    public interface IGetPagedListHelper<in TGetListRequest>
+    public interface IGetListPagedHelper<in TGetListRequest>
     where TGetListRequest : class
     {
         /// <summary>
-        /// 取得符合條件的列表。
+        /// 取得符合條件的有分頁列表。
         /// </summary>
         /// <param name="input">輸入資料</param>
         /// <returns>

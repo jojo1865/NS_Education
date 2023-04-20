@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -19,7 +20,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     /// <typeparam name="TEntity">掌管資料類型</typeparam>
     /// <typeparam name="TGetListRequest">傳入物件類型</typeparam>
     /// <typeparam name="TGetListRow">回傳時，List 中子物件的類型</typeparam>
-    public class GetListHelper<TController, TEntity, TGetListRequest, TGetListRow>
+    public class GetListHelper<TController, TEntity, TGetListRequest, TGetListRow> : IGetListHelper<TGetListRequest>
         where TController : PublicClass, IGetList<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForList
@@ -35,16 +36,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         #region GetList
 
         private static string GetListNotFound => $"{typeof(TController).Name} GetList 時查無資料！";
-
-        /// <summary>
-        /// 取得列表。
-        /// </summary>
-        /// <param name="input">輸入資料</param>
-        /// <returns>
-        /// 成功時：包含列表的通用訊息回傳格式。<br/>
-        /// 驗證失敗，或找不到資料時：不包含列表的通用訊息回傳格式。<br/>
-        /// 意外錯誤時：拋錯。
-        /// </returns>
+        
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList(TGetListRequest input)
@@ -56,7 +48,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson();
 
             // 2. 執行查詢
-            var response = new BaseResponseForList<TGetListRow>();
+            var response = new BaseResponseForPagedList<TGetListRow>();
             response.SetByInput(input);
 
             var queryResult = await _GetListQueryResult(input, response);
@@ -76,7 +68,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         }
 
         private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest t
-            , BaseResponseForList<TGetListRow> response)
+            , BaseResponseForPagedList<TGetListRow> response)
         {
             IQueryable<TEntity> query = FlagHelper.FilterDeletedIfHasFlag(_controller.GetListOrderedQuery(t));
 
@@ -94,5 +86,31 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         }
 
         #endregion
+    }
+    
+    public class GetListHelper<TController, TEntity, TGetListRow> : IGetListHelper
+        where TController : PublicClass, IGetList<TEntity, TGetListRow>
+        where TEntity : class
+        where TGetListRow : class
+    {
+        private readonly TController _controller;
+
+        public GetListHelper(TController controller)
+        {
+            _controller = controller;
+        }
+
+        public async Task<string> GetList()
+        {
+            var queryResult = await FlagHelper.FilterDeletedIfHasFlag(_controller.GetListOrderedQuery()).ToListAsync();
+
+            BaseResponseForList<TGetListRow> response = new BaseResponseForList<TGetListRow>
+            {
+                Items = await Task.WhenAll(queryResult.Select(async entity =>
+                    await _controller.GetListEntityToRow(entity)))
+            };
+
+            return _controller.GetResponseJson(response);
+        }
     }
 }

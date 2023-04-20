@@ -263,6 +263,7 @@
     </Compile>
     <Compile Include="Models\APIItems\BaseRequestForList.cs" />
     <Compile Include="Models\APIItems\BaseResponseForList.cs" />
+    <Compile Include="Models\APIItems\BaseResponseForPagedList.cs" />
     <Compile Include="Models\APIItems\Category\B_Category_APIItem.cs" />
     <Compile Include="Models\APIItems\Company\D_Company_APIItem.cs" />
     <Compile Include="Models\APIItems\Department\D_Department_APIItem.cs" />
@@ -336,6 +337,7 @@
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\DeleteItemHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetInfoByIdHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\SubmitHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IChangeActive.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItem.cs" />

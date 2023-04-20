@@ -88,9 +88,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         #endregion
     }
     
-    public class GetListHelper<TController, TEntity, TGetListRow> : IGetListHelper
-        where TController : PublicClass, IGetList<TEntity, TGetListRow>
-        where TEntity : class
+    public class GetListHelper<TController, TGetListRow> : IGetListHelper
+        where TController : PublicClass, IGetList<TGetListRow>
         where TGetListRow : class
     {
         private readonly TController _controller;
@@ -102,12 +101,9 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         public async Task<string> GetList()
         {
-            var queryResult = await FlagHelper.FilterDeletedIfHasFlag(_controller.GetListOrderedQuery()).ToListAsync();
-
             BaseResponseForList<TGetListRow> response = new BaseResponseForList<TGetListRow>
             {
-                Items = await Task.WhenAll(queryResult.Select(async entity =>
-                    await _controller.GetListEntityToRow(entity)))
+                Items = await _controller.GetListResults()
             };
 
             return _controller.GetResponseJson(response);

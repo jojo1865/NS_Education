@@ -22,7 +22,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface
     }
     
     /// <summary>
-    /// GetList 功能的預設處理工具介面。傳入時單純只執行 GET 而無其他參數，回傳所有掌管資料。
+    /// GetList 功能的預設處理工具介面。傳入時單純只執行 GET 而無其他參數，且不與 DB 互動，回傳所有掌管資料。
     /// </summary>
     public interface IGetListHelper
     {

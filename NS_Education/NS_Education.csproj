@@ -248,6 +248,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\CategoryController.cs" />
+    <Compile Include="Controllers\ContactTypeController.cs" />
     <Compile Include="Controllers\PayTypeController.cs" />
     <Compile Include="Controllers\DepartmentController.cs" />
     <Compile Include="Controllers\CompanyController.cs" />
@@ -266,6 +267,7 @@
     <Compile Include="Models\APIItems\BaseResponseForPagedList.cs" />
     <Compile Include="Models\APIItems\Category\B_Category_APIItem.cs" />
     <Compile Include="Models\APIItems\Company\D_Company_APIItem.cs" />
+    <Compile Include="Models\APIItems\ContactType\GetList\ContactType_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Department\D_Department_APIItem.cs" />
     <Compile Include="Models\APIItems\FoodCategory\D_FoodCategory_APIItem.cs" />
     <Compile Include="Models\APIItems\Hall\D_Hall_APIItem.cs" />

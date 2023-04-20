@@ -11,6 +11,6 @@ namespace NS_Education.Models.APIItems
         /// <summary>
         /// 實際每行資料內容。
         /// </summary>
-        public IList<T> Items { get; set; } = new List<T>();
+        public ICollection<T> Items { get; set; } = new List<T>();
     }
 }

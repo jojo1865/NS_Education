@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NS_Education.Models.APIItems;
@@ -55,12 +56,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     }
     
     /// <summary>
-    /// GetList 功能 API 端點的介面。傳入時單純只執行 GET 而無其他參數，回傳所有掌管資料。
+    /// GetList 功能 API 端點的介面。傳入時單純只執行 GET 而無其他參數，不與 DB 互動，回傳所有掌管資料。
     /// </summary>
-    /// <typeparam name="TEntity">掌管資料的類型</typeparam>
     /// <typeparam name="TGetListRow">回傳時，List 中子物件的類型</typeparam>
-    public interface IGetList<TEntity, TGetListRow>
-        where TEntity : class
+    public interface IGetList<TGetListRow>
         where TGetListRow : class
     {
         /// <summary>
@@ -72,14 +71,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// 意外錯誤時：拋錯。
         /// </returns>
         Task<string> GetList();
-        
-        /// <summary>
-        /// 依據取得列表的輸入資料，取得查詢。<br/>
-        /// 實作者可以在這個方法中進行 AddError，回到主方法後就不會實際執行查詢，而是提早回傳。<br/>
-        /// </summary>
-        /// <returns>具備排序的查詢。</returns>
-        /// <remarks>若此方法是藉由 Helper 被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
-        IOrderedQueryable<TEntity> GetListOrderedQuery();
 
         /// <summary>
         /// 將取得列表的查詢結果轉換成 Response 所需的子物件類型。。<br/>
@@ -87,6 +78,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <param name="entity">單筆查詢結果</param>
         /// <returns>Response 所需類型的單筆資料</returns>
-        Task<TGetListRow> GetListEntityToRow(TEntity entity);
+        Task<ICollection<TGetListRow>> GetListResults();
     }
 }

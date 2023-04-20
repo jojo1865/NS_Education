@@ -6,20 +6,20 @@
 
 namespace NS_Education.Models.Entities
 {
-    public partial class Resver_Bill_Detail
+    public partial class M_Resver_TimeSpan
     {
-        public int RBDID { get; set; }
-        public int RBHID { get; set; }
+        public int MID { get; set; }
+        public int RHID { get; set; }
         public string TargetTable { get; set; }
         public int TargetID { get; set; }
-        public int Price { get; set; }
-        public string Note { get; set; }
-        public bool DeleteFlag { get; set; }
+        public int DTSID { get; set; }
+        public int SortNo { get; set; }
         public DateTime CreDate { get; set; }
         public int CreUID { get; set; }
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
 
-        public virtual Resver_Bill_Header RBH { get; set; }
+        public virtual D_TimeSpan DTS { get; set; }
+        public virtual Resver_Head RH { get; set; }
     }
 }

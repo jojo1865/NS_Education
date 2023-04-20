@@ -15,10 +15,9 @@ namespace NS_Education.Models.Entities
         }
 
         public int RTID { get; set; }
-        public int RHID { get; set; }
+        public int RSID { get; set; }
         public DateTime TargetDate { get; set; }
         public int BSCID { get; set; }
-        public int BSID { get; set; }
         public int BOCID { get; set; }
         public string Title { get; set; }
         public string PrintTitle { get; set; }
@@ -36,9 +35,8 @@ namespace NS_Education.Models.Entities
         public int UpdUID { get; set; }
 
         public virtual B_OrderCode BOC { get; set; }
-        public virtual B_SiteData BS { get; set; }
         public virtual B_StaticCode BSC { get; set; }
-        public virtual Resver_Head RH { get; set; }
+        public virtual Resver_Site RS { get; set; }
         public virtual ICollection<Resver_Throw_Food> Resver_Throw_Food { get; set; }
     }
 }

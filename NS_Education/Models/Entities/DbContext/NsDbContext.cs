@@ -39,16 +39,16 @@ namespace NS_Education.Models.Entities.DbContext
         public virtual DbSet<D_TimeSpan> D_TimeSpan { get; set; }
         public virtual DbSet<D_Zip> D_Zip { get; set; }
         public virtual DbSet<GroupData> GroupData { get; set; }
+        public virtual DbSet<M_Contect> M_Contect { get; set; }
         public virtual DbSet<M_Customer_Category> M_Customer_Category { get; set; }
         public virtual DbSet<M_Department_Category> M_Department_Category { get; set; }
         public virtual DbSet<M_Group_Menu> M_Group_Menu { get; set; }
         public virtual DbSet<M_Group_User> M_Group_User { get; set; }
         public virtual DbSet<M_Partner_Category> M_Partner_Category { get; set; }
-        public virtual DbSet<M_ResverSiteTimeSpan> M_ResverSiteTimeSpan { get; set; }
+        public virtual DbSet<M_Resver_TimeSpan> M_Resver_TimeSpan { get; set; }
         public virtual DbSet<MenuAPI> MenuAPI { get; set; }
         public virtual DbSet<MenuData> MenuData { get; set; }
-        public virtual DbSet<Resver_Bill_Detail> Resver_Bill_Detail { get; set; }
-        public virtual DbSet<Resver_Bill_Header> Resver_Bill_Header { get; set; }
+        public virtual DbSet<Resver_Bill> Resver_Bill { get; set; }
         public virtual DbSet<Resver_Device> Resver_Device { get; set; }
         public virtual DbSet<Resver_GiveBack> Resver_GiveBack { get; set; }
         public virtual DbSet<Resver_Head> Resver_Head { get; set; }
@@ -76,7 +76,7 @@ namespace NS_Education.Models.Entities.DbContext
                 connectionString = connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
                 optionsBuilder.UseSqlServer(connectionString);
             }
-        }
+        } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -621,6 +621,17 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
             });
 
+            modelBuilder.Entity<M_Contect>(entity =>
+            {
+                entity.HasKey(e => e.MID);
+
+                entity.Property(e => e.ContectData).HasMaxLength(30);
+
+                entity.Property(e => e.TargetTable)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<M_Customer_Category>(entity =>
             {
                 entity.HasKey(e => e.MID);
@@ -718,25 +729,30 @@ namespace NS_Education.Models.Entities.DbContext
                     .HasConstraintName("FK_M_Partner_Category_B_Partner");
             });
 
-            modelBuilder.Entity<M_ResverSiteTimeSpan>(entity =>
+            modelBuilder.Entity<M_Resver_TimeSpan>(entity =>
             {
-                entity.HasKey(e => e.MID);
+                entity.HasKey(e => e.MID)
+                    .HasName("PK_M_ResverSiteTimeSpan");
 
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
+
+                entity.Property(e => e.TargetTable)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.DTS)
-                    .WithMany(p => p.M_ResverSiteTimeSpan)
+                    .WithMany(p => p.M_Resver_TimeSpan)
                     .HasForeignKey(d => d.DTSID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_M_ResverSiteTimeSpan_D_TimeSpan");
 
-                entity.HasOne(d => d.RS)
-                    .WithMany(p => p.M_ResverSiteTimeSpan)
-                    .HasForeignKey(d => d.RSID)
+                entity.HasOne(d => d.RH)
+                    .WithMany(p => p.M_Resver_TimeSpan)
+                    .HasForeignKey(d => d.RHID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_ResverSiteTimeSpan_Resver_Site");
+                    .HasConstraintName("FK_M_Resver_TimeSpan_Resver_Head");
             });
 
             modelBuilder.Entity<MenuAPI>(entity =>
@@ -767,28 +783,10 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
             });
 
-            modelBuilder.Entity<Resver_Bill_Detail>(entity =>
+            modelBuilder.Entity<Resver_Bill>(entity =>
             {
-                entity.HasKey(e => e.RBDID);
-
-                entity.Property(e => e.CreDate).HasColumnType("datetime");
-
-                entity.Property(e => e.TargetTable)
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.UpdDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.RBH)
-                    .WithMany(p => p.Resver_Bill_Detail)
-                    .HasForeignKey(d => d.RBHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Bill_Detail_Resver_Bill_Header");
-            });
-
-            modelBuilder.Entity<Resver_Bill_Header>(entity =>
-            {
-                entity.HasKey(e => e.RBHID);
+                entity.HasKey(e => e.RBID)
+                    .HasName("PK_Resver_Bill_Header");
 
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
 
@@ -797,19 +795,19 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.BC)
-                    .WithMany(p => p.Resver_Bill_Header)
+                    .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.BCID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Bill_Header_B_Category");
 
                 entity.HasOne(d => d.DPT)
-                    .WithMany(p => p.Resver_Bill_Header)
+                    .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.DPTID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Bill_Header_D_PayType");
 
                 entity.HasOne(d => d.RH)
-                    .WithMany(p => p.Resver_Bill_Header)
+                    .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.RHID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Bill_Header_Resver_Head");
@@ -841,29 +839,11 @@ namespace NS_Education.Models.Entities.DbContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Device_B_OrderCode");
 
-                entity.HasOne(d => d.BS)
+                entity.HasOne(d => d.RS)
                     .WithMany(p => p.Resver_Device)
-                    .HasForeignKey(d => d.BSID)
+                    .HasForeignKey(d => d.RSID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_B_SiteData");
-
-                entity.HasOne(d => d.DTSIDENavigation)
-                    .WithMany(p => p.Resver_DeviceDTSIDENavigation)
-                    .HasForeignKey(d => d.DTSIDE)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_D_TimeSpanE");
-
-                entity.HasOne(d => d.DTSIDSNavigation)
-                    .WithMany(p => p.Resver_DeviceDTSIDSNavigation)
-                    .HasForeignKey(d => d.DTSIDS)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_D_TimeSpanS");
-
-                entity.HasOne(d => d.RH)
-                    .WithMany(p => p.Resver_Device)
-                    .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_Resver_Head");
+                    .HasConstraintName("FK_Resver_Device_Resver_Site");
             });
 
             modelBuilder.Entity<Resver_GiveBack>(entity =>
@@ -946,12 +926,6 @@ namespace NS_Education.Models.Entities.DbContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Other_B_OrderCode");
 
-                entity.HasOne(d => d.BS)
-                    .WithMany(p => p.Resver_Other)
-                    .HasForeignKey(d => d.BSID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Other_B_SiteData");
-
                 entity.HasOne(d => d.DOPI)
                     .WithMany(p => p.Resver_Other)
                     .HasForeignKey(d => d.DOPIID)
@@ -1032,17 +1006,11 @@ namespace NS_Education.Models.Entities.DbContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Throw_B_StaticCode");
 
-                entity.HasOne(d => d.BS)
+                entity.HasOne(d => d.RS)
                     .WithMany(p => p.Resver_Throw)
-                    .HasForeignKey(d => d.BSID)
+                    .HasForeignKey(d => d.RSID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_B_SiteData");
-
-                entity.HasOne(d => d.RH)
-                    .WithMany(p => p.Resver_Throw)
-                    .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_Resver_Head");
+                    .HasConstraintName("FK_Resver_Throw_Resver_Site");
             });
 
             modelBuilder.Entity<Resver_Throw_Food>(entity =>

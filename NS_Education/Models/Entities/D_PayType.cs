@@ -11,7 +11,7 @@ namespace NS_Education.Models.Entities
     {
         public D_PayType()
         {
-            Resver_Bill_Header = new HashSet<Resver_Bill_Header>();
+            Resver_Bill = new HashSet<Resver_Bill>();
         }
 
         public int DPTID { get; set; }
@@ -33,6 +33,6 @@ namespace NS_Education.Models.Entities
         public int UpdUID { get; set; }
 
         public virtual B_Category BC { get; set; }
-        public virtual ICollection<Resver_Bill_Header> Resver_Bill_Header { get; set; }
+        public virtual ICollection<Resver_Bill> Resver_Bill { get; set; }
     }
 }

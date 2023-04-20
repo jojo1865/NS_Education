@@ -9,11 +9,8 @@ namespace NS_Education.Models.Entities
     public partial class Resver_Device
     {
         public int RDID { get; set; }
-        public int RHID { get; set; }
+        public int RSID { get; set; }
         public DateTime TargetDate { get; set; }
-        public int DTSIDS { get; set; }
-        public int DTSIDE { get; set; }
-        public int BSID { get; set; }
         public int BDID { get; set; }
         public int BOCID { get; set; }
         public string PrintTitle { get; set; }
@@ -32,9 +29,6 @@ namespace NS_Education.Models.Entities
 
         public virtual B_Device BD { get; set; }
         public virtual B_OrderCode BOC { get; set; }
-        public virtual B_SiteData BS { get; set; }
-        public virtual D_TimeSpan DTSIDENavigation { get; set; }
-        public virtual D_TimeSpan DTSIDSNavigation { get; set; }
-        public virtual Resver_Head RH { get; set; }
+        public virtual Resver_Site RS { get; set; }
     }
 }

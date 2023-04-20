@@ -11,10 +11,7 @@ namespace NS_Education.Models.Entities
     {
         public B_SiteData()
         {
-            Resver_Device = new HashSet<Resver_Device>();
-            Resver_Other = new HashSet<Resver_Other>();
             Resver_Site = new HashSet<Resver_Site>();
-            Resver_Throw = new HashSet<Resver_Throw>();
         }
 
         public int BSID { get; set; }
@@ -47,9 +44,6 @@ namespace NS_Education.Models.Entities
         public virtual B_StaticCode BSCID1Navigation { get; set; }
         public virtual B_StaticCode BSCID5Navigation { get; set; }
         public virtual D_Hall DH { get; set; }
-        public virtual ICollection<Resver_Device> Resver_Device { get; set; }
-        public virtual ICollection<Resver_Other> Resver_Other { get; set; }
         public virtual ICollection<Resver_Site> Resver_Site { get; set; }
-        public virtual ICollection<Resver_Throw> Resver_Throw { get; set; }
     }
 }

@@ -11,9 +11,7 @@ namespace NS_Education.Models.Entities
     {
         public D_TimeSpan()
         {
-            M_ResverSiteTimeSpan = new HashSet<M_ResverSiteTimeSpan>();
-            Resver_DeviceDTSIDENavigation = new HashSet<Resver_Device>();
-            Resver_DeviceDTSIDSNavigation = new HashSet<Resver_Device>();
+            M_Resver_TimeSpan = new HashSet<M_Resver_TimeSpan>();
         }
 
         public int DTSID { get; set; }
@@ -30,8 +28,6 @@ namespace NS_Education.Models.Entities
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
 
-        public virtual ICollection<M_ResverSiteTimeSpan> M_ResverSiteTimeSpan { get; set; }
-        public virtual ICollection<Resver_Device> Resver_DeviceDTSIDENavigation { get; set; }
-        public virtual ICollection<Resver_Device> Resver_DeviceDTSIDSNavigation { get; set; }
+        public virtual ICollection<M_Resver_TimeSpan> M_Resver_TimeSpan { get; set; }
     }
 }

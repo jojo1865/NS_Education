@@ -3,12 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Controllers.BaseClass.FunctionInterface;
 using NS_Education.Models.APIItems;
+using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controllers.BaseClass.Helper
+namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
     public class GetListHelper<TController, TEntity, TGetListRequest, TGetListRow>
         where TController : PublicClass, IGetList<TEntity, TGetListRequest, TGetListRow>
@@ -69,7 +71,7 @@ namespace NS_Education.Controllers.BaseClass.Helper
         private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest t
             , BaseResponseForList<TGetListRow> response)
         {
-            IQueryable<TEntity> query = CommonEntityHelper<TEntity>.FilterDeletedIfHasFlag(_controller.GetListOrderedQuery(t));
+            IQueryable<TEntity> query = FlagHelper.FilterDeletedIfHasFlag(_controller.GetListOrderedQuery(t));
 
             // 1. 先取得總筆數
 

@@ -1,10 +1,11 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Controllers.BaseClass.FunctionInterface;
-using NS_Education.Tools;
+using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 
-namespace NS_Education.Controllers.BaseClass.Helper
+namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
     public class GetInfoByIdHelper<TController, TEntity, TGetResponse>
         where TController : PublicClass, IGetInfoById<TEntity, TGetResponse>
@@ -56,7 +57,7 @@ namespace NS_Education.Controllers.BaseClass.Helper
         private async Task<TEntity> _GetInfoByIdQueryResult(int id)
         {
             // 取得實作者的查詢，並檢查刪除狀態
-            return await CommonEntityHelper<TEntity>.FilterDeletedIfHasFlag(_controller.GetInfoByIdQuery(id)).FirstOrDefaultAsync();
+            return await FlagHelper.FilterDeletedIfHasFlag(_controller.GetInfoByIdQuery(id)).FirstOrDefaultAsync();
         }
 
         #endregion

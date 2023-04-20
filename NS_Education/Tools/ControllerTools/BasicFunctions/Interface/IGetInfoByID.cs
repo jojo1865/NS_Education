@@ -1,8 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
-using NS_Education.Tools;
 
-namespace NS_Education.Controllers.BaseClass.FunctionInterface
+namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
     public interface IGetInfoById<TEntity, out TGetResponse>
         where TEntity : class

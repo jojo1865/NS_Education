@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NS_Education.Controllers.BaseClass.FunctionInterface
+namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
     public interface IDeleteItem<out TEntity>
         where TEntity : class

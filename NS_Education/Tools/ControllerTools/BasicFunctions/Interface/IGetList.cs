@@ -2,7 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NS_Education.Models.APIItems;
 
-namespace NS_Education.Controllers.BaseClass.FunctionInterface
+namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
     public interface IGetList<TEntity, in TGetListRequest, TGetListRow>
         where TEntity : class

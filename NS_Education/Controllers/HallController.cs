@@ -3,10 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Controllers.BaseClass;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Hall;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 

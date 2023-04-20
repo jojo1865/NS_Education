@@ -1,11 +1,12 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Controllers.BaseClass.FunctionInterface;
+using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
-using NS_Education.Variables;
 
-namespace NS_Education.Controllers.BaseClass.Helper
+namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
     public class ChangeActiveHelper<TController, TEntity>
         where TController : PublicClass, IChangeActive<TEntity>
@@ -41,7 +42,7 @@ namespace NS_Education.Controllers.BaseClass.Helper
         /// <exception cref="NotSupportedException">資料沒有 ActiveFlag 欄位時</exception>
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            if (!CommonEntityHelper<TEntity>.HasActiveFlag)
+            if (!FlagHelper<TEntity>.HasActiveFlag)
                 throw new NotSupportedException(ChangeActiveNotSupported);
 
             // 1. 驗證輸入。
@@ -69,8 +70,8 @@ namespace NS_Education.Controllers.BaseClass.Helper
             // 3. 實際更新起用狀態與更新者資訊，並寫入 DB。
             try
             {
-                CommonEntityHelper<TEntity>.SetProperty(t, DbConstants.ActiveFlag, activeFlagValue);
-                CommonControllerHelper<TController, TEntity>.SetInfosOnUpdate(_controller, t);
+                FlagHelper.SetActiveFlag(t, activeFlagValue);
+                CreUpdHelper.SetInfosOnUpdate(_controller, t);
                 await _controller.DC.SaveChangesAsync();
             }
             catch (Exception e)
@@ -84,7 +85,7 @@ namespace NS_Education.Controllers.BaseClass.Helper
 
         private async Task<TEntity> _ChangeActiveQueryResult(int id)
         {
-            return await CommonEntityHelper<TEntity>.FilterDeletedIfHasFlag(_controller.ChangeActiveQuery(id)).FirstOrDefaultAsync();
+            return await FlagHelper.FilterDeletedIfHasFlag(_controller.ChangeActiveQuery(id)).FirstOrDefaultAsync();
         }
 
         #endregion

@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Controllers.BaseClass;
 using NS_Education.Models.APIItems.OtherPayItem;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.ControllerTools.BaseClass;
 
 namespace NS_Education.Controllers
 {

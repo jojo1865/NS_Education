@@ -1,8 +1,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NS_Education.Controllers.BaseClass.FunctionInterface
+namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
+    /// <summary>
+    /// ChangeActive。
+    /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
     public interface IChangeActive<out TEntity>
         where TEntity : class
     {

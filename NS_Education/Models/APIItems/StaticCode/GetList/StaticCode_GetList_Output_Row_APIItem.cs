@@ -1,4 +1,4 @@
-namespace NS_Education.Models.APIItems.StaticCode
+namespace NS_Education.Models.APIItems.StaticCode.GetList
 {
     public class StaticCode_GetList_Output_Row_APIItem : BaseRequestForList
     {

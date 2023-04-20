@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using NS_Education.Models.APIItems;
-using NS_Education.Models.APIItems.StaticCode;
+using NS_Education.Models.APIItems.StaticCode.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;

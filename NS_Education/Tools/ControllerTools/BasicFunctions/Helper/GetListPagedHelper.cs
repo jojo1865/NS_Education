@@ -53,13 +53,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             var queryResult = await _GetListQueryResult(input, response);
 
-            // 3. 按照格式回傳結果
-            if (!queryResult.Any() || _controller.HasError())
-            {
-                _controller.AddError(GetListNotFound);
+            // 3. 有錯誤時提早返回
+            if (_controller.HasError())
                 return _controller.GetResponseJson();
-            }
 
+            // 4. 按指定格式回傳結果
             TGetListRow[] rows =
                 await Task.WhenAll(queryResult.Select(async c => await _controller.GetListPagedEntityToRow(c)));
             response.Items = rows.ToList();

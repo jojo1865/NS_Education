@@ -16,6 +16,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         {
             _controller = controller;
         }
+        
+        #region GetListLocal
 
         public async Task<string> GetListLocal()
         {
@@ -23,8 +25,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             {
                 Items = await _controller.GetListLocalResults()
             };
-
+            
             return _controller.GetResponseJson(response);
         }
+        
+        #endregion
     }
 }

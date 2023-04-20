@@ -58,9 +58,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson();
 
             // 4. 按指定格式回傳結果
-            TGetListRow[] rows =
-                await Task.WhenAll(queryResult.Select(async c => await _controller.GetListPagedEntityToRow(c)));
-            response.Items = rows.ToList();
+            response.Items = queryResult.Select(c => Task.Run(() => _controller.GetListPagedEntityToRow(c)).Result).ToList();
 
             return _controller.GetResponseJson(response);
         }

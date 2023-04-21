@@ -23,12 +23,14 @@ namespace NS_Education.Controllers
     /// </summary>
     public class OrderCodeController : PublicClass,
         IGetTypeList<B_OrderCode>,
-        IGetListPaged<B_OrderCode, OrderCode_GetList_Input_APIItem, OrderCode_GetList_Output_Row_APIItem>
+        IGetListPaged<B_OrderCode, OrderCode_GetList_Input_APIItem, OrderCode_GetList_Output_Row_APIItem>,
+        IChangeActive<B_OrderCode>
     {
         #region Initialization
         
         private readonly IGetTypeListHelper _getTypeListHelper;
         private readonly IGetListPagedHelper<OrderCode_GetList_Input_APIItem> _getListHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
 
         /// <summary>
         /// 靜態參數類別名稱對照表。<br/>
@@ -49,6 +51,7 @@ namespace NS_Education.Controllers
                 // CodeType 和 Code 並不是 PK，有可能有多筆同樣 CodeType Code 的資料，所以這裡各種 Code 只取一筆，以免重複 Key
                 .GroupBy(sc => sc.Code)
                 .ToDictionary(group => group.Key, group => group.First());
+            _changeActiveHelper = new ChangeActiveHelper<OrderCodeController, B_OrderCode>(this);
 
             _getTypeListHelper = new GetTypeListHelper<OrderCodeController, B_OrderCode>(this);
             
@@ -168,6 +171,8 @@ namespace NS_Education.Controllers
                 UpdUID = 0
             };
         
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetInfoById(int id)
         {
             // 因為這個端點有特殊邏輯（id 輸入 0 時不查資料而是回傳僅部分欄位的空資料），不使用 Helper 會比較清晰
@@ -240,6 +245,20 @@ namespace NS_Education.Controllers
                 UpdUser = await GetUserNameByID(entity.UpdUID),
                 UpdUID = entity.UpdUID
             };
+        }
+        
+        #endregion
+        
+        #region ChangeActive
+
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
+        {
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        public IQueryable<B_OrderCode> ChangeActiveQuery(int id)
+        {
+            return DC.B_OrderCode.Where(oc => oc.BOCID == id);
         }
         
         #endregion

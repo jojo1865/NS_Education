@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NS_Education.Tools;
 
-namespace NS_Education.Models.APIItems.OrderCode.GetList
+namespace NS_Education.Models.APIItems.OrderCode.GetInfoById
 {
     public class OrderCode_GetInfoById_Output_APIItem : cReturnMessageInfusableAbstract
     {

@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Http;
+using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
+using NS_Education.Models.APIItems.OrderCode.GetInfoById;
 using NS_Education.Models.APIItems.OrderCode.GetList;
+using NS_Education.Models.APIItems.OrderCode.Submit;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -24,13 +27,17 @@ namespace NS_Education.Controllers
     public class OrderCodeController : PublicClass,
         IGetTypeList<B_OrderCode>,
         IGetListPaged<B_OrderCode, OrderCode_GetList_Input_APIItem, OrderCode_GetList_Output_Row_APIItem>,
-        IChangeActive<B_OrderCode>
+        IChangeActive<B_OrderCode>,
+        IDeleteItem<B_OrderCode>,
+        ISubmit<B_OrderCode, OrderCode_Submit_Input_APIItem>
     {
         #region Initialization
-        
+
         private readonly IGetTypeListHelper _getTypeListHelper;
         private readonly IGetListPagedHelper<OrderCode_GetList_Input_APIItem> _getListHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<OrderCode_Submit_Input_APIItem> _submitHelper;
 
         /// <summary>
         /// 靜態參數類別名稱對照表。<br/>
@@ -38,7 +45,7 @@ namespace NS_Education.Controllers
         /// 在 ASP.NET 中，端點每次被呼叫都會是新的 Controller，所以沒有需要 refresh 的問題。
         /// </summary>
         private readonly Dictionary<string, B_OrderCode> OrderCodeTypes;
-        
+
         public OrderCodeController()
         {
             OrderCodeTypes = DC.B_OrderCode
@@ -51,16 +58,18 @@ namespace NS_Education.Controllers
                 // CodeType 和 Code 並不是 PK，有可能有多筆同樣 CodeType Code 的資料，所以這裡各種 Code 只取一筆，以免重複 Key
                 .GroupBy(sc => sc.Code)
                 .ToDictionary(group => group.Key, group => group.First());
+            _submitHelper = new SubmitHelper<OrderCodeController, B_OrderCode, OrderCode_Submit_Input_APIItem>(this);
+            _deleteItemHelper = new DeleteItemHelper<OrderCodeController, B_OrderCode>(this);
             _changeActiveHelper = new ChangeActiveHelper<OrderCodeController, B_OrderCode>(this);
 
             _getTypeListHelper = new GetTypeListHelper<OrderCodeController, B_OrderCode>(this);
-            
+
             _getListHelper = new GetListPagedHelper<OrderCodeController
                 , B_OrderCode
                 , OrderCode_GetList_Input_APIItem
                 , OrderCode_GetList_Output_Row_APIItem>(this);
         }
-        
+
         #endregion
 
         #region GetTypeList
@@ -90,7 +99,7 @@ namespace NS_Education.Controllers
 
         #region GetList
 
-        [HttpGet]
+        [System.Web.Http.HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList(OrderCode_GetList_Input_APIItem input)
         {
@@ -144,12 +153,12 @@ namespace NS_Education.Controllers
         }
 
         #endregion
-        
+
         #region GetInfoById
 
         private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或格式不正確！";
         private const string GetInfoByIdNotFound = "查無 ID 符合的資料！";
-        
+
         private readonly OrderCode_GetInfoById_Output_APIItem _getInfoByIdDummyOutput =
             new OrderCode_GetInfoById_Output_APIItem
             {
@@ -170,8 +179,8 @@ namespace NS_Education.Controllers
                 UpdUser = null,
                 UpdUID = 0
             };
-        
-        [HttpGet]
+
+        [System.Web.Http.HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetInfoById(int id)
         {
@@ -217,7 +226,7 @@ namespace NS_Education.Controllers
             // 4. 回傳
             return GetResponseJson(response);
         }
-        
+
         private async Task<OrderCode_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(
             B_OrderCode entity)
         {
@@ -246,11 +255,13 @@ namespace NS_Education.Controllers
                 UpdUID = entity.UpdUID
             };
         }
-        
+
         #endregion
-        
+
         #region ChangeActive
 
+        [System.Web.Http.HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
@@ -260,7 +271,121 @@ namespace NS_Education.Controllers
         {
             return DC.B_OrderCode.Where(oc => oc.BOCID == id);
         }
-        
+
+        #endregion
+
+        #region DeleteItem
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
+        public async Task<string> DeleteItem(int id)
+        {
+            return await _deleteItemHelper.DeleteItem(id);
+        }
+
+        public IQueryable<B_OrderCode> DeleteItemQuery(int id)
+        {
+            return DC.B_OrderCode.Where(oc => oc.BOCID == id);
+        }
+
+        #endregion
+
+        #region Submit
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(OrderCode_Submit_Input_APIItem.BOCID))]
+        public async Task<string> Submit(OrderCode_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(OrderCode_Submit_Input_APIItem input)
+        {
+            return input.BOCID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(OrderCode_Submit_Input_APIItem input)
+        {
+            return await Task.Run(() => input.StartValidate()
+                .Validate(i => i.BOCID.IsValidIdOrZero(),
+                    () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.CodeType.IsValidIdOrZero(),
+                    () => AddError(EmptyNotAllowed("入帳代號類別")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("入帳代號編碼")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("入帳代號名稱")))
+                .Validate(i => !i.PrintTitle.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("帳單列印名稱")))
+                .Validate(i => i.ActiveFlag != null,
+                    () => AddError(EmptyNotAllowed("是否啟用")))
+                .IsValid());
+        }
+
+        public async Task<B_OrderCode> SubmitCreateData(OrderCode_Submit_Input_APIItem input)
+        {
+            return new B_OrderCode
+            {
+                CodeType = input.CodeType,
+                Code = input.Code,
+                Title = input.Title ?? throw new ArgumentNullException(nameof(input.Title)),
+                PrintTitle = input.PrintTitle ?? throw new ArgumentNullException(nameof(input.PrintTitle)),
+                PrintNote = input.PrintNote ?? "",
+                SortNo = await DC.B_OrderCode
+                    .Where(sc => sc.CodeType == input.CodeType)
+                    .OrderBy(sc => sc.SortNo)
+                    .Select(sc => sc.SortNo)
+                    .FirstOrDefaultAsync() + 1,
+                ActiveFlag = input.ActiveFlag ?? true,
+                DeleteFlag = false,
+            };
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(OrderCode_Submit_Input_APIItem input)
+        {
+            return await Task.Run(() => input.StartValidate()
+                .Validate(i => i.BOCID.IsValidId(),
+                    () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.CodeType.IsValidIdOrZero(),
+                    () => AddError(EmptyNotAllowed("入帳代號類別")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("入帳代號編碼")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("入帳代號名稱")))
+                .Validate(i => !i.PrintTitle.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("帳單列印名稱")))
+                .Validate(i => i.ActiveFlag != null,
+                    () => AddError(EmptyNotAllowed("是否啟用")))
+                .Validate(i => i.DeleteFlag != null,
+                    () => AddError(EmptyNotAllowed("刪除狀態")))
+                .IsValid());
+        }
+
+        public IQueryable<B_OrderCode> SubmitEditQuery(OrderCode_Submit_Input_APIItem input)
+        {
+            return DC.B_OrderCode.Where(oc => oc.ActiveFlag && oc.BOCID == input.BOCID);
+        }
+
+        public void SubmitEditUpdateDataFields(B_OrderCode data, OrderCode_Submit_Input_APIItem input)
+        {
+            data.BOCID = input.BOCID;
+            data.CodeType = input.CodeType;
+            data.Code = input.Code ?? data.Code;
+            data.Title = input.Title ?? data.Title;
+            data.PrintTitle = input.PrintTitle ?? data.PrintTitle;
+            data.PrintNote = input.PrintNote ?? "";
+            data.ActiveFlag = input.ActiveFlag ?? data.ActiveFlag;
+            data.DeleteFlag = input.DeleteFlag ?? data.DeleteFlag;
+        }
+
+        #endregion
+
         #endregion
     }
 }

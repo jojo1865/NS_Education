@@ -48,7 +48,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <param name="input">輸入</param>
         /// <returns>欲新增的物件</returns>
-        /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者可以忽略 CreUid、CreDate、UpdUid 及 UpdDate 的設定。</remarks>
+        /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者對 CreUid、CreDate、UpdUid、UpdDate 及 DeleteFlag 的設定將被覆寫。</remarks>
         Task<TEntity> SubmitCreateData(TSubmitRequest input);
         
         /// <summary>
@@ -74,7 +74,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <param name="data">DB 資料</param>
         /// <param name="input">輸入</param>
-        /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者在更新時可以忽略 UpdUid 及 UpdDate 的更新。</remarks>
+        /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者在更新時對 UpdUid 及 UpdDate 的更新將被覆寫。</remarks>
         void SubmitEditUpdateDataFields(TEntity data, TSubmitRequest input);
     }
 }

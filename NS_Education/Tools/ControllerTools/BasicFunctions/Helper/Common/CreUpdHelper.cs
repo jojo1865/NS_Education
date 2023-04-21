@@ -5,7 +5,7 @@ using NS_Education.Variables;
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
 {
     /// <summary>
-    /// 針對 CreUID、CreDate、UpdUID、UpdDate 等欄位，進行預設處理的工具。
+    /// 針對 CreUID、CreDate、UpdUID、UpdDate、DeleteFlag 等欄位，進行預設處理的工具。
     /// </summary>
     internal static class CreUpdHelper
     {

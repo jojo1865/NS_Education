@@ -1,5 +1,8 @@
 using System;
+using System.Threading.Tasks;
+using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.Extensions;
 using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
@@ -44,6 +47,33 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             t.SetIfHasProperty(DbConstants.DeleteFlag, false);
         }
 
+        /// <summary>
+        /// 協助 Controller 在將 DB Entity 轉換成 Resposne 所須物件時，設定部分普遍的值。
+        /// </summary>
+        /// <param name="entity">DB 物件</param>
+        /// <param name="row">Response 物件</param>
+        /// <param name="controller">Controller 物件</param>
+        /// <typeparam name="TEntity">DB 物件的 Generic Type</typeparam>
+        /// <typeparam name="TRow">Response 物件的 Generic Type</typeparam>
+        /// <typeparam name="TController">Controller 物件的 Generic Type</typeparam>
+        internal static TRow CopyInfosIntoRow<TEntity, TRow, TController>(TEntity entity, TRow row, TController controller)
+            where TEntity : class
+            where TRow : BaseResponseWithCreUpd<TEntity>
+            where TController : PublicClass
+        {
+            row.ActiveFlag = entity.GetIfHasProperty<TEntity, bool>(DbConstants.ActiveFlag);
+            
+            row.CreDate = entity.GetIfHasProperty<TEntity, DateTime>(DbConstants.CreDate).ToFormattedString();
+            row.CreUID = entity.GetIfHasProperty<TEntity, int>(DbConstants.CreUid);
+            row.CreUser = Task.Run(() => controller.GetUserNameByID(row.CreUID)).Result;
+            
+            row.UpdDate = entity.GetIfHasProperty<TEntity, DateTime>(DbConstants.UpdDate).ToFormattedString();
+            row.UpdUID = entity.GetIfHasProperty<TEntity, int>(DbConstants.UpdUid);
+            row.UpdUser = Task.Run(() => controller.GetUserNameByID(row.UpdUID)).Result;
+
+            return row;
+        }
+        
         #endregion
     }
 }

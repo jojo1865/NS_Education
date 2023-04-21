@@ -24,7 +24,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         where TController : PublicClass, IGetListPaged<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForList
-        where TGetListRow : class
+        where TGetListRow : BaseResponseWithCreUpd<TEntity>
     {
         private readonly TController _controller;
 
@@ -35,8 +35,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         #region GetPagedList
 
-        private static string GetListNotFound => $"{typeof(TController).Name} GetList 時查無資料！";
-        
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetPagedList(TGetListRequest input)
@@ -59,7 +57,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 4. 按指定格式回傳結果
             // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。（如：取得 Username）
-            response.Items = queryResult.Select(c => Task.Run(() => _controller.GetListPagedEntityToRow(c)).Result).ToList();
+            response.Items = queryResult
+                .Select(c => CreUpdHelper.CopyInfosIntoRow
+                    (c, Task.Run(() => _controller.GetListPagedEntityToRow(c)).Result, _controller)
+                )
+                .ToList();
 
             return _controller.GetResponseJson(response);
         }

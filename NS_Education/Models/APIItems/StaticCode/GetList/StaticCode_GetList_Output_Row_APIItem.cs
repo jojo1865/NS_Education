@@ -1,6 +1,8 @@
+using NS_Education.Models.Entities;
+
 namespace NS_Education.Models.APIItems.StaticCode.GetList
 {
-    public class StaticCode_GetList_Output_Row_APIItem : BaseRequestForList
+    public class StaticCode_GetList_Output_Row_APIItem : BaseResponseWithCreUpd<B_StaticCode>
     {
         public int BSCID { get; set; }
         public int iCodeType { get; set; }

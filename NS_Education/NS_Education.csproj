@@ -253,6 +253,7 @@
     <Compile Include="Controllers\PayTypeController.cs" />
     <Compile Include="Controllers\DepartmentController.cs" />
     <Compile Include="Controllers\CompanyController.cs" />
+    <Compile Include="Controllers\SiteDataController\SiteDataController.cs" />
     <Compile Include="Controllers\StaticCodeController.cs" />
     <Compile Include="Controllers\TimeSpanController.cs" />
     <Compile Include="Controllers\ZipController.cs" />
@@ -267,6 +268,7 @@
     <Compile Include="Models\APIItems\BaseRequestForList.cs" />
     <Compile Include="Models\APIItems\BaseResponseForList.cs" />
     <Compile Include="Models\APIItems\BaseResponseForPagedList.cs" />
+    <Compile Include="Models\APIItems\BaseResponseWithCreUpd.cs" />
     <Compile Include="Models\APIItems\BaseResponseRowForType.cs" />
     <Compile Include="Models\APIItems\Category\B_Category_APIItem.cs" />
     <Compile Include="Models\APIItems\Company\D_Company_APIItem.cs" />
@@ -280,6 +282,8 @@
     <Compile Include="Models\APIItems\OrderCode\Submit\OrderCode_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\OtherPayItem\D_OtherPayItem_APIItem.cs" />
     <Compile Include="Models\APIItems\PayType\D_PayType_APIItem.cs" />
+    <Compile Include="Models\APIItems\SiteData\GetList\SiteData_GetList_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\SiteData\GetList\SiteData_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetInfoById\StaticCode_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetList\StaticCode_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetList\StaticCode_GetList_Output_Row_APIItem.cs" />
@@ -369,6 +373,7 @@
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs" />
     <Compile Include="Tools\cReturnMessageInfusableAbstract.cs" />
     <Compile Include="Tools\Encryption\JwtHelper.cs" />
+    <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StringExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\TypeExtensionMethods.cs" />
@@ -385,7 +390,6 @@
     <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequirePrivilege.cs" />
     <Compile Include="Tools\Filters\ResponsePrivilegeWrapper\Privilege.cs" />
     <Compile Include="Tools\Filters\ResponsePrivilegeWrapper\ResponsePrivilegeWrapperFilter.cs" />
-    <Compile Include="Tools\ObjectExtensionMethods.cs" />
     <Compile Include="Variables\DbConstants.cs" />
     <Compile Include="Variables\IOConstants.cs" />
     <Compile Include="Variables\JwtConstants.cs" />

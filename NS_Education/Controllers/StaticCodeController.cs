@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.StaticCode.GetInfoById;
 using NS_Education.Models.APIItems.StaticCode.GetList;
+using NS_Education.Models.APIItems.StaticCode.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -28,13 +29,15 @@ namespace NS_Education.Controllers
         , IGetListPaged<B_StaticCode, StaticCode_GetList_Input_APIItem, StaticCode_GetList_Output_Row_APIItem>
         , IChangeActive<B_StaticCode>
         , IDeleteItem<B_StaticCode>
+        , ISubmit<B_StaticCode, StaticCode_Submit_Input_APIItem>
     {
         #region 共用
-        
+
         private readonly IGetTypeListHelper _getTypeListHelper;
         private readonly IGetListPagedHelper<StaticCode_GetList_Input_APIItem> _getListHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<StaticCode_Submit_Input_APIItem> _submitHelper;
 
         /// <summary>
         /// 靜態參數類別名稱對照表。<br/>
@@ -48,7 +51,13 @@ namespace NS_Education.Controllers
             StaticCodeTypes = DC.B_StaticCode
                 .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
                 .Where(sc => sc.CodeType == 0)
-                .ToDictionary(sc => sc.Code, sc => sc);
+                .OrderBy(sc => sc.Code)
+                .ThenBy(sc => sc.SortNo)
+                // EF 不支援 GroupBy，所以回到本地在記憶體做
+                .AsEnumerable()
+                // CodeType 和 Code 並不是 PK，有可能有多筆同樣 CodeType Code 的資料，所以這裡各種 Code 只取一筆，以免重複 Key
+                .GroupBy(sc => sc.Code)
+                .ToDictionary(group => group.Key, group => group.First());
 
             _getTypeListHelper =
                 new GetTypeListHelper<StaticCodeController, B_StaticCode>(this);
@@ -64,10 +73,13 @@ namespace NS_Education.Controllers
 
             _deleteItemHelper =
                 new DeleteItemHelper<StaticCodeController, B_StaticCode>(this);
+
+            _submitHelper =
+                new SubmitHelper<StaticCodeController, B_StaticCode, StaticCode_Submit_Input_APIItem>(this);
         }
 
         #endregion
-        
+
         #region GetTypeList
 
         [HttpGet]
@@ -156,42 +168,43 @@ namespace NS_Education.Controllers
         #endregion
 
         #region GetInfoById
-        
+
         private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或格式有誤！";
         private const string GetInfoByIdNotFound = "查無指定的資料！";
-        
-        private readonly StaticCode_GetInfoById_Output_APIItem _getInfoByIdDummyOutput = new StaticCode_GetInfoById_Output_APIItem
-        {
-            BSCID = 0,
-            iCodeType = 0,
-            sCodeType = null,
-            CodeTypeList = null, // 在轉換方法中設值。所以這個物件不能是 static。
-            Code = null,
-            Title = null,
-            SortNo = 0,
-            Note = null,
-            ActiveFlag = true,
-            CreDate = null,
-            CreUser = null,
-            CreUID = 0,
-            UpdDate = null,
-            UpdUser = null,
-            UpdUID = 0
-        };
-        
+
+        private readonly StaticCode_GetInfoById_Output_APIItem _getInfoByIdDummyOutput =
+            new StaticCode_GetInfoById_Output_APIItem
+            {
+                BSCID = 0,
+                iCodeType = 0,
+                sCodeType = null,
+                CodeTypeList = null, // 在轉換方法中設值。所以這個物件不能是 static。
+                Code = null,
+                Title = null,
+                SortNo = 0,
+                Note = null,
+                ActiveFlag = true,
+                CreDate = null,
+                CreUser = null,
+                CreUID = 0,
+                UpdDate = null,
+                UpdUser = null,
+                UpdUID = 0
+            };
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetInfoById(int id)
         {
             // 因為這個端點有特殊邏輯（id 輸入 0 時不查資料而是回傳僅部分欄位的空資料），不使用 Helper 會比較清晰
-            
+
             // 1. 驗證輸入
             if (id < -1)
             {
                 AddError(GetInfoByIdInputIncorrect);
                 return GetResponseJson();
             }
-            
+
             // 2. 依據輸入分支
             // |- a. 如果是 0，拿空資料
             // +- b. 如果不是 0，查詢資料，無資料時跳錯
@@ -226,11 +239,12 @@ namespace NS_Education.Controllers
             return GetResponseJson(response);
         }
 
-        private async Task<StaticCode_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(B_StaticCode entity)
+        private async Task<StaticCode_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(
+            B_StaticCode entity)
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
-            
+
             return new StaticCode_GetInfoById_Output_APIItem
             {
                 BSCID = entity.BSCID,
@@ -254,7 +268,7 @@ namespace NS_Education.Controllers
         }
 
         #endregion
-        
+
         #region ChangeActive
 
         [HttpGet]
@@ -268,11 +282,11 @@ namespace NS_Education.Controllers
         {
             return DC.B_StaticCode.Where(sc => sc.BSCID == id);
         }
-        
+
         #endregion
-        
+
         #region DeleteItem
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
         public async Task<string> DeleteItem(int id)
@@ -284,7 +298,100 @@ namespace NS_Education.Controllers
         {
             return DC.B_StaticCode.Where(sc => sc.BSCID == id);
         }
-        
+
+        #endregion
+
+        #region Submit
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any,
+            RequirePrivilege.AddOrEdit,
+            null,
+            nameof(StaticCode_Submit_Input_APIItem.BSCID))]
+        public async Task<string> Submit(StaticCode_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(StaticCode_Submit_Input_APIItem input)
+        {
+            return input.BSCID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(StaticCode_Submit_Input_APIItem input)
+        {
+            return await Task.Run(() => input.StartValidate()
+                .Validate(i => i.BSCID.IsValidIdOrZero(),
+                    () => AddError(EmptyNotAllowed("靜態參數 ID")))
+                .Validate(i => i.CodeType.IsValidIdOrZero(),
+                    () => AddError(EmptyNotAllowed("靜態參數所屬類別")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("靜態參數編碼")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("靜態參數名稱")))
+                .Validate(i => i.ActiveFlag != null,
+                    () => AddError(EmptyNotAllowed("是否啟用")))
+                .IsValid());
+        }
+
+        public async Task<B_StaticCode> SubmitCreateData(StaticCode_Submit_Input_APIItem input)
+        {
+            return new B_StaticCode
+            {
+                CodeType = input.CodeType ?? throw new ArgumentNullException(nameof(input.CodeType)),
+                Code = input.Code ?? throw new ArgumentNullException(nameof(input.Code)),
+                Title = input.Title ?? throw new ArgumentNullException(nameof(input.Title)),
+                SortNo = await DC.B_StaticCode
+                    .Where(sc => sc.CodeType == input.CodeType)
+                    .OrderBy(sc => sc.SortNo)
+                    .Select(sc => sc.SortNo)
+                    .FirstOrDefaultAsync() + 1,
+                Note = input.Note ?? "",
+                ActiveFlag = input.ActiveFlag ?? throw new ArgumentNullException(nameof(input.ActiveFlag)),
+            };
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(StaticCode_Submit_Input_APIItem input)
+        {
+            return await Task.Run(() => input.StartValidate()
+                .Validate(i => i.BSCID.IsValidId(),
+                    () => AddError(EmptyNotAllowed("靜態參數 ID")))
+                .Validate(i => i.CodeType.IsValidIdOrZero(),
+                    () => AddError(EmptyNotAllowed("靜態參數所屬類別")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("靜態參數編碼")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("靜態參數名稱")))
+                .Validate(i => i.ActiveFlag != null,
+                    () => AddError(EmptyNotAllowed("是否啟用")))
+                .Validate(i => i.DeleteFlag != null,
+                    () => AddError(EmptyNotAllowed("刪除狀態")))
+                .IsValid());
+        }
+
+        public IQueryable<B_StaticCode> SubmitEditQuery(StaticCode_Submit_Input_APIItem input)
+        {
+            return DC.B_StaticCode.Where(sc => sc.BSCID == input.BSCID);
+        }
+
+        public void SubmitEditUpdateDataFields(B_StaticCode data, StaticCode_Submit_Input_APIItem input)
+        {
+            data.CodeType = input.CodeType ?? data.CodeType;
+            data.Code = input.Code ?? data.Code;
+            data.Title = input.Title ?? data.Title;
+            data.Note = input.Note ?? data.Note;
+            data.ActiveFlag = input.ActiveFlag ?? data.ActiveFlag;
+            data.DeleteFlag = input.DeleteFlag ?? data.DeleteFlag;
+        }
+
+        #endregion
+
         #endregion
     }
 }

@@ -67,7 +67,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private async Task _SubmitAdd(TSubmitRequest input)
         {
             // 1. 建立資料
-            TEntity t = _controller.SubmitCreateData(input);
+            TEntity t = await _controller.SubmitCreateData(input);
             CreUpdHelper.SetInfosOnCreate(_controller, t);
 
             // 2. 儲存至 DB

@@ -67,6 +67,16 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         {
             Error += errorMessage + ";";
         }
+
+        /// <summary>
+        /// 回傳一串缺少欄位時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected internal string EmptyNotAllowed(string fieldName)
+        {
+            return $"「{fieldName}」未輸入或格式不正確！";
+        }
         
         /// <summary>
         /// 判定目前是否有錯誤訊息。

@@ -278,6 +278,7 @@
     <Compile Include="Models\APIItems\StaticCode\GetInfoById\StaticCode_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetList\StaticCode_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetList\StaticCode_GetList_Output_Row_APIItem.cs" />
+    <Compile Include="Models\APIItems\StaticCode\Submit\StaticCode_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\TimeSpan\D_TimeSpan_APIItem.cs" />
     <Compile Include="Models\APIItems\UserData\ChangeActive\UserData_ChangeActive_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\UserData\DeleteItem\UserData_DeleteItem_Input_APIItem.cs" />

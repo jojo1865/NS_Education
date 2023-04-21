@@ -49,7 +49,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <param name="input">輸入</param>
         /// <returns>欲新增的物件</returns>
         /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者可以忽略 CreUid、CreDate、UpdUid 及 UpdDate 的設定。</remarks>
-        TEntity SubmitCreateData(TSubmitRequest input);
+        Task<TEntity> SubmitCreateData(TSubmitRequest input);
         
         /// <summary>
         /// 更新一筆資料時，驗證輸入格式。
@@ -62,19 +62,19 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         Task<bool> SubmitEditValidateInput(TSubmitRequest input);
         
         /// <summary>
-        /// 更新一筆資料時，依據輸入覆寫資料各欄位的方法。
-        /// </summary>
-        /// <param name="data">DB 資料</param>
-        /// <param name="input">輸入</param>
-        /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者在更新時可以忽略 UpdUid 及 UpdDate 的更新。</remarks>
-        void SubmitEditUpdateDataFields(TEntity data, TSubmitRequest input);
-        
-        /// <summary>
         /// 更新一筆資料時，找出原資料的查詢。
         /// </summary>
         /// <param name="input">輸入</param>
         /// <returns>查詢</returns>
         /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
         IQueryable<TEntity> SubmitEditQuery(TSubmitRequest input);
+        
+        /// <summary>
+        /// 更新一筆資料時，依據輸入覆寫資料各欄位的方法。
+        /// </summary>
+        /// <param name="data">DB 資料</param>
+        /// <param name="input">輸入</param>
+        /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者在更新時可以忽略 UpdUid 及 UpdDate 的更新。</remarks>
+        void SubmitEditUpdateDataFields(TEntity data, TSubmitRequest input);
     }
 }

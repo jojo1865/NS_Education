@@ -346,6 +346,7 @@
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListLocalHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListPagedHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetTypeListHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IChangeActiveHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetInfoByIdHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListLocalHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListPagedHelper.cs" />

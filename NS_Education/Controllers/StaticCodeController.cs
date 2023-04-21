@@ -26,11 +26,13 @@ namespace NS_Education.Controllers
     public class StaticCodeController : PublicClass
         , IGetTypeList<B_StaticCode>
         , IGetListPaged<B_StaticCode, StaticCode_GetList_Input_APIItem, StaticCode_GetList_Output_Row_APIItem>
+        , IChangeActive<B_StaticCode>
     {
         #region 共用
         
         private readonly IGetTypeListHelper _getTypeListHelper;
         private readonly IGetListPagedHelper<StaticCode_GetList_Input_APIItem> _getListHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper; 
 
         /// <summary>
         /// 靜態參數類別名稱對照表。<br/>
@@ -54,6 +56,9 @@ namespace NS_Education.Controllers
                     , B_StaticCode
                     , StaticCode_GetList_Input_APIItem
                     , StaticCode_GetList_Output_Row_APIItem>(this);
+
+            _changeActiveHelper =
+                new ChangeActiveHelper<StaticCodeController, B_StaticCode>(this);
         }
 
         #endregion
@@ -243,6 +248,22 @@ namespace NS_Education.Controllers
             };
         }
 
+        #endregion
+        
+        #region ChangeActive
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
+        {
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        public IQueryable<B_StaticCode> ChangeActiveQuery(int id)
+        {
+            return DC.B_StaticCode.Where(sc => sc.BSCID == id);
+        }
+        
         #endregion
     }
 }

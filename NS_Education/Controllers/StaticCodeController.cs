@@ -343,6 +343,7 @@ namespace NS_Education.Controllers
                 CodeType = input.CodeType ?? throw new ArgumentNullException(nameof(input.CodeType)),
                 Code = input.Code ?? throw new ArgumentNullException(nameof(input.Code)),
                 Title = input.Title ?? throw new ArgumentNullException(nameof(input.Title)),
+                // SortNo 邏輯：每種 CodeType 中目前最大的 SortNo+1，如果是第一筆新 Code 就是 1
                 SortNo = await DC.B_StaticCode
                     .Where(sc => sc.CodeType == input.CodeType)
                     .OrderBy(sc => sc.SortNo)

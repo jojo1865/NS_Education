@@ -155,13 +155,6 @@ namespace NS_Education.Controllers
                     Title = entity.Title,
                     SortNo = entity.SortNo,
                     Note = entity.Note ?? "",
-                    ActiveFlag = entity.ActiveFlag,
-                    CreDate = entity.CreDate.ToFormattedString(),
-                    CreUser = await GetUserNameByID(entity.CreUID),
-                    CreUID = entity.CreUID,
-                    UpdDate = entity.UpdDate.ToFormattedString(),
-                    UpdUser = await GetUserNameByID(entity.UpdUID),
-                    UpdUID = entity.UpdUID
                 };
         }
 

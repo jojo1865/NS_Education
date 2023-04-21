@@ -130,7 +130,7 @@ namespace NS_Education.Controllers
 
         public async Task<OrderCode_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_OrderCode entity)
         {
-            return new OrderCode_GetList_Output_Row_APIItem
+            return await Task.FromResult(new OrderCode_GetList_Output_Row_APIItem
             {
                 BOCID = entity.BOCID,
                 iCodeType = entity.CodeType,
@@ -142,14 +142,7 @@ namespace NS_Education.Controllers
                 PrintTitle = entity.PrintTitle ?? "",
                 PrintNote = entity.PrintNote ?? "",
                 SortNo = entity.SortNo,
-                ActiveFlag = entity.ActiveFlag,
-                CreDate = entity.CreDate.ToFormattedString(),
-                CreUser = await GetUserNameByID(entity.CreUID),
-                CreUID = entity.CreUID,
-                UpdDate = entity.UpdDate.ToFormattedString(),
-                UpdUser = await GetUserNameByID(entity.UpdUID),
-                UpdUID = entity.UpdUID
-            };
+            });
         }
 
         #endregion

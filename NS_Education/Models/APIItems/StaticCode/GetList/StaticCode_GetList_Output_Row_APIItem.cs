@@ -11,12 +11,5 @@ namespace NS_Education.Models.APIItems.StaticCode.GetList
         public string Title { get; set; }
         public int SortNo { get; set; }
         public string Note { get; set; }
-        public bool ActiveFlag { get; set; }
-        public string CreDate { get; set; }
-        public string CreUser { get; set; }
-        public int CreUID { get; set; }
-        public string UpdDate { get; set; }
-        public string UpdUser { get; set; }
-        public int UpdUID { get; set; }
     }
 }

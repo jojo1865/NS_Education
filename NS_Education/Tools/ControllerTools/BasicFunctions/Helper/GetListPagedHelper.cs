@@ -57,11 +57,15 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 4. 按指定格式回傳結果
             // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。（如：取得 Username）
-            response.Items = queryResult
-                .Select(c => CreUpdHelper.CopyInfosIntoRow
-                    (c, Task.Run(() => _controller.GetListPagedEntityToRow(c)).Result, _controller)
-                )
-                .ToList();
+            List<TGetListRow> rows = new List<TGetListRow>();
+            foreach (var entity in queryResult)
+            {
+                var row = Task.Run(() => _controller.GetListPagedEntityToRow(entity)).Result;
+                row.SetInfoFromEntity(entity, _controller);
+                rows.Add(row);
+            }
+
+            response.Items = rows;
 
             return _controller.GetResponseJson(response);
         }

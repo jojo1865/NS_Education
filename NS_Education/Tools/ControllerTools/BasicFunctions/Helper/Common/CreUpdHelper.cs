@@ -22,11 +22,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             where TController : PublicClass
             where TEntity : class
         {
-            if (FlagHelper<TEntity>.HasUpdUid)
-                t.SetIfHasProperty(DbConstants.UpdUid, controller.GetUid());
-
-            if (FlagHelper<TEntity>.HasUpdDate)
-                t.SetIfHasProperty(DbConstants.UpdDate, DateTime.Now);
+            t.SetIfHasProperty(DbConstants.UpdUid, controller.GetUid());
+            t.SetIfHasProperty(DbConstants.UpdDate, DateTime.Now);
         }
 
         /// <summary>
@@ -40,17 +37,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             where TController : PublicClass
             where TEntity : class
         {
-            if (FlagHelper<TEntity>.HasCreUid)
-                t.SetIfHasProperty(DbConstants.CreUid, controller.GetUid());
-
-            if (FlagHelper<TEntity>.HasCreDate)
-                t.SetIfHasProperty(DbConstants.CreDate, DateTime.Now);
-
-            if (FlagHelper<TEntity>.HasUpdUid)
-                t.SetIfHasProperty(DbConstants.UpdUid, 0);
-
-            if (FlagHelper<TEntity>.HasCreDate)
-                t.SetIfHasProperty(DbConstants.UpdDate, DateTime.Now);
+            t.SetIfHasProperty(DbConstants.CreUid, controller.GetUid());
+            t.SetIfHasProperty(DbConstants.CreDate, DateTime.Now);
+            t.SetIfHasProperty(DbConstants.UpdUid, 0);
+            t.SetIfHasProperty(DbConstants.UpdDate, DateTime.Now);
         }
 
         #endregion

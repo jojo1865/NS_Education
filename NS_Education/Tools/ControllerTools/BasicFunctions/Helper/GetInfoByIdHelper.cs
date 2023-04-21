@@ -34,11 +34,13 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         public async Task<string> GetInfoById( int id)
         {
             // 1. 驗證輸入資料
-            if (!await _controller.GetInfoByIdValidateInput(id))
-            {
+            bool isValid = await _controller.GetInfoByIdValidateInput(id);
+            
+            if (!isValid && !_controller.HasError())
                 _controller.AddError(GetInfoByIdInputIncorrect);
+
+            if (_controller.HasError())
                 return _controller.GetResponseJson();
-            }
 
             // 2. 取得單筆資料
             TEntity t = await _GetInfoByIdQueryResult(id);

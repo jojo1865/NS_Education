@@ -27,12 +27,14 @@ namespace NS_Education.Controllers
         , IGetTypeList<B_StaticCode>
         , IGetListPaged<B_StaticCode, StaticCode_GetList_Input_APIItem, StaticCode_GetList_Output_Row_APIItem>
         , IChangeActive<B_StaticCode>
+        , IDeleteItem<B_StaticCode>
     {
         #region 共用
         
         private readonly IGetTypeListHelper _getTypeListHelper;
         private readonly IGetListPagedHelper<StaticCode_GetList_Input_APIItem> _getListHelper;
-        private readonly IChangeActiveHelper _changeActiveHelper; 
+        private readonly IChangeActiveHelper _changeActiveHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
 
         /// <summary>
         /// 靜態參數類別名稱對照表。<br/>
@@ -59,6 +61,9 @@ namespace NS_Education.Controllers
 
             _changeActiveHelper =
                 new ChangeActiveHelper<StaticCodeController, B_StaticCode>(this);
+
+            _deleteItemHelper =
+                new DeleteItemHelper<StaticCodeController, B_StaticCode>(this);
         }
 
         #endregion
@@ -260,6 +265,22 @@ namespace NS_Education.Controllers
         }
 
         public IQueryable<B_StaticCode> ChangeActiveQuery(int id)
+        {
+            return DC.B_StaticCode.Where(sc => sc.BSCID == id);
+        }
+        
+        #endregion
+        
+        #region DeleteItem
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
+        public async Task<string> DeleteItem(int id)
+        {
+            return await _deleteItemHelper.DeleteItem(id);
+        }
+
+        public IQueryable<B_StaticCode> DeleteItemQuery(int id)
         {
             return DC.B_StaticCode.Where(sc => sc.BSCID == id);
         }

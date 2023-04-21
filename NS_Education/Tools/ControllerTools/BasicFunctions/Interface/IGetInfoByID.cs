@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using NS_Education.Models;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
@@ -10,7 +11,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     /// <typeparam name="TGetResponse">回傳類型</typeparam>
     public interface IGetInfoById<TEntity, out TGetResponse>
         where TEntity : class
-        where TGetResponse : cReturnMessageInfusableAbstract
+        where TGetResponse : IReturnMessageInfusable
     {
         /// <summary>
         /// 取得單筆資料。

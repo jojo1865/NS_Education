@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -16,7 +17,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     public class GetInfoByIdHelper<TController, TEntity, TGetResponse> : IGetInfoByIdHelper
         where TController : PublicClass, IGetInfoById<TEntity, TGetResponse>
         where TEntity : class
-        where TGetResponse : cReturnMessageInfusableAbstract
+        where TGetResponse : BaseResponseWithCreUpdInfusable<TEntity>
     {
         private readonly TController _controller;
 

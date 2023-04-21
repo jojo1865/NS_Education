@@ -3,7 +3,7 @@ using NS_Education.Tools;
 
 namespace NS_Education.Models.APIItems.StaticCode.GetInfoById
 {
-    public class StaticCode_GetInfoById_Output_APIItem : cReturnMessageInfusableAbstract
+    public class StaticCode_GetInfoById_Output_APIItem : BaseInfusable
     {
         public int BSCID { get; set; }
         public int iCodeType { get; set; }

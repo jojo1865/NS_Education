@@ -270,9 +270,11 @@
     <Compile Include="Models\APIItems\BaseResponseForPagedList.cs" />
     <Compile Include="Models\APIItems\BaseResponseWithCreUpd.cs" />
     <Compile Include="Models\APIItems\BaseResponseRowForType.cs" />
+    <Compile Include="Models\APIItems\BaseResponseWithCreUpdInfusable.cs" />
     <Compile Include="Models\APIItems\Category\B_Category_APIItem.cs" />
     <Compile Include="Models\APIItems\Company\D_Company_APIItem.cs" />
     <Compile Include="Models\APIItems\ContactType\GetList\ContactType_GetList_Output_Row_APIItem.cs" />
+    <Compile Include="Models\APIItems\BaseInfusable.cs" />
     <Compile Include="Models\APIItems\Department\D_Department_APIItem.cs" />
     <Compile Include="Models\APIItems\FoodCategory\D_FoodCategory_APIItem.cs" />
     <Compile Include="Models\APIItems\Hall\D_Hall_APIItem.cs" />
@@ -342,6 +344,7 @@
     <Compile Include="Models\Entities\Resver_Throw_Food.cs" />
     <Compile Include="Models\Entities\UserData.cs" />
     <Compile Include="Models\Entities\UserLog.cs" />
+    <Compile Include="Models\IReturnMessageInfusable.cs" />
     <Compile Include="Models\PublicModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\BeingValidated\BeingValidated.cs" />
@@ -371,7 +374,6 @@
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListPaged.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetTypeList.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs" />
-    <Compile Include="Tools\cReturnMessageInfusableAbstract.cs" />
     <Compile Include="Tools\Encryption\JwtHelper.cs" />
     <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs" />

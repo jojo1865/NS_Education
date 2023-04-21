@@ -3,7 +3,7 @@ using NS_Education.Tools;
 
 namespace NS_Education.Models.APIItems.OrderCode.GetInfoById
 {
-    public class OrderCode_GetInfoById_Output_APIItem : cReturnMessageInfusableAbstract
+    public class OrderCode_GetInfoById_Output_APIItem : BaseInfusable
     {
         public int BOCID { get; set; }
         public int iCodeType { get; set; }

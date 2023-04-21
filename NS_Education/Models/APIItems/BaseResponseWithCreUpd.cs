@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using NS_Education.Tools;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
@@ -15,7 +16,7 @@ namespace NS_Education.Models.APIItems
         /// </summary>
         /// <param name="entity">DB 物件</param>
         /// <param name="controller">Controller 物件</param>
-        public async void SetInfoFromEntity(TEntity entity, PublicClass controller)
+        public async Task SetInfoFromEntity(TEntity entity, PublicClass controller)
         {
             ActiveFlag = entity.GetIfHasProperty<TEntity, bool>(DbConstants.ActiveFlag);
             

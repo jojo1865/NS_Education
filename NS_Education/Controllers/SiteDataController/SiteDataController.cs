@@ -20,18 +20,22 @@ namespace NS_Education.Controllers.SiteDataController
 {
     public class SiteDataController : PublicClass,
         IGetListPaged<B_SiteData, SiteData_GetList_Input_APIItem, SiteData_GetList_Output_Row_APIItem>,
-        IGetInfoById<B_SiteData, SiteData_GetInfoById_Output_APIItem>
+        IGetInfoById<B_SiteData, SiteData_GetInfoById_Output_APIItem>,
+        IChangeActive<B_SiteData>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<SiteData_GetList_Input_APIItem> _getListHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
+        private readonly IChangeActiveHelper _changeActiveHelper;
+
         public SiteDataController()
         {
             _getListHelper = new GetListPagedHelper<SiteDataController, B_SiteData, SiteData_GetList_Input_APIItem,
                 SiteData_GetList_Output_Row_APIItem>(this);
             _getInfoByIdHelper = new GetInfoByIdHelper<SiteDataController, B_SiteData, SiteData_GetInfoById_Output_APIItem>(this);
+            _changeActiveHelper = new ChangeActiveHelper<SiteDataController, B_SiteData>(this);
         }
 
         #endregion
@@ -171,6 +175,19 @@ namespace NS_Education.Controllers.SiteDataController
             };
         }
 
+        #endregion
+
+        #region ChangeActive
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
+        {
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        public IQueryable<B_SiteData> ChangeActiveQuery(int id)
+        {
+            return DC.B_SiteData.Where(sd => sd.BSID == id);
+        }
+        
         #endregion
     }
 }

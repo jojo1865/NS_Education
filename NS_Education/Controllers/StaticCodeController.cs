@@ -120,7 +120,8 @@ namespace NS_Education.Controllers
         {
             return await Task.Run(() => input
                 .StartValidate()
-                .Validate(i => i.CodeType >= -1)
+                .Validate(i => i.CodeType >= -1,
+                    () => AddError(EmptyNotAllowed("靜態參數類別")))
                 .IsValid()
             );
         }

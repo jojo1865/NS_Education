@@ -108,9 +108,12 @@ namespace NS_Education.Controllers
 
         public async Task<bool> GetListPagedValidateInput(OrderCode_GetList_Input_APIItem input)
         {
-            return await Task.Run(() =>
-                input.CodeType >= -1
-            );
+            bool isValid = input.StartValidate()
+                .Validate(i => i.CodeType >= -1,
+                    () => AddError(EmptyNotAllowed("入帳代號類別")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
         }
 
         public IOrderedQueryable<B_OrderCode> GetListPagedOrderedQuery(OrderCode_GetList_Input_APIItem input)

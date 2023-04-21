@@ -41,6 +41,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             t.SetIfHasProperty(DbConstants.CreDate, DateTime.Now);
             t.SetIfHasProperty(DbConstants.UpdUid, 0);
             t.SetIfHasProperty(DbConstants.UpdDate, DateTime.Now);
+            t.SetIfHasProperty(DbConstants.DeleteFlag, false);
         }
 
         #endregion

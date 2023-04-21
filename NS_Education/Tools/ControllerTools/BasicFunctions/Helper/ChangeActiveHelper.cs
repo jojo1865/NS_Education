@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 
@@ -13,7 +14,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     /// </summary>
     /// <typeparam name="TController">Controller 類型</typeparam>
     /// <typeparam name="TEntity">掌管資料類型</typeparam>
-    public class ChangeActiveHelper<TController, TEntity>
+    public class ChangeActiveHelper<TController, TEntity> : IChangeActiveHelper
         where TController : PublicClass, IChangeActive<TEntity>
         where TEntity : class
     {
@@ -33,7 +34,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private const string ChangeActiveInputIdIncorrect = "未輸入欲更新的 ID 或是不正確！";
         private const string ChangeActiveInputFlagNotFound = "未提供啟用狀態的新值！";
         private const string ChangeActiveNotFound = "查無欲更新的資料！";
-
+        
         /// <summary>
         /// 修改資料的啟用/停用狀態。
         /// </summary>
@@ -57,11 +58,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             if (activeFlag is null)
                 _controller.AddError(ChangeActiveInputFlagNotFound);
 
-            // ReSharper disable once PossibleInvalidOperationException
-            bool activeFlagValue = activeFlag.Value;
-
             if (_controller.HasError())
                 return _controller.GetResponseJson();
+            
+            // ReSharper disable once PossibleInvalidOperationException
+            bool activeFlagValue = activeFlag.Value;
 
             // 2. 查詢資料並確認刪除狀態。
             TEntity t = await _ChangeActiveQueryResult(id);

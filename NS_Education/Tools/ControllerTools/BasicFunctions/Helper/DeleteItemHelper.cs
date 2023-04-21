@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 
@@ -13,7 +14,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     /// </summary>
     /// <typeparam name="TController">Controller 類型</typeparam>
     /// <typeparam name="TEntity">掌管資料類型</typeparam>
-    public class DeleteItemHelper<TController, TEntity>
+    public class DeleteItemHelper<TController, TEntity> : IDeleteItemHelper
         where TController : PublicClass, IDeleteItem<TEntity>
         where TEntity : class
     {

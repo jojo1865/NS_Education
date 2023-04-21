@@ -143,7 +143,7 @@ namespace NS_Education.Controllers
 
         public async Task<StaticCode_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_StaticCode entity)
         {
-            return
+            return await Task.FromResult(
                 new StaticCode_GetList_Output_Row_APIItem
                 {
                     BSCID = entity.BSCID,
@@ -155,7 +155,7 @@ namespace NS_Education.Controllers
                     Title = entity.Title,
                     SortNo = entity.SortNo,
                     Note = entity.Note ?? "",
-                };
+                });
         }
 
         #endregion
@@ -175,14 +175,7 @@ namespace NS_Education.Controllers
                 Code = null,
                 Title = null,
                 SortNo = 0,
-                Note = null,
-                ActiveFlag = true,
-                CreDate = null,
-                CreUser = null,
-                CreUID = 0,
-                UpdDate = null,
-                UpdUser = null,
-                UpdUID = 0
+                Note = null
             };
 
         [HttpGet]
@@ -238,7 +231,7 @@ namespace NS_Education.Controllers
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            return new StaticCode_GetInfoById_Output_APIItem
+            return await Task.FromResult(new StaticCode_GetInfoById_Output_APIItem
             {
                 BSCID = entity.BSCID,
                 iCodeType = entity.CodeType,
@@ -249,15 +242,8 @@ namespace NS_Education.Controllers
                 Code = entity.Code,
                 Title = entity.Title,
                 SortNo = entity.SortNo,
-                Note = entity.Note ?? "",
-                ActiveFlag = entity.ActiveFlag,
-                CreDate = entity.CreDate.ToFormattedString(),
-                CreUser = await GetUserNameByID(entity.CreUID),
-                CreUID = entity.CreUID,
-                UpdDate = entity.UpdDate.ToFormattedString(),
-                UpdUser = await GetUserNameByID(entity.UpdUID),
-                UpdUID = entity.UpdUID
-            };
+                Note = entity.Note ?? ""
+            });
         }
 
         #endregion

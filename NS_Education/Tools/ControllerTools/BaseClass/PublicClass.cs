@@ -44,7 +44,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
             return ChangeJson(GetMsgClass(Error));
         }
         
-        public string GetResponseJson<T>(T infusable) where T : cReturnMessageInfusableAbstract
+        public string GetResponseJson<T>(T infusable) where T : IReturnMessageInfusable
         {
             // TODO: 這裡多餘的 cReturnMessage 應該可以避免。可重構此處 Flow
             infusable.Infuse(GetMsgClass(Error));

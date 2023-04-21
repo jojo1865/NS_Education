@@ -163,14 +163,7 @@ namespace NS_Education.Controllers
                 Title = null,
                 PrintTitle = null,
                 PrintNote = null,
-                SortNo = 0,
-                ActiveFlag = true,
-                CreDate = null,
-                CreUser = null,
-                CreUID = 0,
-                UpdDate = null,
-                UpdUser = null,
-                UpdUID = 0
+                SortNo = 0
             };
 
         [System.Web.Http.HttpGet]
@@ -226,7 +219,7 @@ namespace NS_Education.Controllers
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            return new OrderCode_GetInfoById_Output_APIItem
+            return await Task.FromResult(new OrderCode_GetInfoById_Output_APIItem
             {
                 BOCID = entity.BOCID,
                 iCodeType = entity.CodeType,
@@ -238,15 +231,8 @@ namespace NS_Education.Controllers
                 Title = entity.Title ?? "",
                 PrintTitle = entity.PrintTitle ?? "",
                 PrintNote = entity.PrintNote ?? "",
-                SortNo = entity.SortNo,
-                ActiveFlag = entity.ActiveFlag,
-                CreDate = entity.CreDate.ToFormattedString(),
-                CreUser = await GetUserNameByID(entity.CreUID),
-                CreUID = entity.CreUID,
-                UpdDate = entity.UpdDate.ToFormattedString(),
-                UpdUser = await GetUserNameByID(entity.UpdUID),
-                UpdUID = entity.UpdUID
-            };
+                SortNo = entity.SortNo
+            });
         }
 
         #endregion

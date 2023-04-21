@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using NS_Education.Tools;
+using NS_Education.Models.Entities;
 
 namespace NS_Education.Models.APIItems.OrderCode.GetInfoById
 {
-    public class OrderCode_GetInfoById_Output_APIItem : cReturnMessageInfusableAbstract
+    public class OrderCode_GetInfoById_Output_APIItem : BaseResponseWithCreUpdInfusable<B_OrderCode>
     {
         public int BOCID { get; set; }
         public int iCodeType { get; set; }
@@ -14,12 +14,5 @@ namespace NS_Education.Models.APIItems.OrderCode.GetInfoById
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }
         public int SortNo { get; set; }
-        public bool ActiveFlag { get; set; }
-        public string CreDate { get; set; }
-        public string CreUser { get; set; }
-        public int CreUID { get; set; }
-        public string UpdDate { get; set; }
-        public string UpdUser { get; set; }
-        public int UpdUID { get; set; }
     }
 }

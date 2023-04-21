@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -16,7 +17,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     public class GetInfoByIdHelper<TController, TEntity, TGetResponse> : IGetInfoByIdHelper
         where TController : PublicClass, IGetInfoById<TEntity, TGetResponse>
         where TEntity : class
-        where TGetResponse : cReturnMessageInfusableAbstract
+        where TGetResponse : BaseResponseWithCreUpdInfusable<TEntity>
     {
         private readonly TController _controller;
 
@@ -44,7 +45,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 3. 有資料時, 轉換成指定格式並回傳
             if (t != null)
-                return _controller.GetResponseJson(_controller.GetInfoByIdConvertEntityToResponse(t));
+            {
+                var response = _controller.GetInfoByIdConvertEntityToResponse(t);
+                await response.SetInfoFromEntity(t, _controller);
+                return _controller.GetResponseJson(response);
+            }
 
             // 4. 無資料時, 回傳錯誤
             _controller.AddError(GetInfoByIdNotFound);

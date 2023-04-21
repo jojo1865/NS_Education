@@ -61,7 +61,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             foreach (var entity in queryResult)
             {
                 var row = Task.Run(() => _controller.GetListPagedEntityToRow(entity)).Result;
-                row.SetInfoFromEntity(entity, _controller);
+                await row.SetInfoFromEntity(entity, _controller);
                 rows.Add(row);
             }
 

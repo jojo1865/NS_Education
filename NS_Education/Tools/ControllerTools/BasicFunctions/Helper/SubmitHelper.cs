@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
@@ -13,10 +14,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     /// <typeparam name="TController">Controller 類型</typeparam>
     /// <typeparam name="TEntity">掌管資料類型</typeparam>
     /// <typeparam name="TSubmitRequest">傳入物件類型</typeparam>
-    public class SubmitHelper<TController, TEntity, TSubmitRequest>
+    public class SubmitHelper<TController, TEntity, TSubmitRequest> : ISubmitHelper<TSubmitRequest>
         where TController : PublicClass, ISubmit<TEntity, TSubmitRequest>
         where TEntity : class
-        where TSubmitRequest : cReturnMessageInfusableAbstract
+        where TSubmitRequest : class
     {
         private readonly TController _controller;
 
@@ -33,18 +34,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private const string SubmitAddValidateFailed = "欲新增資料的輸入格式不符！";
         private const string SubmitEditValidateFailed = "欲更新資料的輸入格式不符！";
         private const string SubmitEditNotFound = "查無欲更新的資料！";
-
-        /// <summary>
-        /// 新增或更新一筆資料。
-        /// </summary>
-        /// <param name="input">輸入資料</param>
-        /// <returns>
-        /// 成功時：通用訊息回傳格式。<br/>
-        /// 輸入驗證失敗時：包含錯誤訊息的通用訊息回傳格式。<br/>
-        /// 新增，但 DB 連線異常時：包含錯誤訊息的通用訊息回傳格式。<br/>
-        /// 修改，但查無資料，或 DB 連線異常時：包含錯誤訊息的通用訊息回傳格式。<br/>
-        /// 其他錯誤時：拋錯。
-        /// </returns>
+        
         public async Task<string> Submit(TSubmitRequest input)
         {
             // 1. 依據實作內容判定此次 Submit 為新增還是更新。

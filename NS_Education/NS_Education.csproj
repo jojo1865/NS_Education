@@ -352,6 +352,7 @@
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListLocalHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListPagedHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetTypeListHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\ISubmitHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\SubmitHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IChangeActive.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItem.cs" />

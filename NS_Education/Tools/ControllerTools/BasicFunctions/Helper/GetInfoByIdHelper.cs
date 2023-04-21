@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
-using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
@@ -13,7 +13,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     /// <typeparam name="TController">Controller 類型</typeparam>
     /// <typeparam name="TEntity">掌管資料類型</typeparam>
     /// <typeparam name="TGetResponse">回傳物件類型</typeparam>
-    public class GetInfoByIdHelper<TController, TEntity, TGetResponse>
+    public class GetInfoByIdHelper<TController, TEntity, TGetResponse> : IGetInfoByIdHelper
         where TController : PublicClass, IGetInfoById<TEntity, TGetResponse>
         where TEntity : class
         where TGetResponse : cReturnMessageInfusableAbstract
@@ -29,20 +29,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或是值不正確！";
         private const string GetInfoByIdNotFound = "查無欲查詢的資料！";
-
-        /// <summary>
-        /// 取得單筆資料。
-        /// </summary>
-        /// <param name="id">查詢用的索引鍵</param>
-        /// <returns>
-        /// 成功時：包含資料的通用訊息回傳格式。<br/>
-        /// 輸入驗證失敗，或查無資料時：不包含資料的通用訊息回傳格式。<br/>
-        /// 意外錯誤時：拋錯。
-        /// </returns>
+        
         public async Task<string> GetInfoById( int id)
         {
             // 1. 驗證輸入資料
-            if (!id.IsValidId())
+            if (!_controller.GetInfoByIdValidateInput(id))
             {
                 _controller.AddError(GetInfoByIdInputIncorrect);
                 return _controller.GetResponseJson();

@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
+using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
+using NS_Education.Models.APIItems.StaticCode.GetInfoById;
 using NS_Education.Models.APIItems.StaticCode.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -21,33 +24,31 @@ namespace NS_Education.Controllers
     /// 靜態參數的 Controller。
     /// </summary>
     public class StaticCodeController : PublicClass
-            , IGetTypeList<B_StaticCode>
-            , IGetListPaged<B_StaticCode, StaticCode_GetList_Input_APIItem, StaticCode_GetList_Output_Row_APIItem>
+        , IGetTypeList<B_StaticCode>
+        , IGetListPaged<B_StaticCode, StaticCode_GetList_Input_APIItem, StaticCode_GetList_Output_Row_APIItem>
     {
+        #region 共用
+        
         private readonly IGetTypeListHelper _getTypeListHelper;
         private readonly IGetListPagedHelper<StaticCode_GetList_Input_APIItem> _getListHelper;
 
-        private Dictionary<string, B_StaticCode> StaticCodeTypesInner { get; set; }
-
         /// <summary>
         /// 靜態參數類別名稱對照表。<br/>
-        /// 每次實際被取用時，若 Inner 沒有值，才作查詢並 Populate。<br/>
+        /// 內容在建構式 populate。<br/>
         /// 在 ASP.NET 中，端點每次被呼叫都會是新的 Controller，所以沒有需要 refresh 的問題。
         /// </summary>
-        private Dictionary<string, B_StaticCode> StaticCodeTypes
-        {
-            get
-            {
-                return StaticCodeTypesInner ?? (StaticCodeTypesInner = DC.B_StaticCode
-                    .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
-                    .Where(sc => sc.CodeType == 0)
-                    .ToDictionary(sc => sc.Code, sc => sc));
-            }
-        }
-            
+        private readonly Dictionary<string, B_StaticCode> StaticCodeTypes;
+
         public StaticCodeController()
         {
-            _getTypeListHelper = new GetTypeListHelper<StaticCodeController, B_StaticCode>(this);
+            StaticCodeTypes = DC.B_StaticCode
+                .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
+                .Where(sc => sc.CodeType == 0)
+                .ToDictionary(sc => sc.Code, sc => sc);
+
+            _getTypeListHelper =
+                new GetTypeListHelper<StaticCodeController, B_StaticCode>(this);
+
             _getListHelper =
                 new GetListPagedHelper<StaticCodeController
                     , B_StaticCode
@@ -55,8 +56,10 @@ namespace NS_Education.Controllers
                     , StaticCode_GetList_Output_Row_APIItem>(this);
         }
 
-        #region GetTypeList
+        #endregion
         
+        #region GetTypeList
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetTypeList()
@@ -79,11 +82,11 @@ namespace NS_Education.Controllers
                 Title = entity.Title
             });
         }
-        
+
         #endregion
 
         #region GetList
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList(StaticCode_GetList_Input_APIItem input)
@@ -123,7 +126,9 @@ namespace NS_Education.Controllers
                 {
                     BSCID = entity.BSCID,
                     iCodeType = entity.CodeType,
-                    sCodeType = StaticCodeTypes.ContainsKey(entity.CodeType.ToString()) ? StaticCodeTypes[entity.CodeType.ToString()]?.Title ?? "" : "",
+                    sCodeType = StaticCodeTypes.ContainsKey(entity.CodeType.ToString())
+                        ? StaticCodeTypes[entity.CodeType.ToString()]?.Title ?? ""
+                        : "",
                     Code = entity.Code,
                     Title = entity.Title,
                     SortNo = entity.SortNo,
@@ -137,7 +142,107 @@ namespace NS_Education.Controllers
                     UpdUID = entity.UpdUID
                 };
         }
+
+        #endregion
+
+        #region GetInfoById
         
+        private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或格式有誤！";
+        private const string GetInfoByIdNotFound = "查無指定的資料！";
+        
+        private readonly StaticCode_GetInfoById_Output_APIItem _getInfoByIdDummyOutput = new StaticCode_GetInfoById_Output_APIItem
+        {
+            BSCID = 0,
+            iCodeType = 0,
+            sCodeType = null,
+            CodeTypeList = null, // 在轉換方法中設值。所以這個物件不能是 static。
+            Code = null,
+            Title = null,
+            SortNo = 0,
+            Note = null,
+            ActiveFlag = true,
+            CreDate = null,
+            CreUser = null,
+            CreUID = 0,
+            UpdDate = null,
+            UpdUser = null,
+            UpdUID = 0
+        };
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        public async Task<string> GetInfoById(int id)
+        {
+            // 因為這個端點有特殊邏輯（id 輸入 0 時不查資料而是回傳僅部分欄位的空資料），不使用 Helper 會比較清晰
+            
+            // 1. 驗證輸入
+            if (id < -1)
+            {
+                AddError(GetInfoByIdInputIncorrect);
+                return GetResponseJson();
+            }
+            
+            // 2. 依據輸入分支
+            // |- a. 如果是 0，拿空資料
+            // +- b. 如果不是 0，查詢資料，無資料時跳錯
+            StaticCode_GetInfoById_Output_APIItem response;
+            if (id == 0)
+                response = _getInfoByIdDummyOutput;
+            else
+            {
+                var entity = await DC.B_StaticCode
+                    .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
+                    .Where(sc => sc.BSCID == id)
+                    .FirstOrDefaultAsync();
+
+                if (entity == null)
+                {
+                    AddError(GetInfoByIdNotFound);
+                    return GetResponseJson();
+                }
+
+                response = await GetInfoByIdConvertEntityToResponse(entity);
+            }
+
+            // 3. 幫資料塞 CodeTypeList
+            // 借用 GetTypeList 的邏輯
+            response.CodeTypeList = GetTypeListQuery()
+                .Where(sc => !sc.DeleteFlag)
+                .AsEnumerable() // 在這裡就轉換成 Enumerable，避免 LINQ 以為是 Query 中要做的處理，導致多重 DataConnection 問題
+                .Select(sc => Task.Run(() => GetTypeListEntityToRow(sc)).Result)
+                .ToList();
+
+            // 4. 回傳
+            return GetResponseJson(response);
+        }
+
+        private async Task<StaticCode_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(B_StaticCode entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+            
+            return new StaticCode_GetInfoById_Output_APIItem
+            {
+                BSCID = entity.BSCID,
+                iCodeType = entity.CodeType,
+                sCodeType = StaticCodeTypes.ContainsKey(entity.CodeType.ToString())
+                    ? StaticCodeTypes[entity.CodeType.ToString()]?.Title ?? ""
+                    : "",
+                // CodeTypeList 在此不塞值 
+                Code = entity.Code,
+                Title = entity.Title,
+                SortNo = entity.SortNo,
+                Note = entity.Note ?? "",
+                ActiveFlag = entity.ActiveFlag,
+                CreDate = entity.CreDate.ToFormattedString(),
+                CreUser = await GetUserNameByID(entity.CreUID),
+                CreUID = entity.CreUID,
+                UpdDate = entity.UpdDate.ToFormattedString(),
+                UpdUser = await GetUserNameByID(entity.UpdUID),
+                UpdUID = entity.UpdUID
+            };
+        }
+
         #endregion
     }
 }

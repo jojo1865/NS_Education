@@ -22,6 +22,16 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// 意外錯誤時：拋錯。
         /// </returns>
         Task<string> GetInfoById(int id);
+
+        /// <summary>
+        /// 驗證此次要求的輸入是否符合條件。
+        /// </summary>
+        /// <param name="id">輸入</param>
+        /// <returns>
+        /// true：驗證通過<br/>
+        /// false：驗證失敗
+        /// </returns>
+        bool GetInfoByIdValidateInput(int id);
         
         /// <summary>
         /// 取得單筆資料時的查詢。

@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http;
 using Microsoft.Ajax.Utilities;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.SiteData.GetList;
@@ -10,13 +11,15 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters.JwtAuthFilter;
+using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controllers.SiteDataController
 {
     public class SiteDataController : PublicClass,
         IGetListPaged<B_SiteData, SiteData_GetList_Input_APIItem, SiteData_GetList_Output_Row_APIItem>
     {
-        private IGetListPagedHelper<SiteData_GetList_Input_APIItem> _getListHelper;
+        private readonly IGetListPagedHelper<SiteData_GetList_Input_APIItem> _getListHelper;
 
         public SiteDataController()
         {
@@ -25,6 +28,8 @@ namespace NS_Education.Controllers.SiteDataController
         }
 
         #region GetList
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList(SiteData_GetList_Input_APIItem input)
         {
             return await _getListHelper.GetPagedList(input);

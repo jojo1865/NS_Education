@@ -650,8 +650,8 @@ namespace NS_Education.Controllers
                 Role = u.M_Group_User
                     .Where(groupUser => groupUser.G.ActiveFlag && !groupUser.G.DeleteFlag)
                     .OrderBy(groupUser => groupUser.GID)
-                    .First()
-                    .G.Title,
+                    .FirstOrDefault()?
+                    .G.Title ?? "",
                 ActiveFlag = u.ActiveFlag
             };
         }

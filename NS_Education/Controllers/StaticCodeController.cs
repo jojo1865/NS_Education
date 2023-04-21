@@ -100,7 +100,7 @@ namespace NS_Education.Controllers
         {
             return await Task.FromResult(new BaseResponseRowForType
             {
-                ID = entity.CodeType,
+                ID = int.Parse(entity.Code),
                 Title = entity.Title
             });
         }

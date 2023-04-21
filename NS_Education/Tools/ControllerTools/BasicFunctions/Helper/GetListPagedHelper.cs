@@ -35,6 +35,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         #region GetPagedList
 
+        private const string GetPagedListInputIncorrect = "輸入格式錯誤或缺少欄位，請檢查資料內容！";
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetPagedList(TGetListRequest input)
@@ -42,7 +44,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 1. 驗證輸入
             bool inputValidated = await _controller.GetListPagedValidateInput(input);
 
-            if (!inputValidated)
+            if (!inputValidated && !_controller.HasError())
+                _controller.AddError(GetPagedListInputIncorrect);
+            
+            if (_controller.HasError())
                 return _controller.GetResponseJson();
 
             // 2. 執行查詢

@@ -45,7 +45,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 3. 有資料時, 轉換成指定格式並回傳
             if (t != null)
-                return _controller.GetResponseJson(_controller.GetInfoByIdConvertEntityToResponse(t));
+            {
+                var response = _controller.GetInfoByIdConvertEntityToResponse(t);
+                await response.SetInfoFromEntity(t, _controller);
+                return _controller.GetResponseJson(response);
+            }
 
             // 4. 無資料時, 回傳錯誤
             _controller.AddError(GetInfoByIdNotFound);

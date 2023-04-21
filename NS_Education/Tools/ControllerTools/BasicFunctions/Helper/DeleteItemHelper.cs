@@ -49,7 +49,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 throw new NotSupportedException(DeleteItemNotSupported);
 
             // 1. 驗證輸入。
-            if (id.IsValidId())
+            if (!id.IsValidId())
             {
                 _controller.AddError(DeleteItemInputIncorrect);
                 return _controller.GetResponseJson();

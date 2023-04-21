@@ -37,6 +37,18 @@ namespace NS_Education.Tools.Extensions
         /// <returns>true：ID 正確。<br/>
         /// false：ID 錯誤。
         /// </returns>
+        public static bool IsValidIdOrZero(this int id)
+        {
+            return id >= 0;
+        }
+        
+        /// <summary>
+        /// 驗證輸入是否符合 ID 值的規則，並允許 0（通常為新增模式）。
+        /// </summary>
+        /// <param name="id">id</param>
+        /// <returns>true：ID 正確。<br/>
+        /// false：ID 錯誤。
+        /// </returns>
         public static bool IsValidIdOrZero(this int? id)
         {
             return id >= 0;

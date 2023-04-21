@@ -1,12 +1,20 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http;
+using Microsoft.Ajax.Utilities;
+using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
+using NS_Education.Models.APIItems.OrderCode.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
+using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters.JwtAuthFilter;
+using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controllers
 {
@@ -14,12 +22,14 @@ namespace NS_Education.Controllers
     /// 入帳代號 B_OrderCode 的 Controller。
     /// </summary>
     public class OrderCodeController : PublicClass,
-        IGetTypeList<B_OrderCode>
+        IGetTypeList<B_OrderCode>,
+        IGetListPaged<B_OrderCode, OrderCode_GetList_Input_APIItem, OrderCode_GetList_Output_Row_APIItem>
     {
         #region Initialization
         
         private readonly IGetTypeListHelper _getTypeListHelper;
-        
+        private readonly IGetListPagedHelper<OrderCode_GetList_Input_APIItem> _getListHelper;
+
         /// <summary>
         /// 靜態參數類別名稱對照表。<br/>
         /// 內容在建構式 populate。<br/>
@@ -39,8 +49,13 @@ namespace NS_Education.Controllers
                 // CodeType 和 Code 並不是 PK，有可能有多筆同樣 CodeType Code 的資料，所以這裡各種 Code 只取一筆，以免重複 Key
                 .GroupBy(sc => sc.Code)
                 .ToDictionary(group => group.Key, group => group.First());
-            
+
             _getTypeListHelper = new GetTypeListHelper<OrderCodeController, B_OrderCode>(this);
+            
+            _getListHelper = new GetListPagedHelper<OrderCodeController
+                , B_OrderCode
+                , OrderCode_GetList_Input_APIItem
+                , OrderCode_GetList_Output_Row_APIItem>(this);
         }
         
         #endregion
@@ -70,5 +85,163 @@ namespace NS_Education.Controllers
 
         #endregion
 
+        #region GetList
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        public async Task<string> GetList(OrderCode_GetList_Input_APIItem input)
+        {
+            return await _getListHelper.GetPagedList(input);
+        }
+
+        public async Task<bool> GetListPagedValidateInput(OrderCode_GetList_Input_APIItem input)
+        {
+            return await Task.Run(() =>
+                input.CodeType >= -1
+            );
+        }
+
+        public IOrderedQueryable<B_OrderCode> GetListPagedOrderedQuery(OrderCode_GetList_Input_APIItem input)
+        {
+            var query = DC.B_OrderCode.Where(oc => oc.ActiveFlag);
+
+            if (!input.Keyword.IsNullOrWhiteSpace())
+                query = query.Where(oc => oc.Title.Contains(input.Keyword) || oc.Code.Contains(input.Keyword));
+
+            if (input.CodeType >= 0)
+                query = query.Where(oc => oc.CodeType == input.CodeType);
+
+            return query.OrderBy(oc => oc.CodeType)
+                .ThenBy(oc => oc.SortNo)
+                .ThenBy(oc => oc.Code);
+        }
+
+        public async Task<OrderCode_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_OrderCode entity)
+        {
+            return new OrderCode_GetList_Output_Row_APIItem
+            {
+                BOCID = entity.BOCID,
+                iCodeType = entity.CodeType,
+                sCodeType = OrderCodeTypes.ContainsKey(entity.CodeType.ToString())
+                    ? OrderCodeTypes[entity.CodeType.ToString()].Title
+                    : "",
+                Code = entity.Code ?? "",
+                Title = entity.Title ?? "",
+                PrintTitle = entity.PrintTitle ?? "",
+                PrintNote = entity.PrintNote ?? "",
+                SortNo = entity.SortNo,
+                ActiveFlag = entity.ActiveFlag,
+                CreDate = entity.CreDate.ToFormattedString(),
+                CreUser = await GetUserNameByID(entity.CreUID),
+                CreUID = entity.CreUID,
+                UpdDate = entity.UpdDate.ToFormattedString(),
+                UpdUser = await GetUserNameByID(entity.UpdUID),
+                UpdUID = entity.UpdUID
+            };
+        }
+
+        #endregion
+        
+        #region GetInfoById
+
+        private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或格式不正確！";
+        private const string GetInfoByIdNotFound = "查無 ID 符合的資料！";
+        
+        private readonly OrderCode_GetInfoById_Output_APIItem _getInfoByIdDummyOutput =
+            new OrderCode_GetInfoById_Output_APIItem
+            {
+                BOCID = 0,
+                iCodeType = 0,
+                sCodeType = null,
+                CodeTypeList = null, // 在轉換方法中才設值，所以這個物件不能是 static。
+                Code = null,
+                Title = null,
+                PrintTitle = null,
+                PrintNote = null,
+                SortNo = 0,
+                ActiveFlag = true,
+                CreDate = null,
+                CreUser = null,
+                CreUID = 0,
+                UpdDate = null,
+                UpdUser = null,
+                UpdUID = 0
+            };
+        
+        public async Task<string> GetInfoById(int id)
+        {
+            // 因為這個端點有特殊邏輯（id 輸入 0 時不查資料而是回傳僅部分欄位的空資料），不使用 Helper 會比較清晰
+
+            // 1. 驗證輸入
+            if (!id.IsValidIdOrZero())
+            {
+                AddError(GetInfoByIdInputIncorrect);
+                return GetResponseJson();
+            }
+
+            // 2. 依據輸入分支
+            // |- a. 如果是 0，拿空資料
+            // +- b. 如果不是 0，查詢資料，無資料時跳錯
+            OrderCode_GetInfoById_Output_APIItem response;
+            if (id == 0)
+                response = _getInfoByIdDummyOutput;
+            else
+            {
+                var entity = await DC.B_OrderCode
+                    .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
+                    .Where(sc => sc.BOCID == id)
+                    .FirstOrDefaultAsync();
+
+                if (entity == null)
+                {
+                    AddError(GetInfoByIdNotFound);
+                    return GetResponseJson();
+                }
+
+                response = await GetInfoByIdConvertEntityToResponse(entity);
+            }
+
+            // 3. 幫資料塞 CodeTypeList
+            // 借用 GetTypeList 的邏輯
+            response.CodeTypeList = GetTypeListQuery()
+                .Where(sc => !sc.DeleteFlag)
+                .AsEnumerable() // 在這裡就轉換成 Enumerable，避免 LINQ 以為是 Query 中要做的處理，導致多重 DataConnection 問題
+                .Select(sc => Task.Run(() => GetTypeListEntityToRow(sc)).Result)
+                .ToList();
+
+            // 4. 回傳
+            return GetResponseJson(response);
+        }
+        
+        private async Task<OrderCode_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(
+            B_OrderCode entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            return new OrderCode_GetInfoById_Output_APIItem
+            {
+                BOCID = entity.BOCID,
+                iCodeType = entity.CodeType,
+                sCodeType = OrderCodeTypes.ContainsKey(entity.CodeType.ToString())
+                    ? OrderCodeTypes[entity.CodeType.ToString()]?.Title ?? ""
+                    : "",
+                // CodeTypeList 在此不塞值 
+                Code = entity.Code ?? "",
+                Title = entity.Title ?? "",
+                PrintTitle = entity.PrintTitle ?? "",
+                PrintNote = entity.PrintNote ?? "",
+                SortNo = entity.SortNo,
+                ActiveFlag = entity.ActiveFlag,
+                CreDate = entity.CreDate.ToFormattedString(),
+                CreUser = await GetUserNameByID(entity.CreUID),
+                CreUID = entity.CreUID,
+                UpdDate = entity.UpdDate.ToFormattedString(),
+                UpdUser = await GetUserNameByID(entity.UpdUID),
+                UpdUID = entity.UpdUID
+            };
+        }
+        
+        #endregion
     }
 }

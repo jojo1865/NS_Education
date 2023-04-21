@@ -34,7 +34,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         public async Task<string> GetInfoById( int id)
         {
             // 1. 驗證輸入資料
-            if (!_controller.GetInfoByIdValidateInput(id))
+            if (!await _controller.GetInfoByIdValidateInput(id))
             {
                 _controller.AddError(GetInfoByIdInputIncorrect);
                 return _controller.GetResponseJson();
@@ -46,7 +46,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 3. 有資料時, 轉換成指定格式並回傳
             if (t != null)
             {
-                var response = _controller.GetInfoByIdConvertEntityToResponse(t);
+                TGetResponse response = await _controller.GetInfoByIdConvertEntityToResponse(t);
                 await response.SetInfoFromEntity(t, _controller);
                 return _controller.GetResponseJson(response);
             }

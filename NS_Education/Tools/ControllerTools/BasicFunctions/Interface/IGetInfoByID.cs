@@ -9,7 +9,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     /// </summary>
     /// <typeparam name="TEntity">掌管資料的類型</typeparam>
     /// <typeparam name="TGetResponse">回傳類型</typeparam>
-    public interface IGetInfoById<TEntity, out TGetResponse>
+    public interface IGetInfoById<TEntity, TGetResponse>
         where TEntity : class
         where TGetResponse : IReturnMessageInfusable
     {
@@ -32,7 +32,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// true：驗證通過<br/>
         /// false：驗證失敗
         /// </returns>
-        bool GetInfoByIdValidateInput(int id);
+        Task<bool> GetInfoByIdValidateInput(int id);
         
         /// <summary>
         /// 取得單筆資料時的查詢。
@@ -47,6 +47,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <param name="entity">原查詢結果</param>
         /// <returns>Response 所需類型的物件</returns>
-        TGetResponse GetInfoByIdConvertEntityToResponse(TEntity entity);
+        Task<TGetResponse> GetInfoByIdConvertEntityToResponse(TEntity entity);
     }
 }

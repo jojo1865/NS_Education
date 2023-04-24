@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.PayType;
 using NS_Education.Models.APIItems.PayType.GetList;
+using NS_Education.Models.APIItems.PayType.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -20,18 +21,22 @@ namespace NS_Education.Controller.Legacy
 {
     public class PayTypeController : PublicClass,
         IGetListPaged<D_PayType, PayType_GetList_Input_APIItem, PayType_GetList_Output_APIItem>,
-        IDeleteItem<D_PayType>
+        IDeleteItem<D_PayType>,
+        ISubmit<D_PayType, PayType_Submit_Input_APIItem>
     {
         #region Initialization
 
-        private IGetListPagedHelper<PayType_GetList_Input_APIItem> _getListPagedHelper;
-        private IDeleteItemHelper _deleteItemHelper;
+        private readonly IGetListPagedHelper<PayType_GetList_Input_APIItem> _getListPagedHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
+
+        private readonly ISubmitHelper<PayType_Submit_Input_APIItem> _submitHelper;
 
         public PayTypeController()
         {
             _getListPagedHelper = new GetListPagedHelper<PayTypeController, D_PayType, PayType_GetList_Input_APIItem,
                 PayType_GetList_Output_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<PayTypeController, D_PayType>(this);
+            _submitHelper = new SubmitHelper<PayTypeController, D_PayType, PayType_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -180,56 +185,80 @@ namespace NS_Education.Controller.Legacy
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_PayType.DPTID))]
-        public async Task<string> Submit(D_PayType N)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(PayType_Submit_Input_APIItem.DPTID))]
+        public async Task<string> Submit(PayType_Submit_Input_APIItem input)
         {
-            Error = "";
-            if (N.DPTID == 0)
-            {
-                if (N.BCID <= 0)
-                    Error += "請選擇付款方式所屬分類;";
-                if (N.Title == "")
-                    Error += "名稱必須輸入;";
-                if (Error == "")
-                {
-                    N.CreUID = GetUid();
-                    N.UpdDate = N.CreDate = DT;
-                    N.UpdUID = 0;
-                    await DC.D_PayType.AddAsync(N);
-                    await DC.SaveChangesAsync();
-                }
-            }
-            else
-            {
-                var N_ = await DC.D_PayType.FirstOrDefaultAsync(q => q.DPTID == N.DPTID && !q.DeleteFlag);
-                if (N.BCID <= 0)
-                    Error += "請選擇付款方式所屬分類;";
-                if (N.Title == "")
-                    Error += "名稱必須輸入;";
-                if (N_ == null)
-                    Error += "查無資料,無法更新";
-                if (Error == "")
-                {
-                    N_.BCID = N.BCID;
-                    N_.Code = N.Code;
-                    N_.Title = N.Title;
-                    N_.AccountingNo = N.AccountingNo;
-                    N_.CustormerNo = N.CustormerNo;
-                    N_.InvoiceFlag = N.InvoiceFlag;
-                    N_.DepositFlag = N.DepositFlag;
-                    N_.RestaurantFlag = N.RestaurantFlag;
-                    N_.SimpleCheckoutFlag = N.SimpleCheckoutFlag;
-                    N_.SimpleDepositFlag = N.SimpleDepositFlag;
-                    N_.ActiveFlag = N.ActiveFlag;
-                    N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = GetUid();
-                    N_.UpdDate = DT;
-                    await DC.SaveChangesAsync();
-                }
-            }
-
-            return ChangeJson(GetMsgClass(Error));
+            return await _submitHelper.Submit(input);
         }
+
+        public bool SubmitIsAdd(PayType_Submit_Input_APIItem input)
+        {
+            return input.DPTID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(PayType_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DPTID == 0, () => AddError(WrongFormat("付款方式 ID")))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<D_PayType> SubmitCreateData(PayType_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new D_PayType
+            {
+                BCID = input.BCID,
+                Code = input.Code,
+                Title = input.Title,
+                AccountingNo = input.AccountingNo,
+                CustormerNo = input.CustomerNo,
+                InvoiceFlag = input.InvoiceFlag,
+                DepositFlag = input.DepositFlag,
+                RestaurantFlag = input.RestaurantFlag,
+                SimpleCheckoutFlag = input.SimpleCheckoutFlag,
+                SimpleDepositFlag = input.SimpleDepositFlag
+            });
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(PayType_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DPTID.IsValidId(), () => AddError(WrongFormat("付款方式 ID")))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<D_PayType> SubmitEditQuery(PayType_Submit_Input_APIItem input)
+        {
+            return DC.D_PayType.Where(pt => pt.DPTID == input.DPTID);
+        }
+
+        public void SubmitEditUpdateDataFields(D_PayType data, PayType_Submit_Input_APIItem input)
+        {
+            data.BCID = input.BCID;
+            data.Code = input.Code ?? data.Code;
+            data.Title = input.Title ?? data.Title;
+            data.AccountingNo = input.AccountingNo ?? data.AccountingNo;
+            data.CustormerNo = input.CustomerNo ?? data.CustormerNo;
+            data.InvoiceFlag = input.InvoiceFlag;
+            data.DepositFlag = input.DepositFlag;
+            data.RestaurantFlag = input.RestaurantFlag;
+            data.SimpleCheckoutFlag = input.SimpleCheckoutFlag;
+            data.SimpleDepositFlag = input.SimpleDepositFlag;
+        }
+
+        #endregion
 
         #endregion
     }

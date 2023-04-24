@@ -24,7 +24,7 @@ namespace NS_Education.Models.APIItems.PayType
         public string Code { get; set; }
         public string Title { get; set; }
         public string AccountingNo { get; set; }
-        public string CustormerNo { get; set; }
+        public string CustomerNo { get; set; }
 
         public int HourE { get; set; }
         public int MinuteE { get; set; }

@@ -116,7 +116,7 @@ namespace NS_Education.Controller.Legacy
                     Title = N.Title,
 
                     AccountingNo = N.AccountingNo,
-                    CustormerNo = N.CustormerNo,
+                    CustomerNo = N.CustormerNo,
                     InvoiceFlag = N.InvoiceFlag,
                     DepositFlag = N.DepositFlag,
                     RestaurantFlag = N.RestaurantFlag,

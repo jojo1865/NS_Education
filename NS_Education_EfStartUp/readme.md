@@ -8,7 +8,7 @@
 * 在本專案下執行
 ---
 ```sh
-dotnet ef dbcontext scaffold "Data Source=LAPTOP-RUU8RF7Q\NS_EDUCATION;Initial Catalog=ns;Integrated Security=True" Microsoft.EntityFrameworkCore.SqlServer --use-database-names --context-dir ..\NS_Education\Models\Entities\DbContext --output-dir ..\NS_Education\Models\Entities --context NsDbContext
+dotnet ef dbcontext scaffold "Data Source=192.168.50.125\SQL2019D;Database=db_NS_Education;User Id=User_Kevin;Password=User_Kevin;" Microsoft.EntityFrameworkCore.SqlServer --use-database-names --context-dir ..\NS_Education\Models\Entities\DbContext --output-dir ..\NS_Education\Models\Entities --context NsDbContext --force
 ```
 
 # 跑完後所須處理

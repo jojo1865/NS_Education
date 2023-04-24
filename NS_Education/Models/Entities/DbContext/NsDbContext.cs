@@ -76,7 +76,7 @@ namespace NS_Education.Models.Entities.DbContext
                 connectionString = connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
                 optionsBuilder.UseSqlServer(connectionString);
             }
-        } 
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

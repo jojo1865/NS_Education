@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Department;
 using NS_Education.Models.APIItems.Department.GetList;
+using NS_Education.Models.APIItems.Department.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -21,11 +22,14 @@ namespace NS_Education.Controller.Legacy
     public class DepartmentController : PublicClass
         , IGetListPaged<D_Department, Department_GetList_Input_APIItem, Department_GetList_Output_Row_APIItem>
         , IDeleteItem<D_Department>
+        , ISubmit<D_Department, Department_Submit_Input_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Department_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
+
+        private readonly ISubmitHelper<Department_Submit_Input_APIItem> _submitHelper;
 
         public DepartmentController()
         {
@@ -34,6 +38,7 @@ namespace NS_Education.Controller.Legacy
                     Department_GetList_Output_Row_APIItem>(this);
 
             _deleteItemHelper = new DeleteItemHelper<DepartmentController, D_Department>(this);
+            _submitHelper = new SubmitHelper<DepartmentController, D_Department, Department_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -175,51 +180,70 @@ namespace NS_Education.Controller.Legacy
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Department.DDID))]
-        public async Task<string> Submit(D_Department N)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Department_Submit_Input_APIItem.DDID))]
+        public async Task<string> Submit(Department_Submit_Input_APIItem input)
         {
-            Error = "";
-            if (N.DDID == 0)
-            {
-                if (N.DCID <= 0)
-                    Error += "請選擇部門所屬公司;";
-                if (N.TitleC == "")
-                    Error += "名稱必須輸入;";
-                if (Error == "")
-                {
-                    N.CreUID = GetUid();
-                    N.UpdDate = N.CreDate = DT;
-                    N.UpdUID = 0;
-                    await DC.D_Department.AddAsync(N);
-                    await DC.SaveChangesAsync();
-                }
-            }
-            else
-            {
-                var N_ = await DC.D_Department.FirstOrDefaultAsync(q => q.DDID == N.DDID && !q.DeleteFlag);
-                if (N.DCID <= 0)
-                    Error += "請選擇部門所屬公司;";
-                if (N.TitleC == "")
-                    Error += "名稱必須輸入;";
-                if (N_ == null)
-                    Error += "查無資料,無法更新";
-                if (Error == "")
-                {
-                    N_.DCID = N.DCID;
-                    N_.Code = N.Code;
-                    N_.TitleC = N.TitleC;
-                    N_.TitleE = N.TitleE;
-                    N_.PeopleCt = N.PeopleCt;
-                    N_.ActiveFlag = N.ActiveFlag;
-                    N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = GetUid();
-                    N_.UpdDate = DT;
-                    await DC.SaveChangesAsync();
-                }
-            }
-
-            return ChangeJson(GetMsgClass(Error));
+            return await _submitHelper.Submit(input);
         }
+
+        public bool SubmitIsAdd(Department_Submit_Input_APIItem input)
+        {
+            return input.DDID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(Department_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DDID == 0, () => AddError(WrongFormat("部門 ID")))
+                .Validate(i => i.DCID.IsValidId(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<D_Department> SubmitCreateData(Department_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new D_Department
+            {
+                DCID = input.DCID,
+                Code = input.Code,
+                TitleC = input.TitleC,
+                TitleE = input.TitleE,
+                PeopleCt = input.PeopleCt
+            });
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(Department_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
+                .Validate(i => i.DCID.IsValidId(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<D_Department> SubmitEditQuery(Department_Submit_Input_APIItem input)
+        {
+            return DC.D_Department.Where(d => d.DDID == input.DDID);
+        }
+
+        public void SubmitEditUpdateDataFields(D_Department data, Department_Submit_Input_APIItem input)
+        {
+            data.DCID = input.DCID;
+            data.Code = input.Code;
+            data.TitleC = input.TitleC;
+            data.TitleE = input.TitleE;
+            data.PeopleCt = input.PeopleCt;
+        }
+
+        #endregion
 
         #endregion
 

@@ -4,7 +4,9 @@ using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.FoodCategory;
 using NS_Education.Models.APIItems.FoodCategory.GetList;
+using NS_Education.Models.APIItems.FoodCategory.Submit;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -17,12 +19,14 @@ namespace NS_Education.Controller.Legacy
 {
     public class FoodCategoryController : PublicClass,
         IGetListPaged<D_FoodCategory, FoodCategory_GetList_Input_APIItem, FoodCategory_GetList_Output_Row_APIItem>,
-        IDeleteItem<D_FoodCategory>
+        IDeleteItem<D_FoodCategory>,
+        ISubmit<D_FoodCategory, FoodCategory_Submit_Input_APIItem>
     {
         #region Intialization
 
         private readonly IGetListPagedHelper<FoodCategory_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<FoodCategory_Submit_Input_APIItem> _submitHelper;
 
         public FoodCategoryController()
         {
@@ -30,6 +34,7 @@ namespace NS_Education.Controller.Legacy
                 new GetListPagedHelper<FoodCategoryController, D_FoodCategory, FoodCategory_GetList_Input_APIItem,
                     FoodCategory_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<FoodCategoryController, D_FoodCategory>(this);
+            _submitHelper = new SubmitHelper<FoodCategoryController, D_FoodCategory, FoodCategory_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -150,58 +155,66 @@ namespace NS_Education.Controller.Legacy
 
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_FoodCategory.DFCID))]
-        public async Task<string> Submit(D_FoodCategory N)
+        public async Task<string> Submit(FoodCategory_Submit_Input_APIItem input)
         {
-            Error = "";
-            if (N.DFCID == 0)
-            {
-                if (N.Title == "")
-                    Error += "名稱必須輸入;";
-                if (N.UnitPrice < 0)
-                    Error += "請輸入成本的數字;";
-                if (N.Price < 0)
-                    Error += "請輸入價格的數字;";
-                if (Error == "")
-                {
-                    N.CreUID = GetUid();
-                    N.UpdDate = N.CreDate = DT;
-                    N.UpdUID = 0;
-                    await DC.D_FoodCategory.AddAsync(N);
-                    await DC.SaveChangesAsync();
-                }
-            }
-            else
-            {
-                var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == N.DFCID && !q.DeleteFlag);
-                if (N.Title == "")
-                    Error += "名稱必須輸入;";
-                if (N.UnitPrice < 0)
-                    Error += "請輸入成本的數字;";
-                if (N.Price < 0)
-                    Error += "請輸入價格的數字;";
-
-                if (N_ == null)
-                    Error += "查無資料,無法更新";
-                if (Error == "")
-                {
-
-                    N_.Code = N.Code;
-                    N_.Title = N.Title;
-                    N_.UnitPrice = N.UnitPrice;
-                    N_.Price = N.Price;
-
-                    N_.ActiveFlag = N.ActiveFlag;
-                    N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = GetUid();
-                    N_.UpdDate = DT;
-                    await DC.SaveChangesAsync();
-                }
-            }
-
-            return ChangeJson(GetMsgClass(Error));
+            return await _submitHelper.Submit(input);
         }
 
+        public bool SubmitIsAdd(FoodCategory_Submit_Input_APIItem input)
+        {
+            return input.DFCID == 0;
+        }
+
+        #region Submit - Add
+        
+        public async Task<bool> SubmitAddValidateInput(FoodCategory_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DFCID == 0, () => AddError(WrongFormat("餐種 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<D_FoodCategory> SubmitCreateData(FoodCategory_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new D_FoodCategory
+            {
+                Code = input.Code,
+                Title = input.Title,
+                UnitPrice = input.UnitPrice,
+                Price = input.Price
+            });
+        }
+        
+        #endregion
+        
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(FoodCategory_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DFCID.IsValidId(), () => AddError(EmptyNotAllowed("餐種 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<D_FoodCategory> SubmitEditQuery(FoodCategory_Submit_Input_APIItem input)
+        {
+            return DC.D_FoodCategory.Where(fc => fc.DFCID == input.DFCID);
+        }
+
+        public void SubmitEditUpdateDataFields(D_FoodCategory data, FoodCategory_Submit_Input_APIItem input)
+        {
+            data.Code = input.Code ?? data.Code;
+            data.Title = input.Title ?? data.Title;
+            data.UnitPrice = input.UnitPrice;
+            data.Price = input.Price;
+        }
+        
         #endregion
 
+        #endregion
     }
 }

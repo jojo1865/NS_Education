@@ -288,6 +288,8 @@
     <Compile Include="Models\APIItems\SiteData\GetInfoById\SiteData_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\SiteData\GetList\SiteData_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\SiteData\GetList\SiteData_GetList_Output_Row_APIItem.cs" />
+    <Compile Include="Models\APIItems\SiteData\Submit\SiteData_Submit_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\SiteData\Submit\SiteData_Submit_Input_GroupList_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetInfoById\StaticCode_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetList\StaticCode_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetList\StaticCode_GetList_Output_Row_APIItem.cs" />

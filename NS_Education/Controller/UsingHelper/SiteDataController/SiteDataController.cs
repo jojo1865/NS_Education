@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.SiteData.GetInfoById;
 using NS_Education.Models.APIItems.SiteData.GetList;
+using NS_Education.Models.APIItems.SiteData.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -22,15 +23,16 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         IGetListPaged<B_SiteData, SiteData_GetList_Input_APIItem, SiteData_GetList_Output_Row_APIItem>,
         IGetInfoById<B_SiteData, SiteData_GetInfoById_Output_APIItem>,
         IChangeActive<B_SiteData>,
-        IDeleteItem<B_SiteData>
+        IDeleteItem<B_SiteData>,
+        ISubmit<B_SiteData, SiteData_Submit_Input_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<SiteData_GetList_Input_APIItem> _getListHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
-
         private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<SiteData_Submit_Input_APIItem> _submitHelper;
 
         public SiteDataController()
         {
@@ -39,6 +41,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             _getInfoByIdHelper = new GetInfoByIdHelper<SiteDataController, B_SiteData, SiteData_GetInfoById_Output_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<SiteDataController, B_SiteData>(this);
             _deleteItemHelper = new DeleteItemHelper<SiteDataController, B_SiteData>(this);
+            _submitHelper = new SubmitHelper<SiteDataController, B_SiteData, SiteData_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -211,6 +214,121 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         {
             return DC.B_SiteData.Where(sd => sd.BSID == id);
         }
+        
+        #endregion
+
+        #region Submit
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(SiteData_Submit_Input_APIItem.BSID))]
+        public async Task<string> Submit(SiteData_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(SiteData_Submit_Input_APIItem input)
+        {
+            return input.BSID == 0;
+        }
+        
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(SiteData_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(input.StartValidate()
+                .Validate(i => i.BSID == 0, () => AddError("場地 ID 只允許為 0！"))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("類別 ID")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
+                .Validate(i => i.MaxSize >= i.BasicSize, () => AddError("最大容納人數須大於等於一般容納人數！"))
+                .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
+                .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
+                .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
+                .Validate(i => i.BSCID1.IsValidId(), () => AddError(EmptyNotAllowed("樓別 ID")))
+                .Validate(i => i.BSCID5.IsValidId(), () => AddError(EmptyNotAllowed("桌型 ID")))
+                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .IsValid());
+        }
+
+        public async Task<B_SiteData> SubmitCreateData(SiteData_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new B_SiteData
+            {
+                BCID = input.BCID,
+                Code = input.Code,
+                Title = input.Title,
+                BasicSize = input.BasicSize,
+                MaxSize = input.MaxSize,
+                UnitPrice = input.UnitPrice,
+                InPrice = input.InPrice,
+                OutPrice = input.OutPrice,
+                CubicleFlag = input.CubicleFlag,
+                BSCID1 = input.BSCID1,
+                BSCID5 = input.BSCID5,
+                DHID = input.DHID,
+                BOCID = input.BOCID,
+                PhoneExt1 = input.PhoneExt1,
+                PhoneExt2 = input.PhoneExt2,
+                PhoneExt3 = input.PhoneExt3,
+                Note = input.Note,
+                ActiveFlag = input.ActiveFlag
+                // TODO: GroupList 怎麼用?
+            });
+        }
+        
+        #endregion
+
+        #region Submit - Edit
+        
+        public async Task<bool> SubmitEditValidateInput(SiteData_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(input.StartValidate()
+                .Validate(i => i.BSID.IsValidId(), () => AddError(WrongFormat("場地 ID")))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("類別 ID")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
+                .Validate(i => i.MaxSize >= i.BasicSize, () => AddError("最大容納人數須大於等於一般容納人數！"))
+                .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
+                .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
+                .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
+                .Validate(i => i.BSCID1.IsValidId(), () => AddError(EmptyNotAllowed("樓別 ID")))
+                .Validate(i => i.BSCID5.IsValidId(), () => AddError(EmptyNotAllowed("桌型 ID")))
+                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .IsValid());
+        }
+
+        public IQueryable<B_SiteData> SubmitEditQuery(SiteData_Submit_Input_APIItem input)
+        {
+            return DC.B_SiteData.Where(sd => sd.BSID == input.BSID);
+        }
+
+        public void SubmitEditUpdateDataFields(B_SiteData data, SiteData_Submit_Input_APIItem input)
+        {
+            data.BCID = input.BCID;
+            data.Code = input.Code;
+            data.Title = input.Title;
+            data.BasicSize = input.BasicSize;
+            data.MaxSize = input.MaxSize;
+            data.UnitPrice = input.UnitPrice;
+            data.InPrice = input.InPrice;
+            data.OutPrice = input.OutPrice;
+            data.CubicleFlag = input.CubicleFlag;
+            data.BSCID1 = input.BSCID1;
+            data.BSCID5 = input.BSCID5;
+            data.DHID = input.DHID;
+            data.BOCID = input.BOCID;
+            data.PhoneExt1 = input.PhoneExt1;
+            data.PhoneExt2 = input.PhoneExt2;
+            data.PhoneExt3 = input.PhoneExt3;
+            data.Note = input.Note;
+            data.ActiveFlag = input.ActiveFlag;
+            // TODO: GroupList 怎麼用?
+        }
+        
+        #endregion
         
         #endregion
     }

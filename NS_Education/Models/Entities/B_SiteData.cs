@@ -11,6 +11,8 @@ namespace NS_Education.Models.Entities
     {
         public B_SiteData()
         {
+            M_SiteGroupGroup = new HashSet<M_SiteGroup>();
+            M_SiteGroupMaster = new HashSet<M_SiteGroup>();
             Resver_Site = new HashSet<Resver_Site>();
         }
 
@@ -44,6 +46,8 @@ namespace NS_Education.Models.Entities
         public virtual B_StaticCode BSCID1Navigation { get; set; }
         public virtual B_StaticCode BSCID5Navigation { get; set; }
         public virtual D_Hall DH { get; set; }
+        public virtual ICollection<M_SiteGroup> M_SiteGroupGroup { get; set; }
+        public virtual ICollection<M_SiteGroup> M_SiteGroupMaster { get; set; }
         public virtual ICollection<Resver_Site> Resver_Site { get; set; }
     }
 }

@@ -46,6 +46,7 @@ namespace NS_Education.Models.Entities.DbContext
         public virtual DbSet<M_Group_User> M_Group_User { get; set; }
         public virtual DbSet<M_Partner_Category> M_Partner_Category { get; set; }
         public virtual DbSet<M_Resver_TimeSpan> M_Resver_TimeSpan { get; set; }
+        public virtual DbSet<M_SiteGroup> M_SiteGroup { get; set; }
         public virtual DbSet<MenuAPI> MenuAPI { get; set; }
         public virtual DbSet<MenuData> MenuData { get; set; }
         public virtual DbSet<Resver_Bill> Resver_Bill { get; set; }
@@ -76,7 +77,7 @@ namespace NS_Education.Models.Entities.DbContext
                 connectionString = connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
                 optionsBuilder.UseSqlServer(connectionString);
             }
-        }
+        } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -753,6 +754,52 @@ namespace NS_Education.Models.Entities.DbContext
                     .HasForeignKey(d => d.RHID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_M_Resver_TimeSpan_Resver_Head");
+            });
+
+            modelBuilder.Entity<M_SiteGroup>(entity =>
+            {
+                entity.HasKey(e => e.MID)
+                    .HasName("M_SiteGroup_pk");
+
+                entity.HasComment("場地組合");
+
+                entity.HasIndex(e => e.MID)
+                    .HasName("M_SiteGroup_MID_uindex")
+                    .IsUnique();
+
+                entity.Property(e => e.MID).HasComment("流水號 ID");
+
+                entity.Property(e => e.ActiveFlag).HasComment("是否啟用");
+
+                entity.Property(e => e.CreDate)
+                    .HasColumnType("datetime")
+                    .HasComment("建立時間");
+
+                entity.Property(e => e.CreUID).HasComment("建立者 ID");
+
+                entity.Property(e => e.DeleteFlag).HasComment("是否移除");
+
+                entity.Property(e => e.GroupID).HasComment("串聯的場地 ID");
+
+                entity.Property(e => e.MasterID).HasComment("場地 ID");
+
+                entity.Property(e => e.UpdDate)
+                    .HasColumnType("datetime")
+                    .HasComment("更新時間");
+
+                entity.Property(e => e.UpdUID).HasComment("更新者 ID");
+
+                entity.HasOne(d => d.Group)
+                    .WithMany(p => p.M_SiteGroupGroup)
+                    .HasForeignKey(d => d.GroupID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("M_SiteGroup_B_SiteData_BSID_fk_2");
+
+                entity.HasOne(d => d.Master)
+                    .WithMany(p => p.M_SiteGroupMaster)
+                    .HasForeignKey(d => d.MasterID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("M_SiteGroup_B_SiteData_BSID_fk");
             });
 
             modelBuilder.Entity<MenuAPI>(entity =>

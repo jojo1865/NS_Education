@@ -6,67 +6,84 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Company;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
+using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controller.Legacy
 {
-    public class CompanyController : PublicClass
+    public class CompanyController : PublicClass,
+        IGetListPaged<D_Company, Company_GetList_Input_APIItem, Company_GetList_Output_Row_APIItem>,
+        IDeleteItem<D_Company>
     {
+        #region Intialization
+
+        private readonly IGetListPagedHelper<Company_GetList_Input_APIItem> _getListPagedHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
+
+        public CompanyController()
+        {
+            _getListPagedHelper = new GetListPagedHelper<CompanyController, D_Company, Company_GetList_Input_APIItem, Company_GetList_Output_Row_APIItem>(this);
+            _deleteItemHelper = new DeleteItemHelper<CompanyController, D_Company>(this);
+        }
+
+        #endregion
+        #region GetList
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
-        public async Task<string> GetList(string KeyWord = "", int BCID = 0, int NowPage = 1, int CutPage = 10)
+        public async Task<string> GetList(Company_GetList_Input_APIItem input)
         {
-            var Ns = DC.D_Company.Where(q => !q.DeleteFlag);
-            if (BCID > 0)
-                Ns = Ns.Where(q => q.BCID == BCID);
-            if (KeyWord != "")
-                Ns = Ns.Where(q => q.TitleC.Contains(KeyWord) || q.TitleC.Contains(KeyWord) || q.Code.Contains(KeyWord));
-
-            D_Company_List ListData = new D_Company_List();
-            ListData.Items = new List<D_Company_APIItem>();
-            ListData.NowPage = NowPage;
-            ListData.CutPage = CutPage;
-
-            if (NowPage == 0)
-                Ns = Ns.Where(q=>q.ActiveFlag).OrderBy(q => q.TitleC);
-            else
-                Ns = Ns.OrderBy(q => q.TitleC).Skip((NowPage - 1) * CutPage).Take(CutPage);
-
-            Ns = Ns.Include(q => q.BC);
-            
-            var NsList = await Ns.ToListAsync();
-            ListData.SuccessFlag = NsList.Any();
-            ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
-            ListData.AllItemCt = NsList.Count;
-            ListData.AllPageCt = NowPage == 0 ? 0 : (ListData.AllItemCt % CutPage == 0 ? ListData.AllItemCt / CutPage : (ListData.AllItemCt / CutPage) + 1);
-            
-            foreach (var N in NsList)
-            {
-                ListData.Items.Add(new D_Company_APIItem
-                {
-                    DCID = N.DCID,
-                    BCID = N.BCID,
-                    BC_TitleC = N.BC.TitleC,
-                    BC_TitleE = N.BC.TitleE,
-                    BC_List = null,
-                    Code = N.Code,
-                    TitleC = N.TitleC,
-                    TitleE = N.TitleE,
-                    DepartmentCt = N.D_Department.Count,
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                }); ; ;
-            }
-
-            return ChangeJson(ListData);
+            return await _getListPagedHelper.GetPagedList(input);
         }
+
+        public async Task<bool> GetListPagedValidateInput(Company_GetList_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BCID.IsValidIdOrZero(), () => AddError(EmptyNotAllowed("資料所屬分類 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IOrderedQueryable<D_Company> GetListPagedOrderedQuery(Company_GetList_Input_APIItem input)
+        {
+            var query = DC.D_Company.Include(c => c.BC).AsQueryable();
+
+            if (!input.Keyword.IsNullOrWhiteSpace())
+                query = query.Where(c =>
+                    c.TitleC.Contains(input.Keyword) || c.TitleE.Contains(input.Keyword) ||
+                    c.Code.Contains(input.Keyword));
+
+            if (input.BCID.IsValidId())
+                query = query.Where(c => c.BCID == input.BCID);
+
+            return query.OrderBy(c => c.DCID);
+        }
+
+        public async Task<Company_GetList_Output_Row_APIItem> GetListPagedEntityToRow(D_Company entity)
+        {
+            return await Task.FromResult(new Company_GetList_Output_Row_APIItem
+            {
+                DCID = entity.DCID,
+                BCID = entity.BCID,
+                BC_TitleC = entity.BC?.TitleC ?? "",
+                BC_TitleE = entity.BC?.TitleE ?? "",
+                Code = entity.Code ?? "",
+                TitleC = entity.TitleC ?? "",
+                TitleE = entity.TitleE ?? "",
+                DepartmentCt = 0
+            });
+        }
+
+        #endregion
+
+        #region GetInfoByID
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
@@ -104,6 +121,10 @@ namespace NS_Education.Controller.Legacy
             return ChangeJson(Item);
         }
 
+        #endregion
+
+        #region ChangeActive
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
         public async Task<string> ChangeActive(int ID, bool ActiveFlag)
@@ -123,28 +144,28 @@ namespace NS_Education.Controller.Legacy
             return ChangeJson(GetMsgClass(Error));
         }
 
+        #endregion
+
+        #region DeleteItem
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
-        public async Task<string> DeleteItem(int ID)
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
-            Error = "";
-            var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == ID);
-            if (N_ != null)
-            {
-                N_.DeleteFlag = true;
-                N_.UpdDate = DT;
-                N_.UpdUID = GetUid();
-                await DC.SaveChangesAsync();
-            }
-            else
-                Error += "查無資料,無法更新;";
-
-            return ChangeJson(GetMsgClass(Error));
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
         }
+
+        public IQueryable<D_Company> DeleteItemQuery(int id)
+        {
+            return DC.D_Company.Where(c => c.DCID == id);
+        }
+
+        #endregion
+
+        #region Submit
 
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Company.DCID))]
-        // 因為 submit 是新增和修改寫在一起，但權限不應兩種都同時需要，所以此類端點權限驗證寫在 action 中。 
         public async Task<string> Submit(D_Company N)
         {
             Error = "";
@@ -185,7 +206,10 @@ namespace NS_Education.Controller.Legacy
                     await DC.SaveChangesAsync();
                 }
             }
+
             return ChangeJson(GetMsgClass(Error));
         }
+
+        #endregion
     }
 }

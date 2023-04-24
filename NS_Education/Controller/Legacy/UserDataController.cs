@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.UserData.ChangeActive;
-using NS_Education.Models.APIItems.UserData.DeleteItem;
 using NS_Education.Models.APIItems.UserData.GetInfoById;
 using NS_Education.Models.APIItems.UserData.GetList;
 using NS_Education.Models.APIItems.UserData.Login;
@@ -17,6 +16,9 @@ using NS_Education.Models.APIItems.UserData.UpdatePW;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters;
@@ -26,75 +28,84 @@ using NS_Education.Variables;
 
 namespace NS_Education.Controller.Legacy
 {
-    public class UserDataController : PublicClass
+    public class UserDataController : PublicClass,
+        IGetListPaged<UserData, UserData_GetList_Input_APIItem, UserData_GetList_Output_Row_APIItem>,
+        IDeleteItem<UserData>,
+        ISubmit<UserData, UserData_Submit_Input_APIItem>
     {
+        #region 初始化
+
+        private readonly IGetListPagedHelper<UserData_GetList_Input_APIItem> _getListPagedHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<UserData_Submit_Input_APIItem> _submitHelper;
+
+        public UserDataController()
+        {
+            _getListPagedHelper = new
+                GetListPagedHelper<UserDataController, UserData, UserData_GetList_Input_APIItem,
+                    UserData_GetList_Output_Row_APIItem>(this);
+
+            _deleteItemHelper = new
+                DeleteItemHelper<UserDataController, UserData>(this);
+
+            _submitHelper = new
+                SubmitHelper<UserDataController, UserData, UserData_Submit_Input_APIItem>(this);
+        }
+
+        #endregion
+
         #region 錯誤訊息 - 通用
-        /// <summary>
-        /// 回傳「請填入{columnName}！」
-        /// </summary>
-        /// <param name="columnName">欄位名稱</param>
-        /// <returns>錯誤訊息字串</returns>
-        private static string EmptyNotAllowed(string columnName)
-            => $"請填入{columnName}！";
-        
+
         private const string UpdateUidIncorrect = "未提供欲修改的 UID 或格式不正確！";
         private const string UserDataNotFound = "這筆使用者不存在或已被刪除！";
-        
+
         private static string QueryFailed(Exception e) => $"查詢 DB 時出錯，請確認伺服器狀態：{e.Message}！";
 
-        private static string UpdateFailed(Exception e)
-            => $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}！";
         #endregion
 
         #region 錯誤訊息 - 註冊/更新
+
         private const string PasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
-        private const string SignUpUidIncorrect = "缺少 UID，無法寫入！";
         private const string SignUpGidIncorrect = "缺少身分 ID 或查無身分資料，無法寫入！";
         private const string SignUpDdidIncorrect = "缺少部門 ID 或查無部門資料，無法寫入！";
+
         #endregion
 
         #region 錯誤訊息 - 登入
+
         private const string LoginAccountNotFound = "查無此使用者帳號，請重新確認！";
         private const string LoginPasswordIncorrect = "使用者密碼錯誤！";
+
         private static string LoginDateUpdateFailed(Exception e)
             => $"上次登入時間更新失敗，錯誤訊息：{e.Message}！";
+
         #endregion
 
-        #region 錯誤訊息 - 刪除
-
-        private const string DeleteItemOperatorUidIncorrect = "未提供操作者的 UID，無法寫入！";
-        private const string DeleteItemTargetUidIncorrect = "未提供欲刪除的 UID 或格式不正確！";
-        private const string DeleteItemTargetUidNotFound = "查無對應的欲刪除 UID，請檢查輸入是否正確！";
-        private const string DeleteItemTargetAlreadyDeleted = "指定使用者已為刪除狀態！";
-        private static string DeleteItemFailed(Exception e)
-            => $"刪除使用者時失敗，錯誤訊息：{e.Message}！";
-        
-        #endregion
-        
         #region 錯誤訊息 - 啟用/停用
 
         private static string ChangeActiveUpdateFailed(Exception e)
         {
             return $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}";
         }
-        
+
         #endregion
-        
+
         #region 錯誤訊息 - 更新密碼
-        
+
         private static string UpdatePWDbFailed(Exception e) => $"更新密碼時失敗，請確認伺服器狀態：{e.Message}！";
         private const string UpdatePWPasswordNotEncryptable = "密碼只允許英數字！";
-            
+
         #endregion
 
         #region 錯誤訊息 - 查詢
 
         private const string GetUidIncorrect = "缺少 UID，無法寫入！";
         private const string GetUserNotFound = "查無此使用者帳號，請重新確認！";
-        
+
         #endregion
-        
+
         #region SignUp
+
         /// <summary>
         /// 註冊使用者資料。過程中會驗證使用者輸入，並在回傳時一併報錯。<br/>
         /// 如果過程驗證都通過，才寫入資料庫。
@@ -105,7 +116,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<string> SignUp(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();
-            
+
             // TODO: 引用靜態參數檔，完整驗證使用者密碼
 
             // sanitize
@@ -161,22 +172,18 @@ namespace NS_Education.Controller.Legacy
 
             // doesn't write to db if any error raised
             // For postman testing: 若備註欄為特殊值時，不真正寫入資料。
-            if (HasError() || IsATestRegister(input)) return GetResponseJson();
-            
+            if (HasError()) return GetResponseJson();
+
             await DC.UserData.AddAsync(newUser);
             await DC.SaveChangesAsync();
 
             return GetResponseJson();
         }
 
-        // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
-        private static bool IsATestRegister(UserData_Submit_Input_APIItem input)
-        {
-            return input.Note?.ToLower().Equals("newregistertest") ?? false;
-        }
         #endregion
 
         #region Login
+
         /// <summary>
         /// 驗證使用者登入，無誤則會回傳使用者的 Username 和 JWT Token。
         /// </summary>
@@ -193,7 +200,7 @@ namespace NS_Education.Controller.Legacy
                     .Include(u => u.M_Group_User)
                     .FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount)
                 : null;
-            
+
             // 1. 先查詢是否確實有這個帳號
             // 2. 確認帳號的啟用 Flag 與刪除 Flag 
             // 3. 有帳號，才驗證登入密碼
@@ -218,11 +225,11 @@ namespace NS_Education.Controller.Legacy
                 new Claim(JwtConstants.UidClaimType, queried.UID.ToString()),
                 new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.User.GetRoleValue()),
             };
-            
+
             // 特殊規格：如果擁有特殊 GID 的權限，則認識為管理員
             if (queried.M_Group_User.Any(groupUser => groupUser.GID == JwtConstants.AdminGid))
                 claims.Add(new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.Admin.GetRoleValue()));
-                
+
             UserData_Login_Output_APIItem output = new UserData_Login_Output_APIItem
             {
                 UID = queried.UID,
@@ -244,7 +251,7 @@ namespace NS_Education.Controller.Legacy
         private async Task<bool> UpdateUserLoginDate(UserData user)
         {
             bool result = true;
-            
+
             try
             {
                 user.LoginDate = DateTime.Now;
@@ -258,9 +265,9 @@ namespace NS_Education.Controller.Legacy
 
             return result;
         }
-        
+
         #endregion
-        
+
         #region Submit
 
         /// <summary>
@@ -274,123 +281,121 @@ namespace NS_Education.Controller.Legacy
             nameof(UserData_Submit_Input_APIItem.UID), null)]
         public async Task<string> Submit(UserData_Submit_Input_APIItem input)
         {
-            InitializeResponse();
+            return await _submitHelper.Submit(input);
+        }
 
-            UserData original = null;
+        public bool SubmitIsAdd(UserData_Submit_Input_APIItem input)
+        {
+            // 特殊規格：使用者資料的新增是透過 SignUp 端點，因此這裡永遠回傳 false 以讓 Helper 進入修改模式。
+            return false;
+        }
 
-            // 進行驗證。
-            // |- a. 驗證輸入的 UID 是否符合格式。
-            // |- b. 驗證輸入的使用者名稱是否有內容。
-            // |- c. 驗證輸入的使用者帳號是否有內容。
-            // |- d. 驗證輸入的使用者密碼是否有內容。
-            // |- e. 驗證輸入的部門 ID 是否有內容。
-            // +- f. 驗證輸入的身分 ID 是否有內容。
-            bool isValid = input
-                .StartValidate()
-                .Validate(i => i.UID.IsValidId(), () => AddError(SignUpUidIncorrect))
+        #region Submit - Add
+
+        public Task<bool> SubmitAddValidateInput(UserData_Submit_Input_APIItem input)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Task<UserData> SubmitCreateData(UserData_Submit_Input_APIItem input)
+        {
+            throw new NotSupportedException();
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(UserData_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.UID.IsValidId(), () => AddError(EmptyNotAllowed("使用者 ID")))
                 .Validate(i => !i.Username.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者名稱")))
                 .Validate(i => !i.LoginAccount.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者帳號")))
                 .Validate(i => !i.LoginPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者密碼")))
+                .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
                 .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
                 .Validate(i => i.GID.IsValidId(), () => AddError(EmptyNotAllowed("身分 ID")))
                 .IsValid();
-            
-            // 進行處理。
-            // |- a. 查詢資料。
-            // |- b. 驗證確實有查到資料。
-            // |- c. 覆寫資料，包含加密密碼。
-            // +- d. 實際更新 DB。
-            await input.StartValidate(true)
-                .Validate(i => isValid)
-                .ValidateAsync(
-                    async i => original =
-                        await DC.UserData.FirstOrDefaultAsync(u => u.UID == input.UID),
-                    e => QueryFailed(e))
-                .Validate(i => original != null, () => AddError(LoginAccountNotFound))
-                .ValidateAsync(async i => await SubmitPrepareData(i, original), e => AddError(PasswordAlphanumericOnly))
-                .ValidateAsync(async i => await SubmitDoUpdate(i), e => AddError(UpdateFailed(e)));
 
-            return GetResponseJson();
+            return await Task.FromResult(isValid);
         }
 
-        private async Task SubmitPrepareData(UserData_Submit_Input_APIItem input, UserData original)
+        public IQueryable<UserData> SubmitEditQuery(UserData_Submit_Input_APIItem input)
         {
-            // 只在欄位有輸入任何資料時，才更新對應欄位
-            original.UserName = input.Username.IsNullOrWhiteSpace() ? original.UserName : input.Username;
-            original.LoginAccount =
-                input.LoginAccount.IsNullOrWhiteSpace() ? original.LoginAccount : input.LoginAccount;
-            original.LoginPassword =
+            return DC.UserData.Where(u => u.UID == input.UID);
+        }
+
+        public void SubmitEditUpdateDataFields(UserData data, UserData_Submit_Input_APIItem input)
+        {
+                        // 只在欄位有輸入任何資料時，才更新對應欄位
+                        data.UserName = input.Username.IsNullOrWhiteSpace() ? data.UserName : input.Username;
+                        data.LoginAccount =
+                input.LoginAccount.IsNullOrWhiteSpace() ? data.LoginAccount : input.LoginAccount;
+                        data.LoginPassword =
                 input.LoginPassword.IsNullOrWhiteSpace()
-                    ? original.LoginPassword
+                    ? data.LoginPassword
                     : EncryptPassword(input.LoginPassword);
 
             // Note 是可選欄位，因此呼叫者應該保持原始內容
-            original.Note = input.Note;
-            
-            // 只在 input 確實有 ActiveFlag 時才更新啟用狀態
-            original.ActiveFlag = input.ActiveFlag ?? original.ActiveFlag;
+            data.Note = input.Note;
 
-            original.UpdDate = DateTime.Now;
-            original.UpdUID = input.UID;
+            data.UpdDate = DateTime.Now;
+            data.UpdUID = input.UID;
 
-            original.DDID = input.DDID;
+            data.DDID = input.DDID;
             
-            // 如果是管理員，才允許更新權限資訊
-            if (FilterStaticTools.HasRoleInRequest(HttpContext.Request, AuthorizeBy.Admin))
+            // 如果是管理員，才允許繼續更新後續的欄位
+            if (!FilterStaticTools.HasRoleInRequest(HttpContext.Request, AuthorizeBy.Admin)) return;
+            
+            // 只在是管理員時才允許修改啟用狀態
+            data.ActiveFlag = input.ActiveFlag;
+
+            int requesterUID = GetUid();
+            // 資料庫建模是 User 一對多 Group，但現在看到的 Wireframe 似乎規劃為每位使用者僅一個權限組
+            // 所以在這裡
+            // 1. 在 M_Group_User 中查詢此使用者有幾筆權限，如果有多筆就先清空至唯一一筆。
+            // 2. 如果沒有資料就建一筆。
+            // 3. 將唯一一筆 M_Group_User 指向 input 指定的 GID。
+
+            var groupUsers = DC.M_Group_User.Where(gu => gu.UID == data.UID).ToList();
+
+            // 無資料時，新增一筆資料
+            if (!groupUsers.Any())
             {
-                int requesterUID = GetUid();
-                // 資料庫建模是 User 一對多 Group，但現在看到的 Wireframe 似乎規劃為每位使用者僅一個權限組
-                // 所以在這裡
-                // 1. 在 M_Group_User 中查詢此使用者有幾筆權限，如果有多筆就先清空至唯一一筆。
-                // 2. 如果沒有資料就建一筆。
-                // 3. 將唯一一筆 M_Group_User 指向 input 指定的 GID。
-
-                var groupUsers = await DC.M_Group_User.Where(gu => gu.UID == original.UID).ToListAsync();
-
-                if (!groupUsers.Any())
+                // 新增一筆權限資料並返回
+                M_Group_User groupUser = new M_Group_User
                 {
-                    // 新增一筆權限資料並返回
-                    M_Group_User groupUser = new M_Group_User
-                    {
-                        GID = input.GID,
-                        UID = original.UID,
-                        CreDate = DateTime.Now,
-                        CreUID = requesterUID,
-                        UpdDate = DateTime.Now,
-                        UpdUID = 0
-                    };
+                    GID = input.GID,
+                    UID = data.UID,
+                    CreDate = DateTime.Now,
+                    CreUID = requesterUID,
+                    UpdDate = DateTime.Now,
+                    UpdUID = 0
+                };
 
-                    await DC.M_Group_User.AddAsync(groupUser);
-                    return;
-                }
-                
-                // 只保留一筆
-                if (groupUsers.Count > 1)
-                    DC.M_Group_User.RemoveRange(groupUsers.Skip(1));
-
-                // 更新權限資料
-                M_Group_User data = groupUsers.First();
-                data.GID = input.GID;
-                data.UpdUID = requesterUID;
-                data.UpdDate = DateTime.Now;
+                DC.M_Group_User.Add(groupUser);
+                return;
             }
+
+            // 有多筆資料時，只保留一筆
+            if (groupUsers.Count > 1)
+                DC.M_Group_User.RemoveRange(groupUsers.Skip(1));
+
+            // 更新權限資料
+            M_Group_User newGroupUser = groupUsers.First();
+            newGroupUser.GID = input.GID;
+            newGroupUser.UpdUID = requesterUID;
+            newGroupUser.UpdDate = DateTime.Now;
         }
 
-        private async Task SubmitDoUpdate(UserData_Submit_Input_APIItem input)
-        {
-            // TODO: 在確保單元測試方式之後，將此處條件刪除。
-            if (!IsATestUpdate(input))
-                await DC.SaveChangesAsync();
-        }
+        #endregion
 
-        // TODO: 在確保單元測試方式之後，將此處邏輯刪除。
-        private static bool IsATestUpdate(UserData_Submit_Input_APIItem input)
-        {
-            return input.Note?.ToLower().Equals("updatetest") ?? false;
-        }
+
         #endregion
 
         #region 密碼驗證
+
         /// <summary>
         /// 針對使用者密碼進行加密。<br/>
         /// 當使用者密碼為空白、空格、null，或包含非英數字時，回傳 (false, null)。
@@ -425,7 +430,7 @@ namespace NS_Education.Controller.Legacy
         {
             if (!input.IsEncryptablePassword())
                 return false;
-            
+
             try
             {
                 return EncryptPassword(input) == data;
@@ -435,66 +440,27 @@ namespace NS_Education.Controller.Legacy
                 return false;
             }
         }
+
         #endregion
 
         #region DeleteItem
 
-        /// <summary>
-        /// 將指定的 UID 的使用者資料改為刪除狀態。
-        /// </summary>
-        /// <param name="input">輸入資料</param>
-        /// <returns>通用回傳訊息格式</returns>
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag, null, null)]
-        public async Task<string> DeleteItem(UserData_DeleteItem_Input_APIItem input)
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
-            int requesterId = GetUid();
-            // 驗證輸入。
-            // 1. 操作者 UID 是否正確。
-            // 2. 刪除對象 UID 是否正確。
-            bool isInputValid = input
-                .StartValidate(true)
-                .Validate(i => requesterId.IsValidId(), () => AddError(DeleteItemOperatorUidIncorrect))
-                .Validate(i => i.UID.IsValidId(), () => AddError(DeleteItemTargetUidIncorrect))
-                .IsValid();
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
 
-            if (!isInputValid)
-                return GetResponseJson();
-
-            // 查詢資料並驗證。
-            UserData queried = DC.UserData.FirstOrDefault(u => u.UID == input.UID);
-            // 1. 進行查詢後，是否有查到資料。
-            // 2. 該筆資料是否並非刪除狀態。
-            bool isDataValid = queried
-                .StartValidate(true)
-                .Validate(q => q != null, () => AddError(DeleteItemTargetUidNotFound))
-                .Validate(q => q.DeleteFlag == false, () => AddError(DeleteItemTargetAlreadyDeleted))
-                .IsValid();
-            
-            // 資料未通過驗證時，提早返回。
-            if (!isDataValid)
-                return GetResponseJson();
-
-            try
-            {
-                // 更新資料。
-                // ReSharper disable once PossibleNullReferenceException
-                queried.DeleteFlag = true;
-                queried.UpdDate = DateTime.Now;
-                queried.UpdUID = requesterId;
-                await DC.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                AddError(DeleteItemFailed(e));
-            }
-
-            return GetResponseJson();
+        public IQueryable<UserData> DeleteItemQuery(int id)
+        {
+            return DC.UserData.Where(u => u.UID == id);
         }
 
         #endregion
 
         #region ChangeActive
+
         /// <summary>
         /// 啟用 / 停止使用者帳號。
         /// </summary>
@@ -510,7 +476,7 @@ namespace NS_Education.Controller.Legacy
             await input.StartValidate(true)
                 .Validate(i => i.ID.IsValidId(),
                     () => AddError(UpdateUidIncorrect))
-                .Validate(i => i.ActiveFlag != null, 
+                .Validate(i => i.ActiveFlag != null,
                     () => AddError(EmptyNotAllowed("ActiveFlag")))
                 // ReSharper disable once PossibleInvalidOperationException
                 .ValidateAsync(async i => await ChangeActiveFlagForUserData(input.ID, (bool)input.ActiveFlag),
@@ -522,7 +488,7 @@ namespace NS_Education.Controller.Legacy
         private async Task ChangeActiveFlagForUserData(int inputTargetUid, bool newValue)
         {
             UserData queried;
-            
+
             try
             {
                 queried = await GetUserDataById(inputTargetUid);
@@ -546,7 +512,8 @@ namespace NS_Education.Controller.Legacy
             }
         }
 
-        private async Task<UserData> GetUserDataById(int uid) => await DC.UserData.FirstOrDefaultAsync(u => u.UID == uid);
+        private async Task<UserData> GetUserDataById(int uid) =>
+            await DC.UserData.FirstOrDefaultAsync(u => u.UID == uid);
 
         #endregion
 
@@ -591,7 +558,7 @@ namespace NS_Education.Controller.Legacy
             UserData queried = await GetUserDataById(id);
             if (queried == null)
                 throw new NullReferenceException(UserDataNotFound);
-            
+
             // 2. 更新資料，更新失敗時拋錯
             try
             {
@@ -603,9 +570,9 @@ namespace NS_Education.Controller.Legacy
                 throw new DbUpdateException(UpdatePWDbFailed(e));
             }
         }
-        
+
         #endregion
-        
+
         #region GetList
 
         /// <summary>
@@ -617,54 +584,23 @@ namespace NS_Education.Controller.Legacy
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList(UserData_GetList_Input_APIItem input)
         {
-            // 1. 查詢所有 UserData 並逐一套用條件
-            
-            var query = GetListMakeQuery(input);
-
-            // 2. 先取得總筆數
-            UserData_GetList_Output_APIItem output = new UserData_GetList_Output_APIItem
-            {
-                AllItemCt = await query.CountAsync()
-            };
-
-            // 3. 套用分頁數及筆數限制
-            query = query.OrderBy(u => u.UID)
-                .Skip(input.GetStartIndex())
-                .Take(input.GetTakeRowCount());
-
-            output.SetByInput(input);
-            output.Items = await query.Select(u => UserDataToGetListOutput(u)).ToListAsync();
-            
-            // 4. 以通用的 List 型格式回傳
-            return GetResponseJson(output);
+            return await _getListPagedHelper.GetPagedList(input);
         }
 
-        private static UserData_GetList_Output_Row_APIItem UserDataToGetListOutput(UserData u)
+        public async Task<bool> GetListPagedValidateInput(UserData_GetList_Input_APIItem input)
         {
-            return new UserData_GetList_Output_Row_APIItem
-            {
-                Uid = u.UID,
-                Username = u.UserName,
-                Department = u.DD.TitleC,
-                Role = u.M_Group_User
-                    .Where(groupUser => groupUser.G.ActiveFlag && !groupUser.G.DeleteFlag)
-                    .OrderBy(groupUser => groupUser.GID)
-                    .FirstOrDefault()?
-                    .G.Title ?? "",
-                ActiveFlag = u.ActiveFlag
-            };
+            // 此輸入不需驗證
+            return await Task.FromResult(true);
         }
 
-        private IQueryable<UserData> GetListMakeQuery(UserData_GetList_Input_APIItem input)
+        public IOrderedQueryable<UserData> GetListPagedOrderedQuery(UserData_GetList_Input_APIItem input)
         {
-            IQueryable<UserData> query = DC.UserData.AsQueryable()
+            var query = DC.UserData
                 .Include(u => u.DD)
-                .ThenInclude(dd => dd.DC)
+                .ThenInclude(d => d.DC)
                 .Include(u => u.M_Group_User)
-                .ThenInclude(gu => gu.G);
-
-            // 這個列表會顯示使用者的啟用狀態，所以不檢查 ActiveFlag
-            query = query.Where(u => !u.DeleteFlag);
+                .ThenInclude(gu => gu.G)
+                .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(u => u.UserName.Contains(input.Keyword));
@@ -674,7 +610,20 @@ namespace NS_Education.Controller.Legacy
 
             if (input.DDID.IsValidId())
                 query = query.Where(u => u.DDID == input.DDID);
-            return query;
+
+            return query.OrderBy(u => u.UID);
+        }
+
+        public async Task<UserData_GetList_Output_Row_APIItem> GetListPagedEntityToRow(UserData entity)
+        {
+            return await Task.FromResult(new UserData_GetList_Output_Row_APIItem
+            {
+                Uid = entity.UID,
+                Username = entity.UserName,
+                Department = entity.DD.TitleC,
+                // 目前系統每個使用者只會有一個 Group
+                Role = entity.M_Group_User.FirstOrDefault()?.G?.Title ?? ""
+            });
         }
 
         #endregion

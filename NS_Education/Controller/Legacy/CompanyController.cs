@@ -174,7 +174,7 @@ namespace NS_Education.Controller.Legacy
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Company.DCID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Company_Submit_Input_APIItem.DCID))]
         public async Task<string> Submit(Company_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);

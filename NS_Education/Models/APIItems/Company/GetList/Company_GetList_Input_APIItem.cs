@@ -1,4 +1,4 @@
-namespace NS_Education.Models.APIItems.Company
+namespace NS_Education.Models.APIItems.Company.GetList
 {
     public class Company_GetList_Input_APIItem : BaseRequestForList
     {

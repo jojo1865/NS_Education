@@ -5,70 +5,94 @@ using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Department;
+using NS_Education.Models.APIItems.Department.GetList;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
+using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controller.Legacy
 {
     public class DepartmentController : PublicClass
+        , IGetListPaged<D_Department, Department_GetList_Input_APIItem, Department_GetList_Output_Row_APIItem>
+        , IDeleteItem<D_Department>
     {
+        #region Initialization
+
+        private readonly IGetListPagedHelper<Department_GetList_Input_APIItem> _getListPagedHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
+
+        public DepartmentController()
+        {
+            _getListPagedHelper =
+                new GetListPagedHelper<DepartmentController, D_Department, Department_GetList_Input_APIItem,
+                    Department_GetList_Output_Row_APIItem>(this);
+
+            _deleteItemHelper = new DeleteItemHelper<DepartmentController, D_Department>(this);
+        }
+
+        #endregion
+
+        #region GetList
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
-        public async Task<string> GetList(string KeyWord = "", int DCID = 0, int NowPage = 1, int CutPage = 10)
+        public async Task<string> GetList(Department_GetList_Input_APIItem input)
         {
-
-            var Ns = DC.D_Department.Where(q => !q.DeleteFlag);
-            if (DCID > 0)
-                Ns = Ns.Where(q => q.DCID == DCID);
-            if (KeyWord != "")
-                Ns = Ns.Where(q => q.TitleC.Contains(KeyWord) || q.TitleC.Contains(KeyWord) || q.Code.Contains(KeyWord));
-
-            D_Department_List ListData = new D_Department_List();
-            ListData.Items = new List<D_Department_APIItem>();
-            ListData.NowPage = NowPage;
-            ListData.CutPage = CutPage;
-
-            if (NowPage == 0)
-                Ns = Ns.Where(q=>q.ActiveFlag).OrderBy(q => q.TitleC);
-            else
-                Ns = Ns.OrderBy(q => q.TitleC).Skip((NowPage - 1) * CutPage).Take(CutPage);
-
-            Ns = Ns.Include(q => q.DC);
-            
-            var NsList = await Ns.ToListAsync();
-            ListData.SuccessFlag = NsList.Any();
-            ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
-            ListData.AllItemCt = NsList.Count;
-            ListData.AllPageCt = NowPage == 0 ? 0 : (ListData.AllItemCt % CutPage == 0 ? ListData.AllItemCt / CutPage : (ListData.AllItemCt / CutPage) + 1);
-            
-            foreach (var N in NsList)
-            {
-                ListData.Items.Add(new D_Department_APIItem
-                {
-                    DDID = N.DDID,
-                    DCID = N.DCID,
-                    DC_TitleC = N.DC.TitleC,
-                    DC_TitleE = N.DC.TitleE,
-                    DC_List = null,
-                    Code = N.Code,
-                    TitleC = N.TitleC,
-                    TitleE = N.TitleE,
-                    PeopleCt = N.PeopleCt,
-                    HallCt = N.D_Hall.Count,
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                }); ;
-            }
-
-            return ChangeJson(ListData);
+            return await _getListPagedHelper.GetPagedList(input);
         }
+
+        public async Task<bool> GetListPagedValidateInput(Department_GetList_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DCID.IsValidIdOrZero(), () => AddError(WrongFormat("所屬公司 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IOrderedQueryable<D_Department> GetListPagedOrderedQuery(Department_GetList_Input_APIItem input)
+        {
+            var query = DC.D_Department
+                .Include(d => d.DC)
+                .Include(d => d.D_Hall)
+                .AsQueryable();
+
+            if (!input.Keyword.IsNullOrWhiteSpace())
+                query = query.Where(d =>
+                    d.TitleC.Contains(input.Keyword) || d.TitleE.Contains(input.Keyword) ||
+                    d.Code.Contains(input.Keyword));
+
+            if (input.DCID.IsValidId())
+                query = query.Where(d => d.DCID == input.DCID);
+
+            return query.OrderBy(d => d.DDID);
+        }
+
+        public async Task<Department_GetList_Output_Row_APIItem> GetListPagedEntityToRow(D_Department entity)
+        {
+            return await Task.FromResult(new Department_GetList_Output_Row_APIItem
+            {
+                DDID = entity.DDID,
+                DCID = entity.DCID,
+                DC_TitleC = entity.DC.TitleC ?? "",
+                DC_TitleE = entity.DC.TitleE ?? "",
+                Code = entity.Code ?? "",
+                TitleC = entity.TitleC ?? "",
+                TitleE = entity.TitleE ?? "",
+                PeopleCt = entity.PeopleCt,
+                HallCt = entity.D_Hall?.Count ?? 0
+            });
+        }
+
+        #endregion
+
+        #region GetInfoByID
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
@@ -107,6 +131,10 @@ namespace NS_Education.Controller.Legacy
             return ChangeJson(Item);
         }
 
+        #endregion
+
+        #region ChangeActive
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
         public async Task<string> ChangeActive(int ID, bool ActiveFlag)
@@ -126,24 +154,25 @@ namespace NS_Education.Controller.Legacy
             return ChangeJson(GetMsgClass(Error));
         }
 
+        #endregion
+
+        #region DeleteItem
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
-        public async Task<string> DeleteItem(int ID)
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
-            Error = "";
-            var N_ = await DC.D_Department.FirstOrDefaultAsync(q => q.DDID == ID);
-                if (N_ != null)
-                {
-                    N_.DeleteFlag = true;
-                    N_.UpdDate = DT;
-                    N_.UpdUID = GetUid();
-                    await DC.SaveChangesAsync();
-                }
-                else
-                    Error += "查無資料,無法更新;";
-
-                return ChangeJson(GetMsgClass(Error));
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
         }
+
+        public IQueryable<D_Department> DeleteItemQuery(int id)
+        {
+            return DC.D_Department.Where(d => d.DDID == id);
+        }
+
+        #endregion
+
+        #region Submit
 
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Department.DDID))]
@@ -152,11 +181,11 @@ namespace NS_Education.Controller.Legacy
             Error = "";
             if (N.DDID == 0)
             {
-                if(N.DCID<=0)
+                if (N.DCID <= 0)
                     Error += "請選擇部門所屬公司;";
                 if (N.TitleC == "")
                     Error += "名稱必須輸入;";
-                if(Error=="")
+                if (Error == "")
                 {
                     N.CreUID = GetUid();
                     N.UpdDate = N.CreDate = DT;
@@ -188,7 +217,11 @@ namespace NS_Education.Controller.Legacy
                     await DC.SaveChangesAsync();
                 }
             }
+
             return ChangeJson(GetMsgClass(Error));
         }
+
+        #endregion
+
     }
 }

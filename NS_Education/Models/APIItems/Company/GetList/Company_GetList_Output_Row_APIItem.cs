@@ -1,6 +1,6 @@
 using NS_Education.Models.Entities;
 
-namespace NS_Education.Models.APIItems.Company
+namespace NS_Education.Models.APIItems.Company.GetList
 {
     public class Company_GetList_Output_Row_APIItem : BaseResponseWithCreUpd<D_Company>
     {

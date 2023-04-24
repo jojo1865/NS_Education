@@ -78,7 +78,6 @@ namespace NS_Education.Models.Entities.DbContext
                 optionsBuilder.UseSqlServer(connectionString);
             }
         } 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<B_Category>(entity =>
@@ -782,6 +781,8 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.GroupID).HasComment("串聯的場地 ID");
 
                 entity.Property(e => e.MasterID).HasComment("場地 ID");
+
+                entity.Property(e => e.SortNo).HasComment("排序");
 
                 entity.Property(e => e.UpdDate)
                     .HasColumnType("datetime")

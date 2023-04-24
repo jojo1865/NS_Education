@@ -231,7 +231,6 @@ namespace NS_Education.Controller.Legacy
             data.Code = input.Code;
             data.TitleC = input.TitleC;
             data.TitleE = input.TitleE;
-            data.ActiveFlag = input.ActiveFlag;
         }
         #endregion
 

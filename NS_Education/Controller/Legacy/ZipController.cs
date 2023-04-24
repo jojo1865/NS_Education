@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Zip;
 using NS_Education.Models.APIItems.Zip.GetList;
+using NS_Education.Models.APIItems.Zip.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -20,18 +21,22 @@ namespace NS_Education.Controller.Legacy
 {
     public class ZipController : PublicClass,
         IGetListPaged<D_Zip, Zip_GetList_Input_APIItem, Zip_GetList_Output_Row_APIItem>,
-        IDeleteItem<D_Zip>
+        IDeleteItem<D_Zip>,
+        ISubmit<D_Zip, Zip_Submit_Input_APIItem>
     {
+
         #region Initialization
 
         private readonly IGetListPagedHelper<Zip_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<Zip_Submit_Input_APIItem> _submitHelper;
 
         public ZipController()
         {
             _getListPagedHelper = new GetListPagedHelper<ZipController, D_Zip, Zip_GetList_Input_APIItem,
                 Zip_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<ZipController, D_Zip>(this);
+            _submitHelper = new SubmitHelper<ZipController, D_Zip, Zip_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -158,58 +163,87 @@ namespace NS_Education.Controller.Legacy
 
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Zip.DZID))]
-        public async Task<string> Submit(D_Zip N)
+        public async Task<string> Submit(Zip_Submit_Input_APIItem input)
         {
-            Error = "";
-            if (N.DZID == 0)
-            {
-                if (N.ParentID <= 0)
-                    Error += "請選擇這個郵遞區號所屬;";
-                if (N.GroupName == "")
-                    Error += "請輸入這個郵遞區號的層級;";
-                if (N.Title == "")
-                    Error += "名稱必須輸入;";
-                if (Error == "")
-                {
-                    N.CreUID = GetUid();
-                    N.UpdDate = N.CreDate = DT;
-                    N.UpdUID = 0;
-                    await DC.D_Zip.AddAsync(N);
-                    await DC.SaveChangesAsync();
-                }
-            }
-            else
-            {
-                var N_ = await DC.D_Zip.FirstOrDefaultAsync(q => q.DZID == N.DZID && !q.DeleteFlag);
-                if (N.ParentID <= 0)
-                    Error += "請選擇這個郵遞區號所屬;";
-                if (N.GroupName == "")
-                    Error += "請輸入這個郵遞區號的層級;";
-                if (N.Title == "")
-                    Error += "名稱必須輸入;";
-                if (N_ == null)
-                    Error += "查無資料,無法更新";
-                if (Error == "")
-                {
-                    N_.DZID = N.DZID;
-                    N_.Code = N.Code;
-                    N_.Title = N.Title;
-                    N_.ParentID = N.ParentID;
-                    N_.GroupName = N.GroupName;
-                    N_.Note = N.Note;
-
-                    N_.ActiveFlag = N.ActiveFlag;
-                    N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = GetUid();
-                    N_.UpdDate = DT;
-                    await DC.SaveChangesAsync();
-                }
-            }
-
-            return ChangeJson(GetMsgClass(Error));
+            return await _submitHelper.Submit(input);
         }
 
+        public bool SubmitIsAdd(Zip_Submit_Input_APIItem input)
+        {
+            return input.DZID == 0;
+        }
+        
+        private async Task<string[]> SubmitGetGroupNames()
+        {
+            string[] groupNames = await DC.B_StaticCode
+                .Where(sc => sc.CodeType == 13 && sc.ActiveFlag && !sc.DeleteFlag)
+                .Select(sc => sc.Title)
+                .ToArrayAsync();
+            return groupNames;
+        }
+
+        #region Submit - Add
+
+        private const string SubmitGroupNameNotFound = "層級名稱於靜態參數檔中找不到對應資料！";
+        
+        public async Task<bool> SubmitAddValidateInput(Zip_Submit_Input_APIItem input)
+        {
+            string[] groupNames = await SubmitGetGroupNames();
+
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DZID == 0, () => AddError(WrongFormat("國籍 / 郵遞區號 ID")))
+                .Validate(i => i.ParentID.IsValidId(), () => AddError(EmptyNotAllowed("上層 ID")))
+                .Validate(i => groupNames.Contains(input.GroupName), () => AddError(SubmitGroupNameNotFound))
+                .IsValid();
+
+            return isValid;
+        }
+
+        public async Task<D_Zip> SubmitCreateData(Zip_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new D_Zip
+            {
+                ParentID = input.ParentID,
+                Code = input.Code,
+                Title = input.Title,
+                GroupName = input.GroupName,
+                Note = input.Note
+            });
+        }
+        
+        #endregion
+        
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(Zip_Submit_Input_APIItem input)
+        {
+            string[] groupNames = await SubmitGetGroupNames();
+            
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DZID.IsValidId(), () => AddError(EmptyNotAllowed("國籍 / 郵遞區號 ID")))
+                .Validate(i => i.ParentID.IsValidId(), () => AddError(EmptyNotAllowed("上層 ID")))
+                .Validate(i => groupNames.Contains(input.GroupName), () => AddError(SubmitGroupNameNotFound))
+                .IsValid();
+
+            return isValid;
+        }
+
+        public IQueryable<D_Zip> SubmitEditQuery(Zip_Submit_Input_APIItem input)
+        {
+            return DC.D_Zip.Where(z => z.DZID == input.DZID);
+        }
+
+        public void SubmitEditUpdateDataFields(D_Zip data, Zip_Submit_Input_APIItem input)
+        {
+            data.ParentID = input.ParentID;
+            data.Code = input.Code ?? data.Code;
+            data.Title = input.Title ?? data.Title;
+            data.GroupName = input.GroupName ?? data.GroupName;
+            data.Note = input.Note;
+        }
+        
         #endregion
 
+        #endregion
     }
 }

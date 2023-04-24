@@ -75,10 +75,17 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             return _controller.GetResponseJson(response);
         }
 
-        private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest t
+        private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest input
             , BaseResponseForPagedList<TGetListRow> response)
         {
-            IQueryable<TEntity> query = FlagHelper.FilterDeletedIfHasFlag(_controller.GetListPagedOrderedQuery(t));
+            IQueryable<TEntity> query = _controller.GetListPagedOrderedQuery(input);
+            
+            // Filter by ActiveFlag
+            if (input.ActiveFlag == 0 || input.ActiveFlag == 1)
+                query = FlagHelper.FilterByInputActiveFlag(query, input.ActiveFlag == 1);
+            
+            // Filter by DeleteFlag
+            query = FlagHelper.FilterByInputDeleteFlag(query, input.DeleteFlag == 1);
 
             // 1. 先取得總筆數
 
@@ -88,8 +95,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 2. 再回傳實際資料
 
             return await query
-                .Skip(t.GetStartIndex())
-                .Take(t.GetTakeRowCount())
+                .Skip(input.GetStartIndex())
+                .Take(input.GetTakeRowCount())
                 .ToListAsync();
         }
 

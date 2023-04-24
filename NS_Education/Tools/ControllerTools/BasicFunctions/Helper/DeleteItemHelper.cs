@@ -30,30 +30,34 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private static string UpdateFailed(Exception e)
             => $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}！";
         
-        private const string DeleteItemNotSupported = "此 Controller 的資料型態不支援刪除功能！";
-        private const string DeleteItemInputIncorrect = "未輸入欲刪除的 ID 或是不正確！";
-        private const string DeleteItemNotFound = "查無欲刪除的資料！";
+        private const string DeleteItemNotSupported = "此 Controller 的資料型態不支援設定刪除狀態功能！";
+        private const string DeleteItemInputIncorrect = "未輸入欲設定刪除狀態的 ID 或是不正確！";
+        private const string DeleteItemNotFound = "查無欲設定刪除狀態的資料！";
 
         /// <summary>
         /// 刪除單筆資料。
         /// </summary>
         /// <param name="id">欲刪除資料的查詢索引值</param>
+        /// <param name="deleteFlag">欲設定成的刪除狀態</param>
         /// <returns>
         /// 成功時：通用訊息回傳格式。<br/>
         /// 輸入不正確、查無資料、DB 錯誤時：包含錯誤訊息的通用訊息回傳格式。<br/>
         /// 其他異常時：拋錯。
         /// </returns>
-        public async Task<string> DeleteItem(int id)
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
             if (!FlagHelper<TEntity>.HasDeleteFlag)
                 throw new NotSupportedException(DeleteItemNotSupported);
 
             // 1. 驗證輸入。
             if (!id.IsValidId())
-            {
                 _controller.AddError(DeleteItemInputIncorrect);
+
+            if (deleteFlag == null)
+                _controller.AddError(_controller.EmptyNotAllowed(nameof(deleteFlag)));
+            
+            if (_controller.HasError())
                 return _controller.GetResponseJson();
-            }
 
             // 2. 查詢資料並確認刪除狀態。
             TEntity t = await _DeleteItemQueryResult(id);
@@ -67,7 +71,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 3. 更新刪除狀態與更新者資訊，並存入 DB。
             try
             {
-                FlagHelper.SetDeleteFlag(t, true);
+                FlagHelper.SetDeleteFlag(t, deleteFlag ?? throw new ArgumentNullException(nameof(deleteFlag)));
                 CreUpdHelper.SetInfosOnUpdate(_controller, t);
                 await _controller.DC.SaveChangesAsync();
             }
@@ -82,7 +86,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         private async Task<TEntity> _DeleteItemQueryResult(int id)
         {
-            return await FlagHelper.FilterDeletedIfHasFlag(_controller.DeleteItemQuery(id)).FirstOrDefaultAsync();
+            return await _controller.DeleteItemQuery(id).FirstOrDefaultAsync();
         }
 
         #endregion

@@ -67,6 +67,46 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
         }
 
         /// <summary>
+        /// 依據輸入的 ActiveFlag 值對 Query 新增篩選條件。<br/>
+        /// 如果物件沒有 ActiveFlag 欄位，不做任何事。
+        /// </summary>
+        /// <param name="query">查詢</param>
+        /// <param name="activeFlag">目標啟用狀態</param>
+        /// <typeparam name="T">Generic Type</typeparam>
+        /// <returns>
+        /// 物件有 ActiveFlag 時：加上 ActiveFlag == activeFlag 的條件之後的查詢。<br/>
+        /// 其它情況：原本的查詢。
+        /// </returns>
+        internal static IQueryable<T> FilterByInputActiveFlag<T>(IQueryable<T> query, bool activeFlag)
+            where T : class
+        {
+            if (FlagHelper<T>.HasActiveFlag)
+                query = query.Where(entity => EF.Property<bool>(entity, DbConstants.ActiveFlag) == activeFlag);
+
+            return query;
+        }
+        
+        /// <summary>
+        /// 依據輸入的 DeleteFlag 值對 Query 新增篩選條件。<br/>
+        /// 如果物件沒有 DeleteFlag 欄位，不做任何事。
+        /// </summary>
+        /// <param name="query">查詢</param>
+        /// <param name="deleteFlag">目標刪除狀態</param>
+        /// <typeparam name="T">Generic Type</typeparam>
+        /// <returns>
+        /// 物件有 DeleteFlag 時：加上 DeleteFlag == deleteFlag 的條件之後的查詢。<br/>
+        /// 其它情況：原本的查詢。
+        /// </returns>
+        internal static IQueryable<T> FilterByInputDeleteFlag<T>(IQueryable<T> query, bool deleteFlag)
+            where T : class
+        {
+            if (FlagHelper<T>.HasDeleteFlag)
+                query = query.Where(entity => EF.Property<bool>(entity, DbConstants.DeleteFlag) == deleteFlag);
+
+            return query;
+        }
+
+        /// <summary>
         /// 若物件有名稱為 ActiveFlag 的欄位，將該值設為 newValue。
         /// </summary>
         /// <param name="entity">欲設定的物件</param>

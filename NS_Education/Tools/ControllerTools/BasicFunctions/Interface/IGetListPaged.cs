@@ -42,7 +42,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// 實作者可以在這個方法中進行 AddError，回到主方法後就不會實際執行查詢，而是提早回傳。<br/>
         /// </summary>
         /// <returns>具備排序的查詢。</returns>
-        /// <remarks>若此方法是藉由 Helper 被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
+        /// <remarks>若此方法是藉由 Helper 被呼叫時，實作者在查詢中應忽略 ActiveFlag 和 DeleteFlag 的判定。</remarks>
         IOrderedQueryable<TEntity> GetListPagedOrderedQuery(TGetListPagedRequest input);
 
         /// <summary>

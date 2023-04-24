@@ -127,7 +127,7 @@ namespace NS_Education.Controller.UsingHelper
 
         public IOrderedQueryable<B_StaticCode> GetListPagedOrderedQuery(StaticCode_GetList_Input_APIItem input)
         {
-            var query = DC.B_StaticCode.Where(sc => sc.ActiveFlag);
+            var query = DC.B_StaticCode.AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(sc => sc.Title.Contains(input.Keyword) || sc.Code.Contains(input.Keyword));
@@ -268,9 +268,9 @@ namespace NS_Education.Controller.UsingHelper
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
-        public async Task<string> DeleteItem(int id)
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
-            return await _deleteItemHelper.DeleteItem(id);
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
         }
 
         public IQueryable<B_StaticCode> DeleteItemQuery(int id)

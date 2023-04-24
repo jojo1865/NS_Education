@@ -70,10 +70,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public IOrderedQueryable<B_SiteData> GetListPagedOrderedQuery(SiteData_GetList_Input_APIItem input)
         {
             var query = DC.B_SiteData.Include(sd => sd.BC).AsQueryable();
-
-            if (input.ActiveFlag != null)
-                query = query.Where(sd => sd.ActiveFlag == input.ActiveFlag);
-
+            
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(sd => sd.Title.Contains(input.Keyword) || sd.Code.Contains(input.Keyword));
 
@@ -206,9 +203,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
-        public async Task<string> DeleteItem(int id)
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
-            return await _deleteItemHelper.DeleteItem(id);
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
         }
 
         public IQueryable<B_SiteData> DeleteItemQuery(int id)

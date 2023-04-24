@@ -6,7 +6,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.Ajax.Utilities;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.UserData.ChangeActive;
 using NS_Education.Models.APIItems.UserData.DeleteItem;

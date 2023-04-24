@@ -1,7 +1,7 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.Ajax.Utilities;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.SiteData.GetInfoById;
@@ -16,6 +16,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using WebGrease.Css.Extensions;
 
 namespace NS_Education.Controller.UsingHelper.SiteDataController
 {
@@ -253,7 +254,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public async Task<B_SiteData> SubmitCreateData(SiteData_Submit_Input_APIItem input)
         {
-            return await Task.FromResult(new B_SiteData
+            B_SiteData newEntry = new B_SiteData
             {
                 BCID = input.BCID,
                 Code = input.Code,
@@ -272,11 +273,22 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 PhoneExt2 = input.PhoneExt2,
                 PhoneExt3 = input.PhoneExt3,
                 Note = input.Note,
-                ActiveFlag = input.ActiveFlag
-                // TODO: GroupList 怎麼用?
-            });
+                ActiveFlag = input.ActiveFlag,
+                M_SiteGroupGroup = input.GroupList.Select(sg => new M_SiteGroup
+                {
+                    GroupID = sg.BSID,
+                    SortNo = sg.SortNo,
+                    ActiveFlag = true,
+                    DeleteFlag = false,
+                    CreDate = DateTime.Now,
+                    CreUID = GetUid(),
+                    UpdDate = DateTime.Now,
+                    UpdUID = 0
+                }).ToArray()
+            };
+
+            return await Task.FromResult(newEntry);
         }
-        
         #endregion
 
         #region Submit - Edit
@@ -307,6 +319,13 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public void SubmitEditUpdateDataFields(B_SiteData data, SiteData_Submit_Input_APIItem input)
         {
+            // 1. 刪除這個場地原本有的所有組合
+            data.M_SiteGroupGroup.ForEach(sg =>
+            {
+                sg.ActiveFlag = false;
+                sg.DeleteFlag = true;
+            });
+            // 2. 修改資料
             data.BCID = input.BCID;
             data.Code = input.Code;
             data.Title = input.Title;
@@ -325,7 +344,17 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.PhoneExt3 = input.PhoneExt3;
             data.Note = input.Note;
             data.ActiveFlag = input.ActiveFlag;
-            // TODO: GroupList 怎麼用?
+            data.M_SiteGroupGroup = input.GroupList.Select(sg => new M_SiteGroup
+            {
+                GroupID = sg.BSID,
+                SortNo = sg.SortNo,
+                ActiveFlag = true,
+                DeleteFlag = false,
+                CreDate = DateTime.Now,
+                CreUID = GetUid(),
+                UpdDate = DateTime.Now,
+                UpdUID = 0
+            }).ToArray();
         }
         
         #endregion

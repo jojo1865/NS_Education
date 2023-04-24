@@ -35,7 +35,7 @@ namespace NS_Education.Controller.Legacy
         }
 
         #endregion
-        
+
         #region GetList
 
         [HttpGet]
@@ -210,6 +210,6 @@ namespace NS_Education.Controller.Legacy
         }
 
         #endregion
-        
+
     }
 }

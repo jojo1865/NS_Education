@@ -310,8 +310,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(EmptyNotAllowed("靜態參數編碼")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("靜態參數名稱")))
-                .Validate(i => i.ActiveFlag != null,
-                    () => AddError(EmptyNotAllowed("是否啟用")))
                 .IsValid());
         }
 
@@ -328,8 +326,7 @@ namespace NS_Education.Controller.UsingHelper
                     .OrderBy(sc => sc.SortNo)
                     .Select(sc => sc.SortNo)
                     .FirstOrDefaultAsync() + 1,
-                Note = input.Note ?? "",
-                ActiveFlag = input.ActiveFlag ?? throw new ArgumentNullException(nameof(input.ActiveFlag)),
+                Note = input.Note ?? ""
             };
         }
 
@@ -350,8 +347,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(EmptyNotAllowed("靜態參數名稱")))
                 .Validate(i => i.ActiveFlag != null,
                     () => AddError(EmptyNotAllowed("是否啟用")))
-                .Validate(i => i.DeleteFlag != null,
-                    () => AddError(EmptyNotAllowed("刪除狀態")))
                 .IsValid());
         }
 
@@ -366,8 +361,6 @@ namespace NS_Education.Controller.UsingHelper
             data.Code = input.Code ?? data.Code;
             data.Title = input.Title ?? data.Title;
             data.Note = input.Note ?? data.Note;
-            data.ActiveFlag = input.ActiveFlag ?? data.ActiveFlag;
-            data.DeleteFlag = input.DeleteFlag ?? data.DeleteFlag;
         }
 
         #endregion

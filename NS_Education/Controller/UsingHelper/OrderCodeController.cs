@@ -300,8 +300,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(EmptyNotAllowed("入帳代號名稱")))
                 .Validate(i => !i.PrintTitle.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("帳單列印名稱")))
-                .Validate(i => i.ActiveFlag != null,
-                    () => AddError(EmptyNotAllowed("是否啟用")))
                 .IsValid());
         }
 
@@ -318,9 +316,7 @@ namespace NS_Education.Controller.UsingHelper
                     .Where(sc => sc.CodeType == input.CodeType)
                     .OrderBy(sc => sc.SortNo)
                     .Select(sc => sc.SortNo)
-                    .FirstOrDefaultAsync() + 1,
-                ActiveFlag = input.ActiveFlag ?? true,
-                DeleteFlag = false,
+                    .FirstOrDefaultAsync() + 1
             };
         }
 
@@ -341,10 +337,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(EmptyNotAllowed("入帳代號名稱")))
                 .Validate(i => !i.PrintTitle.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("帳單列印名稱")))
-                .Validate(i => i.ActiveFlag != null,
-                    () => AddError(EmptyNotAllowed("是否啟用")))
-                .Validate(i => i.DeleteFlag != null,
-                    () => AddError(EmptyNotAllowed("刪除狀態")))
                 .IsValid());
         }
 
@@ -361,8 +353,6 @@ namespace NS_Education.Controller.UsingHelper
             data.Title = input.Title ?? data.Title;
             data.PrintTitle = input.PrintTitle ?? data.PrintTitle;
             data.PrintNote = input.PrintNote ?? "";
-            data.ActiveFlag = input.ActiveFlag ?? data.ActiveFlag;
-            data.DeleteFlag = input.DeleteFlag ?? data.DeleteFlag;
         }
 
         #endregion

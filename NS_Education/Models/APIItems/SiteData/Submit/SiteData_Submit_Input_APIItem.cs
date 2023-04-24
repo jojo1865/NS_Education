@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.APIItems.SiteData.Submit
 {
-    public class SiteData_Submit_Input_APIItem
+    public class SiteData_Submit_Input_APIItem : BaseRequestForSubmit
     {
         public int BSID { get; set; }
         public int BCID { get; set; }
@@ -22,7 +22,6 @@ namespace NS_Education.Models.APIItems.SiteData.Submit
         public int BSCID5 { get; set; }
         public int DHID { get; set; }
         public int BOCID { get; set; }
-        public bool ActiveFlag { get; set; }
 
         public List<SiteData_Submit_Input_GroupList_Row_APIItem> GroupList { get; set; } =
             new List<SiteData_Submit_Input_GroupList_Row_APIItem>();

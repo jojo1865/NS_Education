@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using NS_Education.Models.APIItems;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
@@ -9,6 +10,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     /// <typeparam name="TEntity">掌管資料的類型</typeparam>
     /// <typeparam name="TSubmitRequest">傳入要求的類型</typeparam>
     public interface ISubmit<TEntity, in TSubmitRequest>
+      where TSubmitRequest : BaseRequestForSubmit
     {
         /// <summary>
         /// 新增或更新一筆資料。

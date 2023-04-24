@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -17,7 +18,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     public class SubmitHelper<TController, TEntity, TSubmitRequest> : ISubmitHelper<TSubmitRequest>
         where TController : PublicClass, ISubmit<TEntity, TSubmitRequest>
         where TEntity : class
-        where TSubmitRequest : class
+        where TSubmitRequest : BaseRequestForSubmit
     {
         private readonly TController _controller;
 
@@ -69,6 +70,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 1. 建立資料
             TEntity t = await _controller.SubmitCreateData(input);
             CreUpdHelper.SetInfosOnCreate(_controller, t);
+            FlagHelper.SetActiveFlag(_controller, input.ActiveFlag);
 
             // 2. 儲存至 DB
             try
@@ -102,6 +104,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 2. 覆寫資料
             _controller.SubmitEditUpdateDataFields(data, input);
             CreUpdHelper.SetInfosOnUpdate(_controller, data);
+            FlagHelper.SetActiveFlag(_controller, input.ActiveFlag);
 
             // 3. 儲存至 DB
             try

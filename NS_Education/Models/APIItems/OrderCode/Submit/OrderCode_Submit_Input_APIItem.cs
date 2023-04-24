@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.OrderCode.Submit
 {
-    public class OrderCode_Submit_Input_APIItem
+    public class OrderCode_Submit_Input_APIItem : BaseRequestForSubmit
     {
         public int BOCID { get; set; }
         public int CodeType { get; set; }
@@ -8,7 +8,5 @@ namespace NS_Education.Models.APIItems.OrderCode.Submit
         public string Title { get; set; }
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }
-        public bool? ActiveFlag { get; set; }
-        public bool? DeleteFlag { get; set; } = false;
     }
 }

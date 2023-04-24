@@ -270,7 +270,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 PhoneExt2 = input.PhoneExt2,
                 PhoneExt3 = input.PhoneExt3,
                 Note = input.Note,
-                ActiveFlag = input.ActiveFlag,
                 M_SiteGroupGroup = input.GroupList.Select(sg => new M_SiteGroup
                 {
                     GroupID = sg.BSID,
@@ -340,7 +339,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.PhoneExt2 = input.PhoneExt2;
             data.PhoneExt3 = input.PhoneExt3;
             data.Note = input.Note;
-            data.ActiveFlag = input.ActiveFlag;
             data.M_SiteGroupGroup = input.GroupList.Select(sg => new M_SiteGroup
             {
                 GroupID = sg.BSID,

@@ -10,7 +10,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controllers
+namespace NS_Education.Controller.Legacy
 {
     public class TimeSpanController : PublicClass
     {

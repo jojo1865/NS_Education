@@ -1,8 +1,8 @@
 ﻿using System.Web.Mvc;
 
-namespace NS_Education.Controllers
+namespace NS_Education.Controller
 {
-    public class HomeController : Controller
+    public class HomeController : System.Web.Mvc.Controller
     {
         public ActionResult Index()
         {

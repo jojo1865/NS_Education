@@ -247,21 +247,21 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Controllers\CategoryController.cs" />
-    <Compile Include="Controllers\ContactTypeController.cs" />
-    <Compile Include="Controllers\OrderCodeController.cs" />
-    <Compile Include="Controllers\PayTypeController.cs" />
-    <Compile Include="Controllers\DepartmentController.cs" />
-    <Compile Include="Controllers\CompanyController.cs" />
-    <Compile Include="Controllers\SiteDataController\SiteDataController.cs" />
-    <Compile Include="Controllers\StaticCodeController.cs" />
-    <Compile Include="Controllers\TimeSpanController.cs" />
-    <Compile Include="Controllers\ZipController.cs" />
-    <Compile Include="Controllers\OtherPayItemController.cs" />
-    <Compile Include="Controllers\FoodCategoryController.cs" />
-    <Compile Include="Controllers\HallController.cs" />
-    <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\UserDataController.cs" />
+    <Compile Include="Controller\Legacy\CategoryController.cs" />
+    <Compile Include="Controller\Legacy\CompanyController.cs" />
+    <Compile Include="Controller\Legacy\ContactTypeController.cs" />
+    <Compile Include="Controller\Legacy\DepartmentController.cs" />
+    <Compile Include="Controller\Legacy\FoodCategoryController.cs" />
+    <Compile Include="Controller\Legacy\HallController.cs" />
+    <Compile Include="Controller\Legacy\OtherPayItemController.cs" />
+    <Compile Include="Controller\Legacy\PayTypeController.cs" />
+    <Compile Include="Controller\Legacy\TimeSpanController.cs" />
+    <Compile Include="Controller\Legacy\UserDataController.cs" />
+    <Compile Include="Controller\Legacy\ZipController.cs" />
+    <Compile Include="Controller\HomeController.cs" />
+    <Compile Include="Controller\UsingHelper\OrderCodeController.cs" />
+    <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs" />
+    <Compile Include="Controller\UsingHelper\StaticCodeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

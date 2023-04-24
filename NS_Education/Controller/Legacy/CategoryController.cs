@@ -11,7 +11,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 
-namespace NS_Education.Controllers
+namespace NS_Education.Controller.Legacy
 {
     public class CategoryController : PublicClass
     {

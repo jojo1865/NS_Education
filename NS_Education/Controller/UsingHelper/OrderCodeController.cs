@@ -19,7 +19,7 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controllers
+namespace NS_Education.Controller.UsingHelper
 {
     /// <summary>
     /// 入帳代號 B_OrderCode 的 Controller。

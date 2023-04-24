@@ -16,7 +16,7 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controllers.SiteDataController
+namespace NS_Education.Controller.UsingHelper.SiteDataController
 {
     public class SiteDataController : PublicClass,
         IGetListPaged<B_SiteData, SiteData_GetList_Input_APIItem, SiteData_GetList_Output_Row_APIItem>,

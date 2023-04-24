@@ -7,7 +7,7 @@ using NS_Education.Models.APIItems.OtherPayItem;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
 
-namespace NS_Education.Controllers
+namespace NS_Education.Controller.Legacy
 {
     public class OtherPayItemController : PublicClass
     {

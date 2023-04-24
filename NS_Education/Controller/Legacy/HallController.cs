@@ -3,35 +3,39 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems.FoodCategory;
+using NS_Education.Models;
+using NS_Education.Models.APIItems.Hall;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controllers
+namespace NS_Education.Controller.Legacy
 {
-    public class FoodCategoryController : PublicClass
+    public class HallController : PublicClass
     {
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
-        public async Task<string> GetList(string KeyWord = "", int NowPage = 1, int CutPage = 10)
+        public async Task<string> GetList(string KeyWord = "", int DDID = 0, int NowPage = 1, int CutPage = 10)
         {
-            var Ns = DC.D_FoodCategory.Where(q => !q.DeleteFlag);
-            
+            var Ns = DC.D_Hall.Where(q => !q.DeleteFlag);
+            if (DDID > 0)
+                Ns = Ns.Where(q => q.DDID == DDID);
             if (KeyWord != "")
-                Ns = Ns.Where(q => q.Title.Contains(KeyWord) || q.Code.Contains(KeyWord));
+                Ns = Ns.Where(q => q.TitleC.Contains(KeyWord) || q.TitleC.Contains(KeyWord) || q.Code.Contains(KeyWord));
 
-            D_FoodCategory_List ListData = new D_FoodCategory_List();
-            ListData.Items = new List<D_FoodCategory_APIItem>();
+            D_Hall_List ListData = new D_Hall_List();
+            ListData.Items = new List<D_Hall_APIItem>();
             ListData.NowPage = NowPage;
             ListData.CutPage = CutPage;
 
             if (NowPage == 0)
-                Ns = Ns.Where(q => q.ActiveFlag).OrderBy(q => q.Title);
+                Ns = Ns.Where(q => q.ActiveFlag).OrderBy(q => q.TitleC);
             else
-                Ns = Ns.OrderBy(q => q.Title).Skip((NowPage - 1) * CutPage).Take(CutPage);
+                Ns = Ns.OrderBy(q => q.TitleC).Skip((NowPage - 1) * CutPage).Take(CutPage);
 
+            Ns.Include(h => h.DD);
+            
             var NsList = await Ns.ToListAsync();
             ListData.SuccessFlag = NsList.Any();
             ListData.Message = ListData.SuccessFlag ? "" : "查無資料";
@@ -40,15 +44,28 @@ namespace NS_Education.Controllers
             
             foreach (var N in NsList)
             {
-                ListData.Items.Add(new D_FoodCategory_APIItem
+                ListData.Items.Add(new D_Hall_APIItem
                 {
-                    DFCID = N.DFCID,
+                    DHID = N.DHID,
+                    DDID = N.DDID,
+                    DD_TitleC = N.DD.TitleC,
+                    DD_TitleE = N.DD.TitleE,
+                    DD_List = null,
                     Code = N.Code,
-                    Title = N.Title,
+                    TitleC = N.TitleC,
+                    TitleE = N.TitleE,
 
-                    UnitPrice = N.UnitPrice,
-                    Price = N.Price,
-                    
+                    DiscountFlag = N.DiscountFlag,
+                    CheckoutNowFlag = N.CheckoutNowFlag,
+                    PrintCheckFlag = N.PrintCheckFlag,
+                    Invoice3Flag = N.Invoice3Flag,
+                    CheckType = N.CheckType,
+                    BusinessTaxRate = N.BusinessTaxRate,
+
+                    DeviceCt = N.B_Device.Count,
+                    SiteCt = N.B_SiteData.Count,
+                    PartnerItemCt = N.B_PartnerItem.Count,
+
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
                     CreUser = await GetUserNameByID(N.CreUID),
@@ -66,18 +83,36 @@ namespace NS_Education.Controllers
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetInfoByID(int ID = 0)
         {
-            var N = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID && !q.DeleteFlag);
-            D_FoodCategory_APIItem Item = null;
+            var N = await DC.D_Hall.Include(q => q.DD).FirstOrDefaultAsync(q => q.DDID == ID && !q.DeleteFlag);
+            D_Hall_APIItem Item = null;
             if (N != null)
             {
-                Item = new D_FoodCategory_APIItem
+                List<cSelectItem> SIs = new List<cSelectItem>();
+                var Deps = DC.D_Department.Where(q => !q.DeleteFlag).OrderBy(q => q.TitleC);
+                
+                foreach (var Dep in await Deps.ToListAsync())
+                    SIs.Add(new cSelectItem { ID = Dep.DDID, Title = Dep.TitleC, SelectFlag = N.DDID == Dep.DDID });
+                Item = new D_Hall_APIItem
                 {
-                    DFCID = N.DFCID,
+                    DDID = N.DDID,
+                    DHID = N.DHID,
+                    DD_TitleC = N.DD.TitleC,
+                    DD_TitleE = N.DD.TitleE,
+                    DD_List = SIs,
                     Code = N.Code,
-                    Title = N.Title,
+                    TitleC = N.TitleC,
+                    TitleE = N.TitleE,
 
-                    UnitPrice = N.UnitPrice,
-                    Price = N.Price,
+                    DiscountFlag = N.DiscountFlag,
+                    CheckoutNowFlag = N.CheckoutNowFlag,
+                    PrintCheckFlag = N.PrintCheckFlag,
+                    Invoice3Flag = N.Invoice3Flag,
+                    CheckType = N.CheckType,
+                    BusinessTaxRate = N.BusinessTaxRate,
+
+                    DeviceCt = N.B_Device.Count,
+                    SiteCt = N.B_SiteData.Count,
+                    PartnerItemCt = N.B_PartnerItem.Count,
 
                     ActiveFlag = N.ActiveFlag,
                     CreDate = N.CreDate.ToString(DateTimeFormat),
@@ -89,7 +124,7 @@ namespace NS_Education.Controllers
                 };
             }
 
-            return ChangeJson(Item);
+            return ChangeJson(Item);    
         }
 
         [HttpGet]
@@ -97,7 +132,7 @@ namespace NS_Education.Controllers
         public async Task<string> ChangeActive(int ID, bool ActiveFlag)
         {
             Error = "";
-            var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID && !q.DeleteFlag);
+            var N_ = await DC.D_Hall.FirstOrDefaultAsync(q => q.DHID == ID && !q.DeleteFlag);
             if (N_ != null)
             {
                 N_.ActiveFlag = ActiveFlag;
@@ -116,7 +151,7 @@ namespace NS_Education.Controllers
         public async Task<string> DeleteItem(int ID)
         {
             Error = "";
-            var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID);
+            var N_ = await DC.D_Hall.FirstOrDefaultAsync(q => q.DHID == ID);
             if (N_ != null)
             {
                 N_.DeleteFlag = true;
@@ -131,47 +166,46 @@ namespace NS_Education.Controllers
         }
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_FoodCategory.DFCID))]
-        public async Task<string> Submit(D_FoodCategory N)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Hall.DHID))]
+        public async Task<string> Submit(D_Hall N)
         {
             Error = "";
-            if (N.DFCID == 0)
+            if (N.DHID == 0)
             {
-                if (N.Title == "")
+                if (N.DDID <= 0)
+                    Error += "請選擇廳別所屬部門;";
+                if (N.TitleC == "")
                     Error += "名稱必須輸入;";
-                if (N.UnitPrice < 0)
-                    Error += "請輸入成本的數字;";
-                if (N.Price < 0)
-                    Error += "請輸入價格的數字;";
                 if (Error == "")
                 {
                     N.CreUID = GetUid();
                     N.UpdDate = N.CreDate = DT;
                     N.UpdUID = 0;
-                    await DC.D_FoodCategory.AddAsync(N);
+                    await DC.D_Hall.AddAsync(N);
                     await DC.SaveChangesAsync();
                 }
             }
             else
             {
-                var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == N.DFCID && !q.DeleteFlag);
-                if (N.Title == "")
+                var N_ = await DC.D_Hall.FirstOrDefaultAsync(q => q.DHID == N.DHID && !q.DeleteFlag);
+                if (N.DDID <= 0)
+                    Error += "請選擇廳別所屬部門;";
+                if (N.TitleC == "")
                     Error += "名稱必須輸入;";
-                if (N.UnitPrice < 0)
-                    Error += "請輸入成本的數字;";
-                if (N.Price < 0)
-                    Error += "請輸入價格的數字;";
-
                 if (N_ == null)
                     Error += "查無資料,無法更新";
                 if (Error == "")
                 {
-                    
+                    N_.DDID = N.DDID;
                     N_.Code = N.Code;
-                    N_.Title = N.Title;
-                    N_.UnitPrice = N.UnitPrice;
-                    N_.Price = N.Price;
-                    
+                    N_.TitleC = N.TitleC;
+                    N_.TitleE = N.TitleE;
+                    N_.DiscountFlag = N.DiscountFlag;
+                    N_.CheckoutNowFlag = N.CheckoutNowFlag;
+                    N_.PrintCheckFlag = N.PrintCheckFlag;
+                    N_.Invoice3Flag = N.Invoice3Flag;
+                    N_.CheckType = N.CheckType;
+                    N_.BusinessTaxRate = N.BusinessTaxRate;
                     N_.ActiveFlag = N.ActiveFlag;
                     N_.DeleteFlag = N.DeleteFlag;
                     N_.UpdUID = GetUid();

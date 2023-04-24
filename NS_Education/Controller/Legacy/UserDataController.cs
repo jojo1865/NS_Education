@@ -25,7 +25,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
 
-namespace NS_Education.Controllers
+namespace NS_Education.Controller.Legacy
 {
     public class UserDataController : PublicClass
     {

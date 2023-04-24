@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -15,7 +14,7 @@ using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 namespace NS_Education.Tools.ControllerTools.BaseClass
 {
     [ResponsePrivilegeWrapperFilter]
-    public class PublicClass : Controller
+    public class PublicClass : System.Web.Mvc.Controller
     {
         public DateTime DT = DateTime.Now;
         protected internal NsDbContext DC { get; }

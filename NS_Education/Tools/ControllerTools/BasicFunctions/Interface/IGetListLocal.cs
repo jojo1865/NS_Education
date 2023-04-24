@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
@@ -26,6 +27,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <param name="entity">單筆查詢結果</param>
         /// <returns>Response 所需類型的單筆資料</returns>
+        [NonAction]
         Task<ICollection<TGetListRow>> GetListLocalResults();
     }
 }

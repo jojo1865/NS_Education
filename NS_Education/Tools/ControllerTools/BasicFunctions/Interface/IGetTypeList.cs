@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 using NS_Education.Models.APIItems;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
@@ -22,6 +23,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <returns>具備排序的所有類別的查詢。</returns>
         /// <remarks>若此方法是藉由 Helper 被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
+        [NonAction]
         IOrderedQueryable<TEntity> GetTypeListQuery();
         
         /// <summary>
@@ -29,6 +31,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <param name="entity">資料</param>
         /// <returns>回傳中 List 的子物件類別</returns>
+        [NonAction]
         Task<BaseResponseRowForType> GetTypeListEntityToRow(TEntity entity);
     }
 }

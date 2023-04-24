@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
@@ -28,6 +29,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <param name="id">欲修改狀態資料的 ID</param>
         /// <returns>查詢</returns>
         /// <remarks>若此方法是藉由 Helper 被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
+        [NonAction]
         IQueryable<TEntity> ChangeActiveQuery(int id);
     }
 }

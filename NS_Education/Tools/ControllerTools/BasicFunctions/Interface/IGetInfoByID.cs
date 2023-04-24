@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 using NS_Education.Models;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
@@ -32,6 +33,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// true：驗證通過<br/>
         /// false：驗證失敗
         /// </returns>
+        [NonAction]
         Task<bool> GetInfoByIdValidateInput(int id);
         
         /// <summary>
@@ -40,6 +42,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <param name="id">使用者輸入的查詢用索引鍵</param>
         /// <returns>查詢。</returns>
         /// <remarks>若此方法是藉由 Helper 被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
+        [NonAction]
         IQueryable<TEntity> GetInfoByIdQuery(int id);
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <param name="entity">原查詢結果</param>
         /// <returns>Response 所需類型的物件</returns>
+        [NonAction]
         Task<TGetResponse> GetInfoByIdConvertEntityToResponse(TEntity entity);
     }
 }

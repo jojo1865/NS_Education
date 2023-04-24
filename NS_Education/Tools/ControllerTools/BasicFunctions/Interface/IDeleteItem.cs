@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
@@ -27,6 +28,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// </summary>
         /// <param name="id">欲刪除資料的 ID</param>
         /// <returns>查詢</returns>
+        [NonAction]
         IQueryable<TEntity> DeleteItemQuery(int id);
     }
 }

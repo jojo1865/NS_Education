@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 using NS_Education.Models.APIItems;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
@@ -33,6 +34,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// true：為新增。<br/>
         /// false：不是新增（視為更新）。
         /// </returns>
+        [NonAction]
         bool SubmitIsAdd(TSubmitRequest input);
         
         /// <summary>
@@ -43,6 +45,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// true：驗證通過。<br/>
         /// false：驗證錯誤。
         /// </returns>
+        [NonAction]
         Task<bool> SubmitAddValidateInput(TSubmitRequest input);
         
         /// <summary>
@@ -51,6 +54,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <param name="input">輸入</param>
         /// <returns>欲新增的物件</returns>
         /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者對 CreUid、CreDate、UpdUid、UpdDate 及 DeleteFlag 的設定將被覆寫。</remarks>
+        [NonAction]
         Task<TEntity> SubmitCreateData(TSubmitRequest input);
         
         /// <summary>
@@ -61,6 +65,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// true：驗證通過。<br/>
         /// false：驗證錯誤。
         /// </returns>
+        [NonAction]
         Task<bool> SubmitEditValidateInput(TSubmitRequest input);
         
         /// <summary>
@@ -69,6 +74,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <param name="input">輸入</param>
         /// <returns>查詢</returns>
         /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者在查詢中可以忽略 DeleteFlag 的判定。</remarks>
+        [NonAction]
         IQueryable<TEntity> SubmitEditQuery(TSubmitRequest input);
         
         /// <summary>
@@ -77,6 +83,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <param name="data">DB 資料</param>
         /// <param name="input">輸入</param>
         /// <remarks>若此方法是藉由預設的 Submit 方法被呼叫時，實作者在更新時對 UpdUid 及 UpdDate 的更新將被覆寫。</remarks>
+        [NonAction]
         void SubmitEditUpdateDataFields(TEntity data, TSubmitRequest input);
     }
 }

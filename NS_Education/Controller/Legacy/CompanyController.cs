@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Company;
 using NS_Education.Models.APIItems.Company.GetList;
+using NS_Education.Models.APIItems.Company.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -20,12 +21,15 @@ namespace NS_Education.Controller.Legacy
 {
     public class CompanyController : PublicClass,
         IGetListPaged<D_Company, Company_GetList_Input_APIItem, Company_GetList_Output_Row_APIItem>,
-        IDeleteItem<D_Company>
+        IDeleteItem<D_Company>,
+        ISubmit<D_Company, Company_Submit_Input_APIItem>
     {
         #region Intialization
 
         private readonly IGetListPagedHelper<Company_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
+
+        private readonly ISubmitHelper<Company_Submit_Input_APIItem> _submitHelper;
 
         public CompanyController()
         {
@@ -33,6 +37,7 @@ namespace NS_Education.Controller.Legacy
                 new GetListPagedHelper<CompanyController, D_Company, Company_GetList_Input_APIItem,
                     Company_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<CompanyController, D_Company>(this);
+            _submitHelper = new SubmitHelper<CompanyController, D_Company, Company_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -170,50 +175,67 @@ namespace NS_Education.Controller.Legacy
 
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Company.DCID))]
-        public async Task<string> Submit(D_Company N)
+        public async Task<string> Submit(Company_Submit_Input_APIItem input)
         {
-            Error = "";
-            if (N.DCID == 0)
-            {
-                if (N.BCID <= 0)
-                    Error += "請選擇公司所屬分類;";
-                if (N.TitleC == "")
-                    Error += "名稱必須輸入;";
-                if (Error == "")
-                {
-                    N.CreUID = GetUid();
-                    N.UpdDate = N.CreDate = DT;
-                    N.UpdUID = 0;
-                    await DC.D_Company.AddAsync(N);
-                    await DC.SaveChangesAsync();
-                }
-            }
-            else
-            {
-                var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == N.DCID && !q.DeleteFlag);
-                if (N.BCID <= 0)
-                    Error += "請選擇公司所屬分類;";
-                if (N.TitleC == "")
-                    Error += "名稱必須輸入;";
-                if (N_ == null)
-                    Error += "查無資料,無法更新";
-                if (Error == "")
-                {
-                    N_.BCID = N.BCID;
-                    N_.Code = N.Code;
-                    N_.TitleC = N.TitleC;
-                    N_.TitleE = N.TitleE;
-                    N_.ActiveFlag = N.ActiveFlag;
-                    N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = GetUid();
-                    N_.UpdDate = DT;
-                    await DC.SaveChangesAsync();
-                }
-            }
-
-            return ChangeJson(GetMsgClass(Error));
+            return await _submitHelper.Submit(input);
         }
 
+        public bool SubmitIsAdd(Company_Submit_Input_APIItem input)
+        {
+            return input.DCID == 0;
+        }
+
+        #region Submit - Add
+        public async Task<bool> SubmitAddValidateInput(Company_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DCID == 0, () => AddError(WrongFormat("公司 ID")))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<D_Company> SubmitCreateData(Company_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new D_Company
+            {
+                BCID = input.BCID,
+                Code = input.Code,
+                TitleC = input.TitleC,
+                TitleE = input.TitleE
+            });
+        }
         #endregion
+
+        #region Submit - Edit
+        public async Task<bool> SubmitEditValidateInput(Company_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DCID.IsValidId(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<D_Company> SubmitEditQuery(Company_Submit_Input_APIItem input)
+        {
+            return DC.D_Company.Where(c => c.DCID == input.DCID);
+        }
+
+        public void SubmitEditUpdateDataFields(D_Company data, Company_Submit_Input_APIItem input)
+        {
+            data.DCID = input.DCID;
+            data.BCID = input.BCID;
+            data.Code = input.Code;
+            data.TitleC = input.TitleC;
+            data.TitleE = input.TitleE;
+            data.ActiveFlag = input.ActiveFlag;
+        }
+        #endregion
+
+        #endregion
+        
     }
 }

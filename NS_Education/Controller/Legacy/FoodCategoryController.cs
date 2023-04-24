@@ -154,7 +154,7 @@ namespace NS_Education.Controller.Legacy
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_FoodCategory.DFCID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(FoodCategory_Submit_Input_APIItem.DFCID))]
         public async Task<string> Submit(FoodCategory_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);

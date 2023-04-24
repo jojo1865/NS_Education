@@ -162,7 +162,7 @@ namespace NS_Education.Controller.Legacy
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Zip.DZID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Zip_Submit_Input_APIItem.DZID))]
         public async Task<string> Submit(Zip_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);

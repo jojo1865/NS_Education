@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Category;
 using NS_Education.Models.APIItems.Category.GetList;
+using NS_Education.Models.APIItems.Category.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -22,25 +23,27 @@ namespace NS_Education.Controller.Legacy
 {
     public class CategoryController : PublicClass,
         IGetListPaged<B_Category, Category_GetList_Input_APIItem, Category_GetList_Output_Row_APIItem>,
-        IDeleteItem<B_Category>
+        IDeleteItem<B_Category>,
+        ISubmit<B_Category, Category_Submit_Input_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Category_GetList_Input_APIItem> _getListPagedHelper;
-
         private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<Category_Submit_Input_APIItem> _submitHelper;
 
         public CategoryController()
         {
             _getListPagedHelper = new GetListPagedHelper<CategoryController, B_Category, Category_GetList_Input_APIItem,
                 Category_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<CategoryController, B_Category>(this);
+            _submitHelper = new SubmitHelper<CategoryController, B_Category, Category_Submit_Input_APIItem>(this);
         }
 
         #endregion
-        
+
         #region GetTypeList
-        
+
         //取得分類的類別列表
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
@@ -92,10 +95,10 @@ namespace NS_Education.Controller.Legacy
 
         public async Task<Category_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_Category entity)
         {
-            B_Category parent = entity.ParentID.IsValidIdOrZero() 
+            B_Category parent = entity.ParentID.IsValidIdOrZero()
                 ? await DC.B_Category.FirstOrDefaultAsync(c => c.BCID == entity.ParentID)
                 : null;
-            
+
             return await Task.FromResult(new Category_GetList_Output_Row_APIItem
             {
                 BCID = entity.BCID,
@@ -219,53 +222,86 @@ namespace NS_Education.Controller.Legacy
 
         #region Submit
 
+        private const string SubmitCategoryTypeNotSupported = "不支援此分類類別！";
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(B_Category.BCID))]
-        public async Task<string> Submit(B_Category N)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Category_Submit_Input_APIItem.BCID))]
+        public async Task<string> Submit(Category_Submit_Input_APIItem input)
         {
-            string Error = "";
-            if (N.BCID == 0) //新增
-            {
-                if (N.TitleC == "")
-                    Error += "名稱必須輸入;";
-                if (Error == "")
-                {
-                    var BCs = await DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == N.CategoryType)
-                        .ToListAsync();
-                    if (BCs.Any())
-                        N.SortNo = BCs.Max(q => q.SortNo) + 1;
-                    N.CreUID = GetUid();
-                    N.UpdDate = N.CreDate = DT;
-                    N.UpdUID = 0;
-                    await DC.B_Category.AddAsync(N);
-                    await DC.SaveChangesAsync();
-                }
-            }
-            else //更新
-            {
-                var N_ = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == N.BCID && !q.DeleteFlag);
-                if (N.TitleC == "")
-                    Error += "名稱必須輸入;";
-                if (N_ == null)
-                    Error += "查無資料,無法更新;";
-                if (Error == "")
-                {
-                    N_.ParentID = N.ParentID;
-                    N_.CategoryType = N.CategoryType;
-                    N_.Code = N.Code;
-                    N_.TitleC = N.TitleC;
-                    N_.TitleE = N.TitleE;
-                    N_.ActiveFlag = N.ActiveFlag;
-                    N_.UpdUID = GetUid();
-                    N_.UpdDate = DT;
-                    await DC.SaveChangesAsync();
-                }
-            }
+            return await _submitHelper.Submit(input);
+        }
 
-            return ChangeJson(GetMsgClass(Error));
+        public bool SubmitIsAdd(Category_Submit_Input_APIItem input)
+        {
+            return input.BCID == 0;
+        }
+        
+        private async Task<int> GetNewSortNo(Category_Submit_Input_APIItem input)
+        {
+            int newSortNo = await DC.B_Category
+                .Where(c => c.CategoryType == input.CategoryType)
+                .OrderByDescending(c => c.SortNo)
+                .Select(c => c.SortNo)
+                .FirstOrDefaultAsync() + 1;
+            return newSortNo;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(Category_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BCID == 0, () => AddError(WrongFormat("分類 ID")))
+                .Validate(i => i.CategoryType < sCategoryTypes.Length, () => AddError(SubmitCategoryTypeNotSupported))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<B_Category> SubmitCreateData(Category_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new B_Category
+            {
+                CategoryType = input.CategoryType,
+                ParentID = input.ParentID,
+                Code = input.Code,
+                TitleC = input.TitleC,
+                TitleE = input.TitleE,
+                SortNo = await GetNewSortNo(input)
+            });
         }
 
         #endregion
 
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(Category_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.CategoryType < sCategoryTypes.Length, () => AddError(SubmitCategoryTypeNotSupported))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<B_Category> SubmitEditQuery(Category_Submit_Input_APIItem input)
+        {
+            return DC.B_Category.Where(c => c.BCID == input.BCID);
+        }
+
+        public void SubmitEditUpdateDataFields(B_Category data, Category_Submit_Input_APIItem input)
+        {
+            data.CategoryType = input.CategoryType;
+            data.ParentID = input.ParentID;
+            data.Code = input.Code ?? data.Code;
+            data.TitleC = input.TitleC ?? data.TitleC;
+            data.TitleE = input.TitleE ?? data.TitleE;
+            // 只在 CategoryType 變更時才生成新的 SortNo
+            data.SortNo = input.CategoryType == data.CategoryType ? data.SortNo : Task.Run(() => GetNewSortNo(input)).Result;
+        }
+
+        #endregion
+
+        #endregion
     }
 }

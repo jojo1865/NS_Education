@@ -16,9 +16,8 @@ namespace NS_Education.Models.Entities
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }
         public int UnitPrice { get; set; }
-        public int Pricing { get; set; }
-        public int Ct { get; set; }
-        public int TotalPrice { get; set; }
+        public int FixedPrice { get; set; }
+        public int QuotedPrice { get; set; }
         public int SortNo { get; set; }
         public string Note { get; set; }
         public bool DeleteFlag { get; set; }

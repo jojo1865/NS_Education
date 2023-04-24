@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.Ajax.Utilities;
 
 namespace NS_Education.Tools.Extensions
 {
@@ -76,6 +75,11 @@ namespace NS_Education.Tools.Extensions
         public static string ToFormattedString(this DateTime datetime)
         {
             return datetime.ToString("yyyy/MM/dd HH:mm");
+        }
+
+        public static string ToFormattedHourAndMinute(this (int hour, int minute) tuple)
+        {
+            return $"{tuple.hour.ToString().PadLeft(2, '0')}:{tuple.minute.ToString().PadLeft(2, '0')}";
         }
     }
 }

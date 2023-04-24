@@ -292,6 +292,7 @@
     <Compile Include="Models\APIItems\Hall\D_Hall_APIItem.cs" />
     <Compile Include="Models\APIItems\Hall\GetList\Hall_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Hall\GetList\Hall_GetList_Output_Row_APIItem.cs" />
+    <Compile Include="Models\APIItems\Hall\Submit\Hall_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\OrderCode\GetInfoById\OrderCode_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\OrderCode\GetList\OrderCode_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\OrderCode\GetList\OrderCode_GetList_Output_Row_APIItem.cs" />

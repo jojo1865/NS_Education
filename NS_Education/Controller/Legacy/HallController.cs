@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models;
 using NS_Education.Models.APIItems.Hall;
 using NS_Education.Models.APIItems.Hall.GetList;
+using NS_Education.Models.APIItems.Hall.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -20,18 +21,21 @@ namespace NS_Education.Controller.Legacy
 {
     public class HallController : PublicClass,
         IGetListPaged<D_Hall, Hall_GetList_Input_APIItem, Hall_GetList_Output_Row_APIItem>,
-        IDeleteItem<D_Hall>
+        IDeleteItem<D_Hall>,
+        ISubmit<D_Hall, Hall_Submit_Input_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Hall_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<Hall_Submit_Input_APIItem> _submitHelper;
 
         public HallController()
         {
             _getListPagedHelper = new GetListPagedHelper<HallController, D_Hall, Hall_GetList_Input_APIItem, Hall_GetList_Output_Row_APIItem>(
                 this);
             _deleteItemHelper = new DeleteItemHelper<HallController, D_Hall>(this);
+            _submitHelper = new SubmitHelper<HallController, D_Hall, Hall_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -193,57 +197,84 @@ namespace NS_Education.Controller.Legacy
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_Hall.DHID))]
-        public async Task<string> Submit(D_Hall N)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Hall_Submit_Input_APIItem.DHID))]
+        public async Task<string> Submit(Hall_Submit_Input_APIItem input)
         {
-            Error = "";
-            if (N.DHID == 0)
-            {
-                if (N.DDID <= 0)
-                    Error += "請選擇廳別所屬部門;";
-                if (N.TitleC == "")
-                    Error += "名稱必須輸入;";
-                if (Error == "")
-                {
-                    N.CreUID = GetUid();
-                    N.UpdDate = N.CreDate = DT;
-                    N.UpdUID = 0;
-                    await DC.D_Hall.AddAsync(N);
-                    await DC.SaveChangesAsync();
-                }
-            }
-            else
-            {
-                var N_ = await DC.D_Hall.FirstOrDefaultAsync(q => q.DHID == N.DHID && !q.DeleteFlag);
-                if (N.DDID <= 0)
-                    Error += "請選擇廳別所屬部門;";
-                if (N.TitleC == "")
-                    Error += "名稱必須輸入;";
-                if (N_ == null)
-                    Error += "查無資料,無法更新";
-                if (Error == "")
-                {
-                    N_.DDID = N.DDID;
-                    N_.Code = N.Code;
-                    N_.TitleC = N.TitleC;
-                    N_.TitleE = N.TitleE;
-                    N_.DiscountFlag = N.DiscountFlag;
-                    N_.CheckoutNowFlag = N.CheckoutNowFlag;
-                    N_.PrintCheckFlag = N.PrintCheckFlag;
-                    N_.Invoice3Flag = N.Invoice3Flag;
-                    N_.CheckType = N.CheckType;
-                    N_.BusinessTaxRate = N.BusinessTaxRate;
-                    N_.ActiveFlag = N.ActiveFlag;
-                    N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = GetUid();
-                    N_.UpdDate = DT;
-                    await DC.SaveChangesAsync();
-                }
-            }
-
-            return ChangeJson(GetMsgClass(Error));
+            return await _submitHelper.Submit(input);
         }
 
+        public bool SubmitIsAdd(Hall_Submit_Input_APIItem input)
+        {
+            return input.DHID == 0;
+        }
+        
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(Hall_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DHID == 0, () => AddError(WrongFormat("廳別 ID")))
+                .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
+                .Validate(i => i.CheckType == 0 || i.CheckType == 1, () => AddError(WrongFormat("開立憑證種類")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<D_Hall> SubmitCreateData(Hall_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new D_Hall
+            {
+                Code = input.Code,
+                TitleC = input.TitleC,
+                TitleE = input.TitleE,
+                DDID = input.DDID,
+                DiscountFlag = input.DiscountFlag,
+                CheckoutNowFlag = input.CheckoutNowFlag,
+                PrintCheckFlag = input.PrintCheckFlag,
+                Invoice3Flag = input.Invoice3Flag,
+                CheckType = input.CheckType,
+                BusinessTaxRate = input.BusinessTaxRate
+            });
+        }
+        
         #endregion
+        
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(Hall_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
+                .Validate(i => i.CheckType == 0 || i.CheckType == 1, () => AddError(WrongFormat("開立憑證種類")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<D_Hall> SubmitEditQuery(Hall_Submit_Input_APIItem input)
+        {
+            return DC.D_Hall.Where(h => h.DHID == input.DHID);
+        }
+
+        public void SubmitEditUpdateDataFields(D_Hall data, Hall_Submit_Input_APIItem input)
+        {
+            data.DDID = input.DDID;
+            data.Code = input.Code ?? data.Code;
+            data.TitleC = input.TitleC ?? data.TitleC;
+            data.TitleE = input.TitleE ?? data.TitleE;
+            data.DiscountFlag = input.DiscountFlag;
+            data.CheckoutNowFlag = input.CheckoutNowFlag;
+            data.PrintCheckFlag = input.PrintCheckFlag;
+            data.Invoice3Flag = input.Invoice3Flag;
+            data.CheckType = input.CheckType;
+            data.BusinessTaxRate = input.BusinessTaxRate;
+        }
+        
+        #endregion
+
+        #endregion
+        
     }
 }

@@ -5,7 +5,9 @@ using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.TimeSpan;
 using NS_Education.Models.APIItems.TimeSpan.GetList;
+using NS_Education.Models.APIItems.TimeSpan.Submit;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -18,12 +20,15 @@ namespace NS_Education.Controller.Legacy
 {
     public class TimeSpanController : PublicClass,
         IGetListPaged<D_TimeSpan, TimeSpan_GetList_Input_APIItem, TimeSpan_GetList_Output_Row_APIItem>,
-        IDeleteItem<D_TimeSpan>
+        IDeleteItem<D_TimeSpan>,
+        ISubmit<D_TimeSpan, TimeSpan_Submit_Input_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<TimeSpan_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
+
+        private readonly ISubmitHelper<TimeSpan_Submit_Input_APIItem> _submitHelper;
 
         public TimeSpanController()
         {
@@ -31,6 +36,7 @@ namespace NS_Education.Controller.Legacy
                 TimeSpan_GetList_Output_Row_APIItem>(this);
 
             _deleteItemHelper = new DeleteItemHelper<TimeSpanController, D_TimeSpan>(this);
+            _submitHelper = new SubmitHelper<TimeSpanController, D_TimeSpan, TimeSpan_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -176,83 +182,82 @@ namespace NS_Education.Controller.Legacy
 
         #region Submit
 
+        private const string SubmitWrongStartTime = "起始時間應小於等於結束時間！";
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(D_TimeSpan.DTSID))]
-        public async Task<string> Submit(D_TimeSpan N)
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(TimeSpan_Submit_Input_APIItem.DTSID))]
+        public async Task<string> Submit(TimeSpan_Submit_Input_APIItem input)
         {
-            Error = "";
-            if (N.DTSID == 0)
-            {
-                if (N.Title == "")
-                    Error += "名稱必須輸入;";
-                if (N.HourS < 0 || N.HourS > 23)
-                    Error += "請輸入起始的小時;";
-                if (N.MinuteS < 0 || N.MinuteS > 59)
-                    Error += "請輸入起始的分鐘數;";
-                if (N.HourE < 0 || N.HourE > 23)
-                    Error += "請輸入結束的小時;";
-                if (N.MinuteE < 0 || N.MinuteE > 59)
-                    Error += "請輸入結束的分鐘數;";
-
-                DateTime DT_S = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourS + ":" +
-                                                   N.MinuteS + ":00");
-                DateTime DT_E = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourE + ":" +
-                                                   N.MinuteE + ":00");
-                if (DT_E <= DT_S)
-                    Error += "結束的時間應該在起始的時間之後;";
-
-                if (Error == "")
-                {
-                    N.CreUID = GetUid();
-                    N.UpdDate = N.CreDate = DT;
-                    N.UpdUID = 0;
-                    await DC.D_TimeSpan.AddAsync(N);
-                    await DC.SaveChangesAsync();
-                }
-            }
-            else
-            {
-                var N_ = await DC.D_TimeSpan.FirstOrDefaultAsync(q => q.DTSID == N.DTSID && !q.DeleteFlag);
-                if (N.Title == "")
-                    Error += "名稱必須輸入;";
-                if (N.HourS < 0 || N.HourS > 23)
-                    Error += "請輸入起始的小時;";
-                if (N.MinuteS < 0 || N.MinuteS > 59)
-                    Error += "請輸入起始的分鐘數;";
-                if (N.HourE < 0 || N.HourE > 23)
-                    Error += "請輸入結束的小時;";
-                if (N.MinuteE < 0 || N.MinuteE > 59)
-                    Error += "請輸入結束的分鐘數;";
-
-                DateTime DT_S = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourS + ":" +
-                                                   N.MinuteS + ":00");
-                DateTime DT_E = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourE + ":" +
-                                                   N.MinuteE + ":00");
-                if (DT_E <= DT_S)
-                    Error += "結束的時間應該在起始的時間之後;";
-
-                if (N_ == null)
-                    Error += "查無資料,無法更新";
-                if (Error == "")
-                {
-                    N_.DTSID = N.DTSID;
-                    N_.Code = N.Code;
-                    N_.Title = N.Title;
-                    N_.HourS = N.HourS;
-                    N_.MinuteS = N.MinuteS;
-                    N_.HourE = N.HourE;
-                    N_.MinuteE = N.MinuteE;
-
-                    N_.ActiveFlag = N.ActiveFlag;
-                    N_.DeleteFlag = N.DeleteFlag;
-                    N_.UpdUID = GetUid();
-                    N_.UpdDate = DT;
-                    await DC.SaveChangesAsync();
-                }
-            }
-
-            return ChangeJson(GetMsgClass(Error));
+            return await _submitHelper.Submit(input);
         }
+
+        public bool SubmitIsAdd(TimeSpan_Submit_Input_APIItem input)
+        {
+            return input.DTSID == 0;
+        }
+
+        #region Submit - Add
+        public async Task<bool> SubmitAddValidateInput(TimeSpan_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DTSID == 0, () => AddError(WrongFormat("時段 ID")))
+                .Validate(i => 0 <= i.HourS && i.HourS <= 23, () => AddError(WrongFormat("起始小時")))
+                .Validate(i => 0 <= i.HourE && i.HourE <= 23, () => AddError(WrongFormat("結束小時")))
+                .Validate(i => 0 <= i.MinuteS && i.MinuteS <= 59, () => AddError(WrongFormat("起始分鐘")))
+                .Validate(i => 0 <= i.MinuteE && i.MinuteE <= 59, () => AddError(WrongFormat("結束分鐘")))
+                .Validate(
+                    i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
+                    () => AddError(SubmitWrongStartTime))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<D_TimeSpan> SubmitCreateData(TimeSpan_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new D_TimeSpan
+            {
+                Code = input.Code,
+                Title = input.Title,
+                HourS = input.HourS,
+                MinuteS = input.MinuteS,
+                HourE = input.HourE,
+                MinuteE = input.MinuteE
+            });
+        }
+        #endregion
+
+        #region Submit - Edit
+        public async Task<bool> SubmitEditValidateInput(TimeSpan_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.DTSID.IsValidId(), () => AddError(EmptyNotAllowed("時段 ID")))
+                .Validate(i => 0 <= i.HourS && i.HourS <= 23, () => AddError(WrongFormat("起始小時")))
+                .Validate(i => 0 <= i.HourE && i.HourE <= 23, () => AddError(WrongFormat("結束小時")))
+                .Validate(i => 0 <= i.MinuteS && i.MinuteS <= 59, () => AddError(WrongFormat("起始分鐘")))
+                .Validate(i => 0 <= i.MinuteE && i.MinuteE <= 59, () => AddError(WrongFormat("結束分鐘")))
+                .Validate(
+                    i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
+                    () => AddError(SubmitWrongStartTime))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<D_TimeSpan> SubmitEditQuery(TimeSpan_Submit_Input_APIItem input)
+        {
+            return DC.D_TimeSpan.Where(ts => ts.DTSID == input.DTSID);
+        }
+
+        public void SubmitEditUpdateDataFields(D_TimeSpan data, TimeSpan_Submit_Input_APIItem input)
+        {
+            data.Code = input.Code;
+            data.Title = input.Title;
+            data.HourS = input.HourS;
+            data.MinuteS = input.MinuteS;
+            data.HourE = input.HourE;
+            data.MinuteE = input.MinuteE;
+        }
+        #endregion
 
         #endregion
     }

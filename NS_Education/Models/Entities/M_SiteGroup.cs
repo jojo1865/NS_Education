@@ -17,6 +17,7 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public int SortNo { get; set; }
 
         public virtual B_SiteData Group { get; set; }
         public virtual B_SiteData Master { get; set; }

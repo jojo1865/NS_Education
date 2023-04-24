@@ -28,11 +28,14 @@ namespace NS_Education.Controller.Legacy
 
         public CompanyController()
         {
-            _getListPagedHelper = new GetListPagedHelper<CompanyController, D_Company, Company_GetList_Input_APIItem, Company_GetList_Output_Row_APIItem>(this);
+            _getListPagedHelper =
+                new GetListPagedHelper<CompanyController, D_Company, Company_GetList_Input_APIItem,
+                    Company_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<CompanyController, D_Company>(this);
         }
 
         #endregion
+
         #region GetList
 
         [HttpGet]

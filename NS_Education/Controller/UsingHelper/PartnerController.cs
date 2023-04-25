@@ -21,6 +21,8 @@ namespace NS_Education.Controller.UsingHelper
     public class PartnerController : PublicClass
         , IGetListPaged<B_Partner, Partner_GetList_Input_APIItem, Partner_GetList_Output_Row_APIItem>
         , IGetInfoById<B_Partner, Partner_GetInfoById_Output_APIItem>
+        , IDeleteItem<B_Partner>
+        , IChangeActive<B_Partner>
     {
         #region Initialization
 
@@ -28,12 +30,18 @@ namespace NS_Education.Controller.UsingHelper
 
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
+        private readonly IDeleteItemHelper _deleteItemHelper;
+
+        private readonly IChangeActiveHelper _changeActiveHelper;
+
         public PartnerController()
         {
             _getListPagedHelper =
                 new GetListPagedHelper<PartnerController, B_Partner, Partner_GetList_Input_APIItem,
                     Partner_GetList_Output_Row_APIItem>(this);
             _getInfoByIdHelper = new GetInfoByIdHelper<PartnerController, B_Partner, Partner_GetInfoById_Output_APIItem>(this);
+            _deleteItemHelper = new DeleteItemHelper<PartnerController, B_Partner>(this);
+            _changeActiveHelper = new ChangeActiveHelper<PartnerController, B_Partner>(this);
         }
 
         #endregion
@@ -174,6 +182,35 @@ namespace NS_Education.Controller.UsingHelper
             });
         }
 
+        #endregion
+
+        #region DeleteItem
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
+
+        public IQueryable<B_Partner> DeleteItemQuery(int id)
+        {
+            return DC.B_Partner.Where(p => p.BPID == id);
+        }
+        #endregion
+
+        #region ChangeActive
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
+        {
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        public IQueryable<B_Partner> ChangeActiveQuery(int id)
+        {
+            return DC.B_Partner.Where(p => p.BPID == id);
+        }
         #endregion
     }
 }

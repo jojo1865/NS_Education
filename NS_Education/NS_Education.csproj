@@ -278,10 +278,11 @@
     <Compile Include="Models\APIItems\BaseResponseWithCreUpd.cs" />
     <Compile Include="Models\APIItems\BaseResponseRowForType.cs" />
     <Compile Include="Models\APIItems\BaseResponseWithCreUpdInfusable.cs" />
+    <Compile Include="Models\APIItems\BusinessUser\BusinessUser_Customer_APIItem.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetInfoById\BusinessUser_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetList\BusinessUser_GetList_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\BusinessUser\GetList\BusinessUser_GetList_Output_Customer_APIItem.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetList\BusinessUser_GetList_Output_Row_APIItem.cs" />
+    <Compile Include="Models\APIItems\BusinessUser\Submit\BusinessUser_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Category\B_Category_APIItem.cs" />
     <Compile Include="Models\APIItems\Category\GetList\Category_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Category\GetList\Category_GetList_Output_Row_APIItem.cs" />

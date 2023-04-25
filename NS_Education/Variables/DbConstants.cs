@@ -8,6 +8,7 @@ namespace NS_Education.Variables
         public const string CreDate = "CreDate";
         public const string UpdUid = "UpdUID";
         public const string UpdDate = "UpdDate";
-        public const string CodeType = "CodeType";
+        public const int OpSalesMappingType = 2;
+        public const int MkSalesMappingType = 1;
     }
 }

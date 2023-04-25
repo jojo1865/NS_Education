@@ -1,10 +1,14 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems.BusinessUser;
 using NS_Education.Models.APIItems.BusinessUser.GetInfoById;
 using NS_Education.Models.APIItems.BusinessUser.GetList;
+using NS_Education.Models.APIItems.BusinessUser.Submit;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -12,6 +16,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -19,7 +24,8 @@ namespace NS_Education.Controller.UsingHelper
         IGetListPaged<BusinessUser, BusinessUser_GetList_Input_APIItem, BusinessUser_GetList_Output_Row_APIItem>,
         IGetInfoById<BusinessUser, BusinessUser_GetInfoById_Output_APIItem>,
         IDeleteItem<BusinessUser>,
-        IChangeActive<BusinessUser>
+        IChangeActive<BusinessUser>,
+        ISubmit<BusinessUser, BusinessUser_Submit_Input_APIItem>
     {
         #region Initialization
 
@@ -27,7 +33,8 @@ namespace NS_Education.Controller.UsingHelper
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
-        
+        private readonly ISubmitHelper<BusinessUser_Submit_Input_APIItem> _submitHelper;
+
         public BusinessUserController()
         {
             _getListPagedHelper =
@@ -43,6 +50,9 @@ namespace NS_Education.Controller.UsingHelper
 
             _changeActiveHelper =
                 new ChangeActiveHelper<BusinessUserController, BusinessUser>(this);
+
+            _submitHelper =
+                new SubmitHelper<BusinessUserController, BusinessUser, BusinessUser_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -93,7 +103,7 @@ namespace NS_Education.Controller.UsingHelper
                 Phone = entity.Phone ?? "",
                 MKsalesFlag = entity.MKsalesFlag,
                 OPsalesFlag = entity.OPsalesFlag,
-                Items = entity.M_Customer_BusinessUser.Select(cbu => new BusinessUser_GetList_Output_Customer_APIItem
+                Items = entity.M_Customer_BusinessUser.Select(cbu => new BusinessUser_Customer_APIItem
                 {
                     CID = cbu.CID,
                     Code = cbu.C?.Code ?? "",
@@ -140,6 +150,9 @@ namespace NS_Education.Controller.UsingHelper
         #endregion
 
         #region DeleteItem
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
             return await _deleteItemHelper.DeleteItem(id, deleteFlag);
@@ -149,9 +162,13 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.BusinessUser.Where(bu => bu.BUID == id);
         }
+
         #endregion
 
         #region ChangeActive
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
@@ -161,6 +178,113 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.BusinessUser.Where(bu => bu.BUID == id);
         }
+
+        #endregion
+
+        #region Submit
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(BusinessUser_Submit_Input_APIItem.BUID))]
+        public async Task<string> Submit(BusinessUser_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(BusinessUser_Submit_Input_APIItem input)
+        {
+            return input.BUID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(BusinessUser_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BUID == 0, () => AddError(WrongFormat("業務 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<BusinessUser> SubmitCreateData(BusinessUser_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new BusinessUser
+            {
+                Code = input.Code,
+                Name = input.Name,
+                Phone = input.Phone,
+                MKsalesFlag = input.MKsalesFlag,
+                OPsalesFlag = input.OPsalesFlag,
+                M_Customer_BusinessUser = input.Items.Select((item, index) => new M_Customer_BusinessUser
+                {
+                    CID = item.CID,
+                    MappingType = input.OPsalesFlag ? DbConstants.OpSalesMappingType : input.MKsalesFlag ? DbConstants.MkSalesMappingType : 0,
+                    SortNo = index + 1,
+                    ActiveFlag = true,
+                    DeleteFlag = false,
+                    CreDate = DateTime.Now,
+                    CreUID = GetUid(),
+                    UpdDate = DateTime.Now,
+                    UpdUID = 0
+                }).ToList()
+            });
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(BusinessUser_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BUID.IsValidId(), () => AddError(EmptyNotAllowed("業務 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<BusinessUser> SubmitEditQuery(BusinessUser_Submit_Input_APIItem input)
+        {
+            return DC.BusinessUser
+                .Include(bu => bu.M_Customer_BusinessUser)
+                .Where(bu => bu.BUID == input.BUID);
+        }
+
+        public void SubmitEditUpdateDataFields(BusinessUser data, BusinessUser_Submit_Input_APIItem input)
+        {
+            // 1. 刪除所有原本的 M_Customer_BusinessUser 資料
+            foreach (M_Customer_BusinessUser cbu in DC.M_Customer_BusinessUser.Where(cbu => cbu.BUID == data.BUID && cbu.ActiveFlag && !cbu.DeleteFlag).ToList())
+            {
+                cbu.DeleteFlag = true;
+                cbu.UpdDate = DateTime.Now;
+                cbu.UpdUID = GetUid();
+            }
+
+            DC.SaveChanges();
+            
+            // 2. 修改資料
+            data.Code = input.Code;
+            data.Name = input.Name;
+            data.Phone = input.Phone;
+            data.MKsalesFlag = input.MKsalesFlag;
+            data.OPsalesFlag = input.OPsalesFlag;
+            data.M_Customer_BusinessUser = input.Items.Select((item, index) => new M_Customer_BusinessUser
+            {
+                CID = item.CID,
+                MappingType = input.OPsalesFlag ? DbConstants.OpSalesMappingType :
+                    input.MKsalesFlag ? DbConstants.MkSalesMappingType : 0,
+                SortNo = index + 1,
+                ActiveFlag = true,
+                DeleteFlag = false,
+                CreDate = DateTime.Now,
+                CreUID = GetUid(),
+                UpdDate = DateTime.Now,
+                UpdUID = 0
+            }).ToList();
+        }
+
+        #endregion
+
         #endregion
     }
 }

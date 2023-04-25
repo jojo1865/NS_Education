@@ -1,6 +1,6 @@
-namespace NS_Education.Models.APIItems.BusinessUser.GetList
+namespace NS_Education.Models.APIItems.BusinessUser
 {
-    public class BusinessUser_GetList_Output_Customer_APIItem
+    public class BusinessUser_Customer_APIItem
     {
         public int CID { get; set; }
         public string Code { get; set; }

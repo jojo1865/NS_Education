@@ -9,5 +9,8 @@ namespace NS_Education.Models.APIItems.OtherPayItem.Submit
         public int UnitPrice { get; set; }
         public int InPrice { get; set; }
         public int OutPrice { get; set; }
+        public int PaidType { get; set; }
+        public int BSCID { get; set; }
+        public int BOCID { get; set; }
     }
 }

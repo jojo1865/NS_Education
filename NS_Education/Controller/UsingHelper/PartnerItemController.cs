@@ -138,15 +138,6 @@ namespace NS_Education.Controller.UsingHelper
             return await _getInfoByIdHelper.GetInfoById(id);
         }
 
-        public async Task<bool> GetInfoByIdValidateInput(int id)
-        {
-            bool isValid = id.StartValidate()
-                .Validate(i => i.IsValidId(), () => AddError(EmptyNotAllowed("房型 ID")))
-                .IsValid();
-
-            return await Task.FromResult(isValid);
-        }
-
         public IQueryable<B_PartnerItem> GetInfoByIdQuery(int id)
         {
             return DC.B_PartnerItem

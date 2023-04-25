@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems;
+using NS_Education.Models.APIItems.Partner.GetInfoById;
 using NS_Education.Models.APIItems.Partner.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -16,22 +19,27 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 namespace NS_Education.Controller.UsingHelper
 {
     public class PartnerController : PublicClass
-    , IGetListPaged<B_Partner, Partner_GetList_Input_APIItem, Partner_GetList_Output_Row_APIItem>
+        , IGetListPaged<B_Partner, Partner_GetList_Input_APIItem, Partner_GetList_Output_Row_APIItem>
+        , IGetInfoById<B_Partner, Partner_GetInfoById_Output_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Partner_GetList_Input_APIItem> _getListPagedHelper;
+
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public PartnerController()
         {
             _getListPagedHelper =
                 new GetListPagedHelper<PartnerController, B_Partner, Partner_GetList_Input_APIItem,
                     Partner_GetList_Output_Row_APIItem>(this);
+            _getInfoByIdHelper = new GetInfoByIdHelper<PartnerController, B_Partner, Partner_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
-        
+
         #region GetList
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList(Partner_GetList_Input_APIItem input)
@@ -84,12 +92,88 @@ namespace NS_Education.Controller.UsingHelper
                 BSCID = entity.BSCID,
                 BSC_Title = entity.BSC?.Title ?? "",
                 Email = entity.Email ?? "",
+                Note = entity.Note,
                 CleanFlag = entity.CleanFlag,
                 CleanPrice = entity.CleanPrice,
                 CleanSDate = entity.CleanSDate.ToFormattedStringDate(),
                 CleanEDate = entity.CleanEDate.ToFormattedStringDate()
             });
         }
+
+        #endregion
+
+        #region GetInfoById
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        public async Task<string> GetInfoById(int id)
+        {
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public async Task<bool> GetInfoByIdValidateInput(int id)
+        {
+            bool isValid = id.StartValidate()
+                .Validate(i => i.IsValidId(), () => AddError(EmptyNotAllowed("合作廠商 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<B_Partner> GetInfoByIdQuery(int id)
+        {
+            return DC.B_Partner
+                .Include(p => p.BC)
+                .Include(p => p.BSC)
+                .Where(p => p.BPID == id);
+        }
+
+        public async Task<Partner_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(B_Partner entity)
+        {
+            return await Task.FromResult(new Partner_GetInfoById_Output_APIItem
+            {
+                BPID = entity.BPID,
+                
+                BCID = entity.BCID,
+                BC_TitleC = entity.BC?.TitleC ?? "",
+                BC_TitleE = entity.BC?.TitleE ?? "",
+                BC_List = entity.BC == null 
+                    ? new List<BaseResponseRowForSelectable>()
+                    : await DC.B_Category
+                        .Where(c => c.CategoryType == entity.BC.CategoryType && c.ActiveFlag && !c.DeleteFlag)
+                        .Select(c => new BaseResponseRowForSelectable
+                        {
+                            ID = c.BCID,
+                            Title = c.TitleC ?? c.TitleE ?? "",
+                            SelectFlag = c.BCID == entity.BCID
+                        }).ToListAsync(),
+                
+                Code = entity.Code ?? "",
+                Title = entity.Title ?? "",
+                Compilation = entity.Compilation,
+                
+                BSCID = entity.BSCID,
+                BSC_Title = entity.BSC?.Title ?? "",
+                BSC_List = entity.BSC == null 
+                    ? new List<BaseResponseRowForSelectable>()
+                    : await DC.B_StaticCode
+                        .Where(sc => sc.CodeType == entity.BSC.CodeType && sc.ActiveFlag && !sc.DeleteFlag)
+                        .Select(sc => new BaseResponseRowForSelectable
+                        {
+                            ID = sc.BSCID,
+                            Title = sc.Title ?? "",
+                            SelectFlag = sc.BSCID == entity.BCID
+                        }).ToListAsync(),
+                
+                Email = entity.Email,
+                Note = entity.Note,
+                CleanFlag = entity.CleanFlag,
+                CleanPrice = entity.CleanPrice,
+                CleanSDate = entity.CleanSDate.ToFormattedStringDate(),
+                CleanEDate = entity.CleanEDate.ToFormattedStringDate()
+            });
+        }
+
         #endregion
     }
 }

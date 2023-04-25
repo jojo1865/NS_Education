@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems.BusinessUser;
 using NS_Education.Models.APIItems.BusinessUser.GetInfoById;
 using NS_Education.Models.APIItems.BusinessUser.GetList;
 using NS_Education.Models.APIItems.BusinessUser.Submit;
@@ -103,7 +102,7 @@ namespace NS_Education.Controller.UsingHelper
                 Phone = entity.Phone ?? "",
                 MKsalesFlag = entity.MKsalesFlag,
                 OPsalesFlag = entity.OPsalesFlag,
-                Items = entity.M_Customer_BusinessUser.Select(cbu => new BusinessUser_Customer_APIItem
+                Items = entity.M_Customer_BusinessUser.Select(cbu => new BusinessUser_GetList_Customer_APIItem
                 {
                     CID = cbu.CID,
                     Code = cbu.C?.Code ?? "",

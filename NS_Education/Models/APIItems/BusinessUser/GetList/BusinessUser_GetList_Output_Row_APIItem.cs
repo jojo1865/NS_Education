@@ -11,7 +11,7 @@ namespace NS_Education.Models.APIItems.BusinessUser.GetList
         public bool MKsalesFlag { get; set; }
         public bool OPsalesFlag { get; set; }
 
-        public ICollection<BusinessUser_Customer_APIItem> Items { get; set; } =
-            new List<BusinessUser_Customer_APIItem>();
+        public ICollection<BusinessUser_GetList_Customer_APIItem> Items { get; set; } =
+            new List<BusinessUser_GetList_Customer_APIItem>();
     }
 }

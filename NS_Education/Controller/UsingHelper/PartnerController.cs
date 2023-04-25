@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Partner.GetInfoById;
 using NS_Education.Models.APIItems.Partner.GetList;
+using NS_Education.Models.APIItems.Partner.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -23,6 +25,7 @@ namespace NS_Education.Controller.UsingHelper
         , IGetInfoById<B_Partner, Partner_GetInfoById_Output_APIItem>
         , IDeleteItem<B_Partner>
         , IChangeActive<B_Partner>
+        , ISubmit<B_Partner, Partner_Submit_Input_APIItem>
     {
         #region Initialization
 
@@ -34,14 +37,18 @@ namespace NS_Education.Controller.UsingHelper
 
         private readonly IChangeActiveHelper _changeActiveHelper;
 
+        private readonly ISubmitHelper<Partner_Submit_Input_APIItem> _submitHelper;
+
         public PartnerController()
         {
             _getListPagedHelper =
                 new GetListPagedHelper<PartnerController, B_Partner, Partner_GetList_Input_APIItem,
                     Partner_GetList_Output_Row_APIItem>(this);
-            _getInfoByIdHelper = new GetInfoByIdHelper<PartnerController, B_Partner, Partner_GetInfoById_Output_APIItem>(this);
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<PartnerController, B_Partner, Partner_GetInfoById_Output_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<PartnerController, B_Partner>(this);
             _changeActiveHelper = new ChangeActiveHelper<PartnerController, B_Partner>(this);
+            _submitHelper = new SubmitHelper<PartnerController, B_Partner, Partner_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -141,11 +148,11 @@ namespace NS_Education.Controller.UsingHelper
             return await Task.FromResult(new Partner_GetInfoById_Output_APIItem
             {
                 BPID = entity.BPID,
-                
+
                 BCID = entity.BCID,
                 BC_TitleC = entity.BC?.TitleC ?? "",
                 BC_TitleE = entity.BC?.TitleE ?? "",
-                BC_List = entity.BC == null 
+                BC_List = entity.BC == null
                     ? new List<BaseResponseRowForSelectable>()
                     : await DC.B_Category
                         .Where(c => c.CategoryType == entity.BC.CategoryType && c.ActiveFlag && !c.DeleteFlag)
@@ -155,14 +162,14 @@ namespace NS_Education.Controller.UsingHelper
                             Title = c.TitleC ?? c.TitleE ?? "",
                             SelectFlag = c.BCID == entity.BCID
                         }).ToListAsync(),
-                
+
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 Compilation = entity.Compilation,
-                
+
                 BSCID = entity.BSCID,
                 BSC_Title = entity.BSC?.Title ?? "",
-                BSC_List = entity.BSC == null 
+                BSC_List = entity.BSC == null
                     ? new List<BaseResponseRowForSelectable>()
                     : await DC.B_StaticCode
                         .Where(sc => sc.CodeType == entity.BSC.CodeType && sc.ActiveFlag && !sc.DeleteFlag)
@@ -172,7 +179,7 @@ namespace NS_Education.Controller.UsingHelper
                             Title = sc.Title ?? "",
                             SelectFlag = sc.BSCID == entity.BCID
                         }).ToListAsync(),
-                
+
                 Email = entity.Email,
                 Note = entity.Note,
                 CleanFlag = entity.CleanFlag,
@@ -185,7 +192,7 @@ namespace NS_Education.Controller.UsingHelper
         #endregion
 
         #region DeleteItem
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
@@ -197,9 +204,11 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.B_Partner.Where(p => p.BPID == id);
         }
+
         #endregion
 
         #region ChangeActive
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
@@ -211,6 +220,111 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.B_Partner.Where(p => p.BPID == id);
         }
+
+        #endregion
+
+        #region Submit
+
+        private const string SubmitCleanDatesIncorrect = "清潔合約結束日應大於等於起始日！";
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Partner_Submit_Input_APIItem.BPID))]
+        public async Task<string> Submit(Partner_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(Partner_Submit_Input_APIItem input)
+        {
+            return input.BPID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(Partner_Submit_Input_APIItem input)
+        {
+            DateTime startDate = default;
+            DateTime endDate = default;
+
+            bool isValid = input.StartValidate(true)
+                .Validate(i => i.BPID == 0, () => AddError(WrongFormat("廠商 ID")))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.CleanSDate.TryParseDateTime(out startDate), () => AddError(WrongFormat("清潔合約起始日")))
+                .Validate(i => i.CleanEDate.TryParseDateTime(out endDate), () => AddError(WrongFormat("清潔合約結束日")))
+                .Validate(i => endDate >= startDate, () => AddError(SubmitCleanDatesIncorrect))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<B_Partner> SubmitCreateData(Partner_Submit_Input_APIItem input)
+        {
+            if (!input.CleanSDate.TryParseDateTime(out DateTime startDate)
+                || !input.CleanEDate.TryParseDateTime(out DateTime endDate))
+                throw new ArgumentException(SubmitCleanDatesIncorrect);
+
+            return await Task.FromResult(new B_Partner
+            {
+                BPID = input.BPID,
+                BCID = input.BCID,
+                Code = input.Code,
+                Title = input.Title,
+                Compilation = input.Compilation,
+                BSCID = input.BSCID,
+                Email = input.Email,
+                CleanFlag = input.CleanFlag,
+                CleanPrice = input.CleanPrice,
+                CleanSDate = startDate,
+                CleanEDate = endDate
+            });
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(Partner_Submit_Input_APIItem input)
+        {
+            DateTime startDate = default;
+            DateTime endDate = default;
+
+            bool isValid = input.StartValidate(true)
+                .Validate(i => i.BPID.IsValidId(), () => AddError(EmptyNotAllowed("廠商 ID")))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.CleanSDate.TryParseDateTime(out startDate), () => AddError(WrongFormat("清潔合約起始日")))
+                .Validate(i => i.CleanEDate.TryParseDateTime(out endDate), () => AddError(WrongFormat("清潔合約結束日")))
+                .Validate(i => endDate >= startDate, () => AddError(SubmitCleanDatesIncorrect))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<B_Partner> SubmitEditQuery(Partner_Submit_Input_APIItem input)
+        {
+            return DC.B_Partner.Where(p => p.BPID == input.BPID);
+        }
+
+        public void SubmitEditUpdateDataFields(B_Partner data, Partner_Submit_Input_APIItem input)
+        {
+            if (!input.CleanSDate.TryParseDateTime(out DateTime startDate)
+                || !input.CleanEDate.TryParseDateTime(out DateTime endDate))
+                throw new ArgumentException(SubmitCleanDatesIncorrect);
+
+            data.BPID = input.BPID;
+            data.BCID = input.BCID;
+            data.Code = input.Code ?? data.Code;
+            data.Title = input.Title ?? data.Title;
+            data.Compilation = input.Compilation ?? data.Compilation;
+            data.BSCID = input.BSCID;
+            data.Email = input.Email ?? data.Email;
+            data.CleanFlag = input.CleanFlag;
+            data.CleanPrice = input.CleanPrice;
+            data.CleanSDate = startDate;
+            data.CleanEDate = endDate;
+        }
+
+        #endregion
+
         #endregion
     }
 }

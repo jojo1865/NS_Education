@@ -261,6 +261,7 @@
     <Compile Include="Controller\HomeController.cs" />
     <Compile Include="Controller\UsingHelper\OrderCodeController.cs" />
     <Compile Include="Controller\UsingHelper\PartnerController.cs" />
+    <Compile Include="Controller\UsingHelper\PartnerItemController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs" />
     <Compile Include="Controller\UsingHelper\StaticCodeController.cs" />
@@ -302,6 +303,9 @@
     <Compile Include="Models\APIItems\OrderCode\GetList\OrderCode_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\OrderCode\Submit\OrderCode_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\OtherPayItem\D_OtherPayItem_APIItem.cs" />
+    <Compile Include="Models\APIItems\PartnerItem\GetInfoById\PartnerItem_GetInfoById_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\PartnerItem\GetList\PartnerItem_GetList_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\PartnerItem\GetList\PartnerItem_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Partner\GetInfoById\Partner_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\Partner\GetList\Partner_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Partner\GetList\Partner_GetList_Output_Row_APIItem.cs" />
@@ -417,6 +421,7 @@
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetTypeList.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs" />
     <Compile Include="Tools\Encryption\JwtHelper.cs" />
+    <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\IntExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs" />

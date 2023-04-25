@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.SiteData.GetInfoById;
 using NS_Education.Models.APIItems.SiteData.GetList;
 using NS_Education.Models.APIItems.SiteData.Submit;
@@ -148,35 +147,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 PhoneExt3 = entity.PhoneExt3 ?? "",
                 Note = entity.Note ?? "",
                 BSCID1 = entity.BSCID1,
-                FloorList = await DC.B_StaticCode
-                    .Where(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.CodeType == 1)
-                    .Select(sc => new BaseResponseRowForSelectable
-                    {
-                        ID = sc.BSCID,
-                        Title = sc.Title ?? "",
-                        SelectFlag = sc.BSCID == entity.BSCID1
-                    })
-                    .ToListAsync(),
+                FloorList = await DC.B_StaticCode.GetStaticCodeSelectable(1, entity.BSCID1),
                 BSCID5 = entity.BSCID5,
-                TableList = await DC.B_StaticCode
-                    .Where(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.CodeType == 5)
-                    .Select(sc => new BaseResponseRowForSelectable
-                    {
-                        ID = sc.BSCID,
-                        Title = sc.Title ?? "",
-                        SelectFlag = sc.BSCID == entity.BSCID5
-                    })
-                    .ToListAsync(),
+                TableList = await DC.B_StaticCode.GetStaticCodeSelectable(5, entity.BSCID5),
                 DHID = entity.DHID,
-                HallList = await DC.D_Hall
-                    .Where(dh => dh.ActiveFlag && !dh.DeleteFlag)
-                    .Select(dh => new BaseResponseRowForSelectable
-                    {
-                        ID = dh.DHID,
-                        Title = dh.TitleC ?? "",
-                        SelectFlag = dh.DHID == entity.DHID
-                    })
-                    .ToListAsync(),
+                HallList = await DC.D_Hall.GetHallSelectable(entity.DHID),
                 BOCID = entity.BOCID
             };
         }

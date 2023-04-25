@@ -169,16 +169,7 @@ namespace NS_Education.Controller.UsingHelper
 
                 BSCID = entity.BSCID,
                 BSC_Title = entity.BSC?.Title ?? "",
-                BSC_List = entity.BSC == null
-                    ? new List<BaseResponseRowForSelectable>()
-                    : await DC.B_StaticCode
-                        .Where(sc => sc.CodeType == entity.BSC.CodeType && sc.ActiveFlag && !sc.DeleteFlag)
-                        .Select(sc => new BaseResponseRowForSelectable
-                        {
-                            ID = sc.BSCID,
-                            Title = sc.Title ?? "",
-                            SelectFlag = sc.BSCID == entity.BCID
-                        }).ToListAsync(),
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSC?.CodeType, entity.BSCID),
 
                 Email = entity.Email,
                 Note = entity.Note,

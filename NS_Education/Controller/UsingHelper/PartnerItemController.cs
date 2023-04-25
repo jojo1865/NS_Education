@@ -4,6 +4,7 @@ using System.Web.Http;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.PartnerItem.GetInfoById;
 using NS_Education.Models.APIItems.PartnerItem.GetList;
+using NS_Education.Models.APIItems.PartnerItem.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -20,7 +21,8 @@ namespace NS_Education.Controller.UsingHelper
         IGetListPaged<B_PartnerItem, PartnerItem_GetList_Input_APIItem, PartnerItem_GetList_Output_Row_APIItem>,
         IGetInfoById<B_PartnerItem, PartnerItem_GetInfoById_Output_APIItem>,
         IDeleteItem<B_PartnerItem>,
-        IChangeActive<B_PartnerItem>
+        IChangeActive<B_PartnerItem>,
+        ISubmit<B_PartnerItem, PartnerItem_Submit_Input_APIItem>
     {
         #region Initialization
 
@@ -28,6 +30,7 @@ namespace NS_Education.Controller.UsingHelper
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
+        private readonly ISubmitHelper<PartnerItem_Submit_Input_APIItem> _submitHelper;
 
         public PartnerItemController()
         {
@@ -39,6 +42,8 @@ namespace NS_Education.Controller.UsingHelper
                 new GetInfoByIdHelper<PartnerItemController, B_PartnerItem, PartnerItem_GetInfoById_Output_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<PartnerItemController, B_PartnerItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<PartnerItemController, B_PartnerItem>(this);
+
+            _submitHelper = new SubmitHelper<PartnerItemController, B_PartnerItem, PartnerItem_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -205,6 +210,94 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.B_PartnerItem.Where(pi => pi.BPIID == id);
         }
+        #endregion
+        
+        #region Submit
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(PartnerItem_Submit_Input_APIItem.BPIID))]
+        public async Task<string> Submit(PartnerItem_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(PartnerItem_Submit_Input_APIItem input)
+        {
+            return input.BPIID == 0;
+        }
+
+        #region Submit - Add
+        
+        public async Task<bool> SubmitAddValidateInput(PartnerItem_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BPIID == 0, () => AddError(WrongFormat("房型 ID")))
+                .Validate(i => i.BPID.IsValidId(), () => AddError(EmptyNotAllowed("廠商 ID")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("房型類型 ID")))
+                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<B_PartnerItem> SubmitCreateData(PartnerItem_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new B_PartnerItem
+            {
+                BPID = input.BPID,
+                BSCID = input.BSCID,
+                BOCID = input.BOCID,
+                DHID = input.DHID,
+                Ct = input.Ct,
+                Price = input.Price,
+                UnitPrice = input.UnitPrice,
+                InPrice = input.InPrice,
+                OutPrice = input.OutPrice,
+                SortNo = input.SortNo,
+                Note = input.Note
+            });
+        }
+        
+        #endregion
+
+        #region Submit - Edit
+        
+        public async Task<bool> SubmitEditValidateInput(PartnerItem_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BPIID.IsValidId(), () => AddError(EmptyNotAllowed("房型 ID")))
+                .Validate(i => i.BPID.IsValidId(), () => AddError(EmptyNotAllowed("廠商 ID")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("房型類型 ID")))
+                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<B_PartnerItem> SubmitEditQuery(PartnerItem_Submit_Input_APIItem input)
+        {
+            return DC.B_PartnerItem.Where(pi => pi.BPIID == input.BPIID);
+        }
+
+        public void SubmitEditUpdateDataFields(B_PartnerItem data, PartnerItem_Submit_Input_APIItem input)
+        {
+            data.BPID = input.BPID;
+            data.BSCID = input.BSCID;
+            data.BOCID = input.BOCID;
+            data.DHID = input.DHID;
+            data.Ct = input.Ct;
+            data.Price = input.Price;
+            data.UnitPrice = input.UnitPrice;
+            data.InPrice = input.InPrice;
+            data.OutPrice = input.OutPrice;
+            data.SortNo = input.SortNo;
+            data.Note = input.Note;
+        }
+        
+        #endregion
+        
         #endregion
     }
 }

@@ -20,11 +20,11 @@ namespace NS_Education.Models.APIItems
         {
             ActiveFlag = entity.GetIfHasProperty<TEntity, bool>(DbConstants.ActiveFlag);
             
-            CreDate = entity.GetIfHasProperty<TEntity, DateTime>(DbConstants.CreDate).ToFormattedString();
+            CreDate = entity.GetIfHasProperty<TEntity, DateTime>(DbConstants.CreDate).ToFormattedStringDateTime();
             CreUID = entity.GetIfHasProperty<TEntity, int>(DbConstants.CreUid);
             CreUser = CreUID == default ? "" : await controller.GetUserNameByID(CreUID);
             
-            UpdDate = entity.GetIfHasProperty<TEntity, DateTime>(DbConstants.UpdDate).ToFormattedString();
+            UpdDate = entity.GetIfHasProperty<TEntity, DateTime>(DbConstants.UpdDate).ToFormattedStringDateTime();
             UpdUID = entity.GetIfHasProperty<TEntity, int>(DbConstants.UpdUid);
             UpdUser = UpdUID == default ? "" : await controller.GetUserNameByID(UpdUID);
         }

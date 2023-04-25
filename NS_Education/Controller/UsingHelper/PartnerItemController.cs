@@ -18,12 +18,16 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class PartnerItemController : PublicClass,
         IGetListPaged<B_PartnerItem, PartnerItem_GetList_Input_APIItem, PartnerItem_GetList_Output_Row_APIItem>,
-        IGetInfoById<B_PartnerItem, PartnerItem_GetInfoById_Output_APIItem>
+        IGetInfoById<B_PartnerItem, PartnerItem_GetInfoById_Output_APIItem>,
+        IDeleteItem<B_PartnerItem>,
+        IChangeActive<B_PartnerItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<PartnerItem_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
 
         public PartnerItemController()
         {
@@ -33,6 +37,8 @@ namespace NS_Education.Controller.UsingHelper
 
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<PartnerItemController, B_PartnerItem, PartnerItem_GetInfoById_Output_APIItem>(this);
+            _deleteItemHelper = new DeleteItemHelper<PartnerItemController, B_PartnerItem>(this);
+            _changeActiveHelper = new ChangeActiveHelper<PartnerItemController, B_PartnerItem>(this);
         }
 
         #endregion
@@ -120,6 +126,8 @@ namespace NS_Education.Controller.UsingHelper
         #endregion
 
         #region GetInfoById
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetInfoById(int id)
         {
             return await _getInfoByIdHelper.GetInfoById(id);
@@ -168,6 +176,34 @@ namespace NS_Education.Controller.UsingHelper
                 SortNo = entity.SortNo,
                 Note = entity.Note ?? ""
             });
+        }
+        #endregion
+
+        #region DeleteItem
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
+
+        public IQueryable<B_PartnerItem> DeleteItemQuery(int id)
+        {
+            return DC.B_PartnerItem.Where(pi => pi.BPIID == id);
+        }
+        #endregion
+
+        #region ChangeActive
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
+        {
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        public IQueryable<B_PartnerItem> ChangeActiveQuery(int id)
+        {
+            return DC.B_PartnerItem.Where(pi => pi.BPIID == id);
         }
         #endregion
     }

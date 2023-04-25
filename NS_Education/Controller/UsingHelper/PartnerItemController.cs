@@ -159,7 +159,7 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<PartnerItem_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(B_PartnerItem entity)
         {
-            return await Task.FromResult(new PartnerItem_GetInfoById_Output_APIItem
+            return new PartnerItem_GetInfoById_Output_APIItem
             {
                 BPIID = entity.BPIID,
                 BPID = entity.BPID,
@@ -180,7 +180,7 @@ namespace NS_Education.Controller.UsingHelper
                 OutPrice = entity.OutPrice,
                 SortNo = entity.SortNo,
                 Note = entity.Note ?? ""
-            });
+            };
         }
         #endregion
 

@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Partner.GetInfoById;
 using NS_Education.Models.APIItems.Partner.GetList;
 using NS_Education.Models.APIItems.Partner.Submit;
@@ -152,16 +150,7 @@ namespace NS_Education.Controller.UsingHelper
                 BCID = entity.BCID,
                 BC_TitleC = entity.BC?.TitleC ?? "",
                 BC_TitleE = entity.BC?.TitleE ?? "",
-                BC_List = entity.BC == null
-                    ? new List<BaseResponseRowForSelectable>()
-                    : await DC.B_Category
-                        .Where(c => c.CategoryType == entity.BC.CategoryType && c.ActiveFlag && !c.DeleteFlag)
-                        .Select(c => new BaseResponseRowForSelectable
-                        {
-                            ID = c.BCID,
-                            Title = c.TitleC ?? c.TitleE ?? "",
-                            SelectFlag = c.BCID == entity.BCID
-                        }).ToListAsync(),
+                BC_List = await DC.B_Category.GetCategorySelectable(entity.BC?.CategoryType, entity.BCID),
 
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",

@@ -76,5 +76,28 @@ namespace NS_Education.Tools.Extensions
                 })
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// 取得 Category 的下拉選單。
+        /// </summary>
+        /// <param name="dbSet">StaticCode 的 DbSet</param>
+        /// <param name="categoryType">欲顯示的 CategoryType</param>
+        /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
+        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<ICollection<BaseResponseRowForSelectable>> GetCategorySelectable(this DbSet<B_Category> dbSet
+            , int? categoryType, int idToSelect)
+        {
+            if (categoryType == null)
+                return new List<BaseResponseRowForSelectable>();
+            
+            return await dbSet
+                .Where(c => c.CategoryType == categoryType && c.ActiveFlag && !c.DeleteFlag)
+                .Select(c => new BaseResponseRowForSelectable
+                {
+                    ID = c.BCID,
+                    Title = c.TitleC ?? c.TitleE ?? "",
+                    SelectFlag = c.BCID == idToSelect
+                }).ToListAsync();
+        }
     }
 }

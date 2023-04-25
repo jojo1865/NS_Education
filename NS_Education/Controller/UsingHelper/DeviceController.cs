@@ -18,23 +18,32 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class DeviceController : PublicClass,
         IGetListPaged<B_Device, Device_GetList_Input_APIItem, Device_GetList_Output_Row_APIItem>,
-        IGetInfoById<B_Device, Device_GetInfoById_Output_APIItem>
+        IGetInfoById<B_Device, Device_GetInfoById_Output_APIItem>,
+        IDeleteItem<B_Device>,
+        IChangeActive<B_Device>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Device_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
-        
+        private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
+
         public DeviceController()
         {
-            _getListPagedHelper = new GetListPagedHelper<DeviceController, B_Device, Device_GetList_Input_APIItem, Device_GetList_Output_Row_APIItem>(this);
+            _getListPagedHelper =
+                new GetListPagedHelper<DeviceController, B_Device, Device_GetList_Input_APIItem,
+                    Device_GetList_Output_Row_APIItem>(this);
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<DeviceController, B_Device, Device_GetInfoById_Output_APIItem>(this);
+            _deleteItemHelper = new DeleteItemHelper<DeviceController, B_Device>(this);
+            _changeActiveHelper = new ChangeActiveHelper<DeviceController, B_Device>(this);
         }
 
         #endregion
-        
+
         #region GetList
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList(Device_GetList_Input_APIItem input)
@@ -67,7 +76,7 @@ namespace NS_Education.Controller.UsingHelper
 
             if (input.BCID.IsValidId())
                 query = query.Where(d => d.BCID == input.BCID);
-            
+
             if (input.DHID.IsValidId())
                 query = query.Where(d => d.DHID == input.DHID);
 
@@ -102,15 +111,16 @@ namespace NS_Education.Controller.UsingHelper
                 OutPrice = entity.OutPrice,
                 SupplierTitle = entity.SupplierTitle ?? "",
                 SupplierName = entity.SupplierName ?? "",
-                SupplierPhone = entity.SupplierPhone ??"",
+                SupplierPhone = entity.SupplierPhone ?? "",
                 Repair = entity.Repair ?? "",
                 Note = entity.Note ?? ""
             });
         }
+
         #endregion
 
         #region GetInfoById
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetInfoById(int id)
@@ -163,7 +173,39 @@ namespace NS_Education.Controller.UsingHelper
                 Note = entity.Note ?? ""
             };
         }
-        
+
+        #endregion
+
+        #region DeleteItem
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
+
+        public IQueryable<B_Device> DeleteItemQuery(int id)
+        {
+            return DC.B_Device.Where(d => d.BDID == id);
+        }
+
+        #endregion
+
+        #region ChangeActive
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
+        {
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        public IQueryable<B_Device> ChangeActiveQuery(int id)
+        {
+            return DC.B_Device.Where(d => d.BDID == id);
+        }
+
         #endregion
     }
 }

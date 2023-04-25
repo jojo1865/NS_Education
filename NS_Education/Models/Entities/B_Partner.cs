@@ -33,6 +33,7 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public string Note { get; set; }
 
         public virtual B_Category BC { get; set; }
         public virtual B_StaticCode BSC { get; set; }

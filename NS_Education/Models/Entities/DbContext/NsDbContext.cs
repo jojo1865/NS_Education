@@ -78,6 +78,7 @@ namespace NS_Education.Models.Entities.DbContext
                 optionsBuilder.UseSqlServer(connectionString);
             }
         } 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<B_Category>(entity =>
@@ -180,6 +181,8 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Email).HasMaxLength(100);
+
+                entity.Property(e => e.Note).HasComment("備註");
 
                 entity.Property(e => e.Title).HasMaxLength(60);
 

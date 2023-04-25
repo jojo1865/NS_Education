@@ -1,9 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Http;
+using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Device.GetInfoById;
 using NS_Education.Models.APIItems.Device.GetList;
+using NS_Education.Models.APIItems.Device.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -20,7 +21,8 @@ namespace NS_Education.Controller.UsingHelper
         IGetListPaged<B_Device, Device_GetList_Input_APIItem, Device_GetList_Output_Row_APIItem>,
         IGetInfoById<B_Device, Device_GetInfoById_Output_APIItem>,
         IDeleteItem<B_Device>,
-        IChangeActive<B_Device>
+        IChangeActive<B_Device>,
+        ISubmit<B_Device, Device_Submit_Input_APIItem>
     {
         #region Initialization
 
@@ -28,6 +30,8 @@ namespace NS_Education.Controller.UsingHelper
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
+
+        private readonly ISubmitHelper<Device_Submit_Input_APIItem> _submitHelper;
 
         public DeviceController()
         {
@@ -38,6 +42,7 @@ namespace NS_Education.Controller.UsingHelper
                 new GetInfoByIdHelper<DeviceController, B_Device, Device_GetInfoById_Output_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<DeviceController, B_Device>(this);
             _changeActiveHelper = new ChangeActiveHelper<DeviceController, B_Device>(this);
+            _submitHelper = new SubmitHelper<DeviceController, B_Device, Device_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -139,7 +144,12 @@ namespace NS_Education.Controller.UsingHelper
 
         public IQueryable<B_Device> GetInfoByIdQuery(int id)
         {
-            return DC.B_Device.Where(d => d.BSCID == id);
+            return DC.B_Device
+                .Include(d => d.BC)
+                .Include(d => d.BSC)
+                .Include(d => d.BOC)
+                .Include(d => d.DH)
+                .Where(d => d.BSCID == id);
         }
 
         public async Task<Device_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(B_Device entity)
@@ -205,6 +215,101 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.B_Device.Where(d => d.BDID == id);
         }
+
+        #endregion
+
+        #region Submit
+
+        [HttpPost]
+        public async Task<string> Submit(Device_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(Device_Submit_Input_APIItem input)
+        {
+            return input.BDID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(Device_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BDID == 0, () => AddError(WrongFormat("設備 ID")))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("類別 ID")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("單位 ID")))
+                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<B_Device> SubmitCreateData(Device_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new B_Device
+            {
+                BCID = input.BCID,
+                BSCID = input.BSCID,
+                BOCID = input.BOCID,
+                DHID = input.DHID,
+                Code = input.Code,
+                Title = input.Title,
+                Ct = input.Ct,
+                UnitPrice = input.UnitPrice,
+                InPrice = input.InPrice,
+                OutPrice = input.OutPrice,
+                SupplierTitle = input.SupplierTitle,
+                SupplierName = input.SupplierName,
+                SupplierPhone = input.SupplierPhone,
+                Repair = input.Repair,
+                Note = input.Note
+            });
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(Device_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BDID.IsValidId(), () => AddError(EmptyNotAllowed("設備 ID")))
+                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("類別 ID")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("單位 ID")))
+                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<B_Device> SubmitEditQuery(Device_Submit_Input_APIItem input)
+        {
+            return DC.B_Device.Where(d => d.BCID == input.BCID);
+        }
+
+        public void SubmitEditUpdateDataFields(B_Device data, Device_Submit_Input_APIItem input)
+        {
+            data.BCID = input.BCID;
+            data.BSCID = input.BSCID;
+            data.BOCID = input.BOCID;
+            data.DHID = input.DHID;
+            data.Code = input.Code ?? data.Code;
+            data.Title = input.Title ?? data.Title;
+            data.Ct = input.Ct;
+            data.UnitPrice = input.UnitPrice;
+            data.InPrice = input.InPrice;
+            data.OutPrice = input.OutPrice;
+            data.SupplierTitle = input.SupplierTitle ?? data.SupplierTitle;
+            data.SupplierName = input.SupplierName ?? data.SupplierName;
+            data.SupplierPhone = input.SupplierPhone ?? data.SupplierPhone;
+            data.Repair = input.Repair ?? data.Repair;
+            data.Note = input.Note ?? data.Note;
+        }
+
+        #endregion
 
         #endregion
     }

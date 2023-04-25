@@ -379,6 +379,7 @@
     <Compile Include="Models\Entities\MenuAPI.cs" />
     <Compile Include="Models\Entities\MenuData.cs" />
     <Compile Include="Models\Entities\M_Contect.cs" />
+    <Compile Include="Models\Entities\M_Customer_BusinessUser.cs" />
     <Compile Include="Models\Entities\M_Customer_Category.cs" />
     <Compile Include="Models\Entities\M_Department_Category.cs" />
     <Compile Include="Models\Entities\M_Group_Menu.cs" />

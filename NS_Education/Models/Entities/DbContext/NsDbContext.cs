@@ -40,6 +40,7 @@ namespace NS_Education.Models.Entities.DbContext
         public virtual DbSet<D_Zip> D_Zip { get; set; }
         public virtual DbSet<GroupData> GroupData { get; set; }
         public virtual DbSet<M_Contect> M_Contect { get; set; }
+        public virtual DbSet<M_Customer_BusinessUser> M_Customer_BusinessUser { get; set; }
         public virtual DbSet<M_Customer_Category> M_Customer_Category { get; set; }
         public virtual DbSet<M_Department_Category> M_Department_Category { get; set; }
         public virtual DbSet<M_Group_Menu> M_Group_Menu { get; set; }
@@ -633,6 +634,54 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.TargetTable)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<M_Customer_BusinessUser>(entity =>
+            {
+                entity.HasKey(e => e.MID)
+                    .HasName("M_Customer_BusinessUser_pk");
+
+                entity.HasIndex(e => e.MID)
+                    .HasName("M_Customer_BusinessUser_MID_uindex")
+                    .IsUnique();
+
+                entity.Property(e => e.MID).HasComment("流水號 ID");
+
+                entity.Property(e => e.ActiveFlag).HasComment("是否啟用");
+
+                entity.Property(e => e.BUID).HasComment("業務負責人 ID");
+
+                entity.Property(e => e.CID).HasComment("客戶 ID");
+
+                entity.Property(e => e.CreDate)
+                    .HasColumnType("datetime")
+                    .HasComment("建立時間");
+
+                entity.Property(e => e.CreUID).HasComment("建立者 ID");
+
+                entity.Property(e => e.DeleteFlag).HasComment("是否移除");
+
+                entity.Property(e => e.MappingType).HasComment("對應模式(0:無指定/1:MK/2:OP)");
+
+                entity.Property(e => e.SortNo).HasComment("排序");
+
+                entity.Property(e => e.UpdDate)
+                    .HasColumnType("datetime")
+                    .HasComment("更新時間");
+
+                entity.Property(e => e.UpdUID).HasComment("更新者 ID");
+
+                entity.HasOne(d => d.BU)
+                    .WithMany(p => p.M_Customer_BusinessUser)
+                    .HasForeignKey(d => d.BUID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("M_Customer_BusinessUser_BusinessUser_BUID_fk");
+
+                entity.HasOne(d => d.C)
+                    .WithMany(p => p.M_Customer_BusinessUser)
+                    .HasForeignKey(d => d.CID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("M_Customer_BusinessUser_Customer_CID_fk");
             });
 
             modelBuilder.Entity<M_Customer_Category>(entity =>

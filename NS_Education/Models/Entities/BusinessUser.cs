@@ -12,6 +12,7 @@ namespace NS_Education.Models.Entities
         public BusinessUser()
         {
             CustomerVisit = new HashSet<CustomerVisit>();
+            M_Customer_BusinessUser = new HashSet<M_Customer_BusinessUser>();
         }
 
         public int BUID { get; set; }
@@ -28,5 +29,6 @@ namespace NS_Education.Models.Entities
         public int UpdUID { get; set; }
 
         public virtual ICollection<CustomerVisit> CustomerVisit { get; set; }
+        public virtual ICollection<M_Customer_BusinessUser> M_Customer_BusinessUser { get; set; }
     }
 }

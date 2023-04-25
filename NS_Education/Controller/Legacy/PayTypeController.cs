@@ -80,8 +80,8 @@ namespace NS_Education.Controller.Legacy
             {
                 DPTID = entity.DPTID,
                 BCID = entity.BCID,
-                BC_TitleC = entity.BC.TitleC ?? "",
-                BC_TitleE = entity.BC.TitleE ?? "",
+                BC_TitleC = entity.BC?.TitleC ?? "",
+                BC_TitleE = entity.BC?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 AccountingNo = entity.AccountingNo,

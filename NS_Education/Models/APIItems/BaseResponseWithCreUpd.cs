@@ -26,7 +26,11 @@ namespace NS_Education.Models.APIItems
             
             UpdDate = entity.GetIfHasProperty<TEntity, DateTime>(DbConstants.UpdDate).ToFormattedStringDateTime();
             UpdUID = entity.GetIfHasProperty<TEntity, int>(DbConstants.UpdUid);
-            UpdUser = UpdUID == default ? "" : await controller.GetUserNameByID(UpdUID);
+            // 當更新者和新增者一樣時，不多做查詢
+            if (UpdUID == CreUID)
+                UpdUser = CreUser;
+            else
+                UpdUser = UpdUID == default ? "" : await controller.GetUserNameByID(UpdUID);
         }
 
         public bool ActiveFlag { get; private set; }

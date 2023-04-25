@@ -85,8 +85,8 @@ namespace NS_Education.Controller.Legacy
             {
                 DDID = entity.DDID,
                 DCID = entity.DCID,
-                DC_TitleC = entity.DC.TitleC ?? "",
-                DC_TitleE = entity.DC.TitleE ?? "",
+                DC_TitleC = entity.DC?.TitleC ?? "",
+                DC_TitleE = entity.DC?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",

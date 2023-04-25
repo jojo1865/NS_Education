@@ -96,12 +96,12 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     RHID = entity.RHID,
                     RSID = entity.RSID,
                     RSSortNo = entity.SortNo,
-                    RHCode = entity.RH.Code ?? "",
-                    RHTitle = entity.RH.Title ?? "",
-                    CID = entity.RH.CID,
-                    CustomerTitle = entity.RH.CustomerTitle,
+                    RHCode = entity.RH?.Code ?? "",
+                    RHTitle = entity.RH?.Title ?? "",
+                    CID = entity.RH?.CID ?? 0,
+                    CustomerTitle = entity.RH?.CustomerTitle ?? "",
                     TargetDate = entity.TargetDate.ToFormattedStringDate(),
-                    Items = entity.RH.M_Resver_TimeSpan.Select(rts => new SiteData_GetListForCalendar_TimeSpan_APIItem
+                    Items = entity.RH?.M_Resver_TimeSpan.Select(rts => new SiteData_GetListForCalendar_TimeSpan_APIItem
                     {
                         DTSID = rts.DTSID,
                         Title = rts.DTS.Title ?? "",

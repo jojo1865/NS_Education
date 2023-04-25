@@ -17,13 +17,17 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class BusinessUserController : PublicClass,
         IGetListPaged<BusinessUser, BusinessUser_GetList_Input_APIItem, BusinessUser_GetList_Output_Row_APIItem>,
-        IGetInfoById<BusinessUser, BusinessUser_GetInfoById_Output_APIItem>
+        IGetInfoById<BusinessUser, BusinessUser_GetInfoById_Output_APIItem>,
+        IDeleteItem<BusinessUser>,
+        IChangeActive<BusinessUser>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<BusinessUser_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
-
+        private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
+        
         public BusinessUserController()
         {
             _getListPagedHelper =
@@ -33,6 +37,12 @@ namespace NS_Education.Controller.UsingHelper
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<BusinessUserController, BusinessUser, BusinessUser_GetInfoById_Output_APIItem>(
                     this);
+
+            _deleteItemHelper =
+                new DeleteItemHelper<BusinessUserController, BusinessUser>(this);
+
+            _changeActiveHelper =
+                new ChangeActiveHelper<BusinessUserController, BusinessUser>(this);
         }
 
         #endregion
@@ -127,6 +137,30 @@ namespace NS_Education.Controller.UsingHelper
             );
         }
 
+        #endregion
+
+        #region DeleteItem
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
+
+        public IQueryable<BusinessUser> DeleteItemQuery(int id)
+        {
+            return DC.BusinessUser.Where(bu => bu.BUID == id);
+        }
+        #endregion
+
+        #region ChangeActive
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
+        {
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        public IQueryable<BusinessUser> ChangeActiveQuery(int id)
+        {
+            return DC.BusinessUser.Where(bu => bu.BUID == id);
+        }
         #endregion
     }
 }

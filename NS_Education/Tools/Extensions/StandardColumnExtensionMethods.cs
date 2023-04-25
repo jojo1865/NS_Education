@@ -71,10 +71,20 @@ namespace NS_Education.Tools.Extensions
         /// 將日期轉換為 yyyy/MM/dd HH:mm 格式
         /// </summary>
         /// <param name="datetime">日期（可包含時間）。</param>
-        /// <returns>格式化的日期字串</returns>
-        public static string ToFormattedString(this DateTime datetime)
+        /// <returns>格式化的日期時間字串</returns>
+        public static string ToFormattedStringDateTime(this DateTime datetime)
         {
             return datetime.ToString("yyyy/MM/dd HH:mm");
+        }
+        
+        /// <summary>
+        /// 將日期轉換為 yyyy/MM/dd 格式
+        /// </summary>
+        /// <param name="datetime">日期。</param>
+        /// <returns>格式化的日期字串</returns>
+        public static string ToFormattedStringDate(this DateTime datetime)
+        {
+            return datetime.ToString("yyyy/MM/dd");
         }
 
         public static string ToFormattedHourAndMinute(this (int hour, int minute) tuple)

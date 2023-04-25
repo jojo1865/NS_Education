@@ -5,6 +5,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
+using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
@@ -31,16 +32,14 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或是值不正確！";
         private const string GetInfoByIdNotFound = "查無欲查詢的資料！";
         
-        public async Task<string> GetInfoById( int id)
+        public async Task<string> GetInfoById(int id)
         {
             // 1. 驗證輸入資料
-            bool isValid = await _controller.GetInfoByIdValidateInput(id);
-            
-            if (!isValid && !_controller.HasError())
+            if (!id.IsValidId())
+            {
                 _controller.AddError(GetInfoByIdInputIncorrect);
-
-            if (_controller.HasError())
                 return _controller.GetResponseJson();
+            }
 
             // 2. 取得單筆資料
             TEntity t = await _GetInfoByIdQueryResult(id);

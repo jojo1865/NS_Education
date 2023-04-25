@@ -26,17 +26,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         Task<string> GetInfoById(int id);
 
         /// <summary>
-        /// 驗證此次要求的輸入是否符合條件。
-        /// </summary>
-        /// <param name="id">輸入</param>
-        /// <returns>
-        /// true：驗證通過<br/>
-        /// false：驗證失敗
-        /// </returns>
-        [NonAction]
-        Task<bool> GetInfoByIdValidateInput(int id);
-        
-        /// <summary>
         /// 取得單筆資料時的查詢。
         /// </summary>
         /// <param name="id">使用者輸入的查詢用索引鍵</param>

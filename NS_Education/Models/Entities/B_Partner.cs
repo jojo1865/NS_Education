@@ -12,7 +12,6 @@ namespace NS_Education.Models.Entities
         public B_Partner()
         {
             B_PartnerItem = new HashSet<B_PartnerItem>();
-            M_Partner_Category = new HashSet<M_Partner_Category>();
             Resver_Throw_Food = new HashSet<Resver_Throw_Food>();
         }
 
@@ -38,7 +37,6 @@ namespace NS_Education.Models.Entities
         public virtual B_Category BC { get; set; }
         public virtual B_StaticCode BSC { get; set; }
         public virtual ICollection<B_PartnerItem> B_PartnerItem { get; set; }
-        public virtual ICollection<M_Partner_Category> M_Partner_Category { get; set; }
         public virtual ICollection<Resver_Throw_Food> Resver_Throw_Food { get; set; }
     }
 }

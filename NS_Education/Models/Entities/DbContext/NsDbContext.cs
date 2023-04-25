@@ -45,7 +45,6 @@ namespace NS_Education.Models.Entities.DbContext
         public virtual DbSet<M_Department_Category> M_Department_Category { get; set; }
         public virtual DbSet<M_Group_Menu> M_Group_Menu { get; set; }
         public virtual DbSet<M_Group_User> M_Group_User { get; set; }
-        public virtual DbSet<M_Partner_Category> M_Partner_Category { get; set; }
         public virtual DbSet<M_Resver_TimeSpan> M_Resver_TimeSpan { get; set; }
         public virtual DbSet<M_SiteGroup> M_SiteGroup { get; set; }
         public virtual DbSet<MenuAPI> MenuAPI { get; set; }
@@ -760,27 +759,6 @@ namespace NS_Education.Models.Entities.DbContext
                     .HasConstraintName("FK_M_Group_User_UserData");
             });
 
-            modelBuilder.Entity<M_Partner_Category>(entity =>
-            {
-                entity.HasKey(e => e.MID);
-
-                entity.Property(e => e.CreDate).HasColumnType("datetime");
-
-                entity.Property(e => e.UpdDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.BC)
-                    .WithMany(p => p.M_Partner_Category)
-                    .HasForeignKey(d => d.BCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_Partner_Category_B_Category");
-
-                entity.HasOne(d => d.BP)
-                    .WithMany(p => p.M_Partner_Category)
-                    .HasForeignKey(d => d.BPID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_Partner_Category_B_Partner");
-            });
-
             modelBuilder.Entity<M_Resver_TimeSpan>(entity =>
             {
                 entity.HasKey(e => e.MID)
@@ -1004,6 +982,12 @@ namespace NS_Education.Models.Entities.DbContext
                     .HasForeignKey(d => d.BSCID12)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Head_B_StaticCode12");
+
+                entity.HasOne(d => d.C)
+                    .WithMany(p => p.Resver_Head)
+                    .HasForeignKey(d => d.CID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Resver_Head_Customer_CID_fk");
             });
 
             modelBuilder.Entity<Resver_Other>(entity =>

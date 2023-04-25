@@ -16,6 +16,7 @@ namespace NS_Education.Models.Entities
             CustomerVisit = new HashSet<CustomerVisit>();
             M_Customer_BusinessUser = new HashSet<M_Customer_BusinessUser>();
             M_Customer_Category = new HashSet<M_Customer_Category>();
+            Resver_Head = new HashSet<Resver_Head>();
         }
 
         public int CID { get; set; }
@@ -48,5 +49,6 @@ namespace NS_Education.Models.Entities
         public virtual ICollection<CustomerVisit> CustomerVisit { get; set; }
         public virtual ICollection<M_Customer_BusinessUser> M_Customer_BusinessUser { get; set; }
         public virtual ICollection<M_Customer_Category> M_Customer_Category { get; set; }
+        public virtual ICollection<Resver_Head> Resver_Head { get; set; }
     }
 }

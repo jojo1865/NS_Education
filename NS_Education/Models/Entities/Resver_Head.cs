@@ -46,6 +46,7 @@ namespace NS_Education.Models.Entities
 
         public virtual B_StaticCode BSCID11Navigation { get; set; }
         public virtual B_StaticCode BSCID12Navigation { get; set; }
+        public virtual Customer C { get; set; }
         public virtual ICollection<M_Resver_TimeSpan> M_Resver_TimeSpan { get; set; }
         public virtual ICollection<Resver_Bill> Resver_Bill { get; set; }
         public virtual ICollection<Resver_GiveBack> Resver_GiveBack { get; set; }

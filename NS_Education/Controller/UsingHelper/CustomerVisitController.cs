@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.CustomerVisit.GetInfoById;
 using NS_Education.Models.APIItems.CustomerVisit.GetList;
+using NS_Education.Models.APIItems.CustomerVisit.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -20,15 +21,17 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 namespace NS_Education.Controller.UsingHelper
 {
     public class CustomerVisitController : PublicClass
-    ,IGetListPaged<CustomerVisit, CustomerVisit_GetList_Input_APIItem, CustomerVisit_GetList_Output_Row_APIItem>
-    ,IGetInfoById<CustomerVisit, CustomerVisit_GetInfoById_Output_APIItem>
-    ,IDeleteItem<CustomerVisit>
+        , IGetListPaged<CustomerVisit, CustomerVisit_GetList_Input_APIItem, CustomerVisit_GetList_Output_Row_APIItem>
+        , IGetInfoById<CustomerVisit, CustomerVisit_GetInfoById_Output_APIItem>
+        , IDeleteItem<CustomerVisit>
+        , ISubmit<CustomerVisit, CustomerVisit_Submit_Input_APIItem>
     {
         #region Initialization
-        
+
         private readonly IGetListPagedHelper<CustomerVisit_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<CustomerVisit_Submit_Input_APIItem> _submitHelper;
 
         public CustomerVisitController()
         {
@@ -42,14 +45,17 @@ namespace NS_Education.Controller.UsingHelper
 
             _deleteItemHelper =
                 new DeleteItemHelper<CustomerVisitController, CustomerVisit>(this);
+            _submitHelper =
+                new SubmitHelper<CustomerVisitController, CustomerVisit, CustomerVisit_Submit_Input_APIItem>(this);
         }
-        
-        
+
+
         #endregion
 
         #region GetList
 
         private const string GetListDateRangeIncorrect = "欲篩選之拜訪期間起始日期不得大於最後日期！";
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(CustomerVisit_GetList_Input_APIItem input)
@@ -66,9 +72,9 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.CID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.BUID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之業務員 ID")))
                 .Validate(i => i.BSCID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之拜訪方式 ID")))
-                .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate), 
+                .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
                     () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
-                .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate), 
+                .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
                     () => AddError(WrongFormat("欲篩選之拜訪期間最後日期")))
                 .Validate(i => sDate <= eDate, () => AddError(GetListDateRangeIncorrect))
                 .IsValid();
@@ -127,10 +133,11 @@ namespace NS_Education.Controller.UsingHelper
                 AfterNote = entity.AfterNote ?? ""
             });
         }
+
         #endregion
 
         #region GetInfoById
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
@@ -147,7 +154,8 @@ namespace NS_Education.Controller.UsingHelper
                 .Where(cv => cv.CVID == id);
         }
 
-        public async Task<CustomerVisit_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(CustomerVisit entity)
+        public async Task<CustomerVisit_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(
+            CustomerVisit entity)
         {
             return new CustomerVisit_GetInfoById_Output_APIItem
             {
@@ -182,7 +190,7 @@ namespace NS_Education.Controller.UsingHelper
                 })
                 .ToListAsync();
         }
-        
+
         private async Task<List<BaseResponseRowForSelectable>> GetSelectedBusinessUserList(int businessUserId)
         {
             return await DC.BusinessUser
@@ -199,6 +207,9 @@ namespace NS_Education.Controller.UsingHelper
         #endregion
 
         #region DeleteItem
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
             return await _deleteItemHelper.DeleteItem(id, deleteFlag);
@@ -208,6 +219,94 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.CustomerVisit.Where(cv => cv.CVID == id);
         }
+
+        #endregion
+
+        #region Submit
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null,
+            nameof(CustomerVisit_Submit_Input_APIItem.CVID))]
+        public async Task<string> Submit(CustomerVisit_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(CustomerVisit_Submit_Input_APIItem input)
+        {
+            return input.CVID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(CustomerVisit_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate(true)
+                .Validate(i => i.CVID == 0, () => AddError(WrongFormat("拜訪紀錄 ID")))
+                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("客戶拜訪方式 ID")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("拜訪業務 ID")))
+                .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<CustomerVisit> SubmitCreateData(CustomerVisit_Submit_Input_APIItem input)
+        {
+            input.VisitDate.TryParseDateTime(out DateTime visitDate);
+            return await Task.FromResult(new CustomerVisit
+            {
+                CID = input.CID,
+                BSCID = input.BSCID,
+                BUID = input.BUID,
+                TargetTitle = input.TargetTitle,
+                VisitDate = visitDate,
+                Title = input.Title,
+                Description = input.Description,
+                AfterNote = input.AfterNote
+            });
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(CustomerVisit_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate(true)
+                .Validate(i => i.CVID.IsValidId(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
+                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("客戶拜訪方式 ID")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("拜訪業務 ID")))
+                .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<CustomerVisit> SubmitEditQuery(CustomerVisit_Submit_Input_APIItem input)
+        {
+            return DC.CustomerVisit.Where(cv => cv.CVID == input.CID);
+        }
+
+        public void SubmitEditUpdateDataFields(CustomerVisit data, CustomerVisit_Submit_Input_APIItem input)
+        {
+            data.CID = input.CID;
+            data.BSCID = input.BSCID;
+            data.BUID = input.BUID;
+            data.TargetTitle = input.TargetTitle;
+
+            input.VisitDate.TryParseDateTime(out DateTime visitDate);
+            data.VisitDate = visitDate;
+
+            data.Title = input.Title;
+            data.Description = input.Description;
+            data.AfterNote = input.AfterNote;
+        }
+
+        #endregion
+
         #endregion
     }
 }

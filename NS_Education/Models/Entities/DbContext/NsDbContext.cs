@@ -63,19 +63,18 @@ namespace NS_Education.Models.Entities.DbContext
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
-
+            
             var connectionStrings = System.Web.Configuration.WebConfigurationManager.ConnectionStrings;
+
             try
             {
-                optionsBuilder.UseSqlServer(
-                    Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"]
-                        .ConnectionString));
+                optionsBuilder.UseSqlServer(Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString));
             }
             catch
             {
                 optionsBuilder.UseSqlServer(connectionStrings["db_NS_EducationConnectionString"].ConnectionString);
             }
-        }
+        } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -373,6 +372,12 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.Title).HasMaxLength(100);
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.BSC)
+                    .WithMany(p => p.CustomerGift)
+                    .HasForeignKey(d => d.BSCID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("CustomerGift_B_StaticCode_BSCID_fk");
 
                 entity.HasOne(d => d.C)
                     .WithMany(p => p.CustomerGift)

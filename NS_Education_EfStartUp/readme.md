@@ -20,17 +20,14 @@ dotnet ef dbcontext scaffold "Data Source=192.168.50.125\SQL2019D;Database=db_NS
             if (optionsBuilder.IsConfigured) return;
             
             var connectionStrings = System.Web.Configuration.WebConfigurationManager.ConnectionStrings;
-            string connectionString =
-                Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString);
 
             try
             {
-                optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer(Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString));
             }
             catch
             {
-                connectionString = connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
-                optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer(connectionStrings["db_NS_EducationConnectionString"].ConnectionString);
             }
         } 
 ```

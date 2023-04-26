@@ -22,6 +22,7 @@ namespace NS_Education.Models.Entities
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
 
+        public virtual B_StaticCode BSC { get; set; }
         public virtual Customer C { get; set; }
     }
 }

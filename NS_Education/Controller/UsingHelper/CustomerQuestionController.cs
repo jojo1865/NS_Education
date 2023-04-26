@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.CustomerQuestion.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -59,7 +60,9 @@ namespace NS_Education.Controller.UsingHelper
 
         public IOrderedQueryable<CustomerQuestion> GetListPagedOrderedQuery(CustomerQuestion_GetList_Input_APIItem input)
         {
-            var query = DC.CustomerQuestion.AsQueryable();
+            var query = DC.CustomerQuestion
+                .Include(cq => cq.C)
+                .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(cq => cq.AskTitle.Contains(input.Keyword) || cq.AskArea.Contains(input.Keyword));

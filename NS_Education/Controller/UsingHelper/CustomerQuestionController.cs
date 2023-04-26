@@ -1,0 +1,104 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web.Mvc;
+using NS_Education.Models.APIItems.CustomerQuestion.GetList;
+using NS_Education.Models.Entities;
+using NS_Education.Tools.BeingValidated;
+using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
+using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters.JwtAuthFilter;
+using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+
+namespace NS_Education.Controller.UsingHelper
+{
+    public class CustomerQuestionController : PublicClass,
+        IGetListPaged<CustomerQuestion, CustomerQuestion_GetList_Input_APIItem, CustomerQuestion_GetList_Output_Row_APIItem>
+    {
+        #region Initialization
+
+        private readonly IGetListPagedHelper<CustomerQuestion_GetList_Input_APIItem> _getListPagedHelper;
+
+        public CustomerQuestionController()
+        {
+            _getListPagedHelper =
+                new GetListPagedHelper<CustomerQuestionController, CustomerQuestion,
+                    CustomerQuestion_GetList_Input_APIItem, CustomerQuestion_GetList_Output_Row_APIItem>(this);
+        }
+
+        #endregion
+        
+        #region GetList
+        private const string GetListDateRangeIncorrect = "欲篩選之問題發生期間起始日期不得大於最後日期！";
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        public async Task<string> GetList(CustomerQuestion_GetList_Input_APIItem input)
+        {
+            return await _getListPagedHelper.GetPagedList(input);
+        }
+
+        public async Task<bool> GetListPagedValidateInput(CustomerQuestion_GetList_Input_APIItem input)
+        {
+            DateTime sDate = default;
+            DateTime eDate = default;
+            bool isValid = input.StartValidate()
+                .Validate(i => i.CID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
+                .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
+                    () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
+                .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
+                    () => AddError(WrongFormat("欲篩選之拜訪期間最後日期")))
+                .Validate(i => sDate.Date <= eDate.Date, () => AddError(GetListDateRangeIncorrect))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IOrderedQueryable<CustomerQuestion> GetListPagedOrderedQuery(CustomerQuestion_GetList_Input_APIItem input)
+        {
+            var query = DC.CustomerQuestion.AsQueryable();
+
+            if (!input.Keyword.IsNullOrWhiteSpace())
+                query = query.Where(cq => cq.AskTitle.Contains(input.Keyword) || cq.AskArea.Contains(input.Keyword));
+
+            if (input.CID.IsValidId())
+                query = query.Where(cq => cq.CID == input.CID);
+
+            if (input.SDate.TryParseDateTime(out DateTime sDate))
+                query = query.Where(cq => cq.AskDate.Date >= sDate.Date);
+            
+            if (input.EDate.TryParseDateTime(out DateTime eDate))
+                query = query.Where(cq => cq.AskDate.Date <= eDate.Date);
+
+            if (input.ResponseType.IsInBetween(0, 1))
+                query = query.Where(cq => cq.ResponseFlag == (input.ResponseType == 1));
+
+            return query.OrderBy(cq => cq.ResponseFlag)
+                .ThenByDescending(cq => cq.AskDate)
+                .ThenBy(cq => cq.CQID);
+        }
+
+        public async Task<CustomerQuestion_GetList_Output_Row_APIItem> GetListPagedEntityToRow(CustomerQuestion entity)
+        {
+            return await Task.FromResult(new CustomerQuestion_GetList_Output_Row_APIItem
+            {
+                CQID = entity.CQID,
+                CID = entity.CID,
+                C_TitleC = entity.C?.TitleC ?? "",
+                C_TitleE = entity.C?.TitleE ?? "",
+                AskDate = entity.AskDate.ToFormattedStringDate(),
+                AskTitle = entity.AskTitle ?? "",
+                AskArea = entity.AskArea ?? "",
+                AskDescription = entity.AskDescription ?? "",
+                ResponseFlag = entity.ResponseFlag,
+                ResponseUser = entity.ResponseFlag ? entity.ResponseUser ?? "" : "",
+                ResponseDescription = entity.ResponseFlag ? entity.ResponseDestriotion ?? "" : "",
+                ResponseDate = entity.ResponseFlag ? entity.ResponseDate.ToFormattedStringDate() : ""
+            });
+        }
+        #endregion
+    }
+}

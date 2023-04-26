@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems.CustomerQuestion.GetInfoById;
 using NS_Education.Models.APIItems.CustomerQuestion.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -17,17 +18,23 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 namespace NS_Education.Controller.UsingHelper
 {
     public class CustomerQuestionController : PublicClass,
-        IGetListPaged<CustomerQuestion, CustomerQuestion_GetList_Input_APIItem, CustomerQuestion_GetList_Output_Row_APIItem>
+        IGetListPaged<CustomerQuestion, CustomerQuestion_GetList_Input_APIItem, CustomerQuestion_GetList_Output_Row_APIItem>,
+        IGetInfoById<CustomerQuestion, CustomerQuestion_GetInfoById_Output_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<CustomerQuestion_GetList_Input_APIItem> _getListPagedHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public CustomerQuestionController()
         {
             _getListPagedHelper =
                 new GetListPagedHelper<CustomerQuestionController, CustomerQuestion,
                     CustomerQuestion_GetList_Input_APIItem, CustomerQuestion_GetList_Output_Row_APIItem>(this);
+
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<CustomerQuestionController, CustomerQuestion,
+                    CustomerQuestion_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -102,6 +109,42 @@ namespace NS_Education.Controller.UsingHelper
                 ResponseDate = entity.ResponseFlag ? entity.ResponseDate.ToFormattedStringDate() : ""
             });
         }
+        #endregion
+
+        #region GetInfoById
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        public async Task<string> GetInfoById(int id)
+        {
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<CustomerQuestion> GetInfoByIdQuery(int id)
+        {
+            return DC.CustomerQuestion.Where(cq => cq.CID == id);
+        }
+
+        public async Task<CustomerQuestion_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(CustomerQuestion entity)
+        {
+            return await Task.FromResult(new CustomerQuestion_GetInfoById_Output_APIItem
+            {
+                CQID = entity.CQID,
+                CID = entity.CID,
+                C_TitleC = entity.C?.TitleC ?? "",
+                C_TitleE = entity.C?.TitleE ?? "",
+                C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
+                AskDate = entity.AskDate.ToFormattedStringDate(),
+                AskTitle = entity.AskTitle ?? "",
+                AskArea = entity.AskArea ?? "",
+                AskDescription = entity.AskDescription ?? "",
+                ResponseFlag = entity.ResponseFlag,
+                ResponseUser = entity.ResponseFlag ? entity.ResponseUser ?? "" : "",
+                ResponseDescription = entity.ResponseFlag ? entity.ResponseDestriotion ?? "" : "",
+                ResponseDate = entity.ResponseFlag ? entity.ResponseDate.ToFormattedStringDate() : ""
+            });
+        }
+        
         #endregion
     }
 }

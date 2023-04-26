@@ -56,7 +56,7 @@ namespace NS_Education.Tools.Extensions
         /// <summary>
         /// 取得 OrderCode 的下拉選單。
         /// </summary>
-        /// <param name="dbSet">StaticCode 的 DbSet</param>
+        /// <param name="dbSet">OrderCode 的 DbSet</param>
         /// <param name="codeType">欲顯示的 CodeType</param>
         /// <param name="bocIdToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
         /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
@@ -80,7 +80,7 @@ namespace NS_Education.Tools.Extensions
         /// <summary>
         /// 取得 Category 的下拉選單。
         /// </summary>
-        /// <param name="dbSet">StaticCode 的 DbSet</param>
+        /// <param name="dbSet">Category 的 DbSet</param>
         /// <param name="categoryType">欲顯示的 CategoryType</param>
         /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
         /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
@@ -98,6 +98,26 @@ namespace NS_Education.Tools.Extensions
                     Title = c.TitleC ?? c.TitleE ?? "",
                     SelectFlag = c.BCID == idToSelect
                 }).ToListAsync();
+        }
+
+        /// <summary>
+        /// 取得 Customer 的下拉選單。
+        /// </summary>
+        /// <param name="dbSet">Customer 的 DbSet</param>
+        /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
+        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<BaseResponseRowForSelectable>> GetCustomerSelectable(this DbSet<Customer> dbSet
+            ,int idToSelect)
+        {
+            return await dbSet
+                .Where(c => c.ActiveFlag && !c.DeleteFlag)
+                .Select(c => new BaseResponseRowForSelectable
+                {
+                    ID = c.CID,
+                    Title = c.TitleC ?? c.TitleE ?? "",
+                    SelectFlag = c.CID == idToSelect
+                })
+                .ToListAsync();
         }
     }
 }

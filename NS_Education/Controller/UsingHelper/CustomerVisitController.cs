@@ -163,7 +163,7 @@ namespace NS_Education.Controller.UsingHelper
                 CID = entity.CID,
                 C_TitleC = entity.C?.TitleC ?? "",
                 C_TitleE = entity.C?.TitleE ?? "",
-                C_List = await GetSelectedCustomerList(entity.CID),
+                C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
                 BSCID = entity.BSCID,
                 BSC_Title = entity.BSC?.Title ?? "",
                 BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSC?.CodeType, entity.BSCID),
@@ -176,19 +176,6 @@ namespace NS_Education.Controller.UsingHelper
                 Description = entity.Description ?? "",
                 AfterNote = entity.AfterNote ?? ""
             };
-        }
-
-        private async Task<List<BaseResponseRowForSelectable>> GetSelectedCustomerList(int customerId)
-        {
-            return await DC.Customer
-                .Where(c => c.ActiveFlag && !c.DeleteFlag)
-                .Select(c => new BaseResponseRowForSelectable
-                {
-                    ID = c.CID,
-                    Title = c.TitleC ?? c.TitleE ?? "",
-                    SelectFlag = c.CID == customerId
-                })
-                .ToListAsync();
         }
 
         private async Task<List<BaseResponseRowForSelectable>> GetSelectedBusinessUserList(int businessUserId)

@@ -50,7 +50,7 @@ namespace NS_Education.Controller.Legacy
             }.AsReadOnly();
         
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList()
         {
             return await _getListLocalHelper.GetListLocal();

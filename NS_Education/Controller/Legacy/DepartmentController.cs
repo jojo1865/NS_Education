@@ -46,7 +46,7 @@ namespace NS_Education.Controller.Legacy
         #region GetList
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(Department_GetList_Input_APIItem input)
         {
             return await _getListPagedHelper.GetPagedList(input);
@@ -100,7 +100,7 @@ namespace NS_Education.Controller.Legacy
         #region GetInfoByID
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoByID(int ID = 0)
         {
             var N = await DC.D_Department.Include(q => q.DC).FirstOrDefaultAsync(q => q.DDID == ID && !q.DeleteFlag);
@@ -141,7 +141,7 @@ namespace NS_Education.Controller.Legacy
         #region ChangeActive
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int ID, bool ActiveFlag)
         {
             Error = "";
@@ -164,7 +164,7 @@ namespace NS_Education.Controller.Legacy
         #region DeleteItem
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
             return await _deleteItemHelper.DeleteItem(id, deleteFlag);

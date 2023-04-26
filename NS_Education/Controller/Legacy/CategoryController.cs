@@ -46,7 +46,7 @@ namespace NS_Education.Controller.Legacy
 
         //取得分類的類別列表
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetTypeList()
         {
             List<cSelectItem> TIs = new List<cSelectItem>();
@@ -61,7 +61,7 @@ namespace NS_Education.Controller.Legacy
 
         //取得分類列表
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(Category_GetList_Input_APIItem input)
         {
             return await _getListPagedHelper.GetPagedList(input);
@@ -120,7 +120,7 @@ namespace NS_Education.Controller.Legacy
 
         //取得分類的內容
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         [ResponsePrivilegeWrapperFilter]
         public async Task<string> GetInfoByID(int ID = 0)
         {
@@ -184,7 +184,7 @@ namespace NS_Education.Controller.Legacy
         #region ChangeActive
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int ID, bool ActiveFlag)
         {
             Error = "";
@@ -207,7 +207,7 @@ namespace NS_Education.Controller.Legacy
         #region DeleteItem
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
             return await _deleteItemHelper.DeleteItem(id, deleteFlag);

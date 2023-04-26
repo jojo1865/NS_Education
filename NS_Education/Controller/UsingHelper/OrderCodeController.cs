@@ -99,7 +99,7 @@ namespace NS_Education.Controller.UsingHelper
         #region GetList
 
         [System.Web.Http.HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(OrderCode_GetList_Input_APIItem input)
         {
             return await _getListHelper.GetPagedList(input);
@@ -169,7 +169,7 @@ namespace NS_Education.Controller.UsingHelper
             };
 
         [System.Web.Http.HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
         {
             // 因為這個端點有特殊邏輯（id 輸入 0 時不查資料而是回傳僅部分欄位的空資料），不使用 Helper 會比較清晰
@@ -242,7 +242,7 @@ namespace NS_Education.Controller.UsingHelper
         #region ChangeActive
 
         [System.Web.Http.HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
@@ -258,7 +258,7 @@ namespace NS_Education.Controller.UsingHelper
         #region DeleteItem
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
             return await _deleteItemHelper.DeleteItem(id, deleteFlag);

@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems;
+using NS_Education.Models.APIItems.CustomerVisit.GetInfoById;
 using NS_Education.Models.APIItems.CustomerVisit.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -18,15 +21,26 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class CustomerVisitController : PublicClass
     ,IGetListPaged<CustomerVisit, CustomerVisit_GetList_Input_APIItem, CustomerVisit_GetList_Output_Row_APIItem>
+    ,IGetInfoById<CustomerVisit, CustomerVisit_GetInfoById_Output_APIItem>
     {
+        #region Initialization
+        
         private readonly IGetListPagedHelper<CustomerVisit_GetList_Input_APIItem> _getListPagedHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public CustomerVisitController()
         {
             _getListPagedHelper =
                 new GetListPagedHelper<CustomerVisitController, CustomerVisit, CustomerVisit_GetList_Input_APIItem,
                     CustomerVisit_GetList_Output_Row_APIItem>(this);
+
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<CustomerVisitController, CustomerVisit, CustomerVisit_GetInfoById_Output_APIItem>(
+                    this);
         }
+        
+        
+        #endregion
 
         #region GetList
 
@@ -108,6 +122,75 @@ namespace NS_Education.Controller.UsingHelper
                 AfterNote = entity.AfterNote ?? ""
             });
         }
+        #endregion
+
+        #region GetInfoById
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        public async Task<string> GetInfoById(int id)
+        {
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<CustomerVisit> GetInfoByIdQuery(int id)
+        {
+            return DC.CustomerVisit
+                .Include(cv => cv.C)
+                .Include(cv => cv.BSC)
+                .Include(cv => cv.BU)
+                .Where(cv => cv.CVID == id);
+        }
+
+        public async Task<CustomerVisit_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(CustomerVisit entity)
+        {
+            return new CustomerVisit_GetInfoById_Output_APIItem
+            {
+                CVID = entity.CVID,
+                CID = entity.CID,
+                C_TitleC = entity.C?.TitleC ?? "",
+                C_TitleE = entity.C?.TitleE ?? "",
+                C_List = await GetSelectedCustomerList(entity.CID),
+                BSCID = entity.BSCID,
+                BSC_Title = entity.BSC?.Title ?? "",
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSC?.CodeType, entity.BSCID),
+                BUID = entity.BUID,
+                BU_Name = entity.BU?.Name ?? "",
+                BU_List = await GetSelectedBusinessUserList(entity.BUID),
+                TargetTitle = entity.TargetTitle ?? "",
+                Title = entity.Title ?? "",
+                VisitDate = entity.VisitDate.ToFormattedStringDate(),
+                Description = entity.Description ?? "",
+                AfterNote = entity.AfterNote ?? ""
+            };
+        }
+
+        private async Task<List<BaseResponseRowForSelectable>> GetSelectedCustomerList(int customerId)
+        {
+            return await DC.Customer
+                .Where(c => c.ActiveFlag && !c.DeleteFlag)
+                .Select(c => new BaseResponseRowForSelectable
+                {
+                    ID = c.CID,
+                    Title = c.TitleC ?? c.TitleE ?? "",
+                    SelectFlag = c.CID == customerId
+                })
+                .ToListAsync();
+        }
+        
+        private async Task<List<BaseResponseRowForSelectable>> GetSelectedBusinessUserList(int businessUserId)
+        {
+            return await DC.BusinessUser
+                .Where(bu => bu.ActiveFlag && !bu.DeleteFlag)
+                .Select(bu => new BaseResponseRowForSelectable
+                {
+                    ID = bu.BUID,
+                    Title = bu.Name ?? "",
+                    SelectFlag = bu.BUID == businessUserId
+                })
+                .ToListAsync();
+        }
+
         #endregion
     }
 }

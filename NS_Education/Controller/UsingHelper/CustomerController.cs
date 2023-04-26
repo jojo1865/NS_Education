@@ -20,12 +20,16 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class CustomerController : PublicClass,
         IGetListPaged<Customer, Customer_GetList_Input_APIItem, Customer_GetList_Output_Row_APIItem>,
-        IGetInfoById<Customer, Customer_GetInfoById_Output_APIItem>
+        IGetInfoById<Customer, Customer_GetInfoById_Output_APIItem>,
+        IChangeActive<Customer>,
+        IDeleteItem<Customer>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Customer_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
 
         public CustomerController()
         {
@@ -34,11 +38,16 @@ namespace NS_Education.Controller.UsingHelper
                     Customer_GetList_Output_Row_APIItem>(this);
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<CustomerController, Customer, Customer_GetInfoById_Output_APIItem>(this);
+            _changeActiveHelper =
+                new ChangeActiveHelper<CustomerController, Customer>(this);
+            _deleteItemHelper =
+                new DeleteItemHelper<CustomerController, Customer>(this);
         }
 
         #endregion
-        
+
         #region GetList
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(Customer_GetList_Input_APIItem input)
@@ -71,9 +80,9 @@ namespace NS_Education.Controller.UsingHelper
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(c =>
-                    c.TitleC.Contains(input.Keyword) 
-                    || c.TitleE.Contains(input.Keyword) 
-                    || c.Compilation.Contains(input.Keyword) 
+                    c.TitleC.Contains(input.Keyword)
+                    || c.TitleE.Contains(input.Keyword)
+                    || c.Compilation.Contains(input.Keyword)
                     || c.Code.Contains(input.Keyword));
 
             if (input.BSCID6.IsValidId())
@@ -128,10 +137,11 @@ namespace NS_Education.Controller.UsingHelper
                 Items = GetBusinessUserListFromEntity(entity)
             });
         }
+
         #endregion
-        
+
         #region GetInfoById
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
@@ -154,10 +164,12 @@ namespace NS_Education.Controller.UsingHelper
                 CID = entity.CID,
                 BSCID6 = entity.BSCID6,
                 BSC6_Title = entity.BSCID6Navigation?.Title ?? "",
-                BSC6_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID6Navigation?.CodeType, entity.BSCID6),
+                BSC6_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID6Navigation?.CodeType,
+                    entity.BSCID6),
                 BSCID4 = entity.BSCID4,
                 BSC4_Title = entity.BSCID4Navigation?.Title ?? "",
-                BSC4_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID4Navigation?.CodeType, entity.BSCID4),
+                BSC4_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID4Navigation?.CodeType,
+                    entity.BSCID4),
                 Code = entity.Code ?? "",
                 Compilation = entity.Compilation ?? "",
                 TitleC = entity.TitleC ?? "",
@@ -191,5 +203,39 @@ namespace NS_Education.Controller.UsingHelper
         }
 
         #endregion
+        
+        #region ChangeActive
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
+        {
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+        
+        public IQueryable<Customer> ChangeActiveQuery(int id)
+        {
+            return DC.Customer.Where(c => c.CID == id);
+        }
+        
+        #endregion
+        
+        #region DeleteItem
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
+
+        public IQueryable<Customer> DeleteItemQuery(int id)
+        {
+            return DC.Customer.Where(c => c.CID == id);
+        }
+        
+        #endregion
+        
+        
     }
 }

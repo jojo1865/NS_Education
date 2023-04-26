@@ -76,7 +76,7 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
                 .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
                     () => AddError(WrongFormat("欲篩選之拜訪期間最後日期")))
-                .Validate(i => sDate <= eDate, () => AddError(GetListDateRangeIncorrect))
+                .Validate(i => sDate.Date <= eDate.Date, () => AddError(GetListDateRangeIncorrect))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -103,10 +103,10 @@ namespace NS_Education.Controller.UsingHelper
                 query = query.Where(cv => cv.BSCID == input.BSCID);
 
             if (input.SDate.TryParseDateTime(out DateTime sDate))
-                query = query.Where(cv => cv.VisitDate >= sDate);
+                query = query.Where(cv => cv.VisitDate.Date >= sDate.Date);
 
             if (input.EDate.TryParseDateTime(out DateTime eDate))
-                query = query.Where(cv => cv.VisitDate <= eDate);
+                query = query.Where(cv => cv.VisitDate.Date <= eDate.Date);
 
             return query.OrderBy(cv => cv.VisitDate)
                 .ThenBy(cv => cv.CID)

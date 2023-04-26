@@ -138,7 +138,9 @@ namespace NS_Education.Controller.UsingHelper
 
         public IQueryable<CustomerQuestion> GetInfoByIdQuery(int id)
         {
-            return DC.CustomerQuestion.Where(cq => cq.CQID == id);
+            return DC.CustomerQuestion
+                .Include(cq => cq.C)
+                .Where(cq => cq.CQID == id);
         }
 
         public async Task<CustomerQuestion_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(

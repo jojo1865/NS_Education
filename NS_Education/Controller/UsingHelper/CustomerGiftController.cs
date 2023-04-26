@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems.CustomerGift.GetInfoById;
 using NS_Education.Models.APIItems.CustomerGift.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -17,21 +18,29 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 namespace NS_Education.Controller.UsingHelper
 {
     public class CustomerGiftController : PublicClass,
-        IGetListPaged<CustomerGift, CustomerGift_GetList_Input_APIItem, CustomerGift_GetList_Output_Row_APIItem>
+        IGetListPaged<CustomerGift, CustomerGift_GetList_Input_APIItem, CustomerGift_GetList_Output_Row_APIItem>,
+        IGetInfoById<CustomerGift, CustomerGift_GetInfoById_Output_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<CustomerGift_GetList_Input_APIItem> _getListPagedHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public CustomerGiftController()
         {
-            _getListPagedHelper = new GetListPagedHelper<CustomerGiftController, CustomerGift, CustomerGift_GetList_Input_APIItem,
-                CustomerGift_GetList_Output_Row_APIItem>(this);
+            _getListPagedHelper =
+                new GetListPagedHelper<CustomerGiftController, CustomerGift, CustomerGift_GetList_Input_APIItem,
+                    CustomerGift_GetList_Output_Row_APIItem>(this);
+
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<CustomerGiftController, CustomerGift, CustomerGift_GetInfoById_Output_APIItem>(
+                    this);
         }
 
         #endregion
-        
+
         #region GetList
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(CustomerGift_GetList_Input_APIItem input)
@@ -97,6 +106,47 @@ namespace NS_Education.Controller.UsingHelper
                 Note = entity.Note ?? ""
             });
         }
+
+        #endregion
+
+        #region GetInfoById
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        public async Task<string> GetInfoById(int id)
+        {
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<CustomerGift> GetInfoByIdQuery(int id)
+        {
+            return DC.CustomerGift
+                .Include(cg => cg.C)
+                .Include(cg => cg.BSC)
+                .Where(cg => cg.CGID == id);
+        }
+
+        public async Task<CustomerGift_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(
+            CustomerGift entity)
+        {
+            return await Task.FromResult(new CustomerGift_GetInfoById_Output_APIItem
+            {
+                CGID = entity.CGID,
+                CID = entity.CID,
+                C_TitleC = entity.C?.TitleC ?? "",
+                C_TitleE = entity.C?.TitleE ?? "",
+                C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
+                Year = entity.Year,
+                SendDate = entity.SendDate.ToFormattedStringDateTime(),
+                BSCID = entity.BSCID,
+                BSC_Title = entity.BSC?.Title ?? "",
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSC?.CodeType, entity.BSCID),
+                Title = entity.Title ?? "",
+                Ct = entity.Ct,
+                Note = entity.Note ?? ""
+            });
+        }
+
         #endregion
     }
 }

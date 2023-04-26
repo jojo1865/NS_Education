@@ -298,6 +298,7 @@
     <Compile Include="Models\APIItems\Company\Submit\Company_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\ContactType\GetList\ContactType_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\BaseInfusable.cs" />
+    <Compile Include="Models\APIItems\CustomerGift\GetInfoById\CustomerGift_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\CustomerGift\GetList\CustomerGift_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\CustomerGift\GetList\CustomerGift_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\CustomerQuestion\GetInfoById\CustomerQuestion_GetInfoById_Output_APIItem.cs" />

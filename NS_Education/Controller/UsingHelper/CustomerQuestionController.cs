@@ -19,12 +19,14 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class CustomerQuestionController : PublicClass,
         IGetListPaged<CustomerQuestion, CustomerQuestion_GetList_Input_APIItem, CustomerQuestion_GetList_Output_Row_APIItem>,
-        IGetInfoById<CustomerQuestion, CustomerQuestion_GetInfoById_Output_APIItem>
+        IGetInfoById<CustomerQuestion, CustomerQuestion_GetInfoById_Output_APIItem>,
+        IDeleteItem<CustomerQuestion>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<CustomerQuestion_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
 
         public CustomerQuestionController()
         {
@@ -35,6 +37,9 @@ namespace NS_Education.Controller.UsingHelper
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<CustomerQuestionController, CustomerQuestion,
                     CustomerQuestion_GetInfoById_Output_APIItem>(this);
+
+            _deleteItemHelper =
+                new DeleteItemHelper<CustomerQuestionController, CustomerQuestion>(this);
         }
 
         #endregion
@@ -122,7 +127,7 @@ namespace NS_Education.Controller.UsingHelper
 
         public IQueryable<CustomerQuestion> GetInfoByIdQuery(int id)
         {
-            return DC.CustomerQuestion.Where(cq => cq.CID == id);
+            return DC.CustomerQuestion.Where(cq => cq.CQID == id);
         }
 
         public async Task<CustomerQuestion_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(CustomerQuestion entity)
@@ -145,6 +150,21 @@ namespace NS_Education.Controller.UsingHelper
             });
         }
         
+        #endregion
+
+        #region DeleteItem
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
+
+        public IQueryable<CustomerQuestion> DeleteItemQuery(int id)
+        {
+            return DC.CustomerQuestion.Where(cq => cq.CQID == id);
+        }
         #endregion
     }
 }

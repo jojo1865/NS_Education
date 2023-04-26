@@ -63,21 +63,19 @@ namespace NS_Education.Models.Entities.DbContext
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
-            
-            var connectionStrings = System.Web.Configuration.WebConfigurationManager.ConnectionStrings;
-            string connectionString =
-                Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString);
 
+            var connectionStrings = System.Web.Configuration.WebConfigurationManager.ConnectionStrings;
             try
             {
-                optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer(
+                    Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"]
+                        .ConnectionString));
             }
             catch
             {
-                connectionString = connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
-                optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer(connectionStrings["db_NS_EducationConnectionString"].ConnectionString);
             }
-        } 
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

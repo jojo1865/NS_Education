@@ -22,11 +22,13 @@ namespace NS_Education.Controller.UsingHelper
     public class CustomerVisitController : PublicClass
     ,IGetListPaged<CustomerVisit, CustomerVisit_GetList_Input_APIItem, CustomerVisit_GetList_Output_Row_APIItem>
     ,IGetInfoById<CustomerVisit, CustomerVisit_GetInfoById_Output_APIItem>
+    ,IDeleteItem<CustomerVisit>
     {
         #region Initialization
         
         private readonly IGetListPagedHelper<CustomerVisit_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
 
         public CustomerVisitController()
         {
@@ -37,6 +39,9 @@ namespace NS_Education.Controller.UsingHelper
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<CustomerVisitController, CustomerVisit, CustomerVisit_GetInfoById_Output_APIItem>(
                     this);
+
+            _deleteItemHelper =
+                new DeleteItemHelper<CustomerVisitController, CustomerVisit>(this);
         }
         
         
@@ -191,6 +196,18 @@ namespace NS_Education.Controller.UsingHelper
                 .ToListAsync();
         }
 
+        #endregion
+
+        #region DeleteItem
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
+
+        public IQueryable<CustomerVisit> DeleteItemQuery(int id)
+        {
+            return DC.CustomerVisit.Where(cv => cv.CVID == id);
+        }
         #endregion
     }
 }

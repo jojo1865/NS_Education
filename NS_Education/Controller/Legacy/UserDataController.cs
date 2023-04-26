@@ -112,7 +112,7 @@ namespace NS_Education.Controller.Legacy
         /// </summary>
         /// <param name="input">輸入資料</param>
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddFlag)]
         public async Task<string> SignUp(UserData_Submit_Input_APIItem input)
         {
             InitializeResponse();
@@ -446,7 +446,7 @@ namespace NS_Education.Controller.Legacy
         #region DeleteItem
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
             return await _deleteItemHelper.DeleteItem(id, deleteFlag);
@@ -467,7 +467,7 @@ namespace NS_Education.Controller.Legacy
         /// <param name="input">輸入資料。</param>
         /// <returns>通用訊息回傳格式。</returns>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(UserData_ChangeActive_Input_APIItem input)
         {
             // 1. 驗證 input 的 TargetUid 格式正確
@@ -525,7 +525,7 @@ namespace NS_Education.Controller.Legacy
         /// <param name="input"><see cref="UserData_UpdatePW_Input_APIItem"/></param>
         /// <returns>通用回傳訊息格式</returns>
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.EditFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.EditFlag)]
         public async Task<string> UpdatePW(UserData_UpdatePW_Input_APIItem input)
         {
             // 1. 驗證。
@@ -581,7 +581,7 @@ namespace NS_Education.Controller.Legacy
         /// <param name="input">輸入資料。請參照 <see cref="UserData_GetList_Input_APIItem"/>。</param>
         /// <returns>回傳結果。請參照 <see cref="UserData_GetList_Output_APIItem"/>，以及 <see cref="UserData_GetList_Output_Row_APIItem"/>。</returns>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(UserData_GetList_Input_APIItem input)
         {
             return await _getListPagedHelper.GetPagedList(input);

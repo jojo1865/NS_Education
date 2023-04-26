@@ -14,7 +14,7 @@ namespace NS_Education.Controllers
     public class FoodCategoryController : PublicClass
     {
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList(string KeyWord = "", int NowPage = 1, int CutPage = 10)
         {
             var Ns = DC.D_FoodCategory.Where(q => !q.DeleteFlag);
@@ -63,7 +63,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetInfoByID(int ID = 0)
         {
             var N = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID && !q.DeleteFlag);
@@ -93,7 +93,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, null, null)]
         public async Task<string> ChangeActive(int ID, bool ActiveFlag)
         {
             Error = "";
@@ -112,7 +112,7 @@ namespace NS_Education.Controllers
         }
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag, null, null)]
         public async Task<string> DeleteItem(int ID)
         {
             Error = "";

@@ -18,8 +18,7 @@ namespace NS_Education.Models.Entities
             D_PayType = new HashSet<D_PayType>();
             M_Customer_Category = new HashSet<M_Customer_Category>();
             M_Department_Category = new HashSet<M_Department_Category>();
-            M_Partner_Category = new HashSet<M_Partner_Category>();
-            Resver_Bill_Header = new HashSet<Resver_Bill_Header>();
+            Resver_Bill = new HashSet<Resver_Bill>();
         }
 
         public int BCID { get; set; }
@@ -43,7 +42,6 @@ namespace NS_Education.Models.Entities
         public virtual ICollection<D_PayType> D_PayType { get; set; }
         public virtual ICollection<M_Customer_Category> M_Customer_Category { get; set; }
         public virtual ICollection<M_Department_Category> M_Department_Category { get; set; }
-        public virtual ICollection<M_Partner_Category> M_Partner_Category { get; set; }
-        public virtual ICollection<Resver_Bill_Header> Resver_Bill_Header { get; set; }
+        public virtual ICollection<Resver_Bill> Resver_Bill { get; set; }
     }
 }

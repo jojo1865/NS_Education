@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.Ajax.Utilities;
 
 namespace NS_Education.Tools.Extensions
 {
@@ -7,7 +6,7 @@ namespace NS_Education.Tools.Extensions
     {
         public static string ExecuteIfNullOrWhiteSpace(this string s, Action func)
         {
-            if (s.IsNullOrWhiteSpace())
+            if (String.IsNullOrWhiteSpace(s))
                 func.Invoke();
 
             return s;
@@ -19,6 +18,11 @@ namespace NS_Education.Tools.Extensions
                 func.Invoke();
 
             return s;
+        }
+
+        public static bool IsNullOrWhiteSpace(this string s)
+        {
+            return String.IsNullOrWhiteSpace(s);
         }
 
         public static string SanitizeForResponseStatusMessage(this string s)

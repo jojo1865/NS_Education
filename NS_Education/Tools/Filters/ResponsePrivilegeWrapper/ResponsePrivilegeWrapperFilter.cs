@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -12,6 +13,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
     /// <summary>
     /// 在 Action 執行完之後，依據 JWT Token Claims 的 UID 與現在的選單，查詢所有子目錄節點權限，在 Response 外面多包一層後回傳。
     /// </summary>
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public class ResponsePrivilegeWrapperFilter : ActionFilterAttribute
     {
         public override void OnActionExecuted(ActionExecutedContext filterContext)

@@ -11,12 +11,11 @@ namespace NS_Education.Models.Entities
     {
         public Resver_Head()
         {
-            Resver_Bill_Header = new HashSet<Resver_Bill_Header>();
-            Resver_Device = new HashSet<Resver_Device>();
+            M_Resver_TimeSpan = new HashSet<M_Resver_TimeSpan>();
+            Resver_Bill = new HashSet<Resver_Bill>();
             Resver_GiveBack = new HashSet<Resver_GiveBack>();
             Resver_Other = new HashSet<Resver_Other>();
             Resver_Site = new HashSet<Resver_Site>();
-            Resver_Throw = new HashSet<Resver_Throw>();
         }
 
         public int RHID { get; set; }
@@ -35,6 +34,8 @@ namespace NS_Education.Models.Entities
         public string MK_Phone { get; set; }
         public int OP_BUID { get; set; }
         public string OP_Phone { get; set; }
+        public int FixedPrice { get; set; }
+        public int QuotedPrice { get; set; }
         public bool CheckFlag { get; set; }
         public bool CheckInFlag { get; set; }
         public bool DeleteFlag { get; set; }
@@ -45,11 +46,11 @@ namespace NS_Education.Models.Entities
 
         public virtual B_StaticCode BSCID11Navigation { get; set; }
         public virtual B_StaticCode BSCID12Navigation { get; set; }
-        public virtual ICollection<Resver_Bill_Header> Resver_Bill_Header { get; set; }
-        public virtual ICollection<Resver_Device> Resver_Device { get; set; }
+        public virtual Customer C { get; set; }
+        public virtual ICollection<M_Resver_TimeSpan> M_Resver_TimeSpan { get; set; }
+        public virtual ICollection<Resver_Bill> Resver_Bill { get; set; }
         public virtual ICollection<Resver_GiveBack> Resver_GiveBack { get; set; }
         public virtual ICollection<Resver_Other> Resver_Other { get; set; }
         public virtual ICollection<Resver_Site> Resver_Site { get; set; }
-        public virtual ICollection<Resver_Throw> Resver_Throw { get; set; }
     }
 }

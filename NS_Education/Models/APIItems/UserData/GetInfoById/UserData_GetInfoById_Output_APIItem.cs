@@ -2,7 +2,7 @@ using NS_Education.Tools;
 
 namespace NS_Education.Models.APIItems.UserData.GetInfoById
 {
-    public class UserData_GetInfoById_Output_APIItem : cReturnMessageInfusableAbstract
+    public class UserData_GetInfoById_Output_APIItem : BaseInfusable
     {
         public int UID { get; set; }
         public string Username { get; set; }

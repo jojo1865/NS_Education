@@ -24,6 +24,8 @@ namespace NS_Education.Models.APIItems.OtherPayItem
         public int InPrice { get; set; }
         public int OutPrice { get; set; }
         public int PaidType { get; set; }
+        public int BSCID { get; set; }
+        public int BOCID { get; set; }
         
         public bool ActiveFlag { get; set; }
         public string CreDate { get; set; }

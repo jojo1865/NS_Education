@@ -39,16 +39,17 @@ namespace NS_Education.Models.Entities.DbContext
         public virtual DbSet<D_TimeSpan> D_TimeSpan { get; set; }
         public virtual DbSet<D_Zip> D_Zip { get; set; }
         public virtual DbSet<GroupData> GroupData { get; set; }
+        public virtual DbSet<M_Contect> M_Contect { get; set; }
+        public virtual DbSet<M_Customer_BusinessUser> M_Customer_BusinessUser { get; set; }
         public virtual DbSet<M_Customer_Category> M_Customer_Category { get; set; }
         public virtual DbSet<M_Department_Category> M_Department_Category { get; set; }
         public virtual DbSet<M_Group_Menu> M_Group_Menu { get; set; }
         public virtual DbSet<M_Group_User> M_Group_User { get; set; }
-        public virtual DbSet<M_Partner_Category> M_Partner_Category { get; set; }
-        public virtual DbSet<M_ResverSiteTimeSpan> M_ResverSiteTimeSpan { get; set; }
+        public virtual DbSet<M_Resver_TimeSpan> M_Resver_TimeSpan { get; set; }
+        public virtual DbSet<M_SiteGroup> M_SiteGroup { get; set; }
         public virtual DbSet<MenuAPI> MenuAPI { get; set; }
         public virtual DbSet<MenuData> MenuData { get; set; }
-        public virtual DbSet<Resver_Bill_Detail> Resver_Bill_Detail { get; set; }
-        public virtual DbSet<Resver_Bill_Header> Resver_Bill_Header { get; set; }
+        public virtual DbSet<Resver_Bill> Resver_Bill { get; set; }
         public virtual DbSet<Resver_Device> Resver_Device { get; set; }
         public virtual DbSet<Resver_GiveBack> Resver_GiveBack { get; set; }
         public virtual DbSet<Resver_Head> Resver_Head { get; set; }
@@ -76,7 +77,7 @@ namespace NS_Education.Models.Entities.DbContext
                 connectionString = connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
                 optionsBuilder.UseSqlServer(connectionString);
             }
-        }
+        } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -180,6 +181,8 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Email).HasMaxLength(100);
+
+                entity.Property(e => e.Note).HasComment("備註");
 
                 entity.Property(e => e.Title).HasMaxLength(60);
 
@@ -621,6 +624,65 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
             });
 
+            modelBuilder.Entity<M_Contect>(entity =>
+            {
+                entity.HasKey(e => e.MID);
+
+                entity.Property(e => e.ContectData).HasMaxLength(30);
+
+                entity.Property(e => e.TargetTable)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<M_Customer_BusinessUser>(entity =>
+            {
+                entity.HasKey(e => e.MID)
+                    .HasName("M_Customer_BusinessUser_pk");
+
+                entity.HasIndex(e => e.MID)
+                    .HasName("M_Customer_BusinessUser_MID_uindex")
+                    .IsUnique();
+
+                entity.Property(e => e.MID).HasComment("流水號 ID");
+
+                entity.Property(e => e.ActiveFlag).HasComment("是否啟用");
+
+                entity.Property(e => e.BUID).HasComment("業務負責人 ID");
+
+                entity.Property(e => e.CID).HasComment("客戶 ID");
+
+                entity.Property(e => e.CreDate)
+                    .HasColumnType("datetime")
+                    .HasComment("建立時間");
+
+                entity.Property(e => e.CreUID).HasComment("建立者 ID");
+
+                entity.Property(e => e.DeleteFlag).HasComment("是否移除");
+
+                entity.Property(e => e.MappingType).HasComment("對應模式(0:無指定/1:MK/2:OP)");
+
+                entity.Property(e => e.SortNo).HasComment("排序");
+
+                entity.Property(e => e.UpdDate)
+                    .HasColumnType("datetime")
+                    .HasComment("更新時間");
+
+                entity.Property(e => e.UpdUID).HasComment("更新者 ID");
+
+                entity.HasOne(d => d.BU)
+                    .WithMany(p => p.M_Customer_BusinessUser)
+                    .HasForeignKey(d => d.BUID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("M_Customer_BusinessUser_BusinessUser_BUID_fk");
+
+                entity.HasOne(d => d.C)
+                    .WithMany(p => p.M_Customer_BusinessUser)
+                    .HasForeignKey(d => d.CID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("M_Customer_BusinessUser_Customer_CID_fk");
+            });
+
             modelBuilder.Entity<M_Customer_Category>(entity =>
             {
                 entity.HasKey(e => e.MID);
@@ -697,46 +759,78 @@ namespace NS_Education.Models.Entities.DbContext
                     .HasConstraintName("FK_M_Group_User_UserData");
             });
 
-            modelBuilder.Entity<M_Partner_Category>(entity =>
+            modelBuilder.Entity<M_Resver_TimeSpan>(entity =>
             {
-                entity.HasKey(e => e.MID);
+                entity.HasKey(e => e.MID)
+                    .HasName("PK_M_ResverSiteTimeSpan");
 
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
 
-                entity.Property(e => e.UpdDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.BC)
-                    .WithMany(p => p.M_Partner_Category)
-                    .HasForeignKey(d => d.BCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_Partner_Category_B_Category");
-
-                entity.HasOne(d => d.BP)
-                    .WithMany(p => p.M_Partner_Category)
-                    .HasForeignKey(d => d.BPID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_Partner_Category_B_Partner");
-            });
-
-            modelBuilder.Entity<M_ResverSiteTimeSpan>(entity =>
-            {
-                entity.HasKey(e => e.MID);
-
-                entity.Property(e => e.CreDate).HasColumnType("datetime");
+                entity.Property(e => e.TargetTable)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.DTS)
-                    .WithMany(p => p.M_ResverSiteTimeSpan)
+                    .WithMany(p => p.M_Resver_TimeSpan)
                     .HasForeignKey(d => d.DTSID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_M_ResverSiteTimeSpan_D_TimeSpan");
 
-                entity.HasOne(d => d.RS)
-                    .WithMany(p => p.M_ResverSiteTimeSpan)
-                    .HasForeignKey(d => d.RSID)
+                entity.HasOne(d => d.RH)
+                    .WithMany(p => p.M_Resver_TimeSpan)
+                    .HasForeignKey(d => d.RHID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_ResverSiteTimeSpan_Resver_Site");
+                    .HasConstraintName("FK_M_Resver_TimeSpan_Resver_Head");
+            });
+
+            modelBuilder.Entity<M_SiteGroup>(entity =>
+            {
+                entity.HasKey(e => e.MID)
+                    .HasName("M_SiteGroup_pk");
+
+                entity.HasComment("場地組合");
+
+                entity.HasIndex(e => e.MID)
+                    .HasName("M_SiteGroup_MID_uindex")
+                    .IsUnique();
+
+                entity.Property(e => e.MID).HasComment("流水號 ID");
+
+                entity.Property(e => e.ActiveFlag).HasComment("是否啟用");
+
+                entity.Property(e => e.CreDate)
+                    .HasColumnType("datetime")
+                    .HasComment("建立時間");
+
+                entity.Property(e => e.CreUID).HasComment("建立者 ID");
+
+                entity.Property(e => e.DeleteFlag).HasComment("是否移除");
+
+                entity.Property(e => e.GroupID).HasComment("串聯的場地 ID");
+
+                entity.Property(e => e.MasterID).HasComment("場地 ID");
+
+                entity.Property(e => e.SortNo).HasComment("排序");
+
+                entity.Property(e => e.UpdDate)
+                    .HasColumnType("datetime")
+                    .HasComment("更新時間");
+
+                entity.Property(e => e.UpdUID).HasComment("更新者 ID");
+
+                entity.HasOne(d => d.Group)
+                    .WithMany(p => p.M_SiteGroupGroup)
+                    .HasForeignKey(d => d.GroupID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("M_SiteGroup_B_SiteData_BSID_fk_2");
+
+                entity.HasOne(d => d.Master)
+                    .WithMany(p => p.M_SiteGroupMaster)
+                    .HasForeignKey(d => d.MasterID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("M_SiteGroup_B_SiteData_BSID_fk");
             });
 
             modelBuilder.Entity<MenuAPI>(entity =>
@@ -767,28 +861,10 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
             });
 
-            modelBuilder.Entity<Resver_Bill_Detail>(entity =>
+            modelBuilder.Entity<Resver_Bill>(entity =>
             {
-                entity.HasKey(e => e.RBDID);
-
-                entity.Property(e => e.CreDate).HasColumnType("datetime");
-
-                entity.Property(e => e.TargetTable)
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.UpdDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.RBH)
-                    .WithMany(p => p.Resver_Bill_Detail)
-                    .HasForeignKey(d => d.RBHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Bill_Detail_Resver_Bill_Header");
-            });
-
-            modelBuilder.Entity<Resver_Bill_Header>(entity =>
-            {
-                entity.HasKey(e => e.RBHID);
+                entity.HasKey(e => e.RBID)
+                    .HasName("PK_Resver_Bill_Header");
 
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
 
@@ -797,19 +873,19 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.BC)
-                    .WithMany(p => p.Resver_Bill_Header)
+                    .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.BCID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Bill_Header_B_Category");
 
                 entity.HasOne(d => d.DPT)
-                    .WithMany(p => p.Resver_Bill_Header)
+                    .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.DPTID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Bill_Header_D_PayType");
 
                 entity.HasOne(d => d.RH)
-                    .WithMany(p => p.Resver_Bill_Header)
+                    .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.RHID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Bill_Header_Resver_Head");
@@ -841,29 +917,11 @@ namespace NS_Education.Models.Entities.DbContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Device_B_OrderCode");
 
-                entity.HasOne(d => d.BS)
+                entity.HasOne(d => d.RS)
                     .WithMany(p => p.Resver_Device)
-                    .HasForeignKey(d => d.BSID)
+                    .HasForeignKey(d => d.RSID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_B_SiteData");
-
-                entity.HasOne(d => d.DTSIDENavigation)
-                    .WithMany(p => p.Resver_DeviceDTSIDENavigation)
-                    .HasForeignKey(d => d.DTSIDE)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_D_TimeSpanE");
-
-                entity.HasOne(d => d.DTSIDSNavigation)
-                    .WithMany(p => p.Resver_DeviceDTSIDSNavigation)
-                    .HasForeignKey(d => d.DTSIDS)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_D_TimeSpanS");
-
-                entity.HasOne(d => d.RH)
-                    .WithMany(p => p.Resver_Device)
-                    .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_Resver_Head");
+                    .HasConstraintName("FK_Resver_Device_Resver_Site");
             });
 
             modelBuilder.Entity<Resver_GiveBack>(entity =>
@@ -924,6 +982,12 @@ namespace NS_Education.Models.Entities.DbContext
                     .HasForeignKey(d => d.BSCID12)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Head_B_StaticCode12");
+
+                entity.HasOne(d => d.C)
+                    .WithMany(p => p.Resver_Head)
+                    .HasForeignKey(d => d.CID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Resver_Head_Customer_CID_fk");
             });
 
             modelBuilder.Entity<Resver_Other>(entity =>
@@ -945,12 +1009,6 @@ namespace NS_Education.Models.Entities.DbContext
                     .HasForeignKey(d => d.BOCID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Other_B_OrderCode");
-
-                entity.HasOne(d => d.BS)
-                    .WithMany(p => p.Resver_Other)
-                    .HasForeignKey(d => d.BSID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Other_B_SiteData");
 
                 entity.HasOne(d => d.DOPI)
                     .WithMany(p => p.Resver_Other)
@@ -1032,17 +1090,11 @@ namespace NS_Education.Models.Entities.DbContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Throw_B_StaticCode");
 
-                entity.HasOne(d => d.BS)
+                entity.HasOne(d => d.RS)
                     .WithMany(p => p.Resver_Throw)
-                    .HasForeignKey(d => d.BSID)
+                    .HasForeignKey(d => d.RSID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_B_SiteData");
-
-                entity.HasOne(d => d.RH)
-                    .WithMany(p => p.Resver_Throw)
-                    .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_Resver_Head");
+                    .HasConstraintName("FK_Resver_Throw_Resver_Site");
             });
 
             modelBuilder.Entity<Resver_Throw_Food>(entity =>

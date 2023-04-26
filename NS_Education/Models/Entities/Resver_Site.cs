@@ -11,7 +11,8 @@ namespace NS_Education.Models.Entities
     {
         public Resver_Site()
         {
-            M_ResverSiteTimeSpan = new HashSet<M_ResverSiteTimeSpan>();
+            Resver_Device = new HashSet<Resver_Device>();
+            Resver_Throw = new HashSet<Resver_Throw>();
         }
 
         public int RSID { get; set; }
@@ -23,9 +24,8 @@ namespace NS_Education.Models.Entities
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }
         public int UnitPrice { get; set; }
-        public int Pricing { get; set; }
-        public int Ct { get; set; }
-        public int TotalPrice { get; set; }
+        public int FixedPrice { get; set; }
+        public int QuotedPrice { get; set; }
         public int SortNo { get; set; }
         public string Note { get; set; }
         public bool DeleteFlag { get; set; }
@@ -38,6 +38,7 @@ namespace NS_Education.Models.Entities
         public virtual B_SiteData BS { get; set; }
         public virtual B_StaticCode BSC { get; set; }
         public virtual Resver_Head RH { get; set; }
-        public virtual ICollection<M_ResverSiteTimeSpan> M_ResverSiteTimeSpan { get; set; }
+        public virtual ICollection<Resver_Device> Resver_Device { get; set; }
+        public virtual ICollection<Resver_Throw> Resver_Throw { get; set; }
     }
 }

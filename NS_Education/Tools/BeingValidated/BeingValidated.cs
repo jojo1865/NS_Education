@@ -6,10 +6,10 @@ namespace NS_Education.Tools.BeingValidated
     public class BeingValidated<T> : IBeingValidated<T>
     {
         public bool IsValid() => !_isInvalid;
-
+        
         private readonly T _target;
         private bool _isInvalid;
-        private readonly bool _skipIfInvalid;
+        private bool _skipIfInvalid;
 
         public BeingValidated(T target, bool skipIfInvalid = false)
         {
@@ -102,6 +102,12 @@ namespace NS_Education.Tools.BeingValidated
                 DoWhenException(onException, e);
             }
 
+            return this;
+        }
+        
+        public IBeingValidated<T> SkipIfAlreadyInvalid(bool setTo = true)
+        {
+            _skipIfInvalid = setTo;
             return this;
         }
     }

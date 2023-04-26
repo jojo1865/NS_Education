@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -208,23 +209,23 @@ namespace NS_Education.Controller.UsingHelper
         }
 
         #endregion
-        
+
         #region ChangeActive
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
         }
-        
+
         public IQueryable<Customer> ChangeActiveQuery(int id)
         {
             return DC.Customer.Where(c => c.CID == id);
         }
-        
+
         #endregion
-        
+
         #region DeleteItem
 
         [HttpGet]
@@ -238,10 +239,13 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.Customer.Where(c => c.CID == id);
         }
-        
+
         #endregion
 
         #region Submit
+
+        private const string SubmitBuIdNotFound = "其中一筆或多筆業務 ID 查無資料！";
+
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Customer_Submit_Input_APIItem.CID))]
         public async Task<string> Submit(Customer_Submit_Input_APIItem input)
@@ -254,15 +258,29 @@ namespace NS_Education.Controller.UsingHelper
             return input.CID == 0;
         }
 
+        private async Task<bool> SubmitCheckAllBuIdExists(IEnumerable<Customer_Submit_BUID_APIItem> items)
+        {
+            HashSet<int> buIdSet = items.Select(item => item.BUID).ToHashSet();
+            return await DC.BusinessUser
+                .Where(bu => bu.ActiveFlag && !bu.DeleteFlag && buIdSet.Contains(bu.BUID))
+                .CountAsync() == buIdSet.Count;
+        }
+
         #region Submit - Add
+
         public async Task<bool> SubmitAddValidateInput(Customer_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
+                // 驗證輸入
                 .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
                 .Validate(i => i.BSCID6.IsValidId(), () => AddError(EmptyNotAllowed("行業別 ID")))
                 .Validate(i => i.BSCID4.IsValidId(), () => AddError(EmptyNotAllowed("區域別 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代號")))
-                .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("客戶名稱")))
+                .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("客戶名稱")))
+                // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
+                .SkipIfAlreadyInvalid()
+                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -286,20 +304,47 @@ namespace NS_Education.Controller.UsingHelper
                 Note = input.Note,
                 BillFlag = input.BillFlag,
                 InFlag = input.InFlag,
-                PotentialFlag = input.PotentialFlag
+                PotentialFlag = input.PotentialFlag,
+                M_Customer_BusinessUser = input.Items.Select(
+                    (item, index) => new M_Customer_BusinessUser
+                    {
+                        BUID = item.BUID,
+                        MappingType = GetBusinessUserMappingType(item.BUID), SortNo = index + 1,
+                        ActiveFlag = true,
+                        DeleteFlag = false,
+                        CreDate = DateTime.Now,
+                        CreUID = GetUid(),
+                        UpdDate = DateTime.Now,
+                        UpdUID = 0
+                    }).ToList()
             });
         }
+
+        private int GetBusinessUserMappingType(int buId)
+        {
+            return DC.BusinessUser
+                .Where(bu => bu.BUID == buId && bu.ActiveFlag && !bu.DeleteFlag)
+                .Select(bu => bu.OPsalesFlag ? 2 : bu.MKsalesFlag ? 1 : 0)
+                .FirstOrDefault();
+        }
+
         #endregion
 
         #region Submit - Edit
+
         public async Task<bool> SubmitEditValidateInput(Customer_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+            bool isValid = await input.StartValidate()
+                // 驗證輸入
+                .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
                 .Validate(i => i.BSCID6.IsValidId(), () => AddError(EmptyNotAllowed("行業別 ID")))
                 .Validate(i => i.BSCID4.IsValidId(), () => AddError(EmptyNotAllowed("區域別 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代號")))
-                .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("客戶名稱")))
+                .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(),
+                    () => AddError(EmptyNotAllowed("客戶名稱")))
+                // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
+                .SkipIfAlreadyInvalid()
+                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -312,6 +357,20 @@ namespace NS_Education.Controller.UsingHelper
 
         public void SubmitEditUpdateDataFields(Customer data, Customer_Submit_Input_APIItem input)
         {
+            // 先刪除所有舊有的 M_Customer_BusinessUser
+            HashSet<int> buIdSet = input.Items.Select(item => item.BUID).ToHashSet();
+            foreach (M_Customer_BusinessUser cbu in DC.M_Customer_BusinessUser
+                         .Where(bu => bu.ActiveFlag && !bu.DeleteFlag && buIdSet.Contains(bu.BUID))
+                         .ToList())
+            {
+                cbu.DeleteFlag = true;
+                cbu.UpdDate = DateTime.Now;
+                cbu.UpdUID = GetUid();
+            }
+
+            DC.SaveChanges();
+
+            // 更新資料
             data.BSCID6 = input.BSCID6;
             data.BSCID4 = input.BSCID4;
             data.Code = input.Code ?? data.Code;
@@ -327,9 +386,23 @@ namespace NS_Education.Controller.UsingHelper
             data.BillFlag = input.BillFlag;
             data.InFlag = input.InFlag;
             data.PotentialFlag = input.PotentialFlag;
+            data.M_Customer_BusinessUser = input.Items.Select(
+                (item, index) => new M_Customer_BusinessUser
+                {
+                    BUID = item.BUID,
+                    MappingType = GetBusinessUserMappingType(item.BUID), 
+                    SortNo = index + 1,
+                    ActiveFlag = true,
+                    DeleteFlag = false,
+                    CreDate = DateTime.Now,
+                    CreUID = GetUid(),
+                    UpdDate = DateTime.Now,
+                    UpdUID = 0
+                }).ToList();
         }
+
         #endregion
-        
+
         #endregion
     }
 }

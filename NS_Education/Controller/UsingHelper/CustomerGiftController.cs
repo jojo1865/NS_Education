@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.CustomerGift.GetInfoById;
 using NS_Education.Models.APIItems.CustomerGift.GetList;
+using NS_Education.Models.APIItems.CustomerGift.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -19,12 +20,16 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class CustomerGiftController : PublicClass,
         IGetListPaged<CustomerGift, CustomerGift_GetList_Input_APIItem, CustomerGift_GetList_Output_Row_APIItem>,
-        IGetInfoById<CustomerGift, CustomerGift_GetInfoById_Output_APIItem>
+        IGetInfoById<CustomerGift, CustomerGift_GetInfoById_Output_APIItem>,
+        IDeleteItem<CustomerGift>,
+        ISubmit<CustomerGift, CustomerGift_Submit_Input_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<CustomerGift_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<CustomerGift_Submit_Input_APIItem> _submitHelper;
 
         public CustomerGiftController()
         {
@@ -35,6 +40,9 @@ namespace NS_Education.Controller.UsingHelper
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<CustomerGiftController, CustomerGift, CustomerGift_GetInfoById_Output_APIItem>(
                     this);
+
+            _deleteItemHelper =
+                new DeleteItemHelper<CustomerGiftController, CustomerGift>(this);
         }
 
         #endregion
@@ -146,6 +154,108 @@ namespace NS_Education.Controller.UsingHelper
                 Note = entity.Note ?? ""
             });
         }
+
+        #endregion
+
+        #region DeleteItem
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
+
+        public IQueryable<CustomerGift> DeleteItemQuery(int id)
+        {
+            return DC.CustomerGift.Where(cg => cg.CGID == id);
+        }
+
+        #endregion
+
+        #region Submit
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(CustomerGift_Submit_Input_APIItem.CGID))]
+        public async Task<string> Submit(CustomerGift_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(CustomerGift_Submit_Input_APIItem input)
+        {
+            return input.CGID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(CustomerGift_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate(true)
+                .Validate(i => i.CGID == 0, () => AddError(WrongFormat("禮品贈與紀錄 ID")))
+                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
+                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("禮品 ID")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<CustomerGift> SubmitCreateData(CustomerGift_Submit_Input_APIItem input)
+        {
+            input.SendDate.TryParseDateTime(out DateTime sendDate);
+            
+            return await Task.FromResult(new CustomerGift
+            {
+                CID = input.CID,
+                Year = input.Year,
+                SendDate = sendDate,
+                BSCID = input.BSCID,
+                Title = input.Title,
+                Ct = input.Ct,
+                Note = input.Note
+            });
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(CustomerGift_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate(true)
+                .Validate(i => i.CGID.IsValidId(), () => AddError(EmptyNotAllowed("禮品贈與紀錄 ID")))
+                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
+                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
+                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("禮品 ID")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<CustomerGift> SubmitEditQuery(CustomerGift_Submit_Input_APIItem input)
+        {
+            return DC.CustomerGift.Where(cg => cg.CGID == input.CGID);
+        }
+
+        public void SubmitEditUpdateDataFields(CustomerGift data, CustomerGift_Submit_Input_APIItem input)
+        {
+            input.SendDate.TryParseDateTime(out DateTime sendDate);
+            
+            data.CID = input.CID;
+            data.Year = input.Year;
+            data.SendDate = sendDate;
+            data.BSCID = input.BSCID;
+            data.Title = input.Title;
+            data.Ct = input.Ct;
+            data.Note = input.Note;
+        }
+
+        #endregion
 
         #endregion
     }

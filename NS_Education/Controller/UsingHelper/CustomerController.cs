@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems.Customer.GetInfoById;
 using NS_Education.Models.APIItems.Customer.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -17,24 +19,28 @@ using NS_Education.Variables;
 namespace NS_Education.Controller.UsingHelper
 {
     public class CustomerController : PublicClass,
-        IGetListPaged<Customer, Customer_GetList_Input_APIItem, Customer_GetList_Output_Row_APIItem>
+        IGetListPaged<Customer, Customer_GetList_Input_APIItem, Customer_GetList_Output_Row_APIItem>,
+        IGetInfoById<Customer, Customer_GetInfoById_Output_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Customer_GetList_Input_APIItem> _getListPagedHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public CustomerController()
         {
             _getListPagedHelper =
                 new GetListPagedHelper<CustomerController, Customer, Customer_GetList_Input_APIItem,
                     Customer_GetList_Output_Row_APIItem>(this);
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<CustomerController, Customer, Customer_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
         
         #region GetList
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(Customer_GetList_Input_APIItem input)
         {
             return await _getListPagedHelper.GetPagedList(input);
@@ -119,15 +125,71 @@ namespace NS_Education.Controller.UsingHelper
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
-                Items = entity.M_Customer_BusinessUser
-                    .Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.BU.ActiveFlag && !cbu.BU.DeleteFlag)
-                    .Select(cbu => new Customer_GetList_BusinessUser_APIItem
-                    {
-                        BUID = cbu.BUID,
-                        Name = cbu.BU.Name ?? ""
-                    }).ToList()
+                Items = GetBusinessUserListFromEntity(entity)
             });
         }
+        #endregion
+        
+        #region GetInfoById
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        public async Task<string> GetInfoById(int id)
+        {
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<Customer> GetInfoByIdQuery(int id)
+        {
+            return DC.Customer
+                .Include(c => c.BSCID6Navigation)
+                .Include(c => c.BSCID4Navigation)
+                .Where(c => c.CID == id);
+        }
+
+        public async Task<Customer_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(Customer entity)
+        {
+            return await Task.FromResult(new Customer_GetInfoById_Output_APIItem
+            {
+                CID = entity.CID,
+                BSCID6 = entity.BSCID6,
+                BSC6_Title = entity.BSCID6Navigation?.Title ?? "",
+                BSC6_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID6Navigation?.CodeType, entity.BSCID6),
+                BSCID4 = entity.BSCID4,
+                BSC4_Title = entity.BSCID4Navigation?.Title ?? "",
+                BSC4_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID4Navigation?.CodeType, entity.BSCID4),
+                Code = entity.Code ?? "",
+                Compilation = entity.Compilation ?? "",
+                TitleC = entity.TitleC ?? "",
+                TitleE = entity.TitleE ?? "",
+                Email = entity.Email ?? "",
+                InvoiceTitle = entity.InvoiceTitle ?? "",
+                ContactName = entity.ContectName ?? "",
+                ContactPhone = entity.ContectPhone ?? "",
+                Website = entity.Website ?? "",
+                Note = entity.Note ?? "",
+                BillFlag = entity.BillFlag,
+                InFlag = entity.InFlag,
+                PotentialFlag = entity.PotentialFlag,
+                ResverCt = entity.Resver_Head.Count(ResverHeadIsViable),
+                VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
+                QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
+                GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
+                Items = GetBusinessUserListFromEntity(entity)
+            });
+        }
+
+        private static List<Customer_GetList_BusinessUser_APIItem> GetBusinessUserListFromEntity(Customer entity)
+        {
+            return entity.M_Customer_BusinessUser
+                .Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.BU.ActiveFlag && !cbu.BU.DeleteFlag)
+                .Select(cbu => new Customer_GetList_BusinessUser_APIItem
+                {
+                    BUID = cbu.BUID,
+                    Name = cbu.BU.Name ?? ""
+                }).ToList();
+        }
+
         #endregion
     }
 }

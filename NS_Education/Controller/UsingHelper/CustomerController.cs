@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Customer.GetInfoById;
 using NS_Education.Models.APIItems.Customer.GetList;
+using NS_Education.Models.APIItems.Customer.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -22,7 +23,8 @@ namespace NS_Education.Controller.UsingHelper
         IGetListPaged<Customer, Customer_GetList_Input_APIItem, Customer_GetList_Output_Row_APIItem>,
         IGetInfoById<Customer, Customer_GetInfoById_Output_APIItem>,
         IChangeActive<Customer>,
-        IDeleteItem<Customer>
+        IDeleteItem<Customer>,
+        ISubmit<Customer, Customer_Submit_Input_APIItem>
     {
         #region Initialization
 
@@ -30,6 +32,7 @@ namespace NS_Education.Controller.UsingHelper
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
+        private readonly ISubmitHelper<Customer_Submit_Input_APIItem> _submitHelper;
 
         public CustomerController()
         {
@@ -42,6 +45,8 @@ namespace NS_Education.Controller.UsingHelper
                 new ChangeActiveHelper<CustomerController, Customer>(this);
             _deleteItemHelper =
                 new DeleteItemHelper<CustomerController, Customer>(this);
+            _submitHelper =
+                new SubmitHelper<CustomerController, Customer, Customer_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -235,7 +240,96 @@ namespace NS_Education.Controller.UsingHelper
         }
         
         #endregion
+
+        #region Submit
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Customer_Submit_Input_APIItem.CID))]
+        public async Task<string> Submit(Customer_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(Customer_Submit_Input_APIItem input)
+        {
+            return input.CID == 0;
+        }
+
+        #region Submit - Add
+        public async Task<bool> SubmitAddValidateInput(Customer_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
+                .Validate(i => i.BSCID6.IsValidId(), () => AddError(EmptyNotAllowed("行業別 ID")))
+                .Validate(i => i.BSCID4.IsValidId(), () => AddError(EmptyNotAllowed("區域別 ID")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代號")))
+                .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("客戶名稱")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<Customer> SubmitCreateData(Customer_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new Customer
+            {
+                BSCID6 = input.BSCID6,
+                BSCID4 = input.BSCID4,
+                Code = input.Code,
+                Compilation = input.Compilation,
+                TitleC = input.TitleC,
+                TitleE = input.TitleE,
+                Email = input.Email,
+                InvoiceTitle = input.InvoiceTitle,
+                ContectName = input.ContactName,
+                ContectPhone = input.ContactPhone,
+                Website = input.Website,
+                Note = input.Note,
+                BillFlag = input.BillFlag,
+                InFlag = input.InFlag,
+                PotentialFlag = input.PotentialFlag
+            });
+        }
+        #endregion
+
+        #region Submit - Edit
+        public async Task<bool> SubmitEditValidateInput(Customer_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.BSCID6.IsValidId(), () => AddError(EmptyNotAllowed("行業別 ID")))
+                .Validate(i => i.BSCID4.IsValidId(), () => AddError(EmptyNotAllowed("區域別 ID")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代號")))
+                .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("客戶名稱")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<Customer> SubmitEditQuery(Customer_Submit_Input_APIItem input)
+        {
+            return DC.Customer.Where(c => c.CID == input.CID);
+        }
+
+        public void SubmitEditUpdateDataFields(Customer data, Customer_Submit_Input_APIItem input)
+        {
+            data.BSCID6 = input.BSCID6;
+            data.BSCID4 = input.BSCID4;
+            data.Code = input.Code ?? data.Code;
+            data.Compilation = input.Compilation ?? data.Compilation;
+            data.TitleC = input.TitleC ?? data.TitleC;
+            data.TitleE = input.TitleE ?? data.TitleE;
+            data.Email = input.Email ?? data.Email;
+            data.InvoiceTitle = input.InvoiceTitle ?? data.InvoiceTitle;
+            data.ContectName = input.ContactName ?? data.ContectName;
+            data.ContectPhone = input.ContactPhone ?? data.ContectPhone;
+            data.Website = input.Website ?? data.Website;
+            data.Note = input.Note ?? data.Note;
+            data.BillFlag = input.BillFlag;
+            data.InFlag = input.InFlag;
+            data.PotentialFlag = input.PotentialFlag;
+        }
+        #endregion
         
-        
+        #endregion
     }
 }

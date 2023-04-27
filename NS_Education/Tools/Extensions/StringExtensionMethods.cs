@@ -24,7 +24,7 @@ namespace NS_Education.Tools.Extensions
         {
             return String.IsNullOrWhiteSpace(s);
         }
-
+        
         public static string SanitizeForResponseStatusMessage(this string s)
         {
             return s.Replace("\r", "").Replace("\n", "");

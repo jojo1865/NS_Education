@@ -69,11 +69,11 @@ namespace NS_Education.Models.Entities.DbContext
             var connectionStrings = System.Web.Configuration.WebConfigurationManager.ConnectionStrings;
 
             string env =
-                Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString);
+                Environment.GetEnvironmentVariable("ConnectionStrings:NsEducationJojo");
             string fallback =
-                connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
+                connectionStrings["db_NS_EducationConnectionStringFallback"].ConnectionString;
 
-            optionsBuilder.UseSqlServer(!env.IsNullOrWhiteSpace() ? env : fallback);
+            optionsBuilder.UseSqlServer((!env.IsNullOrWhiteSpace() ? env : fallback) ?? throw new NullReferenceException("ConnectionString"));
         } 
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)

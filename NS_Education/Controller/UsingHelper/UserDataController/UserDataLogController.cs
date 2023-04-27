@@ -62,7 +62,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             var query = DC.UserLog
                 .Include(ul => ul.U)
                 // 三個月內
-                .Where(ul => ul.CreDate.AddMonths(3) <= DateTime.Now)
+                .Where(ul => DateTime.Now.AddMonths(-3) <= ul.CreDate)
                 .AsQueryable();
 
             if (input.UID.IsValidId())

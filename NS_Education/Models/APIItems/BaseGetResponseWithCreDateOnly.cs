@@ -9,13 +9,13 @@ namespace NS_Education.Models.APIItems
 {
     public abstract class BaseGetResponseWithCreDateOnly : IGetResponse
     {
-        public async Task SetInfoFromEntity(object entity, PublicClass controller)
+        public async Task SetInfoFromEntity<T>(T entity, PublicClass controller)
+            where T : class
         {
             await _SetInfoFromEntity(entity, controller);
         }
 
         private Task _SetInfoFromEntity<TEntity>(TEntity entity, PublicClass controller)
-            where TEntity : class
         {
             CreDate = entity.GetIfHasProperty<TEntity, DateTime>(DbConstants.CreDate).ToFormattedStringDateTime();
             return Task.CompletedTask;

@@ -11,6 +11,7 @@ namespace NS_Education.Models.APIItems
         /// </summary>
         /// <param name="entity">DB 物件</param>
         /// <param name="controller">Controller 物件</param>
-        Task SetInfoFromEntity(object entity, PublicClass controller);
+        Task SetInfoFromEntity<T>(T entity, PublicClass controller)
+            where T : class;
     }
 }

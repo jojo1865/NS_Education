@@ -94,7 +94,7 @@ namespace NS_Education.Controller.Legacy
                 PrintCheckFlag = entity.PrintCheckFlag,
                 Invoice3Flag = entity.Invoice3Flag,
                 CheckType = entity.CheckType,
-                BusinessTaxRate = entity.BusinessTaxRate,
+                BusinessTaxRate = entity.BusinessTaxRatePercentage / 100m,
                 DeviceCt = entity.B_Device?.Count ?? 0,
                 SiteCt = entity.B_SiteData?.Count ?? 0,
                 PartnerItemCt = entity.B_PartnerItem?.Count ?? 0
@@ -134,7 +134,7 @@ namespace NS_Education.Controller.Legacy
                     PrintCheckFlag = N.PrintCheckFlag,
                     Invoice3Flag = N.Invoice3Flag,
                     CheckType = N.CheckType,
-                    BusinessTaxRate = N.BusinessTaxRate,
+                    BusinessTaxRate = N.BusinessTaxRatePercentage / 100m,
 
                     DeviceCt = N.B_Device.Count,
                     SiteCt = N.B_SiteData.Count,
@@ -234,7 +234,7 @@ namespace NS_Education.Controller.Legacy
                 PrintCheckFlag = input.PrintCheckFlag,
                 Invoice3Flag = input.Invoice3Flag,
                 CheckType = input.CheckType,
-                BusinessTaxRate = input.BusinessTaxRate
+                BusinessTaxRatePercentage = (int)(input.BusinessTaxRate * 100)
             });
         }
         
@@ -269,7 +269,7 @@ namespace NS_Education.Controller.Legacy
             data.PrintCheckFlag = input.PrintCheckFlag;
             data.Invoice3Flag = input.Invoice3Flag;
             data.CheckType = input.CheckType;
-            data.BusinessTaxRate = input.BusinessTaxRate;
+            data.BusinessTaxRatePercentage = (int)(input.BusinessTaxRate * 100);
         }
         
         #endregion

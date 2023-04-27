@@ -12,7 +12,7 @@ namespace NS_Education.Models.Entities
         public int RHID { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public double Point { get; set; }
+        public int PointDecimal { get; set; }
         public bool DeleteFlag { get; set; }
         public DateTime CreDate { get; set; }
         public int CreUID { get; set; }

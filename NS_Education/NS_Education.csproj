@@ -413,7 +413,6 @@
     <Compile Include="Models\Entities\M_Department_Category.cs" />
     <Compile Include="Models\Entities\M_Group_Menu.cs" />
     <Compile Include="Models\Entities\M_Group_User.cs" />
-    <Compile Include="Models\Entities\M_Partner_Category.cs" />
     <Compile Include="Models\Entities\M_Resver_TimeSpan.cs" />
     <Compile Include="Models\Entities\M_SiteGroup.cs" />
     <Compile Include="Models\Entities\Resver_Bill.cs" />

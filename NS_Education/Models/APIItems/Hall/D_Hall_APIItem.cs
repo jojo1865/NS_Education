@@ -28,7 +28,7 @@ namespace NS_Education.Models.APIItems.Hall
         public bool PrintCheckFlag { get; set; }
         public bool Invoice3Flag { get; set; }
         public int CheckType { get; set; }
-        public double BusinessTaxRate { get; set; }
+        public decimal BusinessTaxRate { get; set; }
         public int DeviceCt { get; set; }
         public int SiteCt { get; set; }
         public int PartnerItemCt { get; set; }

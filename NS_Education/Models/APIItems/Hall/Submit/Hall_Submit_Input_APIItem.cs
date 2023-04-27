@@ -12,6 +12,6 @@ namespace NS_Education.Models.APIItems.Hall.Submit
         public bool PrintCheckFlag { get; set; }
         public bool Invoice3Flag { get; set; }
         public int CheckType { get; set; }
-        public double BusinessTaxRate { get; set; }
+        public decimal BusinessTaxRate { get; set; }
     }
 }

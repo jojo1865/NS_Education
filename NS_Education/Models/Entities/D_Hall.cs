@@ -26,7 +26,7 @@ namespace NS_Education.Models.Entities
         public bool PrintCheckFlag { get; set; }
         public bool Invoice3Flag { get; set; }
         public int CheckType { get; set; }
-        public double BusinessTaxRate { get; set; }
+        public int BusinessTaxRatePercentage { get; set; }
         public bool ActiveFlag { get; set; }
         public bool DeleteFlag { get; set; }
         public DateTime CreDate { get; set; }

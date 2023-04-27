@@ -517,6 +517,8 @@ namespace NS_Education.Models.Entities.DbContext
             {
                 entity.HasKey(e => e.DHID);
 
+                entity.Property(e => e.BusinessTaxRatePercentage).HasComment("營業稅率（百分比）");
+
                 entity.Property(e => e.Code)
                     .HasMaxLength(10)
                     .IsUnicode(false);
@@ -932,6 +934,8 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasKey(e => e.RGBID);
 
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
+
+                entity.Property(e => e.PointDecimal).HasComment("給分（十分比）");
 
                 entity.Property(e => e.Title).HasMaxLength(100);
 

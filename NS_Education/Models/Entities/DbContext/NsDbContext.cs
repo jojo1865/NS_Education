@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NS_Education.Tools.Extensions;
 
 // Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
@@ -74,7 +75,7 @@ namespace NS_Education.Models.Entities.DbContext
 
             optionsBuilder.UseSqlServer(!env.IsNullOrWhiteSpace() ? env : fallback);
         } 
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<B_Category>(entity =>
@@ -114,29 +115,25 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BC)
                     .WithMany(p => p.B_Device)
                     .HasForeignKey(d => d.BCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_Device_B_Category");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_Device_B_Category");
 
-                entity.HasOne(d => d.BOC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BOC)
                     .WithMany(p => p.B_Device)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_Device_B_OrderCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_Device_B_OrderCode");
 
-                entity.HasOne(d => d.BSC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSC)
                     .WithMany(p => p.B_Device)
                     .HasForeignKey(d => d.BSCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_Device_B_StaticCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_Device_B_StaticCode");
 
-                entity.HasOne(d => d.DH)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DH)
                     .WithMany(p => p.B_Device)
                     .HasForeignKey(d => d.DHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_Device_D_Hall");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_Device_D_Hall");
             });
 
             modelBuilder.Entity<B_OrderCode>(entity =>
@@ -184,17 +181,15 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BC)
                     .WithMany(p => p.B_Partner)
                     .HasForeignKey(d => d.BCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_Partner_B_Category");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_Partner_B_Category");
 
-                entity.HasOne(d => d.BSC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSC)
                     .WithMany(p => p.B_Partner)
                     .HasForeignKey(d => d.BSCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_Partner_B_StaticCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_Partner_B_StaticCode");
             });
 
             modelBuilder.Entity<B_PartnerItem>(entity =>
@@ -205,29 +200,25 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BOC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BOC)
                     .WithMany(p => p.B_PartnerItem)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_PartnerItem_B_OrderCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_PartnerItem_B_OrderCode");
 
-                entity.HasOne(d => d.BP)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BP)
                     .WithMany(p => p.B_PartnerItem)
                     .HasForeignKey(d => d.BPID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_PartnerItem_B_Partner");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_PartnerItem_B_Partner");
 
-                entity.HasOne(d => d.BSC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSC)
                     .WithMany(p => p.B_PartnerItem)
                     .HasForeignKey(d => d.BSCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_PartnerItem_B_StaticCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_PartnerItem_B_StaticCode");
 
-                entity.HasOne(d => d.DH)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DH)
                     .WithMany(p => p.B_PartnerItem)
                     .HasForeignKey(d => d.DHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_PartnerItem_D_Hall");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_PartnerItem_D_Hall");
             });
 
             modelBuilder.Entity<B_SiteData>(entity =>
@@ -256,35 +247,30 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BC)
                     .WithMany(p => p.B_SiteData)
                     .HasForeignKey(d => d.BCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_SiteData_B_Category");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_SiteData_B_Category");
 
-                entity.HasOne(d => d.BOC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BOC)
                     .WithMany(p => p.B_SiteData)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_SiteData_B_OrderCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_SiteData_B_OrderCode");
 
-                entity.HasOne(d => d.BSCID1Navigation)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSCID1Navigation)
                     .WithMany(p => p.B_SiteDataBSCID1Navigation)
                     .HasForeignKey(d => d.BSCID1)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_SiteData_B_StaticCode1");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_SiteData_B_StaticCode1");
 
-                entity.HasOne(d => d.BSCID5Navigation)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSCID5Navigation)
                     .WithMany(p => p.B_SiteDataBSCID5Navigation)
                     .HasForeignKey(d => d.BSCID5)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_SiteData_B_StaticCode5");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_SiteData_B_StaticCode5");
 
-                entity.HasOne(d => d.DH)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DH)
                     .WithMany(p => p.B_SiteData)
                     .HasForeignKey(d => d.DHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_B_SiteData_D_Hall");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_B_SiteData_D_Hall");
             });
 
             modelBuilder.Entity<B_StaticCode>(entity =>
@@ -347,17 +333,15 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BSCID4Navigation)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSCID4Navigation)
                     .WithMany(p => p.CustomerBSCID4Navigation)
                     .HasForeignKey(d => d.BSCID4)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Customer_B_StaticCode4");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Customer_B_StaticCode4");
 
-                entity.HasOne(d => d.BSCID6Navigation)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSCID6Navigation)
                     .WithMany(p => p.CustomerBSCID6Navigation)
                     .HasForeignKey(d => d.BSCID6)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Customer_B_StaticCode6");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Customer_B_StaticCode6");
             });
 
             modelBuilder.Entity<CustomerGift>(entity =>
@@ -372,17 +356,15 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BSC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSC)
                     .WithMany(p => p.CustomerGift)
                     .HasForeignKey(d => d.BSCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("CustomerGift_B_StaticCode_BSCID_fk");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "CustomerGift_B_StaticCode_BSCID_fk");
 
-                entity.HasOne(d => d.C)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.C)
                     .WithMany(p => p.CustomerGift)
                     .HasForeignKey(d => d.CID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CustomerGift_Customer");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_CustomerGift_Customer");
             });
 
             modelBuilder.Entity<CustomerQuestion>(entity =>
@@ -403,11 +385,10 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.C)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.C)
                     .WithMany(p => p.CustomerQuestion)
                     .HasForeignKey(d => d.CID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CustomerQuestion_Customer");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_CustomerQuestion_Customer");
             });
 
             modelBuilder.Entity<CustomerVisit>(entity =>
@@ -424,23 +405,20 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.VisitDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BSC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSC)
                     .WithMany(p => p.CustomerVisit)
                     .HasForeignKey(d => d.BSCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CustomerVisit_B_StaticCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_CustomerVisit_B_StaticCode");
 
-                entity.HasOne(d => d.BU)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BU)
                     .WithMany(p => p.CustomerVisit)
                     .HasForeignKey(d => d.BUID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CustomerVisit_BusinessUser");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_CustomerVisit_BusinessUser");
 
-                entity.HasOne(d => d.C)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.C)
                     .WithMany(p => p.CustomerVisit)
                     .HasForeignKey(d => d.CID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CustomerVisit_Customer");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_CustomerVisit_Customer");
             });
 
             modelBuilder.Entity<D_Company>(entity =>
@@ -459,11 +437,10 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BC)
                     .WithMany(p => p.D_Company)
                     .HasForeignKey(d => d.BCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_D_Company_B_Category");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_D_Company_B_Category");
             });
 
             modelBuilder.Entity<D_Department>(entity =>
@@ -482,11 +459,10 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.DC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DC)
                     .WithMany(p => p.D_Department)
                     .HasForeignKey(d => d.DCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_D_Department_D_Company");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_D_Department_D_Company");
             });
 
             modelBuilder.Entity<D_FoodCategory>(entity =>
@@ -505,11 +481,10 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BOC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BOC)
                     .WithMany(p => p.D_FoodCategory)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_D_FoodCategory_B_OrderCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_D_FoodCategory_B_OrderCode");
             });
 
             modelBuilder.Entity<D_Hall>(entity =>
@@ -530,11 +505,10 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.DD)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DD)
                     .WithMany(p => p.D_Hall)
                     .HasForeignKey(d => d.DDID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_D_Hall_D_Department");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_D_Hall_D_Department");
             });
 
             modelBuilder.Entity<D_OtherPayItem>(entity =>
@@ -578,11 +552,10 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BC)
                     .WithMany(p => p.D_PayType)
                     .HasForeignKey(d => d.BCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_D_PayType_B_Category");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_D_PayType_B_Category");
             });
 
             modelBuilder.Entity<D_TimeSpan>(entity =>
@@ -674,17 +647,15 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdUID).HasComment("更新者 ID");
 
-                entity.HasOne(d => d.BU)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BU)
                     .WithMany(p => p.M_Customer_BusinessUser)
                     .HasForeignKey(d => d.BUID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("M_Customer_BusinessUser_BusinessUser_BUID_fk");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "M_Customer_BusinessUser_BusinessUser_BUID_fk");
 
-                entity.HasOne(d => d.C)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.C)
                     .WithMany(p => p.M_Customer_BusinessUser)
                     .HasForeignKey(d => d.CID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("M_Customer_BusinessUser_Customer_CID_fk");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "M_Customer_BusinessUser_Customer_CID_fk");
             });
 
             modelBuilder.Entity<M_Customer_Category>(entity =>
@@ -695,15 +666,13 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BC)
                     .WithMany(p => p.M_Customer_Category)
-                    .HasForeignKey(d => d.BCID)
-                    .HasConstraintName("FK_M_Customer_Category_B_Category");
+                    .HasForeignKey(d => d.BCID), "FK_M_Customer_Category_B_Category");
 
-                entity.HasOne(d => d.C)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.C)
                     .WithMany(p => p.M_Customer_Category)
-                    .HasForeignKey(d => d.CID)
-                    .HasConstraintName("FK_M_Customer_Category_Customer");
+                    .HasForeignKey(d => d.CID), "FK_M_Customer_Category_Customer");
             });
 
             modelBuilder.Entity<M_Department_Category>(entity =>
@@ -714,32 +683,28 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BC)
                     .WithMany(p => p.M_Department_Category)
-                    .HasForeignKey(d => d.BCID)
-                    .HasConstraintName("FK_M_Department_Category_B_Category");
+                    .HasForeignKey(d => d.BCID), "FK_M_Department_Category_B_Category");
 
-                entity.HasOne(d => d.DD)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DD)
                     .WithMany(p => p.M_Department_Category)
-                    .HasForeignKey(d => d.DDID)
-                    .HasConstraintName("FK_M_Department_Category_D_Department");
+                    .HasForeignKey(d => d.DDID), "FK_M_Department_Category_D_Department");
             });
 
             modelBuilder.Entity<M_Group_Menu>(entity =>
             {
                 entity.HasKey(e => e.MID);
 
-                entity.HasOne(d => d.G)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.G)
                     .WithMany(p => p.M_Group_Menu)
                     .HasForeignKey(d => d.GID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_Group_Menu_GroupData");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_M_Group_Menu_GroupData");
 
-                entity.HasOne(d => d.MD)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.MD)
                     .WithMany(p => p.M_Group_Menu)
                     .HasForeignKey(d => d.MDID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_Group_Menu_MenuData");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_M_Group_Menu_MenuData");
             });
 
             modelBuilder.Entity<M_Group_User>(entity =>
@@ -750,17 +715,15 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.G)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.G)
                     .WithMany(p => p.M_Group_User)
                     .HasForeignKey(d => d.GID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_Group_User_GroupData");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_M_Group_User_GroupData");
 
-                entity.HasOne(d => d.U)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.U)
                     .WithMany(p => p.M_Group_User)
                     .HasForeignKey(d => d.UID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_Group_User_UserData");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_M_Group_User_UserData");
             });
 
             modelBuilder.Entity<M_Resver_TimeSpan>(entity =>
@@ -776,17 +739,15 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.DTS)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DTS)
                     .WithMany(p => p.M_Resver_TimeSpan)
                     .HasForeignKey(d => d.DTSID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_ResverSiteTimeSpan_D_TimeSpan");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_M_ResverSiteTimeSpan_D_TimeSpan");
 
-                entity.HasOne(d => d.RH)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.RH)
                     .WithMany(p => p.M_Resver_TimeSpan)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_M_Resver_TimeSpan_Resver_Head");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_M_Resver_TimeSpan_Resver_Head");
             });
 
             modelBuilder.Entity<M_SiteGroup>(entity =>
@@ -794,7 +755,7 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasKey(e => e.MID)
                     .HasName("M_SiteGroup_pk");
 
-                entity.HasComment("場地組合");
+                RelationalEntityTypeBuilderExtensions.HasComment((EntityTypeBuilder)entity, "場地組合");
 
                 entity.HasIndex(e => e.MID)
                     .HasName("M_SiteGroup_MID_uindex")
@@ -824,17 +785,15 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdUID).HasComment("更新者 ID");
 
-                entity.HasOne(d => d.Group)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.Group)
                     .WithMany(p => p.M_SiteGroupGroup)
                     .HasForeignKey(d => d.GroupID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("M_SiteGroup_B_SiteData_BSID_fk_2");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "M_SiteGroup_B_SiteData_BSID_fk_2");
 
-                entity.HasOne(d => d.Master)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.Master)
                     .WithMany(p => p.M_SiteGroupMaster)
                     .HasForeignKey(d => d.MasterID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("M_SiteGroup_B_SiteData_BSID_fk");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "M_SiteGroup_B_SiteData_BSID_fk");
             });
 
             modelBuilder.Entity<MenuAPI>(entity =>
@@ -845,11 +804,10 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.MD)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.MD)
                     .WithMany(p => p.MenuAPI)
                     .HasForeignKey(d => d.MDID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_MenuAPI_MenuData");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_MenuAPI_MenuData");
             });
 
             modelBuilder.Entity<MenuData>(entity =>
@@ -876,23 +834,20 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BC)
                     .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.BCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Bill_Header_B_Category");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Bill_Header_B_Category");
 
-                entity.HasOne(d => d.DPT)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DPT)
                     .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.DPTID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Bill_Header_D_PayType");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Bill_Header_D_PayType");
 
-                entity.HasOne(d => d.RH)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.RH)
                     .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Bill_Header_Resver_Head");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Bill_Header_Resver_Head");
             });
 
             modelBuilder.Entity<Resver_Device>(entity =>
@@ -909,23 +864,20 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BD)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BD)
                     .WithMany(p => p.Resver_Device)
                     .HasForeignKey(d => d.BDID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_B_Device");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Device_B_Device");
 
-                entity.HasOne(d => d.BOC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BOC)
                     .WithMany(p => p.Resver_Device)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_B_OrderCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Device_B_OrderCode");
 
-                entity.HasOne(d => d.RS)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.RS)
                     .WithMany(p => p.Resver_Device)
                     .HasForeignKey(d => d.RSID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Device_Resver_Site");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Device_Resver_Site");
             });
 
             modelBuilder.Entity<Resver_GiveBack>(entity =>
@@ -940,11 +892,10 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.RH)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.RH)
                     .WithMany(p => p.Resver_GiveBack)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_GiveBack_Resver_Head");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_GiveBack_Resver_Head");
             });
 
             modelBuilder.Entity<Resver_Head>(entity =>
@@ -977,23 +928,20 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BSCID11Navigation)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSCID11Navigation)
                     .WithMany(p => p.Resver_HeadBSCID11Navigation)
                     .HasForeignKey(d => d.BSCID11)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Head_B_StaticCode11");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Head_B_StaticCode11");
 
-                entity.HasOne(d => d.BSCID12Navigation)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSCID12Navigation)
                     .WithMany(p => p.Resver_HeadBSCID12Navigation)
                     .HasForeignKey(d => d.BSCID12)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Head_B_StaticCode12");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Head_B_StaticCode12");
 
-                entity.HasOne(d => d.C)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.C)
                     .WithMany(p => p.Resver_Head)
                     .HasForeignKey(d => d.CID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Resver_Head_Customer_CID_fk");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "Resver_Head_Customer_CID_fk");
             });
 
             modelBuilder.Entity<Resver_Other>(entity =>
@@ -1010,23 +958,20 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BOC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BOC)
                     .WithMany(p => p.Resver_Other)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Other_B_OrderCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Other_B_OrderCode");
 
-                entity.HasOne(d => d.DOPI)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DOPI)
                     .WithMany(p => p.Resver_Other)
                     .HasForeignKey(d => d.DOPIID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Other_D_OtherPayItem");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Other_D_OtherPayItem");
 
-                entity.HasOne(d => d.RH)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.RH)
                     .WithMany(p => p.Resver_Other)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Other_Resver_Head");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Other_Resver_Head");
             });
 
             modelBuilder.Entity<Resver_Site>(entity =>
@@ -1043,29 +988,25 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BOC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BOC)
                     .WithMany(p => p.Resver_Site)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Site_B_OrderCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Site_B_OrderCode");
 
-                entity.HasOne(d => d.BSC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSC)
                     .WithMany(p => p.Resver_Site)
                     .HasForeignKey(d => d.BSCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Site_B_StaticCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Site_B_StaticCode");
 
-                entity.HasOne(d => d.BS)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BS)
                     .WithMany(p => p.Resver_Site)
                     .HasForeignKey(d => d.BSID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Site_B_SiteData");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Site_B_SiteData");
 
-                entity.HasOne(d => d.RH)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.RH)
                     .WithMany(p => p.Resver_Site)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Site_Resver_Head");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Site_Resver_Head");
             });
 
             modelBuilder.Entity<Resver_Throw>(entity =>
@@ -1084,23 +1025,20 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.BOC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BOC)
                     .WithMany(p => p.Resver_Throw)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_B_OrderCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Throw_B_OrderCode");
 
-                entity.HasOne(d => d.BSC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSC)
                     .WithMany(p => p.Resver_Throw)
                     .HasForeignKey(d => d.BSCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_B_StaticCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Throw_B_StaticCode");
 
-                entity.HasOne(d => d.RS)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.RS)
                     .WithMany(p => p.Resver_Throw)
                     .HasForeignKey(d => d.RSID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_Resver_Site");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Throw_Resver_Site");
             });
 
             modelBuilder.Entity<Resver_Throw_Food>(entity =>
@@ -1110,29 +1048,25 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.RTFID).ValueGeneratedNever();
 
-                entity.HasOne(d => d.BP)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BP)
                     .WithMany(p => p.Resver_Throw_Food)
                     .HasForeignKey(d => d.BPID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_D_B_Partner");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Throw_D_B_Partner");
 
-                entity.HasOne(d => d.BSC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.BSC)
                     .WithMany(p => p.Resver_Throw_Food)
                     .HasForeignKey(d => d.BSCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_D_B_StaticCode");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Throw_D_B_StaticCode");
 
-                entity.HasOne(d => d.DFC)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DFC)
                     .WithMany(p => p.Resver_Throw_Food)
                     .HasForeignKey(d => d.DFCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_D_D_FoodCategory");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Throw_D_D_FoodCategory");
 
-                entity.HasOne(d => d.RT)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.RT)
                     .WithMany(p => p.Resver_Throw_Food)
                     .HasForeignKey(d => d.RTID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Resver_Throw_D_Resver_Throw");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_Resver_Throw_D_Resver_Throw");
             });
 
             modelBuilder.Entity<UserData>(entity =>
@@ -1159,11 +1093,10 @@ namespace NS_Education.Models.Entities.DbContext
                     .IsRequired()
                     .HasMaxLength(50);
 
-                entity.HasOne(d => d.DD)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.DD)
                     .WithMany(p => p.UserData)
                     .HasForeignKey(d => d.DDID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_UserData_D_Department");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_UserData_D_Department");
             });
 
             modelBuilder.Entity<UserLog>(entity =>
@@ -1172,16 +1105,17 @@ namespace NS_Education.Models.Entities.DbContext
 
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
 
+                entity.Property(e => e.RequestUrl).HasComment("該次要求的網址");
+
                 entity.Property(e => e.TargetTable)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.HasOne(d => d.U)
+                RelationalForeignKeyBuilderExtensions.HasConstraintName((ReferenceCollectionBuilder)entity.HasOne(d => d.U)
                     .WithMany(p => p.UserLog)
                     .HasForeignKey(d => d.UID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_UserLog_UserData");
+                    .OnDelete(DeleteBehavior.ClientSetNull), "FK_UserLog_UserData");
             });
 
             OnModelCreatingPartial(modelBuilder);

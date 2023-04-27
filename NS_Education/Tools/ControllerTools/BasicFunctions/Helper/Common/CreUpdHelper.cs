@@ -1,5 +1,6 @@
 using System;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.Extensions;
 using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common

@@ -1,8 +1,6 @@
-using NS_Education.Models.Entities;
-
 namespace NS_Education.Models.APIItems.Company.GetList
 {
-    public class Company_GetList_Output_Row_APIItem : BaseResponseWithCreUpd<D_Company>
+    public class Company_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
     {
         public int DCID { get; set; }
         public int BCID { get; set; }

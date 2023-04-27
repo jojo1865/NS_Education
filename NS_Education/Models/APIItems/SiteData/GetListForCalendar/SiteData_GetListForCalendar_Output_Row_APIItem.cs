@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using NS_Education.Models.Entities;
 
 namespace NS_Education.Models.APIItems.SiteData.GetListForCalendar
 {
-    public class SiteData_GetListForCalendar_Output_Row_APIItem : BaseResponseWithCreUpd<Resver_Site>
+    public class SiteData_GetListForCalendar_Output_Row_APIItem : BaseGetResponseWithCreUpd
     {
         public int BSID { get; set; }
         public string Code { get; set; }

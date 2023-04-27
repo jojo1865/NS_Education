@@ -1,6 +1,4 @@
-using NS_Education.Tools;
-
-namespace NS_Education.Models.APIItems.UserData.GetInfoById
+namespace NS_Education.Models.APIItems.UserData.UserData.GetInfoById
 {
     public class UserData_GetInfoById_Output_APIItem : BaseInfusable
     {

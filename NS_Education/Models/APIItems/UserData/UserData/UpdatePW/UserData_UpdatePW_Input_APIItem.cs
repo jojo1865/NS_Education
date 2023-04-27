@@ -1,4 +1,4 @@
-namespace NS_Education.Models.APIItems.UserData.UpdatePW
+namespace NS_Education.Models.APIItems.UserData.UserData.UpdatePW
 {
     public class UserData_UpdatePW_Input_APIItem
     {

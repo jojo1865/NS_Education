@@ -1,4 +1,4 @@
-﻿namespace NS_Education.Models.APIItems.UserData.Login
+﻿namespace NS_Education.Models.APIItems.UserData.UserData.Login
 {
     public class UserData_Login_Input_APIItem
     {

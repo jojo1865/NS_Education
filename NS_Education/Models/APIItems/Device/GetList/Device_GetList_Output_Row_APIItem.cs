@@ -1,8 +1,6 @@
-using NS_Education.Models.Entities;
-
 namespace NS_Education.Models.APIItems.Device.GetList
 {
-    public class Device_GetList_Output_Row_APIItem : BaseResponseWithCreUpd<B_Device>
+    public class Device_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
     {
         public int BDID { get; set; }
         

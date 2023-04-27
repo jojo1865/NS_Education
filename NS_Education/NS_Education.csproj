@@ -256,7 +256,7 @@
     <Compile Include="Controller\Legacy\OtherPayItemController.cs" />
     <Compile Include="Controller\Legacy\PayTypeController.cs" />
     <Compile Include="Controller\Legacy\TimeSpanController.cs" />
-    <Compile Include="Controller\Legacy\UserDataController.cs" />
+    <Compile Include="Controller\Legacy\UserDataController\UserDataController.cs" />
     <Compile Include="Controller\Legacy\ZipController.cs" />
     <Compile Include="Controller\HomeController.cs" />
     <Compile Include="Controller\UsingHelper\BusinessUserController.cs" />
@@ -271,6 +271,7 @@
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs" />
     <Compile Include="Controller\UsingHelper\StaticCodeController.cs" />
+    <Compile Include="Controller\UsingHelper\UserDataController\UserDataLogController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -279,9 +280,10 @@
     <Compile Include="Models\APIItems\BaseResponseForList.cs" />
     <Compile Include="Models\APIItems\BaseResponseForPagedList.cs" />
     <Compile Include="Models\APIItems\BaseResponseRowForSelectable.cs" />
-    <Compile Include="Models\APIItems\BaseResponseWithCreUpd.cs" />
+    <Compile Include="Models\APIItems\BaseGetResponseWithCreDateOnly.cs" />
+    <Compile Include="Models\APIItems\BaseGetResponseWithCreUpd.cs" />
     <Compile Include="Models\APIItems\BaseResponseRowForType.cs" />
-    <Compile Include="Models\APIItems\BaseResponseWithCreUpdInfusable.cs" />
+    <Compile Include="Models\APIItems\BaseGetResponseInfusableWithCreUpd.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetInfoById\BusinessUser_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetList\BusinessUser_GetList_Customer_APIItem.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetList\BusinessUser_GetList_Input_APIItem.cs" />
@@ -332,6 +334,7 @@
     <Compile Include="Models\APIItems\Hall\GetList\Hall_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Hall\GetList\Hall_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Hall\Submit\Hall_Submit_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\IGetResponse.cs" />
     <Compile Include="Models\APIItems\OrderCode\GetInfoById\OrderCode_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\OrderCode\GetList\OrderCode_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\OrderCode\GetList\OrderCode_GetList_Output_Row_APIItem.cs" />
@@ -368,17 +371,19 @@
     <Compile Include="Models\APIItems\TimeSpan\GetList\TimeSpan_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\TimeSpan\GetList\TimeSpan_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\TimeSpan\Submit\TimeSpan_Submit_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\ChangeActive\UserData_ChangeActive_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\DeleteItem\UserData_DeleteItem_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\GetInfoById\UserData_GetInfoById_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\GetInfoById\UserData_GetInfoById_Output_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\GetList\UserData_GetList_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\GetList\UserData_GetList_Output_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\GetList\UserData_GetList_Output_Row_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\Login\UserData_Login_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\Login\UserData_Login_Output_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\Submit\UserData_Submit_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\UserData\UpdatePW\UserData_UpdatePW_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\ChangeActive\UserData_ChangeActive_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\DeleteItem\UserData_DeleteItem_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\GetInfoById\UserData_GetInfoById_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\GetInfoById\UserData_GetInfoById_Output_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\GetList\UserData_GetList_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\GetList\UserData_GetList_Output_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\GetList\UserData_GetList_Output_Row_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\Login\UserData_Login_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\Login\UserData_Login_Output_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\Submit\UserData_Submit_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserData\UpdatePW\UserData_UpdatePW_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserLog\GetList\UserLog_GetList_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\UserData\UserLog\GetList\UserLog_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\D_Zip_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\GetList\Zip_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\GetList\Zip_GetList_Output_Row_APIItem.cs" />
@@ -549,6 +554,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Models\APIItems\UserData\UserData" />
     <Folder Include="Views\Category\" />
     <Folder Include="Views\GetInfo\" />
     <Folder Include="Views\Hall\" />

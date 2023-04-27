@@ -1,10 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using NS_Education.Models.APIItems.Customer.GetList;
 
 namespace NS_Education.Models.APIItems.Customer.GetInfoById
 {
-    public class Customer_GetInfoById_Output_APIItem : BaseResponseWithCreUpdInfusable<Entities.Customer>
+    public class Customer_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
     {
         public int CID { get; set; }
         

@@ -1,8 +1,6 @@
-using NS_Education.Models.Entities;
-
 namespace NS_Education.Models.APIItems.Category.GetList
 {
-    public class Category_GetList_Output_Row_APIItem : BaseResponseWithCreUpd<B_Category>
+    public class Category_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
     {
         public int BCID { get; set; }
         public int iCategoryType { get; set; }

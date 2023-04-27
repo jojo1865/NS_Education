@@ -14,7 +14,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     public interface IGetListPaged<TEntity, in TGetListPagedRequest, TGetListPagedRow>
         where TEntity : class
         where TGetListPagedRequest : BaseRequestForList
-        where TGetListPagedRow : BaseResponseWithCreUpd<TEntity>
+        where TGetListPagedRow : IGetResponse
     {
         /// <summary>
         /// 取得分頁過的列表。

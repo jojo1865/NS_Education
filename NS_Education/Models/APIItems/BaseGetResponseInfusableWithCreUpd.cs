@@ -1,7 +1,6 @@
 namespace NS_Education.Models.APIItems
 {
-    public abstract class BaseResponseWithCreUpdInfusable<TEntity> : BaseResponseWithCreUpd<TEntity>, IReturnMessageInfusable
-      where TEntity : class
+    public abstract class BaseGetResponseInfusableWithCreUpd : BaseGetResponseWithCreUpd, IReturnMessageInfusable
     {
         public bool Success { get; private set; }
         public string Message { get; private set; }

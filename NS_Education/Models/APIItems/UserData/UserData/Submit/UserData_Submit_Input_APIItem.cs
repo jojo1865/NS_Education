@@ -1,4 +1,4 @@
-﻿namespace NS_Education.Models.APIItems.UserData.Submit
+﻿namespace NS_Education.Models.APIItems.UserData.UserData.Submit
 {
     public class UserData_Submit_Input_APIItem : BaseRequestForSubmit
     {

@@ -7,16 +7,14 @@ using NS_Education.Variables;
 
 namespace NS_Education.Models.APIItems
 {
-    public abstract class BaseResponseWithCreUpd<TEntity>
-      where TEntity : class
+    public abstract class BaseGetResponseWithCreUpd : IGetResponse
     {
-        /// <summary>
-        /// 依據實際的 DB 物件，設置此欄位的基本欄位。<br/>
-        /// 若使用 Helper 時，此方法會被自動呼叫，實作者可以省略。
-        /// </summary>
-        /// <param name="entity">DB 物件</param>
-        /// <param name="controller">Controller 物件</param>
-        public async Task SetInfoFromEntity(TEntity entity, PublicClass controller)
+        public async Task SetInfoFromEntity(object entity, PublicClass controller)
+        {
+            await _SetInfoFromEntity(entity, controller);
+        }
+
+        private async Task _SetInfoFromEntity<TEntity>(TEntity entity, PublicClass controller)
         {
             ActiveFlag = entity.GetIfHasProperty<TEntity, bool>(DbConstants.ActiveFlag);
             

@@ -1,8 +1,6 @@
-using NS_Education.Models.Entities;
-
 namespace NS_Education.Models.APIItems.PayType.GetList
 {
-    public class PayType_GetList_Output_APIItem : BaseResponseWithCreUpd<D_PayType>
+    public class PayType_GetList_Output_APIItem : BaseGetResponseWithCreUpd
     {
         public int DPTID { get; set; }
         public int BCID { get; set; }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.APIItems.CustomerGift.GetInfoById
 {
-    public class CustomerGift_GetInfoById_Output_APIItem : BaseResponseWithCreUpdInfusable<Entities.CustomerGift>
+    public class CustomerGift_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
     {
         public int CGID { get; set; }
         

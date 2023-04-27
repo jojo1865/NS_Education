@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.BusinessUser.GetInfoById
 {
-    public class BusinessUser_GetInfoById_Output_APIItem : BaseResponseWithCreUpdInfusable<Entities.BusinessUser>
+    public class BusinessUser_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
     {
         public int BUID { get; set; }
         public string Code { get; set; }

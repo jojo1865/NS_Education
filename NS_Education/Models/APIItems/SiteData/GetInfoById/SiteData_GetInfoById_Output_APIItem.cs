@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using NS_Education.Models.Entities;
 
 namespace NS_Education.Models.APIItems.SiteData.GetInfoById
 {
-    public class SiteData_GetInfoById_Output_APIItem : BaseResponseWithCreUpdInfusable<B_SiteData>
+    public class SiteData_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
     {
         public int BSID { get; set; }
         public int BCID { get; set; }

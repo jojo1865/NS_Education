@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using NS_Education.Models.Entities;
 
 namespace NS_Education.Models.APIItems.PartnerItem.GetInfoById
 {
-    public class PartnerItem_GetInfoById_Output_APIItem : BaseResponseWithCreUpdInfusable<B_PartnerItem>
+    public class PartnerItem_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
     {
         public int BPIID { get; set; }
         

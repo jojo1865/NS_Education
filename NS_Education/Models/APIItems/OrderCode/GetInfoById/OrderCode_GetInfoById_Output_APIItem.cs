@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using NS_Education.Models.Entities;
 
 namespace NS_Education.Models.APIItems.OrderCode.GetInfoById
 {
-    public class OrderCode_GetInfoById_Output_APIItem : BaseResponseWithCreUpdInfusable<B_OrderCode>
+    public class OrderCode_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
     {
         public int BOCID { get; set; }
         public int iCodeType { get; set; }

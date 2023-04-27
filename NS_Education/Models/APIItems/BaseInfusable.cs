@@ -1,6 +1,4 @@
-﻿using NS_Education.Models;
-
-namespace NS_Education.Tools
+﻿namespace NS_Education.Models.APIItems
 {
     public abstract class BaseInfusable : IReturnMessageInfusable
     {

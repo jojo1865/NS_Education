@@ -18,7 +18,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     public class GetInfoByIdHelper<TController, TEntity, TGetResponse> : IGetInfoByIdHelper
         where TController : PublicClass, IGetInfoById<TEntity, TGetResponse>
         where TEntity : class
-        where TGetResponse : BaseResponseWithCreUpdInfusable<TEntity>
+        where TGetResponse : BaseGetResponseInfusableWithCreUpd
     {
         private readonly TController _controller;
 

@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using NS_Education.Models.Entities;
 
 namespace NS_Education.Models.APIItems.Device.GetInfoById
 {
-    public class Device_GetInfoById_Output_APIItem : BaseResponseWithCreUpdInfusable<B_Device>
+    public class Device_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
     {
         public int BDID { get; set; }
         

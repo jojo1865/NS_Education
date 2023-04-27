@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.CustomerVisit.GetList
 {
-    public class CustomerVisit_GetList_Output_Row_APIItem : BaseResponseWithCreUpd<Entities.CustomerVisit>
+    public class CustomerVisit_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
     {
         public int CVID { get; set; }
         public int CID { get; set; }

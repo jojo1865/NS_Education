@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using NS_Education.Models.Entities;
 
 namespace NS_Education.Models.APIItems.StaticCode.GetInfoById
 {
-    public class StaticCode_GetInfoById_Output_APIItem : BaseResponseWithCreUpdInfusable<B_StaticCode>
+    public class StaticCode_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
     {
         public int BSCID { get; set; }
         public int iCodeType { get; set; }

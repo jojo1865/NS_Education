@@ -1,8 +1,6 @@
-using NS_Education.Models.Entities;
-
 namespace NS_Education.Models.APIItems.OtherPayItem.GetList
 {
-    public class OtherPayItem_GetList_Output_Row_APIItem : BaseResponseWithCreUpd<D_OtherPayItem>
+    public class OtherPayItem_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
     {
         public int DOPIID { get; set; }
         public string Code { get; set; }

@@ -16,6 +16,12 @@ namespace NS_Education
             );
             
             routes.MapRoute(
+                name: "UserDataGetUserLogList",
+                url: "UserData/GetUserLogList/{id}",
+                defaults: new { controller = "UserDataLog", action = "GetList", id = UrlParameter.Optional }
+            );
+            
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }

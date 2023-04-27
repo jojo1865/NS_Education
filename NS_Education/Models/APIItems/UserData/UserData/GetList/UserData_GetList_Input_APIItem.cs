@@ -1,4 +1,4 @@
-namespace NS_Education.Models.APIItems.UserData.GetList
+namespace NS_Education.Models.APIItems.UserData.UserData.GetList
 {
     public class UserData_GetList_Input_APIItem : BaseRequestForList
     {

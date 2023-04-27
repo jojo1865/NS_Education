@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.CustomerQuestion.GetList
 {
-    public class CustomerQuestion_GetList_Output_Row_APIItem : BaseResponseWithCreUpd<Entities.CustomerQuestion>
+    public class CustomerQuestion_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
     {
         public int CQID { get; set; }
         

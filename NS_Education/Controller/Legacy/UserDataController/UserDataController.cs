@@ -7,12 +7,12 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems.UserData.ChangeActive;
-using NS_Education.Models.APIItems.UserData.GetInfoById;
-using NS_Education.Models.APIItems.UserData.GetList;
-using NS_Education.Models.APIItems.UserData.Login;
-using NS_Education.Models.APIItems.UserData.Submit;
-using NS_Education.Models.APIItems.UserData.UpdatePW;
+using NS_Education.Models.APIItems.UserData.UserData.ChangeActive;
+using NS_Education.Models.APIItems.UserData.UserData.GetInfoById;
+using NS_Education.Models.APIItems.UserData.UserData.GetList;
+using NS_Education.Models.APIItems.UserData.UserData.Login;
+using NS_Education.Models.APIItems.UserData.UserData.Submit;
+using NS_Education.Models.APIItems.UserData.UserData.UpdatePW;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -26,7 +26,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
 
-namespace NS_Education.Controller.Legacy
+namespace NS_Education.Controller.Legacy.UserDataController
 {
     public class UserDataController : PublicClass,
         IGetListPaged<UserData, UserData_GetList_Input_APIItem, UserData_GetList_Output_Row_APIItem>,

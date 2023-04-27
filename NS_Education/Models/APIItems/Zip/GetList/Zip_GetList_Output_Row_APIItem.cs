@@ -1,8 +1,6 @@
-using NS_Education.Models.Entities;
-
 namespace NS_Education.Models.APIItems.Zip.GetList
 {
-    public class Zip_GetList_Output_Row_APIItem : BaseResponseWithCreUpd<D_Zip>
+    public class Zip_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
     {
         public int DZID { get; set; }
         public string Code { get; set; }

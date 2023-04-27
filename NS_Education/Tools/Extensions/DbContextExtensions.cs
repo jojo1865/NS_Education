@@ -74,7 +74,7 @@ namespace NS_Education.Tools.Extensions
             // write log
             context.ChangeTracker.DetectChanges();
 
-            foreach (var change in context.ChangeTracker.Entries())
+            foreach (var change in context.ChangeTracker.Entries().ToArray())
             {
                 // 未變動或是在寫 UserLog 時，跳過
                 if (change.Entity is UserLog || change.State == EntityState.Unchanged)

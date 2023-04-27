@@ -71,7 +71,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 1. 建立資料
             TEntity t = await _controller.SubmitCreateData(input);
             CreUpdHelper.SetInfosOnCreate(_controller, t);
-            FlagHelper.SetActiveFlag(_controller, input.ActiveFlag);
+            FlagHelper.SetActiveFlag(t, input.ActiveFlag);
 
             // 2. 儲存至 DB
             try
@@ -105,7 +105,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 2. 覆寫資料
             _controller.SubmitEditUpdateDataFields(data, input);
             CreUpdHelper.SetInfosOnUpdate(_controller, data);
-            FlagHelper.SetActiveFlag(_controller, input.ActiveFlag);
+            FlagHelper.SetActiveFlag(data, input.ActiveFlag);
 
             // 3. 儲存至 DB
             try

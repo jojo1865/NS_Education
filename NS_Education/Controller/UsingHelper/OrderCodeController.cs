@@ -202,7 +202,7 @@ namespace NS_Education.Controller.UsingHelper
                 }
                 
                 // 寫 UserLog
-                DC.WriteUserLog<B_OrderCode>(id, UserLogControlType.Show);
+                await DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, id);
 
                 response = await GetInfoByIdConvertEntityToResponse(entity);
             }

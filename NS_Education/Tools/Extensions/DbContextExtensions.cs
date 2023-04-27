@@ -46,6 +46,13 @@ namespace NS_Education.Tools.Extensions
             await context.SaveChangesAsync();
         }
 
+        public static void WriteUserLogAndSave(this NsDbContext context, UserLogControlType type, int? uid = null)
+        {
+            context.WriteUserLog(type, uid);
+
+            context.SaveChanges();
+        }
+
         private static string GetTableNameFromType<T>(this NsDbContext context)
         {
             return context.Model.FindEntityType(nameof(T))?.GetTableName();
@@ -83,7 +90,7 @@ namespace NS_Education.Tools.Extensions
                 }
                 
                 // 如果是 DeleteFlag 改成 true, 視為刪除
-                PropertyEntry deleteFlag = change.Property(DbConstants.DeleteFlag);
+                PropertyEntry deleteFlag = change.Properties.FirstOrDefault(p => p.Metadata.Name == DbConstants.DeleteFlag);
                 if (deleteFlag != null && deleteFlag.IsModified && deleteFlag.OriginalValue is false)
                     controlType = UserLogControlType.Delete;
 
@@ -100,8 +107,10 @@ namespace NS_Education.Tools.Extensions
 
         private static void WriteUserLog(this NsDbContext context, string targetTable, int targetId, UserLogControlType controlType, int? uid = null)
         {
+            HttpRequestBase request = new HttpRequestWrapper(HttpContext.Current.Request);
+            
             if (uid is null)
-                uid =  FilterStaticTools.GetUidInRequestInt(new HttpRequestWrapper(HttpContext.Current.Request));
+                uid =  FilterStaticTools.GetUidInRequestInt(request);
             
             context.UserLog.Add(new UserLog
             {
@@ -109,8 +118,14 @@ namespace NS_Education.Tools.Extensions
                 TargetTable = targetTable ?? "",
                 TargetID = targetId,
                 ControlType = (int)controlType,
-                CreDate = DateTime.Now
+                CreDate = DateTime.Now,
+                RequestUrl = request.Url?.PathAndQuery ?? ""
             });
+        }
+        
+        private static void WriteUserLog(this NsDbContext context, UserLogControlType controlType, int? uid = null)
+        {
+            context.WriteUserLog(null, 0, controlType, uid);
         }
     }
 }

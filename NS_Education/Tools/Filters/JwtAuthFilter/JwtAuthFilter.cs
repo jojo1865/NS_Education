@@ -32,6 +32,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
         #endregion
 
+        private readonly NsDbContext context = new NsDbContext();
+        
         private readonly IAuthorizeType[] _roles;
         private readonly RequiredPrivileges _privileges;
         private readonly string _uidFieldName;
@@ -105,7 +107,15 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 .IsValid();
 
             if (!isValid)
-                actionContext.Result = new HttpUnauthorizedResult($"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
+            {
+                actionContext.Result =
+                    new HttpUnauthorizedResult($"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
+                return;
+            }
+
+            // 若驗證通過時，如果這支是 Show，寫一次 UserLog
+            if (_privileges.RequireShowFlag)
+                context.WriteUserLogAndSave(UserLogControlType.Show, FilterStaticTools.GetUidInClaimInt(claims));
         }
 
         private bool ValidatePrivileges(ActionExecutingContext actionContext, ClaimsPrincipal claims)
@@ -120,7 +130,6 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
             // 3. 依據 uid 查詢所有權限。
             // User -> M_Group_User -> GroupData -> M_Group_Menu -> MenuData -> MenuAPI
-            NsDbContext context = new NsDbContext();
             var query = context.UserData
                     .Include(u => u.M_Group_User)
                     .ThenInclude(groupUser => groupUser.G)

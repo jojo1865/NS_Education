@@ -14,6 +14,7 @@ namespace NS_Education.Models.Entities
         public int TargetID { get; set; }
         public int ControlType { get; set; }
         public DateTime CreDate { get; set; }
+        public string RequestUrl { get; set; }
 
         public virtual UserData U { get; set; }
     }

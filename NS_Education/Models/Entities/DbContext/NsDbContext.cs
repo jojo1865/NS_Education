@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Tools.Extensions;
 
 // Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
 // If you have enabled NRTs for your project, then un-comment the following line:
@@ -66,14 +67,12 @@ namespace NS_Education.Models.Entities.DbContext
             
             var connectionStrings = System.Web.Configuration.WebConfigurationManager.ConnectionStrings;
 
-            try
-            {
-                optionsBuilder.UseSqlServer(Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString));
-            }
-            catch
-            {
-                optionsBuilder.UseSqlServer(connectionStrings["db_NS_EducationConnectionString"].ConnectionString);
-            }
+            string env =
+                Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString);
+            string fallback =
+                connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
+
+            optionsBuilder.UseSqlServer(!env.IsNullOrWhiteSpace() ? env : fallback);
         } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

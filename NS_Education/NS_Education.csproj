@@ -462,6 +462,7 @@
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs" />
     <Compile Include="Tools\Encryption\JwtHelper.cs" />
     <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs" />
+    <Compile Include="Tools\Extensions\DbContextExtensions.cs" />
     <Compile Include="Tools\Extensions\IntExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs" />
@@ -484,6 +485,7 @@
     <Compile Include="Variables\IOConstants.cs" />
     <Compile Include="Variables\JwtConstants.cs" />
     <Compile Include="Variables\PrivilegeConstants.cs" />
+    <Compile Include="Variables\UserLogControlType.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />

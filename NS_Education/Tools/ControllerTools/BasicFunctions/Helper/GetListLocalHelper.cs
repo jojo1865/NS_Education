@@ -21,6 +21,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         public async Task<string> GetListLocal()
         {
+            // 3. 寫 UserLog
             BaseResponseForList<TGetListRow> response = new BaseResponseForList<TGetListRow>
             {
                 Items = await _controller.GetListLocalResults()

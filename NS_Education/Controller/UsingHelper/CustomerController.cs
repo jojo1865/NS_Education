@@ -368,7 +368,7 @@ namespace NS_Education.Controller.UsingHelper
                 cbu.UpdUID = GetUid();
             }
 
-            DC.SaveChanges();
+            DC.SaveChangesWithLog();
 
             // 更新資料
             data.BSCID6 = input.BSCID6;

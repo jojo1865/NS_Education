@@ -17,6 +17,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -199,6 +200,9 @@ namespace NS_Education.Controller.UsingHelper
                     AddError(GetInfoByIdNotFound);
                     return GetResponseJson();
                 }
+                
+                // 寫 UserLog
+                DC.WriteUserLog<B_OrderCode>(id, UserLogControlType.Show);
 
                 response = await GetInfoByIdConvertEntityToResponse(entity);
             }

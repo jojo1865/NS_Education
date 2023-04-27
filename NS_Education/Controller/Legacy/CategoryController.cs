@@ -194,7 +194,7 @@ namespace NS_Education.Controller.Legacy
                 N_.ActiveFlag = ActiveFlag;
                 N_.UpdDate = DT;
                 N_.UpdUID = GetUid();
-                await DC.SaveChangesAsync();
+                await DC.SaveChangesWithLogAsync();
             }
             else
                 Error += "查無資料,無法更新;";

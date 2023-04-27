@@ -175,7 +175,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             if (HasError()) return GetResponseJson();
 
             await DC.UserData.AddAsync(newUser);
-            await DC.SaveChangesAsync();
+            await DC.SaveChangesWithLogAsync();
 
             return GetResponseJson();
         }
@@ -255,7 +255,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             try
             {
                 user.LoginDate = DateTime.Now;
-                await DC.SaveChangesAsync();
+                await DC.SaveChangesWithLogAsync();
             }
             catch (Exception e)
             {
@@ -504,7 +504,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             try
             {
                 queried.ActiveFlag = newValue;
-                await DC.SaveChangesAsync();
+                await DC.SaveChangesWithLogAsync();
             }
             catch (Exception e)
             {
@@ -563,7 +563,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             try
             {
                 queried.LoginPassword = EncryptPassword(inputPassword);
-                await DC.SaveChangesAsync();
+                await DC.SaveChangesWithLogAsync();
             }
             catch (Exception e)
             {

@@ -259,7 +259,7 @@ namespace NS_Education.Controller.UsingHelper
                 cbu.UpdUID = GetUid();
             }
 
-            DC.SaveChanges();
+            DC.SaveChangesWithLog();
             
             // 2. 修改資料
             data.Code = input.Code;

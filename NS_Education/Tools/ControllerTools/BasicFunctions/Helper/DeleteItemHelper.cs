@@ -73,7 +73,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             {
                 FlagHelper.SetDeleteFlag(t, deleteFlag ?? throw new ArgumentNullException(nameof(deleteFlag)));
                 CreUpdHelper.SetInfosOnUpdate(_controller, t);
-                await _controller.DC.SaveChangesAsync();
+                await _controller.DC.SaveChangesWithLogAsync();
             }
             catch (Exception e)
             {

@@ -6,6 +6,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
+using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
@@ -43,8 +44,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 2. 取得單筆資料
             TEntity t = await _GetInfoByIdQueryResult(id);
-
-            // 3. 有資料時, 轉換成指定格式並回傳
+            
+            // 3. 寫 UserLog
+            _controller.DC.WriteUserLog<TEntity>(id, UserLogControlType.Show);
+            
+            // 4. 有資料時, 轉換成指定格式並回傳
             if (t != null)
             {
                 TGetResponse response = await _controller.GetInfoByIdConvertEntityToResponse(t);
@@ -52,7 +56,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson(response);
             }
 
-            // 4. 無資料時, 回傳錯誤
+            // 5. 無資料時, 回傳錯誤
             _controller.AddError(GetInfoByIdNotFound);
             return _controller.GetResponseJson();
         }

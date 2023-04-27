@@ -6,6 +6,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
+using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
@@ -76,7 +77,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             try
             {
                 await _controller.DC.AddAsync(t);
-                await _controller.DC.SaveChangesAsync();
+                await _controller.DC.SaveChangesWithLogAsync();
             }
             catch (Exception e)
             {
@@ -109,7 +110,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 3. 儲存至 DB
             try
             {
-                await _controller.DC.SaveChangesAsync();
+                await _controller.DC.SaveChangesWithLogAsync();
             }
             catch (Exception e)
             {

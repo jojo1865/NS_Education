@@ -78,7 +78,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             {
                 FlagHelper.SetActiveFlag(t, activeFlagValue);
                 CreUpdHelper.SetInfosOnUpdate(_controller, t);
-                await _controller.DC.SaveChangesAsync();
+                await _controller.DC.SaveChangesWithLogAsync();
             }
             catch (Exception e)
             {

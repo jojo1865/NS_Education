@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems.MenuData.GetInfoById;
 using NS_Education.Models.APIItems.MenuData.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -19,10 +20,12 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class MenuDataController : PublicClass
         , IGetListAll<MenuData, MenuData_GetList_Input_APIItem, MenuData_GetList_Output_Row_APIItem>
+        , IGetInfoById<MenuData, MenuData_GetInfoById_Output_APIItem>
     {
         #region Initialization
         
         private readonly IGetListAllHelper<MenuData_GetList_Input_APIItem> _getListAllHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public MenuDataController()
         {
@@ -30,6 +33,9 @@ namespace NS_Education.Controller.UsingHelper
                 new GetListAllHelper<MenuDataController, MenuData, MenuData_GetList_Input_APIItem,
                     MenuData_GetList_Output_Row_APIItem>(
                     this);
+
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<MenuDataController, MenuData, MenuData_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -114,6 +120,31 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<MenuData_GetList_Output_Row_APIItem> GetListAllEntityToRow(MenuData entity)
         {
             return await Task.FromResult(new MenuData_GetList_Output_Row_APIItem
+            {
+                MDID = entity.MDID,
+                Title = entity.Title ?? "",
+                URL = entity.URL ?? "",
+                SortNo = entity.SortNo
+            });
+        }
+        #endregion
+
+        #region GetInfoById
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        public async Task<string> GetInfoById(int id)
+        {
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<MenuData> GetInfoByIdQuery(int id)
+        {
+            return DC.MenuData.Where(md => md.MDID == id);
+        }
+
+        public async Task<MenuData_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(MenuData entity)
+        {
+            return await Task.FromResult(new MenuData_GetInfoById_Output_APIItem
             {
                 MDID = entity.MDID,
                 Title = entity.Title ?? "",

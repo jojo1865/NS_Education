@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems.MenuData.GetInfoById;
-using NS_Education.Models.APIItems.MenuData.GetList;
-using NS_Education.Models.APIItems.MenuData.Submit;
+using NS_Education.Models.APIItems.MenuData.MenuData.GetInfoById;
+using NS_Education.Models.APIItems.MenuData.MenuData.GetList;
+using NS_Education.Models.APIItems.MenuData.MenuData.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -17,7 +17,7 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controller.UsingHelper
+namespace NS_Education.Controller.UsingHelper.MenuDataController
 {
     public class MenuDataController : PublicClass
         , IGetListAll<MenuData, MenuData_GetList_Input_APIItem, MenuData_GetList_Output_Row_APIItem>

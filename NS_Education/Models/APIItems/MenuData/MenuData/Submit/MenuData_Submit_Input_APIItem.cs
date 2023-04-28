@@ -1,4 +1,4 @@
-namespace NS_Education.Models.APIItems.MenuData.Submit
+namespace NS_Education.Models.APIItems.MenuData.MenuData.Submit
 {
     public class MenuData_Submit_Input_APIItem : BaseRequestForSubmit
     {

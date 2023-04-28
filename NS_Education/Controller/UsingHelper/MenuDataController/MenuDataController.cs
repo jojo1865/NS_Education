@@ -267,12 +267,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Validate(i => i.MDID == 0, () => AddError(WrongFormat("選單 ID")))
                 .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(WrongFormat("上層選單 ID")))
                 .Validate(i => i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單名稱")))
-                .Validate(i => i.Url.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單目標網址")))
                 .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序")))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => i.Url.StartsWith("/") && !i.Url.EndsWith("/"), () => AddError(WrongFormat("選單目標網址")))
+                .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.StartsWith("/") && !i.Url.EndsWith("/"), () => AddError(WrongFormat("選單目標網址")))
+                .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.Length.IsInBetween(0, 300), () => AddError(TooLong("選單目標網址")))
                 .Validate(i => i.Title.Length.IsInBetween(0, 50), () => AddError(TooLong("選單名稱")))
-                .Validate(i => i.Url.Length.IsInBetween(0, 300), () => AddError(TooLong("選單目標網址")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -303,12 +302,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Validate(i => i.MDID.IsAboveZero(), () => AddError(EmptyNotAllowed("選單 ID")))
                 .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(WrongFormat("上層選單 ID")))
                 .Validate(i => i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單名稱")))
-                .Validate(i => i.Url.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單目標網址")))
                 .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序")))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => i.Url.StartsWith("/") && !i.Url.EndsWith("/"), () => AddError(WrongFormat("選單目標網址")))
+                .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.StartsWith("/") && !i.Url.EndsWith("/"), () => AddError(WrongFormat("選單目標網址")))
+                .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.Length.IsInBetween(0, 300), () => AddError(TooLong("選單目標網址")))
                 .Validate(i => i.Title.Length.IsInBetween(0, 50), () => AddError(TooLong("選單名稱")))
-                .Validate(i => i.Url.Length.IsInBetween(0, 300), () => AddError(TooLong("選單目標網址")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

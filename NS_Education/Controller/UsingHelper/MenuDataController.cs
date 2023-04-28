@@ -13,6 +13,7 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -69,7 +70,7 @@ namespace NS_Education.Controller.UsingHelper
         private IQueryable<MenuData> GetListQueryUser(MenuData_GetList_Input_APIItem input)
         {
             // 從 UserData 開始
-            var query = DC.UserData
+            IQueryable<M_Group_Menu> mGroupMenus = DC.UserData
                 .Include(ud => ud.M_Group_User)
                 .ThenInclude(mgu => mgu.G)
                 .ThenInclude(g => g.M_Group_Menu)
@@ -82,14 +83,26 @@ namespace NS_Education.Controller.UsingHelper
                 .Select(mgu => mgu.G)
                 .Where(g => g.ActiveFlag && !g.DeleteFlag)
                 // M_Group_Menu
-                .SelectMany(g => g.M_Group_Menu)
-                // 有任何權限才予以回傳
+                .SelectMany(g => g.M_Group_Menu);
+
+            // 檢查是否有任何最高權限
+            bool hasRootPrivilege = mGroupMenus
                 .Where(mgm => mgm.AddFlag || mgm.DeleteFlag || mgm.EditFlag || mgm.PringFlag || mgm.ShowFlag)
+                .Select(mgm => mgm.MD)
+                .Any(md => md.ActiveFlag && !md.DeleteFlag && md.URL == PrivilegeConstants.RootAccessUrl);
+
+            var finalQuery = mGroupMenus
+                // 有具備任一種 flag 的最高權限時，或有具備任一種 flag 的權限才予以回傳
+                // 這邊的 flag 條件要寫兩次，有兩個原因：
+                // 1. 寫成函數會被 EF 當成記憶體函數執行
+                // 2. 有可能有一般權限沒有 flag，但最高權限有 flag 的情況，提早篩就會把這類的 MenuData 篩掉
+                .Where(mgm => hasRootPrivilege || mgm.AddFlag || mgm.DeleteFlag || mgm.EditFlag || mgm.PringFlag || mgm.ShowFlag)
                 // MenuData
                 .Select(mgm => mgm.MD);
 
-            return query;
+            return finalQuery;
         }
+
 
         private IQueryable<MenuData> GetListQueryAdmin(MenuData_GetList_Input_APIItem input)
         {

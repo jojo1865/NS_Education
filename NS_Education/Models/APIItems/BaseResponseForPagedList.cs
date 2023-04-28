@@ -29,7 +29,7 @@ namespace NS_Education.Models.APIItems
         /// 將一些來自於輸入資料的值帶入本物件。
         /// </summary>
         /// <param name="input">輸入資料</param>
-        public void SetByInput(BaseRequestForList input)
+        public void SetByInput(BaseRequestForPagedList input)
         {
             NowPage = input.NowPage;
             CutPage = input.CutPage;

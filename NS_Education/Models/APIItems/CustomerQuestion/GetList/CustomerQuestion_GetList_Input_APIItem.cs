@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.CustomerQuestion.GetList
 {
-    public class CustomerQuestion_GetList_Input_APIItem : BaseRequestForList
+    public class CustomerQuestion_GetList_Input_APIItem : BaseRequestForPagedList
     {
         public string Keyword { get; set; }
         public int CID { get; set; }

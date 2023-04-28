@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.BusinessUser.GetList
 {
-    public class BusinessUser_GetList_Input_APIItem : BaseRequestForList
+    public class BusinessUser_GetList_Input_APIItem : BaseRequestForPagedList
     {
         public string Keyword { get; set; }
         public int MKType { get; set; } = -1;

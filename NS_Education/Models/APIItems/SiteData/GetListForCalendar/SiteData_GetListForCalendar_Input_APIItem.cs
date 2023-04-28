@@ -2,7 +2,7 @@ using System;
 
 namespace NS_Education.Models.APIItems.SiteData.GetListForCalendar
 {
-    public class SiteData_GetListForCalendar_Input_APIItem : BaseRequestForList
+    public class SiteData_GetListForCalendar_Input_APIItem : BaseRequestForPagedList
     {
         public int TargetYear { get; set; } = DateTime.Now.Year;
         public int TargetMonth { get; set; } = DateTime.Now.Month;

@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.Device.GetList
 {
-    public class Device_GetList_Input_APIItem : BaseRequestForList
+    public class Device_GetList_Input_APIItem : BaseRequestForPagedList
     {
         public string Keyword { get; set; }
         public int BCID { get; set; }

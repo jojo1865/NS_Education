@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.UserData.UserData.GetList
 {
-    public class UserData_GetList_Input_APIItem : BaseRequestForList
+    public class UserData_GetList_Input_APIItem : BaseRequestForPagedList
     {
         /// <summary>
         /// 查詢關鍵字。可以用使用者名稱查詢。忽略或空白時不以此做篩選。

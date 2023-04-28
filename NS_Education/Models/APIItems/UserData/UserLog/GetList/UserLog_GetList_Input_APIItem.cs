@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.UserData.UserLog.GetList
 {
-    public class UserLog_GetList_Input_APIItem : BaseRequestForList
+    public class UserLog_GetList_Input_APIItem : BaseRequestForPagedList
     {
         public int UID { get; set; }
         public string TargetTable { get; set; }

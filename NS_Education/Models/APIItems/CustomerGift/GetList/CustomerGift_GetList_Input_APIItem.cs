@@ -2,7 +2,7 @@ using System;
 
 namespace NS_Education.Models.APIItems.CustomerGift.GetList
 {
-    public class CustomerGift_GetList_Input_APIItem : BaseRequestForList
+    public class CustomerGift_GetList_Input_APIItem : BaseRequestForPagedList
     {
         public string Keyword { get; set; }
         public int CID { get; set; }

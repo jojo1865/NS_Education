@@ -12,30 +12,30 @@ using NS_Education.Tools.Extensions;
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
     /// <summary>
-    /// GetList 功能的預設處理工具，處理有分頁的回傳。
+    /// GetList 功能的預設處理工具。處理無分頁的整批資料回傳。
     /// </summary>
     /// <typeparam name="TController">Controller 類型</typeparam>
     /// <typeparam name="TEntity">掌管資料類型</typeparam>
     /// <typeparam name="TGetListRequest">傳入物件類型</typeparam>
     /// <typeparam name="TGetListRow">回傳時，List 中子物件的類型</typeparam>
-    public class GetListPagedHelper<TController, TEntity, TGetListRequest, TGetListRow> : IGetListPagedHelper<TGetListRequest>
-        where TController : PublicClass, IGetListPaged<TEntity, TGetListRequest, TGetListRow>
+    public class GetListAllHelper<TController, TEntity, TGetListRequest, TGetListRow> : IGetListAllHelper<TGetListRequest>
+        where TController : PublicClass, IGetListAll<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
-        where TGetListRequest : BaseRequestForPagedList
+        where TGetListRequest : BaseRequestForList
         where TGetListRow : IGetResponse
     {
         private readonly TController _controller;
 
-        public GetListPagedHelper(TController controller)
+        public GetListAllHelper(TController controller)
         {
             _controller = controller;
         }
 
-        #region GetPagedList
+        #region GetAllList
 
         private const string GetPagedListInputIncorrect = "輸入格式錯誤或缺少欄位，請檢查資料內容！";
-        
-        public async Task<string> GetPagedList(TGetListRequest input)
+
+        public async Task<string> GetAllList(TGetListRequest input)
         {
             // 1. 驗證輸入
             bool inputValidated = await _controller.GetListPagedValidateInput(input);
@@ -47,10 +47,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson();
 
             // 2. 執行查詢
-            var response = new BaseResponseForPagedList<TGetListRow>();
-            response.SetByInput(input);
-
-            var queryResult = await _GetListQueryResult(input, response);
+            var queryResult = await _GetListQueryResult(input);
 
             // 3. 有錯誤時提早返回
             if (_controller.HasError())
@@ -66,13 +63,15 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 rows.Add(row);
             }
 
-            response.Items = rows;
+            BaseResponseForList<TGetListRow> response = new BaseResponseForList<TGetListRow>
+            {
+                Items = rows
+            };
 
             return _controller.GetResponseJson(response);
         }
 
-        private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest input
-            , BaseResponseForPagedList<TGetListRow> response)
+        private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest input)
         {
             IQueryable<TEntity> query = _controller.GetListPagedOrderedQuery(input);
             
@@ -83,17 +82,9 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // Filter by DeleteFlag
             query = FlagHelper.FilterByInputDeleteFlag(query, input.DeleteFlag == 1);
 
-            // 1. 先取得總筆數
+            // 回傳實際資料
 
-            int totalRows = await query.CountAsync();
-            response.AllItemCt = totalRows;
-
-            // 2. 再回傳實際資料
-
-            return await query
-                .Skip(input.GetStartIndex())
-                .Take(input.GetTakeRowCount())
-                .ToListAsync();
+            return await query.ToListAsync();
         }
 
         #endregion

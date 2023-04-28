@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -218,13 +217,7 @@ namespace NS_Education.Controller.UsingHelper
                 {
                     CID = item.CID,
                     MappingType = input.OPsalesFlag ? DbConstants.OpSalesMappingType : input.MKsalesFlag ? DbConstants.MkSalesMappingType : 0,
-                    SortNo = index + 1,
-                    ActiveFlag = true,
-                    DeleteFlag = false,
-                    CreDate = DateTime.Now,
-                    CreUID = GetUid(),
-                    UpdDate = DateTime.Now,
-                    UpdUID = 0
+                    SortNo = index + 1
                 }).ToList()
             });
         }
@@ -255,11 +248,9 @@ namespace NS_Education.Controller.UsingHelper
             foreach (M_Customer_BusinessUser cbu in DC.M_Customer_BusinessUser.Where(cbu => cbu.BUID == data.BUID && cbu.ActiveFlag && !cbu.DeleteFlag).ToList())
             {
                 cbu.DeleteFlag = true;
-                cbu.UpdDate = DateTime.Now;
-                cbu.UpdUID = GetUid();
             }
 
-            DC.SaveChangesWithLog();
+            DC.SaveChangesStandardProcedure(GetUid());
             
             // 2. 修改資料
             data.Code = input.Code;
@@ -273,12 +264,7 @@ namespace NS_Education.Controller.UsingHelper
                 MappingType = input.OPsalesFlag ? DbConstants.OpSalesMappingType :
                     input.MKsalesFlag ? DbConstants.MkSalesMappingType : 0,
                 SortNo = index + 1,
-                ActiveFlag = true,
-                DeleteFlag = false,
-                CreDate = DateTime.Now,
-                CreUID = GetUid(),
-                UpdDate = DateTime.Now,
-                UpdUID = 0
+                ActiveFlag = true
             }).ToList();
         }
 

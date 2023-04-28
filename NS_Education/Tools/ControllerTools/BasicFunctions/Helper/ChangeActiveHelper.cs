@@ -73,12 +73,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson();
             }
 
-            // 3. 實際更新起用狀態與更新者資訊，並寫入 DB。
+            // 3. 實際更新啟用狀態與更新者資訊，並寫入 DB。
             try
             {
                 FlagHelper.SetActiveFlag(t, activeFlagValue);
-                CreUpdHelper.SetInfosOnUpdate(_controller, t);
-                await _controller.DC.SaveChangesWithLogAsync();
+                await _controller.DC.SaveChangesStandardProcedureAsync();
             }
             catch (Exception e)
             {

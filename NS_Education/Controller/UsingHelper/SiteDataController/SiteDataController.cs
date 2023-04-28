@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -239,12 +238,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 {
                     GroupID = sg.BSID,
                     SortNo = sg.SortNo,
-                    ActiveFlag = true,
-                    DeleteFlag = false,
-                    CreDate = DateTime.Now,
-                    CreUID = GetUid(),
-                    UpdDate = DateTime.Now,
-                    UpdUID = 0
+                    ActiveFlag = true
                 }).ToArray()
             };
 
@@ -308,12 +302,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             {
                 GroupID = sg.BSID,
                 SortNo = sg.SortNo,
-                ActiveFlag = true,
-                DeleteFlag = false,
-                CreDate = DateTime.Now,
-                CreUID = GetUid(),
-                UpdDate = DateTime.Now,
-                UpdUID = 0
+                ActiveFlag = true
             }).ToArray();
         }
         

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -310,12 +309,7 @@ namespace NS_Education.Controller.UsingHelper
                     {
                         BUID = item.BUID,
                         MappingType = GetBusinessUserMappingType(item.BUID), SortNo = index + 1,
-                        ActiveFlag = true,
-                        DeleteFlag = false,
-                        CreDate = DateTime.Now,
-                        CreUID = GetUid(),
-                        UpdDate = DateTime.Now,
-                        UpdUID = 0
+                        ActiveFlag = true
                     }).ToList()
             });
         }
@@ -364,11 +358,9 @@ namespace NS_Education.Controller.UsingHelper
                          .ToList())
             {
                 cbu.DeleteFlag = true;
-                cbu.UpdDate = DateTime.Now;
-                cbu.UpdUID = GetUid();
             }
 
-            DC.SaveChangesWithLog();
+            DC.SaveChangesStandardProcedure(GetUid());
 
             // 更新資料
             data.BSCID6 = input.BSCID6;
@@ -392,12 +384,7 @@ namespace NS_Education.Controller.UsingHelper
                     BUID = item.BUID,
                     MappingType = GetBusinessUserMappingType(item.BUID), 
                     SortNo = index + 1,
-                    ActiveFlag = true,
-                    DeleteFlag = false,
-                    CreDate = DateTime.Now,
-                    CreUID = GetUid(),
-                    UpdDate = DateTime.Now,
-                    UpdUID = 0
+                    ActiveFlag = true
                 }).ToList();
         }
 

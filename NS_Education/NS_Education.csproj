@@ -444,7 +444,6 @@
     <Compile Include="Tools\BeingValidated\IBeingValidated.cs" />
     <Compile Include="Tools\ControllerTools\BaseClass\PublicClass.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\ChangeActiveHelper.cs" />
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Common\CreUpdHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Common\FlagHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\DeleteItemHelper.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetInfoByIdHelper.cs" />

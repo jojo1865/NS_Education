@@ -149,23 +149,13 @@ namespace NS_Education.Controller.Legacy.UserDataController
                 LoginAccount = input.LoginAccount.ExecuteIfNullOrWhiteSpace(() => AddError(EmptyNotAllowed("使用者帳號"))),
                 LoginPassword = input.LoginPassword,
                 Note = input.Note,
-                ActiveFlag = true,
-                DeleteFlag = false,
-                CreDate = DateTime.Now,
-                CreUID = requestUid,
-                UpdDate = DateTime.Now,
-                UpdUID = 0,
                 LoginDate = DateTime.Now,
                 DDID = input.DDID,
                 M_Group_User = new List<M_Group_User>
                 {
                     new M_Group_User
                     {
-                        GID = input.GID,
-                        CreDate = DateTime.Now,
-                        CreUID = requestUid,
-                        UpdDate = DateTime.Now,
-                        UpdUID = 0
+                        GID = input.GID
                     }
                 }
             };
@@ -175,7 +165,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             if (HasError()) return GetResponseJson();
 
             await DC.UserData.AddAsync(newUser);
-            await DC.SaveChangesWithLogAsync();
+            await DC.SaveChangesStandardProcedureAsync(GetUid());
 
             return GetResponseJson();
         }
@@ -255,7 +245,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             try
             {
                 user.LoginDate = DateTime.Now;
-                await DC.SaveChangesWithLogAsync();
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
             }
             catch (Exception e)
             {
@@ -340,9 +330,6 @@ namespace NS_Education.Controller.Legacy.UserDataController
             // Note 是可選欄位，因此呼叫者應該保持原始內容
             data.Note = input.Note;
 
-            data.UpdDate = DateTime.Now;
-            data.UpdUID = input.UID;
-
             data.DDID = input.DDID;
             
             // 如果是管理員，才允許繼續更新後續的欄位
@@ -350,8 +337,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             
             // 只在是管理員時才允許修改啟用狀態
             data.ActiveFlag = input.ActiveFlag;
-
-            int requesterUID = GetUid();
+            
             // 資料庫建模是 User 一對多 Group，但現在看到的 Wireframe 似乎規劃為每位使用者僅一個權限組
             // 所以在這裡
             // 1. 在 M_Group_User 中查詢此使用者有幾筆權限，如果有多筆就先清空至唯一一筆。
@@ -367,11 +353,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
                 M_Group_User groupUser = new M_Group_User
                 {
                     GID = input.GID,
-                    UID = data.UID,
-                    CreDate = DateTime.Now,
-                    CreUID = requesterUID,
-                    UpdDate = DateTime.Now,
-                    UpdUID = 0
+                    UID = data.UID
                 };
 
                 DC.M_Group_User.Add(groupUser);
@@ -385,8 +367,6 @@ namespace NS_Education.Controller.Legacy.UserDataController
             // 更新權限資料
             M_Group_User newGroupUser = groupUsers.First();
             newGroupUser.GID = input.GID;
-            newGroupUser.UpdUID = requesterUID;
-            newGroupUser.UpdDate = DateTime.Now;
         }
 
         #endregion
@@ -504,7 +484,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             try
             {
                 queried.ActiveFlag = newValue;
-                await DC.SaveChangesWithLogAsync();
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
             }
             catch (Exception e)
             {
@@ -563,7 +543,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             try
             {
                 queried.LoginPassword = EncryptPassword(inputPassword);
-                await DC.SaveChangesWithLogAsync();
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
             }
             catch (Exception e)
             {

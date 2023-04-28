@@ -76,7 +76,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             // 如果沒有 Admin role, 只回傳使用者有權限的選單
             bool hasAdminRole = FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin);
-            IQueryable<MenuData> query = hasAdminRole ? GetListQueryAdmin(input) : GetListQueryUser(input);
+            IQueryable<MenuData> query = hasAdminRole ? GetListQueryAdmin() : GetListQueryUser();
 
             if (input.ParentID.IsAboveZero())
                 query = query.Where(md => md.ParentID == input.ParentID);
@@ -87,7 +87,7 @@ namespace NS_Education.Controller.UsingHelper
                 .ThenBy(md => md.MDID);
         }
 
-        private IQueryable<MenuData> GetListQueryUser(MenuData_GetList_Input_APIItem input)
+        private IQueryable<MenuData> GetListQueryUser()
         {
             // 從 UserData 開始
             IQueryable<M_Group_Menu> mGroupMenus = DC.UserData
@@ -125,7 +125,7 @@ namespace NS_Education.Controller.UsingHelper
         }
 
 
-        private IQueryable<MenuData> GetListQueryAdmin(MenuData_GetList_Input_APIItem input)
+        private IQueryable<MenuData> GetListQueryAdmin()
         {
             var query = DC.MenuData.AsQueryable();
 
@@ -219,14 +219,12 @@ namespace NS_Education.Controller.UsingHelper
             foreach (MenuData data in menuData)
             {
                 data.ActiveFlag = activeFlag ?? throw new ArgumentNullException(nameof(activeFlag));
-                data.UpdDate = DateTime.Now;
-                data.UpdUID = GetUid();
             }
 
             // 3. 寫入 DB
             try
             {
-                await DC.SaveChangesWithLogAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
             }
             catch (Exception e)
             {
@@ -281,14 +279,12 @@ namespace NS_Education.Controller.UsingHelper
             foreach (MenuData data in menuData)
             {
                 data.DeleteFlag = deleteFlag ?? throw new ArgumentNullException(nameof(deleteFlag));
-                data.UpdDate = DateTime.Now;
-                data.UpdUID = GetUid();
             }
 
             // 4. 儲存至 DB
             try
             {
-                await DC.SaveChangesWithLogAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
             }
             catch (Exception e)
             {
@@ -421,9 +417,7 @@ namespace NS_Education.Controller.UsingHelper
             try
             {
                 menuData.SortNo = sortNo;
-                menuData.UpdDate = DateTime.Now;
-                menuData.UpdUID = GetUid();
-                await DC.SaveChangesWithLogAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
             }
             catch (Exception e)
             {

@@ -21,26 +21,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
         /// 回傳 <see cref="TEntity"/> 是否有名為 DeleteFlag 的欄位。
         /// </summary>
         internal static bool HasDeleteFlag { get; } = typeof(TEntity).HasProperty(DbConstants.DeleteFlag);
-
-        /// <summary>
-        /// 回傳 <see cref="TEntity"/> 是否有名為 CreUid 的欄位。
-        /// </summary>
-        internal static bool HasCreUid { get; } = typeof(TEntity).HasProperty(DbConstants.CreUid);
-        
-        /// <summary>
-        /// 回傳 <see cref="TEntity"/> 是否有名為 CreDate 的欄位。
-        /// </summary>
-        internal static bool HasCreDate { get; } = typeof(TEntity).HasProperty(DbConstants.CreDate);
-        
-        /// <summary>
-        /// 回傳 <see cref="TEntity"/> 是否有名為 UpdUid 的欄位。
-        /// </summary>
-        internal static bool HasUpdUid { get; } = typeof(TEntity).HasProperty(DbConstants.UpdUid);
-        
-        /// <summary>
-        /// 回傳 <see cref="TEntity"/> 是否有名為 UpdDate 的欄位。
-        /// </summary>
-        internal static bool HasUpdDate { get; } = typeof(TEntity).HasProperty(DbConstants.UpdDate);
     }
 
     /// <summary>

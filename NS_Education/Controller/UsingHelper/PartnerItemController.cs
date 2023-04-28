@@ -60,10 +60,10 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(PartnerItem_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BPID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選的合作廠商 ID")))
-                .Validate(i => i.BSCID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選的所屬房型類別 ID")))
-                .Validate(i => i.DHID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選的所屬廳別 ID")))
-                .Validate(i => i.BOCID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選的所屬入帳代號 ID")))
+                .Validate(i => i.BPID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的合作廠商 ID")))
+                .Validate(i => i.BSCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的所屬房型類別 ID")))
+                .Validate(i => i.DHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的所屬廳別 ID")))
+                .Validate(i => i.BOCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的所屬入帳代號 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -90,16 +90,16 @@ namespace NS_Education.Controller.UsingHelper
                        || pi.BOC.Code.Contains(input.Keyword)
                        || pi.DH.Code.Contains(input.Keyword));
 
-            if (input.BPID.IsValidId())
+            if (input.BPID.IsAboveZero())
                 query = query.Where(pi => pi.BPID == input.BPID);
 
-            if (input.BSCID.IsValidId())
+            if (input.BSCID.IsAboveZero())
                 query = query.Where(pi => pi.BSCID == input.BSCID);
 
-            if (input.DHID.IsValidId())
+            if (input.DHID.IsAboveZero())
                 query = query.Where(pi => pi.DHID == input.DHID);
 
-            if (input.BOCID.IsValidId())
+            if (input.BOCID.IsAboveZero())
                 query = query.Where(pi => pi.BOCID == input.BOCID);
 
             return query.OrderBy(pi => pi.SortNo)
@@ -223,10 +223,10 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.BPIID == 0, () => AddError(WrongFormat("房型 ID")))
-                .Validate(i => i.BPID.IsValidId(), () => AddError(EmptyNotAllowed("廠商 ID")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("房型類型 ID")))
-                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.BPID.IsAboveZero(), () => AddError(EmptyNotAllowed("廠商 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("房型類型 ID")))
+                .Validate(i => i.BOCID.IsAboveZero(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -257,11 +257,11 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(PartnerItem_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BPIID.IsValidId(), () => AddError(EmptyNotAllowed("房型 ID")))
-                .Validate(i => i.BPID.IsValidId(), () => AddError(EmptyNotAllowed("廠商 ID")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("房型類型 ID")))
-                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.BPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("房型 ID")))
+                .Validate(i => i.BPID.IsAboveZero(), () => AddError(EmptyNotAllowed("廠商 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("房型類型 ID")))
+                .Validate(i => i.BOCID.IsAboveZero(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

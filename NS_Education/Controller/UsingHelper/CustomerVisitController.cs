@@ -69,9 +69,9 @@ namespace NS_Education.Controller.UsingHelper
             DateTime eDate = default;
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
-                .Validate(i => i.BUID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之業務員 ID")))
-                .Validate(i => i.BSCID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之拜訪方式 ID")))
+                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
+                .Validate(i => i.BUID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之業務員 ID")))
+                .Validate(i => i.BSCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之拜訪方式 ID")))
                 .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
                     () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
                 .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
@@ -93,13 +93,13 @@ namespace NS_Education.Controller.UsingHelper
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(cv => cv.Title.Contains(input.Keyword) || cv.TargetTitle.Contains(input.Keyword));
 
-            if (input.CID.IsValidId())
+            if (input.CID.IsAboveZero())
                 query = query.Where(cv => cv.CID == input.CID);
 
-            if (input.BUID.IsValidId())
+            if (input.BUID.IsAboveZero())
                 query = query.Where(cv => cv.BUID == input.BUID);
 
-            if (input.BSCID.IsValidId())
+            if (input.BSCID.IsAboveZero())
                 query = query.Where(cv => cv.BSCID == input.BSCID);
 
             if (input.SDate.TryParseDateTime(out DateTime sDate))
@@ -230,9 +230,9 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate(true)
                 .Validate(i => i.CVID == 0, () => AddError(WrongFormat("拜訪紀錄 ID")))
-                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("客戶拜訪方式 ID")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("拜訪業務 ID")))
+                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶拜訪方式 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪業務 ID")))
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
@@ -262,10 +262,10 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(CustomerVisit_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate(true)
-                .Validate(i => i.CVID.IsValidId(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
-                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("客戶拜訪方式 ID")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("拜訪業務 ID")))
+                .Validate(i => i.CVID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
+                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶拜訪方式 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪業務 ID")))
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 

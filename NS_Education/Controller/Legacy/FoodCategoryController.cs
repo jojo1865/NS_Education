@@ -194,7 +194,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> SubmitEditValidateInput(FoodCategory_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DFCID.IsValidId(), () => AddError(EmptyNotAllowed("餐種 ID")))
+                .Validate(i => i.DFCID.IsAboveZero(), () => AddError(EmptyNotAllowed("餐種 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

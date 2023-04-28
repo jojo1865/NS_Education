@@ -176,7 +176,7 @@ namespace NS_Education.Controller.UsingHelper
             // 因為這個端點有特殊邏輯（id 輸入 0 時不查資料而是回傳僅部分欄位的空資料），不使用 Helper 會比較清晰
 
             // 1. 驗證輸入
-            if (!id.IsValidIdOrZero())
+            if (!id.IsZeroOrAbove())
             {
                 AddError(GetInfoByIdInputIncorrect);
                 return GetResponseJson();
@@ -294,9 +294,9 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(OrderCode_Submit_Input_APIItem input)
         {
             return await Task.Run(() => input.StartValidate()
-                .Validate(i => i.BOCID.IsValidIdOrZero(),
+                .Validate(i => i.BOCID.IsZeroOrAbove(),
                     () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.CodeType.IsValidIdOrZero(),
+                .Validate(i => i.CodeType.IsZeroOrAbove(),
                     () => AddError(EmptyNotAllowed("入帳代號類別")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("入帳代號編碼")))
@@ -331,9 +331,9 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(OrderCode_Submit_Input_APIItem input)
         {
             return await Task.Run(() => input.StartValidate()
-                .Validate(i => i.BOCID.IsValidId(),
+                .Validate(i => i.BOCID.IsAboveZero(),
                     () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.CodeType.IsValidIdOrZero(),
+                .Validate(i => i.CodeType.IsZeroOrAbove(),
                     () => AddError(EmptyNotAllowed("入帳代號類別")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("入帳代號編碼")))

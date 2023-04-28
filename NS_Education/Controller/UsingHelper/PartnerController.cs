@@ -63,8 +63,8 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Partner_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之合作廠商所屬分類 ID")))
-                .Validate(i => i.BSCID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之合作廠商所在區域 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之合作廠商所屬分類 ID")))
+                .Validate(i => i.BSCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之合作廠商所在區域 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -82,10 +82,10 @@ namespace NS_Education.Controller.UsingHelper
                     p.Title.Contains(input.Keyword) || p.Code.Contains(input.Keyword) ||
                     p.Compilation.Contains(input.Keyword));
 
-            if (input.BCID.IsValidId())
+            if (input.BCID.IsAboveZero())
                 query = query.Where(p => p.BCID == input.BCID);
 
-            if (input.BSCID.IsValidId())
+            if (input.BSCID.IsAboveZero())
                 query = query.Where(p => p.BSCID == input.BSCID);
 
             return query.OrderBy(p => p.BPID);
@@ -219,7 +219,7 @@ namespace NS_Education.Controller.UsingHelper
 
             bool isValid = input.StartValidate(true)
                 .Validate(i => i.BPID == 0, () => AddError(WrongFormat("廠商 ID")))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => i.CleanSDate.TryParseDateTime(out startDate), () => AddError(WrongFormat("清潔合約起始日")))
                 .Validate(i => i.CleanEDate.TryParseDateTime(out endDate), () => AddError(WrongFormat("清潔合約結束日")))
                 .Validate(i => endDate >= startDate, () => AddError(SubmitCleanDatesIncorrect))
@@ -260,8 +260,8 @@ namespace NS_Education.Controller.UsingHelper
             DateTime endDate = default;
 
             bool isValid = input.StartValidate(true)
-                .Validate(i => i.BPID.IsValidId(), () => AddError(EmptyNotAllowed("廠商 ID")))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.BPID.IsAboveZero(), () => AddError(EmptyNotAllowed("廠商 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => i.CleanSDate.TryParseDateTime(out startDate), () => AddError(WrongFormat("清潔合約起始日")))
                 .Validate(i => i.CleanEDate.TryParseDateTime(out endDate), () => AddError(WrongFormat("清潔合約結束日")))
                 .Validate(i => endDate >= startDate, () => AddError(SubmitCleanDatesIncorrect))

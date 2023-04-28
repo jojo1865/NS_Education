@@ -68,7 +68,7 @@ namespace NS_Education.Controller.UsingHelper
             DateTime sDate = default;
             DateTime eDate = default;
             bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
+                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
                     () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
                 .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
@@ -89,7 +89,7 @@ namespace NS_Education.Controller.UsingHelper
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(cq => cq.AskTitle.Contains(input.Keyword) || cq.AskArea.Contains(input.Keyword));
 
-            if (input.CID.IsValidId())
+            if (input.CID.IsAboveZero())
                 query = query.Where(cq => cq.CID == input.CID);
 
             if (input.SDate.TryParseDateTime(out DateTime sDate))
@@ -206,7 +206,7 @@ namespace NS_Education.Controller.UsingHelper
             DateTime responseDate = default;
             var validation = input.StartValidate(true)
                 .Validate(i => i.CQID == 0, () => AddError(WrongFormat("問題紀錄 ID")))
-                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
                 .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")))
                 .Validate(i => !i.AskTitle.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題主旨")))
                 .Validate(i => !i.AskDescription.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題內容")));
@@ -259,8 +259,8 @@ namespace NS_Education.Controller.UsingHelper
             DateTime askDate = default;
             DateTime responseDate = default;
             var validation = input.StartValidate(true)
-                .Validate(i => i.CQID.IsValidId(), () => AddError(EmptyNotAllowed("問題紀錄 ID")))
-                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.CQID.IsAboveZero(), () => AddError(EmptyNotAllowed("問題紀錄 ID")))
+                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
                 .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")))
                 .Validate(i => !i.AskTitle.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題主旨")))
                 .Validate(i => !i.AskDescription.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題內容")));

@@ -230,7 +230,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> SubmitEditValidateInput(TimeSpan_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DTSID.IsValidId(), () => AddError(EmptyNotAllowed("時段 ID")))
+                .Validate(i => i.DTSID.IsAboveZero(), () => AddError(EmptyNotAllowed("時段 ID")))
                 .Validate(i => 0 <= i.HourS && i.HourS <= 23, () => AddError(WrongFormat("起始小時")))
                 .Validate(i => 0 <= i.HourE && i.HourE <= 23, () => AddError(WrongFormat("結束小時")))
                 .Validate(i => 0 <= i.MinuteS && i.MinuteS <= 59, () => AddError(WrongFormat("起始分鐘")))

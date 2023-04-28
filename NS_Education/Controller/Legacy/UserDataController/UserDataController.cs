@@ -120,9 +120,9 @@ namespace NS_Education.Controller.Legacy.UserDataController
             // TODO: 引用靜態參數檔，完整驗證使用者密碼
 
             // sanitize
-            if (!input.GID.IsValidId() || !DC.GroupData.Any(g => g.GID == input.GID))
+            if (!input.GID.IsAboveZero() || !DC.GroupData.Any(g => g.GID == input.GID))
                 AddError(SignUpGidIncorrect);
-            if (!input.DDID.IsValidId() || !DC.D_Department.Any(d => d.DDID == input.DDID))
+            if (!input.DDID.IsAboveZero() || !DC.D_Department.Any(d => d.DDID == input.DDID))
                 AddError(SignUpDdidIncorrect);
             if (input.LoginPassword.IsNullOrWhiteSpace())
                 AddError(EmptyNotAllowed("使用者密碼"));
@@ -309,13 +309,13 @@ namespace NS_Education.Controller.Legacy.UserDataController
         public async Task<bool> SubmitEditValidateInput(UserData_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.UID.IsValidId(), () => AddError(EmptyNotAllowed("使用者 ID")))
+                .Validate(i => i.UID.IsAboveZero(), () => AddError(EmptyNotAllowed("使用者 ID")))
                 .Validate(i => !i.Username.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者名稱")))
                 .Validate(i => !i.LoginAccount.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者帳號")))
                 .Validate(i => !i.LoginPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者密碼")))
                 .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
-                .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
-                .Validate(i => i.GID.IsValidId(), () => AddError(EmptyNotAllowed("身分 ID")))
+                .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
+                .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("身分 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -474,7 +474,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             // 2. 更新 UserData
             // 3. 回傳通用 Response
             await input.StartValidate(true)
-                .Validate(i => i.ID.IsValidId(),
+                .Validate(i => i.ID.IsAboveZero(),
                     () => AddError(UpdateUidIncorrect))
                 .Validate(i => i.ActiveFlag != null,
                     () => AddError(EmptyNotAllowed("ActiveFlag")))
@@ -534,7 +534,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             // +- c. 成功更新資料庫
             bool isValid = input
                 .StartValidate()
-                .Validate(i => i.ID.IsValidId(), () => AddError(UpdateUidIncorrect))
+                .Validate(i => i.ID.IsAboveZero(), () => AddError(UpdateUidIncorrect))
                 .Validate(i => !i.NewPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("新密碼")))
                 .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(UpdatePWPasswordNotEncryptable))
                 .IsValid();
@@ -605,10 +605,10 @@ namespace NS_Education.Controller.Legacy.UserDataController
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(u => u.UserName.Contains(input.Keyword));
 
-            if (input.DCID.IsValidId())
+            if (input.DCID.IsAboveZero())
                 query = query.Where(u => u.DD.DCID == input.DCID);
 
-            if (input.DDID.IsValidId())
+            if (input.DDID.IsAboveZero())
                 query = query.Where(u => u.DDID == input.DDID);
 
             return query.OrderBy(u => u.UID);
@@ -642,7 +642,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             UserData userData = null;
 
             bool isValid = await input.StartValidate(true)
-                .Validate(i => i.UID.IsValidId(), () => AddError(GetUidIncorrect))
+                .Validate(i => i.UID.IsAboveZero(), () => AddError(GetUidIncorrect))
                 .ValidateAsync(async i => userData = await GetMakeQuery(i), e => AddError(QueryFailed(e)))
                 .Validate(i => userData != null, () => AddError(GetUserNotFound))
                 .IsValid();

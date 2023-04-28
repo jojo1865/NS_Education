@@ -50,8 +50,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         public async Task<bool> GetListPagedValidateInput(UserLog_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.UID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之使用者 ID")))
-                .Validate(i => i.TargetID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之目標資料 ID")))
+                .Validate(i => i.UID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之使用者 ID")))
+                .Validate(i => i.TargetID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之目標資料 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -65,13 +65,13 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .Where(ul => DateTime.Now.AddMonths(-3) <= ul.CreDate)
                 .AsQueryable();
 
-            if (input.UID.IsValidId())
+            if (input.UID.IsAboveZero())
                 query = query.Where(ul => ul.UID == input.UID);
 
             if (!input.TargetTable.IsNullOrWhiteSpace())
                 query = query.Where(ul => ul.TargetTable.Contains(input.TargetTable));
 
-            if (input.TargetID.IsValidId())
+            if (input.TargetID.IsAboveZero())
                 query = query.Where(ul => ul.TargetID == input.TargetID);
             
             // 由新到舊

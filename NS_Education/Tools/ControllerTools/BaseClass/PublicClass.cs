@@ -82,9 +82,19 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected internal string WrongFormat(string fieldName)
+        protected string WrongFormat(string fieldName)
         {
             return $"「{fieldName}」格式不正確！";
+        }
+
+        /// <summary>
+        /// 回傳一串欄位內容過長時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string TooLong(string fieldName)
+        {
+            return $"「{fieldName}」超過最大長度！";
         }
         
         /// <summary>
@@ -100,9 +110,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
 
         /// <summary>
         /// 暫存 UID 處。ASP.NET 的 Controller 在每個 Action 都是獨特的 Instance，
-        /// 因此
+        /// 因此會基於每次 Action 為單位做暫存。
         /// </summary>
-        private int? uid = null;
+        private int? _uid;
         
         /// <summary>
         /// 取得目前 Request header JWT Token 中的 UID（送來請求的使用者 UID）。<br/>
@@ -111,7 +121,8 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <returns>UID</returns>
         protected internal int GetUid()
         {
-            return FilterStaticTools.GetUidInRequestInt(Request);
+            _uid = _uid ?? FilterStaticTools.GetUidInRequestInt(Request);
+            return _uid.Value;
         }
 
         /// <summary>

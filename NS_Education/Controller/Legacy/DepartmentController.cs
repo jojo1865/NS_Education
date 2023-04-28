@@ -55,7 +55,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> GetListPagedValidateInput(Department_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DCID.IsValidIdOrZero(), () => AddError(WrongFormat("所屬公司 ID")))
+                .Validate(i => i.DCID.IsZeroOrAbove(), () => AddError(WrongFormat("所屬公司 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -73,7 +73,7 @@ namespace NS_Education.Controller.Legacy
                     d.TitleC.Contains(input.Keyword) || d.TitleE.Contains(input.Keyword) ||
                     d.Code.Contains(input.Keyword));
 
-            if (input.DCID.IsValidId())
+            if (input.DCID.IsAboveZero())
                 query = query.Where(d => d.DCID == input.DCID);
 
             return query.OrderBy(d => d.DDID);
@@ -197,7 +197,7 @@ namespace NS_Education.Controller.Legacy
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.DDID == 0, () => AddError(WrongFormat("部門 ID")))
-                .Validate(i => i.DCID.IsValidId(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -222,8 +222,8 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> SubmitEditValidateInput(Department_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
-                .Validate(i => i.DCID.IsValidId(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
+                .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

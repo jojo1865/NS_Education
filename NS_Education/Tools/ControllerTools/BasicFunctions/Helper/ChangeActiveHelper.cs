@@ -52,7 +52,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 throw new NotSupportedException(ChangeActiveNotSupported);
 
             // 1. 驗證輸入。
-            if (!id.IsValidId())
+            if (!id.IsAboveZero())
                 _controller.AddError(ChangeActiveInputIdIncorrect);
 
             if (activeFlag is null)

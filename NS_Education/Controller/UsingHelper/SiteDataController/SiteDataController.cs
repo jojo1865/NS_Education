@@ -59,7 +59,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         {
             bool isValid = input
                 .StartValidate()
-                .Validate(i => i.BCID.IsValidIdOrZero(),
+                .Validate(i => i.BCID.IsZeroOrAbove(),
                     () => AddError(EmptyNotAllowed("分類 ID")))
                 .IsValid();
 
@@ -199,7 +199,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         {
             return await Task.FromResult(input.StartValidate()
                 .Validate(i => i.BSID == 0, () => AddError("場地 ID 只允許為 0！"))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("類別 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("類別 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
@@ -207,10 +207,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
                 .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
                 .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
-                .Validate(i => i.BSCID1.IsValidId(), () => AddError(EmptyNotAllowed("樓別 ID")))
-                .Validate(i => i.BSCID5.IsValidId(), () => AddError(EmptyNotAllowed("桌型 ID")))
-                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
-                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.BSCID1.IsAboveZero(), () => AddError(EmptyNotAllowed("樓別 ID")))
+                .Validate(i => i.BSCID5.IsAboveZero(), () => AddError(EmptyNotAllowed("桌型 ID")))
+                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.BOCID.IsAboveZero(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
                 .IsValid());
         }
 
@@ -257,8 +257,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public async Task<bool> SubmitEditValidateInput(SiteData_Submit_Input_APIItem input)
         {
             return await Task.FromResult(input.StartValidate()
-                .Validate(i => i.BSID.IsValidId(), () => AddError(WrongFormat("場地 ID")))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("類別 ID")))
+                .Validate(i => i.BSID.IsAboveZero(), () => AddError(WrongFormat("場地 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("類別 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
@@ -266,10 +266,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
                 .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
                 .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
-                .Validate(i => i.BSCID1.IsValidId(), () => AddError(EmptyNotAllowed("樓別 ID")))
-                .Validate(i => i.BSCID5.IsValidId(), () => AddError(EmptyNotAllowed("桌型 ID")))
-                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
-                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.BSCID1.IsAboveZero(), () => AddError(EmptyNotAllowed("樓別 ID")))
+                .Validate(i => i.BSCID5.IsAboveZero(), () => AddError(EmptyNotAllowed("桌型 ID")))
+                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.BOCID.IsAboveZero(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
                 .IsValid());
         }
 

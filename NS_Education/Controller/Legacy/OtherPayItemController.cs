@@ -241,7 +241,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> SubmitEditValidateInput(OtherPayItem_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DOPIID.IsValidId(), () => AddError(EmptyNotAllowed("項目 ID")))
+                .Validate(i => i.DOPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("項目 ID")))
                 .Validate(i => i.PaidType.IsInBetween(0, 1), () => AddError(WrongFormat("計價方式")))
                 .Validate(i => SubmitAllowedBSCID.Contains(i.Code), () => AddError(SubmitBSCIDNotSupported))
                 .IsValid();

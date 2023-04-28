@@ -52,7 +52,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> GetListPagedValidateInput(Hall_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DDID.IsValidIdOrZero(), () => AddError(WrongFormat("所屬部門 ID")))
+                .Validate(i => i.DDID.IsZeroOrAbove(), () => AddError(WrongFormat("所屬部門 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -214,7 +214,7 @@ namespace NS_Education.Controller.Legacy
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.DHID == 0, () => AddError(WrongFormat("廳別 ID")))
-                .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
+                .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
                 .Validate(i => i.CheckType == 0 || i.CheckType == 1, () => AddError(WrongFormat("開立憑證種類")))
                 .IsValid();
 
@@ -245,8 +245,8 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> SubmitEditValidateInput(Hall_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
-                .Validate(i => i.DDID.IsValidId(), () => AddError(EmptyNotAllowed("部門 ID")))
+                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
                 .Validate(i => i.CheckType == 0 || i.CheckType == 1, () => AddError(WrongFormat("開立憑證種類")))
                 .IsValid();
 

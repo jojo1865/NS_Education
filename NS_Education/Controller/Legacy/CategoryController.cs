@@ -95,7 +95,7 @@ namespace NS_Education.Controller.Legacy
 
         public async Task<Category_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_Category entity)
         {
-            B_Category parent = entity.ParentID.IsValidIdOrZero()
+            B_Category parent = entity.ParentID.IsZeroOrAbove()
                 ? await DC.B_Category.FirstOrDefaultAsync(c => c.BCID == entity.ParentID)
                 : null;
 
@@ -277,7 +277,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> SubmitEditValidateInput(Category_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => i.CategoryType < sCategoryTypes.Length, () => AddError(SubmitCategoryTypeNotSupported))
                 .IsValid();
 

@@ -219,6 +219,8 @@ namespace NS_Education.Controller.UsingHelper
             foreach (MenuData data in menuData)
             {
                 data.ActiveFlag = activeFlag ?? throw new ArgumentNullException(nameof(activeFlag));
+                data.UpdDate = DateTime.Now;
+                data.UpdUID = GetUid();
             }
 
             // 3. 寫入 DB
@@ -279,6 +281,8 @@ namespace NS_Education.Controller.UsingHelper
             foreach (MenuData data in menuData)
             {
                 data.DeleteFlag = deleteFlag ?? throw new ArgumentNullException(nameof(deleteFlag));
+                data.UpdDate = DateTime.Now;
+                data.UpdUID = GetUid();
             }
 
             // 4. 儲存至 DB
@@ -417,6 +421,8 @@ namespace NS_Education.Controller.UsingHelper
             try
             {
                 menuData.SortNo = sortNo;
+                menuData.UpdDate = DateTime.Now;
+                menuData.UpdUID = GetUid();
                 await DC.SaveChangesWithLogAsync(GetUid());
             }
             catch (Exception e)

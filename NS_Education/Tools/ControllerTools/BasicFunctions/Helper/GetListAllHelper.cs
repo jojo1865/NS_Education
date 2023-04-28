@@ -38,7 +38,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         public async Task<string> GetAllList(TGetListRequest input)
         {
             // 1. 驗證輸入
-            bool inputValidated = await _controller.GetListPagedValidateInput(input);
+            bool inputValidated = await _controller.GetListAllValidateInput(input);
 
             if (!inputValidated && !_controller.HasError())
                 _controller.AddError(GetPagedListInputIncorrect);
@@ -58,7 +58,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             List<TGetListRow> rows = new List<TGetListRow>();
             foreach (var entity in queryResult)
             {
-                var row = Task.Run(() => _controller.GetListPagedEntityToRow(entity)).Result;
+                var row = Task.Run(() => _controller.GetListAllEntityToRow(entity)).Result;
                 await row.SetInfoFromEntity(entity, _controller);
                 rows.Add(row);
             }
@@ -73,7 +73,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest input)
         {
-            IQueryable<TEntity> query = _controller.GetListPagedOrderedQuery(input);
+            IQueryable<TEntity> query = _controller.GetListAllOrderedQuery(input);
             
             // Filter by ActiveFlag
             if (input.ActiveFlag.IsInBetween(0, 1))

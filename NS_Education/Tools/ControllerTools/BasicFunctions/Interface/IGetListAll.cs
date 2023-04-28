@@ -37,7 +37,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// false：驗證不通過。
         /// </returns>
         [NonAction]
-        Task<bool> GetListPagedValidateInput(TGetListAllRequest input);
+        Task<bool> GetListAllValidateInput(TGetListAllRequest input);
 
         /// <summary>
         /// 依據取得列表的輸入資料，取得查詢。<br/>
@@ -46,7 +46,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <returns>具備排序的查詢。</returns>
         /// <remarks>若此方法是藉由 Helper 被呼叫時，實作者在查詢中應忽略 ActiveFlag 和 DeleteFlag 的判定。</remarks>
         [NonAction]
-        IOrderedQueryable<TEntity> GetListPagedOrderedQuery(TGetListAllRequest input);
+        IOrderedQueryable<TEntity> GetListAllOrderedQuery(TGetListAllRequest input);
 
         /// <summary>
         /// 將取得列表的查詢結果轉換成 Response 所需的子物件類型。。<br/>
@@ -55,6 +55,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <param name="entity">單筆查詢結果</param>
         /// <returns>Response 所需類型的單筆資料</returns>
         [NonAction]
-        Task<TGetListAllResponseRow> GetListPagedEntityToRow(TEntity entity);
+        Task<TGetListAllResponseRow> GetListAllEntityToRow(TEntity entity);
     }
 }

@@ -249,8 +249,6 @@ namespace NS_Education.Controller.UsingHelper
             {
                 cbu.DeleteFlag = true;
             }
-
-            DC.SaveChangesStandardProcedure(GetUid());
             
             // 2. 修改資料
             data.Code = input.Code;

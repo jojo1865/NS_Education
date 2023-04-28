@@ -360,8 +360,6 @@ namespace NS_Education.Controller.UsingHelper
                 cbu.DeleteFlag = true;
             }
 
-            DC.SaveChangesStandardProcedure(GetUid());
-
             // 更新資料
             data.BSCID6 = input.BSCID6;
             data.BSCID4 = input.BSCID4;

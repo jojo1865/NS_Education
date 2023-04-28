@@ -349,8 +349,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(EmptyNotAllowed("靜態參數編碼")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("靜態參數名稱")))
-                .Validate(i => i.ActiveFlag != null,
-                    () => AddError(EmptyNotAllowed("是否啟用")))
                 .IsValid());
         }
 

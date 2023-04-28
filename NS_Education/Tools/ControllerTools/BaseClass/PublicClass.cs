@@ -82,9 +82,19 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected internal string WrongFormat(string fieldName)
+        protected string WrongFormat(string fieldName)
         {
             return $"「{fieldName}」格式不正確！";
+        }
+
+        /// <summary>
+        /// 回傳一串欄位內容過長時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string TooLong(string fieldName)
+        {
+            return $"「{fieldName}」超過最大長度！";
         }
         
         /// <summary>

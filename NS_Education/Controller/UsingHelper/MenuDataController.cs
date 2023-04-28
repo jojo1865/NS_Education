@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.MenuData.GetInfoById;
 using NS_Education.Models.APIItems.MenuData.GetList;
+using NS_Education.Models.APIItems.MenuData.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -23,6 +24,7 @@ namespace NS_Education.Controller.UsingHelper
     public class MenuDataController : PublicClass
         , IGetListAll<MenuData, MenuData_GetList_Input_APIItem, MenuData_GetList_Output_Row_APIItem>
         , IGetInfoById<MenuData, MenuData_GetInfoById_Output_APIItem>
+        , ISubmit<MenuData, MenuData_Submit_Input_APIItem>
     {
         #region Common
 
@@ -36,6 +38,8 @@ namespace NS_Education.Controller.UsingHelper
         private readonly IGetListAllHelper<MenuData_GetList_Input_APIItem> _getListAllHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
+        private readonly ISubmitHelper<MenuData_Submit_Input_APIItem> _submitHelper;
+
         public MenuDataController()
         {
             _getListAllHelper =
@@ -45,6 +49,7 @@ namespace NS_Education.Controller.UsingHelper
 
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<MenuDataController, MenuData, MenuData_GetInfoById_Output_APIItem>(this);
+            _submitHelper = new SubmitHelper<MenuDataController, MenuData, MenuData_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -228,7 +233,7 @@ namespace NS_Education.Controller.UsingHelper
         }
 
         #endregion
-        
+
         #region DeleteItem
 
         /// <summary>
@@ -260,7 +265,7 @@ namespace NS_Education.Controller.UsingHelper
 
             if (!isValid)
                 return;
-            
+
             // 2. 找出資料
             var menuData = await DC.MenuData.Where(md => md.MDID == id || md.ParentID == id).ToListAsync();
 
@@ -269,13 +274,13 @@ namespace NS_Education.Controller.UsingHelper
                 AddError(DataNotFound);
                 return;
             }
-            
+
             // 3. 設定資料
             foreach (MenuData data in menuData)
             {
                 data.DeleteFlag = deleteFlag ?? throw new ArgumentNullException(nameof(deleteFlag));
             }
-            
+
             // 4. 儲存至 DB
             try
             {
@@ -286,6 +291,95 @@ namespace NS_Education.Controller.UsingHelper
                 AddError(UpdateDbError(e));
             }
         }
+
+        #endregion
+
+        #region Submit
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, null, nameof(MenuData_Submit_Input_APIItem.MDID))]
+        public async Task<string> Submit(MenuData_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(MenuData_Submit_Input_APIItem input)
+        {
+            return input.MDID == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(MenuData_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.MDID == 0, () => AddError(WrongFormat("選單 ID")))
+                .Validate(i => i.ParentId.IsValidIdOrZero(), () => AddError(WrongFormat("上層選單 ID")))
+                .Validate(i => i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單名稱")))
+                .Validate(i => i.Url.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單目標網址")))
+                .Validate(i => i.SortNo.IsValidIdOrZero(), () => AddError(WrongFormat("選單排序")))
+                .SkipIfAlreadyInvalid()
+                .Validate(i => i.Url.StartsWith("/") && !i.Url.EndsWith("/"), () => AddError(WrongFormat("選單目標網址")))
+                .Validate(i => i.Title.Length.IsInBetween(0, 50), () => AddError(TooLong("選單名稱")))
+                .Validate(i => i.Url.Length.IsInBetween(0, 300), () => AddError(TooLong("選單目標網址")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<MenuData> SubmitCreateData(MenuData_Submit_Input_APIItem input)
+        {
+            return new MenuData
+            {
+                ParentID = input.ParentId,
+                Title = input.Title,
+                URL = input.Url,
+                SortNo = input.SortNo.IsValidId()
+                    ? input.SortNo
+                    : await DC.MenuData
+                        .OrderByDescending(md => md.SortNo)
+                        .Select(md => md.SortNo).FirstOrDefaultAsync() + 1
+            };
+        }
+
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(MenuData_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.MDID.IsValidId(), () => AddError(EmptyNotAllowed("選單 ID")))
+                .Validate(i => i.ParentId.IsValidIdOrZero(), () => AddError(WrongFormat("上層選單 ID")))
+                .Validate(i => i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單名稱")))
+                .Validate(i => i.Url.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單目標網址")))
+                .Validate(i => i.SortNo.IsValidIdOrZero(), () => AddError(WrongFormat("選單排序")))
+                .SkipIfAlreadyInvalid()
+                .Validate(i => i.Url.StartsWith("/") && !i.Url.EndsWith("/"), () => AddError(WrongFormat("選單目標網址")))
+                .Validate(i => i.Title.Length.IsInBetween(0, 50), () => AddError(TooLong("選單名稱")))
+                .Validate(i => i.Url.Length.IsInBetween(0, 300), () => AddError(TooLong("選單目標網址")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<MenuData> SubmitEditQuery(MenuData_Submit_Input_APIItem input)
+        {
+            return DC.MenuData.Where(md => md.MDID == input.MDID);
+        }
+
+        public void SubmitEditUpdateDataFields(MenuData data, MenuData_Submit_Input_APIItem input)
+        {
+            data.ParentID = input.ParentId;
+            data.Title = input.Title ?? data.Title;
+            data.URL = input.Url ?? data.URL;
+            data.SortNo = input.SortNo.IsValidId()
+                ? input.SortNo
+                : data.SortNo;
+        }
+
+        #endregion
+
         #endregion
     }
 }

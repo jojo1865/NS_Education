@@ -27,6 +27,7 @@ namespace NS_Education.Controller.UsingHelper
         #region Common
 
         private static string UpdateDbError(Exception e) => $"更新資料庫時失敗，請確認伺服器狀態：{e.Message}";
+        private const string DataNotFound = "查無符合條件的資料！";
 
         #endregion
 
@@ -200,10 +201,15 @@ namespace NS_Education.Controller.UsingHelper
 
             // 2. 執行更新
             List<MenuData> menuData = await DC.MenuData
-                .Where(md => md.ActiveFlag && !md.DeleteFlag)
+                .Where(md => !md.DeleteFlag)
                 // 僅在關閉時才連同下層一同關閉
                 .Where(md => md.MDID == id || activeFlag == false && md.ParentID == id)
                 .ToListAsync();
+
+            if (!menuData.Any())
+            {
+                AddError(DataNotFound);
+            }
 
             foreach (MenuData data in menuData)
             {
@@ -221,6 +227,65 @@ namespace NS_Education.Controller.UsingHelper
             }
         }
 
+        #endregion
+        
+        #region DeleteItem
+
+        /// <summary>
+        /// 刪除單一選單以及其下層所有選單。
+        /// </summary>
+        /// <param name="id">對象資料 ID</param>
+        /// <param name="deleteFlag">
+        /// true：刪除<br/>
+        /// false：取消刪除
+        /// </param>
+        /// <returns>通用回傳格式訊息</returns>
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            // 有特殊邏輯：刪除時，需要連同子選單一同刪除，所以這裡不使用 Helper。
+            await _deleteItem(id, deleteFlag);
+
+            return GetResponseJson();
+        }
+
+        private async Task _deleteItem(int id, bool? deleteFlag)
+        {
+            // 1. 驗證輸入
+            bool isValid = this.StartValidate()
+                .Validate(_ => id.IsValidId(), () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
+                .Validate(_ => deleteFlag != null, () => AddError(EmptyNotAllowed("DeleteFlag")))
+                .IsValid();
+
+            if (!isValid)
+                return;
+            
+            // 2. 找出資料
+            var menuData = await DC.MenuData.Where(md => md.MDID == id || md.ParentID == id).ToListAsync();
+
+            if (!menuData.Any())
+            {
+                AddError(DataNotFound);
+                return;
+            }
+            
+            // 3. 設定資料
+            foreach (MenuData data in menuData)
+            {
+                data.DeleteFlag = deleteFlag ?? throw new ArgumentNullException(nameof(deleteFlag));
+            }
+            
+            // 4. 儲存至 DB
+            try
+            {
+                await DC.SaveChangesWithLogAsync(GetUid());
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbError(e));
+            }
+        }
         #endregion
     }
 }

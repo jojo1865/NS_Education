@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems.MenuData.MenuApi.GetList;
+using NS_Education.Models.APIItems.MenuData.MenuApi.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -20,27 +21,33 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
     /// 但處理的內容會與 MenuAPI 有關。
     /// </summary>
     public class MenuApiController : PublicClass,
-        IGetListAll<MenuAPI, MenuApi_GetList_Input_APIItem, MenuApi_GetList_Output_Row_APIItem>
+        IGetListAll<MenuAPI, MenuApi_GetList_Input_APIItem, MenuApi_GetList_Output_Row_APIItem>,
+        ISubmit<MenuAPI, MenuApi_Submit_Input_APIItem>
     {
         #region Common
 
-        private static readonly string[] ApiTypes = {"瀏覽", "新增", "修改", "刪除", "匯出", "登入/登出"}; 
-        
+        private static readonly string[] ApiTypes = { "瀏覽", "新增", "修改", "刪除", "匯出", "登入/登出" };
+
         #endregion
-        
+
         #region Initialization
 
         private readonly IGetListAllHelper<MenuApi_GetList_Input_APIItem> _getListAllHelper;
 
+        private readonly ISubmitHelper<MenuApi_Submit_Input_APIItem> _submitHelper;
+
         public MenuApiController()
         {
-            _getListAllHelper = new GetListAllHelper<MenuApiController, MenuAPI, MenuApi_GetList_Input_APIItem, MenuApi_GetList_Output_Row_APIItem>(this);
+            _getListAllHelper =
+                new GetListAllHelper<MenuApiController, MenuAPI, MenuApi_GetList_Input_APIItem,
+                    MenuApi_GetList_Output_Row_APIItem>(this);
+            _submitHelper = new SubmitHelper<MenuApiController, MenuAPI, MenuApi_Submit_Input_APIItem>(this);
         }
 
         #endregion
-        
+
         #region GetList
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
         public async Task<string> GetList(MenuApi_GetList_Input_APIItem input)
@@ -80,6 +87,79 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 Note = entity.Note ?? ""
             });
         }
+
+        #endregion
+
+        #region Submit
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, null, nameof(MenuApi_Submit_Input_APIItem.SeqNo))]
+        public async Task<string> Submit(MenuApi_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(MenuApi_Submit_Input_APIItem input)
+        {
+            return input.SeqNo == 0;
+        }
+
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(MenuApi_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.MDID.IsAboveZero(), () => AddError(EmptyNotAllowed("選單 ID")))
+                .Validate(i => i.SeqNo == 0, () => AddError(WrongFormat("API 流水號")))
+                .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("API 網址")))
+                .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), () => AddError(WrongFormat("API 屬性 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public async Task<MenuAPI> SubmitCreateData(MenuApi_Submit_Input_APIItem input)
+        {
+            return await Task.FromResult(new MenuAPI
+            {
+                MDID = input.MDID,
+                APIURL = input.ApiUrl,
+                APIType = input.APIType,
+                Note = input.Note
+            });
+        }
+        
+        #endregion
+
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(MenuApi_Submit_Input_APIItem input)
+        {
+            bool isValid = input.StartValidate()
+                .Validate(i => i.MDID.IsAboveZero(), () => AddError(EmptyNotAllowed("選單 ID")))
+                .Validate(i => i.SeqNo.IsAboveZero(), () => AddError(WrongFormat("API 流水號")))
+                .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("API 網址")))
+                .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), () => AddError(WrongFormat("API 屬性 ID")))
+                .IsValid();
+
+            return await Task.FromResult(isValid);
+        }
+
+        public IQueryable<MenuAPI> SubmitEditQuery(MenuApi_Submit_Input_APIItem input)
+        {
+            return DC.MenuAPI.Where(api => api.SeqNo == input.SeqNo);
+        }
+
+        public void SubmitEditUpdateDataFields(MenuAPI data, MenuApi_Submit_Input_APIItem input)
+        {
+            data.MDID = input.MDID;
+            data.APIURL = input.ApiUrl ?? data.APIURL;
+            data.APIType = input.APIType;
+            data.Note = input.Note ?? data.Note;
+        }
+
+        #endregion
+
         #endregion
     }
 }

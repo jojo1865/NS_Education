@@ -20,11 +20,17 @@ namespace NS_Education
                 url: "UserData/GetUserLogList/{id}",
                 defaults: new { controller = "UserDataLog", action = "GetList", id = UrlParameter.Optional }
             );
-            
+
             routes.MapRoute(
                 name: "MenuDataGetListForApi",
                 url: "MenuData/GetAPIList/{id}",
                 defaults: new { controller = "MenuApi", action = "GetList", id = UrlParameter.Optional }
+            );
+            
+            routes.MapRoute(
+                name: "MenuDataSubmitForApi",
+                url: "MenuData/SubmitAPI/{id}",
+                defaults: new { controller = "MenuApi", action = "Submit", id = UrlParameter.Optional }
             );
             
             routes.MapRoute(

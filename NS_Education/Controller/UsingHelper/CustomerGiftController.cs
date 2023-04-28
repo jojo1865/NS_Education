@@ -43,6 +43,9 @@ namespace NS_Education.Controller.UsingHelper
 
             _deleteItemHelper =
                 new DeleteItemHelper<CustomerGiftController, CustomerGift>(this);
+
+            _submitHelper =
+                new SubmitHelper<CustomerGiftController, CustomerGift, CustomerGift_Submit_Input_APIItem>(this);
         }
 
         #endregion

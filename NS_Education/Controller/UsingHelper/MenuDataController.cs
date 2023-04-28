@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -22,8 +24,14 @@ namespace NS_Education.Controller.UsingHelper
         , IGetListAll<MenuData, MenuData_GetList_Input_APIItem, MenuData_GetList_Output_Row_APIItem>
         , IGetInfoById<MenuData, MenuData_GetInfoById_Output_APIItem>
     {
+        #region Common
+
+        private static string UpdateDbError(Exception e) => $"更新資料庫時失敗，請確認伺服器狀態：{e.Message}";
+
+        #endregion
+
         #region Initialization
-        
+
         private readonly IGetListAllHelper<MenuData_GetList_Input_APIItem> _getListAllHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
@@ -39,9 +47,9 @@ namespace NS_Education.Controller.UsingHelper
         }
 
         #endregion
-        
+
         #region GetList
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(MenuData_GetList_Input_APIItem input)
@@ -63,7 +71,7 @@ namespace NS_Education.Controller.UsingHelper
             // 如果沒有 Admin role, 只回傳使用者有權限的選單
             bool hasAdminRole = FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin);
             IQueryable<MenuData> query = hasAdminRole ? GetListQueryAdmin(input) : GetListQueryUser(input);
-            
+
             if (input.ParentID.IsValidId())
                 query = query.Where(md => md.ParentID == input.ParentID);
 
@@ -102,7 +110,8 @@ namespace NS_Education.Controller.UsingHelper
                 // 這邊的 flag 條件要寫兩次，有兩個原因：
                 // 1. 寫成函數會被 EF 當成記憶體函數執行
                 // 2. 有可能有一般權限沒有 flag，但最高權限有 flag 的情況，提早篩就會把這類的 MenuData 篩掉
-                .Where(mgm => hasRootPrivilege || mgm.AddFlag || mgm.DeleteFlag || mgm.EditFlag || mgm.PringFlag || mgm.ShowFlag)
+                .Where(mgm => hasRootPrivilege || mgm.AddFlag || mgm.DeleteFlag || mgm.EditFlag || mgm.PringFlag ||
+                              mgm.ShowFlag)
                 // MenuData
                 .Select(mgm => mgm.MD);
 
@@ -127,9 +136,11 @@ namespace NS_Education.Controller.UsingHelper
                 SortNo = entity.SortNo
             });
         }
+
         #endregion
 
         #region GetInfoById
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
@@ -152,6 +163,64 @@ namespace NS_Education.Controller.UsingHelper
                 SortNo = entity.SortNo
             });
         }
+
+        #endregion
+
+        #region ChangeActive
+
+        /// <summary>
+        /// 更新單一選單的啟用 / 關閉狀態。設為關閉時，將連同下層選單一同設定。
+        /// </summary>
+        /// <param name="id">對象資料 ID</param>
+        /// <param name="activeFlag">
+        /// true：設為啟用<br/>
+        /// false：設為關閉
+        /// </param>
+        /// <returns>通用回傳格式訊息</returns>
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
+        {
+            // 有特殊邏輯：關閉時，需要同步關閉下層所有選單，所以這裡不用 helper。
+            await _changeActive(id, activeFlag);
+
+            return GetResponseJson();
+        }
+
+        private async Task _changeActive(int id, bool? activeFlag)
+        {
+            // 1. 驗證輸入
+            bool isValid = this.StartValidate()
+                .Validate(_ => id.IsValidId(), () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
+                .Validate(_ => activeFlag != null, () => AddError(EmptyNotAllowed("ActiveFlag")))
+                .IsValid();
+
+            if (!isValid)
+                return;
+
+            // 2. 執行更新
+            List<MenuData> menuData = await DC.MenuData
+                .Where(md => md.ActiveFlag && !md.DeleteFlag)
+                // 僅在關閉時才連同下層一同關閉
+                .Where(md => md.MDID == id || activeFlag == false && md.ParentID == id)
+                .ToListAsync();
+
+            foreach (MenuData data in menuData)
+            {
+                data.ActiveFlag = activeFlag ?? throw new ArgumentNullException(nameof(activeFlag));
+            }
+
+            // 3. 寫入 DB
+            try
+            {
+                await DC.SaveChangesWithLogAsync(GetUid());
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbError(e));
+            }
+        }
+
         #endregion
     }
 }

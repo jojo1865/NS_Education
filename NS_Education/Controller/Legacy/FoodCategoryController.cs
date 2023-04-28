@@ -51,7 +51,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> GetListPagedValidateInput(FoodCategory_GetList_Input_APIItem input)
         {
             // 輸入無須驗證
-            return true;
+            return await Task.FromResult(true);
         }
 
         public IOrderedQueryable<D_FoodCategory> GetListPagedOrderedQuery(FoodCategory_GetList_Input_APIItem input)

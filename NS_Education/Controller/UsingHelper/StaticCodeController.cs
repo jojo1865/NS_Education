@@ -306,9 +306,9 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(StaticCode_Submit_Input_APIItem input)
         {
             return await Task.Run(() => input.StartValidate()
-                .Validate(i => i.BSCID.IsValidIdOrZero(),
+                .Validate(i => i.BSCID.IsZeroOrAbove(),
                     () => AddError(EmptyNotAllowed("靜態參數 ID")))
-                .Validate(i => i.CodeType.IsValidIdOrZero(),
+                .Validate(i => i.CodeType.IsZeroOrAbove(),
                     () => AddError(EmptyNotAllowed("靜態參數所屬類別")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("靜態參數編碼")))
@@ -341,9 +341,9 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(StaticCode_Submit_Input_APIItem input)
         {
             return await Task.Run(() => input.StartValidate()
-                .Validate(i => i.BSCID.IsValidId(),
+                .Validate(i => i.BSCID.IsAboveZero(),
                     () => AddError(EmptyNotAllowed("靜態參數 ID")))
-                .Validate(i => i.CodeType.IsValidIdOrZero(),
+                .Validate(i => i.CodeType.IsZeroOrAbove(),
                     () => AddError(EmptyNotAllowed("靜態參數所屬類別")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("靜態參數編碼")))

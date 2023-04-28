@@ -8,54 +8,6 @@ namespace NS_Education.Tools.Extensions
     public static class StandardColumnExtensionMethods
     {
         /// <summary>
-        /// 驗證輸入是否符合 ID 值的規則。
-        /// </summary>
-        /// <param name="id">id</param>
-        /// <returns>true：ID 正確。<br/>
-        /// false：ID 錯誤。
-        /// </returns>
-        public static bool IsValidId(this int id)
-        {
-            return id > 0;
-        }
-        
-        /// <summary>
-        /// 驗證輸入是否符合 ID 值的規則。
-        /// </summary>
-        /// <param name="id">id</param>
-        /// <returns>true：ID 正確。<br/>
-        /// false：ID 錯誤。
-        /// </returns>
-        public static bool IsValidId(this int? id)
-        {
-            return id > 0;
-        }
-        
-        /// <summary>
-        /// 驗證輸入是否符合 ID 值的規則，並允許 0（通常為新增模式）。
-        /// </summary>
-        /// <param name="id">id</param>
-        /// <returns>true：ID 正確。<br/>
-        /// false：ID 錯誤。
-        /// </returns>
-        public static bool IsValidIdOrZero(this int id)
-        {
-            return id >= 0;
-        }
-        
-        /// <summary>
-        /// 驗證輸入是否符合 ID 值的規則，並允許 0（通常為新增模式）。
-        /// </summary>
-        /// <param name="id">id</param>
-        /// <returns>true：ID 正確。<br/>
-        /// false：ID 錯誤。
-        /// </returns>
-        public static bool IsValidIdOrZero(this int? id)
-        {
-            return id >= 0;
-        }
-
-        /// <summary>
         /// 驗證一組字串是否符合本專案目前支援的密碼格式。<br/>
         /// 目前只支援英數字。
         /// </summary>

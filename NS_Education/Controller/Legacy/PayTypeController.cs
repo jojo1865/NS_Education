@@ -53,7 +53,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> GetListPagedValidateInput(PayType_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsValidIdOrZero(), () => AddError(EmptyNotAllowed("所屬分類 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("所屬分類 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -202,7 +202,7 @@ namespace NS_Education.Controller.Legacy
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.DPTID == 0, () => AddError(WrongFormat("付款方式 ID")))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -232,8 +232,8 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> SubmitEditValidateInput(PayType_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DPTID.IsValidId(), () => AddError(WrongFormat("付款方式 ID")))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.DPTID.IsAboveZero(), () => AddError(WrongFormat("付款方式 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

@@ -59,9 +59,9 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Device_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之所屬分類 ID")))
-                .Validate(i => i.DHID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之所屬廳別 ID")))
-                .Validate(i => i.BOCID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之所屬入帳代號 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬分類 ID")))
+                .Validate(i => i.DHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬廳別 ID")))
+                .Validate(i => i.BOCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬入帳代號 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -79,13 +79,13 @@ namespace NS_Education.Controller.UsingHelper
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(d => d.Title.Contains(input.Keyword) || d.Code.Contains(input.Keyword));
 
-            if (input.BCID.IsValidId())
+            if (input.BCID.IsAboveZero())
                 query = query.Where(d => d.BCID == input.BCID);
 
-            if (input.DHID.IsValidId())
+            if (input.DHID.IsAboveZero())
                 query = query.Where(d => d.DHID == input.DHID);
 
-            if (input.BOCID.IsValidId())
+            if (input.BOCID.IsAboveZero())
                 query = query.Where(d => d.BOCID == input.BOCID);
 
             return query.OrderBy(d => d.BCID)
@@ -229,10 +229,10 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.BDID == 0, () => AddError(WrongFormat("設備 ID")))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("類別 ID")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("單位 ID")))
-                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("類別 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("單位 ID")))
+                .Validate(i => i.BOCID.IsAboveZero(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -267,11 +267,11 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(Device_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BDID.IsValidId(), () => AddError(EmptyNotAllowed("設備 ID")))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("類別 ID")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("單位 ID")))
-                .Validate(i => i.BOCID.IsValidId(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.DHID.IsValidId(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.BDID.IsAboveZero(), () => AddError(EmptyNotAllowed("設備 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("類別 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("單位 ID")))
+                .Validate(i => i.BOCID.IsAboveZero(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
+                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

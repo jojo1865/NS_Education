@@ -66,7 +66,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListAllValidateInput(MenuData_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.ParentID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之選單上層 ID")))
+                .Validate(i => i.ParentID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之選單上層 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -78,7 +78,7 @@ namespace NS_Education.Controller.UsingHelper
             bool hasAdminRole = FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin);
             IQueryable<MenuData> query = hasAdminRole ? GetListQueryAdmin(input) : GetListQueryUser(input);
 
-            if (input.ParentID.IsValidId())
+            if (input.ParentID.IsAboveZero())
                 query = query.Where(md => md.ParentID == input.ParentID);
 
             return query.OrderBy(md => md.SortNo)
@@ -197,7 +197,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             // 1. 驗證輸入
             bool isValid = this.StartValidate()
-                .Validate(_ => id.IsValidId(), () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
+                .Validate(_ => id.IsAboveZero(), () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
                 .Validate(_ => activeFlag != null, () => AddError(EmptyNotAllowed("ActiveFlag")))
                 .IsValid();
 
@@ -259,7 +259,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             // 1. 驗證輸入
             bool isValid = this.StartValidate()
-                .Validate(_ => id.IsValidId(), () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
+                .Validate(_ => id.IsAboveZero(), () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
                 .Validate(_ => deleteFlag != null, () => AddError(EmptyNotAllowed("DeleteFlag")))
                 .IsValid();
 
@@ -314,10 +314,10 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.MDID == 0, () => AddError(WrongFormat("選單 ID")))
-                .Validate(i => i.ParentId.IsValidIdOrZero(), () => AddError(WrongFormat("上層選單 ID")))
+                .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(WrongFormat("上層選單 ID")))
                 .Validate(i => i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單名稱")))
                 .Validate(i => i.Url.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單目標網址")))
-                .Validate(i => i.SortNo.IsValidIdOrZero(), () => AddError(WrongFormat("選單排序")))
+                .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序")))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.Url.StartsWith("/") && !i.Url.EndsWith("/"), () => AddError(WrongFormat("選單目標網址")))
                 .Validate(i => i.Title.Length.IsInBetween(0, 50), () => AddError(TooLong("選單名稱")))
@@ -334,7 +334,7 @@ namespace NS_Education.Controller.UsingHelper
                 ParentID = input.ParentId,
                 Title = input.Title,
                 URL = input.Url,
-                SortNo = input.SortNo.IsValidId()
+                SortNo = input.SortNo.IsAboveZero()
                     ? input.SortNo
                     : await DC.MenuData
                         .OrderByDescending(md => md.SortNo)
@@ -349,11 +349,11 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(MenuData_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.MDID.IsValidId(), () => AddError(EmptyNotAllowed("選單 ID")))
-                .Validate(i => i.ParentId.IsValidIdOrZero(), () => AddError(WrongFormat("上層選單 ID")))
+                .Validate(i => i.MDID.IsAboveZero(), () => AddError(EmptyNotAllowed("選單 ID")))
+                .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(WrongFormat("上層選單 ID")))
                 .Validate(i => i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單名稱")))
                 .Validate(i => i.Url.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("選單目標網址")))
-                .Validate(i => i.SortNo.IsValidIdOrZero(), () => AddError(WrongFormat("選單排序")))
+                .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序")))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.Url.StartsWith("/") && !i.Url.EndsWith("/"), () => AddError(WrongFormat("選單目標網址")))
                 .Validate(i => i.Title.Length.IsInBetween(0, 50), () => AddError(TooLong("選單名稱")))
@@ -373,7 +373,7 @@ namespace NS_Education.Controller.UsingHelper
             data.ParentID = input.ParentId;
             data.Title = input.Title ?? data.Title;
             data.URL = input.Url ?? data.URL;
-            data.SortNo = input.SortNo.IsValidId()
+            data.SortNo = input.SortNo.IsAboveZero()
                 ? input.SortNo
                 : data.SortNo;
         }

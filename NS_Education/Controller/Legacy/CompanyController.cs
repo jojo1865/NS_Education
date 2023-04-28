@@ -54,7 +54,7 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> GetListPagedValidateInput(Company_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsValidIdOrZero(), () => AddError(EmptyNotAllowed("資料所屬分類 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("資料所屬分類 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -69,7 +69,7 @@ namespace NS_Education.Controller.Legacy
                     c.TitleC.Contains(input.Keyword) || c.TitleE.Contains(input.Keyword) ||
                     c.Code.Contains(input.Keyword));
 
-            if (input.BCID.IsValidId())
+            if (input.BCID.IsAboveZero())
                 query = query.Where(c => c.BCID == input.BCID);
 
             return query.OrderBy(c => c.DCID);
@@ -190,7 +190,7 @@ namespace NS_Education.Controller.Legacy
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.DCID == 0, () => AddError(WrongFormat("公司 ID")))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -212,8 +212,8 @@ namespace NS_Education.Controller.Legacy
         public async Task<bool> SubmitEditValidateInput(Company_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DCID.IsValidId(), () => AddError(EmptyNotAllowed("公司 ID")))
-                .Validate(i => i.BCID.IsValidId(), () => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

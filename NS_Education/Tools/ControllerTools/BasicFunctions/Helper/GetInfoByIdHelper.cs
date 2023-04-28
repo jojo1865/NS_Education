@@ -36,7 +36,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         public async Task<string> GetInfoById(int id)
         {
             // 1. 驗證輸入資料
-            if (!id.IsValidId())
+            if (!id.IsAboveZero())
             {
                 _controller.AddError(GetInfoByIdInputIncorrect);
                 return _controller.GetResponseJson();

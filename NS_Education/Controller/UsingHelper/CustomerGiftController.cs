@@ -59,7 +59,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(CustomerGift_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate(true)
-                .Validate(i => i.CID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
+                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.SendYear.IsInBetween(1911, 9999), () => AddError(WrongFormat("欲篩選之贈送年分")))
                 .Validate(i =>
                         !i.SDate.TryParseDateTime(out DateTime startDate)
@@ -81,7 +81,7 @@ namespace NS_Education.Controller.UsingHelper
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(cg => cg.Title.Contains(input.Keyword));
 
-            if (input.CID.IsValidId())
+            if (input.CID.IsAboveZero())
                 query = query.Where(cg => cg.CID == input.CID);
 
             query = query.Where(cg => cg.Year == input.SendYear);
@@ -193,10 +193,10 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate(true)
                 .Validate(i => i.CGID == 0, () => AddError(WrongFormat("禮品贈與紀錄 ID")))
-                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("禮品 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品 ID")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
                 .IsValid();
 
@@ -226,11 +226,11 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(CustomerGift_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate(true)
-                .Validate(i => i.CGID.IsValidId(), () => AddError(EmptyNotAllowed("禮品贈與紀錄 ID")))
-                .Validate(i => i.CID.IsValidId(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.CGID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品贈與紀錄 ID")))
+                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
-                .Validate(i => i.BSCID.IsValidId(), () => AddError(EmptyNotAllowed("禮品 ID")))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品 ID")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
                 .IsValid();
 

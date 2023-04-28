@@ -52,8 +52,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             bool isValid = input.StartValidate()
                 .Validate(i => i.TargetYear.IsInBetween(1911, 9999), () => AddError(WrongFormat("目標年分")))
                 .Validate(i => i.TargetMonth.IsInBetween(1, 12), () => AddError(WrongFormat("目標月份")))
-                .Validate(i => i.BSID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之場地 ID")))
-                .Validate(i => i.CID.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
+                .Validate(i => i.BSID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之場地 ID")))
+                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -73,11 +73,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 rs => rs.TargetDate.Year == input.TargetYear && rs.TargetDate.Month == input.TargetMonth);
             
             // 場地 ID
-            if (input.BSID.IsValidId())
+            if (input.BSID.IsAboveZero())
                 query = query.Where(rs => rs.BSID == input.BSID);
             
             // 客戶 ID
-            if (input.CID.IsValidId())
+            if (input.CID.IsAboveZero())
                 query = query.Where(rs => rs.RH.CID == input.CID);
 
             return query.OrderBy(rs => rs.TargetDate)

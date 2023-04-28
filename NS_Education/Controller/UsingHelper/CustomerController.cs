@@ -64,8 +64,8 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Customer_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BSCID6.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選的行業別")))
-                .Validate(i => i.BSCID4.IsValidIdOrZero(), () => AddError(WrongFormat("欲篩選的區域別")))
+                .Validate(i => i.BSCID6.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的行業別")))
+                .Validate(i => i.BSCID4.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的區域別")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -91,13 +91,13 @@ namespace NS_Education.Controller.UsingHelper
                     || c.Compilation.Contains(input.Keyword)
                     || c.Code.Contains(input.Keyword));
 
-            if (input.BSCID6.IsValidId())
+            if (input.BSCID6.IsAboveZero())
                 query = query.Where(c => c.BSCID6 == input.BSCID6);
 
-            if (input.BSCID4.IsValidId())
+            if (input.BSCID4.IsAboveZero())
                 query = query.Where(c => c.BSCID4 == input.BSCID4);
 
-            if (input.BUID.IsValidId())
+            if (input.BUID.IsAboveZero())
                 query = query.Where(c => c.M_Customer_BusinessUser.Any(cbu => cbu.BUID == input.BUID));
 
             // ResverType 為 0 時，只找沒有任何預約紀錄的客戶
@@ -273,8 +273,8 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
-                .Validate(i => i.BSCID6.IsValidId(), () => AddError(EmptyNotAllowed("行業別 ID")))
-                .Validate(i => i.BSCID4.IsValidId(), () => AddError(EmptyNotAllowed("區域別 ID")))
+                .Validate(i => i.BSCID6.IsAboveZero(), () => AddError(EmptyNotAllowed("行業別 ID")))
+                .Validate(i => i.BSCID4.IsAboveZero(), () => AddError(EmptyNotAllowed("區域別 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代號")))
                 .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("客戶名稱")))
@@ -337,8 +337,8 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
-                .Validate(i => i.BSCID6.IsValidId(), () => AddError(EmptyNotAllowed("行業別 ID")))
-                .Validate(i => i.BSCID4.IsValidId(), () => AddError(EmptyNotAllowed("區域別 ID")))
+                .Validate(i => i.BSCID6.IsAboveZero(), () => AddError(EmptyNotAllowed("行業別 ID")))
+                .Validate(i => i.BSCID4.IsAboveZero(), () => AddError(EmptyNotAllowed("區域別 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代號")))
                 .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(),
                     () => AddError(EmptyNotAllowed("客戶名稱")))

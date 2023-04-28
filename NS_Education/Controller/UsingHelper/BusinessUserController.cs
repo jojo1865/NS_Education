@@ -236,7 +236,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(BusinessUser_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BUID.IsValidId(), () => AddError(EmptyNotAllowed("業務 ID")))
+                .Validate(i => i.BUID.IsAboveZero(), () => AddError(EmptyNotAllowed("業務 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

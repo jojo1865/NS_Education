@@ -109,7 +109,7 @@ namespace NS_Education.Controller.Legacy
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoByID(int ID = 0)
         {
-            var N = await DC.D_Hall.Include(q => q.DD).FirstOrDefaultAsync(q => q.DDID == ID && !q.DeleteFlag);
+            var N = await DC.D_Hall.Include(q => q.DD).FirstOrDefaultAsync(q => q.DHID == ID && !q.DeleteFlag);
             D_Hall_APIItem Item = null;
             if (N != null)
             {

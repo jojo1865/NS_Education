@@ -381,5 +381,50 @@ namespace NS_Education.Controller.UsingHelper
         #endregion
 
         #endregion
+        
+        #region ChangeSortNo
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        public async Task<string> ChangeSortNo(int id, int sortNo)
+        {
+            await _changeSortNo(id, sortNo);
+
+            return GetResponseJson();
+        }
+
+        private async Task _changeSortNo(int id, int sortNo)
+        {
+            // 1. 驗證輸入
+            bool isValid = this.StartValidate()
+                .Validate(_ => id.IsAboveZero(), () => AddError(EmptyNotAllowed("欲更新的選單 ID")))
+                .Validate(_ => sortNo.IsAboveZero(), () => AddError(EmptyNotAllowed("新的排序數字")))
+                .IsValid();
+
+            if (!isValid)
+                return;
+            
+            // 2. 查出資料
+            MenuData menuData = await DC.MenuData.FirstOrDefaultAsync(md => md.MDID == id && !md.DeleteFlag);
+
+            if (menuData == null)
+            {
+                AddError(DataNotFound);
+                return;
+            }
+            
+            // 3. 修改資料並儲存
+            try
+            {
+                menuData.SortNo = sortNo;
+                await DC.SaveChangesWithLogAsync(GetUid());
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbError(e));
+            }
+        }
+
+        #endregion
     }
 }

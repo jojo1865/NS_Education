@@ -13,7 +13,7 @@
     }
     public class cReturnMessage
     {
-        public bool Success = true;
+        public bool SuccessFlag = true;
         public string Message = "";
     }
 }

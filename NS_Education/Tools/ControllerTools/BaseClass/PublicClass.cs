@@ -32,7 +32,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
             cReturnMessage RM = new cReturnMessage();
             if (sError != "")
             {
-                RM.Success = false;
+                RM.SuccessFlag = false;
                 RM.Message = sError;
             }
             return RM;

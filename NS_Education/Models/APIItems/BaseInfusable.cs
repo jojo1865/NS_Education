@@ -2,11 +2,11 @@
 {
     public abstract class BaseInfusable : IReturnMessageInfusable
     {
-        public bool Success { get; private set; }
+        public bool SuccessFlag { get; private set; }
         public string Message { get; private set; }
         public void Infuse(cReturnMessage msg)
         {
-            Success = msg.Success;
+            SuccessFlag = msg.SuccessFlag;
             Message = msg.Message;
         }
     }

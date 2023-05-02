@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -6,6 +8,7 @@ using NS_Education.Models.APIItems.GroupData;
 using NS_Education.Models.APIItems.GroupData.GetInfoById;
 using NS_Education.Models.APIItems.GroupData.GetList;
 using NS_Education.Models.APIItems.GroupData.Submit;
+using NS_Education.Models.APIItems.GroupData.SubmitMenuData;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -201,6 +204,111 @@ namespace NS_Education.Controller.UsingHelper
         }
         
         #endregion
+        #endregion
+        
+        #region SubmitMenuData
+        
+        private const string SameMdIdDetected = "發現重覆的 MDID，請檢查輸入內容！";
+
+        /// <summary>
+        /// 新增/更新權限對應單一選單的 API 權限。
+        /// </summary>
+        /// <param name="input">輸入值。參照 <see cref="GroupData_SubmitMenuData_Input_APIItem"/>。</param>
+        /// <returns>通用回傳訊息格式</returns>
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin,
+            RequirePrivilege.AddFlag | RequirePrivilege.EditFlag | RequirePrivilege.DeleteFlag)]
+        public async Task<string> SubmitMenuData(GroupData_SubmitMenuData_Input_APIItem input)
+        {
+            // 1. 驗證輸入
+            if (!SubmitMenuDataValidateInput(input))
+                return GetResponseJson();
+
+            // 2. 更新 M_Group_Menu
+            await SubmitMenuDataUpdateMGroupMenu(input);
+
+            // 3. 更新 DB
+            await SubmitMenuDataWriteDb();
+            
+            // 4. 回傳資料
+            return GetResponseJson();
+        }
+
+        private async Task SubmitMenuDataWriteDb()
+        {
+            try
+            {
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbFailed(e));
+            }
+        }
+
+        private static string UpdateDbFailed(Exception e)
+        {
+            return $"更新 DB 時失敗：{e.Message}！";
+        }
+
+        private async Task SubmitMenuDataUpdateMGroupMenu(GroupData_SubmitMenuData_Input_APIItem input)
+        {
+            // 輸入的 MDID
+            IEnumerable<int> inputIds = input.GroupItems.Select(item => item.MDID).ToHashSet();
+
+            // 依據輸入的 MDID 建立 MDID to MenuData 字典
+            Dictionary<int, M_Group_Menu> menuIdToGroupMenuDict = await DC.M_Group_Menu
+                .Where(mgm => mgm.GID == input.GID)
+                .Where(mgm => inputIds.Contains(mgm.MDID))
+                .ToDictionaryAsync(mgm => mgm.MDID, mgm => mgm);
+
+            foreach (GroupData_MenuItem_APIItem item in input.GroupItems)
+            {
+                if (menuIdToGroupMenuDict.TryGetValue(item.MDID, out M_Group_Menu mgm))
+                {
+                    // 有原資料，則輸入的 ActiveFlag 為
+                    // |- a.  true 時：修改資料。
+                    // +- b. false 時：刪除資料。
+                    if (!item.ActiveFlag)
+                    {
+                        DC.M_Group_Menu.Remove(mgm);
+                        continue;
+                    }
+
+                    mgm.ShowFlag = item.ShowFlag;
+                    mgm.AddFlag = item.AddFlag;
+                    mgm.EditFlag = item.EditFlag;
+                    mgm.DeleteFlag = item.DeleteFlag;
+                    mgm.PringFlag = item.PrintFlag;
+                }
+                else if (item.ActiveFlag)
+                {
+                    // 沒有原資料，若 ActiveFlag 為 true，新增一筆 M_Group_Menu
+                    M_Group_Menu newEntity = new M_Group_Menu
+                    {
+                        GID = input.GID,
+                        MDID = item.MDID,
+                        ShowFlag = item.ShowFlag,
+                        AddFlag = item.AddFlag,
+                        EditFlag = item.EditFlag,
+                        DeleteFlag = item.DeleteFlag,
+                        PringFlag = item.PrintFlag
+                    };
+
+                    await DC.M_Group_Menu.AddAsync(newEntity);
+                }
+            }
+        }
+
+        private bool SubmitMenuDataValidateInput(GroupData_SubmitMenuData_Input_APIItem input)
+        {
+            return input.StartValidate()
+                .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
+                .Validate(i => i.GroupItems.Any(), () => AddError(EmptyNotAllowed("選單權限列表")))
+                .Validate(i => i.GroupItems.GroupBy(item => item.MDID).Count() == i.GroupItems.Count, () => AddError(SameMdIdDetected))
+                .IsValid();
+        }
+
         #endregion
     }
 }

@@ -23,6 +23,7 @@ namespace NS_Education.Controller.Legacy
         , IGetListPaged<D_Department, Department_GetList_Input_APIItem, Department_GetList_Output_Row_APIItem>
         , IDeleteItem<D_Department>
         , ISubmit<D_Department, Department_Submit_Input_APIItem>
+    , IChangeActive<D_Department>
     {
         #region Initialization
 
@@ -30,6 +31,7 @@ namespace NS_Education.Controller.Legacy
         private readonly IDeleteItemHelper _deleteItemHelper;
 
         private readonly ISubmitHelper<Department_Submit_Input_APIItem> _submitHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
 
         public DepartmentController()
         {
@@ -39,6 +41,7 @@ namespace NS_Education.Controller.Legacy
 
             _deleteItemHelper = new DeleteItemHelper<DepartmentController, D_Department>(this);
             _submitHelper = new SubmitHelper<DepartmentController, D_Department, Department_Submit_Input_APIItem>(this);
+            _changeActiveHelper = new ChangeActiveHelper<DepartmentController, D_Department>(this);
         }
 
         #endregion
@@ -142,19 +145,14 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            Error = "";
-            var N_ = await DC.D_Department.FirstOrDefaultAsync(q => q.DDID == ID && !q.DeleteFlag);
-            if (N_ != null)
-            {
-                N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            else
-                Error += "查無資料,無法更新;";
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
 
-            return ChangeJson(GetMsgClass(Error));
+        public IQueryable<D_Department> ChangeActiveQuery(int id)
+        {
+            return DC.D_Department.Where(dd => dd.DDID == id);
         }
 
         #endregion
@@ -244,6 +242,7 @@ namespace NS_Education.Controller.Legacy
         #endregion
 
         #endregion
+
 
     }
 }

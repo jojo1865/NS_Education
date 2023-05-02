@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems.GroupData.GetInfoById;
 using NS_Education.Models.APIItems.GroupData.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -14,17 +16,22 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 namespace NS_Education.Controller.UsingHelper
 {
     public class GroupDataController : PublicClass,
-        IGetListPaged<GroupData, GroupData_GetList_Input_APIItem, GroupData_GetList_Output_Row_APIItem>
+        IGetListPaged<GroupData, GroupData_GetList_Input_APIItem, GroupData_GetList_Output_Row_APIItem>,
+        IGetInfoById<GroupData, GroupData_GetInfoById_Output_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<GroupData_GetList_Input_APIItem> _getListPagedHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public GroupDataController()
         {
             _getListPagedHelper =
                 new GetListPagedHelper<GroupDataController, GroupData, GroupData_GetList_Input_APIItem,
                     GroupData_GetList_Output_Row_APIItem>(this);
+
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<GroupDataController, GroupData, GroupData_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -59,6 +66,47 @@ namespace NS_Education.Controller.UsingHelper
             {
                 GID = entity.GID,
                 Title = entity.Title ?? ""
+            });
+        }
+        #endregion
+
+        #region GetInfoById
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        public async Task<string> GetInfoById(int id)
+        {
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<GroupData> GetInfoByIdQuery(int id)
+        {
+            return DC.GroupData
+                .Where(gd => gd.GID == id);
+        }
+
+        public async Task<GroupData_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(GroupData entity)
+        {
+            return await Task.FromResult(new GroupData_GetInfoById_Output_APIItem
+            {
+                GID = entity.GID,
+                Title = entity.Title ?? "",
+                GroupItems = DC.MenuData
+                    .Include(md => md.M_Group_Menu)
+                    .Where(md => md.ActiveFlag && !md.DeleteFlag)
+                    .AsEnumerable()
+                    .Select(md => new { MenuData = md, ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID)})
+                    .Select(result => new GroupData_GetInfoById_Output_MenuItem_APIItem
+                    {
+                        MDID = result.MenuData.MDID,
+                        Title = result.MenuData.Title ?? "",
+                        ActiveFlag = result.ThisGroupMenu != null,
+                        AddFlag = result.ThisGroupMenu?.AddFlag ?? false,
+                        ShowFlag = result.ThisGroupMenu?.ShowFlag ?? false,
+                        EditFlag = result.ThisGroupMenu?.EditFlag ?? false,
+                        DeleteFlag = result.ThisGroupMenu?.DeleteFlag ?? false,
+                        PrintFlag = result.ThisGroupMenu?.PringFlag ?? false
+                    })
+                    .ToList()
             });
         }
         #endregion

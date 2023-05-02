@@ -24,13 +24,15 @@ namespace NS_Education.Controller.Legacy
     public class CategoryController : PublicClass,
         IGetListPaged<B_Category, Category_GetList_Input_APIItem, Category_GetList_Output_Row_APIItem>,
         IDeleteItem<B_Category>,
-        ISubmit<B_Category, Category_Submit_Input_APIItem>
+        ISubmit<B_Category, Category_Submit_Input_APIItem>,
+        IChangeActive<B_Category>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Category_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly ISubmitHelper<Category_Submit_Input_APIItem> _submitHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
 
         public CategoryController()
         {
@@ -38,6 +40,7 @@ namespace NS_Education.Controller.Legacy
                 Category_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<CategoryController, B_Category>(this);
             _submitHelper = new SubmitHelper<CategoryController, B_Category, Category_Submit_Input_APIItem>(this);
+            _changeActiveHelper = new ChangeActiveHelper<CategoryController, B_Category>(this);
         }
 
         #endregion
@@ -185,19 +188,14 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            Error = "";
-            var N_ = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == ID && !q.DeleteFlag);
-            if (N_ != null)
-            {
-                N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            else
-                Error += "查無資料,無法更新;";
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
 
-            return ChangeJson(GetMsgClass(Error));
+        public IQueryable<B_Category> ChangeActiveQuery(int id)
+        {
+            return DC.B_Category.Where(c => c.BCID == id);
         }
 
         #endregion

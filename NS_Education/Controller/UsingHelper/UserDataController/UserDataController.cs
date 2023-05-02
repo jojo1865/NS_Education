@@ -24,7 +24,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
 
-namespace NS_Education.Controller.Legacy.UserDataController
+namespace NS_Education.Controller.UsingHelper.UserDataController
 {
     public class UserDataController : PublicClass,
         IGetListPaged<UserData, UserData_GetList_Input_APIItem, UserData_GetList_Output_Row_APIItem>,

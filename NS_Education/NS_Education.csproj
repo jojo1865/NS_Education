@@ -256,7 +256,6 @@
     <Compile Include="Controller\Legacy\OtherPayItemController.cs" />
     <Compile Include="Controller\Legacy\PayTypeController.cs" />
     <Compile Include="Controller\Legacy\TimeSpanController.cs" />
-    <Compile Include="Controller\Legacy\UserDataController\UserDataController.cs" />
     <Compile Include="Controller\Legacy\ZipController.cs" />
     <Compile Include="Controller\HomeController.cs" />
     <Compile Include="Controller\UsingHelper\BusinessUserController.cs" />
@@ -275,6 +274,7 @@
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs" />
     <Compile Include="Controller\UsingHelper\StaticCodeController.cs" />
+    <Compile Include="Controller\UsingHelper\UserDataController\UserDataController.cs" />
     <Compile Include="Controller\UsingHelper\UserDataController\UserDataLogController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

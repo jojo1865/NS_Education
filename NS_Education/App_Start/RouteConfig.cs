@@ -34,6 +34,12 @@ namespace NS_Education
             );
             
             routes.MapRoute(
+                name: "MenuDataGetListByUid",
+                url: "MenuData/GetListByUID/{id}",
+                defaults: new { controller = "MenuApiPerUser", action = "GetList", id = UrlParameter.Optional }
+            );
+            
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }

@@ -266,6 +266,7 @@
     <Compile Include="Controller\UsingHelper\CustomerVisitController.cs" />
     <Compile Include="Controller\UsingHelper\DeviceController.cs" />
     <Compile Include="Controller\UsingHelper\MenuDataController\MenuApiController.cs" />
+    <Compile Include="Controller\UsingHelper\MenuDataController\MenuApiPerUserController.cs" />
     <Compile Include="Controller\UsingHelper\MenuDataController\MenuDataController.cs" />
     <Compile Include="Controller\UsingHelper\OrderCodeController.cs" />
     <Compile Include="Controller\UsingHelper\PartnerController.cs" />
@@ -338,6 +339,9 @@
     <Compile Include="Models\APIItems\Hall\GetList\Hall_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Hall\Submit\Hall_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\IGetResponse.cs" />
+    <Compile Include="Models\APIItems\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_ChildMenu_APIItem.cs" />
+    <Compile Include="Models\APIItems\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_MenuApi_APIItem.cs" />
+    <Compile Include="Models\APIItems\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_Node_APIItem.cs" />
     <Compile Include="Models\APIItems\MenuData\MenuApi\GetList\MenuApi_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\MenuData\MenuApi\GetList\MenuApi_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\MenuData\MenuApi\Submit\MenuApi_Submit_Input_APIItem.cs" />

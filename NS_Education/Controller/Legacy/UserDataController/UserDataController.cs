@@ -245,7 +245,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
             try
             {
                 user.LoginDate = DateTime.Now;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(user.UID);
             }
             catch (Exception e)
             {

@@ -113,8 +113,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 return;
             }
 
-            // 若驗證通過時，如果這支是 Show，寫一次 UserLog
-            if (_privileges.RequireShowFlag)
+            // 若驗證通過時，如果這支是 Show 或沒有要求任何權限，視為瀏覽，寫一次 UserLog
+            if (_privileges.RequireShowFlag || _privileges.None)
                 context.WriteUserLogAndSave(UserLogControlType.Show, FilterStaticTools.GetUidInClaimInt(claims));
         }
 

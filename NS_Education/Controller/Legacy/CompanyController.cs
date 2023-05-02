@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models;
-using NS_Education.Models.APIItems.Company;
+using NS_Education.Models.APIItems.Company.GetInfoById;
 using NS_Education.Models.APIItems.Company.GetList;
 using NS_Education.Models.APIItems.Company.Submit;
 using NS_Education.Models.Entities;
@@ -21,6 +19,7 @@ namespace NS_Education.Controller.Legacy
 {
     public class CompanyController : PublicClass,
         IGetListPaged<D_Company, Company_GetList_Input_APIItem, Company_GetList_Output_Row_APIItem>,
+        IGetInfoById<D_Company, Company_GetInfoById_Output_APIItem>,
         IDeleteItem<D_Company>,
         ISubmit<D_Company, Company_Submit_Input_APIItem>,
         IChangeActive<D_Company>
@@ -33,6 +32,8 @@ namespace NS_Education.Controller.Legacy
         private readonly ISubmitHelper<Company_Submit_Input_APIItem> _submitHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
 
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper; 
+
         public CompanyController()
         {
             _getListPagedHelper =
@@ -41,6 +42,7 @@ namespace NS_Education.Controller.Legacy
             _deleteItemHelper = new DeleteItemHelper<CompanyController, D_Company>(this);
             _submitHelper = new SubmitHelper<CompanyController, D_Company, Company_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<CompanyController, D_Company>(this);
+            _getInfoByIdHelper = new GetInfoByIdHelper<CompanyController, D_Company, Company_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -99,38 +101,33 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoById(int id)
         {
-            var N = await DC.D_Company.Include(q => q.BC).FirstOrDefaultAsync(q => q.DCID == ID && !q.DeleteFlag);
-            D_Company_APIItem Item = null;
-            if (N != null)
-            {
-                List<cSelectItem> SIs = new List<cSelectItem>();
-                var Cats = DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == 1).OrderBy(q => q.SortNo);
-                foreach (var Cat in await Cats.ToListAsync())
-                    SIs.Add(new cSelectItem { ID = Cat.BCID, Title = Cat.TitleC, SelectFlag = N.BCID == Cat.BCID });
-                Item = new D_Company_APIItem
-                {
-                    DCID = N.DCID,
-                    BCID = N.BCID,
-                    BC_TitleC = N.BC.TitleC,
-                    BC_TitleE = N.BC.TitleE,
-                    BC_List = SIs,
-                    Code = N.Code,
-                    TitleC = N.TitleC,
-                    TitleE = N.TitleE,
-                    DepartmentCt = N.D_Department.Count,
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                };
-            }
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
 
-            return ChangeJson(Item);
+        public IQueryable<D_Company> GetInfoByIdQuery(int id)
+        {
+            return DC.D_Company
+                .Include(dc => dc.BC)
+                .Include(dc => dc.D_Department)
+                .Where(dc => dc.DCID == id);
+        }
+
+        public async Task<Company_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(D_Company entity)
+        {
+            return await Task.FromResult(new Company_GetInfoById_Output_APIItem
+            {
+                DCID = entity.DCID,
+                BCID = entity.BCID,
+                BC_TitleC = entity.BC?.TitleC ?? "",
+                BC_TitleE = entity.BC?.TitleE ?? "",
+                BC_List = await DC.B_Category.GetCategorySelectable(entity.BC?.CategoryType, entity.BCID),
+                Code = entity.Code ?? "",
+                TitleC = entity.TitleC ?? "",
+                TitleE = entity.TitleE ?? "",
+                DepartmentCt = entity.D_Department.Count
+            });
         }
 
         #endregion

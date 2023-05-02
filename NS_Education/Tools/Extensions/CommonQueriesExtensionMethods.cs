@@ -54,6 +54,26 @@ namespace NS_Education.Tools.Extensions
         }
         
         /// <summary>
+        /// 取得 Department 的下拉選單。
+        /// </summary>
+        /// <param name="dbSet">Department 的 DbSet</param>
+        /// <param name="ddIdToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
+        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<ICollection<BaseResponseRowForSelectable>> GetDepartmentSelectable(this DbSet<D_Department> dbSet,
+            int ddIdToSelect)
+        {
+            return await dbSet
+                .Where(dd => dd.ActiveFlag && !dd.DeleteFlag)
+                .Select(dd => new BaseResponseRowForSelectable
+                {
+                    ID = dd.DDID,
+                    Title = dd.TitleC ?? "",
+                    SelectFlag = dd.DDID == ddIdToSelect
+                })
+                .ToListAsync();
+        }
+        
+        /// <summary>
         /// 取得 OrderCode 的下拉選單。
         /// </summary>
         /// <param name="dbSet">OrderCode 的 DbSet</param>

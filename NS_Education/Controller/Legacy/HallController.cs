@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models;
-using NS_Education.Models.APIItems.Hall;
+using NS_Education.Models.APIItems.Hall.GetInfoById;
 using NS_Education.Models.APIItems.Hall.GetList;
 using NS_Education.Models.APIItems.Hall.Submit;
 using NS_Education.Models.Entities;
@@ -23,7 +21,8 @@ namespace NS_Education.Controller.Legacy
         IGetListPaged<D_Hall, Hall_GetList_Input_APIItem, Hall_GetList_Output_Row_APIItem>,
         IDeleteItem<D_Hall>,
         ISubmit<D_Hall, Hall_Submit_Input_APIItem>,
-        IChangeActive<D_Hall>
+        IChangeActive<D_Hall>,
+        IGetInfoById<D_Hall, Hall_GetInfoById_Output_APIItem>
     {
         #region Initialization
 
@@ -31,6 +30,7 @@ namespace NS_Education.Controller.Legacy
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly ISubmitHelper<Hall_Submit_Input_APIItem> _submitHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public HallController()
         {
@@ -39,6 +39,7 @@ namespace NS_Education.Controller.Legacy
             _deleteItemHelper = new DeleteItemHelper<HallController, D_Hall>(this);
             _submitHelper = new SubmitHelper<HallController, D_Hall, Hall_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<HallController, D_Hall>(this);
+            _getInfoByIdHelper = new GetInfoByIdHelper<HallController, D_Hall, Hall_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -110,50 +111,43 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoById(int id)
         {
-            var N = await DC.D_Hall.Include(q => q.DD).FirstOrDefaultAsync(q => q.DHID == ID && !q.DeleteFlag);
-            D_Hall_APIItem Item = null;
-            if (N != null)
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<D_Hall> GetInfoByIdQuery(int id)
+        {
+            return DC.D_Hall
+                .Include(dh => dh.DD)
+                .Include(dh => dh.B_Device)
+                .Include(dh => dh.B_SiteData)
+                .Include(dh => dh.B_PartnerItem)
+                .Where(dh => dh.DHID == id);
+        }
+
+        public async Task<Hall_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(D_Hall entity)
+        {
+            return await Task.FromResult(new Hall_GetInfoById_Output_APIItem
             {
-                List<cSelectItem> SIs = new List<cSelectItem>();
-                var Deps = DC.D_Department.Where(q => !q.DeleteFlag).OrderBy(q => q.TitleC);
-
-                foreach (var Dep in await Deps.ToListAsync())
-                    SIs.Add(new cSelectItem { ID = Dep.DDID, Title = Dep.TitleC, SelectFlag = N.DDID == Dep.DDID });
-                Item = new D_Hall_APIItem
-                {
-                    DDID = N.DDID,
-                    DHID = N.DHID,
-                    DD_TitleC = N.DD.TitleC,
-                    DD_TitleE = N.DD.TitleE,
-                    DD_List = SIs,
-                    Code = N.Code,
-                    TitleC = N.TitleC,
-                    TitleE = N.TitleE,
-
-                    DiscountFlag = N.DiscountFlag,
-                    CheckoutNowFlag = N.CheckoutNowFlag,
-                    PrintCheckFlag = N.PrintCheckFlag,
-                    Invoice3Flag = N.Invoice3Flag,
-                    CheckType = N.CheckType,
-                    BusinessTaxRate = N.BusinessTaxRatePercentage / 100m,
-
-                    DeviceCt = N.B_Device.Count,
-                    SiteCt = N.B_SiteData.Count,
-                    PartnerItemCt = N.B_PartnerItem.Count,
-
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                };
-            }
-
-            return ChangeJson(Item);
+                DHID = entity.DHID,
+                DDID = entity.DDID,
+                DD_TitleC = entity.DD?.TitleC ?? "",
+                DD_TitleE = entity.DD?.TitleE ?? "",
+                DD_List = await DC.D_Department.GetDepartmentSelectable(entity.DDID),
+                Code = entity.Code ?? "",
+                TitleC = entity.TitleC ?? "",
+                TitleE = entity.TitleE ?? "",
+                DiscountFlag = entity.DiscountFlag,
+                CheckoutNowFlag = entity.CheckoutNowFlag,
+                PrintCheckFlag = entity.PrintCheckFlag,
+                Invoice3Flag = entity.Invoice3Flag,
+                CheckType = entity.CheckType,
+                BusinessTaxRatePercentage = entity.BusinessTaxRatePercentage,
+                DeviceCt = entity.B_Device.Count,
+                SiteCt = entity.B_SiteData.Count,
+                PartnerItemCt = entity.B_PartnerItem.Count
+            });
         }
 
         #endregion

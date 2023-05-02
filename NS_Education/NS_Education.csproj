@@ -247,7 +247,6 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Controller\Legacy\CategoryController.cs" />
     <Compile Include="Controller\Legacy\CompanyController.cs" />
     <Compile Include="Controller\Legacy\ContactTypeController.cs" />
     <Compile Include="Controller\Legacy\DepartmentController.cs" />
@@ -259,6 +258,8 @@
     <Compile Include="Controller\Legacy\ZipController.cs" />
     <Compile Include="Controller\HomeController.cs" />
     <Compile Include="Controller\UsingHelper\BusinessUserController.cs" />
+    <Compile Include="Controller\UsingHelper\CategoryController\CategoryController.cs" />
+    <Compile Include="Controller\UsingHelper\CategoryController\CategoryTypeListController.cs" />
     <Compile Include="Controller\UsingHelper\CustomerController.cs" />
     <Compile Include="Controller\UsingHelper\CustomerGiftController.cs" />
     <Compile Include="Controller\UsingHelper\CustomerQuestionController.cs" />
@@ -296,6 +297,7 @@
     <Compile Include="Models\APIItems\BusinessUser\Submit\BusinessUser_Submit_CID_APIItem.cs" />
     <Compile Include="Models\APIItems\BusinessUser\Submit\BusinessUser_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Category\B_Category_APIItem.cs" />
+    <Compile Include="Models\APIItems\Category\GetInfoById\Category_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\Category\GetList\Category_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Category\GetList\Category_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Category\Submit\Category_Submit_Input_APIItem.cs" />

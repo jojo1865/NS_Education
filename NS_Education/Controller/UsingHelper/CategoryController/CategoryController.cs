@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models;
-using NS_Education.Models.APIItems.Category;
+using NS_Education.Models.APIItems.Category.GetInfoById;
 using NS_Education.Models.APIItems.Category.GetList;
 using NS_Education.Models.APIItems.Category.Submit;
 using NS_Education.Models.Entities;
@@ -17,12 +15,12 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
-using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 
-namespace NS_Education.Controller.Legacy
+namespace NS_Education.Controller.UsingHelper.CategoryController
 {
     public class CategoryController : PublicClass,
         IGetListPaged<B_Category, Category_GetList_Input_APIItem, Category_GetList_Output_Row_APIItem>,
+        IGetInfoById<B_Category, Category_GetInfoById_Output_APIItem>,
         IDeleteItem<B_Category>,
         ISubmit<B_Category, Category_Submit_Input_APIItem>,
         IChangeActive<B_Category>
@@ -33,6 +31,7 @@ namespace NS_Education.Controller.Legacy
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly ISubmitHelper<Category_Submit_Input_APIItem> _submitHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public CategoryController()
         {
@@ -41,21 +40,8 @@ namespace NS_Education.Controller.Legacy
             _deleteItemHelper = new DeleteItemHelper<CategoryController, B_Category>(this);
             _submitHelper = new SubmitHelper<CategoryController, B_Category, Category_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<CategoryController, B_Category>(this);
-        }
-
-        #endregion
-
-        #region GetTypeList
-
-        //取得分類的類別列表
-        [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetTypeList()
-        {
-            List<cSelectItem> TIs = new List<cSelectItem>();
-            await Task.Run(() =>
-                TIs.AddRange(sCategoryTypes.Select((t, i) => new cSelectItem { ID = i, Title = t })));
-            return ChangeJson(TIs);
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<CategoryController, B_Category, Category_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -124,62 +110,43 @@ namespace NS_Education.Controller.Legacy
         //取得分類的內容
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        [ResponsePrivilegeWrapperFilter]
-        public async Task<string> GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoById(int id)
         {
-            var N = await DC.B_Category.FirstOrDefaultAsync(q => !q.DeleteFlag && q.BCID == ID);
-            List<cSelectItem> TIs = new List<cSelectItem>();
-            for (int i = 0; i < sCategoryTypes.Length; i++)
-                TIs.Add(new cSelectItem
-                    { ID = i, Title = sCategoryTypes[i], SelectFlag = (N == null ? i == 0 : i == N.CategoryType) });
-            B_Category_APIItem Item = new B_Category_APIItem();
-            if (N != null)
-            {
-                B_Category BC_P = null;
-                List<cSelectItem> BC_Ps = null;
-                if (N.ParentID > 0)
-                {
-                    BC_P = await DC.B_Category.FirstOrDefaultAsync(q => q.BCID == N.ParentID && !q.DeleteFlag);
-                    if (BC_P != null)
-                    {
-                        BC_Ps = new List<cSelectItem>();
-                        var _BC_Ps = DC.B_Category.Where(q => q.ParentID == BC_P.ParentID && !q.DeleteFlag)
-                            .OrderBy(q => q.SortNo);
-                        foreach (var _BC in await _BC_Ps.ToListAsync())
-                            BC_Ps.Add(new cSelectItem
-                                { ID = _BC.BCID, Title = _BC.TitleC, SelectFlag = _BC.BCID == BC_P.BCID });
-                    }
-                }
+            // 特殊邏輯：如果 id 為 0，回傳一個空的
+            return id == 0 
+                ? await GetInfoByIdZero()
+                : await _getInfoByIdHelper.GetInfoById(id);
+        }
 
-                Item = new B_Category_APIItem()
-                {
-                    BCID = N.BCID,
-                    iCategoryType = N.CategoryType,
-                    sCategoryType = sCategoryTypes[N.CategoryType],
-                    CategoryTypeList = TIs,
-                    ParentID = N.ParentID,
-                    ParentList = BC_Ps,
-                    ParentTitleC = (BC_P != null ? BC_P.TitleC : ""),
-                    ParentTitleE = (BC_P != null ? BC_P.TitleE : ""),
-                    Code = N.Code,
-                    TitleC = N.TitleC,
-                    TitleE = N.TitleE,
-                    SortNo = N.SortNo,
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                };
-            }
-            else
+        private async Task<string> GetInfoByIdZero()
+        {
+            Category_GetInfoById_Output_APIItem response = new Category_GetInfoById_Output_APIItem
             {
-                Item.CategoryTypeList = TIs;
-            }
+                CategoryTypeList = CategoryTypeListController.GetCategoryTypeList(sCategoryTypes)
+            };
 
-            return ChangeJson(Item);
+            return await Task.FromResult(GetResponseJson(response));
+        }
+
+        public IQueryable<B_Category> GetInfoByIdQuery(int id)
+        {
+            return DC.B_Category.Where(c => c.BCID == id);
+        }
+
+        public async Task<Category_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(B_Category entity)
+        {
+            return await Task.FromResult(new Category_GetInfoById_Output_APIItem
+            {
+                BCID = entity.BCID,
+                iCategoryType = entity.CategoryType,
+                sCategoryType = entity.CategoryType < sCategoryTypes.Length ? sCategoryTypes[entity.CategoryType] : "",
+                CategoryTypeList = CategoryTypeListController.GetCategoryTypeList(sCategoryTypes),
+                ParentID = entity.ParentID,
+                Code = entity.Code ?? "",
+                TitleC = entity.TitleC ?? "",
+                TitleE = entity.TitleE ?? "",
+                SortNo = entity.SortNo
+            });
         }
 
         #endregion

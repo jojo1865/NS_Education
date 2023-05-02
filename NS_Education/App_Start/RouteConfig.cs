@@ -10,6 +10,12 @@ namespace NS_Education
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
+                name: "CategoryGetTypeList",
+                url: "Category/GetTypeList/{id}",
+                defaults: new { controller = "CategoryTypeList", action = "GetList", id = UrlParameter.Optional }
+            );
+            
+            routes.MapRoute(
                 name: "SiteDataGetListForCalendar",
                 url: "SiteData/GetCalendarList/{id}",
                 defaults: new { controller = "SiteDataCalendar", action = "GetList", id = UrlParameter.Optional }

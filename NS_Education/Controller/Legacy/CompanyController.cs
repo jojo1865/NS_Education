@@ -22,7 +22,8 @@ namespace NS_Education.Controller.Legacy
     public class CompanyController : PublicClass,
         IGetListPaged<D_Company, Company_GetList_Input_APIItem, Company_GetList_Output_Row_APIItem>,
         IDeleteItem<D_Company>,
-        ISubmit<D_Company, Company_Submit_Input_APIItem>
+        ISubmit<D_Company, Company_Submit_Input_APIItem>,
+        IChangeActive<D_Company>
     {
         #region Intialization
 
@@ -30,6 +31,7 @@ namespace NS_Education.Controller.Legacy
         private readonly IDeleteItemHelper _deleteItemHelper;
 
         private readonly ISubmitHelper<Company_Submit_Input_APIItem> _submitHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
 
         public CompanyController()
         {
@@ -38,6 +40,7 @@ namespace NS_Education.Controller.Legacy
                     Company_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<CompanyController, D_Company>(this);
             _submitHelper = new SubmitHelper<CompanyController, D_Company, Company_Submit_Input_APIItem>(this);
+            _changeActiveHelper = new ChangeActiveHelper<CompanyController, D_Company>(this);
         }
 
         #endregion
@@ -136,19 +139,14 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            Error = "";
-            var N_ = await DC.D_Company.FirstOrDefaultAsync(q => q.DCID == ID && !q.DeleteFlag);
-            if (N_ != null)
-            {
-                N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            else
-                Error += "查無資料,無法更新;";
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
 
-            return ChangeJson(GetMsgClass(Error));
+        public IQueryable<D_Company> ChangeActiveQuery(int id)
+        {
+            return DC.D_Company.Where(c => c.DCID == id);
         }
 
         #endregion
@@ -233,6 +231,5 @@ namespace NS_Education.Controller.Legacy
         #endregion
 
         #endregion
-        
     }
 }

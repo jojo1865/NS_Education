@@ -22,13 +22,15 @@ namespace NS_Education.Controller.Legacy
     public class HallController : PublicClass,
         IGetListPaged<D_Hall, Hall_GetList_Input_APIItem, Hall_GetList_Output_Row_APIItem>,
         IDeleteItem<D_Hall>,
-        ISubmit<D_Hall, Hall_Submit_Input_APIItem>
+        ISubmit<D_Hall, Hall_Submit_Input_APIItem>,
+        IChangeActive<D_Hall>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Hall_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly ISubmitHelper<Hall_Submit_Input_APIItem> _submitHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
 
         public HallController()
         {
@@ -36,6 +38,7 @@ namespace NS_Education.Controller.Legacy
                 this);
             _deleteItemHelper = new DeleteItemHelper<HallController, D_Hall>(this);
             _submitHelper = new SubmitHelper<HallController, D_Hall, Hall_Submit_Input_APIItem>(this);
+            _changeActiveHelper = new ChangeActiveHelper<HallController, D_Hall>(this);
         }
 
         #endregion
@@ -159,19 +162,14 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            Error = "";
-            var N_ = await DC.D_Hall.FirstOrDefaultAsync(q => q.DHID == ID && !q.DeleteFlag);
-            if (N_ != null)
-            {
-                N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            else
-                Error += "查無資料,無法更新;";
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
 
-            return ChangeJson(GetMsgClass(Error));
+        public IQueryable<D_Hall> ChangeActiveQuery(int id)
+        {
+            return DC.D_Hall.Where(dh => dh.DHID == id);
         }
 
         #endregion
@@ -273,6 +271,5 @@ namespace NS_Education.Controller.Legacy
         #endregion
 
         #endregion
-        
     }
 }

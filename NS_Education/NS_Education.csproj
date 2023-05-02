@@ -327,6 +327,7 @@
     <Compile Include="Models\APIItems\Customer\Submit\Customer_Submit_BUID_APIItem.cs" />
     <Compile Include="Models\APIItems\Customer\Submit\Customer_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Department\D_Department_APIItem.cs" />
+    <Compile Include="Models\APIItems\Department\GetInfoById\Department_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\Department\GetList\Department_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Department\GetList\Department_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Department\Submit\Department_Submit_Input_APIItem.cs" />

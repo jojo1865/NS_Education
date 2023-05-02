@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models;
-using NS_Education.Models.APIItems.Department;
+using NS_Education.Models.APIItems.Department.GetInfoById;
 using NS_Education.Models.APIItems.Department.GetList;
 using NS_Education.Models.APIItems.Department.Submit;
 using NS_Education.Models.Entities;
@@ -21,9 +19,10 @@ namespace NS_Education.Controller.Legacy
 {
     public class DepartmentController : PublicClass
         , IGetListPaged<D_Department, Department_GetList_Input_APIItem, Department_GetList_Output_Row_APIItem>
+        , IGetInfoById<D_Department, Department_GetInfoById_Output_APIItem>
         , IDeleteItem<D_Department>
         , ISubmit<D_Department, Department_Submit_Input_APIItem>
-    , IChangeActive<D_Department>
+        , IChangeActive<D_Department>
     {
         #region Initialization
 
@@ -32,6 +31,8 @@ namespace NS_Education.Controller.Legacy
 
         private readonly ISubmitHelper<Department_Submit_Input_APIItem> _submitHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
+
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public DepartmentController()
         {
@@ -42,6 +43,7 @@ namespace NS_Education.Controller.Legacy
             _deleteItemHelper = new DeleteItemHelper<DepartmentController, D_Department>(this);
             _submitHelper = new SubmitHelper<DepartmentController, D_Department, Department_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<DepartmentController, D_Department>(this);
+            _getInfoByIdHelper = new GetInfoByIdHelper<DepartmentController, D_Department, Department_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -104,39 +106,33 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoById(int id)
         {
-            var N = await DC.D_Department.Include(q => q.DC).FirstOrDefaultAsync(q => q.DDID == ID && !q.DeleteFlag);
-            D_Department_APIItem Item = null;
-            if (N != null)
-            {
-                List<cSelectItem> SIs = new List<cSelectItem>();
-                var Coms = DC.D_Company.Where(q => !q.DeleteFlag).OrderBy(q => q.TitleC);
-                foreach (var Com in await Coms.ToListAsync())
-                    SIs.Add(new cSelectItem { ID = Com.DCID, Title = Com.TitleC, SelectFlag = N.DCID == Com.DCID });
-                Item = new D_Department_APIItem
-                {
-                    DDID = N.DDID,
-                    DCID = N.DCID,
-                    DC_TitleC = N.DC.TitleC,
-                    DC_TitleE = N.DC.TitleE,
-                    DC_List = SIs,
-                    Code = N.Code,
-                    TitleC = N.TitleC,
-                    TitleE = N.TitleE,
-                    PeopleCt = N.PeopleCt,
-                    HallCt = N.D_Hall.Count,
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                };
-            }
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
 
-            return ChangeJson(Item);
+        public IQueryable<D_Department> GetInfoByIdQuery(int id)
+        {
+            return DC.D_Department
+                .Include(dd => dd.DC)
+                .Include(dd => dd.D_Hall)
+                .Where(dd => dd.DDID == id);
+        }
+
+        public async Task<Department_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(D_Department entity)
+        {
+            return await Task.FromResult(new Department_GetInfoById_Output_APIItem
+            {
+                DDID = entity.DDID,
+                DCID = entity.DCID,
+                DC_TitleC = entity.DC?.TitleC ?? "",
+                DC_TitleE = entity.DC?.TitleE ?? "",
+                Code = entity.Code ?? "",
+                TitleC = entity.TitleC ?? "",
+                TitleE = entity.TitleE ?? "",
+                HallCt = entity.D_Hall.Count,
+                PeopleCt = entity.PeopleCt
+            });
         }
 
         #endregion
@@ -242,7 +238,5 @@ namespace NS_Education.Controller.Legacy
         #endregion
 
         #endregion
-
-
     }
 }

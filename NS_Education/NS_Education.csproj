@@ -500,6 +500,7 @@
     <Compile Include="Variables\DbConstants.cs" />
     <Compile Include="Variables\IOConstants.cs" />
     <Compile Include="Variables\JwtConstants.cs" />
+    <Compile Include="Variables\MenuApiType.cs" />
     <Compile Include="Variables\PrivilegeConstants.cs" />
     <Compile Include="Variables\UserLogControlType.cs" />
   </ItemGroup>

@@ -67,7 +67,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             return GetResponseJson(response);
         }
 
-        private static MenuData_GetListByUid_Output_Node_APIItem CreateNode(int thisNodeId,
+        private MenuData_GetListByUid_Output_Node_APIItem CreateNode(int thisNodeId,
             IDictionary<int, MenuData> menuDataDict,
             ILookup<int, MenuData> parentToChildrenLookUp,
             IDictionary<int, MenuData_GetListByUid_Output_Node_APIItem> createdNodes)
@@ -80,7 +80,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
             var children = parentToChildrenLookUp.FirstOrDefault(g => g.Key == thisNodeId);
 
-            // 如果 createdNodes 已經有這個 ParentID，表示已經建立過，回傳原有資料
+            // 如果 createdNodes 已經有這個 nodeId，表示已經建立過，回傳原有資料
             if (createdNodes.TryGetValue(thisNodeId,
                     out MenuData_GetListByUid_Output_Node_APIItem result))
                 return result;
@@ -102,6 +102,20 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                             CreateNode(child.MDID, menuDataDict, parentToChildrenLookUp, createdNodes)).ToList() ??
                         new List<MenuData_GetListByUid_Output_Node_APIItem>(),
                 Apis = parentMenuOrNull?.MenuAPI
+                           .Where(api => api.MD.ActiveFlag 
+                                         && !api.MD.DeleteFlag
+                                         && api.MD.M_Group_Menu.Any(mgm => 
+                                             mgm.G.ActiveFlag
+                                             && !mgm.G.DeleteFlag
+                                             && mgm.G.M_Group_User.Any(mgu => mgu.UID == GetUid())
+                                             // APIType 對照 M_Group_Menu，只有擁有所須權限 flag 時才能計入
+                                             && (api.APIType != (int)MenuApiType.Add || mgm.AddFlag)
+                                             && (api.APIType != (int)MenuApiType.Delete || mgm.DeleteFlag)
+                                             && (api.APIType != (int)MenuApiType.Edit || mgm.EditFlag)
+                                             && (api.APIType != (int)MenuApiType.Print || mgm.PringFlag)
+                                             && (api.APIType != (int)MenuApiType.Show || mgm.ShowFlag)
+                                         )
+                           )
                            .Select(menuApi => new MenuData_GetListByUid_Output_MenuApi_APIItem
                            {
                                ApiUrl = menuApi.APIURL ?? "",
@@ -141,9 +155,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Where(g => g.ActiveFlag && !g.DeleteFlag)
                 // M_Group_Menu
                 .SelectMany(g => g.M_Group_Menu)
+                // 初步篩選有任何 flag 才列入考量，API type 對照 flag 的部分之後在記憶體做
                 .Where(mgm => mgm.AddFlag || mgm.DeleteFlag || mgm.EditFlag || mgm.PringFlag || mgm.ShowFlag)
                 // MenuData
-                .Select(mgm => mgm.MD);
+                .Select(mgm => mgm.MD)
+                .Where(md => md.ActiveFlag && !md.DeleteFlag);
 
             bool hasRootAccess = menuData.Any(md => md.URL == PrivilegeConstants.RootAccessUrl);
 
@@ -151,7 +167,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 ? DC.MenuData.AsQueryable()
                 : menuData;
 
-            query = query.Include(md => md.MenuAPI);
+            query = query.Include(md => md.MenuAPI)
+                .ThenInclude(api => api.MD)
+                .ThenInclude(md => md.M_Group_Menu)
+                .ThenInclude(mgm => mgm.G)
+                .ThenInclude(g => g.M_Group_User);
 
             return query.OrderBy(md => md.SortNo)
                 .ThenBy(md => md.URL)

@@ -2,8 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems.OtherPayItem;
+using NS_Education.Models.APIItems.OtherPayItem.GetInfoById;
 using NS_Education.Models.APIItems.OtherPayItem.GetList;
 using NS_Education.Models.APIItems.OtherPayItem.Submit;
 using NS_Education.Models.Entities;
@@ -20,14 +19,18 @@ namespace NS_Education.Controller.Legacy
 {
     public class OtherPayItemController : PublicClass,
         IGetListPaged<D_OtherPayItem, OtherPayItem_GetList_Input_APIItem, OtherPayItem_GetList_Output_Row_APIItem>,
+        IGetInfoById<D_OtherPayItem, OtherPayItem_GetInfoById_Output_APIItem>,
         IDeleteItem<D_OtherPayItem>,
-        ISubmit<D_OtherPayItem, OtherPayItem_Submit_Input_APIItem>
+        ISubmit<D_OtherPayItem, OtherPayItem_Submit_Input_APIItem>, 
+        IChangeActive<D_OtherPayItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<OtherPayItem_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly ISubmitHelper<OtherPayItem_Submit_Input_APIItem> _submitHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public OtherPayItemController()
         {
@@ -38,6 +41,12 @@ namespace NS_Education.Controller.Legacy
             _deleteItemHelper = new DeleteItemHelper<OtherPayItemController, D_OtherPayItem>(this);
             _submitHelper =
                 new SubmitHelper<OtherPayItemController, D_OtherPayItem, OtherPayItem_Submit_Input_APIItem>(this);
+
+            _changeActiveHelper = new ChangeActiveHelper<OtherPayItemController, D_OtherPayItem>(this);
+
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<OtherPayItemController, D_OtherPayItem, OtherPayItem_GetInfoById_Output_APIItem>(
+                    this);
         }
 
         #endregion
@@ -91,44 +100,31 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoById(int id)
         {
-            var N = await DC.D_OtherPayItem.FirstOrDefaultAsync(q => q.DOPIID == ID && !q.DeleteFlag);
-            D_OtherPayItem_APIItem Item = null;
-            if (N != null)
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<D_OtherPayItem> GetInfoByIdQuery(int id)
+        {
+            return DC.D_OtherPayItem.Where(opi => opi.DOPIID == id);
+        }
+
+        public async Task<OtherPayItem_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(D_OtherPayItem entity)
+        {
+            return await Task.FromResult(new OtherPayItem_GetInfoById_Output_APIItem
             {
-                Item = new D_OtherPayItem_APIItem
-                {
-                    DOPIID = N.DOPIID,
-                    Code = N.Code,
-                    Title = N.Title,
-
-                    Ct = N.Ct,
-                    UnitPrice = N.UnitPrice,
-                    InPrice = N.InPrice,
-                    OutPrice = N.OutPrice,
-                    PaidType = N.PaidType,
-                    BSCID = N.BSCID,
-                    BOCID = N.BOCID,
-
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate
-                        ? N.UpdDate.ToString(DateTimeFormat)
-                        : ""),
-                    UpdUser = (N.CreDate != N.UpdDate
-                        ? await GetUserNameByID(N.UpdUID)
-                        : ""),
-                    UpdUID = (N.CreDate != N.UpdDate
-                        ? N.UpdUID
-                        : 0),
-
-                };
-            }
-
-            return ChangeJson(Item);
+                DOPIID = entity.DOPIID,
+                Code = entity.Code ?? "",
+                Title = entity.Title ?? "",
+                Ct = entity.Ct,
+                UnitPrice = entity.UnitPrice,
+                InPrice = entity.InPrice,
+                OutPrice = entity.OutPrice,
+                PaidType = entity.PaidType,
+                BSCID = entity.BSCID,
+                BOCID = entity.BOCID
+            });
         }
 
         #endregion
@@ -137,19 +133,14 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            Error = "";
-            var N_ = await DC.D_OtherPayItem.FirstOrDefaultAsync(q => q.DOPIID == ID && !q.DeleteFlag);
-            if (N_ != null)
-            {
-                N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            else
-                Error += "查無資料,無法更新;";
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
 
-            return ChangeJson(GetMsgClass(Error));
+        public IQueryable<D_OtherPayItem> ChangeActiveQuery(int id)
+        {
+            return DC.D_OtherPayItem.Where(opi => opi.DOPIID == id);
         }
 
         #endregion

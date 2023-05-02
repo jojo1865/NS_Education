@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems.UserData.UserData.ChangeActive;
 using NS_Education.Models.APIItems.UserData.UserData.GetInfoById;
 using NS_Education.Models.APIItems.UserData.UserData.GetList;
 using NS_Education.Models.APIItems.UserData.UserData.Login;
@@ -30,15 +28,19 @@ namespace NS_Education.Controller.Legacy.UserDataController
 {
     public class UserDataController : PublicClass,
         IGetListPaged<UserData, UserData_GetList_Input_APIItem, UserData_GetList_Output_Row_APIItem>,
+        IGetInfoById<UserData, UserData_GetInfoById_Output_APIItem>,
         IDeleteItem<UserData>,
-        ISubmit<UserData, UserData_Submit_Input_APIItem>
+        ISubmit<UserData, UserData_Submit_Input_APIItem>,
+        IChangeActive<UserData>
     {
         #region 初始化
 
         private readonly IGetListPagedHelper<UserData_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly ISubmitHelper<UserData_Submit_Input_APIItem> _submitHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
 
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         public UserDataController()
         {
             _getListPagedHelper = new
@@ -50,6 +52,10 @@ namespace NS_Education.Controller.Legacy.UserDataController
 
             _submitHelper = new
                 SubmitHelper<UserDataController, UserData, UserData_Submit_Input_APIItem>(this);
+
+            _changeActiveHelper = new
+                ChangeActiveHelper<UserDataController, UserData>(this);
+            _getInfoByIdHelper = new GetInfoByIdHelper<UserDataController, UserData, UserData_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -441,59 +447,17 @@ namespace NS_Education.Controller.Legacy.UserDataController
 
         #region ChangeActive
 
-        /// <summary>
-        /// 啟用 / 停止使用者帳號。
-        /// </summary>
-        /// <param name="input">輸入資料。</param>
-        /// <returns>通用訊息回傳格式。</returns>
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(UserData_ChangeActive_Input_APIItem input)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            // 1. 驗證 input 的 TargetUid 格式正確
-            // 2. 更新 UserData
-            // 3. 回傳通用 Response
-            await input.StartValidate(true)
-                .Validate(i => i.ID.IsAboveZero(),
-                    () => AddError(UpdateUidIncorrect))
-                .Validate(i => i.ActiveFlag != null,
-                    () => AddError(EmptyNotAllowed("ActiveFlag")))
-                // ReSharper disable once PossibleInvalidOperationException
-                .ValidateAsync(async i => await ChangeActiveFlagForUserData(input.ID, (bool)input.ActiveFlag),
-                    e => AddError(e.Message));
-
-            return GetResponseJson();
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
         }
 
-        private async Task ChangeActiveFlagForUserData(int inputTargetUid, bool newValue)
+        public IQueryable<UserData> ChangeActiveQuery(int id)
         {
-            UserData queried;
-
-            try
-            {
-                queried = await GetUserDataById(inputTargetUid);
-            }
-            catch (Exception e)
-            {
-                throw new DataException(QueryFailed(e));
-            }
-
-            if (queried == null || queried.DeleteFlag)
-                throw new NullReferenceException(UserDataNotFound);
-
-            try
-            {
-                queried.ActiveFlag = newValue;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            catch (Exception e)
-            {
-                throw new NullReferenceException(ChangeActiveUpdateFailed(e));
-            }
+            return DC.UserData.Where(ud => ud.UID == id);
         }
-
-        private async Task<UserData> GetUserDataById(int uid) =>
-            await DC.UserData.FirstOrDefaultAsync(u => u.UID == uid);
 
         #endregion
 
@@ -535,7 +499,7 @@ namespace NS_Education.Controller.Legacy.UserDataController
         private async Task UpdatePasswordForUserData(int id, string inputPassword)
         {
             // 1. 查詢資料。無資料時拋錯
-            UserData queried = await GetUserDataById(id);
+            UserData queried = await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == id);
             if (queried == null)
                 throw new NullReferenceException(UserDataNotFound);
 
@@ -616,48 +580,39 @@ namespace NS_Education.Controller.Legacy.UserDataController
         /// <param name="input">輸入資訊。請參照 <see cref="UserData_GetInfoById_Input_APIItem"/>。</param>
         /// <returns><see cref="UserData_GetInfoById_Output_APIItem"/></returns>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.ShowFlag, "UID", null)]
-        public async Task<string> GetInfoById(UserData_GetInfoById_Input_APIItem input)
+        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.ShowFlag, "ID", null)]
+        public async Task<string> GetInfoById(int id)
         {
-            UserData userData = null;
-
-            bool isValid = await input.StartValidate(true)
-                .Validate(i => i.UID.IsAboveZero(), () => AddError(GetUidIncorrect))
-                .ValidateAsync(async i => userData = await GetMakeQuery(i), e => AddError(QueryFailed(e)))
-                .Validate(i => userData != null, () => AddError(GetUserNotFound))
-                .IsValid();
-
-            return isValid ? GetResponseJson(UserDataToGetInfoByIdOutput(userData)) : GetResponseJson();
+            return await _getInfoByIdHelper.GetInfoById(id);
         }
 
-        private static UserData_GetInfoById_Output_APIItem UserDataToGetInfoByIdOutput(UserData userData)
+        public IQueryable<UserData> GetInfoByIdQuery(int id)
         {
-            return new UserData_GetInfoById_Output_APIItem
+            return DC.UserData
+                .Include(ud => ud.M_Group_User)
+                .ThenInclude(mgu => mgu.G)
+                .Where(ud => ud.UID == id);
+        }
+
+        public async Task<UserData_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(UserData entity)
+        {
+            return await Task.FromResult(new UserData_GetInfoById_Output_APIItem
             {
-                UID = userData.UID,
-                Username = userData.UserName,
-                LoginAccount = userData.LoginAccount,
-                LoginPassword = HSM.Des_1(userData.LoginPassword),
-                DDID = userData.DDID,
-                GID = userData.M_Group_User
-                    .Where(gu => gu.G.ActiveFlag && !gu.G.DeleteFlag)
-                    .OrderBy(gu => gu.GID)
-                    .FirstOrDefault()?
-                    .GID ?? 0,
-                ActiveFlag = userData.ActiveFlag,
-                Note = userData.Note
-            };
-        }
-
-        private async Task<UserData> GetMakeQuery(UserData_GetInfoById_Input_APIItem input)
-        {
-            UserData userData = await DC.UserData
-                .Include(u => u.M_Group_User)
-                .ThenInclude(gu => gu.G)
-                .FirstOrDefaultAsync(u => !u.DeleteFlag && u.UID == input.UID);
-            return userData;
+                UID = entity.UID,
+                Username = entity.UserName,
+                LoginAccount = entity.LoginAccount,
+                LoginPassword = HSM.Des_1(entity.LoginPassword),
+                DDID = entity.DDID,
+                GID = entity.M_Group_User
+                    .Where(mgu => mgu.G.ActiveFlag && !mgu.G.DeleteFlag)
+                    .OrderBy(mgu => mgu.MID)
+                    .Select(mgu => mgu.GID)
+                    .FirstOrDefault(),
+                Note = entity.Note ?? ""
+            });
         }
 
         #endregion
+        
     }
 }

@@ -166,7 +166,7 @@ namespace NS_Education.Controller.Legacy
             if (N_ != null)
             {
                 N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync();
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
             }
             else
                 Error += "查無資料,無法更新;";

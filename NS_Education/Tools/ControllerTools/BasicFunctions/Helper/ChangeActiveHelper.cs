@@ -77,7 +77,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             try
             {
                 FlagHelper.SetActiveFlag(t, activeFlagValue);
-                await _controller.DC.SaveChangesStandardProcedureAsync();
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid());
             }
             catch (Exception e)
             {

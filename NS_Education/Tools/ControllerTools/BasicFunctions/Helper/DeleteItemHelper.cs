@@ -72,7 +72,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             try
             {
                 FlagHelper.SetDeleteFlag(t, deleteFlag ?? throw new ArgumentNullException(nameof(deleteFlag)));
-                await _controller.DC.SaveChangesStandardProcedureAsync();
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid());
             }
             catch (Exception e)
             {

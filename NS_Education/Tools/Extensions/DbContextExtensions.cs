@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NS_Education.Models.Entities;
 using NS_Education.Models.Entities.DbContext;
-using NS_Education.Tools.Filters;
 using NS_Education.Variables;
 
 namespace NS_Education.Tools.Extensions
@@ -21,10 +20,10 @@ namespace NS_Education.Tools.Extensions
         /// 儲存修改之前，自動設置 CreUid 等欄位，並寫入 UserLog。
         /// </summary>
         /// <param name="context">DbContext</param>
-        /// <param name="uid">（可選）要求者的 UID。</param>
-        public static void SaveChangesStandardProcedure(this NsDbContext context, int? uid = null)
+        /// <param name="uid">要求者的 UID。</param>
+        public static void SaveChangesStandardProcedure(this NsDbContext context, int uid)
         {
-            DoStandardProcedure(context, uid ?? GetUid());
+            DoStandardProcedure(context, uid);
 
             context.SaveChanges();
         }
@@ -33,10 +32,10 @@ namespace NS_Education.Tools.Extensions
         /// 異步儲存修改之前，自動設置 CreUid 等欄位，並寫入 UserLog。
         /// </summary>
         /// <param name="context">DbContext</param>
-        /// <param name="uid">（可選）要求者的 UID。</param>
-        public static async Task SaveChangesStandardProcedureAsync(this NsDbContext context, int? uid = null)
+        /// <param name="uid">要求者的 UID。</param>
+        public static async Task SaveChangesStandardProcedureAsync(this NsDbContext context, int uid)
         {
-            DoStandardProcedure(context, uid ?? GetUid());
+            DoStandardProcedure(context, uid);
 
             await context.SaveChangesAsync();
         }
@@ -46,10 +45,10 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="context">DbContext</param>
         /// <param name="type">操作類型</param>
-        /// <param name="uid">（可選）使用者 ID</param>
-        public static void WriteUserLogAndSave(this NsDbContext context, UserLogControlType type, int? uid = null)
+        /// <param name="uid">使用者 ID</param>
+        public static void WriteUserLogAndSave(this NsDbContext context, UserLogControlType type, int uid)
         {
-            context.WriteUserLog(type, uid ?? GetUid());
+            context.WriteUserLog(type, uid);
 
             context.SaveChanges();
         }
@@ -59,10 +58,10 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="context">DbContext</param>
         /// <param name="type">操作類型</param>
-        /// <param name="uid">（可選）使用者 ID</param>
-        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int? uid = null)
+        /// <param name="uid">使用者 ID</param>
+        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int uid)
         {
-            context.WriteUserLog(type, uid ?? GetUid());
+            context.WriteUserLog(type, uid);
 
             await context.SaveChangesAsync();
         }
@@ -77,12 +76,6 @@ namespace NS_Education.Tools.Extensions
                 // 未變動或是在寫 UserLog 時，跳過
                 if (change.Entity is UserLog 
                     || change.State == EntityState.Unchanged)
-                    return;
-
-                // 只有登入日期改變時，不做任何事（這是登入紀錄）
-                if (change.Entity is UserData 
-                    && change.State == EntityState.Modified
-                    && change.Properties.All(p => !p.IsModified || p.Metadata.Name == nameof(UserData.LoginDate)))
                     return;
 
                 SetBasicFields(uid, change);
@@ -185,11 +178,6 @@ namespace NS_Education.Tools.Extensions
         private static HttpRequestWrapper GetCurrentRequest()
         {
             return new HttpRequestWrapper(HttpContext.Current.Request);
-        }
-
-        private static int GetUid(HttpRequestBase request = null)
-        { 
-            return FilterStaticTools.GetUidInRequestInt(request ?? GetCurrentRequest());
         }
 
         private static void WriteUserLog(this NsDbContext context, UserLogControlType controlType, int uid)

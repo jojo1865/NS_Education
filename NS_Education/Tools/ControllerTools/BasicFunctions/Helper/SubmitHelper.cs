@@ -76,7 +76,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             try
             {
                 await _controller.DC.AddAsync(t);
-                await _controller.DC.SaveChangesStandardProcedureAsync();
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid());
             }
             catch (Exception e)
             {
@@ -108,7 +108,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 3. 儲存至 DB
             try
             {
-                await _controller.DC.SaveChangesStandardProcedureAsync();
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid());
             }
             catch (Exception e)
             {

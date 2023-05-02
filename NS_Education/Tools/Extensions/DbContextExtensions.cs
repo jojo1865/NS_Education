@@ -95,21 +95,22 @@ namespace NS_Education.Tools.Extensions
 
         private static void SetBasicFields(int uid, EntityEntry change)
         {
-            switch (change.State)
+            UserLogControlType type = GetUserLogControlType(change);
+            switch (type)
             {
-                case EntityState.Added:
+                case UserLogControlType.Add:
                     change.SetIfEntityHasProperty(DbConstants.DeleteFlag, false);
                     change.SetIfEntityHasProperty(DbConstants.CreDate, DateTime.Now);
                     change.SetIfEntityHasProperty(DbConstants.CreUid, uid);
                     change.SetIfEntityHasProperty(DbConstants.UpdDate, DateTime.Now);
                     change.SetIfEntityHasProperty(DbConstants.UpdUid, 0);
                     break;
-                case EntityState.Deleted:
+                case UserLogControlType.Delete:
                     change.SetIfEntityHasProperty(DbConstants.DeleteFlag, true);
                     change.SetIfEntityHasProperty(DbConstants.UpdDate, DateTime.Now);
                     change.SetIfEntityHasProperty(DbConstants.UpdUid, uid);
                     break;
-                case EntityState.Modified:
+                case UserLogControlType.Edit:
                     change.SetIfEntityHasProperty(DbConstants.UpdDate, DateTime.Now);
                     change.SetIfEntityHasProperty(DbConstants.UpdUid, uid);
                     break;
@@ -129,6 +130,13 @@ namespace NS_Education.Tools.Extensions
             int targetId = context.GetTargetIdFromEntity(change.Entity);
 
             // 依據這筆修改的狀態，指定 ControlType
+            UserLogControlType controlType = GetUserLogControlType(change);
+
+            context.WriteUserLog(change.Metadata.GetTableName(), targetId, controlType, uid);
+        }
+
+        private static UserLogControlType GetUserLogControlType(EntityEntry change)
+        {
             UserLogControlType controlType = UserLogControlType.Show;
             switch (change.State)
             {
@@ -147,8 +155,7 @@ namespace NS_Education.Tools.Extensions
             PropertyEntry deleteFlag = change.Properties.FirstOrDefault(p => p.Metadata.Name == DbConstants.DeleteFlag);
             if (deleteFlag != null && deleteFlag.IsModified && deleteFlag.OriginalValue is false)
                 controlType = UserLogControlType.Delete;
-
-            context.WriteUserLog(change.Metadata.GetTableName(), targetId, controlType, uid);
+            return controlType;
         }
 
         private static int GetTargetIdFromEntity<T>(this NsDbContext context, T entity)

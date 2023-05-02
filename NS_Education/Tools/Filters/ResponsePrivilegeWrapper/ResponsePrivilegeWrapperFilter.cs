@@ -65,7 +65,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
                 )
                 .Join(menuApis,
                     groupMenu => groupMenu.MD.URL,
-                    menuApi => menuApi.APIURL,
+                    menuApi => menuApi.MD.URL,
                     (groupMenu, menuApi) => new Privilege
                     {
                         Url = menuApi.APIURL, 

@@ -1,6 +1,6 @@
-namespace NS_Education.Models.APIItems.GroupData.GetInfoById
+namespace NS_Education.Models.APIItems.GroupData
 {
-    public class GroupData_GetInfoById_Output_MenuItem_APIItem
+    public class GroupData_MenuItem_APIItem
     {
         public int MDID { get; set; }
         public string Title { get; set; }

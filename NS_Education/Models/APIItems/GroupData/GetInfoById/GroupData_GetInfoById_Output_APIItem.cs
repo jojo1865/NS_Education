@@ -7,7 +7,7 @@ namespace NS_Education.Models.APIItems.GroupData.GetInfoById
         public int GID { get; set; }
         public string Title { get; set; }
 
-        public ICollection<GroupData_GetInfoById_Output_MenuItem_APIItem> GroupItems { get; set; } =
-            new List<GroupData_GetInfoById_Output_MenuItem_APIItem>();
+        public ICollection<GroupData_MenuItem_APIItem> GroupItems { get; set; } =
+            new List<GroupData_MenuItem_APIItem>();
     }
 }

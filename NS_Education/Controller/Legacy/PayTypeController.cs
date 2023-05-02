@@ -22,7 +22,8 @@ namespace NS_Education.Controller.Legacy
     public class PayTypeController : PublicClass,
         IGetListPaged<D_PayType, PayType_GetList_Input_APIItem, PayType_GetList_Output_APIItem>,
         IDeleteItem<D_PayType>,
-        ISubmit<D_PayType, PayType_Submit_Input_APIItem>
+        ISubmit<D_PayType, PayType_Submit_Input_APIItem>,
+        IChangeActive<D_PayType>
     {
         #region Initialization
 
@@ -30,6 +31,7 @@ namespace NS_Education.Controller.Legacy
         private readonly IDeleteItemHelper _deleteItemHelper;
 
         private readonly ISubmitHelper<PayType_Submit_Input_APIItem> _submitHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
 
         public PayTypeController()
         {
@@ -37,6 +39,7 @@ namespace NS_Education.Controller.Legacy
                 PayType_GetList_Output_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<PayTypeController, D_PayType>(this);
             _submitHelper = new SubmitHelper<PayTypeController, D_PayType, PayType_Submit_Input_APIItem>(this);
+            _changeActiveHelper = new ChangeActiveHelper<PayTypeController, D_PayType>(this);
         }
 
         #endregion
@@ -147,19 +150,14 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            Error = "";
-            var N_ = await DC.D_PayType.FirstOrDefaultAsync(q => q.DPTID == ID && !q.DeleteFlag);
-            if (N_ != null)
-            {
-                N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            else
-                Error += "查無資料,無法更新;";
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
 
-            return ChangeJson(GetMsgClass(Error));
+        public IQueryable<D_PayType> ChangeActiveQuery(int id)
+        {
+            return DC.D_PayType.Where(pt => pt.DPTID == id);
         }
 
         #endregion

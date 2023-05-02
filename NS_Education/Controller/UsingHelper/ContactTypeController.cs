@@ -15,7 +15,7 @@ namespace NS_Education.Controller.Legacy
         PublicClass, 
         IGetListLocal<ContactType_GetList_Output_Row_APIItem>
     {
-        private IGetListLocalHelper _getListLocalHelper;
+        private readonly IGetListLocalHelper _getListLocalHelper;
 
         public ContactTypeController()
         {

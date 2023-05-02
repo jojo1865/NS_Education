@@ -1,8 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems.FoodCategory;
+using NS_Education.Models.APIItems.FoodCategory.GetInfoById;
 using NS_Education.Models.APIItems.FoodCategory.GetList;
 using NS_Education.Models.APIItems.FoodCategory.Submit;
 using NS_Education.Models.Entities;
@@ -19,14 +18,20 @@ namespace NS_Education.Controller.Legacy
 {
     public class FoodCategoryController : PublicClass,
         IGetListPaged<D_FoodCategory, FoodCategory_GetList_Input_APIItem, FoodCategory_GetList_Output_Row_APIItem>,
+        IGetInfoById<D_FoodCategory, FoodCategory_GetInfoById_Output_APIItem>,
         IDeleteItem<D_FoodCategory>,
-        ISubmit<D_FoodCategory, FoodCategory_Submit_Input_APIItem>
+        ISubmit<D_FoodCategory, FoodCategory_Submit_Input_APIItem>,
+        IChangeActive<D_FoodCategory>
     {
         #region Intialization
 
         private readonly IGetListPagedHelper<FoodCategory_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly ISubmitHelper<FoodCategory_Submit_Input_APIItem> _submitHelper;
+
+        private readonly IChangeActiveHelper _changeActiveHelper;
+
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper; 
 
         public FoodCategoryController()
         {
@@ -35,6 +40,8 @@ namespace NS_Education.Controller.Legacy
                     FoodCategory_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<FoodCategoryController, D_FoodCategory>(this);
             _submitHelper = new SubmitHelper<FoodCategoryController, D_FoodCategory, FoodCategory_Submit_Input_APIItem>(this);
+            _changeActiveHelper = new ChangeActiveHelper<FoodCategoryController, D_FoodCategory>(this);
+            _getInfoByIdHelper = new GetInfoByIdHelper<FoodCategoryController, D_FoodCategory, FoodCategory_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -82,32 +89,26 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoById(int id)
         {
-            var N = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID && !q.DeleteFlag);
-            D_FoodCategory_APIItem Item = null;
-            if (N != null)
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<D_FoodCategory> GetInfoByIdQuery(int id)
+        {
+            return DC.D_FoodCategory.Where(fc => fc.DFCID == id);
+        }
+
+        public async Task<FoodCategory_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(D_FoodCategory entity)
+        {
+            return await Task.FromResult(new FoodCategory_GetInfoById_Output_APIItem
             {
-                Item = new D_FoodCategory_APIItem
-                {
-                    DFCID = N.DFCID,
-                    Code = N.Code,
-                    Title = N.Title,
-
-                    UnitPrice = N.UnitPrice,
-                    Price = N.Price,
-
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                };
-            }
-
-            return ChangeJson(Item);
+                DFCID = entity.DFCID,
+                Code = entity.Code ?? "",
+                Title = entity.Title ?? "",
+                UnitPrice = entity.UnitPrice,
+                Price = entity.Price
+            });
         }
 
         #endregion
@@ -116,19 +117,14 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            Error = "";
-            var N_ = await DC.D_FoodCategory.FirstOrDefaultAsync(q => q.DFCID == ID && !q.DeleteFlag);
-            if (N_ != null)
-            {
-                N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            else
-                Error += "查無資料,無法更新;";
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
 
-            return ChangeJson(GetMsgClass(Error));
+        public IQueryable<D_FoodCategory> ChangeActiveQuery(int id)
+        {
+            return DC.D_FoodCategory.Where(fc => fc.DFCID == id);
         }
 
         #endregion

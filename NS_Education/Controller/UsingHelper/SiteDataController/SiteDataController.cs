@@ -275,7 +275,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public void SubmitEditUpdateDataFields(B_SiteData data, SiteData_Submit_Input_APIItem input)
         {
             // 1. 刪除這個場地原本有的所有組合
-            data.M_SiteGroupGroup.ForEach(sg =>
+            data.M_SiteGroupMaster.ForEach(sg =>
             {
                 sg.ActiveFlag = false;
                 sg.DeleteFlag = true;

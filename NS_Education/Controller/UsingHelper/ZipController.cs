@@ -15,7 +15,7 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controller.Legacy
+namespace NS_Education.Controller.UsingHelper
 {
     public class ZipController : PublicClass,
         IGetListPaged<D_Zip, Zip_GetList_Input_APIItem, Zip_GetList_Output_Row_APIItem>,

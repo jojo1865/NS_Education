@@ -34,7 +34,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
         #endregion
 
-        private readonly NsDbContext _dbContext = new NsDbContext();
+        // 每次呼叫時都開一個新的連線，避免非同步問題
+        private static NsDbContext DbContext => new NsDbContext();
         
         private readonly IAuthorizeType[] _roles;
         private readonly RequiredPrivileges _privileges;
@@ -120,7 +121,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims)
         {
             // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
-            bool isEnabled = _dbContext.B_StaticCode.Where(sc =>
+            bool isEnabled = DbContext.B_StaticCode.Where(sc =>
                 sc.CodeType == (int)StaticCodeType.SafetyControl && sc.ActiveFlag && !sc.DeleteFlag)
                 .Where(sc => sc.Code == ((int)StaticCodeSafetyControlCode.IsEnforcingOneTokenOneLogin).ToString())
                 .Select(sc => sc.SortNo)
@@ -132,7 +133,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             // 驗證 Token 符合 UserData 中紀錄的 JWT
             int uid = FilterStaticTools.GetUidInClaimInt(claims);
 
-            UserData user = _dbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);
+            UserData user = DbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);
 
             if (user is null)
                 throw new Exception(UserDataNotFound);
@@ -153,7 +154,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
             // 3. 依據 uid 查詢所有權限。
             // User -> M_Group_User -> GroupData -> M_Group_Menu -> MenuData -> MenuAPI
-            var query = _dbContext.UserData
+            var query = DbContext.UserData
                     .Include(u => u.M_Group_User)
                     .ThenInclude(groupUser => groupUser.G)
                     .ThenInclude(group => group.M_Group_Menu)

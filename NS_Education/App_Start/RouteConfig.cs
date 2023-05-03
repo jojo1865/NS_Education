@@ -10,6 +10,12 @@ namespace NS_Education
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
+                name: "ResverGetHeadList",
+                url: "Resver/GetHeadList/{id}",
+                defaults: new { controller = "Resver", action = "GetList", id = UrlParameter.Optional }
+            );
+            
+            routes.MapRoute(
                 name: "CategoryGetTypeList",
                 url: "Category/GetTypeList/{id}",
                 defaults: new { controller = "CategoryTypeList", action = "GetList", id = UrlParameter.Optional }

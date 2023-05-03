@@ -270,6 +270,7 @@
     <Compile Include="Controller\UsingHelper\PartnerController.cs" />
     <Compile Include="Controller\UsingHelper\PartnerItemController.cs" />
     <Compile Include="Controller\UsingHelper\PayTypeController.cs" />
+    <Compile Include="Controller\UsingHelper\ResverController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs" />
     <Compile Include="Controller\UsingHelper\StaticCodeController.cs" />
@@ -384,6 +385,8 @@
     <Compile Include="Models\APIItems\PayType\GetList\PayType_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\PayType\GetList\PayType_GetList_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\PayType\Submit\PayType_Submit_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\Resver\GetHeadList\Resver_GetHeadList_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\Resver\GetHeadList\Resver_GetHeadList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\SiteData\GetInfoById\SiteData_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\SiteData\GetListForCalendar\SiteData_GetListForCalendar_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\SiteData\GetListForCalendar\SiteData_GetListForCalendar_Output_Row_APIItem.cs" />

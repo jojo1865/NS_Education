@@ -88,6 +88,19 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
 
         /// <summary>
+        /// 回傳一串欄位內容過短時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <param name="length">（可選）長度</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string TooShort(string fieldName, int? length = null)
+        {
+            return length == null 
+                ? $"「{fieldName}」低於最小長度！"
+                : $"「{fieldName}」不得低於 {length} 個字！";
+        }
+        
+        /// <summary>
         /// 回傳一串欄位內容過長時可使用的預設錯誤訊息字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>

@@ -53,6 +53,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 AddError(SignUpGidIncorrect);
             if (!input.DDID.IsAboveZero() || !DC.D_Department.Any(d => d.DDID == input.DDID))
                 AddError(SignUpDdIdIncorrect);
+            int passwordMinLength = GetPasswordMinLength();
             if (input.LoginPassword.IsNullOrWhiteSpace())
                 AddError(EmptyNotAllowed("使用者密碼"));
             else
@@ -66,6 +67,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     AddError(PasswordAlphanumericOnly);
                     // 這裡不做提早返回，方便一次顯示更多錯誤訊息給使用者
                 }
+            if ((input.LoginPassword?.Length ?? 0) < passwordMinLength)
+                AddError(TooShort("密碼", passwordMinLength));
 
             // create UserData object, validate the columns along
             // TODO: 引用靜態參數檔，完整驗證使用者欄位
@@ -304,14 +307,18 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         public async Task<bool> SubmitEditValidateInput(UserData_Submit_Input_APIItem input)
         {
+            int passwordMinLength = GetPasswordMinLength();
+            
             bool isValid = input.StartValidate()
                 .Validate(i => i.UID.IsAboveZero(), () => AddError(EmptyNotAllowed("使用者 ID")))
                 .Validate(i => !i.Username.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者名稱")))
                 .Validate(i => !i.LoginAccount.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者帳號")))
                 .Validate(i => !i.LoginPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者密碼")))
-                .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
                 .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
                 .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("身分 ID")))
+                .SkipIfAlreadyInvalid()
+                .Validate(i => i.LoginPassword.Length >= passwordMinLength, () => AddError(TooShort("使用者密碼", passwordMinLength)))
+                .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -492,12 +499,15 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             // 1. 驗證。
             // |- a. 驗證所有輸入均有值
-            // |- b. 驗證新密碼可加密
-            // +- c. 成功更新資料庫
+            // |- b. 驗證密碼最小長度
+            // |- c. 驗證新密碼可加密
+            // +- d. 成功更新資料庫
+            int passwordMinLength = GetPasswordMinLength();
             bool isValid = input
                 .StartValidate()
                 .Validate(i => i.ID.IsAboveZero(), () => AddError(UpdateUidIncorrect))
                 .Validate(i => !i.NewPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("新密碼")))
+                .Validate(i => i.NewPassword?.Length >= passwordMinLength, () => AddError(TooShort("新密碼", passwordMinLength)))
                 .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(UpdatePWPasswordNotEncryptable))
                 .IsValid();
 
@@ -510,6 +520,15 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             // 2. 回傳通用訊息格式。
             return GetResponseJson();
+        }
+
+        private int GetPasswordMinLength()
+        {
+            return DC.B_StaticCode.Where(sc =>
+                    sc.CodeType == (int)StaticCodeType.SafetyControl && sc.ActiveFlag && !sc.DeleteFlag)
+                .Where(sc => sc.Code == ((int)StaticCodeSafetyControlCode.PasswordMinLength).ToString())
+                .Select(sc => sc.SortNo)
+                .FirstOrDefault();
         }
 
         private async Task UpdatePasswordForUserData(int id, string inputPassword)

@@ -147,9 +147,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         private const string LoginAccountNotFound = "查無此使用者帳號，請重新確認！";
         private const string LoginPasswordIncorrect = "使用者密碼錯誤！";
 
-        private static string LoginDateUpdateFailed(Exception e)
+        private static string LoginJwtUpdateFailed(Exception e)
         {
-            return $"上次登入時間更新失敗，錯誤訊息：{e.Message}！";
+            return $"更新 JWT 時失敗，錯誤訊息：{e.Message}！";
+        }
+        
+        private static string LoginDateOrJwtUpdateFailed(Exception e)
+        {
+            return $"更新 JWT 或登入時間時失敗，錯誤訊息：{e.Message}！";
         }
 
         #endregion
@@ -187,13 +192,11 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             // 1. 先查詢是否確實有這個帳號
             // 2. 確認帳號的啟用 Flag 與刪除 Flag 
             // 3. 有帳號，才驗證登入密碼
-            // 4. 更新使用者的上次登入時間，需更新成功才算登入成功
-            bool isValidated = await queried.StartValidate(true)
+            bool isValidated = queried.StartValidate(true)
                 .Validate(q => q != null, () => AddError(LoginAccountNotFound))
                 .Validate(q => q.ActiveFlag && !q.DeleteFlag, () => AddError(LoginAccountNotFound))
                 .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
                     () => AddError(LoginPasswordIncorrect))
-                .ValidateAsync(UpdateUserLoginDate)
                 .IsValid();
 
             if (!isValidated)
@@ -220,33 +223,43 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 JwtToken = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims)
             };
 
+            // 1. 更新 JWT 欄位
+            // 2. 更新 LoginDate
+            // 3. 儲存至 DB
+            await this.StartValidate()
+                .ValidateAsync(_ => UpdateJWT(queried, output.JwtToken), e => AddError(LoginJwtUpdateFailed(e)))
+                .Validate(_ => UpdateUserLoginDate(queried))
+                .ValidateAsync(_ => DC.SaveChangesStandardProcedureAsync(queried.UID),
+                    e => AddError(LoginDateOrJwtUpdateFailed(e)));
+
             return GetResponseJson(output);
         }
 
         /// <summary>
-        ///     更新使用者的登入日期時間。
+        /// 更新使用者的 JWT 資料，並在 UserPasswordLog 寫一筆紀錄。
+        /// </summary>
+        /// <param name="user">userdata</param>
+        /// <param name="jwt">新的 Token</param>
+        private async Task UpdateJWT(UserData user, string jwt)
+        {
+            UserPasswordLog newLog = new UserPasswordLog
+            {
+                UID = user.UID,
+                Type = (int)UserPasswordLogType.Login
+            };
+
+            await DC.UserPasswordLog.AddAsync(newLog);
+            
+            user.JWT = jwt;
+        }
+
+        /// <summary>
+        /// 更新使用者的登入日期時間。
         /// </summary>
         /// <param name="user">使用者資料</param>
-        /// <returns>
-        ///     true：更新成功。<br />
-        ///     false：更新失敗。
-        /// </returns>
-        private async Task<bool> UpdateUserLoginDate(UserData user)
+        private static void UpdateUserLoginDate(UserData user)
         {
-            bool result = true;
-
-            try
-            {
-                user.LoginDate = DateTime.Now;
-                await DC.SaveChangesStandardProcedureAsync(user.UID);
-            }
-            catch (Exception e)
-            {
-                AddError(LoginDateUpdateFailed(e));
-                result = false;
-            }
-
-            return result;
+            user.LoginDate = DateTime.Now;
         }
 
         #endregion

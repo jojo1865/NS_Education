@@ -521,6 +521,7 @@
     <Compile Include="Variables\MenuApiType.cs" />
     <Compile Include="Variables\PrivilegeConstants.cs" />
     <Compile Include="Variables\UserLogControlType.cs" />
+    <Compile Include="Variables\UserPasswordLogType.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />

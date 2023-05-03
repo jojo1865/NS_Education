@@ -380,6 +380,7 @@
     <Compile Include="Models\APIItems\OtherPayItem\Submit\OtherPayItem_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Partner\Submit\Partner_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\PayType\D_PayType_APIItem.cs" />
+    <Compile Include="Models\APIItems\PayType\GetInfoById\PayType_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\PayType\GetList\PayType_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\PayType\GetList\PayType_GetList_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\PayType\Submit\PayType_Submit_Input_APIItem.cs" />

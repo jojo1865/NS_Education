@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models;
-using NS_Education.Models.APIItems.PayType;
+using NS_Education.Models.APIItems.PayType.GetInfoById;
 using NS_Education.Models.APIItems.PayType.GetList;
 using NS_Education.Models.APIItems.PayType.Submit;
 using NS_Education.Models.Entities;
@@ -21,6 +19,7 @@ namespace NS_Education.Controller.Legacy
 {
     public class PayTypeController : PublicClass,
         IGetListPaged<D_PayType, PayType_GetList_Input_APIItem, PayType_GetList_Output_APIItem>,
+        IGetInfoById<D_PayType, PayType_GetInfoById_Output_APIItem>,
         IDeleteItem<D_PayType>,
         ISubmit<D_PayType, PayType_Submit_Input_APIItem>,
         IChangeActive<D_PayType>
@@ -32,6 +31,7 @@ namespace NS_Education.Controller.Legacy
 
         private readonly ISubmitHelper<PayType_Submit_Input_APIItem> _submitHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public PayTypeController()
         {
@@ -40,6 +40,7 @@ namespace NS_Education.Controller.Legacy
             _deleteItemHelper = new DeleteItemHelper<PayTypeController, D_PayType>(this);
             _submitHelper = new SubmitHelper<PayTypeController, D_PayType, PayType_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<PayTypeController, D_PayType>(this);
+            _getInfoByIdHelper = new GetInfoByIdHelper<PayTypeController, D_PayType, PayType_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -103,45 +104,37 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoById(int id)
         {
-            var N = await DC.D_PayType.FirstOrDefaultAsync(q => q.DPTID == ID && !q.DeleteFlag);
-            D_PayType_APIItem Item = null;
-            if (N != null)
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<D_PayType> GetInfoByIdQuery(int id)
+        {
+            return DC.D_PayType
+                .Include(pt => pt.BC)
+                .Where(pt => pt.DPTID == id);
+        }
+
+        public async Task<PayType_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(D_PayType entity)
+        {
+            return new PayType_GetInfoById_Output_APIItem
             {
-                List<cSelectItem> SIs = new List<cSelectItem>();
-                var Cats = DC.B_Category.Where(q => !q.DeleteFlag && q.CategoryType == 8).OrderBy(q => q.SortNo);
-                foreach (var Cat in await Cats.ToListAsync())
-                    SIs.Add(new cSelectItem { ID = Cat.BCID, Title = Cat.TitleC, SelectFlag = N.BCID == Cat.BCID });
-                Item = new D_PayType_APIItem
-                {
-                    DPTID = N.DPTID,
-                    BCID = N.BCID,
-                    BC_TitleC = N.BC.TitleC,
-                    BC_TitleE = N.BC.TitleE,
-                    BC_List = SIs,
-                    Code = N.Code,
-                    Title = N.Title,
-
-                    AccountingNo = N.AccountingNo,
-                    CustomerNo = N.CustormerNo,
-                    InvoiceFlag = N.InvoiceFlag,
-                    DepositFlag = N.DepositFlag,
-                    RestaurantFlag = N.RestaurantFlag,
-                    SimpleCheckoutFlag = N.SimpleCheckoutFlag,
-                    SimpleDepositFlag = N.SimpleDepositFlag,
-
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                };
-            }
-
-            return ChangeJson(Item);
+                DPTID = entity.DPTID,
+                BCID = entity.BCID,
+                BC_TitleC = entity.BC?.TitleC ?? "",
+                BC_TitleE = entity.BC?.TitleE ?? "",
+                BC_List = await DC.B_Category.GetCategorySelectable(entity.BC?.CategoryType, entity.BCID),
+                Code = entity.Code ?? "",
+                Title = entity.Title ?? "",
+                AccountingNo = entity.AccountingNo ?? "",
+                CustomerNo = entity.CustormerNo ?? "",
+                InvoiceFlag = entity.InvoiceFlag,
+                DepositFlag = entity.DepositFlag,
+                RestaurantFlag = entity.RestaurantFlag,
+                SimpleCheckoutFlag = entity.SimpleCheckoutFlag,
+                SimpleDepositFlag = entity.SimpleDepositFlag
+            };
         }
 
         #endregion

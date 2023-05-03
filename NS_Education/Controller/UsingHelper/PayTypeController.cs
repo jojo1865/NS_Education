@@ -15,7 +15,7 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controller.Legacy
+namespace NS_Education.Controller.UsingHelper
 {
     public class PayTypeController : PublicClass,
         IGetListPaged<D_PayType, PayType_GetList_Input_APIItem, PayType_GetList_Output_APIItem>,

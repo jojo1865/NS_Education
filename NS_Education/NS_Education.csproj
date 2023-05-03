@@ -247,7 +247,6 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Controller\Legacy\PayTypeController.cs" />
     <Compile Include="Controller\Legacy\TimeSpanController.cs" />
     <Compile Include="Controller\Legacy\ZipController.cs" />
     <Compile Include="Controller\HomeController.cs" />
@@ -272,6 +271,7 @@
     <Compile Include="Controller\UsingHelper\OtherPayItemController.cs" />
     <Compile Include="Controller\UsingHelper\PartnerController.cs" />
     <Compile Include="Controller\UsingHelper\PartnerItemController.cs" />
+    <Compile Include="Controller\UsingHelper\PayTypeController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs" />
     <Compile Include="Controller\UsingHelper\StaticCodeController.cs" />

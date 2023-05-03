@@ -2,8 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.APIItems.TimeSpan;
+using NS_Education.Models.APIItems.TimeSpan.GetInfoById;
 using NS_Education.Models.APIItems.TimeSpan.GetList;
 using NS_Education.Models.APIItems.TimeSpan.Submit;
 using NS_Education.Models.Entities;
@@ -20,6 +19,7 @@ namespace NS_Education.Controller.Legacy
 {
     public class TimeSpanController : PublicClass,
         IGetListPaged<D_TimeSpan, TimeSpan_GetList_Input_APIItem, TimeSpan_GetList_Output_Row_APIItem>,
+        IGetInfoById<D_TimeSpan, TimeSpan_GetInfoById_Output_APIItem>,
         IDeleteItem<D_TimeSpan>,
         ISubmit<D_TimeSpan, TimeSpan_Submit_Input_APIItem>,
         IChangeActive<D_TimeSpan>
@@ -32,6 +32,8 @@ namespace NS_Education.Controller.Legacy
         private readonly ISubmitHelper<TimeSpan_Submit_Input_APIItem> _submitHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
 
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
+
         public TimeSpanController()
         {
             _getListPagedHelper = new GetListPagedHelper<TimeSpanController, D_TimeSpan, TimeSpan_GetList_Input_APIItem,
@@ -40,6 +42,7 @@ namespace NS_Education.Controller.Legacy
             _deleteItemHelper = new DeleteItemHelper<TimeSpanController, D_TimeSpan>(this);
             _submitHelper = new SubmitHelper<TimeSpanController, D_TimeSpan, TimeSpan_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<TimeSpanController, D_TimeSpan>(this);
+            _getInfoByIdHelper = new GetInfoByIdHelper<TimeSpanController, D_TimeSpan, TimeSpan_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -75,11 +78,6 @@ namespace NS_Education.Controller.Legacy
 
         public async Task<TimeSpan_GetList_Output_Row_APIItem> GetListPagedEntityToRow(D_TimeSpan entity)
         {
-            // 計算 GetTimespan
-            // 將兩種時間都換算成總分鐘數, 然後再相減
-            int timeDiff = entity.HourS * 60 + entity.MinuteS - entity.HourE * 60 + entity.MinuteE;
-            // 如果是負數的情況，當成 0 輸出
-            timeDiff = Math.Max(timeDiff, 0);
             return await Task.FromResult(new TimeSpan_GetList_Output_Row_APIItem
             {
                 DTSID = entity.DTSID,
@@ -91,8 +89,18 @@ namespace NS_Education.Controller.Legacy
                 MinuteE = entity.MinuteE,
                 TimeS = (entity.HourS, entity.MinuteS).ToFormattedHourAndMinute(),
                 TimeE = (entity.HourE, entity.MinuteE).ToFormattedHourAndMinute(),
-                GetTimeSpan = timeDiff > 60 ? $"{timeDiff/60}小時{timeDiff%60}分鐘" : $"{timeDiff%60}分鐘"
+                GetTimeSpan = FormatGetTimeSpan((entity.HourS, entity.MinuteS), (entity.HourE, entity.MinuteE))
             });
+        }
+
+        private string FormatGetTimeSpan((int hour, int minute) startTime, (int hour, int minute) endTime)
+        {
+            // 計算 GetTimespan
+            // 將兩種時間都換算成總分鐘數, 然後再相減
+            int timeDiff = startTime.hour * 60 + startTime.minute - endTime.hour * 60 + endTime.minute;
+            // 如果是負數的情況，當成 0 輸出
+            timeDiff = Math.Max(timeDiff, 0);
+            return timeDiff > 60 ? $"{timeDiff / 60}小時{timeDiff % 60}分鐘" : $"{timeDiff % 60}分鐘";
         }
 
         #endregion
@@ -101,45 +109,31 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoById(int id)
         {
-            var N = await DC.D_TimeSpan.FirstOrDefaultAsync(q => q.DTSID == ID && !q.DeleteFlag);
-            D_TimeSpan_APIItem Item = null;
-            if (N != null)
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        public IQueryable<D_TimeSpan> GetInfoByIdQuery(int id)
+        {
+            return DC.D_TimeSpan.Where(ts => ts.DTSID == id);
+        }
+
+        public async Task<TimeSpan_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(D_TimeSpan entity)
+        {
+            return await Task.FromResult(new TimeSpan_GetInfoById_Output_APIItem
             {
-                DateTime DT_S = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourS + ":" +
-                                                   N.MinuteS + ":00");
-                DateTime DT_E = Convert.ToDateTime(DT.Year + "/" + DT.Month + "/" + DT.Day + " " + N.HourE + ":" +
-                                                   N.MinuteE + ":00");
-                TimeSpan TS = DT_E - DT_S;
-
-
-                Item = new D_TimeSpan_APIItem
-                {
-                    DTSID = N.DTSID,
-
-                    Code = N.Code,
-                    Title = N.Title,
-
-                    HourS = N.HourS,
-                    MinuteS = N.MinuteS,
-                    HourE = N.HourE,
-                    MinuteE = N.MinuteE,
-                    TimeS = N.HourS.ToString().PadLeft(2, '0') + ":" + N.MinuteS.ToString().PadLeft(2, '0'),
-                    TimeE = N.HourE.ToString().PadLeft(2, '0') + ":" + N.MinuteE.ToString().PadLeft(2, '0'),
-                    GetTimeSpan = (TS.Hours > 0 ? TS.Hours + "小時" : "") + TS.Minutes.ToString() + "分鐘",
-
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                };
-            }
-
-            return ChangeJson(Item);
+                DTSID = entity.DTSID,
+                Code = entity.Code ?? "",
+                Title = entity.Title ?? "",
+                HourS = entity.HourS,
+                MinuteS = entity.MinuteS,
+                HourE = entity.HourE,
+                MinuteE = entity.MinuteE,
+                TimeS = (entity.HourS, entity.MinuteS).ToFormattedHourAndMinute(),
+                TimeE = (entity.HourE, entity.MinuteE).ToFormattedHourAndMinute(),
+                GetTimeSpan = FormatGetTimeSpan((entity.HourS, entity.MinuteS), (entity.HourE, entity.MinuteE))
+            });
         }
 
         #endregion

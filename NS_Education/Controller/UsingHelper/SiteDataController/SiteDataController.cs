@@ -14,7 +14,6 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
-using WebGrease.Css.Extensions;
 
 namespace NS_Education.Controller.UsingHelper.SiteDataController
 {
@@ -37,7 +36,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         {
             _getListHelper = new GetListPagedHelper<SiteDataController, B_SiteData, SiteData_GetList_Input_APIItem,
                 SiteData_GetList_Output_Row_APIItem>(this);
-            _getInfoByIdHelper = new GetInfoByIdHelper<SiteDataController, B_SiteData, SiteData_GetInfoById_Output_APIItem>(this);
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<SiteDataController, B_SiteData, SiteData_GetInfoById_Output_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<SiteDataController, B_SiteData>(this);
             _deleteItemHelper = new DeleteItemHelper<SiteDataController, B_SiteData>(this);
             _submitHelper = new SubmitHelper<SiteDataController, B_SiteData, SiteData_Submit_Input_APIItem>(this);
@@ -68,7 +68,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public IOrderedQueryable<B_SiteData> GetListPagedOrderedQuery(SiteData_GetList_Input_APIItem input)
         {
             var query = DC.B_SiteData.Include(sd => sd.BC).AsQueryable();
-            
+
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(sd => sd.Title.Contains(input.Keyword) || sd.Code.Contains(input.Keyword));
 
@@ -148,7 +148,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         #endregion
 
         #region ChangeActive
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
@@ -160,11 +160,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         {
             return DC.B_SiteData.Where(sd => sd.BSID == id);
         }
-        
+
         #endregion
 
         #region DeleteItem
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
@@ -176,10 +176,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         {
             return DC.B_SiteData.Where(sd => sd.BSID == id);
         }
-        
+
         #endregion
 
         #region Submit
+
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(SiteData_Submit_Input_APIItem.BSID))]
         public async Task<string> Submit(SiteData_Submit_Input_APIItem input)
@@ -191,7 +192,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         {
             return input.BSID == 0;
         }
-        
+
         #region Submit - Add
 
         public async Task<bool> SubmitAddValidateInput(SiteData_Submit_Input_APIItem input)
@@ -244,10 +245,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             return await Task.FromResult(newEntry);
         }
+
         #endregion
 
         #region Submit - Edit
-        
+
         public async Task<bool> SubmitEditValidateInput(SiteData_Submit_Input_APIItem input)
         {
             return await Task.FromResult(input.StartValidate()
@@ -269,18 +271,22 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public IQueryable<B_SiteData> SubmitEditQuery(SiteData_Submit_Input_APIItem input)
         {
-            return DC.B_SiteData.Where(sd => sd.BSID == input.BSID);
+            return DC.B_SiteData
+                .Include(sd => sd.M_SiteGroupMaster)
+                .Where(sd => sd.BSID == input.BSID);
         }
 
         public void SubmitEditUpdateDataFields(B_SiteData data, SiteData_Submit_Input_APIItem input)
         {
-            // 1. 刪除這個場地原本有的所有組合
-            data.M_SiteGroupMaster.ForEach(sg =>
+            // 1. 將所有舊資料設為刪除狀態
+            // TODO: 找出有效率方法，只處理真的需要新增或刪除的資料
+            foreach (var oldData in data.M_SiteGroupMaster)
             {
-                sg.ActiveFlag = false;
-                sg.DeleteFlag = true;
-            });
-            // 2. 修改資料
+                oldData.ActiveFlag = false;
+                oldData.DeleteFlag = true;
+            }
+
+            // 3. 修改資料
             data.BCID = input.BCID;
             data.Code = input.Code;
             data.Title = input.Title;
@@ -298,17 +304,18 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.PhoneExt2 = input.PhoneExt2;
             data.PhoneExt3 = input.PhoneExt3;
             data.Note = input.Note;
-            data.M_SiteGroupMaster = input.GroupList.Select(item => new M_SiteGroup
-            {
-                GroupID = item.BSID,
-                SortNo = item.SortNo,
-                ActiveFlag = true
-            }).ToArray();
+            data.M_SiteGroupMaster = data.M_SiteGroupMaster.Concat(input.GroupList
+                .Select(item => new M_SiteGroup
+                {
+                    GroupID = item.BSID,
+                    SortNo = item.SortNo,
+                    ActiveFlag = true
+                }))
+                .ToArray();
         }
-        
 
         #endregion
-        
+
         #endregion
     }
 }

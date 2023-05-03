@@ -200,7 +200,7 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = input.StartValidate()
                 .Validate(i => i.DOPIID == 0, () => AddError(WrongFormat("項目 ID")))
                 .Validate(i => i.PaidType.IsInBetween(0, 1), () => AddError(WrongFormat("計價方式")))
-                .Validate(i => SubmitAllowedBSCID.Contains(i.Code), () => AddError(SubmitBSCIDNotSupported))
+                .Validate(i => !SubmitAllowedBSCID.Contains(i.Code), () => AddError(SubmitBSCIDNotSupported))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -232,7 +232,7 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = input.StartValidate()
                 .Validate(i => i.DOPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("項目 ID")))
                 .Validate(i => i.PaidType.IsInBetween(0, 1), () => AddError(WrongFormat("計價方式")))
-                .Validate(i => SubmitAllowedBSCID.Contains(i.Code), () => AddError(SubmitBSCIDNotSupported))
+                .Validate(i => !SubmitAllowedBSCID.Contains(i.Code), () => AddError(SubmitBSCIDNotSupported))
                 .IsValid();
 
             return await Task.FromResult(isValid);

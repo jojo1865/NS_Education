@@ -34,9 +34,6 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
         #endregion
 
-        // 每次呼叫時都開一個新的連線，避免非同步問題
-        private static NsDbContext DbContext => new NsDbContext();
-        
         private readonly IAuthorizeType[] _roles;
         private readonly RequiredPrivileges _privileges;
         private readonly string _uidFieldName;
@@ -121,25 +118,33 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims)
         {
             // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
-            bool isEnabled = DbContext.B_StaticCode.Where(sc =>
-                sc.CodeType == (int)StaticCodeType.SafetyControl && sc.ActiveFlag && !sc.DeleteFlag)
-                .Where(sc => sc.Code == ((int)StaticCodeSafetyControlCode.IsEnforcingOneTokenOneLogin).ToString())
-                .Select(sc => sc.SortNo)
-                .FirstOrDefault() == 1;
+            using (NsDbContext dbContext = new NsDbContext())
+            {
+                bool isEnabled = dbContext.B_StaticCode.Where(sc =>
+                        sc.CodeType == (int)StaticCodeType.SafetyControl && sc.ActiveFlag && !sc.DeleteFlag)
+                    .Where(sc => sc.Code == ((int)StaticCodeSafetyControlCode.IsEnforcingOneTokenOneLogin).ToString())
+                    .Select(sc => sc.SortNo)
+                    .FirstOrDefault() == 1;
 
-            if (!isEnabled)
-                return;
-            
+
+                if (!isEnabled)
+                    return;
+            }
+
             // 驗證 Token 符合 UserData 中紀錄的 JWT
             int uid = FilterStaticTools.GetUidInClaimInt(claims);
 
-            UserData user = DbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);
+            using (NsDbContext dbContext = new NsDbContext())
+            {
+                UserData user =
+                    dbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);
 
-            if (user is null)
-                throw new Exception(UserDataNotFound);
-            
-            if (user.JWT != GetToken(actionExecutingContext))
-                throw new Exception(TokenExpired);
+                if (user is null)
+                    throw new Exception(UserDataNotFound);
+
+                if (user.JWT != GetToken(actionExecutingContext))
+                    throw new Exception(TokenExpired);
+            }
         }
 
         private bool ValidatePrivileges(ActionExecutingContext actionContext, ClaimsPrincipal claims)
@@ -154,26 +159,29 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
             // 3. 依據 uid 查詢所有權限。
             // User -> M_Group_User -> GroupData -> M_Group_Menu -> MenuData -> MenuAPI
-            var query = DbContext.UserData
-                    .Include(u => u.M_Group_User)
-                    .ThenInclude(groupUser => groupUser.G)
-                    .ThenInclude(group => group.M_Group_Menu)
-                    .ThenInclude(groupMenu => groupMenu.MD)
-                    .ThenInclude(menuData => menuData.MenuAPI)
-                    .Where(u => u.UID == uid && u.ActiveFlag && !u.DeleteFlag)
-                    .SelectMany(u => u.M_Group_User)
-                    .Select(groupUser => groupUser.G)
-                    .SelectMany(group => group.M_Group_Menu)
-                    .Where(groupMenu => groupMenu.G.ActiveFlag
-                                        && !groupMenu.G.DeleteFlag
-                                        && groupMenu.MD.ActiveFlag
-                                        && !groupMenu.MD.DeleteFlag
-                                        && FilterStaticTools.GetContextUri(actionContext).Contains(groupMenu.MD.URL)
-                    )
-                ;
+            using (NsDbContext dbContext = new NsDbContext())
+            {
+                var query = dbContext.UserData
+                        .Include(u => u.M_Group_User)
+                        .ThenInclude(groupUser => groupUser.G)
+                        .ThenInclude(group => group.M_Group_Menu)
+                        .ThenInclude(groupMenu => groupMenu.MD)
+                        .ThenInclude(menuData => menuData.MenuAPI)
+                        .Where(u => u.UID == uid && u.ActiveFlag && !u.DeleteFlag)
+                        .SelectMany(u => u.M_Group_User)
+                        .Select(groupUser => groupUser.G)
+                        .SelectMany(group => group.M_Group_Menu)
+                        .Where(groupMenu => groupMenu.G.ActiveFlag
+                                            && !groupMenu.G.DeleteFlag
+                                            && groupMenu.MD.ActiveFlag
+                                            && !groupMenu.MD.DeleteFlag
+                                            && FilterStaticTools.GetContextUri(actionContext).Contains(groupMenu.MD.URL)
+                        )
+                    ;
 
-            // 4. 具備所有所需 Flags 時，才回傳 true。
-            return HasAllFlagsInDb(actionContext, query.ToList());
+                // 4. 具備所有所需 Flags 時，才回傳 true。
+                return HasAllFlagsInDb(actionContext, query.ToList());
+            }
         }
 
         private bool HasAllFlagsInDb(ActionExecutingContext actionContext, List<M_Group_Menu> queried)

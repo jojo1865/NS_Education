@@ -97,10 +97,15 @@ namespace NS_Education.Controller.UsingHelper
         {
             // 計算 GetTimespan
             // 將兩種時間都換算成總分鐘數, 然後再相減
-            int timeDiff = startTime.hour * 60 + startTime.minute - endTime.hour * 60 + endTime.minute;
+            int timeDiff = endTime.hour * 60 + endTime.minute - startTime.hour * 60 - startTime.minute;
             // 如果是負數的情況，當成 0 輸出
             timeDiff = Math.Max(timeDiff, 0);
-            return timeDiff > 60 ? $"{timeDiff / 60}小時{timeDiff % 60}分鐘" : $"{timeDiff % 60}分鐘";
+            // 生成結果字串
+            string result = "";
+            if (timeDiff >= 60)
+                result += $"{timeDiff / 60}小時";
+            result += $"{timeDiff % 60}分鐘";
+            return result;
         }
 
         #endregion

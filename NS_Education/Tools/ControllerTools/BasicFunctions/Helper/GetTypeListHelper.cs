@@ -7,6 +7,8 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
+using NS_Education.Tools.Extensions;
+using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
@@ -36,7 +38,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 Items = queryResult.Select(entity => Task.Run(() => _controller.GetTypeListEntityToRow(entity)).Result).ToList()
             };
             
-            // 3. 回傳
+            // 3. 寫一筆 UserLog
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid());
+            
+            // 4. 回傳
             return _controller.GetResponseJson(response);
 
         }

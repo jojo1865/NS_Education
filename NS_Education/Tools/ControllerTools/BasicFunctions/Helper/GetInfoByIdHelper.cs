@@ -46,7 +46,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             TEntity t = await _GetInfoByIdQueryResult(id);
             
             // 3. 寫 UserLog
-            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, id);
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid());
             
             // 4. 有資料時, 轉換成指定格式並回傳
             if (t != null)

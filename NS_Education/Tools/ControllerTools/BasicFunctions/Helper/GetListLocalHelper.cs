@@ -3,6 +3,8 @@ using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
+using NS_Education.Tools.Extensions;
+using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
@@ -21,7 +23,9 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         public async Task<string> GetListLocal()
         {
-            // 3. 寫 UserLog
+            // 寫一筆 UserLog
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid());
+            
             BaseResponseForList<TGetListRow> response = new BaseResponseForList<TGetListRow>
             {
                 Items = await _controller.GetListLocalResults()

@@ -8,6 +8,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
+using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
@@ -53,7 +54,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             if (_controller.HasError())
                 return _controller.GetResponseJson();
 
-            // 4. 按指定格式回傳結果
+            // 4. 寫一筆 UserLog
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid());
+            
+            // 5. 按指定格式回傳結果
             // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。（如：取得 Username）
             List<TGetListRow> rows = new List<TGetListRow>();
             foreach (var entity in queryResult)

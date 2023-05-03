@@ -171,7 +171,7 @@ namespace NS_Education.Tools.Extensions
                 TargetID = targetId,
                 ControlType = (int)controlType,
                 CreDate = DateTime.Now,
-                RequestUrl = request.Url?.PathAndQuery ?? ""
+                RequestUrl = request.Url?.PathAndQuery ?? "",
             });
         }
 

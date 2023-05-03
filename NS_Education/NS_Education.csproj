@@ -461,6 +461,7 @@
     <Compile Include="Models\Entities\Resver_Throw_Food.cs" />
     <Compile Include="Models\Entities\UserData.cs" />
     <Compile Include="Models\Entities\UserLog.cs" />
+    <Compile Include="Models\Entities\UserPasswordLog.cs" />
     <Compile Include="Models\IReturnMessageInfusable.cs" />
     <Compile Include="Models\PublicModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

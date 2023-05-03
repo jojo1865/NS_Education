@@ -13,6 +13,7 @@ namespace NS_Education.Models.Entities
         {
             M_Group_User = new HashSet<M_Group_User>();
             UserLog = new HashSet<UserLog>();
+            UserPasswordLog = new HashSet<UserPasswordLog>();
         }
 
         public int UID { get; set; }
@@ -28,9 +29,11 @@ namespace NS_Education.Models.Entities
         public DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
         public DateTime LoginDate { get; set; }
+        public string JWT { get; set; }
 
         public virtual D_Department DD { get; set; }
         public virtual ICollection<M_Group_User> M_Group_User { get; set; }
         public virtual ICollection<UserLog> UserLog { get; set; }
+        public virtual ICollection<UserPasswordLog> UserPasswordLog { get; set; }
     }
 }

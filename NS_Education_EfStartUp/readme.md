@@ -22,10 +22,10 @@ dotnet ef dbcontext scaffold "Data Source=192.168.50.125\SQL2019D;Database=db_NS
             var connectionStrings = System.Web.Configuration.WebConfigurationManager.ConnectionStrings;
 
             string env =
-                Environment.ExpandEnvironmentVariables(connectionStrings["db_NS_EducationConnectionStringEnv"].ConnectionString);
+                Environment.GetEnvironmentVariable("ConnectionStrings:NsEducationJojo");
             string fallback =
-                connectionStrings["db_NS_EducationConnectionString"].ConnectionString;
+                connectionStrings["db_NS_EducationConnectionStringFallback"].ConnectionString;
 
-            optionsBuilder.UseSqlServer(!env.IsNullOrWhiteSpace() ? env : fallback);
+            optionsBuilder.UseSqlServer((!env.IsNullOrWhiteSpace() ? env : fallback) ?? throw new NullReferenceException("ConnectionString"));
         } 
 ```

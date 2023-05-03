@@ -21,6 +21,7 @@ namespace NS_Education.Controller.Legacy
 {
     public class ZipController : PublicClass,
         IGetListPaged<D_Zip, Zip_GetList_Input_APIItem, Zip_GetList_Output_Row_APIItem>,
+        IChangeActive<D_Zip>,
         IDeleteItem<D_Zip>,
         ISubmit<D_Zip, Zip_Submit_Input_APIItem>
     {
@@ -28,6 +29,8 @@ namespace NS_Education.Controller.Legacy
         #region Initialization
 
         private readonly IGetListPagedHelper<Zip_GetList_Input_APIItem> _getListPagedHelper;
+
+        private readonly IChangeActiveHelper _changeActiveHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly ISubmitHelper<Zip_Submit_Input_APIItem> _submitHelper;
 
@@ -36,6 +39,7 @@ namespace NS_Education.Controller.Legacy
             _getListPagedHelper = new GetListPagedHelper<ZipController, D_Zip, Zip_GetList_Input_APIItem,
                 Zip_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<ZipController, D_Zip>(this);
+            _changeActiveHelper = new ChangeActiveHelper<ZipController, D_Zip>(this);
             _submitHelper = new SubmitHelper<ZipController, D_Zip, Zip_Submit_Input_APIItem>(this);
         }
 
@@ -124,20 +128,16 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            Error = "";
-            var N_ = await DC.D_Zip.FirstOrDefaultAsync(q => q.DZID == ID && !q.DeleteFlag);
-            if (N_ != null)
-            {
-                N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            else
-                Error += "查無資料,無法更新;";
-
-            return ChangeJson(GetMsgClass(Error));
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
         }
+
+        public IQueryable<D_Zip> ChangeActiveQuery(int id)
+        {
+            return DC.D_Zip.Where(z => z.DZID == id);
+        }
+
 
         #endregion
 

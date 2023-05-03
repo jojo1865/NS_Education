@@ -328,10 +328,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             data.UserName = input.Username.IsNullOrWhiteSpace() ? data.UserName : input.Username;
             data.LoginAccount =
                 input.LoginAccount.IsNullOrWhiteSpace() ? data.LoginAccount : input.LoginAccount;
-            data.LoginPassword =
-                input.LoginPassword.IsNullOrWhiteSpace()
-                    ? data.LoginPassword
-                    : EncryptPassword(input.LoginPassword);
+            
+            // 如果密碼有變動時，更新密碼。
+            string newPassword = EncryptPassword(input.LoginPassword);
+            if (!input.LoginPassword.IsNullOrWhiteSpace() && newPassword != data.LoginPassword)
+            {
+                WriteUserChangePasswordLog(data.UID, data.LoginPassword, newPassword);
+                data.LoginPassword = newPassword;
+            }
 
             // Note 是可選欄位，因此呼叫者應該保持原始內容
             data.Note = input.Note;
@@ -375,6 +379,19 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             newGroupUser.GID = input.GID;
         }
 
+        private void WriteUserChangePasswordLog(int uid, string oldPassword, string newPassword)
+        {
+            UserPasswordLog newLog = new UserPasswordLog
+            {
+                UID = uid,
+                Type = (int)UserPasswordLogType.ChangePassword,
+                OldPassword = oldPassword,
+                NewPassword = newPassword
+            };
+
+            DC.UserPasswordLog.Add(newLog);
+        }
+
         #endregion
 
         #endregion
@@ -383,7 +400,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         /// <summary>
         ///     針對使用者密碼進行加密。<br />
-        ///     當使用者密碼為空白、空格、null，或包含非英數字時，回傳 (false, null)。
         /// </summary>
         /// <param name="password">使用者密碼</param>
         /// <returns>result: 加密結果<br />encryptedPassword: 加密後的字串</returns>
@@ -503,10 +519,16 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             if (queried == null)
                 throw new NullReferenceException(UserDataNotFound);
 
-            // 2. 更新資料，更新失敗時拋錯
+            // 2. 密碼沒有變時，不做任何事
+            string newPassword = EncryptPassword(inputPassword);
+            if (newPassword == queried.LoginPassword)
+                return;
+            
+            // 3. 更新資料，更新失敗時拋錯
             try
             {
-                queried.LoginPassword = EncryptPassword(inputPassword);
+                WriteUserChangePasswordLog(queried.UID, queried.LoginPassword, newPassword);
+                queried.LoginPassword = newPassword;
                 await DC.SaveChangesStandardProcedureAsync(GetUid());
             }
             catch (Exception e)

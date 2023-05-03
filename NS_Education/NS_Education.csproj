@@ -415,6 +415,7 @@
     <Compile Include="Models\APIItems\UserData\UserLog\GetList\UserLog_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\UserData\UserLog\GetList\UserLog_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\D_Zip_APIItem.cs" />
+    <Compile Include="Models\APIItems\Zip\GetInfoById\Zip_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\GetList\Zip_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\GetList\Zip_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\Submit\Zip_Submit_Input_APIItem.cs" />

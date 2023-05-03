@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Models;
-using NS_Education.Models.APIItems.Zip;
+using NS_Education.Models.APIItems.Zip.GetInfoById;
 using NS_Education.Models.APIItems.Zip.GetList;
 using NS_Education.Models.APIItems.Zip.Submit;
 using NS_Education.Models.Entities;
@@ -21,6 +19,7 @@ namespace NS_Education.Controller.Legacy
 {
     public class ZipController : PublicClass,
         IGetListPaged<D_Zip, Zip_GetList_Input_APIItem, Zip_GetList_Output_Row_APIItem>,
+        IGetInfoById<D_Zip, Zip_GetInfoById_Output_APIItem>,
         IChangeActive<D_Zip>,
         IDeleteItem<D_Zip>,
         ISubmit<D_Zip, Zip_Submit_Input_APIItem>
@@ -29,7 +28,7 @@ namespace NS_Education.Controller.Legacy
         #region Initialization
 
         private readonly IGetListPagedHelper<Zip_GetList_Input_APIItem> _getListPagedHelper;
-
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly ISubmitHelper<Zip_Submit_Input_APIItem> _submitHelper;
@@ -39,6 +38,7 @@ namespace NS_Education.Controller.Legacy
             _getListPagedHelper = new GetListPagedHelper<ZipController, D_Zip, Zip_GetList_Input_APIItem,
                 Zip_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<ZipController, D_Zip>(this);
+            _getInfoByIdHelper = new GetInfoByIdHelper<ZipController, D_Zip, Zip_GetInfoById_Output_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<ZipController, D_Zip>(this);
             _submitHelper = new SubmitHelper<ZipController, D_Zip, Zip_Submit_Input_APIItem>(this);
         }
@@ -94,32 +94,27 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetInfoByID(int ID = 0)
+        public async Task<string> GetInfoById(int id)
         {
-            var N = DC.D_Zip.FirstOrDefault(q => q.DZID == ID && !q.DeleteFlag);
-            D_Zip_APIItem Item = null;
-            if (N != null)
-            {
-                List<cSelectItem> SIs = new List<cSelectItem>();
-                Item = new D_Zip_APIItem
-                {
-                    DZID = N.DZID,
-                    ParentID = N.ParentID,
-                    Code = N.Code,
-                    Title = N.Title,
-                    GroupName = N.GroupName,
-                    Note = N.Note,
-                    ActiveFlag = N.ActiveFlag,
-                    CreDate = N.CreDate.ToString(DateTimeFormat),
-                    CreUser = await GetUserNameByID(N.CreUID),
-                    CreUID = N.CreUID,
-                    UpdDate = (N.CreDate != N.UpdDate ? N.UpdDate.ToString(DateTimeFormat) : ""),
-                    UpdUser = (N.CreDate != N.UpdDate ? await GetUserNameByID(N.UpdUID) : ""),
-                    UpdUID = (N.CreDate != N.UpdDate ? N.UpdUID : 0)
-                };
-            }
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
 
-            return ChangeJson(Item);
+        public IQueryable<D_Zip> GetInfoByIdQuery(int id)
+        {
+            return DC.D_Zip.Where(z => z.DZID == id);
+        }
+
+        public async Task<Zip_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(D_Zip entity)
+        {
+            return await Task.FromResult(new Zip_GetInfoById_Output_APIItem
+            {
+                DZID = entity.DZID,
+                Code = entity.Code ?? "",
+                Title = entity.Title ?? "",
+                Note = entity.Note ?? "",
+                ParentID = entity.ParentID,
+                GroupName = entity.GroupName ?? ""
+            });
         }
 
         #endregion

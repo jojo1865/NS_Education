@@ -32,7 +32,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
             ClaimsPrincipal claims;
             try
             {
-                JwtAuthFilter.JwtAuthFilter.ValidateToken(filterContext, JwtConstants.Secret, out claims);
+                JwtAuthFilter.JwtAuthFilter.ValidateTokenDecryptable(filterContext, JwtConstants.Secret, out claims);
             }
             catch {
                 // 解密失敗或取不到 JWT 時，不回傳任何權限資訊

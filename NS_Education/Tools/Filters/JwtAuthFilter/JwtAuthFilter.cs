@@ -29,6 +29,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             => $"驗證 JWT Token 時出錯：{e.Message}";
         
         private const string RequirePrivilegeAddOrEditNoFieldName = "RequirePrivilege 指定 AddOrEdit，卻沒有提供 addOrEditKeyFieldName！";
+        private const string TokenExpired = "登入已過期，請登出後重新登入。";
+        private const string UserDataNotFound = "查無對應的 UID";
 
         #endregion
 
@@ -95,11 +97,14 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             ClaimsPrincipal claims = null;
 
             // 1. 驗證有 Token 且解析正常無誤。
-            // 2. 驗證 Token 中 Claim 包含指定的 Role。
-            // 3. 驗證 Privilege，所有 Flag 在任一所屬 Group 均有允許。
+            // 2. 驗證 Token 符合對應 UserData 的最新 Token。
+            // 3. 驗證 Token 中 Claim 包含指定的 Role。
+            // 4. 驗證 Privilege，所有 Flag 在任一所屬 Group 均有允許。
             bool isValid = actionContext.StartValidate(true)
-                .Validate(c => ValidateToken(c, JwtConstants.Secret, out claims),
+                .Validate(c => ValidateTokenDecryptable(c, JwtConstants.Secret, out claims),
                     e => errorMessage = HasValidTokenFailed(e))
+                .Validate(c => ValidateTokenIsLatest(c, claims),
+                    e => errorMessage = e.Message)
                 .Validate(c => ValidateClaimRole(c, claims),
                     () => errorMessage = HasNoRoleOrPrivilege)
                 .Validate(c => ValidatePrivileges(c, claims),
@@ -110,6 +115,19 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             
             actionContext.Result =
                 new HttpUnauthorizedResult($"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
+        }
+
+        private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims)
+        {
+            int uid = FilterStaticTools.GetUidInClaimInt(claims);
+
+            UserData user = _dbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);
+
+            if (user is null)
+                throw new Exception(UserDataNotFound);
+            
+            if (user.JWT != GetToken(actionExecutingContext))
+                throw new Exception(TokenExpired);
         }
 
         private bool ValidatePrivileges(ActionExecutingContext actionContext, ClaimsPrincipal claims)
@@ -226,7 +244,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             return String.Equals(uidInClaim, uidInRequest);
         }
 
-        public static void ValidateToken(ControllerContext actionContext, string secret, out ClaimsPrincipal claims)
+        public static void ValidateTokenDecryptable(ControllerContext actionContext, string secret, out ClaimsPrincipal claims)
         {
             claims = null;
 

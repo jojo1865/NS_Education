@@ -1193,8 +1193,6 @@ namespace NS_Education.Models.Entities.DbContext
             {
                 entity.HasKey(e => e.UPLID);
 
-                entity.Property(e => e.UPLID).ValueGeneratedNever();
-
                 entity.Property(e => e.CreDate).HasColumnType("datetime");
 
                 entity.Property(e => e.NewPassword).HasMaxLength(100);

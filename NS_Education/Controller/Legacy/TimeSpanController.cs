@@ -21,7 +21,8 @@ namespace NS_Education.Controller.Legacy
     public class TimeSpanController : PublicClass,
         IGetListPaged<D_TimeSpan, TimeSpan_GetList_Input_APIItem, TimeSpan_GetList_Output_Row_APIItem>,
         IDeleteItem<D_TimeSpan>,
-        ISubmit<D_TimeSpan, TimeSpan_Submit_Input_APIItem>
+        ISubmit<D_TimeSpan, TimeSpan_Submit_Input_APIItem>,
+        IChangeActive<D_TimeSpan>
     {
         #region Initialization
 
@@ -29,6 +30,7 @@ namespace NS_Education.Controller.Legacy
         private readonly IDeleteItemHelper _deleteItemHelper;
 
         private readonly ISubmitHelper<TimeSpan_Submit_Input_APIItem> _submitHelper;
+        private readonly IChangeActiveHelper _changeActiveHelper;
 
         public TimeSpanController()
         {
@@ -37,6 +39,7 @@ namespace NS_Education.Controller.Legacy
 
             _deleteItemHelper = new DeleteItemHelper<TimeSpanController, D_TimeSpan>(this);
             _submitHelper = new SubmitHelper<TimeSpanController, D_TimeSpan, TimeSpan_Submit_Input_APIItem>(this);
+            _changeActiveHelper = new ChangeActiveHelper<TimeSpanController, D_TimeSpan>(this);
         }
 
         #endregion
@@ -145,19 +148,14 @@ namespace NS_Education.Controller.Legacy
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
-        public async Task<string> ChangeActive(int ID, bool ActiveFlag)
+        public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
-            Error = "";
-            var N_ = await DC.D_TimeSpan.FirstOrDefaultAsync(q => q.DTSID == ID && !q.DeleteFlag);
-            if (N_ != null)
-            {
-                N_.ActiveFlag = ActiveFlag;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
-            }
-            else
-                Error += "查無資料,無法更新;";
+            return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
 
-            return ChangeJson(GetMsgClass(Error));
+        public IQueryable<D_TimeSpan> ChangeActiveQuery(int id)
+        {
+            return DC.D_TimeSpan.Where(ts => ts.DTSID == id);
         }
 
         #endregion

@@ -79,5 +79,37 @@ namespace NS_Education.Tools.Extensions
         {
             return $"{tuple.hour.ToString().PadLeft(2, '0')}:{tuple.minute.ToString().PadLeft(2, '0')}";
         }
+        
+        /// <summary>
+        /// 接受兩組開始時間與結束時間，計算兩者間差異，轉換成 n 小時 m 分鐘的格式。不支援跨日。
+        /// </summary>
+        /// <param name="startTime">起始時間</param>
+        /// <param name="endTime">結束時間</param>
+        /// <returns>「n小時m分鐘」格式的字串</returns>
+        public static string FormatTimeSpanUntil(this (int hour, int minute) startTime, (int hour, int minute) endTime)
+        {
+            // 計算 GetTimespan
+            // 將兩種時間都換算成總分鐘數, 然後再相減
+            int timeDiff = startTime.GetMinutesUntil(endTime);
+            // 如果是負數的情況，當成 0 輸出
+            timeDiff = Math.Max(timeDiff, 0);
+            // 生成結果字串
+            string result = "";
+            if (timeDiff >= 60)
+                result += $"{timeDiff / 60}小時";
+            result += $"{timeDiff % 60}分鐘";
+            return result;
+        }
+
+        /// <summary>
+        /// 接受兩組開始時間與結束時間，計算兩者間差異分鐘數，不支援跨日。
+        /// </summary>
+        /// <param name="startTime">起始時間</param>
+        /// <param name="endTime">結束時間</param>
+        /// <returns>分鐘數</returns>
+        public static int GetMinutesUntil(this (int hour, int minute) startTime, (int hour, int minute) endTime)
+        {
+            return endTime.hour * 60 + endTime.minute - startTime.hour * 60 - startTime.minute;
+        }
     }
 }

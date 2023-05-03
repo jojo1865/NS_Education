@@ -14,5 +14,10 @@ namespace NS_Education.Variables
         /// 用於確認預約單的 BSCID12 是否為草稿狀態。
         /// </summary>
         public const int ReserveHeadDraftStateCode = 1;
+
+        /// <summary>
+        /// 用於確認預約行程的種類是否為餐飲。
+        /// </summary>
+        public const string ReseverThrowDineTitle = "餐飲";
     }
 }

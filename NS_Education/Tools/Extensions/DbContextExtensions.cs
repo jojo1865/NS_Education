@@ -27,7 +27,7 @@ namespace NS_Education.Tools.Extensions
 
             context.SaveChanges();
         }
-        
+
         /// <summary>
         /// 異步儲存修改之前，自動設置 CreUid 等欄位，並寫入 UserLog。
         /// </summary>
@@ -39,7 +39,7 @@ namespace NS_Education.Tools.Extensions
 
             await context.SaveChangesAsync();
         }
-        
+
         /// <summary>
         /// 寫一筆 UserLog 並儲存到 DB。
         /// </summary>
@@ -52,7 +52,7 @@ namespace NS_Education.Tools.Extensions
 
             context.SaveChanges();
         }
-        
+
         /// <summary>
         /// 異步地寫一筆 UserLog 並儲存到 DB。
         /// </summary>
@@ -74,14 +74,14 @@ namespace NS_Education.Tools.Extensions
             foreach (var change in context.ChangeTracker.Entries().ToArray())
             {
                 // 未變動或是在寫 UserLog 時，跳過
-                if (change.Entity is UserLog 
+                if (change.Entity is UserLog
                     || change.State == EntityState.Unchanged)
                     return;
 
                 SetBasicFields(uid, change);
                 WriteUserLog(context, uid, change);
             }
-            
+
             // 把前述的 changes 一同納入下次存檔
             context.ChangeTracker.DetectChanges();
         }
@@ -155,15 +155,17 @@ namespace NS_Education.Tools.Extensions
         {
             // 從 Entity 找出 PK 並找出手上物件的該欄位值，如果有任何 null 時，回傳 0
             IEntityType entityType = context.Model.FindEntityType(nameof(T));
-            int.TryParse(entityType?.FindPrimaryKey()?.Properties?.FirstOrDefault()?.PropertyInfo?.GetValue(entity)?.ToString(),
+            int.TryParse(
+                entityType?.FindPrimaryKey()?.Properties?.FirstOrDefault()?.PropertyInfo?.GetValue(entity)?.ToString(),
                 out int result);
             return result;
         }
 
-        private static void WriteUserLog(this NsDbContext context, string targetTable, int targetId, UserLogControlType controlType, int uid)
+        private static void WriteUserLog(this NsDbContext context, string targetTable, int targetId,
+            UserLogControlType controlType, int uid)
         {
             HttpRequestBase request = GetCurrentRequest();
-            
+
             context.UserLog.Add(new UserLog
             {
                 UID = uid,
@@ -184,6 +186,19 @@ namespace NS_Education.Tools.Extensions
         {
             // 未指定 targetTable 跟 targetId 時的 helper
             context.WriteUserLog(null, 0, controlType, uid);
+        }
+
+        /// <summary>
+        /// 取得一種物件在 DbContext 中對應的 Table 名。
+        /// </summary>
+        /// <param name="context">DbContext</param>
+        /// <typeparam name="T">Generic Type</typeparam>
+        /// <returns>Table 名。</returns>
+        public static string GetTableName<T>(this NsDbContext context)
+            where T : class
+
+        {
+            return context.Model.FindEntityType(typeof(T)).GetTableName();
         }
     }
 }

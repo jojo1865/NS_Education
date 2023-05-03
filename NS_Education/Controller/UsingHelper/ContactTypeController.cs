@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.ContactType.GetList;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
@@ -48,7 +50,30 @@ namespace NS_Education.Controller.UsingHelper
                     Title = "LINE"
                 },
             }.AsReadOnly();
+
+        /// <summary>
+        /// 提供給其他需要用到通訊方式下拉選單的功能用。
+        /// </summary>
+        /// <returns>通訊方式的選單</returns>
+        public static ICollection<ContactType_GetList_Output_Row_APIItem> GetContactTypeList()
+        {
+            return ContactTypes;
+        }
         
+        /// <summary>
+        /// 提供給其他需要用到通訊方式下拉可選選單的功能用。
+        /// </summary>
+        /// <returns>通訊方式的可選選單</returns>
+        public static ICollection<BaseResponseRowForSelectable> GetContactTypeSelectable(int selectId)
+        {
+            return ContactTypes.Select(ct => new BaseResponseRowForSelectable
+            {
+                ID = ct.ID,
+                Title = ct.Title ?? "",
+                SelectFlag = ct.ID == selectId
+            }).ToList();
+        }
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList()

@@ -234,10 +234,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 PhoneExt2 = input.PhoneExt2,
                 PhoneExt3 = input.PhoneExt3,
                 Note = input.Note,
-                M_SiteGroupGroup = input.GroupList.Select(sg => new M_SiteGroup
+                M_SiteGroupMaster = input.GroupList.Select(item => new M_SiteGroup
                 {
-                    GroupID = sg.BSID,
-                    SortNo = sg.SortNo,
+                    GroupID = item.BSID,
+                    SortNo = item.SortNo,
                     ActiveFlag = true
                 }).ToArray()
             };
@@ -275,7 +275,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public void SubmitEditUpdateDataFields(B_SiteData data, SiteData_Submit_Input_APIItem input)
         {
             // 1. 刪除這個場地原本有的所有組合
-            data.M_SiteGroupGroup.ForEach(sg =>
+            data.M_SiteGroupMaster.ForEach(sg =>
             {
                 sg.ActiveFlag = false;
                 sg.DeleteFlag = true;
@@ -298,14 +298,15 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.PhoneExt2 = input.PhoneExt2;
             data.PhoneExt3 = input.PhoneExt3;
             data.Note = input.Note;
-            data.M_SiteGroupGroup = input.GroupList.Select(sg => new M_SiteGroup
+            data.M_SiteGroupMaster = input.GroupList.Select(item => new M_SiteGroup
             {
-                GroupID = sg.BSID,
-                SortNo = sg.SortNo,
+                GroupID = item.BSID,
+                SortNo = item.SortNo,
                 ActiveFlag = true
             }).ToArray();
         }
         
+
         #endregion
         
         #endregion

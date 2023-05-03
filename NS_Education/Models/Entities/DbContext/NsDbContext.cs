@@ -995,6 +995,18 @@ namespace NS_Education.Models.Entities.DbContext
                     .HasForeignKey(d => d.CID)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Resver_Head_Customer_CID_fk");
+
+                entity.HasOne(d => d.MK_BU)
+                    .WithMany(p => p.Resver_HeadMK_BU)
+                    .HasForeignKey(d => d.MK_BUID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Resver_Head_BusinessUser_BUID_fk");
+
+                entity.HasOne(d => d.OP_BU)
+                    .WithMany(p => p.Resver_HeadOP_BU)
+                    .HasForeignKey(d => d.OP_BUID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Resver_Head_BusinessUser_BUID_fk_2");
             });
 
             modelBuilder.Entity<Resver_Other>(entity =>

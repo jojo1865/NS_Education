@@ -166,10 +166,11 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         private static string UpdatePWDbFailed(Exception e)
         {
-            return $"更新密碼時失敗，請確認伺服器狀態：{e.Message}！";
+            return $"更新密碼時失敗：{e.Message}！";
         }
 
         private const string UpdatePWPasswordNotEncryptable = "密碼只允許英數字！";
+        private const string DailyChangePasswordLimitExceeded = "此帳號今日已無法再修改密碼！";
 
         #endregion
         
@@ -388,6 +389,37 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         private void WriteUserChangePasswordLog(int uid, string oldPassword, string newPassword)
         {
+            // 先檢查同一天是不是已經有超過上限次數的修改密碼歷史了
+            int dailyLimit = GetPasswordEditTimeDaily();
+
+            // 驗證
+            // |- a. 修改密碼次數
+            // +- b. 此密碼是否還不能重用
+
+            UserPasswordLog[] logs = DC.UserPasswordLog
+                .Where(log => log.UID == uid && log.Type == (int)UserPasswordLogType.ChangePassword)
+                .ToArray();
+
+            int todayChangedTimes = logs.Count(log => log.CreDate.Date == DateTime.Now.Date);
+
+            if (todayChangedTimes > dailyLimit)
+                throw new Exception(DailyChangePasswordLimitExceeded);
+
+            int uniquePasswordCountLimit = GetUniquePasswordCountLimit();
+
+            UserPasswordLog[] updatePasswordHistories = logs
+                .OrderByDescending(log => log.CreDate)
+                .Take(uniquePasswordCountLimit)
+                .ToArray();
+            
+            // 新密碼：所有 n 筆都不能出現
+            // 舊密碼：最新的 n-1 筆不能出現
+
+            if (updatePasswordHistories.Any(log => log.NewPassword == newPassword) 
+                || updatePasswordHistories.Reverse().Skip(1).Any(log => log.OldPassword == newPassword))
+                throw new Exception($"不可重覆使用前 {uniquePasswordCountLimit} 組密碼！");
+
+                // 沒有才繼續下去
             UserPasswordLog newLog = new UserPasswordLog
             {
                 UID = uid,
@@ -397,6 +429,15 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             };
 
             DC.UserPasswordLog.Add(newLog);
+        }
+
+        private int GetUniquePasswordCountLimit()
+        {
+            return DC.B_StaticCode.Where(sc =>
+                    sc.ActiveFlag && !sc.DeleteFlag && sc.CodeType == (int)StaticCodeType.SafetyControl)
+                .Where(sc => sc.Code == ((int)StaticCodeSafetyControlCode.PasswordNoReuseCount).ToString())
+                .Select(sc => sc.SortNo)
+                .FirstOrDefault();
         }
 
         #endregion
@@ -520,6 +561,15 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             // 2. 回傳通用訊息格式。
             return GetResponseJson();
+        }
+
+        private int GetPasswordEditTimeDaily()
+        {
+            return DC.B_StaticCode.Where(sc =>
+                    sc.ActiveFlag && !sc.DeleteFlag && sc.CodeType == (int)StaticCodeType.SafetyControl)
+                .Where(sc => sc.Code == ((int)StaticCodeSafetyControlCode.PasswordChangeDailyLimit).ToString())
+                .Select(sc => sc.SortNo)
+                .FirstOrDefault();
         }
 
         private int GetPasswordMinLength()

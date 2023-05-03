@@ -97,7 +97,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             ClaimsPrincipal claims = null;
 
             // 1. 驗證有 Token 且解析正常無誤。
-            // 2. 驗證 Token 符合對應 UserData 的最新 Token。
+            // 2. 當設定檔要求時，驗證 Token 符合對應 UserData 的最新 Token。
             // 3. 驗證 Token 中 Claim 包含指定的 Role。
             // 4. 驗證 Privilege，所有 Flag 在任一所屬 Group 均有允許。
             bool isValid = actionContext.StartValidate(true)
@@ -119,6 +119,17 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
         private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims)
         {
+            // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
+            bool isEnabled = _dbContext.B_StaticCode.Where(sc =>
+                sc.CodeType == (int)StaticCodeType.SafetyControl && sc.ActiveFlag && !sc.DeleteFlag)
+                .Where(sc => sc.Code == ((int)StaticCodeSafetyControlCode.IsEnforcingOneTokenOneLogin).ToString())
+                .Select(sc => sc.SortNo)
+                .FirstOrDefault() == 1;
+
+            if (!isEnabled)
+                return;
+            
+            // 驗證 Token 符合 UserData 中紀錄的 JWT
             int uid = FilterStaticTools.GetUidInClaimInt(claims);
 
             UserData user = _dbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);

@@ -520,6 +520,8 @@
     <Compile Include="Variables\JwtConstants.cs" />
     <Compile Include="Variables\MenuApiType.cs" />
     <Compile Include="Variables\PrivilegeConstants.cs" />
+    <Compile Include="Variables\StaticCodeSafetyControlCode.cs" />
+    <Compile Include="Variables\StaticCodeType.cs" />
     <Compile Include="Variables\UserLogControlType.cs" />
     <Compile Include="Variables\UserPasswordLogType.cs" />
   </ItemGroup>

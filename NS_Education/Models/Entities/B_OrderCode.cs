@@ -15,6 +15,7 @@ namespace NS_Education.Models.Entities
             B_PartnerItem = new HashSet<B_PartnerItem>();
             B_SiteData = new HashSet<B_SiteData>();
             D_FoodCategory = new HashSet<D_FoodCategory>();
+            D_OtherPayItem = new HashSet<D_OtherPayItem>();
             Resver_Device = new HashSet<Resver_Device>();
             Resver_Other = new HashSet<Resver_Other>();
             Resver_Site = new HashSet<Resver_Site>();
@@ -39,6 +40,7 @@ namespace NS_Education.Models.Entities
         public virtual ICollection<B_PartnerItem> B_PartnerItem { get; set; }
         public virtual ICollection<B_SiteData> B_SiteData { get; set; }
         public virtual ICollection<D_FoodCategory> D_FoodCategory { get; set; }
+        public virtual ICollection<D_OtherPayItem> D_OtherPayItem { get; set; }
         public virtual ICollection<Resver_Device> Resver_Device { get; set; }
         public virtual ICollection<Resver_Other> Resver_Other { get; set; }
         public virtual ICollection<Resver_Site> Resver_Site { get; set; }

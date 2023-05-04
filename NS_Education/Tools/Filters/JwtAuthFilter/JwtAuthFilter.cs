@@ -110,9 +110,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 .IsValid();
 
             if (isValid) return;
-            
-            actionContext.Result =
-                new HttpUnauthorizedResult($"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
+
+            throw new UnauthorizedAccessException($"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
         }
 
         private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims)

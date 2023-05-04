@@ -13,7 +13,7 @@ using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 
 namespace NS_Education.Tools.ControllerTools.BaseClass
 {
-    [ResponsePrivilegeWrapperFilter]
+    [ResponseWrapperFilter(Order = Int32.MaxValue)]
     public class PublicClass : System.Web.Mvc.Controller
     {
         public DateTime DT = DateTime.Now;

@@ -4,30 +4,26 @@ using System.Linq;
 using System.Security.Claims;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 using NS_Education.Models.Entities.DbContext;
 using NS_Education.Variables;
 
 namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
 {
     /// <summary>
-    /// 在 Action 執行完之後，依據 JWT Token Claims 的 UID 與現在的選單，查詢所有子目錄節點權限，在 Response 外面多包一層後回傳。
+    /// 在 Action 執行完之後，依據 JWT Token Claims 的 UID 與現在的選單，查詢所有子目錄節點權限，在 Response 外面多包一層後回傳。<br/>
+    /// 同時，把 Response 轉成 200，列入欄位表示 Status 和錯誤訊息。
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-    public class ResponsePrivilegeWrapperFilter : ActionFilterAttribute
+    public class ResponseWrapperFilter : ActionFilterAttribute
     {
         public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
-            // 1. 確定是 200, 否則提早返回
-            if (filterContext.HttpContext.Response.StatusCode == 200)
-            {
-                WrapResponseWithPrivilege(filterContext);
-            }
+            WrapResponse(filterContext);
 
             base.OnActionExecuted(filterContext);
         }
 
-        private static void WrapResponseWithPrivilege(ActionExecutedContext filterContext)
+        private static void WrapResponse(ActionExecutedContext filterContext)
         {
             ClaimsPrincipal claims;
             try
@@ -36,6 +32,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
             }
             catch {
                 // 解密失敗或取不到 JWT 時，不回傳任何權限資訊
+                WrapResponse(filterContext, null);
                 return;
             }
 
@@ -43,11 +40,13 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
             // Query 1: 找出目前所在的 MenuData 底下所有 MenuAPI
             var menuApis = context.MenuData
                 .Include(menuData => menuData.MenuAPI)
+                .ThenInclude(menuApi => menuApi.MD)
                 .Where(mainMenu => mainMenu.ActiveFlag
                                    && !mainMenu.DeleteFlag
                                    && FilterStaticTools.GetContextUri(filterContext)
                                        .Contains(mainMenu.URL))
-                .SelectMany(mainMenu => mainMenu.MenuAPI);
+                .SelectMany(mainMenu => mainMenu.MenuAPI)
+                ;
 
             // Query 2: 將 menuAPI 對應回 m_group_menu, 確認 user 有無權限
             var queryResult  = context.M_Group_Menu
@@ -128,21 +127,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
         private static void WrapResponse(ActionExecutedContext filterContext, IEnumerable<Privilege> privileges)
         {
             // 取得此次 action 完整的 HTTP Response 並轉成 JObject
-            JObject modify = JObject.FromObject(filterContext.Result);
-            
-            // 如果沒有 Content, 不做包裝以免出錯
-            if (modify["Content"] == null)
-                return;
-            
-            // 修改 Content 結構，多套一層
-            modify["Content"] = JToken.FromObject(new
-                {
-                    ApiResponse = JToken.Parse(modify["Content"]?.Value<string>()),
-                    Privileges = privileges
-                }
-            ).ToString();
-
-            filterContext.Result = (ActionResult)modify.ToObject(filterContext.Result.GetType());
+            filterContext.Result = RequestWrappingHelper.CreateWrappedResponse(filterContext, filterContext.Result, privileges);
         }
     }
 }

@@ -199,5 +199,65 @@ namespace NS_Education.Tools.Extensions
                 })
                 .ToListAsync();
         }
+        
+        /// <summary>
+        /// 取得 Device 的下拉選單。
+        /// </summary>
+        /// <param name="dbSet">Device 的 DbSet</param>
+        /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
+        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<BaseResponseRowForSelectable>> GetOtherPayItemSelectable(this DbSet<B_Device> dbSet
+            ,int idToSelect)
+        {
+            return await dbSet
+                .Where(d => d.ActiveFlag && !d.DeleteFlag)
+                .Select(d => new BaseResponseRowForSelectable
+                {
+                    ID = d.BDID,
+                    Title = d.Title ?? d.Code ?? "",
+                    SelectFlag = d.BDID == idToSelect
+                })
+                .ToListAsync();
+        }
+        
+        /// <summary>
+        /// 取得 OtherPayItem 的下拉選單。
+        /// </summary>
+        /// <param name="dbSet">OtherPayItem 的 DbSet</param>
+        /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
+        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<BaseResponseRowForSelectable>> GetOtherPayItemSelectable(this DbSet<D_OtherPayItem> dbSet
+            ,int idToSelect)
+        {
+            return await dbSet
+                .Where(opi => opi.ActiveFlag && !opi.DeleteFlag)
+                .Select(opi => new BaseResponseRowForSelectable
+                {
+                    ID = opi.DOPIID,
+                    Title = opi.Title ?? opi.Code ?? "",
+                    SelectFlag = opi.DOPIID == idToSelect
+                })
+                .ToListAsync();
+        }
+        
+        /// <summary>
+        /// 取得 PayType 的下拉選單。
+        /// </summary>
+        /// <param name="dbSet">PayType 的 DbSet</param>
+        /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
+        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<BaseResponseRowForSelectable>> GetOtherPayItemSelectable(this DbSet<D_PayType> dbSet
+            ,int idToSelect)
+        {
+            return await dbSet
+                .Where(pt => pt.ActiveFlag && !pt.DeleteFlag)
+                .Select(pt => new BaseResponseRowForSelectable
+                {
+                    ID = pt.DPTID,
+                    Title = pt.Title ?? "",
+                    SelectFlag = pt.DPTID == idToSelect
+                })
+                .ToListAsync();
+        }
     }
 }

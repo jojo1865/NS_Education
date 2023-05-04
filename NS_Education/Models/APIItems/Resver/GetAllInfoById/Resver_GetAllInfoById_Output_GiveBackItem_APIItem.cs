@@ -5,6 +5,6 @@ namespace NS_Education.Models.APIItems.Resver.GetAllInfoById
         public int RGBID { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public int PointPercentage { get; set; }
+        public int PointDecimal { get; set; }
     }
 }

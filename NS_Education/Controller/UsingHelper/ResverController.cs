@@ -21,17 +21,22 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class ResverController : PublicClass, 
         IGetListPaged<Resver_Head, Resver_GetHeadList_Input_APIItem, Resver_GetHeadList_Output_Row_APIItem>,
-        IGetInfoById<Resver_Head, Resver_GetAllInfoById_Output_APIItem>
+        IGetInfoById<Resver_Head, Resver_GetAllInfoById_Output_APIItem>,
+        IDeleteItem<Resver_Head>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Resver_GetHeadList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
+        private readonly IDeleteItemHelper
+            _deleteItemHelper;
+
         public ResverController()
         {
             _getListPagedHelper = new GetListPagedHelper<ResverController, Resver_Head, Resver_GetHeadList_Input_APIItem, Resver_GetHeadList_Output_Row_APIItem>(this);
             _getInfoByIdHelper = new GetInfoByIdHelper<ResverController, Resver_Head, Resver_GetAllInfoById_Output_APIItem>(this);
+            _deleteItemHelper = new DeleteItemHelper<ResverController, Resver_Head>(this);
         }
 
         #endregion
@@ -416,6 +421,20 @@ namespace NS_Education.Controller.UsingHelper
                 .ToList();
         }
 
+        #endregion
+
+        #region DeleteItem
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
+        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        {
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+        }
+
+        public IQueryable<Resver_Head> DeleteItemQuery(int id)
+        {
+            return DC.Resver_Head.Where(rh => rh.RHID == id);
+        }
         #endregion
     }
 }

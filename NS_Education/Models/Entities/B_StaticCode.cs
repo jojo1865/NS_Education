@@ -20,6 +20,7 @@ namespace NS_Education.Models.Entities
             CustomerBSCID6Navigation = new HashSet<Customer>();
             CustomerGift = new HashSet<CustomerGift>();
             CustomerVisit = new HashSet<CustomerVisit>();
+            D_OtherPayItem = new HashSet<D_OtherPayItem>();
             Resver_HeadBSCID11Navigation = new HashSet<Resver_Head>();
             Resver_HeadBSCID12Navigation = new HashSet<Resver_Head>();
             Resver_Site = new HashSet<Resver_Site>();
@@ -49,6 +50,7 @@ namespace NS_Education.Models.Entities
         public virtual ICollection<Customer> CustomerBSCID6Navigation { get; set; }
         public virtual ICollection<CustomerGift> CustomerGift { get; set; }
         public virtual ICollection<CustomerVisit> CustomerVisit { get; set; }
+        public virtual ICollection<D_OtherPayItem> D_OtherPayItem { get; set; }
         public virtual ICollection<Resver_Head> Resver_HeadBSCID11Navigation { get; set; }
         public virtual ICollection<Resver_Head> Resver_HeadBSCID12Navigation { get; set; }
         public virtual ICollection<Resver_Site> Resver_Site { get; set; }

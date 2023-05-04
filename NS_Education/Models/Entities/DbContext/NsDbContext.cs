@@ -74,7 +74,7 @@ namespace NS_Education.Models.Entities.DbContext
                 connectionStrings["db_NS_EducationConnectionStringFallback"].ConnectionString;
 
             optionsBuilder.UseSqlServer((!env.IsNullOrWhiteSpace() ? env : fallback) ?? throw new NullReferenceException("ConnectionString"));
-        } 
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -555,6 +555,18 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.Property(e => e.Title).HasMaxLength(60);
 
                 entity.Property(e => e.UpdDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.BOC)
+                    .WithMany(p => p.D_OtherPayItem)
+                    .HasForeignKey(d => d.BOCID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("D_OtherPayItem_B_OrderCode_BOCID_fk");
+
+                entity.HasOne(d => d.BSC)
+                    .WithMany(p => p.D_OtherPayItem)
+                    .HasForeignKey(d => d.BSCID)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("D_OtherPayItem_B_StaticCode_BSCID_fk");
             });
 
             modelBuilder.Entity<D_PayType>(entity =>

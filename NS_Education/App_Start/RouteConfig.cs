@@ -26,6 +26,12 @@ namespace NS_Education
                 url: "Category/GetTypeList/{id}",
                 defaults: new { controller = "CategoryTypeList", action = "GetList", id = UrlParameter.Optional }
             );
+
+            routes.MapRoute(
+                name: "SiteDataGetTableList",
+                url: "SiteData/GetTableList/{id}",
+                defaults: new { controller = "SiteData", action = "GetList", id = UrlParameter.Optional }
+            );
             
             routes.MapRoute(
                 name: "SiteDataGetListForCalendar",

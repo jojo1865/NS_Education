@@ -99,7 +99,7 @@ namespace NS_Education.Controller.UsingHelper
 
         #region GetList
 
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(OrderCode_GetList_Input_APIItem input)
         {
@@ -169,7 +169,7 @@ namespace NS_Education.Controller.UsingHelper
                 SortNo = 0
             };
 
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
         {
@@ -246,7 +246,7 @@ namespace NS_Education.Controller.UsingHelper
 
         #region ChangeActive
 
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
@@ -262,7 +262,7 @@ namespace NS_Education.Controller.UsingHelper
 
         #region DeleteItem
 
-        [HttpPost]
+        [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {

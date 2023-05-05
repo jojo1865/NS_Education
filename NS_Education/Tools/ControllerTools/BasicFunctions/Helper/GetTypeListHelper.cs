@@ -32,7 +32,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson();
 
             // 2. 轉換為 BaseResponseForList
-            BaseResponseForList<BaseResponseRowForType> response = new BaseResponseForList<BaseResponseRowForType>
+            BaseResponseForList<BaseResponseRowIdTitle> response = new BaseResponseForList<BaseResponseRowIdTitle>
             {
                 // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。
                 Items = queryResult.Select(entity => Task.Run(() => _controller.GetTypeListEntityToRow(entity)).Result).ToList()

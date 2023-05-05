@@ -291,7 +291,7 @@
     <Compile Include="Models\APIItems\BaseResponseRowForSelectable.cs" />
     <Compile Include="Models\APIItems\BaseGetResponseWithCreDateOnly.cs" />
     <Compile Include="Models\APIItems\BaseGetResponseWithCreUpd.cs" />
-    <Compile Include="Models\APIItems\BaseResponseRowForType.cs" />
+    <Compile Include="Models\APIItems\BaseResponseRowIdTitle.cs" />
     <Compile Include="Models\APIItems\BaseGetResponseInfusableWithCreUpd.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetInfoById\BusinessUser_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetList\BusinessUser_GetList_Customer_APIItem.cs" />

@@ -32,6 +32,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <param name="entity">資料</param>
         /// <returns>回傳中 List 的子物件類別</returns>
         [NonAction]
-        Task<BaseResponseRowForType> GetTypeListEntityToRow(TEntity entity);
+        Task<BaseResponseRowIdTitle> GetTypeListEntityToRow(TEntity entity);
     }
 }

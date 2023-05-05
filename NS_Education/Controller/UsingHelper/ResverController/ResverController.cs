@@ -436,5 +436,127 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             return DC.Resver_Head.Where(rh => rh.RHID == id);
         }
         #endregion
+        
+        #region ChangeCheck
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        public async Task<string> ChangeCheck(int? id, bool? checkFlag)
+        {
+            // 1. 驗證輸入
+            if (!ChangeCheckValidateInput(id, checkFlag))
+                return GetResponseJson();
+
+            // 2. 查詢 DB
+            Resver_Head entity = await ChangeCheckQueryFromDb(id);
+
+            if (entity is null)
+            {
+                AddError(NotFound());
+                return GetResponseJson();
+            }
+            
+            // 3. 修改 DB
+            entity.CheckFlag = checkFlag ?? throw new ArgumentNullException(nameof(checkFlag));
+            await ChangeCheckUpdateDb();
+            
+            // 4. 回傳
+            return GetResponseJson();
+        }
+
+        private async Task ChangeCheckUpdateDb()
+        {
+            try
+            {
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbFailed(e));
+            }
+        }
+
+        private async Task<Resver_Head> ChangeCheckQueryFromDb(int? id)
+        {
+            if (id == null)
+                throw new ArgumentNullException(nameof(id));
+            
+            return await DC.Resver_Head
+                .Where(rh => !rh.DeleteFlag && rh.RHID == id)
+                .FirstOrDefaultAsync();
+        }
+
+        private bool ChangeCheckValidateInput(int? id, bool? checkFlag)
+        {
+            bool isValid = this.StartValidate()
+                .Validate(_ => id > 0, () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
+                .Validate(_ => checkFlag != null, () => AddError(EmptyNotAllowed("確認狀態")))
+                .IsValid();
+
+            return isValid;
+        }
+
+        #endregion
+        
+        #region ChangeCheckIn
+        
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        public async Task<string> ChangeCheckIn(int? id, bool? checkInFlag)
+        {
+            // 1. 驗證輸入
+            if (!ChangeCheckInValidateInput(id, checkInFlag))
+                return GetResponseJson();
+
+            // 2. 查詢 DB
+            Resver_Head entity = await ChangeCheckInQueryFromDb(id);
+
+            if (entity is null)
+            {
+                AddError(NotFound());
+                return GetResponseJson();
+            }
+            
+            // 3. 修改 DB
+            entity.CheckInFlag = checkInFlag ?? throw new ArgumentNullException(nameof(checkInFlag));
+            await ChangeCheckInUpdateDb();
+            
+            // 4. 回傳
+            return GetResponseJson();
+        }
+
+        private async Task ChangeCheckInUpdateDb()
+        {
+            try
+            {
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbFailed(e));
+            }
+        }
+
+        private async Task<Resver_Head> ChangeCheckInQueryFromDb(int? id)
+        {
+            if (id == null)
+                throw new ArgumentNullException(nameof(id));
+            
+            return await DC.Resver_Head
+                .Where(rh => !rh.DeleteFlag && rh.RHID == id)
+                .FirstOrDefaultAsync();
+        }
+
+        private bool ChangeCheckInValidateInput(int? id, bool? checkInFlag)
+        {
+            bool isValid = this.StartValidate()
+                .Validate(_ => id > 0, () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
+                .Validate(_ => checkInFlag != null, () => AddError(EmptyNotAllowed("報到狀態")))
+                .IsValid();
+
+            return isValid;
+        }
+        
+        #endregion
     }
 }

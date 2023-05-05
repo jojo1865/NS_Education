@@ -68,6 +68,26 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
 
         /// <summary>
+        /// 回傳一串更新 DB 失敗時可用的預設錯誤字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string UpdateDbFailed(Exception e = null)
+        {
+            return e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}！";
+        }
+        
+        /// <summary>
+        /// 回傳一串查無資料時可用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string NotFound()
+        {
+            return $"查無資料！";
+        }
+        
+        /// <summary>
         /// 回傳一串缺少欄位時可使用的預設錯誤訊息字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>

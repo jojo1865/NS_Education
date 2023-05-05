@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Company.GetInfoById;
 using NS_Education.Models.APIItems.Company.GetList;
 using NS_Education.Models.APIItems.Company.Submit;
@@ -67,7 +68,10 @@ namespace NS_Education.Controller.UsingHelper
 
         public IOrderedQueryable<D_Company> GetListPagedOrderedQuery(Company_GetList_Input_APIItem input)
         {
-            var query = DC.D_Company.Include(c => c.BC).AsQueryable();
+            var query = DC.D_Company
+                .Include(c => c.BC)
+                .Include(c => c.D_Department)
+                .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(c =>
@@ -91,7 +95,12 @@ namespace NS_Education.Controller.UsingHelper
                 Code = entity.Code ?? "",
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",
-                DepartmentCt = 0
+                DepartmentItems = entity.D_Department.Select(dd => new BaseResponseRowIdTitle
+                {
+                    ID = dd.DDID,
+                    Title = dd.TitleC ?? dd.TitleE ?? ""
+                }).ToList(),
+                DepartmentCt = entity.D_Department.Count
             });
         }
 

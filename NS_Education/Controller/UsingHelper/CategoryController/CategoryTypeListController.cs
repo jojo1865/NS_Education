@@ -16,7 +16,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
     /// 處理 Category 的 GetTypeList 功能。
     /// </summary>
     public class CategoryTypeListController : PublicClass,
-        IGetListLocal<BaseResponseRowForType>
+        IGetListLocal<BaseResponseRowIdTitle>
     {
         #region Initialization
 
@@ -24,7 +24,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
 
         public CategoryTypeListController()
         {
-            _getListLocalHelper = new GetListLocalHelper<CategoryTypeListController, BaseResponseRowForType>(this);
+            _getListLocalHelper = new GetListLocalHelper<CategoryTypeListController, BaseResponseRowIdTitle>(this);
         }
 
         #endregion
@@ -37,14 +37,14 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
             return await _getListLocalHelper.GetListLocal();
         }
 
-        public async Task<ICollection<BaseResponseRowForType>> GetListLocalResults()
+        public async Task<ICollection<BaseResponseRowIdTitle>> GetListLocalResults()
         {
             return await Task.FromResult(GetCategoryTypeList(sCategoryTypes));
         }
 
-        public static IList<BaseResponseRowForType> GetCategoryTypeList(string[] sCategoryTypes)
+        public static IList<BaseResponseRowIdTitle> GetCategoryTypeList(string[] sCategoryTypes)
         {
-            return sCategoryTypes.Select((s, i) => new BaseResponseRowForType
+            return sCategoryTypes.Select((s, i) => new BaseResponseRowIdTitle
             {
                 ID = i,
                 Title = s

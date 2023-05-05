@@ -86,9 +86,9 @@ namespace NS_Education.Controller.UsingHelper
                 .OrderBy(oc => oc.SortNo);
         }
 
-        public async Task<BaseResponseRowForType> GetTypeListEntityToRow(B_OrderCode entity)
+        public async Task<BaseResponseRowIdTitle> GetTypeListEntityToRow(B_OrderCode entity)
         {
-            return await Task.Run(() => new BaseResponseRowForType
+            return await Task.Run(() => new BaseResponseRowIdTitle
             {
                 ID = int.Parse(entity.Code),
                 Title = entity.Title

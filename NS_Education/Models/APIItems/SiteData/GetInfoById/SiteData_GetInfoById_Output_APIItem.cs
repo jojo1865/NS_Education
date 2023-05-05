@@ -32,5 +32,8 @@ namespace NS_Education.Models.APIItems.SiteData.GetInfoById
             new List<BaseResponseRowForSelectable>();
         
         public int BOCID { get; set; }
+
+        public ICollection<SiteData_GetInfoById_Output_GroupList_Row_APIItem> Items { get; set; } =
+            new List<SiteData_GetInfoById_Output_GroupList_Row_APIItem>();
     }
 }

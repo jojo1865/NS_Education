@@ -79,8 +79,7 @@ namespace NS_Education.Controller.UsingHelper
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(p =>
-                    p.Title.Contains(input.Keyword) || p.Code.Contains(input.Keyword) ||
-                    p.Compilation.Contains(input.Keyword));
+                    p.Title.Contains(input.Keyword) || p.Code.Contains(input.Keyword));
 
             if (input.BCID.IsAboveZero())
                 query = query.Where(p => p.BCID == input.BCID);

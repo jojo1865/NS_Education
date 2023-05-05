@@ -95,11 +95,14 @@ namespace NS_Education.Controller.UsingHelper
                 Code = entity.Code ?? "",
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",
-                DepartmentItems = entity.D_Department.Select(dd => new BaseResponseRowIdTitle
+                DepartmentItems = entity.D_Department
+                    .OrderBy(dd => dd.DDID)
+                    .Select(dd => new BaseResponseRowIdTitle
                 {
                     ID = dd.DDID,
                     Title = dd.TitleC ?? dd.TitleE ?? ""
-                }).ToList(),
+                })
+                    .ToList(),
                 DepartmentCt = entity.D_Department.Count
             });
         }

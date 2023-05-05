@@ -205,6 +205,7 @@ namespace NS_Education.Controller.UsingHelper
                 await DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, GetUid());
 
                 response = await GetInfoByIdConvertEntityToResponse(entity);
+                await response.SetInfoFromEntity(entity, this);
             }
 
             // 3. 幫資料塞 CodeTypeList

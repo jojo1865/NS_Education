@@ -205,7 +205,7 @@ namespace NS_Education.Controller.UsingHelper
         
         #region Submit
 
-        [HttpGet]
+        [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(PartnerItem_Submit_Input_APIItem.BPIID))]
         public async Task<string> Submit(PartnerItem_Submit_Input_APIItem input)
         {

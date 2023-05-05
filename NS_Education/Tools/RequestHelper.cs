@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Web;
 using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
 using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 
-namespace NS_Education.Tools.Filters
+namespace NS_Education.Tools
 {
-    public static class RequestWrappingHelper
+    public static class RequestHelper
     {
         internal static ActionResult CreateWrappedResponse(ControllerContext filterContext, ActionResult originalActionResult, IEnumerable<Privilege> privileges = null)
         {
@@ -47,6 +49,37 @@ namespace NS_Education.Tools.Filters
             filterContext.HttpContext.Response.StatusDescription = "OK";
 
             return newActionResult;
+        }
+
+        public static void AddCorsHeaders(HttpResponseBase httpResponse = null)
+        {
+            var httpRequest = HttpContext.Current.Request;
+            httpResponse = httpResponse ?? new HttpResponseWrapper(HttpContext.Current.Response);
+            
+            string originHeader = "";
+
+            if (httpRequest.Headers.AllKeys.Contains("Origin"))
+            {
+                originHeader = httpRequest.Headers["Origin"];
+            }
+            else if (httpRequest.Headers.AllKeys.Contains("Referer"))
+            {
+                originHeader = httpRequest.Headers["Referer"];
+            }
+
+            if (!string.IsNullOrWhiteSpace(originHeader))
+            {
+                httpResponse.Headers.Remove("Access-Control-Allow-Origin");
+                httpResponse.Headers.Add("Access-Control-Allow-Origin", originHeader);
+            }
+
+            httpResponse.Headers.Remove("Access-Control-Allow-Credentials");
+            httpResponse.Headers.Remove("Access-Control-Allow-Headers");
+            httpResponse.Headers.Remove("Access-Control-Allow-Method");
+            httpResponse.Headers.Add("Access-Control-Allow-Credentials", "true");
+            httpResponse.Headers.Add("Access-Control-Allow-Headers",
+                "Accepts, Content-Type, Origin, X-My-Header, Pragma, Authorization");
+            httpResponse.Headers.Add("Access-Control-Allow-Method", "GET, POST");
         }
     }
 }

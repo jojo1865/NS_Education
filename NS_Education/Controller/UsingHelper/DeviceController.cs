@@ -140,7 +140,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(d => d.BSC)
                 .Include(d => d.BOC)
                 .Include(d => d.DH)
-                .Where(d => d.BSCID == id);
+                .Where(d => d.BDID == id);
         }
 
         public async Task<Device_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(B_Device entity)
@@ -279,7 +279,7 @@ namespace NS_Education.Controller.UsingHelper
 
         public IQueryable<B_Device> SubmitEditQuery(Device_Submit_Input_APIItem input)
         {
-            return DC.B_Device.Where(d => d.BCID == input.BCID);
+            return DC.B_Device.Where(d => d.BDID == input.BDID);
         }
 
         public void SubmitEditUpdateDataFields(B_Device data, Device_Submit_Input_APIItem input)

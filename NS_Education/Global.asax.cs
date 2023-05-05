@@ -1,11 +1,10 @@
-using System.Linq;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using Microsoft.IdentityModel.Logging;
-using NS_Education.Tools.Extensions;
+using NS_Education.Tools;
 
 namespace NS_Education
 {
@@ -27,27 +26,11 @@ namespace NS_Education
 
         protected void Application_BeginRequest()
         {
-            // 處理 CORS Preflight Request
-            string originHeader = "";
+            // 處理 CORS Request
+            RequestHelper.AddCorsHeaders();
 
-            if (Request.HttpMethod != "OPTIONS")
-                return;
-            
-            if (Request.Headers.AllKeys.Contains("Origin"))
-            {
-                originHeader = Request.Headers["Origin"];
-            }
-            else if (Request.Headers.AllKeys.Contains("Referer"))
-            {
-                originHeader = Request.Headers["Referer"];
-            }
-
-            if (!string.IsNullOrWhiteSpace(originHeader))
-            {
-                Response.Headers.Add("Access-Control-Allow-Origin", originHeader);
-            }
-            
-            if (!originHeader.IsNullOrWhiteSpace()) {
+            if (Request.HttpMethod == "OPTIONS") {
+                // 如果是 OPTIONS，即刻回傳
                 Response.Flush();
             }
         }

@@ -114,7 +114,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public IQueryable<B_SiteData> GetInfoByIdQuery(int id)
         {
-            return DC.B_SiteData.Where(sd => sd.BSID == id);
+            return DC.B_SiteData
+                .Include(sd => sd.M_SiteGroupMaster)
+                .ThenInclude(sg => sg.Group)
+                .Where(sd => sd.BSID == id);
         }
 
         public async Task<SiteData_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(B_SiteData entity)
@@ -136,12 +139,25 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 PhoneExt3 = entity.PhoneExt3 ?? "",
                 Note = entity.Note ?? "",
                 BSCID1 = entity.BSCID1,
-                FloorList = await DC.B_StaticCode.GetStaticCodeSelectable(1, entity.BSCID1),
+                FloorList = await DC.B_StaticCode.GetStaticCodeSelectable(1,
+                    entity.BSCID1),
                 BSCID5 = entity.BSCID5,
-                TableList = await DC.B_StaticCode.GetStaticCodeSelectable(5, entity.BSCID5),
+                TableList = await DC.B_StaticCode.GetStaticCodeSelectable(5,
+                    entity.BSCID5),
                 DHID = entity.DHID,
                 HallList = await DC.D_Hall.GetHallSelectable(entity.DHID),
-                BOCID = entity.BOCID
+                BOCID = entity.BOCID,
+                Items = entity.M_SiteGroupMaster
+                    .Where(siteGroup => siteGroup.ActiveFlag && !siteGroup.DeleteFlag)
+                    .Select(siteGroup => new SiteData_GetInfoById_Output_GroupList_Row_APIItem
+                    {
+                        BSID = siteGroup.Group?.BSID ?? 0,
+                        Code = siteGroup.Group?.Code ?? "",
+                        Title = siteGroup.Group?.Title ?? "",
+                        SortNo = siteGroup.SortNo
+                    })
+                    .OrderBy(siteGroup => siteGroup.SortNo)
+                    .ToList()
             };
         }
 

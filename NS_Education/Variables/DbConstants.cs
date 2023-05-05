@@ -18,6 +18,6 @@ namespace NS_Education.Variables
         /// <summary>
         /// 用於確認預約行程的種類是否為餐飲。
         /// </summary>
-        public const string ReseverThrowDineTitle = "餐飲";
+        public const string ThrowDineTitle = "餐飲";
     }
 }

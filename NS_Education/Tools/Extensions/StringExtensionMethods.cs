@@ -20,6 +20,11 @@ namespace NS_Education.Tools.Extensions
             return s;
         }
 
+        public static bool HasContent(this string s)
+        {
+            return !String.IsNullOrWhiteSpace(s);
+        }
+        
         public static bool IsNullOrWhiteSpace(this string s)
         {
             return String.IsNullOrWhiteSpace(s);

@@ -80,11 +80,22 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <summary>
         /// 回傳一串查無資料時可用的預設錯誤訊息字串。
         /// </summary>
-        /// <param name="fieldName">欄位名稱</param>
+        /// <param name="fieldName">（可選）欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string NotFound()
+        protected string NotFound(string fieldName = null)
         {
-            return $"查無資料！";
+            return fieldName is null ? "查無資料！" : $"「{fieldName}」查無對應資料！";
+        }
+
+        /// <summary>
+        /// 回傳一串最小值大於最大值時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="minFieldName">最小值的欄位名稱</param>
+        /// <param name="maxFieldName">最大值的欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected internal string MinLargerThanMax(string minFieldName, string maxFieldName)
+        {
+            return $"「{minFieldName}」必須小於等於「{maxFieldName}」！";
         }
         
         /// <summary>

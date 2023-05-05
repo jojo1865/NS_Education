@@ -49,11 +49,12 @@ namespace NS_Education.Tools.Extensions
         /// 轉換成功時：DateTime 結果<br/>
         /// 轉換失敗時：欲設的 DateTime 值
         /// </param>
+        /// <param name="type">（可選）允許轉換的格式。忽略時，皆允許。</param>
         /// <returns>
         /// true：轉換成功<br/>
         /// false：轉換失敗
         /// </returns>
-        public static bool TryParseDateTime(this string s, out DateTime result)
+        public static bool TryParseDateTime(this string s, out DateTime result, DateTimeParseType type = DateTimeParseType.Date | DateTimeParseType.DateTime)
         {
             result = default;
             if (s == null)
@@ -61,9 +62,9 @@ namespace NS_Education.Tools.Extensions
             
             s = s.Trim();
 
-            if (s.Length == IoConstants.DateTimeFormat.Length)
+            if (type.HasFlag(DateTimeParseType.DateTime) && s.Length == IoConstants.DateTimeFormat.Length)
                 return DateTime.TryParseExact(s, IoConstants.DateTimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out result);
-            if (s.Length == IoConstants.DateFormat.Length)
+            if (type.HasFlag(DateTimeParseType.Date) && s.Length == IoConstants.DateFormat.Length)
                 return DateTime.TryParseExact(s, IoConstants.DateFormat, CultureInfo.InvariantCulture,
                     DateTimeStyles.AssumeLocal, out result);
             
@@ -111,5 +112,12 @@ namespace NS_Education.Tools.Extensions
         {
             return endTime.hour * 60 + endTime.minute - startTime.hour * 60 - startTime.minute;
         }
+    }
+
+    [Flags]
+    public enum DateTimeParseType
+    {
+        Date = 1,
+        DateTime = 2
     }
 }

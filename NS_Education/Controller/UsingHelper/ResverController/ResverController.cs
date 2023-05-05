@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Resver.GetAllInfoById;
 using NS_Education.Models.APIItems.Resver.GetHeadList;
+using NS_Education.Models.APIItems.Resver.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -22,21 +23,24 @@ namespace NS_Education.Controller.UsingHelper.ResverController
     public class ResverController : PublicClass, 
         IGetListPaged<Resver_Head, Resver_GetHeadList_Input_APIItem, Resver_GetHeadList_Output_Row_APIItem>,
         IGetInfoById<Resver_Head, Resver_GetAllInfoById_Output_APIItem>,
-        IDeleteItem<Resver_Head>
+        IDeleteItem<Resver_Head>,
+        ISubmit<Resver_Head, Resver_Submit_Input_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<Resver_GetHeadList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
-        private readonly IDeleteItemHelper
-            _deleteItemHelper;
+        private readonly IDeleteItemHelper _deleteItemHelper;
+
+        private readonly ISubmitHelper<Resver_Submit_Input_APIItem> _submitHelper;
 
         public ResverController()
         {
             _getListPagedHelper = new GetListPagedHelper<ResverController, Resver_Head, Resver_GetHeadList_Input_APIItem, Resver_GetHeadList_Output_Row_APIItem>(this);
             _getInfoByIdHelper = new GetInfoByIdHelper<ResverController, Resver_Head, Resver_GetAllInfoById_Output_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<ResverController, Resver_Head>(this);
+            _submitHelper = new SubmitHelper<ResverController, Resver_Head, Resver_Submit_Input_APIItem>(this);
         }
 
         #endregion
@@ -353,7 +357,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     SortNo = rt.SortNo,
                     Note = rt.Note,
                     TimeSpanItems = GetTimeSpanFromHead<Resver_Throw>(rs.RH, rt.RTID),
-                    FoodItems = rt.BSC?.Title != DbConstants.ReseverThrowDineTitle
+                    FoodItems = rt.BSC?.Title != DbConstants.ThrowDineTitle
                         ? new List<Resver_GetAllInfoById_Output_FoodItem_APIItem>()
                         : GetALlInfoByIdPopulateFoodItems(rt)
                 })
@@ -556,6 +560,244 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             return isValid;
         }
+        
+        #endregion
+
+        #region Submit
+        public async Task<string> Submit(Resver_Submit_Input_APIItem input)
+        {
+            return await _submitHelper.Submit(input);
+        }
+
+        public bool SubmitIsAdd(Resver_Submit_Input_APIItem input)
+        {
+            return input.RHID == 0;
+        }
+        
+        #region Submit - Add
+
+        public async Task<bool> SubmitAddValidateInput(Resver_Submit_Input_APIItem input)
+        {
+            DateTime headStartDate = default;
+            DateTime headEndDate = default;
+
+            // 主預約單
+            bool isHeadValid = input.StartValidate()
+                .Validate(i => i.RHID == 0, () => AddError(WrongFormat("預約單 ID")))
+                .Validate(i => SubmitValidateStaticCode(i.BSCID12, StaticCodeType.ResverStatus),
+                    () => AddError(NotFound("預約狀態 ID")))
+                .Validate(i => SubmitValidateStaticCode(i.BSCID11, StaticCodeType.ResverSource),
+                    () => AddError(NotFound("預約來源 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("預約單編號")))
+                .Validate(i => i.SDate.TryParseDateTime(out headStartDate), () => AddError(WrongFormat("預約單起始日")))
+                .Validate(i => i.EDate.TryParseDateTime(out headEndDate), () => AddError(WrongFormat("預約單結束日")))
+                .Validate(i => headEndDate.Date >= headStartDate.Date,
+                    () => AddError(MinLargerThanMax("預約單起始日", "預約單結束日")))
+                .Validate(i => SubmitValidateCustomerId(i.CID), () => AddError(NotFound("客戶")))
+                .Validate(i => i.CustomerTitle.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱")))
+                .Validate(i => i.ContactName.HasContent(), () => AddError(EmptyNotAllowed("聯絡人名稱")))
+                .Validate(i => SubmitValidateMKBusinessUser(i.MK_BUID), () => AddError(NotFound("MK 業務")))
+                .Validate(i => SubmitValidateOPBusinessUser(i.OP_BUID), () => AddError(NotFound("OP 業務")))
+                .IsValid();
+
+            // 主預約單 -> 聯絡方式
+            bool isContactItemValid = input.ContactItems.All(item =>
+                item.StartValidate()
+                    .Validate(ci => ci.MID == 0, () => AddError(WrongFormat("聯絡方式對應 ID")))
+                    .Validate(ci => SubmitValidateContactType(ci.ContactType), () => AddError(NotFound("聯絡方式編號")))
+                    .Validate(ci => ci.ContactData.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式內容")))
+                    .IsValid());
+
+            // 主預約單 -> 場地列表
+            bool isSiteItemsValid = input.SiteItems.All(item =>
+                item.StartValidate()
+                    .Validate(si => si.RSID == 0, () => AddError(WrongFormat("場地預約單 ID")))
+                    .Validate(si => si.TargetDate.TryParseDateTime(out _), () => AddError(WrongFormat("場地使用日期")))
+                    .Validate(si => SubmitValidateSiteData(si.BSID), () => AddError(NotFound("場地 ID")))
+                    .Validate(si => SubmitValidateOrderCode(si.BOCID), () => AddError(NotFound("預約場地的入帳代號 ID")))
+                    .Validate(si => SubmitValidateStaticCode(si.BSCID, StaticCodeType.SiteTable))
+                    .IsValid());
+
+            // 主預約單 -> 場地列表 -> 時段列表
+            bool isSiteItemTimeSpanItemValid =
+                SubmitValidateTimeSpanItems(input.SiteItems.SelectMany(si => si.TimeSpanItems));
+
+            // 主預約單 -> 場地列表 -> 行程列表
+            bool isSiteItemThrowItemValid = input.SiteItems
+                .SelectMany(si => si.ThrowItems)
+                .All(item =>
+                    item.StartValidate()
+                        .Validate(ti => ti.RTID == 0, () => AddError(WrongFormat("行程預約單 ID")))
+                        .Validate(ti => ti.TargetDate.TryParseDateTime(out _),
+                            () => AddError(WrongFormat("預約行程的預計使用日期")))
+                        .Validate(ti => SubmitValidateStaticCode(ti.BSCID, StaticCodeType.ResverThrow),
+                            () => AddError(WrongFormat("預約類型")))
+                        .Validate(ti => ti.Title.HasContent(), () => AddError(EmptyNotAllowed("行程名稱")))
+                        .Validate(ti => SubmitValidateOrderCode(ti.BOCID), () => AddError("預約行程的入帳代號 ID"))
+                        .IsValid());
+
+            // 主預約單 -> 場地列表 -> 行程列表 -> 時段列表
+            bool isSiteItemThrowItemTimeSpanItemValid =
+                SubmitValidateTimeSpanItems(input.SiteItems.SelectMany(si => si.ThrowItems)
+                    .SelectMany(ti => ti.TimeSpanItems));
+
+            // 主預約單 -> 場地列表 -> 行程列表 -> 餐飲補充列表
+            bool isSiteItemThrowItemFoodItemValid =
+                input.SiteItems
+                    .SelectMany(si => si.ThrowItems).SelectMany(ti => ti.FoodItems)
+                    .All(item =>
+                        item.StartValidate()
+                            .Validate(fi => fi.RTFID == 0, () => AddError(WrongFormat("行程餐飲預約單 ID")))
+                            .Validate(fi => SubmitValidateFoodCategory(fi.DFCID),
+                                () => AddError(NotFound("預約行程的餐種 ID")))
+                            .Validate(fi => SubmitValidateStaticCode(fi.BSCID, StaticCodeType.Cuisine),
+                                () => AddError(NotFound("預約行程的餐別 ID")))
+                            .Validate(fi => SubmitValidatePartner(fi.BPID), () => AddError(NotFound("預約行程的廠商 ID")))
+                            .IsValid());
+
+            // 主預約單 -> 場地列表 -> 設備列表
+            bool isSiteItemDeviceItemValid =
+                input.SiteItems.SelectMany(si => si.DeviceItems)
+                    .All(item =>
+                        item.StartValidate()
+                            .Validate(di => di.RDID == 0, () => AddError(WrongFormat("設備預約單 ID")))
+                            .Validate(di => di.TargetDate.TryParseDateTime(out _),
+                                () => AddError(WrongFormat("預約設備的預計使用日期")))
+                            .Validate(di => SubmitValidateDevice(di.BDID), () => AddError(NotFound("預約設備 ID")))
+                            .Validate(di => SubmitValidateOrderCode(di.BOCID), () => AddError(NotFound("預約設備的入帳代號 ID")))
+                            .IsValid()
+                    );
+
+            // 主預約單 -> 場地列表 -> 設備列表 -> 時段列表
+            bool isSiteItemDeviceItemTimeSpanItemValid = SubmitValidateTimeSpanItems(input.SiteItems
+                .SelectMany(si => si.DeviceItems)
+                .SelectMany(di => di.TimeSpanItems));
+
+            // 主預約單 -> 其他收費項目列表
+            bool isOtherItemValid =
+                input.OtherItems.All(item => item.StartValidate()
+                    .Validate(oi => oi.ROID == 0, () => AddError(WrongFormat("其他收費項目預約單 ID")))
+                    .Validate(oi => oi.TargetDate.TryParseDateTime(out _), () => AddError(WrongFormat("其他收費項目的預計使用日期")))
+                    .Validate(oi => SubmitValidateOtherPayItem(oi.DOPIID), () => AddError(NotFound("其他收費項目 ID")))
+                    .Validate(oi => SubmitValidateOrderCode(oi.BOCID), () => AddError(NotFound("其他收費項目的入帳代號 ID")))
+                    .IsValid());
+            
+            // 主預約單 -> 繳費紀錄列表
+            bool isBillItemValid =
+                input.BillItems.All(item => item.StartValidate()
+                    .Validate(bi => bi.RBID == 0, () => AddError(WrongFormat("繳費紀錄預約單 ID")))
+                    .Validate(bi => SubmitValidateCategory(bi.BCID), () => AddError(NotFound("繳費類別 ID")))
+                    .Validate(bi => SubmitValidatePayType(bi.DPTID), () => AddError(NotFound("繳費紀錄的付款方式 ID")))
+                    .Validate(bi => bi.PayDate.TryParseDateTime(out _, DateTimeParseType.DateTime), () => AddError("付款時間"))
+                    .IsValid());
+
+            return await Task.FromResult(isHeadValid && isContactItemValid);
+        }
+
+        private bool SubmitValidatePayType(int payTypeId)
+        {
+            return payTypeId.IsAboveZero() && DC.D_PayType.Any(pt => pt.ActiveFlag && !pt.DeleteFlag && pt.DPTID == payTypeId);
+        }
+
+        private bool SubmitValidateCategory(int categoryId)
+        {
+            return categoryId.IsAboveZero() && DC.B_Category.Any(c => c.ActiveFlag && !c.DeleteFlag && c.BCID == categoryId);
+        }
+
+        private bool SubmitValidateOtherPayItem(int otherPayItemId)
+        {
+            return otherPayItemId.IsAboveZero() && DC.D_OtherPayItem.Any(opi => opi.ActiveFlag && !opi.DeleteFlag && opi.DOPIID == otherPayItemId);
+        }
+
+        private bool SubmitValidateDevice(int deviceId)
+        {
+            return deviceId.IsAboveZero() && DC.B_Device.Any(bd => bd.ActiveFlag && !bd.DeleteFlag && bd.BDID == deviceId);
+        }
+
+        private bool SubmitValidatePartner(int partnerId)
+        {
+            return partnerId.IsAboveZero() && DC.B_Partner.Any(p => p.ActiveFlag && !p.DeleteFlag && p.BPID == partnerId);
+        }
+
+        private bool SubmitValidateFoodCategory(int foodCategoryId)
+        {
+            return foodCategoryId.IsAboveZero() && DC.D_FoodCategory.Any(dfc =>
+                dfc.ActiveFlag && !dfc.DeleteFlag && dfc.DFCID == foodCategoryId);
+        }
+
+        private bool SubmitValidateTimeSpanItems(IEnumerable<Resver_Submit_TimeSpanItem_Input_APIItem> items)
+        {
+            return items.All(item =>
+                item.StartValidate()
+                    .Validate(tsi => SubmitValidateDataTimeSpan(tsi.DTSID))
+                    .IsValid());
+        }
+
+        private bool SubmitValidateDataTimeSpan(int dtsId)
+        {
+            return dtsId.IsAboveZero() && DC.D_TimeSpan.Any(dts => dts.ActiveFlag && !dts.DeleteFlag && dts.DTSID == dtsId);
+        }
+
+        private bool SubmitValidateOrderCode(int orderCodeId)
+        {
+            return orderCodeId.IsAboveZero() && DC.B_OrderCode.Any(boc => boc.ActiveFlag && !boc.DeleteFlag && boc.BOCID == orderCodeId);
+        }
+
+        private bool SubmitValidateSiteData(int siteDataId)
+        {
+            return siteDataId.IsAboveZero() && DC.B_SiteData.Any(sd => sd.ActiveFlag && !sd.DeleteFlag && sd.BSID == siteDataId);
+        }
+
+        private static bool SubmitValidateContactType(int contactType)
+        {
+            return ContactTypeController.GetContactTypeList().Any(ct => ct.ID == contactType);
+        }
+
+        private bool SubmitValidateOPBusinessUser(int businessUserId)
+        {
+            return businessUserId.IsAboveZero() && DC.BusinessUser.Any(bu => bu.ActiveFlag && !bu.DeleteFlag && bu.OPsalesFlag && bu.BUID == businessUserId);
+        }
+
+        private bool SubmitValidateMKBusinessUser(int businessUserId)
+        {
+            return businessUserId.IsAboveZero() && DC.BusinessUser.Any(bu => bu.ActiveFlag && !bu.DeleteFlag && bu.MKsalesFlag && bu.BUID == businessUserId);
+        }
+
+        private bool SubmitValidateCustomerId(int customerId)
+        {
+            return customerId.IsAboveZero() && DC.Customer.Any(c => c.ActiveFlag && !c.DeleteFlag && c.CID == customerId);
+        }
+
+        private bool SubmitValidateStaticCode(int BSCID, StaticCodeType CodeType)
+        {
+            return BSCID.IsAboveZero() && DC.B_StaticCode.Any(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.BSCID == BSCID && sc.CodeType == (int)CodeType);
+        }
+
+        public async Task<Resver_Head> SubmitCreateData(Resver_Submit_Input_APIItem input)
+        {
+            throw new NotImplementedException();
+        }
+        
+        #endregion
+        
+        #region Submit - Edit
+
+        public async Task<bool> SubmitEditValidateInput(Resver_Submit_Input_APIItem input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IQueryable<Resver_Head> SubmitEditQuery(Resver_Submit_Input_APIItem input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubmitEditUpdateDataFields(Resver_Head data, Resver_Submit_Input_APIItem input)
+        {
+            throw new NotImplementedException();
+        }
+        
+        #endregion
         
         #endregion
     }

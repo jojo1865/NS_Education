@@ -273,7 +273,8 @@
     <Compile Include="Controller\UsingHelper\PayTypeController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs" />
-    <Compile Include="Controller\UsingHelper\StaticCodeController.cs" />
+    <Compile Include="Controller\UsingHelper\StaticCodeController\StaticCodeController.cs" />
+    <Compile Include="Controller\UsingHelper\StaticCodeController\StaticCodeTypeListController.cs" />
     <Compile Include="Controller\UsingHelper\TimeSpanController.cs" />
     <Compile Include="Controller\UsingHelper\UserDataController\UserDataController.cs" />
     <Compile Include="Controller\UsingHelper\UserDataController\UserDataLogController.cs" />
@@ -397,6 +398,8 @@
     <Compile Include="Models\APIItems\StaticCode\GetInfoById\StaticCode_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetList\StaticCode_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\GetList\StaticCode_GetList_Output_Row_APIItem.cs" />
+    <Compile Include="Models\APIItems\StaticCode\GetTypeList\StaticCode_GetTypeList_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\StaticCode\GetTypeList\StaticCode_GetTypeList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\StaticCode\Submit\StaticCode_Submit_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\TimeSpan\D_TimeSpan_APIItem.cs" />
     <Compile Include="Models\APIItems\TimeSpan\GetInfoById\TimeSpan_GetInfoById_Output_APIItem.cs" />

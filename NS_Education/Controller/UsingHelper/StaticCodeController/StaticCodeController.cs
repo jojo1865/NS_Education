@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.StaticCode.GetInfoById;
 using NS_Education.Models.APIItems.StaticCode.GetList;
+using NS_Education.Models.APIItems.StaticCode.GetTypeList;
 using NS_Education.Models.APIItems.StaticCode.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -19,21 +20,19 @@ using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
 
-namespace NS_Education.Controller.UsingHelper
+namespace NS_Education.Controller.UsingHelper.StaticCodeController
 {
     /// <summary>
     /// 靜態參數的 Controller。
     /// </summary>
     public class StaticCodeController : PublicClass
-        , IGetTypeList<B_StaticCode>
         , IGetListPaged<B_StaticCode, StaticCode_GetList_Input_APIItem, StaticCode_GetList_Output_Row_APIItem>
         , IChangeActive<B_StaticCode>
         , IDeleteItem<B_StaticCode>
         , ISubmit<B_StaticCode, StaticCode_Submit_Input_APIItem>
     {
         #region 共用
-
-        private readonly IGetTypeListHelper _getTypeListHelper;
+        
         private readonly IGetListPagedHelper<StaticCode_GetList_Input_APIItem> _getListHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
@@ -59,9 +58,6 @@ namespace NS_Education.Controller.UsingHelper
                 .GroupBy(sc => sc.Code)
                 .ToDictionary(group => group.Key, group => group.First());
 
-            _getTypeListHelper =
-                new GetTypeListHelper<StaticCodeController, B_StaticCode>(this);
-
             _getListHelper =
                 new GetListPagedHelper<StaticCodeController
                     , B_StaticCode
@@ -76,33 +72,6 @@ namespace NS_Education.Controller.UsingHelper
 
             _submitHelper =
                 new SubmitHelper<StaticCodeController, B_StaticCode, StaticCode_Submit_Input_APIItem>(this);
-        }
-
-        #endregion
-
-        #region GetTypeList
-
-        [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetTypeList()
-        {
-            return await _getTypeListHelper.GetTypeList();
-        }
-
-        public IOrderedQueryable<B_StaticCode> GetTypeListQuery()
-        {
-            return DC.B_StaticCode
-                .Where(sc => sc.CodeType == 0 && sc.ActiveFlag)
-                .OrderBy(sc => sc.SortNo);
-        }
-
-        public async Task<BaseResponseRowIdTitle> GetTypeListEntityToRow(B_StaticCode entity)
-        {
-            return await Task.FromResult(new BaseResponseRowIdTitle
-            {
-                ID = int.Parse(entity.Code),
-                Title = entity.Title
-            });
         }
 
         #endregion
@@ -210,7 +179,7 @@ namespace NS_Education.Controller.UsingHelper
                     AddError(GetInfoByIdNotFound);
                     return GetResponseJson();
                 }
-                
+
                 // 寫 user log
                 await DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, GetUid());
 
@@ -219,11 +188,15 @@ namespace NS_Education.Controller.UsingHelper
             }
 
             // 3. 幫資料塞 CodeTypeList
-            // 借用 GetTypeList 的邏輯
-            response.CodeTypeList = GetTypeListQuery()
-                .Where(sc => !sc.DeleteFlag)
+            response.CodeTypeList = DC.B_StaticCode
+                .Where(sc => sc.CodeType == response.iCodeType && sc.ActiveFlag && !sc.DeleteFlag)
+                .OrderBy(sc => sc.SortNo)
                 .AsEnumerable() // 在這裡就轉換成 Enumerable，避免 LINQ 以為是 Query 中要做的處理，導致多重 DataConnection 問題
-                .Select(sc => Task.Run(() => GetTypeListEntityToRow(sc)).Result)
+                .Select(sc => new BaseResponseRowIdTitle
+                {
+                    ID = int.Parse(sc.Code),
+                    Title = sc.Title
+                })
                 .ToList();
 
             // 4. 回傳
@@ -369,5 +342,25 @@ namespace NS_Education.Controller.UsingHelper
         #endregion
 
         #endregion
+
+        public async Task<string> GetList(StaticCode_GetTypeList_Input_APIItem input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> GetListAllValidateInput(StaticCode_GetTypeList_Input_APIItem input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IOrderedQueryable<B_StaticCode> GetListAllOrderedQuery(StaticCode_GetTypeList_Input_APIItem input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<StaticCode_GetTypeList_Output_Row_APIItem> GetListAllEntityToRow(B_StaticCode entity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

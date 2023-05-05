@@ -22,6 +22,12 @@ namespace NS_Education
             );
             
             routes.MapRoute(
+                name: "StaticCodeGetTypeList",
+                url: "StaticCode/GetTypeList/{id}",
+                defaults: new { controller = "StaticCodeTypeList", action = "GetList", id = UrlParameter.Optional }
+            );
+            
+            routes.MapRoute(
                 name: "CategoryGetTypeList",
                 url: "Category/GetTypeList/{id}",
                 defaults: new { controller = "CategoryTypeList", action = "GetList", id = UrlParameter.Optional }

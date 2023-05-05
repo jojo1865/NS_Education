@@ -17,7 +17,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
 
-namespace NS_Education.Controller.UsingHelper
+namespace NS_Education.Controller.UsingHelper.ResverController
 {
     public class ResverController : PublicClass, 
         IGetListPaged<Resver_Head, Resver_GetHeadList_Input_APIItem, Resver_GetHeadList_Output_Row_APIItem>,

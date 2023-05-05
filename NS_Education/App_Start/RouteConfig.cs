@@ -32,7 +32,7 @@ namespace NS_Education
                 url: "Resver/GetHeadList/{id}",
                 defaults: new { controller = "Resver", action = "GetList", id = UrlParameter.Optional }
             );
-
+            
             routes.MapRoute(
                 name: "CategoryGetTypeList",
                 url: "Category/GetTypeList/{id}",

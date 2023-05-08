@@ -206,7 +206,7 @@ namespace NS_Education.Controller.UsingHelper
             DateTime responseDate = default;
             var validation = input.StartValidate(true)
                 .Validate(i => i.CQID == 0, () => AddError(WrongFormat("問題紀錄 ID")))
-                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(EmptyNotAllowed("客戶 ID")))
                 .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")))
                 .Validate(i => !i.AskTitle.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題主旨")))
                 .Validate(i => !i.AskDescription.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題內容")));
@@ -214,7 +214,7 @@ namespace NS_Education.Controller.UsingHelper
             // 若傳入內容表示已回答，則回答者相關的欄位需要檢核
             if (input.ResponseFlag)
             {
-                validation.Validate(i => !i.ResponseUser.IsNullOrWhiteSpace(),
+                await validation.Validate(i => !i.ResponseUser.IsNullOrWhiteSpace(),
                         () => AddError(EmptyNotAllowed("回答者姓名")))
                     .Validate(i => !i.ResponseDescription.IsNullOrWhiteSpace(),
                         () => AddError(EmptyNotAllowed("回答內容")))
@@ -224,7 +224,7 @@ namespace NS_Education.Controller.UsingHelper
                         () => AddError(SubmitResponseDateNotAfterAskDate));
             }
 
-            return await Task.FromResult(validation.IsValid());
+            return await validation.IsValid();
         }
 
         public async Task<CustomerQuestion> SubmitCreateData(CustomerQuestion_Submit_Input_APIItem input)
@@ -260,7 +260,7 @@ namespace NS_Education.Controller.UsingHelper
             DateTime responseDate = default;
             var validation = input.StartValidate(true)
                 .Validate(i => i.CQID.IsAboveZero(), () => AddError(EmptyNotAllowed("問題紀錄 ID")))
-                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(EmptyNotAllowed("客戶 ID")))
                 .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")))
                 .Validate(i => !i.AskTitle.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題主旨")))
                 .Validate(i => !i.AskDescription.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題內容")));
@@ -268,7 +268,7 @@ namespace NS_Education.Controller.UsingHelper
             // 若傳入內容表示已回答，則回答者相關的欄位需要檢核
             if (input.ResponseFlag)
             {
-                validation.Validate(i => !i.ResponseUser.IsNullOrWhiteSpace(),
+                await validation.Validate(i => !i.ResponseUser.IsNullOrWhiteSpace(),
                         () => AddError(EmptyNotAllowed("回答者姓名")))
                     .Validate(i => !i.ResponseDescription.IsNullOrWhiteSpace(),
                         () => AddError(EmptyNotAllowed("回答內容")))
@@ -278,7 +278,7 @@ namespace NS_Education.Controller.UsingHelper
                         () => AddError(SubmitResponseDateNotAfterAskDate));
             }
 
-            return await Task.FromResult(validation.IsValid());
+            return await validation.IsValid();
         }
 
         public IQueryable<CustomerQuestion> SubmitEditQuery(CustomerQuestion_Submit_Input_APIItem input)

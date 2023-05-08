@@ -196,8 +196,6 @@ namespace NS_Education.Controller.UsingHelper
 
         #region Submit
 
-        private const string SubmitCleanDatesIncorrect = "清潔合約結束日應大於等於起始日！";
-
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Partner_Submit_Input_APIItem.BPID))]
         public async Task<string> Submit(Partner_Submit_Input_APIItem input)

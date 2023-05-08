@@ -343,12 +343,12 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
 
         #endregion
 
-        public async Task<string> GetList(StaticCode_GetTypeList_Input_APIItem input)
+        public Task<string> GetList(StaticCode_GetTypeList_Input_APIItem input)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> GetListAllValidateInput(StaticCode_GetTypeList_Input_APIItem input)
+        public Task<bool> GetListAllValidateInput(StaticCode_GetTypeList_Input_APIItem input)
         {
             throw new NotImplementedException();
         }
@@ -358,7 +358,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             throw new NotImplementedException();
         }
 
-        public async Task<StaticCode_GetTypeList_Output_Row_APIItem> GetListAllEntityToRow(B_StaticCode entity)
+        public Task<StaticCode_GetTypeList_Output_Row_APIItem> GetListAllEntityToRow(B_StaticCode entity)
         {
             throw new NotImplementedException();
         }

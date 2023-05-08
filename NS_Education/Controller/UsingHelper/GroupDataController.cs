@@ -246,11 +246,6 @@ namespace NS_Education.Controller.UsingHelper
             }
         }
 
-        private static string UpdateDbFailed(Exception e)
-        {
-            return $"更新 DB 時失敗：{e.Message}！";
-        }
-
         private async Task SubmitMenuDataUpdateMGroupMenu(GroupData_SubmitMenuData_Input_APIItem input)
         {
             // 輸入的 MDID

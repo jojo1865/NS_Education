@@ -26,6 +26,6 @@ dotnet ef dbcontext scaffold "Data Source=192.168.50.125\SQL2019D;Database=db_NS
             string fallback =
                 connectionStrings["db_NS_EducationConnectionStringFallback"].ConnectionString;
 
-            optionsBuilder.UseSqlServer((!env.IsNullOrWhiteSpace() ? env : fallback) ?? throw new NullReferenceException("ConnectionString"));
+            optionsBuilder.UseSqlServer((!string.IsNullOrWhiteSpace(env) ? env : fallback) ?? throw new NullReferenceException("ConnectionString"));
         } 
 ```

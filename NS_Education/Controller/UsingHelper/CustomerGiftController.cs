@@ -15,6 +15,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -194,12 +195,12 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitAddValidateInput(CustomerGift_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate(true)
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.CGID == 0, () => AddError(WrongFormat("禮品贈與紀錄 ID")))
-                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
-                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift), () => AddError(NotFound("禮品 ID")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
                 .IsValid();
 
@@ -228,12 +229,12 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitEditValidateInput(CustomerGift_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate(true)
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.CGID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品贈與紀錄 ID")))
-                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
-                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift), () => AddError(NotFound("禮品 ID")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
                 .IsValid();
 

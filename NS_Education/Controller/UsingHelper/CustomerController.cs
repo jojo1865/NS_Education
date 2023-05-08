@@ -330,7 +330,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 // 驗證輸入
-                .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
+                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
                 .Validate(i => i.BSCID6.IsAboveZero(), () => AddError(EmptyNotAllowed("行業別 ID")))
                 .Validate(i => i.BSCID4.IsAboveZero(), () => AddError(EmptyNotAllowed("區域別 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代號")))

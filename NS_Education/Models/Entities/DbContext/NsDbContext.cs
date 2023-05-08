@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
-using NS_Education.Tools.Extensions;
 
 // Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
 // If you have enabled NRTs for your project, then un-comment the following line:
@@ -73,8 +72,8 @@ namespace NS_Education.Models.Entities.DbContext
             string fallback =
                 connectionStrings["db_NS_EducationConnectionStringFallback"].ConnectionString;
 
-            optionsBuilder.UseSqlServer((!env.IsNullOrWhiteSpace() ? env : fallback) ?? throw new NullReferenceException("ConnectionString"));
-        }
+            optionsBuilder.UseSqlServer((!string.IsNullOrWhiteSpace(env) ? env : fallback) ?? throw new NullReferenceException("ConnectionString"));
+        } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -690,13 +689,11 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.BU)
                     .WithMany(p => p.M_Customer_BusinessUser)
                     .HasForeignKey(d => d.BUID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("M_Customer_BusinessUser_BusinessUser_BUID_fk");
 
                 entity.HasOne(d => d.C)
                     .WithMany(p => p.M_Customer_BusinessUser)
                     .HasForeignKey(d => d.CID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("M_Customer_BusinessUser_Customer_CID_fk");
             });
 

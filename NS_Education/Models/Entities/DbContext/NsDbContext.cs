@@ -789,13 +789,11 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.DTS)
                     .WithMany(p => p.M_Resver_TimeSpan)
                     .HasForeignKey(d => d.DTSID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_M_ResverSiteTimeSpan_D_TimeSpan");
 
                 entity.HasOne(d => d.RH)
                     .WithMany(p => p.M_Resver_TimeSpan)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_M_Resver_TimeSpan_Resver_Head");
             });
 
@@ -889,19 +887,16 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.BC)
                     .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.BCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Bill_Header_B_Category");
 
                 entity.HasOne(d => d.DPT)
                     .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.DPTID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Bill_Header_D_PayType");
 
                 entity.HasOne(d => d.RH)
                     .WithMany(p => p.Resver_Bill)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Bill_Header_Resver_Head");
             });
 
@@ -922,19 +917,16 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.BD)
                     .WithMany(p => p.Resver_Device)
                     .HasForeignKey(d => d.BDID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Device_B_Device");
 
                 entity.HasOne(d => d.BOC)
                     .WithMany(p => p.Resver_Device)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Device_B_OrderCode");
 
                 entity.HasOne(d => d.RS)
                     .WithMany(p => p.Resver_Device)
                     .HasForeignKey(d => d.RSID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Device_Resver_Site");
             });
 
@@ -953,7 +945,6 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.RH)
                     .WithMany(p => p.Resver_GiveBack)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_GiveBack_Resver_Head");
             });
 
@@ -1035,19 +1026,16 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.BOC)
                     .WithMany(p => p.Resver_Other)
                     .HasForeignKey(d => d.BOCID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Other_B_OrderCode");
 
                 entity.HasOne(d => d.DOPI)
                     .WithMany(p => p.Resver_Other)
                     .HasForeignKey(d => d.DOPIID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Other_D_OtherPayItem");
 
                 entity.HasOne(d => d.RH)
                     .WithMany(p => p.Resver_Other)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Other_Resver_Head");
             });
 
@@ -1086,7 +1074,6 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.RH)
                     .WithMany(p => p.Resver_Site)
                     .HasForeignKey(d => d.RHID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Site_Resver_Head");
             });
 
@@ -1121,7 +1108,6 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.RS)
                     .WithMany(p => p.Resver_Throw)
                     .HasForeignKey(d => d.RSID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Throw_Resver_Site");
             });
 
@@ -1153,7 +1139,6 @@ namespace NS_Education.Models.Entities.DbContext
                 entity.HasOne(d => d.RT)
                     .WithMany(p => p.Resver_Throw_Food)
                     .HasForeignKey(d => d.RTID)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Resver_Throw_D_Resver_Throw");
             });
 

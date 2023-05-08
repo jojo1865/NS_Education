@@ -68,6 +68,37 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
 
         /// <summary>
+        /// 回傳一串更新 DB 失敗時可用的預設錯誤字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string UpdateDbFailed(Exception e = null)
+        {
+            return e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}！";
+        }
+        
+        /// <summary>
+        /// 回傳一串查無資料時可用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">（可選）欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string NotFound(string fieldName = null)
+        {
+            return fieldName is null ? "查無資料！" : $"「{fieldName}」查無對應資料！";
+        }
+
+        /// <summary>
+        /// 回傳一串最小值大於最大值時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="minFieldName">最小值的欄位名稱</param>
+        /// <param name="maxFieldName">最大值的欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected internal string MinLargerThanMax(string minFieldName, string maxFieldName)
+        {
+            return $"「{minFieldName}」必須小於等於「{maxFieldName}」！";
+        }
+        
+        /// <summary>
         /// 回傳一串缺少欄位時可使用的預設錯誤訊息字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
@@ -78,13 +109,27 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
         
         /// <summary>
-        /// 回傳一串欄位格式錯誤時時可使用的預設錯誤訊息字串。
+        /// 回傳一串欄位格式錯誤時可使用的預設錯誤訊息字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
         protected string WrongFormat(string fieldName)
         {
             return $"「{fieldName}」格式不正確！";
+        }
+
+        /// <summary>
+        /// 回傳一串超出範圍時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string OutOfRange(string fieldName, int? min = null, int? max = null)
+        {
+            string minMessage = min is null ? "" : $"，最小值為 {min}";
+            string maxMessage = max is null ? "" : $"，最大值為 {max}";
+            return $"「{fieldName}」超出範圍{minMessage}{maxMessage}！";
         }
 
         /// <summary>

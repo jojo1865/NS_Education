@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
@@ -72,7 +73,12 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             TEntity t = await _controller.SubmitCreateData(input);
             FlagHelper.SetActiveFlag(t, input.ActiveFlag);
 
-            // 2. 儲存至 DB
+            // 2. 如果 ID 不是 0，表示此前已有手動儲存至 DB，折返。
+            // 否則，儲存至DB。
+            if ((int)(_controller.DC.Model.FindEntityType(typeof(TEntity)).FindPrimaryKey().Properties.FirstOrDefault()
+                    ?.PropertyInfo.GetValue(t) ?? 0) != 0)
+                return;
+            
             try
             {
                 await _controller.DC.AddAsync(t);

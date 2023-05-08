@@ -288,7 +288,10 @@ namespace NS_Education.Tools.Extensions
         /// </returns>
         public static async Task<bool> ValidateCategoryExists(this DbSet<B_Category> dbSet, int categoryId, int? categoryType = null)
         {
-            return categoryId.IsAboveZero() && await dbSet.AnyAsync(c => c.ActiveFlag && !c.DeleteFlag && c.BCID == categoryId && categoryType == null || c.CategoryType == categoryType);
+            return categoryId.IsAboveZero() && await dbSet.AnyAsync(c => c.ActiveFlag 
+                && !c.DeleteFlag
+                && c.BCID == categoryId 
+                && c.CategoryType == (categoryType ?? c.CategoryType));
         }
     }
 }

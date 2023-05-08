@@ -16,6 +16,8 @@ namespace NS_Education.Tools.Extensions
     /// </summary>
     public static class DbContextExtensions
     {
+        private static DateTime MinimumDbDateTime { get; } = new DateTime(1753, 1, 1, 12, 0, 0);
+        
         /// <summary>
         /// 儲存修改之前，自動設置 CreUid 等欄位，並寫入 UserLog。
         /// </summary>
@@ -80,10 +82,19 @@ namespace NS_Education.Tools.Extensions
 
                 SetBasicFields(uid, change);
                 WriteUserLog(context, uid, change);
+                SanitizeDateColumns(change);
             }
 
             // 把前述的 changes 一同納入下次存檔
             context.ChangeTracker.DetectChanges();
+        }
+
+        private static void SanitizeDateColumns(EntityEntry change)
+        {
+            // 檢查日期欄位，如果太小就設為 SQL Server 可支援的最小值（1753/1/1 12:00:00）
+            foreach (var propertyInfo in change.Entity.GetType().GetProperties().Where(p =>
+                         p.PropertyType == typeof(DateTime) && (DateTime)p.GetValue(change.Entity) < MinimumDbDateTime))
+                propertyInfo.SetValue(change.Entity, MinimumDbDateTime);
         }
 
         private static void SetBasicFields(int uid, EntityEntry change)

@@ -70,6 +70,33 @@ namespace NS_Education.Tools.Extensions
             
             return false;
         }
+        
+        /// <summary>
+        /// 將字串轉換成 DateTime，無論成功或失敗，回傳轉換結果。
+        /// </summary>
+        /// <param name="s">字串</param>
+        /// <param name="type">（可選）允許轉換的格式。忽略時，皆允許。</param>
+        /// <returns>
+        /// 轉換成功時：對象 DateTime<br/>
+        /// 轉換失敗時：DateTime 的預設值
+        /// </returns>
+        public static DateTime ParseDateTime(this string s, DateTimeParseType type = DateTimeParseType.Date | DateTimeParseType.DateTime)
+        {
+            DateTime result = default;
+            
+            if (s == null)
+                return default;
+            
+            s = s.Trim();
+
+            if (type.HasFlag(DateTimeParseType.DateTime) && s.Length == IoConstants.DateTimeFormat.Length)
+                DateTime.TryParseExact(s, IoConstants.DateTimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out result);
+            if (type.HasFlag(DateTimeParseType.Date) && s.Length == IoConstants.DateFormat.Length)
+                DateTime.TryParseExact(s, IoConstants.DateFormat, CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeLocal, out result);
+            
+            return result;
+        }
 
         /// <summary>
         /// 接受兩個整數，轉換成 00:00 的格式。

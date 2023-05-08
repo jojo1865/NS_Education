@@ -564,6 +564,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         #endregion
 
         #region Submit
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Resver_Submit_Input_APIItem.RHID))]
         public async Task<string> Submit(Resver_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);
@@ -578,32 +580,44 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         public async Task<bool> SubmitAddValidateInput(Resver_Submit_Input_APIItem input)
         {
+            return await SubmitValidateInput(input);
+        }
+
+        public async Task<Resver_Head> SubmitCreateData(Resver_Submit_Input_APIItem input)
+        {
+            return await _SubmitCreateData(input);
+        }
+
+        private async Task<bool> SubmitValidateInput(Resver_Submit_Input_APIItem input)
+        {
+            bool isAdd = SubmitIsAdd(input);
+            
             DateTime headStartDate = default;
             DateTime headEndDate = default;
 
             // 主預約單
-            bool isHeadValid = input.StartValidate()
-                .Validate(i => i.RHID == 0, () => AddError(WrongFormat("預約單 ID")))
-                .Validate(i => SubmitValidateStaticCode(i.BSCID12, StaticCodeType.ResverStatus),
+            bool isHeadValid = await input.StartValidate()
+                .Validate(i => isAdd ? i.RHID == 0 : i.RHID.IsZeroOrAbove(), () => AddError(WrongFormat("預約單 ID")))
+                .ValidateAsync(async i => await SubmitValidateStaticCode(i.BSCID12, StaticCodeType.ResverStatus),
                     () => AddError(NotFound("預約狀態 ID")))
-                .Validate(i => SubmitValidateStaticCode(i.BSCID11, StaticCodeType.ResverSource),
+                .ValidateAsync(async i => await SubmitValidateStaticCode(i.BSCID11, StaticCodeType.ResverSource),
                     () => AddError(NotFound("預約來源 ID")))
                 .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("預約單編號")))
                 .Validate(i => i.SDate.TryParseDateTime(out headStartDate), () => AddError(WrongFormat("預約單起始日")))
                 .Validate(i => i.EDate.TryParseDateTime(out headEndDate), () => AddError(WrongFormat("預約單結束日")))
                 .Validate(i => headEndDate.Date >= headStartDate.Date,
                     () => AddError(MinLargerThanMax("預約單起始日", "預約單結束日")))
-                .Validate(i => SubmitValidateCustomerId(i.CID), () => AddError(NotFound("客戶")))
+                .ValidateAsync(async i => await SubmitValidateCustomerId(i.CID), () => AddError(NotFound("客戶")))
                 .Validate(i => i.CustomerTitle.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱")))
                 .Validate(i => i.ContactName.HasContent(), () => AddError(EmptyNotAllowed("聯絡人名稱")))
-                .Validate(i => SubmitValidateMKBusinessUser(i.MK_BUID), () => AddError(NotFound("MK 業務")))
-                .Validate(i => SubmitValidateOPBusinessUser(i.OP_BUID), () => AddError(NotFound("OP 業務")))
+                .ValidateAsync(async i => await SubmitValidateMKBusinessUser(i.MK_BUID), () => AddError(NotFound("MK 業務")))
+                .ValidateAsync(async i => await SubmitValidateOPBusinessUser(i.OP_BUID), () => AddError(NotFound("OP 業務")))
                 .IsValid();
 
             // 主預約單 -> 聯絡方式
             bool isContactItemValid = input.ContactItems.All(item =>
                 item.StartValidate()
-                    .Validate(ci => ci.MID == 0, () => AddError(WrongFormat("聯絡方式對應 ID")))
+                    .Validate(ci => isAdd ? ci.MID == 0 : ci.MID.IsZeroOrAbove(), () => AddError(WrongFormat("聯絡方式對應 ID")))
                     .Validate(ci => SubmitValidateContactType(ci.ContactType), () => AddError(NotFound("聯絡方式編號")))
                     .Validate(ci => ci.ContactData.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式內容")))
                     .IsValid());
@@ -611,11 +625,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 主預約單 -> 場地列表
             bool isSiteItemsValid = input.SiteItems.All(item =>
                 item.StartValidate()
-                    .Validate(si => si.RSID == 0, () => AddError(WrongFormat("場地預約單 ID")))
+                    .Validate(si => isAdd ? si.RSID == 0 : si.RSID.IsZeroOrAbove(), () => AddError(WrongFormat("場地預約單 ID")))
                     .Validate(si => si.TargetDate.TryParseDateTime(out _), () => AddError(WrongFormat("場地使用日期")))
-                    .Validate(si => SubmitValidateSiteData(si.BSID), () => AddError(NotFound("場地 ID")))
-                    .Validate(si => SubmitValidateOrderCode(si.BOCID), () => AddError(NotFound("預約場地的入帳代號 ID")))
-                    .Validate(si => SubmitValidateStaticCode(si.BSCID, StaticCodeType.SiteTable))
+                    .Validate(si => Task.Run(() => SubmitValidateSiteData(si.BSID)).Result, () => AddError(NotFound("場地 ID")))
+                    .Validate(si => Task.Run(() => SubmitValidateOrderCode(si.BOCID)).Result, () => AddError(NotFound("預約場地的入帳代號 ID")))
+                    .Validate(si => Task.Run(() => SubmitValidateStaticCode(si.BSCID, StaticCodeType.SiteTable)).Result, () => AddError(NotFound("預約場地的桌型 ID")))
                     .IsValid());
 
             // 主預約單 -> 場地列表 -> 時段列表
@@ -627,13 +641,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .SelectMany(si => si.ThrowItems)
                 .All(item =>
                     item.StartValidate()
-                        .Validate(ti => ti.RTID == 0, () => AddError(WrongFormat("行程預約單 ID")))
+                        .Validate(ti => isAdd ? ti.RTID == 0 : ti.RTID.IsZeroOrAbove(), () => AddError(WrongFormat("行程預約單 ID")))
                         .Validate(ti => ti.TargetDate.TryParseDateTime(out _),
                             () => AddError(WrongFormat("預約行程的預計使用日期")))
-                        .Validate(ti => SubmitValidateStaticCode(ti.BSCID, StaticCodeType.ResverThrow),
+                        .Validate(ti => Task.Run(() => SubmitValidateStaticCode(ti.BSCID, StaticCodeType.ResverThrow)).Result,
                             () => AddError(WrongFormat("預約類型")))
                         .Validate(ti => ti.Title.HasContent(), () => AddError(EmptyNotAllowed("行程名稱")))
-                        .Validate(ti => SubmitValidateOrderCode(ti.BOCID), () => AddError("預約行程的入帳代號 ID"))
+                        .Validate(ti => Task.Run(() => SubmitValidateOrderCode(ti.BOCID)).Result, () => AddError("預約行程的入帳代號 ID"))
                         .IsValid());
 
             // 主預約單 -> 場地列表 -> 行程列表 -> 時段列表
@@ -647,10 +661,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .SelectMany(si => si.ThrowItems).SelectMany(ti => ti.FoodItems)
                     .All(item =>
                         item.StartValidate()
-                            .Validate(fi => fi.RTFID == 0, () => AddError(WrongFormat("行程餐飲預約單 ID")))
+                            .Validate(fi => isAdd ? fi.RTFID == 0 : fi.RTFID.IsZeroOrAbove(), () => AddError(WrongFormat("行程餐飲預約單 ID")))
                             .Validate(fi => SubmitValidateFoodCategory(fi.DFCID),
                                 () => AddError(NotFound("預約行程的餐種 ID")))
-                            .Validate(fi => SubmitValidateStaticCode(fi.BSCID, StaticCodeType.Cuisine),
+                            .Validate(fi => Task.Run(() => SubmitValidateStaticCode(fi.BSCID, StaticCodeType.Cuisine)).Result,
                                 () => AddError(NotFound("預約行程的餐別 ID")))
                             .Validate(fi => SubmitValidatePartner(fi.BPID), () => AddError(NotFound("預約行程的廠商 ID")))
                             .IsValid());
@@ -660,11 +674,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 input.SiteItems.SelectMany(si => si.DeviceItems)
                     .All(item =>
                         item.StartValidate()
-                            .Validate(di => di.RDID == 0, () => AddError(WrongFormat("設備預約單 ID")))
+                            .Validate(di => isAdd ? di.RDID == 0 : di.RDID.IsZeroOrAbove(), () => AddError(WrongFormat("設備預約單 ID")))
                             .Validate(di => di.TargetDate.TryParseDateTime(out _),
                                 () => AddError(WrongFormat("預約設備的預計使用日期")))
                             .Validate(di => SubmitValidateDevice(di.BDID), () => AddError(NotFound("預約設備 ID")))
-                            .Validate(di => SubmitValidateOrderCode(di.BOCID), () => AddError(NotFound("預約設備的入帳代號 ID")))
+                            .Validate(di => Task.Run(() => SubmitValidateOrderCode(di.BOCID)).Result, () => AddError(NotFound("預約設備的入帳代號 ID")))
                             .IsValid()
                     );
 
@@ -676,22 +690,40 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 主預約單 -> 其他收費項目列表
             bool isOtherItemValid =
                 input.OtherItems.All(item => item.StartValidate()
-                    .Validate(oi => oi.ROID == 0, () => AddError(WrongFormat("其他收費項目預約單 ID")))
+                    .Validate(oi => isAdd ? oi.ROID == 0 : oi.ROID.IsZeroOrAbove(), () => AddError(WrongFormat("其他收費項目預約單 ID")))
                     .Validate(oi => oi.TargetDate.TryParseDateTime(out _), () => AddError(WrongFormat("其他收費項目的預計使用日期")))
                     .Validate(oi => SubmitValidateOtherPayItem(oi.DOPIID), () => AddError(NotFound("其他收費項目 ID")))
-                    .Validate(oi => SubmitValidateOrderCode(oi.BOCID), () => AddError(NotFound("其他收費項目的入帳代號 ID")))
+                    .Validate(oi => Task.Run(() => SubmitValidateOrderCode(oi.BOCID)).Result, () => AddError(NotFound("其他收費項目的入帳代號 ID")))
                     .IsValid());
             
             // 主預約單 -> 繳費紀錄列表
             bool isBillItemValid =
                 input.BillItems.All(item => item.StartValidate()
-                    .Validate(bi => bi.RBID == 0, () => AddError(WrongFormat("繳費紀錄預約單 ID")))
+                    .Validate(bi => isAdd ? bi.RBID == 0 : bi.RBID.IsZeroOrAbove(), () => AddError(WrongFormat("繳費紀錄預約單 ID")))
                     .Validate(bi => SubmitValidateCategory(bi.BCID), () => AddError(NotFound("繳費類別 ID")))
                     .Validate(bi => SubmitValidatePayType(bi.DPTID), () => AddError(NotFound("繳費紀錄的付款方式 ID")))
                     .Validate(bi => bi.PayDate.TryParseDateTime(out _, DateTimeParseType.DateTime), () => AddError("付款時間"))
                     .IsValid());
-
-            return await Task.FromResult(isHeadValid && isContactItemValid);
+            
+            // 主預約單 -> 預約回饋紀錄列表
+            bool isGiveBackItemValid =
+                input.GiveBackItems.All(item => item.StartValidate()
+                    .Validate(gbi => isAdd ? gbi.RGBID == 0 : gbi.RGBID.IsZeroOrAbove(), () => AddError(WrongFormat("預約回饋預約單 ID")))
+                    .Validate(gbi => gbi.PointDecimal.IsInBetween(0, 50), () => AddError(OutOfRange("回饋分數", 0, 50)))
+                    .IsValid());
+            
+            return await Task.FromResult(isHeadValid 
+                                         && isContactItemValid 
+                                         && isSiteItemsValid 
+                                         && isSiteItemTimeSpanItemValid 
+                                         && isSiteItemThrowItemValid 
+                                         && isSiteItemThrowItemTimeSpanItemValid
+                                         && isSiteItemThrowItemFoodItemValid
+                                         && isSiteItemDeviceItemValid
+                                         && isSiteItemDeviceItemTimeSpanItemValid
+                                         && isOtherItemValid
+                                         && isBillItemValid
+                                         && isGiveBackItemValid);
         }
 
         private bool SubmitValidatePayType(int payTypeId)
@@ -729,23 +761,23 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             return items.All(item =>
                 item.StartValidate()
-                    .Validate(tsi => SubmitValidateDataTimeSpan(tsi.DTSID))
+                    .Validate(tsi => Task.Run(() => SubmitValidateDataTimeSpan(tsi.DTSID)).Result)
                     .IsValid());
         }
 
-        private bool SubmitValidateDataTimeSpan(int dtsId)
+        private async Task<bool> SubmitValidateDataTimeSpan(int dtsId)
         {
-            return dtsId.IsAboveZero() && DC.D_TimeSpan.Any(dts => dts.ActiveFlag && !dts.DeleteFlag && dts.DTSID == dtsId);
+            return dtsId.IsAboveZero() && await DC.D_TimeSpan.AnyAsync(dts => dts.ActiveFlag && !dts.DeleteFlag && dts.DTSID == dtsId);
         }
 
-        private bool SubmitValidateOrderCode(int orderCodeId)
+        private async Task<bool> SubmitValidateOrderCode(int orderCodeId)
         {
-            return orderCodeId.IsAboveZero() && DC.B_OrderCode.Any(boc => boc.ActiveFlag && !boc.DeleteFlag && boc.BOCID == orderCodeId);
+            return orderCodeId.IsAboveZero() && await DC.B_OrderCode.AnyAsync(boc => boc.ActiveFlag && !boc.DeleteFlag && boc.BOCID == orderCodeId);
         }
 
-        private bool SubmitValidateSiteData(int siteDataId)
+        private async Task<bool> SubmitValidateSiteData(int siteDataId)
         {
-            return siteDataId.IsAboveZero() && DC.B_SiteData.Any(sd => sd.ActiveFlag && !sd.DeleteFlag && sd.BSID == siteDataId);
+            return siteDataId.IsAboveZero() && await DC.B_SiteData.AnyAsync(sd => sd.ActiveFlag && !sd.DeleteFlag && sd.BSID == siteDataId);
         }
 
         private static bool SubmitValidateContactType(int contactType)
@@ -753,48 +785,359 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             return ContactTypeController.GetContactTypeList().Any(ct => ct.ID == contactType);
         }
 
-        private bool SubmitValidateOPBusinessUser(int businessUserId)
+        private async Task<bool> SubmitValidateOPBusinessUser(int businessUserId)
         {
-            return businessUserId.IsAboveZero() && DC.BusinessUser.Any(bu => bu.ActiveFlag && !bu.DeleteFlag && bu.OPsalesFlag && bu.BUID == businessUserId);
+            return businessUserId.IsAboveZero() && await DC.BusinessUser.AnyAsync(bu => bu.ActiveFlag && !bu.DeleteFlag && bu.OPsalesFlag && bu.BUID == businessUserId);
         }
 
-        private bool SubmitValidateMKBusinessUser(int businessUserId)
+        private async Task<bool> SubmitValidateMKBusinessUser(int businessUserId)
         {
-            return businessUserId.IsAboveZero() && DC.BusinessUser.Any(bu => bu.ActiveFlag && !bu.DeleteFlag && bu.MKsalesFlag && bu.BUID == businessUserId);
+            return businessUserId.IsAboveZero() && await DC.BusinessUser.AnyAsync(bu => bu.ActiveFlag && !bu.DeleteFlag && bu.MKsalesFlag && bu.BUID == businessUserId);
         }
 
-        private bool SubmitValidateCustomerId(int customerId)
+        private async Task<bool> SubmitValidateCustomerId(int customerId)
         {
-            return customerId.IsAboveZero() && DC.Customer.Any(c => c.ActiveFlag && !c.DeleteFlag && c.CID == customerId);
+            return customerId.IsAboveZero() && await DC.Customer.AnyAsync(c => c.ActiveFlag && !c.DeleteFlag && c.CID == customerId);
         }
 
-        private bool SubmitValidateStaticCode(int BSCID, StaticCodeType CodeType)
+        private async Task<bool> SubmitValidateStaticCode(int staticCodeId, StaticCodeType codeType)
         {
-            return BSCID.IsAboveZero() && DC.B_StaticCode.Any(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.BSCID == BSCID && sc.CodeType == (int)CodeType);
+            return staticCodeId.IsAboveZero() && await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.BSCID == staticCodeId && sc.CodeType == (int)codeType);
         }
 
-        public async Task<Resver_Head> SubmitCreateData(Resver_Submit_Input_APIItem input)
+        private async Task<Resver_Head> _SubmitCreateData(Resver_Submit_Input_APIItem input, Resver_Head data = null)
         {
-            throw new NotImplementedException();
+            // 基本參數初始化
+            bool isAdd = SubmitIsAdd(input);
+            IList<object> entitiesToAdd = new List<object>();
+
+            // 取得主資料
+            Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
+            // 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
+            await DC.AddAsync(head);
+            await DC.SaveChangesStandardProcedureAsync(GetUid());
+            // 清理所有跟這張預約單有關的 ResverTimeSpan
+            head.M_Resver_TimeSpan.Clear();
+
+            // 開始寫入值
+            SubmitPopulateHeadValues(input, head);
+            SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
+            await SubmitPopulateHeadSiteItems(input, head);
+            SubmitPopulateHeadOtherItems(input, head, entitiesToAdd);
+            SubmitPopulateHeadBillItems(input, head, entitiesToAdd);
+            SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
+            
+            // 寫入 Db
+            await DC.AddRangeAsync(entitiesToAdd);
+            return head;
         }
-        
+
+        private void SubmitPopulateHeadGiveBackItems(Resver_Submit_Input_APIItem input, Resver_Head head,
+            ICollection<object> entitiesToAdd)
+        {
+            foreach (var item in input.GiveBackItems)
+            {
+                Resver_GiveBack giveBack = SubmitFindOrCreateNew<Resver_GiveBack>(item.RGBID, entitiesToAdd);
+                giveBack.RHID = head.RHID;
+                giveBack.Title = item.Title;
+                giveBack.Description = item.Description;
+                giveBack.PointDecimal = item.PointDecimal;
+            }
+        }
+
+        private void SubmitPopulateHeadBillItems(Resver_Submit_Input_APIItem input, Resver_Head head,
+            ICollection<object> entitiesToAdd)
+        {
+            foreach (var item in input.BillItems)
+            {
+                Resver_Bill bill = SubmitFindOrCreateNew<Resver_Bill>(item.RBID, entitiesToAdd);
+                bill.RHID = head.RHID;
+                bill.BCID = item.BCID;
+                bill.DPTID = item.DPTID;
+                bill.Price = item.Price;
+                bill.Note = item.Note;
+                bill.PayFlag = item.PayFlag;
+                bill.PayDate = item.PayDate.ParseDateTime();
+                bill.CheckUID = head.UpdUID;
+            }
+        }
+
+        private void SubmitPopulateHeadOtherItems(Resver_Submit_Input_APIItem input, Resver_Head head,
+            ICollection<object> entitiesToAdd)
+        {
+            foreach (var item in input.OtherItems)
+            {
+                Resver_Other other = SubmitFindOrCreateNew<Resver_Other>(item.ROID, entitiesToAdd);
+                other.TargetDate = item.TargetDate.ParseDateTime().Date;
+                other.RHID = head.RHID;
+                other.DOPIID = item.DOPIID;
+                other.BOCID = item.BOCID;
+                other.PrintTitle = item.PrintTitle;
+                other.PrintNote = item.PrintNote;
+                other.UnitPrice = item.UnitPrice;
+                other.FixedPrice = item.FixedPrice;
+                other.Ct = item.Ct;
+                other.QuotedPrice = item.QuotedPrice;
+                other.SortNo = item.SortNo;
+                other.Note = item.Note;
+            }
+        }
+
+        private async Task SubmitPopulateHeadSiteItems(Resver_Submit_Input_APIItem input, Resver_Head head)
+        {
+            foreach (var item in input.SiteItems)
+            {
+                Resver_Site site = SubmitFindOrCreateNew<Resver_Site>(item.RSID);
+                site.TargetDate = item.TargetDate.ParseDateTime().Date;
+                site.RHID = head.RHID;
+                site.BSID = item.BSID;
+                site.BOCID = item.BOCID;
+                site.PrintTitle = item.PrintTitle;
+                site.PrintNote = item.PrintNote;
+                site.UnitPrice = item.UnitPrice;
+                site.FixedPrice = item.FixedPrice;
+                site.QuotedPrice = item.QuotedPrice;
+                site.SortNo = item.SortNo;
+                site.Note = item.Note;
+                site.BSCID = item.BSCID;
+
+                // 先儲存至 DB, 才有 RSID...
+                await DC.AddAsync(site);
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
+
+                SubmitPopulateSiteItemTimeSpanItems(item, head, site);
+                await SubmitPopulateSiteItemThrowItems(item, head, site);
+                await SubmitPopulateSiteItemDeviceItems(item, head, site);
+            }
+        }
+
+        private async Task SubmitPopulateSiteItemDeviceItems(Resver_Submit_SiteItem_Input_APIItem item,
+            Resver_Head head, Resver_Site site)
+        {
+            site.Resver_Device.Clear();
+            foreach (var deviceItem in item.DeviceItems)
+            {
+                Resver_Device device = SubmitFindOrCreateNew<Resver_Device>(deviceItem.RDID);
+                device.TargetDate = deviceItem.TargetDate.ParseDateTime().Date;
+                device.RSID = site.RSID;
+                device.BDID = deviceItem.BDID;
+                device.BOCID = deviceItem.BOCID;
+                device.PrintTitle = deviceItem.PrintTitle;
+                device.PrintNote = deviceItem.PrintNote;
+                device.UnitPrice = deviceItem.UnitPrice;
+                device.FixedPrice = deviceItem.FixedPrice;
+                device.QuotedPrice = deviceItem.QuotedPrice;
+                device.SortNo = deviceItem.SortNo;
+                device.Note = deviceItem.Note;
+
+                site.Resver_Device.Add(device);
+                // 先儲存至 DB 才有 RDID...
+                await DC.Resver_Device.AddAsync(device);
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
+
+                // 寫入 device 的 TimeSpan
+                int sortNo = 0;
+                foreach (var timeSpanItem in deviceItem.TimeSpanItems)
+                {
+                    M_Resver_TimeSpan ts = new M_Resver_TimeSpan
+                    {
+                        RHID = head.RHID,
+                        TargetTable = DC.GetTableName<Resver_Device>(),
+                        TargetID = device.RDID,
+                        DTSID = timeSpanItem.DTSID,
+                        SortNo = ++sortNo
+                    };
+
+                    head.M_Resver_TimeSpan.Add(ts);
+                }
+            }
+        }
+
+        private async Task SubmitPopulateSiteItemThrowItems(Resver_Submit_SiteItem_Input_APIItem item,
+            Resver_Head head, Resver_Site site)
+        {
+            site.Resver_Throw.Clear();
+            foreach (var throwItem in item.ThrowItems)
+            {
+                Resver_Throw throwData = SubmitFindOrCreateNew<Resver_Throw>(throwItem.RTID);
+                throwData.TargetDate = throwItem.TargetDate.ParseDateTime().Date;
+                throwData.RSID = site.RSID;
+                throwData.BSCID = throwItem.BSCID;
+                throwData.Title = throwItem.Title;
+                throwData.BOCID = throwItem.BOCID;
+                throwData.PrintTitle = throwItem.PrintTitle;
+                throwData.PrintNote = throwItem.PrintNote;
+                throwData.UnitPrice = throwItem.UnitPrice;
+                throwData.FixedPrice = throwItem.FixedPrice;
+                throwData.QuotedPrice = throwItem.QuotedPrice;
+                throwData.SortNo = throwItem.SortNo;
+                throwData.Note = throwItem.Note;
+                
+                site.Resver_Throw.Add(throwData);
+
+                // 先儲存才有 RTID 給 Resver_TimeSpan 用...
+                await DC.AddAsync(throwData);
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
+
+                SubmitPopulateSiteItemThrowItemTimeSpanItems(throwData, throwItem, head);
+                SubmitPopulateSiteItemThrowItemThrowFoodItems(throwData, throwItem);
+            }
+        }
+
+        private static void SubmitPopulateSiteItemThrowItemThrowFoodItems(Resver_Throw throwData,
+            Resver_Submit_ThrowItem_Input_APIItem throwItem)
+        {
+            throwData.Resver_Throw_Food = throwItem.FoodItems.Select(fi => new Resver_Throw_Food
+            {
+                RTID = throwData.RTID,
+                DFCID = fi.DFCID,
+                BSCID = fi.BSCID,
+                BPID = fi.BPID,
+                Ct = fi.Ct,
+                UnitPrice = fi.UnitPrice,
+                Price = fi.Price
+            }).ToList();
+        }
+
+        private void SubmitPopulateSiteItemThrowItemTimeSpanItems(Resver_Throw throwData,
+            Resver_Submit_ThrowItem_Input_APIItem throwItem,
+            Resver_Head head)
+        {
+            int sortNo = 0;
+            foreach (var timeSpanItem in throwItem.TimeSpanItems)
+            {
+                M_Resver_TimeSpan resverTimeSpan = new M_Resver_TimeSpan
+                {
+                    RHID = head.RHID,
+                    TargetTable = DC.GetTableName<Resver_Throw>(),
+                    TargetID = throwData.RTID,
+                    DTSID = timeSpanItem.DTSID,
+                    SortNo = ++sortNo
+                };
+                head.M_Resver_TimeSpan.Add(resverTimeSpan);
+            }
+        }
+
+        private void SubmitPopulateSiteItemTimeSpanItems(Resver_Submit_SiteItem_Input_APIItem item, Resver_Head head,
+            Resver_Site site)
+        {
+            int sortNo = 0;
+            foreach (var timeSpanItem in item.TimeSpanItems)
+            {
+                M_Resver_TimeSpan resverTimeSpan = new M_Resver_TimeSpan
+                {
+                    RHID = head.RHID,
+                    TargetTable = DC.GetTableName<Resver_Site>(),
+                    TargetID = site.RSID,
+                    DTSID = timeSpanItem.DTSID,
+                    SortNo = ++sortNo
+                };
+
+                head.M_Resver_TimeSpan.Add(resverTimeSpan);
+            }
+        }
+
+        private void SubmitPopulateHeadContactItems(Resver_Submit_Input_APIItem input, Resver_Head head, ICollection<object> entitiesToAdd, bool isAdd)
+        {
+            if (!isAdd)
+            {
+                // 先清除所有原本有的 M_Contect
+                var originalContacts = DC.M_Contect
+                    .Where(c => c.TargetTable == DC.GetTableName<Resver_Head>() && c.TargetID == input.RHID)
+                    .AsEnumerable();
+                
+                DC.RemoveRange(originalContacts);
+            }
+
+            int sortNo = 0;
+            foreach (var contactItem in input.ContactItems)
+            {
+                M_Contect contact = new M_Contect
+                {
+                    ContectType = contactItem.ContactType,
+                    TargetTable = DC.GetTableName<Resver_Head>(),
+                    TargetID = head.RHID,
+                    ContectData = contactItem.ContactData,
+                    SortNo = ++sortNo
+                };
+                entitiesToAdd.Add(contact);
+            }
+        }
+
+        private static void SubmitPopulateHeadValues(Resver_Submit_Input_APIItem input, Resver_Head head)
+        {
+            head.BSCID12 = input.BSCID12;
+            head.BSCID11 = input.BSCID11;
+            head.Code = input.Code;
+            head.Title = input.Title;
+            head.SDate = input.SDate.ParseDateTime().Date;
+            head.EDate = input.EDate.ParseDateTime().Date;
+            head.PeopleCt = input.PeopleCt;
+            head.CID = input.CID;
+            head.CustomerTitle = input.CustomerTitle;
+            head.ContactName = input.ContactName;
+            head.MK_BUID = input.MK_BUID;
+            head.MK_Phone = input.MK_Phone;
+            head.OP_BUID = input.OP_BUID;
+            head.OP_Phone = input.OP_Phone;
+            head.Note = input.Note;
+            head.FixedPrice = input.FixedPrice;
+            head.QuotedPrice = input.QuotedPrice;
+        }
+
+        private T SubmitFindOrCreateNew<T>(int id, ICollection<object> entitiesToAdd = null)
+            where T : class
+        {
+            T t = null;
+            if (id != 0)
+                t = DC.Find<T>(id);
+            if (t != null
+                && (t.GetIfHasProperty<T, bool?>(DbConstants.ActiveFlag) ?? true)
+                && (t.GetIfHasProperty<T, bool?>(DbConstants.DeleteFlag) ?? false) == false)
+            {
+                // 讀取所有 FK property
+                foreach (var navigationEntry in DC.Entry(t).Navigations)
+                {
+                    navigationEntry.Load();
+                }
+
+                return t;
+            }
+
+            t = Activator.CreateInstance<T>();
+            entitiesToAdd?.Add(t);
+            return t;
+        }
+
         #endregion
         
         #region Submit - Edit
 
         public async Task<bool> SubmitEditValidateInput(Resver_Submit_Input_APIItem input)
         {
-            throw new NotImplementedException();
+            return await SubmitValidateInput(input);
         }
 
         public IQueryable<Resver_Head> SubmitEditQuery(Resver_Submit_Input_APIItem input)
         {
-            throw new NotImplementedException();
+            return DC.Resver_Head.Where(rh => rh.RHID == input.RHID)
+                // site
+                .Include(rh => rh.Resver_Site)
+                .ThenInclude(rs => rs.Resver_Throw)
+                .ThenInclude(rt => rt.Resver_Throw_Food)
+                .Include(rh => rh.Resver_Site)
+                .ThenInclude(rs => rs.Resver_Device)
+                // other
+                .Include(rh => rh.Resver_Other)
+                // bill
+                .Include(rh => rh.Resver_Bill)
+                // giveback
+                .Include(rh => rh.Resver_GiveBack);
         }
 
         public void SubmitEditUpdateDataFields(Resver_Head data, Resver_Submit_Input_APIItem input)
         {
-            throw new NotImplementedException();
+            Task.Run(() => _SubmitCreateData(input, data)).GetAwaiter().GetResult();
         }
         
         #endregion

@@ -109,13 +109,27 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
         
         /// <summary>
-        /// 回傳一串欄位格式錯誤時時可使用的預設錯誤訊息字串。
+        /// 回傳一串欄位格式錯誤時可使用的預設錯誤訊息字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
         protected string WrongFormat(string fieldName)
         {
             return $"「{fieldName}」格式不正確！";
+        }
+
+        /// <summary>
+        /// 回傳一串超出範圍時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string OutOfRange(string fieldName, int? min = null, int? max = null)
+        {
+            string minMessage = min is null ? "" : $"，最小值為 {min}";
+            string maxMessage = max is null ? "" : $"，最大值為 {max}";
+            return $"「{fieldName}」超出範圍{minMessage}{maxMessage}！";
         }
 
         /// <summary>

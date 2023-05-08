@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.Entities;
+using NS_Education.Variables;
 
 namespace NS_Education.Tools.Extensions
 {
@@ -258,6 +259,36 @@ namespace NS_Education.Tools.Extensions
                     SelectFlag = pt.DPTID == idToSelect
                 })
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// 驗證一筆 BSCID 是實際存在的 StaticCode，且符合指定的 CodeType。
+        /// </summary>
+        /// <param name="dbSet">StaticCode 的 DbSet</param>
+        /// <param name="staticCodeId">欲對照的資料 ID</param>
+        /// <param name="codeType">CodeType</param>
+        /// <returns>
+        /// true：該資料存在。<br/>
+        /// false：查無該資料。
+        /// </returns>
+        public static async Task<bool> ValidateStaticCodeExists(this DbSet<B_StaticCode> dbSet, int staticCodeId, StaticCodeType codeType)
+        {
+            return staticCodeId.IsAboveZero() && await dbSet.AnyAsync(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.BSCID == staticCodeId && sc.CodeType == (int)codeType);
+        }
+        
+        /// <summary>
+        /// 驗證一筆 BCID 是實際存在的 Category，且符合指定的 CategoryType。
+        /// </summary>
+        /// <param name="dbSet">Category 的 DbSet</param>
+        /// <param name="categoryId">欲對照的資料 ID</param>
+        /// <param name="categoryType">（可選）欲對照的資料的 CategoryType</param>
+        /// <returns>
+        /// true：該資料存在。<br/>
+        /// false：查無該資料。
+        /// </returns>
+        public static async Task<bool> ValidateCategoryExists(this DbSet<B_Category> dbSet, int categoryId, int? categoryType = null)
+        {
+            return categoryId.IsAboveZero() && await dbSet.AnyAsync(c => c.ActiveFlag && !c.DeleteFlag && c.BCID == categoryId && categoryType == null || c.CategoryType == categoryType);
         }
     }
 }

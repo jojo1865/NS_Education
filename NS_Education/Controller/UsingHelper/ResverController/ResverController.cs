@@ -733,7 +733,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         private bool SubmitValidateCategory(int categoryId)
         {
-            return categoryId.IsAboveZero() && DC.B_Category.Any(c => c.ActiveFlag && !c.DeleteFlag && c.BCID == categoryId);
+            return Task.Run(() => DC.B_Category.ValidateCategoryExists(categoryId)).Result;
         }
 
         private bool SubmitValidateOtherPayItem(int otherPayItemId)
@@ -802,7 +802,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         private async Task<bool> SubmitValidateStaticCode(int staticCodeId, StaticCodeType codeType)
         {
-            return staticCodeId.IsAboveZero() && await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.BSCID == staticCodeId && sc.CodeType == (int)codeType);
+            return await DC.B_StaticCode.ValidateStaticCodeExists(staticCodeId, codeType);
         }
 
         private async Task<Resver_Head> _SubmitCreateData(Resver_Submit_Input_APIItem input, Resver_Head data = null)

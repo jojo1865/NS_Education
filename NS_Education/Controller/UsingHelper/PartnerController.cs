@@ -15,6 +15,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -218,6 +219,8 @@ namespace NS_Education.Controller.UsingHelper
 
             bool isValid = input.StartValidate(true)
                 .Validate(i => i.BPID == 0, () => AddError(WrongFormat("廠商 ID")))
+                .Validate(i => Task.Run(() => DC.B_Category.ValidateCategoryExists(i.BCID, 9)).Result, () => AddError(NotFound("分類 ID")))
+                .Validate(i => Task.Run(() => DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region)).Result, () => AddError(NotFound("區域 ID")))
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代碼")))
                 .Validate(i => i.Code.Length.IsInBetween(1, 10), () => AddError(TooLong("代碼")))
@@ -226,11 +229,10 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => !i.Compilation.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("統一編號")))
                 .Validate(i => i.Compilation.Length == 8, () => AddError(WrongFormat("統一編號")))
                 .Validate(i => i.Compilation.All(Char.IsNumber), () => AddError(WrongFormat("統一編號")))
-                .Validate(i => !i.Email.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("E-Mail")))
-                .Validate(i => i.Email.Length.IsInBetween(1, 100), () => AddError(TooLong("E-Mail")))
-                .Validate(i => i.CleanSDate.TryParseDateTime(out startDate), () => AddError(WrongFormat("清潔合約起始日")))
-                .Validate(i => i.CleanEDate.TryParseDateTime(out endDate), () => AddError(WrongFormat("清潔合約結束日")))
-                .Validate(i => endDate >= startDate, () => AddError(SubmitCleanDatesIncorrect))
+                .Validate(i => i.Email is null || i.Email.Length.IsInBetween(0, 100), () => AddError(TooLong("E-Mail")))
+                .Validate(i => !i.CleanFlag || i.CleanSDate.TryParseDateTime(out startDate), () => AddError(WrongFormat("清潔合約起始日")))
+                .Validate(i => !i.CleanFlag || i.CleanEDate.TryParseDateTime(out endDate), () => AddError(WrongFormat("清潔合約結束日")))
+                .Validate(i => !i.CleanFlag || endDate >= startDate, () => AddError(MinLargerThanMax("清潔合約起始日", "清潔合約結束日")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

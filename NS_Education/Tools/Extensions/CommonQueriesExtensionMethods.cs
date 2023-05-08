@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Variables;
 
 namespace NS_Education.Tools.Extensions
@@ -338,6 +339,33 @@ namespace NS_Education.Tools.Extensions
         public static async Task<bool> ValidateHallExists(this DbSet<D_Hall> dbSet, int hallId)
         {
             return hallId.IsAboveZero() && await dbSet.AnyAsync(p => p.ActiveFlag && !p.DeleteFlag && p.DHID == hallId);
+        }
+        
+        /// <summary>
+        /// 驗證一筆資料的 Id 是實際存在的。
+        /// </summary>
+        /// <param name="dbSet">dbSet</param>
+        /// <param name="id">欲對照的資料 ID</param>
+        /// <param name="idFieldName">ID 欄位名稱</param>
+        /// <returns>
+        /// true：該資料存在。<br/>
+        /// false：查無該資料。
+        /// </returns>
+        public static async Task<bool> ValidateIdExists<T>(this DbSet<T> dbSet, int id, string idFieldName)
+        where T : class
+        {
+            if (!id.IsAboveZero())
+                return false;
+
+            var query = dbSet.AsQueryable();
+            if (FlagHelper<T>.HasActiveFlag)
+                query = query.Where(t => EF.Property<bool>(t, DbConstants.ActiveFlag) == true);
+            if (FlagHelper<T>.HasDeleteFlag)
+                query = query.Where(t => EF.Property<bool>(t, DbConstants.DeleteFlag) == false);
+
+            query = query.Where(t => EF.Property<int>(t, idFieldName) == id);
+
+            return await query.AnyAsync();
         }
     }
 }

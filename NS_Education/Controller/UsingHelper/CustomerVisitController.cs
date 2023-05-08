@@ -17,6 +17,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -228,11 +229,11 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitAddValidateInput(CustomerVisit_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate(true)
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.CVID == 0, () => AddError(WrongFormat("拜訪紀錄 ID")))
-                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
-                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶拜訪方式 ID")))
-                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪業務 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod), () => AddError(NotFound("客戶拜訪方式 ID")))
+                .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)), () => AddError(NotFound("拜訪業務 ID")))
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
@@ -261,11 +262,11 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitEditValidateInput(CustomerVisit_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate(true)
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.CVID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
-                .Validate(i => i.CID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶 ID")))
-                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("客戶拜訪方式 ID")))
-                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪業務 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod), () => AddError(NotFound("客戶拜訪方式 ID")))
+                .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)), () => AddError(NotFound("拜訪業務 ID")))
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
@@ -274,7 +275,7 @@ namespace NS_Education.Controller.UsingHelper
 
         public IQueryable<CustomerVisit> SubmitEditQuery(CustomerVisit_Submit_Input_APIItem input)
         {
-            return DC.CustomerVisit.Where(cv => cv.CVID == input.CID);
+            return DC.CustomerVisit.Where(cv => cv.CVID == input.CVID);
         }
 
         public void SubmitEditUpdateDataFields(CustomerVisit data, CustomerVisit_Submit_Input_APIItem input)

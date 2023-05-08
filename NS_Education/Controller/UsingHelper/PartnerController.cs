@@ -240,10 +240,6 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<B_Partner> SubmitCreateData(Partner_Submit_Input_APIItem input)
         {
-            if (!input.CleanSDate.TryParseDateTime(out DateTime startDate)
-                || !input.CleanEDate.TryParseDateTime(out DateTime endDate))
-                throw new ArgumentException(SubmitCleanDatesIncorrect);
-
             return await Task.FromResult(new B_Partner
             {
                 BPID = input.BPID,
@@ -255,8 +251,8 @@ namespace NS_Education.Controller.UsingHelper
                 Email = input.Email,
                 CleanFlag = input.CleanFlag,
                 CleanPrice = input.CleanPrice,
-                CleanSDate = startDate,
-                CleanEDate = endDate
+                CleanSDate = input.CleanSDate.ParseDateTime().Date,
+                CleanEDate = input.CleanEDate.ParseDateTime().Date
             });
         }
 
@@ -271,6 +267,8 @@ namespace NS_Education.Controller.UsingHelper
 
             bool isValid = input.StartValidate(true)
                 .Validate(i => i.BPID.IsAboveZero(), () => AddError(EmptyNotAllowed("廠商 ID")))
+                .Validate(i => Task.Run(() => DC.B_Category.ValidateCategoryExists(i.BCID, 9)).Result, () => AddError(NotFound("分類 ID")))
+                .Validate(i => Task.Run(() => DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region)).Result, () => AddError(NotFound("區域 ID")))
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代碼")))
                 .Validate(i => i.Code.Length.IsInBetween(1, 10), () => AddError(TooLong("代碼")))
@@ -279,12 +277,12 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => !i.Compilation.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("統一編號")))
                 .Validate(i => i.Compilation.Length == 8, () => AddError(WrongFormat("統一編號")))
                 .Validate(i => i.Compilation.All(Char.IsNumber), () => AddError(WrongFormat("統一編號")))
-                .Validate(i => !i.Email.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("E-Mail")))
-                .Validate(i => i.Email.Length.IsInBetween(1, 100), () => AddError(TooLong("E-Mail")))
-                .Validate(i => i.CleanSDate.TryParseDateTime(out startDate), () => AddError(WrongFormat("清潔合約起始日")))
-                .Validate(i => i.CleanEDate.TryParseDateTime(out endDate), () => AddError(WrongFormat("清潔合約結束日")))
-                .Validate(i => endDate >= startDate, () => AddError(SubmitCleanDatesIncorrect))
+                .Validate(i => i.Email is null || i.Email.Length.IsInBetween(0, 100), () => AddError(TooLong("E-Mail")))
+                .Validate(i => !i.CleanFlag || i.CleanSDate.TryParseDateTime(out startDate), () => AddError(WrongFormat("清潔合約起始日")))
+                .Validate(i => !i.CleanFlag || i.CleanEDate.TryParseDateTime(out endDate), () => AddError(WrongFormat("清潔合約結束日")))
+                .Validate(i => !i.CleanFlag || endDate >= startDate, () => AddError(MinLargerThanMax("清潔合約起始日", "清潔合約結束日")))
                 .IsValid();
+
 
             return await Task.FromResult(isValid);
         }
@@ -296,10 +294,6 @@ namespace NS_Education.Controller.UsingHelper
 
         public void SubmitEditUpdateDataFields(B_Partner data, Partner_Submit_Input_APIItem input)
         {
-            if (!input.CleanSDate.TryParseDateTime(out DateTime startDate)
-                || !input.CleanEDate.TryParseDateTime(out DateTime endDate))
-                throw new ArgumentException(SubmitCleanDatesIncorrect);
-
             data.BPID = input.BPID;
             data.BCID = input.BCID;
             data.Code = input.Code ?? data.Code;
@@ -309,8 +303,8 @@ namespace NS_Education.Controller.UsingHelper
             data.Email = input.Email ?? data.Email;
             data.CleanFlag = input.CleanFlag;
             data.CleanPrice = input.CleanPrice;
-            data.CleanSDate = startDate;
-            data.CleanEDate = endDate;
+            data.CleanSDate = input.CleanSDate.ParseDateTime().Date;
+            data.CleanEDate = input.CleanEDate.ParseDateTime().Date;
         }
 
         #endregion

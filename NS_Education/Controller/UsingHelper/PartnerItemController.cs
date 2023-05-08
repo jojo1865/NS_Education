@@ -14,6 +14,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -221,12 +222,12 @@ namespace NS_Education.Controller.UsingHelper
         
         public async Task<bool> SubmitAddValidateInput(PartnerItem_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.BPIID == 0, () => AddError(WrongFormat("房型 ID")))
-                .Validate(i => i.BPID.IsAboveZero(), () => AddError(EmptyNotAllowed("廠商 ID")))
-                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("房型類型 ID")))
-                .Validate(i => i.BOCID.IsAboveZero(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), () => AddError(NotFound("廠商 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), () => AddError(NotFound("房型類型 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, 9), () => AddError(NotFound("入帳代號 ID")))
+                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -256,14 +257,13 @@ namespace NS_Education.Controller.UsingHelper
         
         public async Task<bool> SubmitEditValidateInput(PartnerItem_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.BPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("房型 ID")))
-                .Validate(i => i.BPID.IsAboveZero(), () => AddError(EmptyNotAllowed("廠商 ID")))
-                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("房型類型 ID")))
-                .Validate(i => i.BOCID.IsAboveZero(), () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), () => AddError(NotFound("廠商 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), () => AddError(NotFound("房型類型 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, 9), () => AddError(NotFound("入帳代號 ID")))
+                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
                 .IsValid();
-
             return await Task.FromResult(isValid);
         }
 

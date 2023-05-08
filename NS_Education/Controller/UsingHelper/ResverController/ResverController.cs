@@ -748,7 +748,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         private bool SubmitValidatePartner(int partnerId)
         {
-            return partnerId.IsAboveZero() && DC.B_Partner.Any(p => p.ActiveFlag && !p.DeleteFlag && p.BPID == partnerId);
+            return Task.Run(() => DC.B_Partner.ValidatePartnerExists(partnerId)).Result;
         }
 
         private bool SubmitValidateFoodCategory(int foodCategoryId)
@@ -772,7 +772,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         private async Task<bool> SubmitValidateOrderCode(int orderCodeId)
         {
-            return orderCodeId.IsAboveZero() && await DC.B_OrderCode.AnyAsync(boc => boc.ActiveFlag && !boc.DeleteFlag && boc.BOCID == orderCodeId);
+            return await DC.B_OrderCode.ValidateOrderCodeExists(orderCodeId);
         }
 
         private async Task<bool> SubmitValidateSiteData(int siteDataId)

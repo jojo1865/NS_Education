@@ -293,5 +293,51 @@ namespace NS_Education.Tools.Extensions
                 && c.BCID == categoryId 
                 && c.CategoryType == (categoryType ?? c.CategoryType));
         }
+        
+        /// <summary>
+        /// 驗證一筆 BOCID 是實際存在的 OrderCode，且符合指定的 CodeType。
+        /// </summary>
+        /// <param name="dbSet">Category 的 DbSet</param>
+        /// <param name="orderCodeId">欲對照的資料 ID</param>
+        /// <param name="codeType">（可選）欲對照的資料的 CodeType</param>
+        /// <returns>
+        /// true：該資料存在。<br/>
+        /// false：查無該資料。
+        /// </returns>
+        public static async Task<bool> ValidateOrderCodeExists(this DbSet<B_OrderCode> dbSet, int orderCodeId, int? codeType = null)
+        {
+            return orderCodeId.IsAboveZero() 
+                   && await dbSet.AnyAsync(boc => boc.ActiveFlag && !boc.DeleteFlag 
+                                                                 && boc.BOCID == orderCodeId 
+                                                                 && boc.CodeType == (codeType ?? boc.CodeType));
+        }
+
+        /// <summary>
+        /// 驗證一筆 BPID 是實際存在的 Partner。
+        /// </summary>
+        /// <param name="dbSet">Partner 的 dbSet</param>
+        /// <param name="partnerId">欲對照的資料 ID</param>
+        /// <returns>
+        /// true：該資料存在。<br/>
+        /// false：查無該資料。
+        /// </returns>
+        public static async Task<bool> ValidatePartnerExists(this DbSet<B_Partner> dbSet, int partnerId)
+        {
+            return partnerId.IsAboveZero() && await dbSet.AnyAsync(p => p.ActiveFlag && !p.DeleteFlag && p.BPID == partnerId);
+        }
+        
+        /// <summary>
+        /// 驗證一筆 DHID 是實際存在的 Hall。
+        /// </summary>
+        /// <param name="dbSet">Hall 的 dbSet</param>
+        /// <param name="hallId">欲對照的資料 ID</param>
+        /// <returns>
+        /// true：該資料存在。<br/>
+        /// false：查無該資料。
+        /// </returns>
+        public static async Task<bool> ValidateHallExists(this DbSet<D_Hall> dbSet, int hallId)
+        {
+            return hallId.IsAboveZero() && await dbSet.AnyAsync(p => p.ActiveFlag && !p.DeleteFlag && p.DHID == hallId);
+        }
     }
 }

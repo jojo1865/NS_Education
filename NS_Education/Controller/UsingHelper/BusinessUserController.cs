@@ -199,6 +199,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.BUID == 0, () => AddError(WrongFormat("業務 ID")))
+                .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count, () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))  
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -230,6 +231,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.BUID.IsAboveZero(), () => AddError(EmptyNotAllowed("業務 ID")))
+                .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count, () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -244,13 +246,8 @@ namespace NS_Education.Controller.UsingHelper
 
         public void SubmitEditUpdateDataFields(BusinessUser data, BusinessUser_Submit_Input_APIItem input)
         {
-            // 1. 刪除所有原本的 M_Customer_BusinessUser 資料
-            foreach (M_Customer_BusinessUser cbu in DC.M_Customer_BusinessUser.Where(cbu => cbu.BUID == data.BUID && cbu.ActiveFlag && !cbu.DeleteFlag).ToList())
-            {
-                cbu.DeleteFlag = true;
-            }
-            
-            // 2. 修改資料
+            data.M_Customer_BusinessUser.Clear();
+
             data.Code = input.Code;
             data.Name = input.Name;
             data.Phone = input.Phone;

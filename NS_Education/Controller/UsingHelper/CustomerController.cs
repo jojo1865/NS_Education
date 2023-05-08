@@ -103,14 +103,9 @@ namespace NS_Education.Controller.UsingHelper
             // ResverType 為 1 時，只找有預約過的客戶
             if (input.ResverType.IsInBetween(0, 1))
                 query = query.Where(c =>
-                    c.Resver_Head.Any(ResverHeadIsViable) == (input.ResverType == 1));
+                    c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.BSCID12Navigation.Code == DbConstants.ReserveHeadDraftStateCode) == (input.ResverType == 1));
 
             return query.OrderBy(c => c.CID);
-        }
-
-        private static bool ResverHeadIsViable(Resver_Head rh)
-        {
-            return !rh.DeleteFlag && rh.BSCID12 == DbConstants.ReserveHeadDraftStateCode;
         }
 
         public async Task<Customer_GetList_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity)
@@ -135,7 +130,7 @@ namespace NS_Education.Controller.UsingHelper
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(ResverHeadIsViable),
+                ResverCt = entity.Resver_Head.Count(rh => !rh.DeleteFlag && rh.BSCID12Navigation.Code == DbConstants.ReserveHeadDraftStateCode),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
@@ -188,7 +183,7 @@ namespace NS_Education.Controller.UsingHelper
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(ResverHeadIsViable),
+                ResverCt = entity.Resver_Head.Count(rh => !rh.DeleteFlag && rh.BSCID12Navigation.Code == DbConstants.ReserveHeadDraftStateCode),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),

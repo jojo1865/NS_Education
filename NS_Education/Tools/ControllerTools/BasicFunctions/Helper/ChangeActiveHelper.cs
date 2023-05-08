@@ -19,7 +19,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         where TEntity : class
     {
         private static string UpdateFailed(Exception e)
-            => $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}！";
+            => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
         
         private readonly TController _controller;
 

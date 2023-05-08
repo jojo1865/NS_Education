@@ -28,7 +28,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         #region DeleteItem
 
         private static string UpdateFailed(Exception e)
-            => $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}！";
+            => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
         
         private const string DeleteItemNotSupported = "此 Controller 的資料型態不支援設定刪除狀態功能！";
         private const string DeleteItemInputIncorrect = "未輸入欲設定刪除狀態的 ID 或是不正確！";

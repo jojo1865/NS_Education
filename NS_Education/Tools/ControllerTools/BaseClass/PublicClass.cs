@@ -74,7 +74,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <returns>預設錯誤訊息字串</returns>
         protected string UpdateDbFailed(Exception e = null)
         {
-            return e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}！";
+            return e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
         }
         
         /// <summary>

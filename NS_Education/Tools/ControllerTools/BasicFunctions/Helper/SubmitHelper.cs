@@ -32,7 +32,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         #region Submit
         
         private static string UpdateFailed(Exception e)
-            => $"更新 DB 時出錯，請確認伺服器狀態：{e.Message}！";
+            => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
 
         private const string SubmitAddValidateFailed = "欲新增資料的輸入格式不符！";
         private const string SubmitEditValidateFailed = "欲更新資料的輸入格式不符！";

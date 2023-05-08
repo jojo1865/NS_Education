@@ -287,6 +287,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 SortNo = input.SortNo.IsAboveZero()
                     ? input.SortNo
                     : await DC.MenuData
+                        .Where(md => md.ParentID == input.ParentId && md.ActiveFlag && !md.DeleteFlag)
                         .OrderByDescending(md => md.SortNo)
                         .Select(md => md.SortNo).FirstOrDefaultAsync() + 1
             };

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.MenuData.MenuData.GetInfoById;
 using NS_Education.Models.APIItems.MenuData.MenuData.GetList;
 using NS_Education.Models.APIItems.MenuData.MenuData.Submit;
@@ -20,7 +21,6 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 namespace NS_Education.Controller.UsingHelper.MenuDataController
 {
     public class MenuDataController : PublicClass
-        , IGetListAll<MenuData, MenuData_GetList_Input_APIItem, MenuData_GetList_Output_Row_APIItem>
         , IGetInfoById<MenuData, MenuData_GetInfoById_Output_APIItem>
         , ISubmit<MenuData, MenuData_Submit_Input_APIItem>
     {
@@ -32,19 +32,13 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #endregion
 
         #region Initialization
-
-        private readonly IGetListAllHelper<MenuData_GetList_Input_APIItem> _getListAllHelper;
+        
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         private readonly ISubmitHelper<MenuData_Submit_Input_APIItem> _submitHelper;
 
         public MenuDataController()
         {
-            _getListAllHelper =
-                new GetListAllHelper<MenuDataController, MenuData, MenuData_GetList_Input_APIItem,
-                    MenuData_GetList_Output_Row_APIItem>(
-                    this);
-
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<MenuDataController, MenuData, MenuData_GetInfoById_Output_APIItem>(this);
             _submitHelper = new SubmitHelper<MenuDataController, MenuData, MenuData_Submit_Input_APIItem>(this);
@@ -58,7 +52,56 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(MenuData_GetList_Input_APIItem input)
         {
-            return await _getListAllHelper.GetAllList(input);
+            // 特殊邏輯：
+            // 假設有下列這些資料：1 ParentId 0 SortNo 1
+            //                 2 ParentId 0 SortNo 2
+            //                 3 ParentId 1 SortNo 1
+            //                 4 ParentId 2 SortNo 1
+            //                 5 ParentId 2 SortNo 2
+            // 則最後結果必須排列為：
+            // 1 ParentId 0 SortNo 1
+            // 3 ParentId 1 SortNo 1
+            // 2 ParentId 0 SortNo 2
+            // 4 ParentId 2 SortNo 1
+            // 5 ParentId 2 SortNo 2
+            //
+            // 因為每筆資料需要取得 Parent，不符合域設步驟
+            // 所以，無法使用 helper
+
+            // 1. 驗證輸入
+            if (!await GetListAllValidateInput(input))
+                return GetResponseJson();
+            
+            // 2. 查詢資料
+            // 依照 MDID 做成 dictionary, 並依照 parentId 做成 lookup
+            var list = await GetListAllQuery(input).ToListAsync();
+            var dictionary = list.ToDictionary(md => md.MDID, md => md);
+            var lookup = dictionary.ToLookup(md => md.Value.ParentID, md => md.Value);
+
+            // 建立 最後的 response
+            BaseResponseForList<MenuData_GetList_Output_Row_APIItem> response =
+                new BaseResponseForList<MenuData_GetList_Output_Row_APIItem>();
+
+            // 3. 重新排序
+            // 如果 parent 在 dictionary 中找不到，表示這是一個 parent，所以由 parent 開始長
+            foreach (var parent in lookup.Where(grouping => !dictionary.ContainsKey(grouping.Key)).OrderBy(g => g.Key).SelectMany(g => g))
+            {
+                // 先把 parent 放進去
+                response.Items.Add(await GetListAllEntityToRow(parent));
+
+                // 再把 children 放進去
+                foreach (var children in lookup[parent.MDID]
+                             .OrderBy(md => md.SortNo)
+                             .ThenBy(md => md.URL)
+                             .ThenBy(md => md.Title)
+                             .ThenBy(md => md.MDID))
+                {
+                    response.Items.Add(await GetListAllEntityToRow(children));
+                }
+            }
+            
+            // 4. 回傳結果
+            return GetResponseJson(response);
         }
 
         public async Task<bool> GetListAllValidateInput(MenuData_GetList_Input_APIItem input)
@@ -70,28 +113,32 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             return await Task.FromResult(isValid);
         }
 
-        public IOrderedQueryable<MenuData> GetListAllOrderedQuery(MenuData_GetList_Input_APIItem input)
+        public IQueryable<MenuData> GetListAllQuery(MenuData_GetList_Input_APIItem input)
         {
             IQueryable<MenuData> query = DC.MenuData.AsQueryable();
 
             if (input.ParentID.IsAboveZero())
                 query = query.Where(md => md.ParentID == input.ParentID);
 
-            return query.OrderBy(md => md.SortNo)
-                .ThenBy(md => md.URL)
-                .ThenBy(md => md.Title)
-                .ThenBy(md => md.MDID);
+            if (input.ActiveFlag > -1)
+                query = query.Where(md => md.ActiveFlag == (input.ActiveFlag == 1));
+            
+            return query.Where(md => md.DeleteFlag == (input.DeleteFlag == 1));
         }
 
         public async Task<MenuData_GetList_Output_Row_APIItem> GetListAllEntityToRow(MenuData entity)
         {
-            return await Task.FromResult(new MenuData_GetList_Output_Row_APIItem
+            var item = new MenuData_GetList_Output_Row_APIItem
             {
                 MDID = entity.MDID,
                 Title = entity.Title ?? "",
                 URL = entity.URL ?? "",
                 SortNo = entity.SortNo
-            });
+            };
+
+            await item.SetInfoFromEntity(entity, this);
+
+            return item;
         }
 
         #endregion

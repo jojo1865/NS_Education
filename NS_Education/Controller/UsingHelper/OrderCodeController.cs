@@ -294,18 +294,20 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitAddValidateInput(OrderCode_Submit_Input_APIItem input)
         {
-            return await Task.Run(() => input.StartValidate()
-                .Validate(i => i.BOCID.IsZeroOrAbove(),
-                    () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.CodeType.IsZeroOrAbove(),
-                    () => AddError(EmptyNotAllowed("入帳代號類別")))
-                .Validate(i => !i.Code.IsNullOrWhiteSpace(),
+            bool isValid = input.StartValidate()
+                .Validate(i => i.BOCID == 0,
+                    () => AddError(WrongFormat("入帳代號 ID")))
+                .Validate(i => i.CodeType.IsInBetween(0, 9),
+                    () => AddError(OutOfRange("入帳代號類別", 0, 9)))
+                .Validate(i => i.Code.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號編碼")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(),
+                .Validate(i => i.Title.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號名稱")))
-                .Validate(i => !i.PrintTitle.IsNullOrWhiteSpace(),
+                .Validate(i => i.PrintTitle.HasContent(),
                     () => AddError(EmptyNotAllowed("帳單列印名稱")))
-                .IsValid());
+                .IsValid();
+
+            return await Task.FromResult(isValid);
         }
 
         public async Task<B_OrderCode> SubmitCreateData(OrderCode_Submit_Input_APIItem input)
@@ -331,18 +333,20 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitEditValidateInput(OrderCode_Submit_Input_APIItem input)
         {
-            return await Task.Run(() => input.StartValidate()
+            bool isValid = input.StartValidate()
                 .Validate(i => i.BOCID.IsAboveZero(),
-                    () => AddError(EmptyNotAllowed("入帳代號 ID")))
-                .Validate(i => i.CodeType.IsZeroOrAbove(),
-                    () => AddError(EmptyNotAllowed("入帳代號類別")))
-                .Validate(i => !i.Code.IsNullOrWhiteSpace(),
+                    () => AddError(WrongFormat("入帳代號 ID")))
+                .Validate(i => i.CodeType.IsInBetween(0, 9),
+                    () => AddError(OutOfRange("入帳代號類別", 0, 9)))
+                .Validate(i => i.Code.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號編碼")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(),
+                .Validate(i => i.Title.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號名稱")))
-                .Validate(i => !i.PrintTitle.IsNullOrWhiteSpace(),
+                .Validate(i => i.PrintTitle.HasContent(),
                     () => AddError(EmptyNotAllowed("帳單列印名稱")))
-                .IsValid());
+                .IsValid();
+
+            return await Task.FromResult(isValid);
         }
 
         public IQueryable<B_OrderCode> SubmitEditQuery(OrderCode_Submit_Input_APIItem input)

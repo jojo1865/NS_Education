@@ -53,7 +53,14 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Validate(i => i.Id.Distinct().Count() == i.Id.Count, () => AddError(CopyNotAllowed("欲查詢之預約單 ID 集合")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            // 檢查所有 RHID 是否都存在
+            bool allIdValid = input.Id.Aggregate(true, (result, id) => result &
+                id.StartValidate()
+                    .Validate(_ => DC.Resver_Head.Any(rh => !rh.DeleteFlag && rh.RHID == id), () => AddError(NotFound($"預約單 ID {id}")))
+                    .IsValid()
+            );
+
+            return await Task.FromResult(isValid && allIdValid);
         }
 
         public IOrderedQueryable<Resver_Head> GetListAllOrderedQuery(PrintReport_GetResverListByIds1_Input_APIItem input)

@@ -98,6 +98,16 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
         
         /// <summary>
+        /// 回傳一串已存在同樣資料時的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="keyFieldName">（可選）用於判定重覆的欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string AlreadyExists(string keyFieldName = null)
+        {
+            return keyFieldName is null ? "已存在相同資料！" : $"已存在「{keyFieldName}」包含相同值的資料！";
+        }
+        
+        /// <summary>
         /// 回傳一串發現重複資料時可用的預設錯誤訊息字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>

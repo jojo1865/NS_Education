@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.StaticCode.GetInfoById;
 using NS_Education.Models.APIItems.StaticCode.GetList;
-using NS_Education.Models.APIItems.StaticCode.GetTypeList;
 using NS_Education.Models.APIItems.StaticCode.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -279,16 +278,30 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
 
         public async Task<bool> SubmitAddValidateInput(StaticCode_Submit_Input_APIItem input)
         {
-            return await Task.Run(() => input.StartValidate()
-                .Validate(i => i.BSCID.IsZeroOrAbove(),
-                    () => AddError(EmptyNotAllowed("靜態參數 ID")))
-                .Validate(i => i.CodeType.IsZeroOrAbove(),
-                    () => AddError(EmptyNotAllowed("靜態參數所屬類別")))
-                .Validate(i => !i.Code.IsNullOrWhiteSpace(),
-                    () => AddError(EmptyNotAllowed("靜態參數編碼")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(),
-                    () => AddError(EmptyNotAllowed("靜態參數名稱")))
-                .IsValid());
+            bool isValid = await input.StartValidate()
+                .Validate(i => i.BSCID == 0,
+                    () => AddError(WrongFormat("靜態參數 ID")))
+                .Validate(i => i.CodeType >= 0, () => AddError(OutOfRange("參數所屬類別", 0)))
+                .Validate(i => i.Code.HasContent())
+                .Validate(i => i.Title.HasContent())
+                .SkipIfAlreadyInvalid()
+                // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
+                .ValidateAsync(async i => i.CodeType > 0
+                                          || await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
+                                              && !sc.DeleteFlag
+                                              && sc.CodeType == 0
+                                              && sc.Code == sc.CodeType.ToString())
+                    , () => AddError(NotFound("參數所屬類別")))
+                // 同 CodeType 下不允許重複編碼的資料
+                .ValidateAsync(async i =>
+                        !await DC.B_StaticCode.AnyAsync(bc => bc.ActiveFlag
+                                                              && !bc.DeleteFlag
+                                                              && bc.CodeType == i.CodeType
+                                                              && bc.Code == i.Code)
+                    , () => AddError(AlreadyExists("編碼")))
+                .IsValid();
+
+            return isValid;
         }
 
         public async Task<B_StaticCode> SubmitCreateData(StaticCode_Submit_Input_APIItem input)
@@ -314,16 +327,30 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
 
         public async Task<bool> SubmitEditValidateInput(StaticCode_Submit_Input_APIItem input)
         {
-            return await Task.Run(() => input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.BSCID.IsAboveZero(),
                     () => AddError(EmptyNotAllowed("靜態參數 ID")))
-                .Validate(i => i.CodeType.IsZeroOrAbove(),
-                    () => AddError(EmptyNotAllowed("靜態參數所屬類別")))
-                .Validate(i => !i.Code.IsNullOrWhiteSpace(),
-                    () => AddError(EmptyNotAllowed("靜態參數編碼")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(),
-                    () => AddError(EmptyNotAllowed("靜態參數名稱")))
-                .IsValid());
+                .Validate(i => i.CodeType >= 0, () => AddError(OutOfRange("參數所屬類別", 0)))
+                .Validate(i => i.Code.HasContent())
+                .Validate(i => i.Title.HasContent())
+                .SkipIfAlreadyInvalid()
+                // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
+                .ValidateAsync(async i => i.CodeType > 0
+                                          || await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
+                                              && !sc.DeleteFlag
+                                              && sc.CodeType == 0
+                                              && sc.Code == sc.CodeType.ToString())
+                    , () => AddError(NotFound("參數所屬類別")))
+                // 同 CodeType 下不允許重複編碼的資料
+                .ValidateAsync(async i =>
+                        !await DC.B_StaticCode.AnyAsync(bc => bc.ActiveFlag
+                                                              && !bc.DeleteFlag
+                                                              && bc.CodeType == i.CodeType
+                                                              && bc.Code == i.Code)
+                    , () => AddError(AlreadyExists("編碼")))
+                .IsValid();
+
+            return isValid;
         }
 
         public IQueryable<B_StaticCode> SubmitEditQuery(StaticCode_Submit_Input_APIItem input)
@@ -342,25 +369,5 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         #endregion
 
         #endregion
-
-        public Task<string> GetList(StaticCode_GetTypeList_Input_APIItem input)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> GetListAllValidateInput(StaticCode_GetTypeList_Input_APIItem input)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IOrderedQueryable<B_StaticCode> GetListAllOrderedQuery(StaticCode_GetTypeList_Input_APIItem input)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<StaticCode_GetTypeList_Output_Row_APIItem> GetListAllEntityToRow(B_StaticCode entity)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

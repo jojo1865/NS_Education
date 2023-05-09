@@ -234,6 +234,8 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod), () => AddError(NotFound("客戶拜訪方式 ID")))
                 .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)), () => AddError(NotFound("拜訪業務 ID")))
+                .Validate(i => i.TargetTitle.HasContent(), () => AddError(EmptyNotAllowed("拜訪對象")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("主旨")))
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
@@ -267,6 +269,8 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod), () => AddError(NotFound("客戶拜訪方式 ID")))
                 .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)), () => AddError(NotFound("拜訪業務 ID")))
+                .Validate(i => i.TargetTitle.HasContent(), () => AddError(EmptyNotAllowed("拜訪對象")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("主旨")))
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 

@@ -184,8 +184,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         #endregion
 
         #region Submit
-
-        private const string SubmitCategoryTypeNotSupported = "不支援此分類類別！";
+        
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Category_Submit_Input_APIItem.BCID))]
         public async Task<string> Submit(Category_Submit_Input_APIItem input)
@@ -212,9 +211,14 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
 
         public async Task<bool> SubmitAddValidateInput(Category_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.BCID == 0, () => AddError(WrongFormat("分類 ID")))
-                .Validate(i => i.CategoryType < sCategoryTypes.Length, () => AddError(SubmitCategoryTypeNotSupported))
+                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(UnsupportedValue("上層 ID")))
+                .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
+                    await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)), () => AddError(NotFound("上層 ID")))
+                .Validate(i => i.CategoryType.IsInBetween(0, 9), () => AddError(OutOfRange("分類所屬類別", 0, 9)))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("分類編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("分類名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -239,9 +243,14 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
 
         public async Task<bool> SubmitEditValidateInput(Category_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
-                .Validate(i => i.CategoryType < sCategoryTypes.Length, () => AddError(SubmitCategoryTypeNotSupported))
+                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(UnsupportedValue("上層 ID")))
+                .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
+                    await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)), () => AddError(NotFound("上層 ID")))
+                .Validate(i => i.CategoryType.IsInBetween(0, 9), () => AddError(OutOfRange("分類所屬類別", 0, 9)))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("分類編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("分類名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

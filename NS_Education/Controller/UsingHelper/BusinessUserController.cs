@@ -199,6 +199,8 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isInputValid = input.StartValidate()
                 .Validate(i => i.BUID == 0, () => AddError(WrongFormat("業務 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("員工編號")))
+                .Validate(i => i.Name.HasContent(), () => AddError(EmptyNotAllowed("姓名")))
                 .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count,
                     () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
                 .IsValid();
@@ -242,6 +244,8 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isInputValid = input.StartValidate()
                 .Validate(i => i.BUID.IsAboveZero(), () => AddError(EmptyNotAllowed("業務 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("員工編號")))
+                .Validate(i => i.Name.HasContent(), () => AddError(EmptyNotAllowed("姓名")))
                 .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count,
                     () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
                 .IsValid();

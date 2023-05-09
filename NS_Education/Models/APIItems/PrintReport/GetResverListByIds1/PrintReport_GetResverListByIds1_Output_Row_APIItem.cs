@@ -45,38 +45,4 @@ namespace NS_Education.Models.APIItems.PrintReport.GetResverListByIds1
         public ICollection<PrintReport_GetResverListByIds1_SiteItem_APIItem> SiteItems =
             new List<PrintReport_GetResverListByIds1_SiteItem_APIItem>();
     }
-
-    public class PrintReport_GetResverListByIds1_SiteItem_APIItem
-    {
-        public int RSID { get; set; }
-        public string Date { get; set; }
-        public string SiteTitle { get; set; }
-        public string TableTitle { get; set; }
-        public int FixedPrice { get; set; }
-        public int QuotedPrice { get; set; }
-
-        public ICollection<PrintReport_GetResverListByIds1_TimeSpanItem_APIItem> TimeSpanItems =
-            new List<PrintReport_GetResverListByIds1_TimeSpanItem_APIItem>();
-        
-        public ICollection<PrintReport_GetResverListByIds1_DeviceItem_APIItem> DeviceItems =
-            new List<PrintReport_GetResverListByIds1_DeviceItem_APIItem>();
-    }
-
-    public class PrintReport_GetResverListByIds1_DeviceItem_APIItem
-    {
-        public int RDID { get; set; }
-        public string TargetDate { get; set; }
-        public string BD_Title { get; set; }
-        public int SortNo { get; set; }
-        public string Note { get; set; }
-    }
-
-    public class PrintReport_GetResverListByIds1_TimeSpanItem_APIItem
-    {
-        public int DTSID { get; set; }
-        public string Title { get; set; }
-        public string TimeS { get; set; }
-        public string TimeE { get; set; }
-        public int Minutes { get; set; }
-    }
 }

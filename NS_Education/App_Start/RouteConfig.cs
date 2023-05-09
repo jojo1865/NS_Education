@@ -28,6 +28,12 @@ namespace NS_Education
             );
             
             routes.MapRoute(
+                name: "PrintReportGetResverListByIDs2",
+                url: "PrintReport/GetResverListByIDs2/{id}",
+                defaults: new { controller = "GetResverListByIDs2", action = "GetList", id = UrlParameter.Optional }
+            );
+            
+            routes.MapRoute(
                 name: "StaticCodeGetTypeList",
                 url: "StaticCode/GetTypeList/{id}",
                 defaults: new { controller = "StaticCodeTypeList", action = "GetList", id = UrlParameter.Optional }

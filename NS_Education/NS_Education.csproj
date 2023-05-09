@@ -272,6 +272,7 @@
     <Compile Include="Controller\UsingHelper\PartnerItemController.cs" />
     <Compile Include="Controller\UsingHelper\PayTypeController.cs" />
     <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs1Controller.cs" />
+    <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs2Controller.cs" />
     <Compile Include="Controller\UsingHelper\ResverController\ResverController.cs" />
     <Compile Include="Controller\UsingHelper\ResverController\ResverSiteController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs" />
@@ -389,8 +390,15 @@
     <Compile Include="Models\APIItems\PayType\GetList\PayType_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\PayType\GetList\PayType_GetList_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\PayType\Submit\PayType_Submit_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_DeviceItem_APIItem.cs" />
     <Compile Include="Models\APIItems\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_Output_Row_APIItem.cs" />
+    <Compile Include="Models\APIItems\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_SiteItem_APIItem.cs" />
+    <Compile Include="Models\APIItems\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_TimeSpanItem_APIItem.cs" />
+    <Compile Include="Models\APIItems\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_PayItemDetail_APIItem.cs" />
+    <Compile Include="Models\APIItems\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_Input_APIItem.cs" />
+    <Compile Include="Models\APIItems\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_Output_Row_APIItem.cs" />
+    <Compile Include="Models\APIItems\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_PayItem_APIItem.cs" />
     <Compile Include="Models\APIItems\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_BillItem_APIItem.cs" />
     <Compile Include="Models\APIItems\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_ContactItem_APIItem.cs" />
@@ -499,6 +507,7 @@
     <Compile Include="Models\Entities\UserPasswordLog.cs" />
     <Compile Include="Models\IReturnMessageInfusable.cs" />
     <Compile Include="Models\PublicModel.cs" />
+    <Compile Include="Models\Utilities\PrintReport\GetResverListByIDs2\PrintReport_GetResverListByIds2_PayItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\BeingValidated\BeingValidated.cs" />
     <Compile Include="Tools\BeingValidated\ChainValidateHelperExtensionMethods.cs" />

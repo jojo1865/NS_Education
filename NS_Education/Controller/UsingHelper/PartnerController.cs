@@ -215,13 +215,10 @@ namespace NS_Education.Controller.UsingHelper
             DateTime startDate = default;
             DateTime endDate = default;
 
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.BPID == 0, () => AddError(WrongFormat("廠商 ID")))
-                .Validate(i => Task.Run(() => DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner)).Result,
-                    () => AddError(NotFound("分類 ID")))
-                .Validate(
-                    i => Task.Run(() => DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region))
-                        .Result, () => AddError(NotFound("區域 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner), () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region), () => AddError(NotFound("區域 ID")))
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代碼")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("名稱")))
@@ -239,7 +236,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.Compilation.Length == 8, () => AddError(WrongFormat("統一編號")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            return isValid;
         }
 
         public async Task<B_Partner> SubmitCreateData(Partner_Submit_Input_APIItem input)
@@ -269,10 +266,10 @@ namespace NS_Education.Controller.UsingHelper
             DateTime startDate = default;
             DateTime endDate = default;
 
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.BPID.IsAboveZero(), () => AddError(EmptyNotAllowed("廠商 ID")))
-                .Validate(i => Task.Run(() => DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner)).Result, () => AddError(NotFound("分類 ID")))
-                .Validate(i => Task.Run(() => DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region)).Result, () => AddError(NotFound("區域 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner), () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region), () => AddError(NotFound("區域 ID")))
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代碼")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("名稱")))
@@ -287,9 +284,8 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.Compilation.Length == 8, () => AddError(WrongFormat("統一編號")))
                 .Validate(i => i.Compilation.All(Char.IsNumber), () => AddError(WrongFormat("統一編號")))
                 .IsValid();
-
-
-            return await Task.FromResult(isValid);
+            
+            return isValid;
         }
 
         public IQueryable<B_Partner> SubmitEditQuery(Partner_Submit_Input_APIItem input)

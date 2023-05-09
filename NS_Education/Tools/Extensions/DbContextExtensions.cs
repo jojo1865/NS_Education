@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata;
 using NS_Education.Models.Entities;
 using NS_Education.Models.Entities.DbContext;
 using NS_Education.Variables;
@@ -131,7 +130,7 @@ namespace NS_Education.Tools.Extensions
         private static void WriteUserLog(NsDbContext context, int uid, EntityEntry change)
         {
             // 取得此資料的第一個 PK 欄位（通常是流水號）
-            int targetId = context.GetTargetIdFromEntity(change.Entity);
+            int targetId = GetTargetIdFromEntity(change);
 
             // 依據這筆修改的狀態，指定 ControlType
             UserLogControlType controlType = GetUserLogControlType(change);
@@ -162,11 +161,10 @@ namespace NS_Education.Tools.Extensions
             return controlType;
         }
 
-        private static int GetTargetIdFromEntity<T>(this NsDbContext context, T entity)
+        private static int GetTargetIdFromEntity(EntityEntry entityEntry)
         {
             // 從 Entity 找出 PK 並找出手上物件的該欄位值，如果有任何 null 時，回傳 0
-            IEntityType entityType = context.Model.FindEntityType(entity.GetType());
-            object result = entityType?.FindPrimaryKey()?.Properties?.FirstOrDefault()?.PropertyInfo?.GetValue(entity);
+            object result = entityEntry.Metadata.FindPrimaryKey()?.Properties?.FirstOrDefault()?.PropertyInfo?.GetValue(entityEntry.Entity);
             
             return result is int i ? i : 0;
         }

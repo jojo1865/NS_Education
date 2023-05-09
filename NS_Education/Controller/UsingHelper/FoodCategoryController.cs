@@ -165,6 +165,8 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.DFCID == 0, () => AddError(WrongFormat("餐種 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -189,6 +191,8 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.DFCID.IsAboveZero(), () => AddError(EmptyNotAllowed("餐種 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

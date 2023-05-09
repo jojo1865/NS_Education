@@ -179,10 +179,12 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.DTSID == 0, () => AddError(WrongFormat("時段 ID")))
-                .Validate(i => 0 <= i.HourS && i.HourS <= 23, () => AddError(WrongFormat("起始小時")))
-                .Validate(i => 0 <= i.HourE && i.HourE <= 23, () => AddError(WrongFormat("結束小時")))
-                .Validate(i => 0 <= i.MinuteS && i.MinuteS <= 59, () => AddError(WrongFormat("起始分鐘")))
-                .Validate(i => 0 <= i.MinuteE && i.MinuteE <= 59, () => AddError(WrongFormat("結束分鐘")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.HourS.IsInBetween(0, 23), () => AddError(OutOfRange("起始小時", 0, 23)))
+                .Validate(i => i.HourE.IsInBetween(0, 24), () => AddError(OutOfRange("結束小時", 0, 24)))
+                .Validate(i => i.MinuteS.IsInBetween(0, 59), () => AddError(OutOfRange("起始分鐘", 0, 59)))
+                .Validate(i => i.MinuteE.IsInBetween(0, 59), () => AddError(OutOfRange("結束分鐘", 0, 59)))
                 .Validate(
                     i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
                     () => AddError(SubmitWrongStartTime))
@@ -210,10 +212,12 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.DTSID.IsAboveZero(), () => AddError(EmptyNotAllowed("時段 ID")))
-                .Validate(i => 0 <= i.HourS && i.HourS <= 23, () => AddError(WrongFormat("起始小時")))
-                .Validate(i => 0 <= i.HourE && i.HourE <= 23, () => AddError(WrongFormat("結束小時")))
-                .Validate(i => 0 <= i.MinuteS && i.MinuteS <= 59, () => AddError(WrongFormat("起始分鐘")))
-                .Validate(i => 0 <= i.MinuteE && i.MinuteE <= 59, () => AddError(WrongFormat("結束分鐘")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.HourS.IsInBetween(0, 23), () => AddError(OutOfRange("起始小時", 0, 23)))
+                .Validate(i => i.HourE.IsInBetween(0, 24), () => AddError(OutOfRange("結束小時", 0, 24)))
+                .Validate(i => i.MinuteS.IsInBetween(0, 59), () => AddError(OutOfRange("起始分鐘", 0, 59)))
+                .Validate(i => i.MinuteE.IsInBetween(0, 59), () => AddError(OutOfRange("結束分鐘", 0, 59)))
                 .Validate(
                     i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
                     () => AddError(SubmitWrongStartTime))

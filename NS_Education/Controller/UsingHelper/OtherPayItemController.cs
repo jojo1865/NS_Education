@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems.OtherPayItem.GetInfoById;
@@ -14,6 +13,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -163,29 +163,12 @@ namespace NS_Education.Controller.UsingHelper
 
         #region Submit
 
-        private HashSet<string> SubmitAllowedBSCID = new HashSet<string>();
-        private const string SubmitBSCIDNotSupported = "不支援此單位 ID！";
-        
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null,
             nameof(OtherPayItem_Submit_Input_APIItem.DOPIID))]
         public async Task<string> Submit(OtherPayItem_Submit_Input_APIItem input)
         {
-            // 如果還沒有 BSCID 的資料，撈一次
-            SubmitPopulateBSCIDSet();
-
             return await _submitHelper.Submit(input);
-        }
-
-        private void SubmitPopulateBSCIDSet()
-        {
-            if (SubmitAllowedBSCID?.Any() ?? true)
-            {
-                SubmitAllowedBSCID = DC.B_StaticCode
-                    .Where(sc => sc.CodeType == 2 && sc.ActiveFlag && !sc.DeleteFlag)
-                    .Select(sc => sc.Code)
-                    .ToHashSet();
-            }
         }
 
         public bool SubmitIsAdd(OtherPayItem_Submit_Input_APIItem input)
@@ -197,10 +180,13 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitAddValidateInput(OtherPayItem_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.DOPIID == 0, () => AddError(WrongFormat("項目 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .Validate(i => i.PaidType.IsInBetween(0, 1), () => AddError(WrongFormat("計價方式")))
-                .Validate(i => !SubmitAllowedBSCID.Contains(i.Code), () => AddError(SubmitBSCIDNotSupported))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit), () => AddError(NotFound("單位 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID), () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -229,10 +215,13 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitEditValidateInput(OtherPayItem_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.DOPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("項目 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .Validate(i => i.PaidType.IsInBetween(0, 1), () => AddError(WrongFormat("計價方式")))
-                .Validate(i => !SubmitAllowedBSCID.Contains(i.Code), () => AddError(SubmitBSCIDNotSupported))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit), () => AddError(NotFound("單位 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID), () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

@@ -23,16 +23,13 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class GroupDataController : PublicClass,
         IGetListPaged<GroupData, GroupData_GetList_Input_APIItem, GroupData_GetList_Output_Row_APIItem>,
-        IGetInfoById<GroupData, GroupData_GetInfoById_Output_APIItem>,
         IDeleteItem<GroupData>,
         ISubmit<GroupData, GroupData_Submit_Input_APIItem>
     {
         #region Initialization
 
         private readonly IGetListPagedHelper<GroupData_GetList_Input_APIItem> _getListPagedHelper;
-        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
-
         private readonly ISubmitHelper<GroupData_Submit_Input_APIItem> _submitHelper;
 
         public GroupDataController()
@@ -41,9 +38,8 @@ namespace NS_Education.Controller.UsingHelper
                 new GetListPagedHelper<GroupDataController, GroupData, GroupData_GetList_Input_APIItem,
                     GroupData_GetList_Output_Row_APIItem>(this);
 
-            _getInfoByIdHelper =
-                new GetInfoByIdHelper<GroupDataController, GroupData, GroupData_GetInfoById_Output_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<GroupDataController, GroupData>(this);
+
             _submitHelper = new SubmitHelper<GroupDataController, GroupData, GroupData_Submit_Input_APIItem>(this);
         }
 
@@ -92,13 +88,35 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
         {
-            return await _getInfoByIdHelper.GetInfoById(id);
+            // 特殊規格：GroupData 不考慮 DeleteFlag 的邏輯，所以不能使用 Helper。
+            
+            // 1. 驗證輸入
+            if (!id.IsAboveZero())
+            {
+                AddError(EmptyNotAllowed("權限 ID"));
+                return GetResponseJson();
+            }
+            
+            // 2. 查詢資料
+            GroupData data = await GetInfoByIdQuery(id).FirstOrDefaultAsync();
+
+            // 3. 回傳資料
+            if (data is null)
+            {
+                AddError(NotFound());
+                return GetResponseJson();
+            }
+
+            GroupData_GetInfoById_Output_APIItem response = await GetInfoByIdConvertEntityToResponse(data);
+            await response.SetInfoFromEntity(data, this);
+            
+            return GetResponseJson(response);
         }
 
         public IQueryable<GroupData> GetInfoByIdQuery(int id)
         {
             return DC.GroupData
-                .Where(gd => gd.GID == id);
+                .Where(gd => gd.ActiveFlag && gd.GID == id);
         }
 
         public async Task<GroupData_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(GroupData entity)

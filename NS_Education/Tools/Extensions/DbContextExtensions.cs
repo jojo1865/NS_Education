@@ -165,11 +165,10 @@ namespace NS_Education.Tools.Extensions
         private static int GetTargetIdFromEntity<T>(this NsDbContext context, T entity)
         {
             // 從 Entity 找出 PK 並找出手上物件的該欄位值，如果有任何 null 時，回傳 0
-            IEntityType entityType = context.Model.FindEntityType(nameof(T));
-            int.TryParse(
-                entityType?.FindPrimaryKey()?.Properties?.FirstOrDefault()?.PropertyInfo?.GetValue(entity)?.ToString(),
-                out int result);
-            return result;
+            IEntityType entityType = context.Model.FindEntityType(entity.GetType());
+            object result = entityType?.FindPrimaryKey()?.Properties?.FirstOrDefault()?.PropertyInfo?.GetValue(entity);
+            
+            return result is int i ? i : 0;
         }
 
         private static void WriteUserLog(this NsDbContext context, string targetTable, int targetId,

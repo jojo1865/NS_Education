@@ -187,9 +187,11 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitAddValidateInput(Department_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.DDID == 0, () => AddError(WrongFormat("部門 ID")))
-                .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)), () => AddError(EmptyNotAllowed("公司 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -213,9 +215,11 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitEditValidateInput(Department_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
-                .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)), () => AddError(EmptyNotAllowed("公司 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

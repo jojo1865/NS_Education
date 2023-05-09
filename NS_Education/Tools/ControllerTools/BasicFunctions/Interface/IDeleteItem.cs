@@ -24,7 +24,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         Task<string> DeleteItem(int id, bool? deleteFlag);
         
         /// <summary>
-        /// 刪除單筆資料的查詢。如果與 GetInfoById 的邏輯相同，可以直接使用 base。
+        /// 刪除單筆資料的查詢。
         /// </summary>
         /// <param name="id">欲刪除資料的 ID</param>
         /// <returns>查詢</returns>

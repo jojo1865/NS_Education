@@ -232,7 +232,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID5, StaticCodeType.SiteTable),
                     () => AddError(NotFound("桌型 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID),
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Site),
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
@@ -295,7 +295,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID5, StaticCodeType.SiteTable),
                     () => AddError(NotFound("桌型 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID),
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Site),
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 

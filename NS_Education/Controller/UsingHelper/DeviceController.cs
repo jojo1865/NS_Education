@@ -234,7 +234,7 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("類別 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
                     () => AddError(NotFound("單位 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, 4),
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Device),
                     () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
                     () => AddError(NotFound("廳別 ID")))
@@ -279,7 +279,7 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("類別 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
                     () => AddError(NotFound("單位 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, 4),
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Device),
                     () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
                     () => AddError(NotFound("廳別 ID")))

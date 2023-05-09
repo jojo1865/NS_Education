@@ -300,17 +300,17 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">Category 的 DbSet</param>
         /// <param name="orderCodeId">欲對照的資料 ID</param>
-        /// <param name="codeType">（可選）欲對照的資料的 CodeType</param>
+        /// <param name="orderCodeType">（可選）欲對照的資料的 CodeType</param>
         /// <returns>
         /// true：該資料存在。<br/>
         /// false：查無該資料。
         /// </returns>
-        public static async Task<bool> ValidateOrderCodeExists(this DbSet<B_OrderCode> dbSet, int orderCodeId, int? codeType = null)
+        public static async Task<bool> ValidateOrderCodeExists(this DbSet<B_OrderCode> dbSet, int orderCodeId, OrderCodeType orderCodeType)
         {
             return orderCodeId.IsAboveZero() 
                    && await dbSet.AnyAsync(boc => boc.ActiveFlag && !boc.DeleteFlag 
                                                                  && boc.BOCID == orderCodeId 
-                                                                 && boc.CodeType == (codeType ?? boc.CodeType));
+                                                                 && boc.CodeType == (int)orderCodeType);
         }
 
         /// <summary>

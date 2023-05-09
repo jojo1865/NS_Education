@@ -34,8 +34,10 @@ namespace NS_Education.Controller.UsingHelper
 
         public HallController()
         {
-            _getListPagedHelper = new GetListPagedHelper<HallController, D_Hall, Hall_GetList_Input_APIItem, Hall_GetList_Output_Row_APIItem>(
-                this);
+            _getListPagedHelper =
+                new GetListPagedHelper<HallController, D_Hall, Hall_GetList_Input_APIItem,
+                    Hall_GetList_Output_Row_APIItem>(
+                    this);
             _deleteItemHelper = new DeleteItemHelper<HallController, D_Hall>(this);
             _submitHelper = new SubmitHelper<HallController, D_Hall, Hall_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<HallController, D_Hall>(this);
@@ -43,7 +45,7 @@ namespace NS_Education.Controller.UsingHelper
         }
 
         #endregion
-        
+
         #region GetList
 
         [HttpGet]
@@ -197,15 +199,18 @@ namespace NS_Education.Controller.UsingHelper
         {
             return input.DHID == 0;
         }
-        
+
         #region Submit - Add
 
         public async Task<bool> SubmitAddValidateInput(Hall_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.DHID == 0, () => AddError(WrongFormat("廳別 ID")))
-                .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
-                .Validate(i => i.CheckType == 0 || i.CheckType == 1, () => AddError(WrongFormat("開立憑證種類")))
+                .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
+                    () => AddError(NotFound("部門 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(UnsupportedValue("開立憑證種類")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -227,17 +232,20 @@ namespace NS_Education.Controller.UsingHelper
                 BusinessTaxRatePercentage = (int)(input.BusinessTaxRate * 100)
             });
         }
-        
+
         #endregion
-        
+
         #region Submit - Edit
 
         public async Task<bool> SubmitEditValidateInput(Hall_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
-                .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
-                .Validate(i => i.CheckType == 0 || i.CheckType == 1, () => AddError(WrongFormat("開立憑證種類")))
+                .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
+                    () => AddError(NotFound("部門 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(UnsupportedValue("開立憑證種類")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -261,7 +269,7 @@ namespace NS_Education.Controller.UsingHelper
             data.CheckType = input.CheckType;
             data.BusinessTaxRatePercentage = (int)(input.BusinessTaxRate * 100);
         }
-        
+
         #endregion
 
         #endregion

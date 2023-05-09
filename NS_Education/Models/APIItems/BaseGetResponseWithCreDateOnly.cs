@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using NS_Education.Tools;
+using Newtonsoft.Json;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Variables;
@@ -17,9 +17,11 @@ namespace NS_Education.Models.APIItems
 
         private Task _SetInfoFromEntity<TEntity>(TEntity entity, PublicClass controller)
         {
-            CreDate = entity.GetIfHasProperty<TEntity, DateTime>(DbConstants.CreDate).ToFormattedStringDateTime();
+            CreDate = entity.GetIfHasProperty<TEntity, DateTime?>(DbConstants.CreDate) is DateTime dt ? dt.ToFormattedStringDateTime() : null;
             return Task.CompletedTask;
         }
+        
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string CreDate { get; private set; }
     }
 }

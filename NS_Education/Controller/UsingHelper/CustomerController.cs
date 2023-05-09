@@ -347,13 +347,7 @@ namespace NS_Education.Controller.UsingHelper
         public void SubmitEditUpdateDataFields(Customer data, Customer_Submit_Input_APIItem input)
         {
             // 先刪除所有舊有的 M_Customer_BusinessUser
-            HashSet<int> buIdSet = input.Items.Select(item => item.BUID).ToHashSet();
-            foreach (M_Customer_BusinessUser cbu in DC.M_Customer_BusinessUser
-                         .Where(bu => bu.ActiveFlag && !bu.DeleteFlag && buIdSet.Contains(bu.BUID))
-                         .ToList())
-            {
-                cbu.DeleteFlag = true;
-            }
+            DC.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.CID));
 
             // 更新資料
             data.BSCID6 = input.BSCID6;

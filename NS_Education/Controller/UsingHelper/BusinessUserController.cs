@@ -262,14 +262,14 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<BusinessUser> SubmitEditQuery(BusinessUser_Submit_Input_APIItem input)
         {
             return DC.BusinessUser
-                .Include(bu => bu.M_Customer_BusinessUser)
                 .Where(bu => bu.BUID == input.BUID);
         }
 
         public void SubmitEditUpdateDataFields(BusinessUser data, BusinessUser_Submit_Input_APIItem input)
         {
-            data.M_Customer_BusinessUser.Clear();
-
+            // 先刪除所有舊有的 M_Customer_BusinessUser
+            DC.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.BUID));
+            
             data.Code = input.Code;
             data.Name = input.Name;
             data.Phone = input.Phone;

@@ -15,6 +15,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -195,7 +196,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DCID == 0, () => AddError(WrongFormat("公司 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID), () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), () => AddError(NotFound("分類 ID")))
                 .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
@@ -220,7 +221,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID), () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), () => AddError(NotFound("分類 ID")))
                 .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();

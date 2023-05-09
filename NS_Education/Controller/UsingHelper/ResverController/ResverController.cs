@@ -700,7 +700,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             bool isBillItemValid =
                 input.BillItems.All(item => item.StartValidate()
                     .Validate(bi => isAdd ? bi.RBID == 0 : bi.RBID.IsZeroOrAbove(), () => AddError(WrongFormat("繳費紀錄預約單 ID")))
-                    .Validate(bi => SubmitValidateCategory(bi.BCID), () => AddError(NotFound("繳費類別 ID")))
+                    .Validate(bi => SubmitValidateCategory(bi.BCID, CategoryType.PayType), () => AddError(NotFound("繳費類別 ID")))
                     .Validate(bi => SubmitValidatePayType(bi.DPTID), () => AddError(NotFound("繳費紀錄的付款方式 ID")))
                     .Validate(bi => bi.PayDate.TryParseDateTime(out _, DateTimeParseType.DateTime), () => AddError("付款時間"))
                     .IsValid());
@@ -731,9 +731,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             return payTypeId.IsAboveZero() && DC.D_PayType.Any(pt => pt.ActiveFlag && !pt.DeleteFlag && pt.DPTID == payTypeId);
         }
 
-        private bool SubmitValidateCategory(int categoryId)
+        private bool SubmitValidateCategory(int categoryId, CategoryType categoryType)
         {
-            return Task.Run(() => DC.B_Category.ValidateCategoryExists(categoryId)).Result;
+            return Task.Run(() => DC.B_Category.ValidateCategoryExists(categoryId, categoryType)).Result;
         }
 
         private bool SubmitValidateOtherPayItem(int otherPayItemId)

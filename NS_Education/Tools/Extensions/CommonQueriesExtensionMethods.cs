@@ -287,12 +287,12 @@ namespace NS_Education.Tools.Extensions
         /// true：該資料存在。<br/>
         /// false：查無該資料。
         /// </returns>
-        public static async Task<bool> ValidateCategoryExists(this DbSet<B_Category> dbSet, int categoryId, int? categoryType = null)
+        public static async Task<bool> ValidateCategoryExists(this DbSet<B_Category> dbSet, int categoryId, CategoryType categoryType)
         {
             return categoryId.IsAboveZero() && await dbSet.AnyAsync(c => c.ActiveFlag 
                 && !c.DeleteFlag
                 && c.BCID == categoryId 
-                && c.CategoryType == (categoryType ?? c.CategoryType));
+                && c.CategoryType == (int)categoryType);
         }
         
         /// <summary>

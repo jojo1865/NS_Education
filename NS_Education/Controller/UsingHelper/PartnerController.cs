@@ -217,7 +217,7 @@ namespace NS_Education.Controller.UsingHelper
 
             bool isValid = input.StartValidate()
                 .Validate(i => i.BPID == 0, () => AddError(WrongFormat("廠商 ID")))
-                .Validate(i => Task.Run(() => DC.B_Category.ValidateCategoryExists(i.BCID, 9)).Result,
+                .Validate(i => Task.Run(() => DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner)).Result,
                     () => AddError(NotFound("分類 ID")))
                 .Validate(
                     i => Task.Run(() => DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region))
@@ -271,7 +271,7 @@ namespace NS_Education.Controller.UsingHelper
 
             bool isValid = input.StartValidate()
                 .Validate(i => i.BPID.IsAboveZero(), () => AddError(EmptyNotAllowed("廠商 ID")))
-                .Validate(i => Task.Run(() => DC.B_Category.ValidateCategoryExists(i.BCID, 9)).Result, () => AddError(NotFound("分類 ID")))
+                .Validate(i => Task.Run(() => DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner)).Result, () => AddError(NotFound("分類 ID")))
                 .Validate(i => Task.Run(() => DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region)).Result, () => AddError(NotFound("區域 ID")))
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代碼")))

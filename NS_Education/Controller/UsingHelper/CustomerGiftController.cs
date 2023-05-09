@@ -63,13 +63,13 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(CustomerGift_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate(true)
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
-                .Validate(i => i.SendYear.IsInBetween(1911, 9999), () => AddError(WrongFormat("欲篩選之贈送年分")))
+                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
+                .Validate(i => i.SendYear.IsInBetween(1911, 9999), () => AddError(WrongFormat("贈送年分")))
                 .Validate(i =>
                         !i.SDate.TryParseDateTime(out DateTime startDate)
                         || !i.EDate.TryParseDateTime(out DateTime endDate)
                         || endDate >= startDate
-                    , () => AddError("GetDateRangeIncorrect"))
+                    , () => AddError(MinLargerThanMax("贈送日期起始日", "贈送日期結束日")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

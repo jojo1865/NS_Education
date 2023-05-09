@@ -226,7 +226,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.BPIID == 0, () => AddError(WrongFormat("房型 ID")))
                 .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), () => AddError(NotFound("廠商 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), () => AddError(NotFound("房型類型 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, 9), () => AddError(NotFound("入帳代號 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, 5), () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
                 .IsValid();
 
@@ -261,7 +261,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.BPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("房型 ID")))
                 .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), () => AddError(NotFound("廠商 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), () => AddError(NotFound("房型類型 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, 9), () => AddError(NotFound("入帳代號 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, 5), () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
                 .IsValid();
             return await Task.FromResult(isValid);

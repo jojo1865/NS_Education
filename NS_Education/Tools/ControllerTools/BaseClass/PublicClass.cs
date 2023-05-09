@@ -68,16 +68,6 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
 
         /// <summary>
-        /// 回傳一串不支援輸入值時可用的預設錯誤字串。
-        /// </summary>
-        /// <param name="fieldName">欄位名稱</param>
-        /// <returns>預設錯誤訊息字串</returns>
-        protected string UnsupportedValue(string fieldName)
-        {
-            return $"{fieldName} 不支援這個輸入值，請重新確認。";
-        }
-        
-        /// <summary>
         /// 回傳一串更新 DB 失敗時可用的預設錯誤字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
@@ -118,6 +108,16 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
             return keyFieldName is null ? $"「{fieldName}」不允許包含重複的資料！" : $"「{fieldName}」中不允許「{keyFieldName}」有任何重複資料！";
         }
 
+        /// <summary>
+        /// 回傳一串不支援輸入值時可用的預設錯誤字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string UnsupportedValue(string fieldName)
+        {
+            return $"{fieldName} 不支援這個輸入值，請重新確認。";
+        }
+        
         /// <summary>
         /// 回傳一串最小值大於最大值時可使用的預設錯誤訊息字串。
         /// </summary>

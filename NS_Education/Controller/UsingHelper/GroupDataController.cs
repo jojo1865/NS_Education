@@ -136,18 +136,7 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
-            // 特殊規格：
-            // 這個 API 不支援復活。所以：
-            // |- a. deleteFlag 未給值時：自動帶入 true。
-            // +- b. deleteFlag 為 false 時：報錯回傳。
-
-            if (deleteFlag is false)
-            {
-                AddError(UnsupportedValue("DeleteFlag"));
-                return GetResponseJson();
-            }
-            
-            return await _deleteItemHelper.DeleteItem(id, true);
+            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
         }
 
         public IQueryable<GroupData> DeleteItemQuery(int id)

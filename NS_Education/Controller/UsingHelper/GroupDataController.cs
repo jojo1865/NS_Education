@@ -326,11 +326,28 @@ namespace NS_Education.Controller.UsingHelper
 
         private bool SubmitMenuDataValidateInput(GroupData_SubmitMenuData_Input_APIItem input)
         {
-            return input.StartValidate()
+            bool isInputValid = input.StartValidate()
                 .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
                 .Validate(i => i.GroupItems.Any(), () => AddError(EmptyNotAllowed("選單權限列表")))
-                .Validate(i => i.GroupItems.GroupBy(item => item.MDID).Count() == i.GroupItems.Count, () => AddError(SameMdIdDetected))
+                .Validate(i => i.GroupItems.GroupBy(item => item.MDID).Count() == i.GroupItems.Count,
+                    () => AddError(SameMdIdDetected))
                 .IsValid();
+
+            // 檢查是否所有 MDID 都存在
+            bool isValid = isInputValid &&
+                           input.GroupItems.Aggregate(true, (result, item) => result &
+                                                                              item.StartValidate()
+                                                                                  .Validate(_ =>
+                                                                                          DC.MenuData.Any(md =>
+                                                                                              md.ActiveFlag &&
+                                                                                              !md.DeleteFlag &&
+                                                                                              md.MDID == item.MDID),
+                                                                                      () => AddError(
+                                                                                          NotFound(
+                                                                                              $"選單 ID {item.MDID}")))
+                                                                                  .IsValid());
+
+            return isValid;
         }
 
         #endregion

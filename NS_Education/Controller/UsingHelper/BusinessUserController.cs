@@ -197,10 +197,21 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitAddValidateInput(BusinessUser_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isInputValid = input.StartValidate()
                 .Validate(i => i.BUID == 0, () => AddError(WrongFormat("業務 ID")))
-                .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count, () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))  
+                .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count,
+                    () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
                 .IsValid();
+
+            // 驗證所有 CID 都實際存在於資料庫。
+            bool isValid = isInputValid &&
+                           input.Items.Aggregate(true, (result, item) =>
+                               result & item.StartValidate()
+                                   .Validate(_ => 
+                                           DC.Customer.Any(c => c.ActiveFlag && !c.DeleteFlag && c.CID == item.CID),
+                                       () => AddError(NotFound($"客戶 ID {item.CID}")))
+                                   .IsValid()
+                           );
 
             return await Task.FromResult(isValid);
         }
@@ -229,10 +240,21 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitEditValidateInput(BusinessUser_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isInputValid = input.StartValidate()
                 .Validate(i => i.BUID.IsAboveZero(), () => AddError(EmptyNotAllowed("業務 ID")))
-                .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count, () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
+                .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count,
+                    () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
                 .IsValid();
+
+            // 驗證所有 CID 都實際存在於資料庫。
+            bool isValid = isInputValid &&
+                           input.Items.Aggregate(true, (result, item) =>
+                               result & item.StartValidate()
+                                   .Validate(_ => 
+                                           DC.Customer.Any(c => c.ActiveFlag && !c.DeleteFlag && c.CID == item.CID),
+                                       () => AddError(NotFound($"客戶 ID {item.CID}")))
+                                   .IsValid()
+                           );
 
             return await Task.FromResult(isValid);
         }

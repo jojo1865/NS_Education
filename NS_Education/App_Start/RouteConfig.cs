@@ -20,6 +20,12 @@ namespace NS_Education
                 url: "Error",
                 defaults: new { controller = "Error", action = "Error" }
             );
+
+            routes.MapRoute(
+                name: "PrintReportGetResverListByIDs1",
+                url: "PrintReport/GetResverListByIDs1/{id}",
+                defaults: new { controller = "GetResverListByIDs1", action = "GetList", id = UrlParameter.Optional }
+            );
             
             routes.MapRoute(
                 name: "StaticCodeGetTypeList",

@@ -107,6 +107,17 @@ namespace NS_Education.Tools.Extensions
         {
             return $"{tuple.hour.ToString().PadLeft(2, '0')}:{tuple.minute.ToString().PadLeft(2, '0')}";
         }
+
+        /// <summary>
+        /// 接受兩個整數，轉換成 00:00 的格式。
+        /// </summary>
+        /// <param name="hour">代表小時的整數</param>
+        /// <param name="minute">代表分鐘的整數</param>
+        /// <returns>00:00 格式的字串</returns>
+        public static string ToFormattedHourAndMinute(int hour, int minute)
+        {
+            return $"{hour.ToString().PadLeft(2, '0')}:{minute.ToString().PadLeft(2, '0')}";
+        }
         
         /// <summary>
         /// 接受兩組開始時間與結束時間，計算兩者間差異，轉換成 n 小時 m 分鐘的格式。不支援跨日。
@@ -138,6 +149,19 @@ namespace NS_Education.Tools.Extensions
         public static int GetMinutesUntil(this (int hour, int minute) startTime, (int hour, int minute) endTime)
         {
             return endTime.hour * 60 + endTime.minute - startTime.hour * 60 - startTime.minute;
+        }
+
+        /// <summary>
+        /// 接受兩組開始時間與結束時間，計算兩者間差異分鐘數，不支援跨日。
+        /// </summary>
+        /// <param name="startHour">起始時間的小時</param>
+        /// <param name="startMinute">起始時間的分鐘</param>
+        /// <param name="endHour">結束時間的小時</param>
+        /// <param name="endMinute">結束時間的分鐘</param>
+        /// <returns>分鐘數</returns>
+        public static int GetMinutesBetween(int startHour, int startMinute, int endHour, int endMinute)
+        {
+            return startHour * 60 + startMinute - endHour * 60 - endMinute;
         }
     }
 

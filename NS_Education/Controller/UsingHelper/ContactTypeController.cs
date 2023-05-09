@@ -52,6 +52,18 @@ namespace NS_Education.Controller.UsingHelper
             }.AsReadOnly();
 
         /// <summary>
+        /// 提供給其他需要用到通訊方式的功能用。透過 Id 取得通訊方式名稱，但當 Id 超出範圍時回傳 null。
+        /// </summary>
+        /// <param name="contactTypeId">Id</param>
+        /// <returns>
+        /// 有此值的資料時：回傳該資料 Title。<br/>
+        /// 無此值的資料時：回傳 null。
+        /// </returns>
+        public static string GetContactTypeTitle(int contactTypeId)
+        {
+            return contactTypeId > 0 && ContactTypes.Count > contactTypeId ? ContactTypes.ElementAt(contactTypeId).Title : null;
+        }
+        /// <summary>
         /// 提供給其他需要用到通訊方式下拉選單的功能用。
         /// </summary>
         /// <returns>通訊方式的選單</returns>

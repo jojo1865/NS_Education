@@ -108,14 +108,14 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
         public async Task<bool> SubmitAddValidateInput(MenuApi_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
-                .Validate(i => i.MDID.IsAboveZero(), () => AddError(EmptyNotAllowed("選單 ID")))
+            bool isValid = await input.StartValidate()
+                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)), () => AddError(NotFound("選單 ID")))
                 .Validate(i => i.SeqNo == 0, () => AddError(WrongFormat("API 流水號")))
                 .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("API 網址")))
                 .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), () => AddError(WrongFormat("API 屬性 ID")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            return isValid;
         }
 
         public async Task<MenuAPI> SubmitCreateData(MenuApi_Submit_Input_APIItem input)
@@ -135,14 +135,14 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
         public async Task<bool> SubmitEditValidateInput(MenuApi_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
-                .Validate(i => i.MDID.IsAboveZero(), () => AddError(EmptyNotAllowed("選單 ID")))
+            bool isValid = await input.StartValidate()
+                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)), () => AddError(NotFound("選單 ID")))
                 .Validate(i => i.SeqNo.IsAboveZero(), () => AddError(WrongFormat("API 流水號")))
                 .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("API 網址")))
                 .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), () => AddError(WrongFormat("API 屬性 ID")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            return isValid;
         }
 
         public IQueryable<MenuAPI> SubmitEditQuery(MenuApi_Submit_Input_APIItem input)

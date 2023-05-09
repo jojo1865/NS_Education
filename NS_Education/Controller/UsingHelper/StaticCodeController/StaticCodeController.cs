@@ -286,7 +286,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 .Validate(i => i.Title.HasContent())
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
-                .ValidateAsync(async i => i.CodeType > 0
+                .ValidateAsync(async i => i.CodeType == 0
                                           || await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
                                               && !sc.DeleteFlag
                                               && sc.CodeType == 0
@@ -335,7 +335,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 .Validate(i => i.Title.HasContent())
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
-                .ValidateAsync(async i => i.CodeType > 0
+                .ValidateAsync(async i => i.CodeType == 0
                                           || await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
                                               && !sc.DeleteFlag
                                               && sc.CodeType == 0

@@ -268,13 +268,16 @@ namespace NS_Education.Tools.Extensions
         public static async Task AddAsync<TEntity>(this NsDbContext context, TEntity entity)
             where TEntity : class
         {
-            await Task.Run(() => context.Set<TEntity>().Add(entity));
+            await Task.Run(() => context.Set(entity.GetType()).Add(entity));
         }
         
         public static async Task AddRangeAsync<TEntity>(this NsDbContext context, IEnumerable<TEntity> entities)
             where TEntity : class
         {
-            await Task.Run(() => context.Set<TEntity>().AddRange(entities));
+            foreach (var entity in entities)
+            {
+                await Task.Run(() => context.Set(entity.GetType()).Add(entity));
+            }
         }
         
         public static async Task AddAsync<TEntity>(this DbSet<TEntity> dbSet, TEntity entity)

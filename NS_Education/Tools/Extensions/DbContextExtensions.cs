@@ -17,7 +17,7 @@ namespace NS_Education.Tools.Extensions
     /// </summary>
     public static class DbContextExtensions
     {
-        private static DateTime MinimumDbDateTime => System.Data.SqlTypes.SqlDateTime.MinValue.Value;
+        private static readonly DateTime MinimumDbDateTime = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
         
         /// <summary>
         /// 儲存修改之前，自動設置 CreUid 等欄位，並寫入 UserLog。

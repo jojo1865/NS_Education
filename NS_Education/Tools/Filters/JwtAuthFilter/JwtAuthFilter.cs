@@ -159,6 +159,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             // User -> M_Group_User -> GroupData -> M_Group_Menu -> MenuData -> MenuAPI
             using (db_NS_EducationEntities dbContext = new db_NS_EducationEntities())
             {
+                string contextUri = FilterStaticTools.GetContextUri(actionContext);
+                
                 var query = dbContext.UserData
                         .Include(u => u.M_Group_User)
                         .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData))
@@ -173,7 +175,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                                             && !groupMenu.GroupData.DeleteFlag
                                             && groupMenu.MenuData.ActiveFlag
                                             && !groupMenu.MenuData.DeleteFlag
-                                            && FilterStaticTools.GetContextUri(actionContext).Contains(groupMenu.MenuData.URL)
+                                            && contextUri.Contains(groupMenu.MenuData.URL)
                         )
                     ;
 

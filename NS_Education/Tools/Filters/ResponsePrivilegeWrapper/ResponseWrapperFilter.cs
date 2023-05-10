@@ -38,17 +38,18 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
 
             db_NS_EducationEntities context = new db_NS_EducationEntities();
             // Query 1: 找出目前所在的 MenuData 底下所有 MenuAPI
+            string contextUri = FilterStaticTools.GetContextUri(filterContext);
             var menuApis = context.MenuData
                 .Include(menuData => menuData.MenuAPI)
                 .Include(menuData => menuData.MenuAPI.Select(api => api.MenuData))
                 .Where(mainMenu => mainMenu.ActiveFlag
                                    && !mainMenu.DeleteFlag
-                                   && FilterStaticTools.GetContextUri(filterContext)
-                                       .Contains(mainMenu.URL))
+                                   && contextUri.Contains(mainMenu.URL))
                 .SelectMany(mainMenu => mainMenu.MenuAPI)
                 ;
 
             // Query 2: 將 menuAPI 對應回 m_group_menu, 確認 user 有無權限
+            int uidInClaim = FilterStaticTools.GetUidInClaimInt(claims);
             var queryResult  = context.M_Group_Menu
                 .Include(groupMenu => groupMenu.GroupData)
                 .Include(groupMenu => groupMenu.GroupData.M_Group_User)
@@ -60,7 +61,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
                         .Select(groupUser => groupUser.UserData)
                         .Any(user => user.ActiveFlag
                                      && !user.DeleteFlag
-                                     && user.UID == FilterStaticTools.GetUidInClaimInt(claims))
+                                     && user.UID == uidInClaim)
                 )
                 .Join(menuApis,
                     groupMenu => groupMenu.MenuData.URL,

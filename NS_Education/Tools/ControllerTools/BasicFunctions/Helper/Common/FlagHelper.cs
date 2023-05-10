@@ -42,7 +42,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             where T : class
         {
             if (FlagHelper<T>.HasDeleteFlag)
-                query = query.WhereInterpolated($"{DbConstants.DeleteFlag} = {false}");
+                query = query.Where($"{DbConstants.DeleteFlag} == @0", false);
+
             return query;
         }
 
@@ -61,7 +62,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             where T : class
         {
             if (FlagHelper<T>.HasActiveFlag)
-                query = query.WhereInterpolated($"{DbConstants.ActiveFlag} = {activeFlag}");
+                query = query.Where($"{DbConstants.ActiveFlag} == @0", activeFlag);
 
             return query;
         }
@@ -81,7 +82,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             where T : class
         {
             if (FlagHelper<T>.HasDeleteFlag)
-                query = query.WhereInterpolated($"{DbConstants.DeleteFlag} = {deleteFlag}");
+                query = query.Where($"{DbConstants.DeleteFlag} == @0", deleteFlag);
 
             return query;
         }

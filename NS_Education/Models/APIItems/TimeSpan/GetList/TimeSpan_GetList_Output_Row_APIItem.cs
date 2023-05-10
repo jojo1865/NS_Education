@@ -13,6 +13,7 @@ namespace NS_Education.Models.APIItems.TimeSpan.GetList
         public string TimeS { get; set; }
         public string TimeE { get; set; }
 
+        public string PriceRate { get; set; }
         public string GetTimeSpan { get; set; }
     }
 }

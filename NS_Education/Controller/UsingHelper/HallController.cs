@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Hall.GetInfoById;
 using NS_Education.Models.APIItems.Hall.GetList;
 using NS_Education.Models.APIItems.Hall.Submit;
@@ -67,7 +67,7 @@ namespace NS_Education.Controller.UsingHelper
         public IOrderedQueryable<D_Hall> GetListPagedOrderedQuery(Hall_GetList_Input_APIItem input)
         {
             var query = DC.D_Hall
-                .Include(h => h.DD)
+                .Include(h => h.D_Department)
                 .Include(h => h.B_Device)
                 .Include(h => h.B_SiteData)
                 .Include(h => h.B_PartnerItem)
@@ -90,8 +90,8 @@ namespace NS_Education.Controller.UsingHelper
             {
                 DDID = entity.DDID,
                 DHID = entity.DHID,
-                DD_TitleC = entity.DD?.TitleC ?? "",
-                DD_TitleE = entity.DD?.TitleE ?? "",
+                DD_TitleC = entity.D_Department?.TitleC ?? "",
+                DD_TitleE = entity.D_Department?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",
@@ -121,7 +121,7 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<D_Hall> GetInfoByIdQuery(int id)
         {
             return DC.D_Hall
-                .Include(dh => dh.DD)
+                .Include(dh => dh.D_Department)
                 .Include(dh => dh.B_Device)
                 .Include(dh => dh.B_SiteData)
                 .Include(dh => dh.B_PartnerItem)
@@ -134,8 +134,8 @@ namespace NS_Education.Controller.UsingHelper
             {
                 DHID = entity.DHID,
                 DDID = entity.DDID,
-                DD_TitleC = entity.DD?.TitleC ?? "",
-                DD_TitleE = entity.DD?.TitleE ?? "",
+                DD_TitleC = entity.D_Department?.TitleC ?? "",
+                DD_TitleE = entity.D_Department?.TitleE ?? "",
                 DD_List = await DC.D_Department.GetDepartmentSelectable(entity.DDID),
                 Code = entity.Code ?? "",
                 TitleC = entity.TitleC ?? "",

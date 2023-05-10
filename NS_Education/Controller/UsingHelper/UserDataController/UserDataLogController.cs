@@ -1,8 +1,8 @@
 using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.UserData.UserLog.GetList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -60,7 +60,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         public IOrderedQueryable<UserLog> GetListPagedOrderedQuery(UserLog_GetList_Input_APIItem input)
         {
             var query = DC.UserLog
-                .Include(ul => ul.U)
+                .Include(ul => ul.UserData)
                 // 三個月內
                 .Where(ul => DateTime.Now.AddMonths(-3) <= ul.CreDate)
                 .AsQueryable();
@@ -87,7 +87,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             {
                 ULID = entity.ULID,
                 UID = entity.UID,
-                UserName = entity.U?.UserName ?? "",
+                UserName = entity.UserData?.UserName ?? "",
                 TargetTable = entity.TargetTable ?? "",
                 TargetID = entity.TargetID,
                 ControlType = entity.ControlType < ControlTypes.Length 

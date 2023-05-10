@@ -1,5 +1,5 @@
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 using NS_Education.Tools.Extensions;
 using NS_Education.Variables;
 
@@ -42,7 +42,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             where T : class
         {
             if (FlagHelper<T>.HasDeleteFlag)
-                query = query.Where(entity => EF.Property<bool>(entity, DbConstants.DeleteFlag) == false);
+                query = query.WhereInterpolated($"{DbConstants.DeleteFlag} = {false}");
             return query;
         }
 
@@ -61,7 +61,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             where T : class
         {
             if (FlagHelper<T>.HasActiveFlag)
-                query = query.Where(entity => EF.Property<bool>(entity, DbConstants.ActiveFlag) == activeFlag);
+                query = query.WhereInterpolated($"{DbConstants.ActiveFlag} = {activeFlag}");
 
             return query;
         }
@@ -81,7 +81,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common
             where T : class
         {
             if (FlagHelper<T>.HasDeleteFlag)
-                query = query.Where(entity => EF.Property<bool>(entity, DbConstants.DeleteFlag) == deleteFlag);
+                query = query.WhereInterpolated($"{DbConstants.DeleteFlag} = {deleteFlag}");
 
             return query;
         }

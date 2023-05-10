@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Ajax.Utilities;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NS_Education.Models;
-using NS_Education.Models.Entities.DbContext;
+using NS_Education.Models.Entities;
 using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 
@@ -17,14 +17,14 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
     public class PublicClass : System.Web.Mvc.Controller
     {
         public DateTime DT = DateTime.Now;
-        protected internal NsDbContext DC { get; }
+        protected internal db_NS_EducationEntities DC { get; }
         public string[] sCategoryTypes = new string[] { "通用", "公司", "部門", "場地", "備忘", "服務", "設備", "客戶", "付款類", "合作廠商" };
         public string DateFormat = "yyyy/MM/dd";
         public string DateTimeFormat = "yyyy/MM/dd HH:mm";
         public string Error = "";
         public PublicClass()
         {
-            DC = new NsDbContext();
+            DC = new db_NS_EducationEntities();
         }
 
         public cReturnMessage GetMsgClass(string sError)

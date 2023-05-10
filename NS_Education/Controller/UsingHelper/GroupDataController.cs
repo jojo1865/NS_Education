@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.GroupData;
 using NS_Education.Models.APIItems.GroupData.GetInfoById;
 using NS_Education.Models.APIItems.GroupData.GetList;

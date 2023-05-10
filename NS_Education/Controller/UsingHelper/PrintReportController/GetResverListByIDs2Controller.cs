@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.PrintReport.GetResverListByIds2;
 using NS_Education.Models.Entities;
 using NS_Education.Models.Utilities.PrintReport.GetResverListByIDs2;
@@ -76,12 +76,11 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         {
             var query = DC.Resver_Head
                 .Include(rh => rh.Resver_Bill)
-                .Include(rh => rh.C)
+                .Include(rh => rh.Customer)
                 .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Throw)
-                .ThenInclude(rt => rt.Resver_Throw_Food)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Device)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
                 .Include(rh => rh.Resver_Other)
                 .AsQueryable();
 
@@ -105,7 +104,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 Title = entity.Title ?? "",
                 TotalPrice = payItems.Sum(pi => pi.Price),
                 PaidPrice = entity.Resver_Bill.Where(rb => rb.PayFlag && !rb.DeleteFlag).Sum(rb => rb.Price),
-                Compilation = entity.C?.Compilation ?? "",
+                Compilation = entity.Customer?.Compilation ?? "",
                 Items = GetListAllPopulatePayItems(payItems)
             };
 

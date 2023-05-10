@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using NS_Education.Models.APIItems.ContactType.GetList;
 

@@ -1,8 +1,8 @@
 using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Partner.GetInfoById;
 using NS_Education.Models.APIItems.Partner.GetList;
 using NS_Education.Models.APIItems.Partner.Submit;
@@ -74,8 +74,8 @@ namespace NS_Education.Controller.UsingHelper
         public IOrderedQueryable<B_Partner> GetListPagedOrderedQuery(Partner_GetList_Input_APIItem input)
         {
             var query = DC.B_Partner
-                .Include(p => p.BC)
-                .Include(p => p.BSC)
+                .Include(p => p.B_Category)
+                .Include(p => p.B_StaticCode)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -97,13 +97,13 @@ namespace NS_Education.Controller.UsingHelper
             {
                 BPID = entity.BPID,
                 BCID = entity.BCID,
-                BC_TitleC = entity.BC?.TitleC ?? "",
-                BC_TitleE = entity.BC?.TitleE ?? "",
+                BC_TitleC = entity.B_Category?.TitleC ?? "",
+                BC_TitleE = entity.B_Category?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 Compilation = entity.Compilation ?? "",
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
                 Email = entity.Email ?? "",
                 Note = entity.Note,
                 CleanFlag = entity.CleanFlag,
@@ -127,8 +127,8 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<B_Partner> GetInfoByIdQuery(int id)
         {
             return DC.B_Partner
-                .Include(p => p.BC)
-                .Include(p => p.BSC)
+                .Include(p => p.B_Category)
+                .Include(p => p.B_StaticCode)
                 .Where(p => p.BPID == id);
         }
 
@@ -139,17 +139,17 @@ namespace NS_Education.Controller.UsingHelper
                 BPID = entity.BPID,
 
                 BCID = entity.BCID,
-                BC_TitleC = entity.BC?.TitleC ?? "",
-                BC_TitleE = entity.BC?.TitleE ?? "",
-                BC_List = await DC.B_Category.GetCategorySelectable(entity.BC?.CategoryType, entity.BCID),
+                BC_TitleC = entity.B_Category?.TitleC ?? "",
+                BC_TitleE = entity.B_Category?.TitleE ?? "",
+                BC_List = await DC.B_Category.GetCategorySelectable(entity.B_Category?.CategoryType, entity.BCID),
 
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 Compilation = entity.Compilation,
 
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSC?.CodeType, entity.BSCID),
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID),
 
                 Email = entity.Email,
                 Note = entity.Note,

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Security.Claims;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NS_Education.Models.Entities.DbContext;
+using NS_Education.Models.Entities;
 using NS_Education.Variables;
 
 namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
@@ -36,11 +36,11 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
                 return;
             }
 
-            NsDbContext context = new NsDbContext();
+            db_NS_EducationEntities context = new db_NS_EducationEntities();
             // Query 1: 找出目前所在的 MenuData 底下所有 MenuAPI
             var menuApis = context.MenuData
                 .Include(menuData => menuData.MenuAPI)
-                .ThenInclude(menuApi => menuApi.MD)
+                .Include(menuData => menuData.MenuAPI.Select(api => api.MenuData))
                 .Where(mainMenu => mainMenu.ActiveFlag
                                    && !mainMenu.DeleteFlag
                                    && FilterStaticTools.GetContextUri(filterContext)
@@ -50,21 +50,21 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
 
             // Query 2: 將 menuAPI 對應回 m_group_menu, 確認 user 有無權限
             var queryResult  = context.M_Group_Menu
-                .Include(groupMenu => groupMenu.G)
-                .ThenInclude(group => group.M_Group_User)
-                .ThenInclude(groupUser => groupUser.U)
-                .Include(groupMenu => groupMenu.MD)
+                .Include(groupMenu => groupMenu.GroupData)
+                .Include(groupMenu => groupMenu.GroupData.M_Group_User)
+                .Include(groupMenu => groupMenu.GroupData.M_Group_User.Select(mgu => mgu.UserData))
+                .Include(groupMenu => groupMenu.MenuData)
                 // 選出所有此 user 擁有權限的 groupMenu
                 .Where(groupMenu
-                    => groupMenu.G.M_Group_User
-                        .Select(groupUser => groupUser.U)
+                    => groupMenu.GroupData.M_Group_User
+                        .Select(groupUser => groupUser.UserData)
                         .Any(user => user.ActiveFlag
                                      && !user.DeleteFlag
                                      && user.UID == FilterStaticTools.GetUidInClaimInt(claims))
                 )
                 .Join(menuApis,
-                    groupMenu => groupMenu.MD.URL,
-                    menuApi => menuApi.MD.URL,
+                    groupMenu => groupMenu.MenuData.URL,
+                    menuApi => menuApi.MenuData.URL,
                     (groupMenu, menuApi) => new Privilege
                     {
                         Url = menuApi.APIURL, 

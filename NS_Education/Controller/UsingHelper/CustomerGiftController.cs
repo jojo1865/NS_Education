@@ -1,8 +1,8 @@
 using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.CustomerGift.GetInfoById;
 using NS_Education.Models.APIItems.CustomerGift.GetList;
 using NS_Education.Models.APIItems.CustomerGift.Submit;
@@ -78,8 +78,8 @@ namespace NS_Education.Controller.UsingHelper
         public IOrderedQueryable<CustomerGift> GetListPagedOrderedQuery(CustomerGift_GetList_Input_APIItem input)
         {
             var query = DC.CustomerGift
-                .Include(cg => cg.C)
-                .Include(cg => cg.BSC)
+                .Include(cg => cg.Customer)
+                .Include(cg => cg.B_StaticCode)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -107,12 +107,12 @@ namespace NS_Education.Controller.UsingHelper
             {
                 CGID = entity.CGID,
                 CID = entity.CID,
-                C_TitleC = entity.C?.TitleC ?? "",
-                C_TitleE = entity.C?.TitleE ?? "",
+                C_TitleC = entity.Customer?.TitleC ?? "",
+                C_TitleE = entity.Customer?.TitleE ?? "",
                 Year = entity.Year,
                 SendDate = entity.SendDate.ToFormattedStringDateTime(),
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
                 Title = entity.Title ?? "",
                 Ct = entity.Ct,
                 Note = entity.Note ?? ""
@@ -133,8 +133,8 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<CustomerGift> GetInfoByIdQuery(int id)
         {
             return DC.CustomerGift
-                .Include(cg => cg.C)
-                .Include(cg => cg.BSC)
+                .Include(cg => cg.Customer)
+                .Include(cg => cg.B_StaticCode)
                 .Where(cg => cg.CGID == id);
         }
 
@@ -145,14 +145,14 @@ namespace NS_Education.Controller.UsingHelper
             {
                 CGID = entity.CGID,
                 CID = entity.CID,
-                C_TitleC = entity.C?.TitleC ?? "",
-                C_TitleE = entity.C?.TitleE ?? "",
+                C_TitleC = entity.Customer?.TitleC ?? "",
+                C_TitleE = entity.Customer?.TitleE ?? "",
                 C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
                 Year = entity.Year,
                 SendDate = entity.SendDate.ToFormattedStringDateTime(),
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSC?.CodeType, entity.BSCID),
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID),
                 Title = entity.Title ?? "",
                 Ct = entity.Ct,
                 Note = entity.Note ?? ""

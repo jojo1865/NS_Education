@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.UserData.UserData.GetInfoById;
 using NS_Education.Models.APIItems.UserData.UserData.GetList;
 using NS_Education.Models.APIItems.UserData.UserData.Login;
@@ -631,17 +632,17 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         public IOrderedQueryable<UserData> GetListPagedOrderedQuery(UserData_GetList_Input_APIItem input)
         {
             var query = DC.UserData
-                .Include(u => u.DD)
-                .ThenInclude(d => d.DC)
+                .Include(u => u.D_Department)
+                .Include(u => u.D_Department.M_Department_Category)
                 .Include(u => u.M_Group_User)
-                .ThenInclude(gu => gu.G)
+                .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData))
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(u => u.UserName.Contains(input.Keyword));
 
             if (input.DCID.IsAboveZero())
-                query = query.Where(u => u.DD.DCID == input.DCID);
+                query = query.Where(u => u.D_Department.DCID == input.DCID);
 
             if (input.DDID.IsAboveZero())
                 query = query.Where(u => u.DDID == input.DDID);
@@ -655,9 +656,9 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             {
                 Uid = entity.UID,
                 Username = entity.UserName,
-                Department = entity.DD.TitleC,
+                Department = entity.D_Department?.TitleC,
                 // 目前系統每個使用者只會有一個 Group
-                Role = entity.M_Group_User.FirstOrDefault()?.G?.Title ?? ""
+                Role = entity.M_Group_User.FirstOrDefault()?.GroupData?.Title ?? ""
             });
         }
 
@@ -683,7 +684,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             return DC.UserData
                 .Include(ud => ud.M_Group_User)
-                .ThenInclude(mgu => mgu.G)
+                .Include(ud => ud.M_Group_User.Select(mgu => mgu.GroupData))
                 .Where(ud => ud.UID == id);
         }
 
@@ -697,7 +698,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 LoginPassword = HSM.Des_1(entity.LoginPassword),
                 DDID = entity.DDID,
                 GID = entity.M_Group_User
-                    .Where(mgu => mgu.G.ActiveFlag && !mgu.G.DeleteFlag)
+                    .Where(mgu => mgu.GroupData.ActiveFlag && !mgu.GroupData.DeleteFlag)
                     .OrderBy(mgu => mgu.MID)
                     .Select(mgu => mgu.GID)
                     .FirstOrDefault(),

@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Department.GetInfoById;
 using NS_Education.Models.APIItems.Department.GetList;
 using NS_Education.Models.APIItems.Department.Submit;
@@ -69,7 +69,7 @@ namespace NS_Education.Controller.UsingHelper
         public IOrderedQueryable<D_Department> GetListPagedOrderedQuery(Department_GetList_Input_APIItem input)
         {
             var query = DC.D_Department
-                .Include(d => d.DC)
+                .Include(d => d.D_Company)
                 .Include(d => d.D_Hall)
                 .AsQueryable();
 
@@ -90,8 +90,8 @@ namespace NS_Education.Controller.UsingHelper
             {
                 DDID = entity.DDID,
                 DCID = entity.DCID,
-                DC_TitleC = entity.DC?.TitleC ?? "",
-                DC_TitleE = entity.DC?.TitleE ?? "",
+                DC_TitleC = entity.D_Company?.TitleC ?? "",
+                DC_TitleE = entity.D_Company?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",
@@ -114,7 +114,7 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<D_Department> GetInfoByIdQuery(int id)
         {
             return DC.D_Department
-                .Include(dd => dd.DC)
+                .Include(dd => dd.D_Company)
                 .Include(dd => dd.D_Hall)
                 .Where(dd => dd.DDID == id);
         }
@@ -125,8 +125,8 @@ namespace NS_Education.Controller.UsingHelper
             {
                 DDID = entity.DDID,
                 DCID = entity.DCID,
-                DC_TitleC = entity.DC?.TitleC ?? "",
-                DC_TitleE = entity.DC?.TitleE ?? "",
+                DC_TitleC = entity.D_Company?.TitleC ?? "",
+                DC_TitleE = entity.D_Company?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Resver.GetResverSiteList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -62,7 +62,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         public IOrderedQueryable<B_SiteData> GetListPagedOrderedQuery(Resver_GetResverSiteList_Input_APIItem input)
         {
             var query = DC.B_SiteData
-                .Include(sd => sd.BOC)
+                .Include(sd => sd.B_OrderCode)
                 .AsQueryable();
 
             if (input.BSCID1.IsAboveZero())
@@ -136,10 +136,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 BOCID = entity.BOCID,
-                BOC_Code = entity.BOC?.Code ?? "",
-                BOC_Title = entity.BOC?.Title ?? "",
-                BOC_PrintTitle = entity.BOC?.PrintTitle ?? "",
-                BOC_PrintNote = entity.BOC?.PrintNote ?? "",
+                BOC_Code = entity.B_OrderCode?.Code ?? "",
+                BOC_Title = entity.B_OrderCode?.Title ?? "",
+                BOC_PrintTitle = entity.B_OrderCode?.PrintTitle ?? "",
+                BOC_PrintNote = entity.B_OrderCode?.PrintNote ?? "",
                 Items = freeDate == default 
                     ? new List<Resver_GetResverSiteList_TimeSpan_Output_APIItem>()
                     : DC.D_TimeSpan

@@ -1,7 +1,7 @@
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.SiteData.GetInfoById;
 using NS_Education.Models.APIItems.SiteData.GetList;
 using NS_Education.Models.APIItems.SiteData.Submit;
@@ -68,7 +68,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public IOrderedQueryable<B_SiteData> GetListPagedOrderedQuery(SiteData_GetList_Input_APIItem input)
         {
-            var query = DC.B_SiteData.Include(sd => sd.BC).AsQueryable();
+            var query = DC.B_SiteData.Include(sd => sd.B_Category).AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(sd => sd.Title.Contains(input.Keyword) || sd.Code.Contains(input.Keyword));
@@ -85,8 +85,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             {
                 BSID = entity.BSID,
                 BCID = entity.BCID,
-                BC_TitleC = entity.BC?.TitleC ?? "",
-                BC_TitleE = entity.BC?.TitleE ?? "",
+                BC_TitleC = entity.B_Category?.TitleC ?? "",
+                BC_TitleE = entity.B_Category?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 BasicSize = entity.BasicSize,
@@ -116,8 +116,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public IQueryable<B_SiteData> GetInfoByIdQuery(int id)
         {
             return DC.B_SiteData
-                .Include(sd => sd.M_SiteGroupMaster)
-                .ThenInclude(sg => sg.Group)
+                .Include(sd => sd.M_SiteGroup)
+                .Include(sd => sd.M_SiteGroup.Select(sg => sg.B_SiteData1))
                 .Where(sd => sd.BSID == id);
         }
 
@@ -148,13 +148,13 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 DHID = entity.DHID,
                 HallList = await DC.D_Hall.GetHallSelectable(entity.DHID),
                 BOCID = entity.BOCID,
-                Items = entity.M_SiteGroupMaster
+                Items = entity.M_SiteGroup
                     .Where(siteGroup => siteGroup.ActiveFlag && !siteGroup.DeleteFlag)
                     .Select(siteGroup => new SiteData_GetInfoById_Output_GroupList_Row_APIItem
                     {
-                        BSID = siteGroup.Group?.BSID ?? 0,
-                        Code = siteGroup.Group?.Code ?? "",
-                        Title = siteGroup.Group?.Title ?? "",
+                        BSID = siteGroup.B_SiteData1?.BSID ?? 0,
+                        Code = siteGroup.B_SiteData1?.Code ?? "",
+                        Title = siteGroup.B_SiteData1?.Title ?? "",
                         SortNo = siteGroup.SortNo
                     })
                     .OrderBy(siteGroup => siteGroup.SortNo)
@@ -260,7 +260,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 PhoneExt2 = input.PhoneExt2,
                 PhoneExt3 = input.PhoneExt3,
                 Note = input.Note,
-                M_SiteGroupMaster = input.GroupList.Select(item => new M_SiteGroup
+                M_SiteGroup = input.GroupList.Select(item => new M_SiteGroup
                 {
                     GroupID = item.BSID,
                     SortNo = item.SortNo,
@@ -305,7 +305,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public IQueryable<B_SiteData> SubmitEditQuery(SiteData_Submit_Input_APIItem input)
         {
             return DC.B_SiteData
-                .Include(sd => sd.M_SiteGroupMaster)
+                .Include(sd => sd.M_SiteGroup)
                 .Where(sd => sd.BSID == input.BSID);
         }
 
@@ -313,7 +313,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         {
             // 1. 將所有舊資料設為刪除狀態
             // TODO: 找出有效率方法，只處理真的需要新增或刪除的資料
-            foreach (var oldData in data.M_SiteGroupMaster)
+            foreach (var oldData in data.M_SiteGroup)
             {
                 oldData.ActiveFlag = false;
                 oldData.DeleteFlag = true;
@@ -337,7 +337,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.PhoneExt2 = input.PhoneExt2;
             data.PhoneExt3 = input.PhoneExt3;
             data.Note = input.Note;
-            data.M_SiteGroupMaster = data.M_SiteGroupMaster.Concat(input.GroupList
+            data.M_SiteGroup = data.M_SiteGroup.Concat(input.GroupList
                 .Select(item => new M_SiteGroup
                 {
                     GroupID = item.BSID,

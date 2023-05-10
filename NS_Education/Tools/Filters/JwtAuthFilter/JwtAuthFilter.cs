@@ -4,15 +4,14 @@ using System.Linq;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.Entities;
-using NS_Education.Models.Entities.DbContext;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter.AuthorizeType;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
+using static System.Data.Entity.QueryableExtensions;
 
 namespace NS_Education.Tools.Filters.JwtAuthFilter
 {
@@ -117,7 +116,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims)
         {
             // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
-            using (NsDbContext dbContext = new NsDbContext())
+            using (db_NS_EducationEntities dbContext = new db_NS_EducationEntities())
             {
                 bool isEnabled = dbContext.B_StaticCode.Where(sc =>
                         sc.CodeType == (int)StaticCodeType.SafetyControl && sc.ActiveFlag && !sc.DeleteFlag)
@@ -133,7 +132,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             // 驗證 Token 符合 UserData 中紀錄的 JWT
             int uid = FilterStaticTools.GetUidInClaimInt(claims);
 
-            using (NsDbContext dbContext = new NsDbContext())
+            using (db_NS_EducationEntities dbContext = new db_NS_EducationEntities())
             {
                 UserData user =
                     dbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);
@@ -158,23 +157,23 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
             // 3. 依據 uid 查詢所有權限。
             // User -> M_Group_User -> GroupData -> M_Group_Menu -> MenuData -> MenuAPI
-            using (NsDbContext dbContext = new NsDbContext())
+            using (db_NS_EducationEntities dbContext = new db_NS_EducationEntities())
             {
                 var query = dbContext.UserData
                         .Include(u => u.M_Group_User)
-                        .ThenInclude(groupUser => groupUser.G)
-                        .ThenInclude(group => group.M_Group_Menu)
-                        .ThenInclude(groupMenu => groupMenu.MD)
-                        .ThenInclude(menuData => menuData.MenuAPI)
+                        .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData))
+                        .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData).Select(g => g.M_Group_Menu))
+                        .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData).Select(g => g.M_Group_Menu.Select(mgm => mgm.MenuData)))
+                        .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData).Select(g => g.M_Group_Menu.Select(mgm => mgm.MenuData).Select(md => md.MenuAPI)))
                         .Where(u => u.UID == uid && u.ActiveFlag && !u.DeleteFlag)
                         .SelectMany(u => u.M_Group_User)
-                        .Select(groupUser => groupUser.G)
+                        .Select(groupUser => groupUser.GroupData)
                         .SelectMany(group => group.M_Group_Menu)
-                        .Where(groupMenu => groupMenu.G.ActiveFlag
-                                            && !groupMenu.G.DeleteFlag
-                                            && groupMenu.MD.ActiveFlag
-                                            && !groupMenu.MD.DeleteFlag
-                                            && FilterStaticTools.GetContextUri(actionContext).Contains(groupMenu.MD.URL)
+                        .Where(groupMenu => groupMenu.GroupData.ActiveFlag
+                                            && !groupMenu.GroupData.DeleteFlag
+                                            && groupMenu.MenuData.ActiveFlag
+                                            && !groupMenu.MenuData.DeleteFlag
+                                            && FilterStaticTools.GetContextUri(actionContext).Contains(groupMenu.MenuData.URL)
                         )
                     ;
 

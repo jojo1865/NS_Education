@@ -1,7 +1,7 @@
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.PartnerItem.GetInfoById;
 using NS_Education.Models.APIItems.PartnerItem.GetList;
 using NS_Education.Models.APIItems.PartnerItem.Submit;
@@ -73,23 +73,23 @@ namespace NS_Education.Controller.UsingHelper
         public IOrderedQueryable<B_PartnerItem> GetListPagedOrderedQuery(PartnerItem_GetList_Input_APIItem input)
         {
             var query = DC.B_PartnerItem
-                .Include(pi => pi.BP)
-                .Include(pi => pi.BSC)
-                .Include(pi => pi.BOC)
-                .Include(pi => pi.DH)
+                .Include(pi => pi.B_Partner)
+                .Include(pi => pi.B_StaticCode)
+                .Include(pi => pi.B_OrderCode)
+                .Include(pi => pi.D_Hall)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(pi
-                    => pi.BP.Title.Contains(input.Keyword)
-                       || pi.BSC.Title.Contains(input.Keyword)
-                       || pi.BOC.Title.Contains(input.Keyword)
-                       || pi.DH.TitleC.Contains(input.Keyword)
-                       || pi.DH.TitleE.Contains(input.Keyword)
-                       || pi.BP.Code.Contains(input.Keyword)
-                       || pi.BSC.Code.Contains(input.Keyword)
-                       || pi.BOC.Code.Contains(input.Keyword)
-                       || pi.DH.Code.Contains(input.Keyword));
+                    => pi.B_Partner.Title.Contains(input.Keyword)
+                       || pi.B_StaticCode.Title.Contains(input.Keyword)
+                       || pi.B_OrderCode.Title.Contains(input.Keyword)
+                       || pi.D_Hall.TitleC.Contains(input.Keyword)
+                       || pi.D_Hall.TitleE.Contains(input.Keyword)
+                       || pi.D_Hall.Code.Contains(input.Keyword)
+                       || pi.B_StaticCode.Code.Contains(input.Keyword)
+                       || pi.B_OrderCode.Code.Contains(input.Keyword)
+                       || pi.D_Hall.Code.Contains(input.Keyword));
 
             if (input.BPID.IsAboveZero())
                 query = query.Where(pi => pi.BPID == input.BPID);
@@ -113,13 +113,13 @@ namespace NS_Education.Controller.UsingHelper
             {
                 BPIID = entity.BPIID,
                 BPID = entity.BPID,
-                BP_Title = entity.BP?.Title ?? "",
+                BP_Title = entity.B_Partner?.Title ?? "",
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
                 BOCID = entity.BOCID,
-                BOC_Title = entity.BOC?.Title ?? "",
+                BOC_Title = entity.B_OrderCode?.Title ?? "",
                 DHID = entity.DHID,
-                DH_Title = entity.DH?.TitleC ?? entity.DH?.TitleE ?? "",
+                DH_Title = entity.D_Hall?.TitleC ?? entity.D_Hall?.TitleE ?? "",
                 Ct = entity.Ct,
                 Price = entity.Price,
                 UnitPrice = entity.UnitPrice,
@@ -142,10 +142,10 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<B_PartnerItem> GetInfoByIdQuery(int id)
         {
             return DC.B_PartnerItem
-                .Include(pi => pi.BP)
-                .Include(pi => pi.BSC)
-                .Include(pi => pi.BOC)
-                .Include(pi => pi.DH)
+                .Include(pi => pi.B_Partner)
+                .Include(pi => pi.B_StaticCode)
+                .Include(pi => pi.B_OrderCode)
+                .Include(pi => pi.D_Hall)
                 .Where(pi => pi.BPIID == id);
         }
 
@@ -155,15 +155,15 @@ namespace NS_Education.Controller.UsingHelper
             {
                 BPIID = entity.BPIID,
                 BPID = entity.BPID,
-                BP_Title = entity.BP?.Title ?? "",
+                BP_Title = entity.B_Partner?.Title ?? "",
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSC?.CodeType, entity.BSCID),
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID),
                 BOCID = entity.BOCID,
-                BOC_Title = entity.BOC?.Title ?? "",
-                BOC_List = await DC.B_OrderCode.GetOrderCodeSelectable(entity.BOC?.CodeType, entity.BOCID),
+                BOC_Title = entity.B_OrderCode?.Title ?? "",
+                BOC_List = await DC.B_OrderCode.GetOrderCodeSelectable(entity.B_OrderCode?.CodeType, entity.BOCID),
                 DHID = entity.DHID,
-                DH_Title = entity.DH?.TitleC ?? entity.DH?.TitleE ?? "",
+                DH_Title = entity.D_Hall?.TitleC ?? entity.D_Hall?.TitleE ?? "",
                 DH_List = await DC.D_Hall.GetHallSelectable(entity.DHID),
                 Ct = entity.Ct,
                 Price = entity.Price,

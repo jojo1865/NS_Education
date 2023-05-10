@@ -1,6 +1,6 @@
 using System;
+using System.Data.Entity;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;

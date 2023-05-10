@@ -1,7 +1,7 @@
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.SiteData.GetListForCalendar;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -62,10 +62,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public IOrderedQueryable<Resver_Site> GetListPagedOrderedQuery(SiteData_GetListForCalendar_Input_APIItem input)
         {
             var query = DC.Resver_Site
-                .Include(rs => rs.RH)
-                .ThenInclude(rh => rh.M_Resver_TimeSpan)
-                .ThenInclude(rts => rts.DTS)
-                .Include(rs => rs.BS)
+                .Include(rs => rs.Resver_Head)
+                .Include(rs => rs.Resver_Head.M_Resver_TimeSpan)
+                .Include(rs => rs.Resver_Head.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
+                .Include(rs => rs.B_SiteData)
                 .AsQueryable();
             
             // 年份和月份
@@ -78,7 +78,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             
             // 客戶 ID
             if (input.CID.IsAboveZero())
-                query = query.Where(rs => rs.RH.CID == input.CID);
+                query = query.Where(rs => rs.Resver_Head.CID == input.CID);
 
             return query.OrderBy(rs => rs.TargetDate)
                 .ThenBy(rs => rs.SortNo)
@@ -91,20 +91,20 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             return await Task.FromResult(new SiteData_GetListForCalendar_Output_Row_APIItem
                 {
                     BSID = entity.BSID,
-                    Code = entity.BS.Code ?? "",
-                    Title = entity.BS.Title ?? "",
+                    Code = entity.B_SiteData.Code ?? "",
+                    Title = entity.B_SiteData.Title ?? "",
                     RHID = entity.RHID,
                     RSID = entity.RSID,
                     RSSortNo = entity.SortNo,
-                    RHCode = entity.RH?.Code ?? "",
-                    RHTitle = entity.RH?.Title ?? "",
-                    CID = entity.RH?.CID ?? 0,
-                    CustomerTitle = entity.RH?.CustomerTitle ?? "",
+                    RHCode = entity.Resver_Head?.Code ?? "",
+                    RHTitle = entity.Resver_Head?.Title ?? "",
+                    CID = entity.Resver_Head?.CID ?? 0,
+                    CustomerTitle = entity.Resver_Head?.CustomerTitle ?? "",
                     TargetDate = entity.TargetDate.ToFormattedStringDate(),
-                    Items = entity.RH?.M_Resver_TimeSpan.Select(rts => new SiteData_GetListForCalendar_TimeSpan_APIItem
+                    Items = entity.Resver_Head?.M_Resver_TimeSpan.Select(rts => new SiteData_GetListForCalendar_TimeSpan_APIItem
                     {
                         DTSID = rts.DTSID,
-                        Title = rts.DTS.Title ?? "",
+                        Title = rts.D_TimeSpan.Title ?? "",
                         SortNo = rts.SortNo
                     }).OrderBy(item => item.SortNo)
                         .ThenBy(item => item.DTSID)

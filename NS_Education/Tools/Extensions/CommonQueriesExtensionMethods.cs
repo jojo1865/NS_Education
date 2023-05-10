@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
@@ -359,11 +360,11 @@ namespace NS_Education.Tools.Extensions
 
             var query = dbSet.AsQueryable();
             if (FlagHelper<T>.HasActiveFlag)
-                query = query.Where(t => EF.Property<bool>(t, DbConstants.ActiveFlag) == true);
+                query = query.Where($"{DbConstants.ActiveFlag} = $0", true);
             if (FlagHelper<T>.HasDeleteFlag)
-                query = query.Where(t => EF.Property<bool>(t, DbConstants.DeleteFlag) == false);
+                query = query.Where($"{DbConstants.DeleteFlag} = $0", true);
 
-            query = query.Where(t => EF.Property<int>(t, idFieldName) == id);
+            query = query.Where($"{idFieldName} = $0", id);
 
             return await query.AnyAsync();
         }

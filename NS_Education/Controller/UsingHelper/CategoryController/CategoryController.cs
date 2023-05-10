@@ -1,8 +1,8 @@
-﻿using System.Linq;
+﻿using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Category.GetInfoById;
 using NS_Education.Models.APIItems.Category.GetList;
 using NS_Education.Models.APIItems.Category.Submit;

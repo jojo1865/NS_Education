@@ -1,8 +1,8 @@
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.PrintReport.GetResverListByIds1;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
@@ -69,16 +69,14 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         public IOrderedQueryable<Resver_Head> GetListAllOrderedQuery(PrintReport_GetResverListByIds1_Input_APIItem input)
         {
             var query = DC.Resver_Head
-                .Include(rh => rh.C)
+                .Include(rh => rh.Customer)
                 .Include(rh => rh.M_Resver_TimeSpan)
-                .ThenInclude(rts => rts.DTS)
+                .Include(rh => rh.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
                 .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Device)
-                .ThenInclude(rd => rd.BD)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.BS)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.BSC)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_Device)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.B_StaticCode))
                 .AsQueryable();
 
             query = query.Where(rh => input.Id.Contains(rh.RHID));
@@ -117,7 +115,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     : "",
                 ContactValue2 = contacts.Count >= 2 ? contacts[1].ContectData ?? "" : "",
                 ContactName = entity.ContactName ?? "",
-                Compilation = entity.C?.Compilation ?? "",
+                Compilation = entity.Customer?.Compilation ?? "",
                 Title = entity.Title ?? "",
                 SDate = entity.SDate.ToFormattedStringDate(),
                 EDate = entity.EDate.ToFormattedStringDate(),
@@ -134,8 +132,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             {
                 RSID = rs.RSID,
                 Date = rs.TargetDate.ToFormattedStringDate(),
-                SiteTitle = rs.BS?.Title ?? "",
-                TableTitle = rs.BSC?.Title ?? "",
+                SiteTitle = rs.B_SiteData?.Title ?? "",
+                TableTitle = rs.B_StaticCode?.Title ?? "",
                 FixedPrice = rs.FixedPrice,
                 QuotedPrice = rs.QuotedPrice,
                 TimeSpanItems = GetListAllPopulateRowSiteItemTimeSpanItems(entity, rs),
@@ -143,19 +141,29 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             }).ToList();
         }
 
-        private List<PrintReport_GetResverListByIds1_TimeSpanItem_APIItem> GetListAllPopulateRowSiteItemTimeSpanItems(Resver_Head entity, Resver_Site rs)
+        private List<PrintReport_GetResverListByIds1_TimeSpanItem_APIItem> GetListAllPopulateRowSiteItemTimeSpanItems(
+            Resver_Head entity, Resver_Site rs)
         {
             return entity.M_Resver_TimeSpan
-                .Where(rts => 
-                    rts.TargetTable == DC.GetTableName<Resver_Site>() 
+                .Where(rts =>
+                    rts.TargetTable == DC.GetTableName<Resver_Site>()
                     && rts.TargetID == rs.RSID)
                 .Select(rts => new PrintReport_GetResverListByIds1_TimeSpanItem_APIItem
                 {
                     DTSID = rts.DTSID,
-                    Title = rts.DTS != null ? rts.DTS.Title ?? "" : "",
-                    TimeS = rts.DTS != null ? StandardColumnExtensionMethods.ToFormattedHourAndMinute(rts.DTS.HourS, rts.DTS.MinuteS) : "",
-                    TimeE = rts.DTS != null ? StandardColumnExtensionMethods.ToFormattedHourAndMinute(rts.DTS.HourE, rts.DTS.MinuteE) : "",
-                    Minutes = rts.DTS != null ? StandardColumnExtensionMethods.GetMinutesBetween(rts.DTS.HourS, rts.DTS.MinuteS, rts.DTS.HourE, rts.DTS.MinuteE): 0,
+                    Title = rts.D_TimeSpan != null ? rts.D_TimeSpan.Title ?? "" : "",
+                    TimeS = rts.D_TimeSpan != null
+                        ? StandardColumnExtensionMethods.ToFormattedHourAndMinute(rts.D_TimeSpan.HourS,
+                            rts.D_TimeSpan.MinuteS)
+                        : "",
+                    TimeE = rts.D_TimeSpan != null
+                        ? StandardColumnExtensionMethods.ToFormattedHourAndMinute(rts.D_TimeSpan.HourE,
+                            rts.D_TimeSpan.MinuteE)
+                        : "",
+                    Minutes = rts.D_TimeSpan != null
+                        ? StandardColumnExtensionMethods.GetMinutesBetween(rts.D_TimeSpan.HourS, rts.D_TimeSpan.MinuteS,
+                            rts.D_TimeSpan.HourE, rts.D_TimeSpan.MinuteE)
+                        : 0,
                 }).ToList();
         }
 
@@ -165,7 +173,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             {
                 RDID = rd.RDID,
                 TargetDate = rd.TargetDate.ToFormattedStringDate(),
-                BD_Title = rd.BD?.Title ?? "",
+                BD_Title = rd.B_Device.Title ?? "",
                 SortNo = rd.SortNo,
                 Note = rd.Note ?? ""
             }).ToList();

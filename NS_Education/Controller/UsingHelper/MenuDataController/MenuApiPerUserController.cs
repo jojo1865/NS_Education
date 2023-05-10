@@ -1,8 +1,8 @@
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.MenuData.MenuApi.GetListByUid;
 using NS_Education.Models.Entities;
@@ -102,12 +102,12 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                             CreateNode(child.MDID, menuDataDict, parentToChildrenLookUp, createdNodes)).ToList() ??
                         new List<MenuData_GetListByUid_Output_Node_APIItem>(),
                 Apis = parentMenuOrNull?.MenuAPI
-                           .Where(api => api.MD.ActiveFlag 
-                                         && !api.MD.DeleteFlag
-                                         && api.MD.M_Group_Menu.Any(mgm => 
-                                             mgm.G.ActiveFlag
-                                             && !mgm.G.DeleteFlag
-                                             && mgm.G.M_Group_User.Any(mgu => mgu.UID == GetUid())
+                           .Where(api => api.MenuData.ActiveFlag 
+                                         && !api.MenuData.DeleteFlag
+                                         && api.MenuData.M_Group_Menu.Any(mgm => 
+                                             mgm.GroupData.ActiveFlag
+                                             && !mgm.GroupData.DeleteFlag
+                                             && mgm.GroupData.M_Group_User.Any(mgu => mgu.UID == GetUid())
                                              // APIType 對照 M_Group_Menu，只有擁有所須權限 flag 時才能計入
                                              && (api.APIType != (int)MenuApiType.Add || mgm.AddFlag)
                                              && (api.APIType != (int)MenuApiType.Delete || mgm.DeleteFlag)
@@ -143,22 +143,22 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // 如果是 Admin 或擁有 / 權限的人，回傳所有選單。否則才進行篩選
             var menuData = DC.UserData
                 .Include(ud => ud.M_Group_User)
-                .ThenInclude(mgu => mgu.G)
-                .ThenInclude(g => g.M_Group_Menu)
-                .ThenInclude(mgm => mgm.MD)
+                .Include(ud => ud.M_Group_User.Select(mgu => mgu.GroupData))
+                .Include(ud => ud.M_Group_User.Select(mgu => mgu.GroupData.M_Group_Menu))
+                .Include(ud => ud.M_Group_User.Select(mgu => mgu.GroupData.M_Group_Menu.Select(mgm => mgm.MenuData)))
                 // UserData
                 .Where(ud => ud.ActiveFlag && !ud.DeleteFlag)
                 .Where(ud => ud.UID == GetUid())
                 .SelectMany(ud => ud.M_Group_User)
                 // Group
-                .Select(mgu => mgu.G)
+                .Select(mgu => mgu.GroupData)
                 .Where(g => g.ActiveFlag && !g.DeleteFlag)
                 // M_Group_Menu
                 .SelectMany(g => g.M_Group_Menu)
                 // 初步篩選有任何 flag 才列入考量，API type 對照 flag 的部分之後在記憶體做
                 .Where(mgm => mgm.AddFlag || mgm.DeleteFlag || mgm.EditFlag || mgm.PringFlag || mgm.ShowFlag)
                 // MenuData
-                .Select(mgm => mgm.MD)
+                .Select(mgm => mgm.MenuData)
                 .Where(md => md.ActiveFlag && !md.DeleteFlag);
 
             bool hasRootAccess = menuData.Any(md => md.URL == PrivilegeConstants.RootAccessUrl);
@@ -168,10 +168,10 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 : menuData;
 
             query = query.Include(md => md.MenuAPI)
-                .ThenInclude(api => api.MD)
-                .ThenInclude(md => md.M_Group_Menu)
-                .ThenInclude(mgm => mgm.G)
-                .ThenInclude(g => g.M_Group_User);
+                .Include(md => md.MenuAPI.Select(api => api.MenuData))
+                .Include(md => md.MenuAPI.Select(api => api.MenuData.M_Group_Menu))
+                .Include(md => md.MenuAPI.Select(api => api.MenuData.M_Group_Menu.Select(mgm => mgm.GroupData)))
+                .Include(md => md.MenuAPI.Select(api => api.MenuData.M_Group_Menu.Select(mgm => mgm.GroupData).Select(gd => gd.M_Group_User)));
 
             return query.OrderBy(md => md.SortNo)
                 .ThenBy(md => md.URL)

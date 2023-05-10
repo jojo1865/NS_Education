@@ -1,7 +1,7 @@
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Device.GetInfoById;
 using NS_Education.Models.APIItems.Device.GetList;
 using NS_Education.Models.APIItems.Device.Submit;
@@ -71,10 +71,10 @@ namespace NS_Education.Controller.UsingHelper
         public IOrderedQueryable<B_Device> GetListPagedOrderedQuery(Device_GetList_Input_APIItem input)
         {
             var query = DC.B_Device
-                .Include(d => d.BC)
-                .Include(d => d.BSC)
-                .Include(d => d.BOC)
-                .Include(d => d.DH)
+                .Include(d => d.B_Category)
+                .Include(d => d.B_StaticCode)
+                .Include(d => d.B_OrderCode)
+                .Include(d => d.D_Hall)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -101,14 +101,14 @@ namespace NS_Education.Controller.UsingHelper
             {
                 BDID = entity.BDID,
                 BCID = entity.BCID,
-                BC_TitleC = entity.BC?.TitleC ?? "",
-                BC_TitleE = entity.BC?.TitleE ?? "",
+                BC_TitleC = entity.B_Category?.TitleC ?? "",
+                BC_TitleE = entity.B_Category?.TitleE ?? "",
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
                 BOCID = entity.BOCID,
-                BOC_Title = entity.BOC?.Title ?? "",
+                BOC_Title = entity.B_OrderCode?.Title ?? "",
                 DHID = entity.DHID,
-                DH_Title = entity.DH?.TitleC ?? entity.DH?.TitleE ?? "",
+                DH_Title = entity.D_Hall?.TitleC ?? entity.D_Hall?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 Ct = entity.Ct,
@@ -137,10 +137,10 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<B_Device> GetInfoByIdQuery(int id)
         {
             return DC.B_Device
-                .Include(d => d.BC)
-                .Include(d => d.BSC)
-                .Include(d => d.BOC)
-                .Include(d => d.DH)
+                .Include(d => d.B_Category)
+                .Include(d => d.B_StaticCode)
+                .Include(d => d.B_OrderCode)
+                .Include(d => d.D_Hall)
                 .Where(d => d.BDID == id);
         }
 
@@ -150,17 +150,17 @@ namespace NS_Education.Controller.UsingHelper
             {
                 BDID = entity.BDID,
                 BCID = entity.BCID,
-                BC_TitleC = entity.BC?.TitleC ?? "",
-                BC_TitleE = entity.BC?.TitleE ?? "",
-                BC_List = await DC.B_Category.GetCategorySelectable(entity.BC?.CategoryType, entity.BCID),
+                BC_TitleC = entity.B_Category?.TitleC ?? "",
+                BC_TitleE = entity.B_Category?.TitleE ?? "",
+                BC_List = await DC.B_Category.GetCategorySelectable(entity.B_Category?.CategoryType, entity.BCID),
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSC?.CodeType, entity.BSCID),
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID),
                 BOCID = entity.BOCID,
-                BOC_Title = entity.BOC?.Title ?? "",
-                BOC_List = await DC.B_OrderCode.GetOrderCodeSelectable(entity.BOC?.CodeType, entity.BOCID),
+                BOC_Title = entity.B_OrderCode?.Title ?? "",
+                BOC_List = await DC.B_OrderCode.GetOrderCodeSelectable(entity.B_OrderCode?.CodeType, entity.BOCID),
                 DHID = entity.DHID,
-                DH_Title = entity.DH?.TitleC ?? entity.DH?.TitleE ?? "",
+                DH_Title = entity.D_Hall?.TitleC ?? entity.D_Hall?.TitleE ?? "",
                 DH_List = await DC.D_Hall.GetHallSelectable(entity.DHID),
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",

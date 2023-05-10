@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Zip.GetInfoById;
 using NS_Education.Models.APIItems.Zip.GetList;
 using NS_Education.Models.APIItems.Zip.Submit;

@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.PayType.GetInfoById;
 using NS_Education.Models.APIItems.PayType.GetList;
 using NS_Education.Models.APIItems.PayType.Submit;
@@ -67,7 +67,7 @@ namespace NS_Education.Controller.UsingHelper
         public IOrderedQueryable<D_PayType> GetListPagedOrderedQuery(PayType_GetList_Input_APIItem input)
         {
             var query = DC.D_PayType
-                .Include(pt => pt.BC)
+                .Include(pt => pt.B_Category)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -85,8 +85,8 @@ namespace NS_Education.Controller.UsingHelper
             {
                 DPTID = entity.DPTID,
                 BCID = entity.BCID,
-                BC_TitleC = entity.BC?.TitleC ?? "",
-                BC_TitleE = entity.BC?.TitleE ?? "",
+                BC_TitleC = entity.B_Category?.TitleC ?? "",
+                BC_TitleE = entity.B_Category?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 AccountingNo = entity.AccountingNo,
@@ -113,7 +113,7 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<D_PayType> GetInfoByIdQuery(int id)
         {
             return DC.D_PayType
-                .Include(pt => pt.BC)
+                .Include(pt => pt.B_Category)
                 .Where(pt => pt.DPTID == id);
         }
 
@@ -123,9 +123,9 @@ namespace NS_Education.Controller.UsingHelper
             {
                 DPTID = entity.DPTID,
                 BCID = entity.BCID,
-                BC_TitleC = entity.BC?.TitleC ?? "",
-                BC_TitleE = entity.BC?.TitleE ?? "",
-                BC_List = await DC.B_Category.GetCategorySelectable(entity.BC?.CategoryType, entity.BCID),
+                BC_TitleC = entity.B_Category?.TitleC ?? "",
+                BC_TitleE = entity.B_Category?.TitleE ?? "",
+                BC_List = await DC.B_Category.GetCategorySelectable(entity.B_Category?.CategoryType, entity.BCID),
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 AccountingNo = entity.AccountingNo ?? "",

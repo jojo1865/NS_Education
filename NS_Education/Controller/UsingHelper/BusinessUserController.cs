@@ -1,7 +1,7 @@
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.BusinessUser.GetInfoById;
 using NS_Education.Models.APIItems.BusinessUser.GetList;
 using NS_Education.Models.APIItems.BusinessUser.Submit;
@@ -74,7 +74,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             var query = DC.BusinessUser
                 .Include(bu => bu.M_Customer_BusinessUser)
-                .ThenInclude(cbu => cbu.C)
+                .Include(bu => bu.M_Customer_BusinessUser.Select(cbu => cbu.Customer))
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -104,9 +104,9 @@ namespace NS_Education.Controller.UsingHelper
                 Items = entity.M_Customer_BusinessUser.Select(cbu => new BusinessUser_GetList_Customer_APIItem
                 {
                     CID = cbu.CID,
-                    Code = cbu.C?.Code ?? "",
-                    TitleC = cbu.C?.TitleC ?? "",
-                    TitleE = cbu.C?.TitleE ?? ""
+                    Code = cbu.Customer?.Code ?? "",
+                    TitleC = cbu.Customer?.TitleC ?? "",
+                    TitleE = cbu.Customer?.TitleE ?? ""
                 }).ToList()
             });
         }
@@ -272,7 +272,7 @@ namespace NS_Education.Controller.UsingHelper
         public void SubmitEditUpdateDataFields(BusinessUser data, BusinessUser_Submit_Input_APIItem input)
         {
             // 先刪除所有舊有的 M_Customer_BusinessUser
-            DC.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.BUID));
+            DC.M_Customer_BusinessUser.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.BUID));
             
             data.Code = input.Code;
             data.Name = input.Name;

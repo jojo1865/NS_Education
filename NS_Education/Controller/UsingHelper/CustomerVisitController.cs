@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.CustomerVisit.GetInfoById;
 using NS_Education.Models.APIItems.CustomerVisit.GetList;
@@ -86,9 +86,9 @@ namespace NS_Education.Controller.UsingHelper
         public IOrderedQueryable<CustomerVisit> GetListPagedOrderedQuery(CustomerVisit_GetList_Input_APIItem input)
         {
             var query = DC.CustomerVisit
-                .Include(cv => cv.C)
-                .Include(cv => cv.BSC)
-                .Include(cv => cv.BU)
+                .Include(cv => cv.Customer)
+                .Include(cv => cv.B_StaticCode)
+                .Include(cv => cv.BusinessUser)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -121,12 +121,12 @@ namespace NS_Education.Controller.UsingHelper
             {
                 CVID = entity.CVID,
                 CID = entity.CID,
-                C_TitleC = entity.C?.TitleC ?? "",
-                C_TitleE = entity.C?.TitleE ?? "",
+                C_TitleC = entity.Customer?.TitleC ?? "",
+                C_TitleE = entity.Customer?.TitleE ?? "",
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
                 BUID = entity.BUID,
-                BU_Name = entity.BU?.Name ?? "",
+                BU_Name = entity.BusinessUser?.Name ?? "",
                 TargetTitle = entity.TargetTitle ?? "",
                 Title = entity.Title ?? "",
                 VisitDate = entity.VisitDate.ToFormattedStringDate(),
@@ -149,9 +149,9 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<CustomerVisit> GetInfoByIdQuery(int id)
         {
             return DC.CustomerVisit
-                .Include(cv => cv.C)
-                .Include(cv => cv.BSC)
-                .Include(cv => cv.BU)
+                .Include(cv => cv.Customer)
+                .Include(cv => cv.B_StaticCode)
+                .Include(cv => cv.BusinessUser)
                 .Where(cv => cv.CVID == id);
         }
 
@@ -162,14 +162,14 @@ namespace NS_Education.Controller.UsingHelper
             {
                 CVID = entity.CVID,
                 CID = entity.CID,
-                C_TitleC = entity.C?.TitleC ?? "",
-                C_TitleE = entity.C?.TitleE ?? "",
+                C_TitleC = entity.Customer?.TitleC ?? "",
+                C_TitleE = entity.Customer?.TitleE ?? "",
                 C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
                 BSCID = entity.BSCID,
-                BSC_Title = entity.BSC?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSC?.CodeType, entity.BSCID),
+                BSC_Title = entity.B_StaticCode?.Title ?? "",
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID),
                 BUID = entity.BUID,
-                BU_Name = entity.BU?.Name ?? "",
+                BU_Name = entity.BusinessUser?.Name ?? "",
                 BU_List = await GetSelectedBusinessUserList(entity.BUID),
                 TargetTitle = entity.TargetTitle ?? "",
                 Title = entity.Title ?? "",

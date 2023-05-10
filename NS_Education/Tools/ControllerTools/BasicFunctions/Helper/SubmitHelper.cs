@@ -1,7 +1,6 @@
 using System;
-using System.Linq;
+using System.Data.Entity;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
@@ -75,13 +74,12 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 2. 如果 ID 不是 0，表示此前已有手動儲存至 DB，折返。
             // 否則，儲存至DB。
-            if ((int)(_controller.DC.Model.FindEntityType(typeof(TEntity)).FindPrimaryKey().Properties.FirstOrDefault()
-                    ?.PropertyInfo.GetValue(t) ?? 0) != 0)
+            if (_controller.DC.GetPrimaryKeyFromEntity(t) != 0)
                 return;
             
             try
             {
-                await _controller.DC.AddAsync(t);
+                await Task.Run(() => _controller.DC.Set<TEntity>().Add(t));
                 await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid());
             }
             catch (Exception e)

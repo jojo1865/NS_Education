@@ -1,8 +1,8 @@
 using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.CustomerQuestion.GetInfoById;
 using NS_Education.Models.APIItems.CustomerQuestion.GetList;
 using NS_Education.Models.APIItems.CustomerQuestion.Submit;
@@ -83,7 +83,7 @@ namespace NS_Education.Controller.UsingHelper
             CustomerQuestion_GetList_Input_APIItem input)
         {
             var query = DC.CustomerQuestion
-                .Include(cq => cq.C)
+                .Include(cq => cq.Customer)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -112,8 +112,8 @@ namespace NS_Education.Controller.UsingHelper
             {
                 CQID = entity.CQID,
                 CID = entity.CID,
-                C_TitleC = entity.C?.TitleC ?? "",
-                C_TitleE = entity.C?.TitleE ?? "",
+                C_TitleC = entity.Customer?.TitleC ?? "",
+                C_TitleE = entity.Customer?.TitleE ?? "",
                 AskDate = entity.AskDate.ToFormattedStringDate(),
                 AskTitle = entity.AskTitle ?? "",
                 AskArea = entity.AskArea ?? "",
@@ -139,7 +139,7 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<CustomerQuestion> GetInfoByIdQuery(int id)
         {
             return DC.CustomerQuestion
-                .Include(cq => cq.C)
+                .Include(cq => cq.Customer)
                 .Where(cq => cq.CQID == id);
         }
 
@@ -150,8 +150,8 @@ namespace NS_Education.Controller.UsingHelper
             {
                 CQID = entity.CQID,
                 CID = entity.CID,
-                C_TitleC = entity.C?.TitleC ?? "",
-                C_TitleE = entity.C?.TitleE ?? "",
+                C_TitleC = entity.Customer?.TitleC ?? "",
+                C_TitleE = entity.Customer?.TitleE ?? "",
                 C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
                 AskDate = entity.AskDate.ToFormattedStringDate(),
                 AskTitle = entity.AskTitle ?? "",

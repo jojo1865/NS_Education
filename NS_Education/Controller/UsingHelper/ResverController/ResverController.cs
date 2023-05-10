@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.Entity.Core.Metadata.Edm;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Resver.GetAllInfoById;
 using NS_Education.Models.APIItems.Resver.GetHeadList;
 using NS_Education.Models.APIItems.Resver.Submit;
@@ -68,7 +70,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         public IOrderedQueryable<Resver_Head> GetListPagedOrderedQuery(Resver_GetHeadList_Input_APIItem input)
         {
             var query = DC.Resver_Head
-                .Include(rh => rh.BSCID12Navigation)
+                .Include(rh => rh.B_StaticCode)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -101,7 +103,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 CustomerCode = entity.CustomerTitle ?? "",
                 PeopleCt = entity.PeopleCt,
                 BSCID12 = entity.BSCID12,
-                BSCID12_Title = entity.BSCID12Navigation?.Title ?? ""
+                BSCID12_Title = entity.B_StaticCode.Title ?? ""
             });
         }
 
@@ -120,60 +122,42 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         public IQueryable<Resver_Head> GetInfoByIdQuery(int id)
         {
             return DC.Resver_Head
-                .Include(rh => rh.BSCID12Navigation)
-                .Include(rh => rh.BSCID11Navigation)
-                .Include(rh => rh.MK_BU)
-                .Include(rh => rh.OP_BU)
+                .Include(rh => rh.B_StaticCode)
+                .Include(rh => rh.B_StaticCode1)
+                .Include(rh => rh.BusinessUser)
+                .Include(rh => rh.BusinessUser1)
                 // site
                 .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.BS)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.BOC)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.BSC)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.RH)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.B_OrderCode))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.B_StaticCode))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Head))
                 // resver_timespan
                 .Include(rh => rh.M_Resver_TimeSpan)
-                .ThenInclude(rts => rts.DTS)
+                .Include(rh => rh.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
                 // site -> throw
                 .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Throw)
-                .ThenInclude(rt => rt.BSC)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Throw)
-                .ThenInclude(rt => rt.BOC)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.B_StaticCode)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.B_OrderCode)))
                 // site -> throw -> throw_food
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Throw)
-                .ThenInclude(rt => rt.Resver_Throw_Food)
-                .ThenInclude(rtf => rtf.DFC)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Throw)
-                .ThenInclude(rt => rt.Resver_Throw_Food)
-                .ThenInclude(rtf => rtf.BSC)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Throw)
-                .ThenInclude(rt => rt.Resver_Throw_Food)
-                .ThenInclude(rtf => rtf.BP)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.D_FoodCategory))))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_StaticCode))))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_Partner))))
                 // site -> device
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Device)
-                .ThenInclude(rd => rd.BD)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Device)
-                .ThenInclude(rd => rd.BOC)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_Device)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_OrderCode)))
                 // otherItem
                 .Include(rh => rh.Resver_Other)
-                .ThenInclude(ro => ro.DOPI)
-                .ThenInclude(dopi => dopi.BSC)
-                .Include(rh => rh.Resver_Other)
-                .ThenInclude(ro => ro.BOC)
+                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem))
+                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem.B_StaticCode))
+                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem.B_OrderCode))
                 // bill
                 .Include(rs => rs.Resver_Bill)
-                .ThenInclude(rb => rb.BC)
-                .Include(rs => rs.Resver_Bill)
-                .ThenInclude(rb => rb.DPT)
+                .Include(rs => rs.Resver_Bill.Select(rb => rb.B_Category))
+                .Include(rs => rs.Resver_Bill.Select(rb => rb.D_PayType))
                 // GiveBack
                 .Include(rb => rb.Resver_GiveBack)
 
@@ -186,13 +170,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             {
                 RHID = entity.RHID,
                 BSCID12 = entity.BSCID12,
-                BSC12_Title = entity.BSCID12Navigation?.Title ?? "",
+                BSC12_Title = entity.B_StaticCode.Title ?? "",
                 BSC12_List =
-                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID12Navigation?.CodeType, entity.BSCID12),
+                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID12),
                 BSCID11 = entity.BSCID11,
-                BSC11_Title = entity.BSCID11Navigation?.Title ?? "",
+                BSC11_Title = entity.B_StaticCode1?.Title ?? "",
                 BSC11_List =
-                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID11Navigation?.CodeType, entity.BSCID11),
+                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType, entity.BSCID11),
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 SDate = entity.SDate.ToFormattedStringDate(),
@@ -204,11 +188,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 ContactName = entity.ContactName ?? "",
                 ContactTypeList = ContactTypeController.GetContactTypeList(),
                 MK_BUID = entity.MK_BUID,
-                MK_BU_Name = entity.MK_BU.Name ?? "",
+                MK_BU_Name = entity.BusinessUser.Name ?? "",
                 MK_BU_List = await DC.BusinessUser.GetBusinessUserSelectable(entity.MK_BUID),
                 MK_Phone = entity.MK_Phone ?? "",
                 OP_BUID = entity.OP_BUID,
-                OP_BU_Name = entity.OP_BU?.Name ?? "",
+                OP_BU_Name = entity.BusinessUser1?.Name ?? "",
                 OP_BU_List = await DC.BusinessUser.GetBusinessUserSelectable(entity.OP_BUID),
                 OP_Phone = entity.OP_Phone ?? "",
                 Note = entity.Note,
@@ -242,10 +226,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             {
                 RBID = rb.RBID,
                 BCID = rb.BCID,
-                BC_Title = rb.BC?.TitleC ?? rb.BC?.TitleE ?? "",
-                BC_List = Task.Run(() => DC.B_Category.GetCategorySelectable(rb.BC?.CategoryType, rb.BCID)).Result,
+                BC_Title = rb.B_Category?.TitleC ?? rb.B_Category?.TitleE ?? "",
+                BC_List = Task.Run(() => DC.B_Category.GetCategorySelectable(rb.B_Category?.CategoryType, rb.BCID)).Result,
                 DPTID = rb.DPTID,
-                DPT_Title = rb.DPT?.Title ?? "",
+                DPT_Title = rb.D_PayType?.Title ?? "",
                 DPT_List = Task.Run(() => DC.D_PayType.GetOtherPayItemSelectable(rb.DPTID)).Result,
                 Price = rb.Price,
                 Note = rb.Note ?? "",
@@ -262,13 +246,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 ROID = ro.ROID,
                 TargetDate = ro.TargetDate.ToFormattedStringDate(),
                 DOPIID = ro.DOPIID,
-                DOPI_Title = ro.DOPI?.Title ?? "",
+                DOPI_Title = ro.D_OtherPayItem?.Title ?? "",
                 DOPI_List = Task.Run(() => DC.D_OtherPayItem.GetOtherPayItemSelectable(ro.DOPIID)).Result,
-                BSCID = ro.DOPI?.BSCID ?? 0,
-                BSC_Title = ro.DOPI?.BSC?.Title ?? "",
+                BSCID = ro.D_OtherPayItem?.BSCID ?? 0,
+                BSC_Title = ro.D_OtherPayItem?.B_StaticCode?.Title ?? "",
                 BOCID = ro.BOCID,
-                BOC_Code = ro.BOC?.Code ?? "",
-                BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(ro.BOC?.CodeType, ro.BOCID)).Result,
+                BOC_Code = ro.B_OrderCode?.Code ?? "",
+                BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(ro.B_OrderCode?.CodeType, ro.BOCID)).Result,
                 PrintTitle = ro.PrintTitle ?? "",
                 PrintNote = ro.PrintNote ?? "",
                 UnitPrice = ro.UnitPrice,
@@ -288,10 +272,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     RSID = rs.RSID,
                     TargetDate = rs.TargetDate.ToFormattedStringDate(),
                     BSID = rs.BSID,
-                    BS_Title = rs.BS?.Title ?? "",
+                    BS_Title = rs.B_SiteData?.Title ?? "",
                     BOCID = rs.BOCID,
-                    BOC_Code = rs.BOC?.Code ?? "",
-                    BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rs.BOC?.CodeType, rs.BOCID)).Result,
+                    BOC_Code = rs.B_OrderCode?.Code ?? "",
+                    BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rs.B_OrderCode?.CodeType, rs.BOCID)).Result,
                     PrintTitle = rs.PrintTitle ?? "",
                     PrintNote = rs.PrintNote ?? "",
                     UnitPrice = rs.UnitPrice,
@@ -300,10 +284,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     SortNo = rs.SortNo,
                     Note = rs.Note ?? "",
                     BSCID = rs.BSCID,
-                    BSC_Title = rs.BSC?.Title ?? "",
-                    BSC_List = Task.Run(() => DC.B_StaticCode.GetStaticCodeSelectable(rs.BSC?.CodeType, rs.BSCID))
+                    BSC_Title = rs.B_StaticCode?.Title ?? "",
+                    BSC_List = Task.Run(() => DC.B_StaticCode.GetStaticCodeSelectable(rs.B_StaticCode?.CodeType, rs.BSCID))
                         .Result,
-                    TimeSpanItems = GetTimeSpanFromHead<Resver_Site>(rs.RH, rs.RSID),
+                    TimeSpanItems = GetTimeSpanFromHead<Resver_Site>(rs.Resver_Head, rs.RSID),
                     ThrowItems = GetAllInfoByIdPopulateThrowItems(rs),
                     DeviceItems = GetAllInfoByIdPopulateDeviceItems(rs)
                 })
@@ -318,11 +302,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 RDID = rd.RDID,
                 TargetDate = rd.TargetDate.ToFormattedStringDate(),
                 BDID = rd.BDID,
-                BD_Title = rd.BD?.Title ?? "",
+                BD_Title = rd.B_Device?.Title ?? "",
                 BD_List = Task.Run(() => DC.B_Device.GetOtherPayItemSelectable(rd.BDID)).Result,
                 BOCID = rd.BOCID,
-                BOC_Code = rd.BOC?.Code ?? "",
-                BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rd.BOC?.CodeType, rd.BOCID)).Result,
+                BOC_Code = rd.B_OrderCode?.Code ?? "",
+                BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rd.B_OrderCode?.CodeType, rd.BOCID)).Result,
                 PrintTitle = rd.PrintTitle ?? "",
                 PrintNote = rd.PrintNote ?? "",
                 UnitPrice = rd.UnitPrice,
@@ -330,7 +314,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 QuotedPrice = rd.QuotedPrice,
                 SortNo = rd.SortNo,
                 Note = rd.Note ?? "",
-                TimeSpanItems = GetTimeSpanFromHead<Resver_Device>(rs.RH, rd.RDID)
+                TimeSpanItems = GetTimeSpanFromHead<Resver_Device>(rs.Resver_Head, rd.RDID)
             }).ToList();
         }
 
@@ -342,13 +326,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     RTID = rt.RTID,
                     TargetDate = rt.TargetDate.ToFormattedStringDate(),
                     BSCID = rt.BSCID,
-                    BSC_Title = rt.BSC?.Title ?? "",
-                    BSC_List = Task.Run(() => DC.B_StaticCode.GetStaticCodeSelectable(rt.BSC?.CodeType, rt.BSCID))
+                    BSC_Title = rt.B_StaticCode?.Title ?? "",
+                    BSC_List = Task.Run(() => DC.B_StaticCode.GetStaticCodeSelectable(rt.B_StaticCode?.CodeType, rt.BSCID))
                         .Result,
                     Title = rt.Title ?? "",
                     BOCID = rt.BOCID,
-                    BOC_Title = rt.BOC?.Title ?? "",
-                    BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rt.BOC?.CodeType, rt.BOCID)).Result,
+                    BOC_Title = rt.B_OrderCode?.Title ?? "",
+                    BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rt.B_OrderCode?.CodeType, rt.BOCID)).Result,
                     PrintTitle = rt.PrintTitle ?? "",
                     PrintNote = rt.PrintNote ?? "",
                     UnitPrice = rt.UnitPrice,
@@ -356,8 +340,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     QuotedPrice = rt.QuotedPrice,
                     SortNo = rt.SortNo,
                     Note = rt.Note,
-                    TimeSpanItems = GetTimeSpanFromHead<Resver_Throw>(rs.RH, rt.RTID),
-                    FoodItems = rt.BSC?.Title != DbConstants.ThrowDineTitle
+                    TimeSpanItems = GetTimeSpanFromHead<Resver_Throw>(rs.Resver_Head, rt.RTID),
+                    FoodItems = rt.B_StaticCode?.Title != DbConstants.ThrowDineTitle
                         ? new List<Resver_GetAllInfoById_Output_FoodItem_APIItem>()
                         : GetALlInfoByIdPopulateFoodItems(rt)
                 })
@@ -372,14 +356,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 {
                     RTFID = rtf.RTFID,
                     DFCID = rtf.DFCID,
-                    DFC_Title = rtf.DFC?.Title,
+                    DFC_Title = rtf.D_FoodCategory?.Title,
                     DFC_List = Task.Run(() => DC.D_FoodCategory.GetFoodCategorySelectable(rtf.DFCID)).Result,
                     BSCID = rtf.BSCID,
-                    BSC_Title = rtf.BSC?.Title,
-                    BSC_List = Task.Run(() => DC.B_StaticCode.GetStaticCodeSelectable(rtf.BSC?.CodeType, rtf.BSCID))
+                    BSC_Title = rtf.B_StaticCode?.Title,
+                    BSC_List = Task.Run(() => DC.B_StaticCode.GetStaticCodeSelectable(rtf.B_StaticCode?.CodeType, rtf.BSCID))
                         .Result,
                     BPID = rtf.BPID,
-                    BP_Title = rtf.BP?.Title,
+                    BP_Title = rtf.B_Partner?.Title,
                     BP_List = Task.Run(() => DC.B_Partner.GetPartnerSelectable(rtf.BPID)).Result,
                     Ct = rtf.Ct,
                     UnitPrice = rtf.UnitPrice,
@@ -416,11 +400,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Select(rts => new Resver_GetAllInfoById_Output_TimeSpanItem_APIItem
                 {
                     DTSID = rts.DTSID,
-                    Title = rts.DTS?.Title ?? "",
-                    TimeS = (rts.DTS?.HourS ?? 0, rts.DTS?.MinuteS ?? 0).ToFormattedHourAndMinute(),
-                    TimeE = (rts.DTS?.HourE ?? 0, rts.DTS?.MinuteE ?? 0).ToFormattedHourAndMinute(),
-                    Minutes = (rts.DTS?.HourS ?? 0, rts.DTS?.MinuteS ?? 0).GetMinutesUntil((rts.DTS?.HourE ?? 0,
-                        rts.DTS?.MinuteE ?? 0))
+                    Title = rts.D_TimeSpan?.Title ?? "",
+                    TimeS = (rts.D_TimeSpan?.HourS ?? 0, rts.D_TimeSpan?.MinuteS ?? 0).ToFormattedHourAndMinute(),
+                    TimeE = (rts.D_TimeSpan?.HourE ?? 0, rts.D_TimeSpan?.MinuteE ?? 0).ToFormattedHourAndMinute(),
+                    Minutes = (rts.D_TimeSpan?.HourS ?? 0, rts.D_TimeSpan?.MinuteS ?? 0).GetMinutesUntil((rts.D_TimeSpan?.HourE ?? 0,
+                        rts.D_TimeSpan?.MinuteE ?? 0))
                 })
                 .ToList();
         }
@@ -1046,7 +1030,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Where(c => c.TargetTable == DC.GetTableName<Resver_Head>() && c.TargetID == input.RHID)
                     .AsEnumerable();
                 
-                DC.RemoveRange(originalContacts);
+                DC.M_Contect.RemoveRange(originalContacts);
             }
 
             int sortNo = 0;
@@ -1090,15 +1074,29 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             T t = null;
             if (id != 0)
-                t = DC.Find<T>(id);
+                t = DC.Set<T>().Find(id);
             if (t != null
                 && (t.GetIfHasProperty<T, bool?>(DbConstants.ActiveFlag) ?? true)
                 && (t.GetIfHasProperty<T, bool?>(DbConstants.DeleteFlag) ?? false) == false)
             {
+                // 取得這個物件的 navigationProperties
+                var objectContext = ((IObjectContextAdapter)DC).ObjectContext;
+
+                var entityType = objectContext
+                    .MetadataWorkspace
+                    .GetItems<EntityType>(DataSpace.CSpace)
+                    .FirstOrDefault(et => et.Name == t.GetType().Name);
+
+                if (entityType == null)
+                    return t;
+                
+                var navigationProperties = entityType
+                    .NavigationProperties;
+                
                 // 讀取所有 FK property
-                foreach (var navigationEntry in DC.Entry(t).Navigations)
+                foreach (string propertyName in navigationProperties.Select(navigationProperty => navigationProperty.Name))
                 {
-                    navigationEntry.Load();
+                    objectContext.LoadProperty(t, propertyName);
                 }
 
                 return t;
@@ -1123,10 +1121,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             return DC.Resver_Head.Where(rh => rh.RHID == input.RHID)
                 // site
                 .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Throw)
-                .ThenInclude(rt => rt.Resver_Throw_Food)
-                .Include(rh => rh.Resver_Site)
-                .ThenInclude(rs => rs.Resver_Device)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
                 // other
                 .Include(rh => rh.Resver_Other)
                 // bill

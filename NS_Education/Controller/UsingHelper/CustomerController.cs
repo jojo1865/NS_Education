@@ -1,8 +1,8 @@
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NS_Education.Models.APIItems.Customer.GetInfoById;
 using NS_Education.Models.APIItems.Customer.GetList;
 using NS_Education.Models.APIItems.Customer.Submit;
@@ -74,13 +74,13 @@ namespace NS_Education.Controller.UsingHelper
         {
             var query = DC.Customer
                 .Include(c => c.Resver_Head)
-                .Include(c => c.BSCID6Navigation)
-                .Include(c => c.BSCID4Navigation)
+                .Include(c => c.B_StaticCode)
+                .Include(c => c.B_StaticCode1)
                 .Include(c => c.CustomerVisit)
                 .Include(c => c.CustomerQuestion)
                 .Include(c => c.CustomerGift)
                 .Include(c => c.M_Customer_BusinessUser)
-                .ThenInclude(cbu => cbu.BU)
+                .Include(c => c.M_Customer_BusinessUser.Select(cbu => cbu.BusinessUser))
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -103,7 +103,7 @@ namespace NS_Education.Controller.UsingHelper
             // ResverType 為 1 時，只找有預約過的客戶
             if (input.ResverType.IsInBetween(0, 1))
                 query = query.Where(c =>
-                    c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.BSCID12Navigation.Code == DbConstants.ReserveHeadDraftStateCode) == (input.ResverType == 1));
+                    c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.B_StaticCode.Code == DbConstants.ReserveHeadDraftStateCode) == (input.ResverType == 1));
 
             return query.OrderBy(c => c.CID);
         }
@@ -114,9 +114,9 @@ namespace NS_Education.Controller.UsingHelper
             {
                 CID = entity.CID,
                 BSCID6 = entity.BSCID6,
-                BSC6_Title = entity.BSCID6Navigation?.Title ?? "",
+                BSC6_Title = entity.B_StaticCode?.Title ?? "",
                 BSCID4 = entity.BSCID4,
-                BSC4_Title = entity.BSCID4Navigation?.Title ?? "",
+                BSC4_Title = entity.B_StaticCode1?.Title ?? "",
                 Code = entity.Code ?? "",
                 Compilation = entity.Compilation ?? "",
                 TitleC = entity.TitleC ?? "",
@@ -130,7 +130,7 @@ namespace NS_Education.Controller.UsingHelper
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(rh => !rh.DeleteFlag && rh.BSCID12Navigation.Code == DbConstants.ReserveHeadDraftStateCode),
+                ResverCt = entity.Resver_Head.Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code == DbConstants.ReserveHeadDraftStateCode),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
@@ -152,8 +152,8 @@ namespace NS_Education.Controller.UsingHelper
         public IQueryable<Customer> GetInfoByIdQuery(int id)
         {
             return DC.Customer
-                .Include(c => c.BSCID6Navigation)
-                .Include(c => c.BSCID4Navigation)
+                .Include(c => c.B_StaticCode)
+                .Include(c => c.B_StaticCode1)
                 .Where(c => c.CID == id);
         }
 
@@ -163,12 +163,12 @@ namespace NS_Education.Controller.UsingHelper
             {
                 CID = entity.CID,
                 BSCID6 = entity.BSCID6,
-                BSC6_Title = entity.BSCID6Navigation?.Title ?? "",
-                BSC6_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID6Navigation?.CodeType,
+                BSC6_Title = entity.B_StaticCode?.Title ?? "",
+                BSC6_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType,
                     entity.BSCID6),
                 BSCID4 = entity.BSCID4,
-                BSC4_Title = entity.BSCID4Navigation?.Title ?? "",
-                BSC4_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.BSCID4Navigation?.CodeType,
+                BSC4_Title = entity.B_StaticCode1?.Title ?? "",
+                BSC4_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType,
                     entity.BSCID4),
                 Code = entity.Code ?? "",
                 Compilation = entity.Compilation ?? "",
@@ -183,7 +183,7 @@ namespace NS_Education.Controller.UsingHelper
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(rh => !rh.DeleteFlag && rh.BSCID12Navigation.Code == DbConstants.ReserveHeadDraftStateCode),
+                ResverCt = entity.Resver_Head.Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code == DbConstants.ReserveHeadDraftStateCode),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
@@ -194,11 +194,11 @@ namespace NS_Education.Controller.UsingHelper
         private static List<Customer_GetList_BusinessUser_APIItem> GetBusinessUserListFromEntity(Customer entity)
         {
             return entity.M_Customer_BusinessUser
-                .Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.BU.ActiveFlag && !cbu.BU.DeleteFlag)
+                .Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.BusinessUser.ActiveFlag && !cbu.BusinessUser.DeleteFlag)
                 .Select(cbu => new Customer_GetList_BusinessUser_APIItem
                 {
                     BUID = cbu.BUID,
-                    Name = cbu.BU.Name ?? ""
+                    Name = cbu.BusinessUser?.Name ?? ""
                 }).ToList();
         }
 
@@ -347,7 +347,7 @@ namespace NS_Education.Controller.UsingHelper
         public void SubmitEditUpdateDataFields(Customer data, Customer_Submit_Input_APIItem input)
         {
             // 先刪除所有舊有的 M_Customer_BusinessUser
-            DC.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.CID));
+            DC.M_Customer_BusinessUser.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.CID));
 
             // 更新資料
             data.BSCID6 = input.BSCID6;

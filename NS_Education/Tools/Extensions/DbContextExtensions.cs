@@ -124,10 +124,10 @@ namespace NS_Education.Tools.Extensions
 
         private static void SetIfEntityHasProperty(this DbEntityEntry change, string propertyName, object newValue)
         {
-            DbPropertyEntry propertyEntry = change.Property(propertyName);
-
-            propertyEntry.CurrentValue = newValue;
-            propertyEntry.IsModified = true;
+            change.Entity.SetIfHasProperty(propertyName, newValue);
+            
+            if (change.State != EntityState.Unchanged) return;
+            change.State = EntityState.Modified;
         }
 
         private static void WriteUserLog(db_NS_EducationEntities context, int uid, DbEntityEntry change)
@@ -158,8 +158,11 @@ namespace NS_Education.Tools.Extensions
             }
 
             // 如果是 DeleteFlag 改成 true, 視為刪除
-            DbPropertyEntry deleteFlag = change.Property(DbConstants.DeleteFlag);
-            if (deleteFlag != null && deleteFlag.IsModified && deleteFlag.OriginalValue is false)
+            object deleteFlagString = change.Entity.GetType().GetProperty(DbConstants.DeleteFlag);
+            if (bool.TryParse(deleteFlagString?.ToString(), out bool deleteFlag) 
+                && change.State.HasFlag(EntityState.Modified) 
+                && change.OriginalValues[DbConstants.DeleteFlag] is false 
+                && deleteFlag)
                 controlType = UserLogControlType.Delete;
             return controlType;
         }
@@ -178,7 +181,7 @@ namespace NS_Education.Tools.Extensions
                 .ObjectStateManager
                 .GetObjectStateEntry(entity)
                 .EntityKey
-                .EntityKeyValues
+                .EntityKeyValues?
                 .Select(kv => kv.Value)
                 .FirstOrDefault();
             

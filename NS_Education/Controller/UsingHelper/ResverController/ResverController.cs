@@ -304,6 +304,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 BDID = rd.BDID,
                 BD_Title = rd.B_Device?.Title ?? "",
                 BD_List = Task.Run(() => DC.B_Device.GetOtherPayItemSelectable(rd.BDID)).Result,
+                Ct = rd.Ct,
                 BOCID = rd.BOCID,
                 BOC_Code = rd.B_OrderCode?.Code ?? "",
                 BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rd.B_OrderCode?.CodeType, rd.BOCID)).Result,

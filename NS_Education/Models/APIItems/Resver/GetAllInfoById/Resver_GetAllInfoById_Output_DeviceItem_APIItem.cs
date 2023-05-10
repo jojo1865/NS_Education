@@ -12,6 +12,7 @@ namespace NS_Education.Models.APIItems.Resver.GetAllInfoById
         public ICollection<BaseResponseRowForSelectable> BD_List { get; set; } =
             new List<BaseResponseRowForSelectable>();
         
+        public int Ct { get; set; }
         public int BOCID { get; set; }
         public string BOC_Code { get; set; }
 

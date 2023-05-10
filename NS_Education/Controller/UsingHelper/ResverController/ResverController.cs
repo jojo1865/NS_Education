@@ -905,6 +905,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 device.TargetDate = deviceItem.TargetDate.ParseDateTime().Date;
                 device.RSID = site.RSID;
                 device.BDID = deviceItem.BDID;
+                device.Ct = deviceItem.Ct;
                 device.BOCID = deviceItem.BOCID;
                 device.PrintTitle = deviceItem.PrintTitle;
                 device.PrintNote = deviceItem.PrintNote;

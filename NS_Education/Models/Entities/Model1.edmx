@@ -718,7 +718,7 @@
           <Key>
             <PropertyRef Name="RTFID" />
           </Key>
-          <Property Name="RTFID" Type="int" Nullable="false" />
+          <Property Name="RTFID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="RTID" Type="int" Nullable="false" />
           <Property Name="DFCID" Type="int" Nullable="false" />
           <Property Name="BSCID" Type="int" Nullable="false" />
@@ -2887,7 +2887,7 @@
           <Key>
             <PropertyRef Name="RTFID" />
           </Key>
-          <Property Name="RTFID" Type="Int32" Nullable="false" />
+          <Property Name="RTFID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="RTID" Type="Int32" Nullable="false" />
           <Property Name="DFCID" Type="Int32" Nullable="false" />
           <Property Name="BSCID" Type="Int32" Nullable="false" />

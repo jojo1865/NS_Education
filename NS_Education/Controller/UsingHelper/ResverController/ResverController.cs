@@ -799,13 +799,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 取得主資料
             Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
             // 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
+            SubmitPopulateHeadValues(input, head);
             await DC.AddAsync(head);
             await DC.SaveChangesStandardProcedureAsync(GetUid());
             // 清理所有跟這張預約單有關的 ResverTimeSpan
             head.M_Resver_TimeSpan.Clear();
 
             // 開始寫入值
-            SubmitPopulateHeadValues(input, head);
             SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
             await SubmitPopulateHeadSiteItems(input, head);
             SubmitPopulateHeadOtherItems(input, head, entitiesToAdd);

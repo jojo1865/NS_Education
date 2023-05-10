@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems.TimeSpan.GetInfoById;
@@ -121,6 +122,7 @@ namespace NS_Education.Controller.UsingHelper
                 MinuteE = entity.MinuteE,
                 TimeS = (entity.HourS, entity.MinuteS).ToFormattedHourAndMinute(),
                 TimeE = (entity.HourE, entity.MinuteE).ToFormattedHourAndMinute(),
+                PriceRate = (entity.PriceRatePercentage / 100m).ToString("0.00", CultureInfo.InvariantCulture),
                 GetTimeSpan = (entity.HourS, entity.MinuteS).FormatTimeSpanUntil((entity.HourE, entity.MinuteE))
             });
         }

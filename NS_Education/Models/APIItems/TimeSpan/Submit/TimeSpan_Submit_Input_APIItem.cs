@@ -9,5 +9,7 @@ namespace NS_Education.Models.APIItems.TimeSpan.Submit
         public int MinuteS { get; set; }
         public int HourE { get; set; }
         public int MinuteE { get; set; }
+        
+        public string PriceRate { get; set; }
     }
 }

@@ -177,6 +177,9 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit - Add
         public async Task<bool> SubmitAddValidateInput(TimeSpan_Submit_Input_APIItem input)
         {
+
+            decimal priceRate = 0m;
+            
             bool isValid = input.StartValidate()
                 .Validate(i => i.DTSID == 0, () => AddError(WrongFormat("時段 ID")))
                 .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
@@ -188,6 +191,11 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(
                     i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
                     () => AddError(SubmitWrongStartTime))
+                .SkipIfAlreadyInvalid()
+                .Validate(i => i.PriceRate.HasContent(), () => AddError(EmptyNotAllowed("價格基數")))
+                .Validate(i => decimal.TryParse(i.PriceRate, out priceRate), () => AddError(WrongFormat("價格基數")))
+                .Validate(i => priceRate.IsInBetween(0m, 1m), () => AddError(OutOfRange("價格基數", 0, 1)))
+                .Validate(i => (priceRate * 100m % 1m) == 0m, () => AddError(TooLong("價格基數的小數後位數", 2)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -202,7 +210,8 @@ namespace NS_Education.Controller.UsingHelper
                 HourS = input.HourS,
                 MinuteS = input.MinuteS,
                 HourE = input.HourE,
-                MinuteE = input.MinuteE
+                MinuteE = input.MinuteE,
+                PriceRatePercentage = (int)(decimal.Parse(input.PriceRate) * 100m) // 小數後會被捨去
             });
         }
         #endregion
@@ -210,6 +219,8 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit - Edit
         public async Task<bool> SubmitEditValidateInput(TimeSpan_Submit_Input_APIItem input)
         {
+            decimal priceRate = 0m;
+            
             bool isValid = input.StartValidate()
                 .Validate(i => i.DTSID.IsAboveZero(), () => AddError(EmptyNotAllowed("時段 ID")))
                 .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
@@ -221,6 +232,11 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(
                     i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
                     () => AddError(SubmitWrongStartTime))
+                .SkipIfAlreadyInvalid()
+                .Validate(i => i.PriceRate.HasContent(), () => AddError(EmptyNotAllowed("價格基數")))
+                .Validate(i => decimal.TryParse(i.PriceRate, out priceRate), () => AddError(WrongFormat("價格基數")))
+                .Validate(i => priceRate.IsInBetween(0m, 1m), () => AddError(OutOfRange("價格基數", 0, 1)))
+                .Validate(i => (priceRate * 100m % 1m) == 0m, () => AddError(TooLong("價格基數的小數後位數", 2)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -239,6 +255,7 @@ namespace NS_Education.Controller.UsingHelper
             data.MinuteS = input.MinuteS;
             data.HourE = input.HourE;
             data.MinuteE = input.MinuteE;
+            data.PriceRatePercentage = (int)(decimal.Parse(input.PriceRate) * 100m); // 小數後會被捨去
         }
         #endregion
 

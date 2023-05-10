@@ -637,6 +637,7 @@
     <Compile Include="Tools\Encryption\JwtHelper.cs" />
     <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\DbContextExtensions.cs" />
+    <Compile Include="Tools\Extensions\DecimalExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\IntExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs" />

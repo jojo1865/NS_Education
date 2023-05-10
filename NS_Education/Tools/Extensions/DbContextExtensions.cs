@@ -176,10 +176,16 @@ namespace NS_Education.Tools.Extensions
         where TEntity : class
         {
             // 從 Entity 找出 PK 並找出手上物件的該欄位值，如果有任何 null 時，回傳 0
-            object result = ((IObjectContextAdapter)context)
+            // 通常如果是 false，表示 context 中還沒有追蹤這個物件（PK = 0），所以回傳 0
+            bool hasStateEntry = ((IObjectContextAdapter)context)
                 .ObjectContext
                 .ObjectStateManager
-                .GetObjectStateEntry(entity)
+                .TryGetObjectStateEntry(entity, out var stateEntry);
+
+            if (!hasStateEntry)
+                return 0;
+
+            object result = stateEntry
                 .EntityKey
                 .EntityKeyValues?
                 .Select(kv => kv.Value)

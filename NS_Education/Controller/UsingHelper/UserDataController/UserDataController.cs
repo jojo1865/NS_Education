@@ -87,7 +87,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     {
                         GID = input.GID
                     }
-                }
+                },
+                ActiveFlag = true
             };
 
             // doesn't write to db if any error raised

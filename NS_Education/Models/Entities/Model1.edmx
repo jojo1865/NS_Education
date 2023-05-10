@@ -387,6 +387,7 @@
           <Property Name="MinuteS" Type="int" Nullable="false" />
           <Property Name="HourE" Type="int" Nullable="false" />
           <Property Name="MinuteE" Type="int" Nullable="false" />
+          <Property Name="PriceRatePercentage" Type="int" Nullable="false" />
           <Property Name="ActiveFlag" Type="bit" Nullable="false" />
           <Property Name="DeleteFlag" Type="bit" Nullable="false" />
           <Property Name="CreDate" Type="datetime" Nullable="false" />
@@ -584,6 +585,7 @@
           <Property Name="RSID" Type="int" Nullable="false" />
           <Property Name="TargetDate" Type="datetime" Nullable="false" />
           <Property Name="BDID" Type="int" Nullable="false" />
+          <Property Name="Ct" Type="int" Nullable="false" />
           <Property Name="BOCID" Type="int" Nullable="false" />
           <Property Name="PrintTitle" Type="nvarchar" MaxLength="100" />
           <Property Name="PrintNote" Type="nvarchar" MaxLength="100" />
@@ -2504,6 +2506,7 @@
           <Property Name="MinuteS" Type="Int32" Nullable="false" />
           <Property Name="HourE" Type="Int32" Nullable="false" />
           <Property Name="MinuteE" Type="Int32" Nullable="false" />
+          <Property Name="PriceRatePercentage" Type="Int32" Nullable="false" />
           <Property Name="ActiveFlag" Type="Boolean" Nullable="false" />
           <Property Name="DeleteFlag" Type="Boolean" Nullable="false" />
           <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
@@ -2724,6 +2727,7 @@
           <Property Name="RSID" Type="Int32" Nullable="false" />
           <Property Name="TargetDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="BDID" Type="Int32" Nullable="false" />
+          <Property Name="Ct" Type="Int32" Nullable="false" />
           <Property Name="BOCID" Type="Int32" Nullable="false" />
           <Property Name="PrintTitle" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="PrintNote" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
@@ -3866,7 +3870,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="db_NS_EducationEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="B_Category" EntityType="Self.B_Category" />
           <EntitySet Name="B_Device" EntityType="Self.B_Device" />
           <EntitySet Name="B_OrderCode" EntityType="Self.B_OrderCode" />
@@ -4211,7 +4215,7 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="db_NS_EducationModelStoreContainer" CdmEntityContainer="db_NS_EducationEntities">
+        <EntityContainerMapping StorageEntityContainer="db_NS_EducationModelStoreContainer" CdmEntityContainer="Entities">
           <EntitySetMapping Name="B_Category">
             <EntityTypeMapping TypeName="db_NS_EducationModel.B_Category">
               <MappingFragment StoreEntitySet="B_Category">
@@ -4611,6 +4615,7 @@
                 <ScalarProperty Name="MinuteS" ColumnName="MinuteS" />
                 <ScalarProperty Name="HourE" ColumnName="HourE" />
                 <ScalarProperty Name="MinuteE" ColumnName="MinuteE" />
+                <ScalarProperty Name="PriceRatePercentage" ColumnName="PriceRatePercentage" />
                 <ScalarProperty Name="ActiveFlag" ColumnName="ActiveFlag" />
                 <ScalarProperty Name="DeleteFlag" ColumnName="DeleteFlag" />
                 <ScalarProperty Name="CreDate" ColumnName="CreDate" />
@@ -4822,6 +4827,7 @@
                 <ScalarProperty Name="RSID" ColumnName="RSID" />
                 <ScalarProperty Name="TargetDate" ColumnName="TargetDate" />
                 <ScalarProperty Name="BDID" ColumnName="BDID" />
+                <ScalarProperty Name="Ct" ColumnName="Ct" />
                 <ScalarProperty Name="BOCID" ColumnName="BOCID" />
                 <ScalarProperty Name="PrintTitle" ColumnName="PrintTitle" />
                 <ScalarProperty Name="PrintNote" ColumnName="PrintNote" />

@@ -36,7 +36,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
                 return;
             }
 
-            db_NS_EducationEntities context = new db_NS_EducationEntities();
+            NsDbContext context = new NsDbContext();
             // Query 1: 找出目前所在的 MenuData 底下所有 MenuAPI
             string contextUri = FilterStaticTools.GetContextUri(filterContext);
             var menuApis = context.MenuData

@@ -24,7 +24,7 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="context">DbContext</param>
         /// <param name="uid">要求者的 UID。</param>
-        public static void SaveChangesStandardProcedure(this db_NS_EducationEntities context, int uid)
+        public static void SaveChangesStandardProcedure(this NsDbContext context, int uid)
         {
             DoStandardProcedure(context, uid);
 
@@ -36,7 +36,7 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="context">DbContext</param>
         /// <param name="uid">要求者的 UID。</param>
-        public static async Task SaveChangesStandardProcedureAsync(this db_NS_EducationEntities context, int uid)
+        public static async Task SaveChangesStandardProcedureAsync(this NsDbContext context, int uid)
         {
             DoStandardProcedure(context, uid);
 
@@ -49,7 +49,7 @@ namespace NS_Education.Tools.Extensions
         /// <param name="context">DbContext</param>
         /// <param name="type">操作類型</param>
         /// <param name="uid">使用者 ID</param>
-        public static void WriteUserLogAndSave(this db_NS_EducationEntities context, UserLogControlType type, int uid)
+        public static void WriteUserLogAndSave(this NsDbContext context, UserLogControlType type, int uid)
         {
             context.WriteUserLog(type, uid);
 
@@ -62,14 +62,14 @@ namespace NS_Education.Tools.Extensions
         /// <param name="context">DbContext</param>
         /// <param name="type">操作類型</param>
         /// <param name="uid">使用者 ID</param>
-        public static async Task WriteUserLogAndSaveAsync(this db_NS_EducationEntities context, UserLogControlType type, int uid)
+        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int uid)
         {
             context.WriteUserLog(type, uid);
 
             await context.SaveChangesAsync();
         }
 
-        private static void DoStandardProcedure(db_NS_EducationEntities context, int uid)
+        private static void DoStandardProcedure(NsDbContext context, int uid)
         {
             // write log
             context.ChangeTracker.DetectChanges();
@@ -130,7 +130,7 @@ namespace NS_Education.Tools.Extensions
             change.State = EntityState.Modified;
         }
 
-        private static void WriteUserLog(db_NS_EducationEntities context, int uid, DbEntityEntry change)
+        private static void WriteUserLog(NsDbContext context, int uid, DbEntityEntry change)
         {
             // 取得此資料的第一個 PK 欄位（通常是流水號）
             int targetId = context.GetPrimaryKeyFromEntityEntry(change);
@@ -167,12 +167,12 @@ namespace NS_Education.Tools.Extensions
             return controlType;
         }
 
-        private static int GetPrimaryKeyFromEntityEntry(this db_NS_EducationEntities context, DbEntityEntry entityEntry)
+        private static int GetPrimaryKeyFromEntityEntry(this NsDbContext context, DbEntityEntry entityEntry)
         {
             return context.GetPrimaryKeyFromEntity(entityEntry.Entity);
         }
         
-        public static int GetPrimaryKeyFromEntity<TEntity>(this db_NS_EducationEntities context, TEntity entity)
+        public static int GetPrimaryKeyFromEntity<TEntity>(this NsDbContext context, TEntity entity)
         where TEntity : class
         {
             // 從 Entity 找出 PK 並找出手上物件的該欄位值，如果有任何 null 時，回傳 0
@@ -188,7 +188,7 @@ namespace NS_Education.Tools.Extensions
             return result is int i ? i : 0;
         }
 
-        private static void WriteUserLog(this db_NS_EducationEntities context, string targetTable, int targetId,
+        private static void WriteUserLog(this NsDbContext context, string targetTable, int targetId,
             UserLogControlType controlType, int uid)
         {
             HttpRequestBase request = GetCurrentRequest();
@@ -209,7 +209,7 @@ namespace NS_Education.Tools.Extensions
             return new HttpRequestWrapper(HttpContext.Current.Request);
         }
 
-        private static void WriteUserLog(this db_NS_EducationEntities context, UserLogControlType controlType, int uid)
+        private static void WriteUserLog(this NsDbContext context, UserLogControlType controlType, int uid)
         {
             // 未指定 targetTable 跟 targetId 時的 helper
             context.WriteUserLog(null, 0, controlType, uid);
@@ -221,7 +221,7 @@ namespace NS_Education.Tools.Extensions
         /// <param name="context">DbContext</param>
         /// <param name="entry">物件的 EntityEntry </param>
         /// <returns>Table 名。</returns>
-        private static string GetTableName(this db_NS_EducationEntities context, DbEntityEntry entry)
+        private static string GetTableName(this NsDbContext context, DbEntityEntry entry)
         {
             var objectContext = ((IObjectContextAdapter)context).ObjectContext;
 
@@ -244,7 +244,7 @@ namespace NS_Education.Tools.Extensions
         /// <param name="context">DbContext</param>
         /// <typeparam name="T">Generic Type</typeparam>
         /// <returns>Table 名。</returns>
-        public static string GetTableName<T>(this db_NS_EducationEntities context)
+        public static string GetTableName<T>(this NsDbContext context)
             where T : class
         {
             ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
@@ -259,13 +259,13 @@ namespace NS_Education.Tools.Extensions
             return tableName;
         }
 
-        public static async Task AddAsync<TEntity>(this db_NS_EducationEntities context, TEntity entity)
+        public static async Task AddAsync<TEntity>(this NsDbContext context, TEntity entity)
             where TEntity : class
         {
             await Task.Run(() => context.Set<TEntity>().Add(entity));
         }
         
-        public static async Task AddRangeAsync<TEntity>(this db_NS_EducationEntities context, IEnumerable<TEntity> entities)
+        public static async Task AddRangeAsync<TEntity>(this NsDbContext context, IEnumerable<TEntity> entities)
             where TEntity : class
         {
             await Task.Run(() => context.Set<TEntity>().AddRange(entities));

@@ -27,6 +27,7 @@ namespace NS_Education.Models.Entities
         public int MinuteS { get; set; }
         public int HourE { get; set; }
         public int MinuteE { get; set; }
+        public int PriceRatePercentage { get; set; }
         public bool ActiveFlag { get; set; }
         public bool DeleteFlag { get; set; }
         public System.DateTime CreDate { get; set; }

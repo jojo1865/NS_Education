@@ -17,14 +17,14 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
     public class PublicClass : System.Web.Mvc.Controller
     {
         public DateTime DT = DateTime.Now;
-        protected internal db_NS_EducationEntities DC { get; }
+        protected internal NsDbContext DC { get; }
         public string[] sCategoryTypes = new string[] { "通用", "公司", "部門", "場地", "備忘", "服務", "設備", "客戶", "付款類", "合作廠商" };
         public string DateFormat = "yyyy/MM/dd";
         public string DateTimeFormat = "yyyy/MM/dd HH:mm";
         public string Error = "";
         public PublicClass()
         {
-            DC = new db_NS_EducationEntities();
+            DC = new NsDbContext();
         }
 
         public cReturnMessage GetMsgClass(string sError)

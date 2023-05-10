@@ -18,6 +18,7 @@ namespace NS_Education.Models.Entities
         public int RSID { get; set; }
         public System.DateTime TargetDate { get; set; }
         public int BDID { get; set; }
+        public int Ct { get; set; }
         public int BOCID { get; set; }
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }

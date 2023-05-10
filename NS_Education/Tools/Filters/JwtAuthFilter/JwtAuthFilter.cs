@@ -116,9 +116,9 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims)
         {
             // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
-            using (db_NS_EducationEntities dbContext = new db_NS_EducationEntities())
+            using (NsDbContext nsDbContext = new NsDbContext())
             {
-                bool isEnabled = dbContext.B_StaticCode.Where(sc =>
+                bool isEnabled = nsDbContext.B_StaticCode.Where(sc =>
                         sc.CodeType == (int)StaticCodeType.SafetyControl && sc.ActiveFlag && !sc.DeleteFlag)
                     .Where(sc => sc.Code == ((int)StaticCodeSafetyControlCode.IsEnforcingOneTokenOneLogin).ToString())
                     .Select(sc => sc.SortNo)
@@ -132,10 +132,10 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             // 驗證 Token 符合 UserData 中紀錄的 JWT
             int uid = FilterStaticTools.GetUidInClaimInt(claims);
 
-            using (db_NS_EducationEntities dbContext = new db_NS_EducationEntities())
+            using (NsDbContext nsDbContext = new NsDbContext())
             {
                 UserData user =
-                    dbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);
+                    nsDbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);
 
                 if (user is null)
                     throw new Exception(UserDataNotFound);
@@ -157,11 +157,11 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
             // 3. 依據 uid 查詢所有權限。
             // User -> M_Group_User -> GroupData -> M_Group_Menu -> MenuData -> MenuAPI
-            using (db_NS_EducationEntities dbContext = new db_NS_EducationEntities())
+            using (NsDbContext nsDbContext = new NsDbContext())
             {
                 string contextUri = FilterStaticTools.GetContextUri(actionContext);
                 
-                var query = dbContext.UserData
+                var query = nsDbContext.UserData
                         .Include(u => u.M_Group_User)
                         .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData))
                         .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData).Select(g => g.M_Group_Menu))

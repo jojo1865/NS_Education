@@ -13,9 +13,9 @@ namespace NS_Education.Models.Entities
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class db_NS_EducationEntities : DbContext
+    public partial class NsDbContext : DbContext
     {
-        public db_NS_EducationEntities()
+        public NsDbContext()
             : base("name=db_NS_EducationEntities")
         {
         }

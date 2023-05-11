@@ -47,36 +47,40 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             InitializeResponse();
 
-            // TODO: 引用靜態參數檔，完整驗證使用者密碼
-
-            // sanitize
-            if (!input.GID.IsAboveZero() || !DC.GroupData.Any(g => g.GID == input.GID))
-                AddError(SignUpGidIncorrect);
-            if (!input.DDID.IsAboveZero() || !DC.D_Department.Any(d => d.DDID == input.DDID))
-                AddError(SignUpDdIdIncorrect);
             int passwordMinLength = GetPasswordMinLength();
-            if (input.LoginPassword.IsNullOrWhiteSpace())
-                AddError(EmptyNotAllowed("使用者密碼"));
-            else
-                // check and encrypt pw
-                try
-                {
-                    input.LoginPassword = EncryptPassword(input.LoginPassword);
-                }
-                catch (ValidationException)
-                {
-                    AddError(PasswordAlphanumericOnly);
-                    // 這裡不做提早返回，方便一次顯示更多錯誤訊息給使用者
-                }
-            if ((input.LoginPassword?.Length ?? 0) < passwordMinLength)
-                AddError(TooShort("密碼", passwordMinLength));
+            
+            bool isValid = await input.StartValidate()
+                .ValidateAsync(
+                    async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)),
+                    () => AddError(NotFound("權限 ID")))
+                .ValidateAsync(
+                    async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
+                    () => AddError(NotFound("部門 ID")))
+                .Validate(i => i.Username.HasContent() && i.Username.Length.IsInBetween(1, 50),
+                    () => AddError(LengthOutOfRange("使用者名稱", 1, 50)))
+                .Validate(i => i.LoginAccount.HasContent() && i.LoginAccount.Length.IsInBetween(1, 100),
+                    () => AddError(LengthOutOfRange("使用者帳號", 1, 100)))
+                // 驗證使用者帳號尚未被使用
+                .ValidateAsync(
+                    async i => !await DC.UserData.AnyAsync(ud =>
+                        !ud.DeleteFlag && ud.LoginAccount == input.LoginAccount),
+                    () => AddError(AlreadyExists("使用者帳號")))
+                .Validate(i => i.LoginPassword.HasContent(), () => AddError(EmptyNotAllowed("使用者密碼")))
+                .SkipIfAlreadyInvalid()
+                .Validate(i => i.LoginPassword.Length.IsInBetween(passwordMinLength, 100),
+                    () => AddError(LengthOutOfRange("使用者密碼", passwordMinLength, 100)))
+                .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
+                .IsValid();
+
+            if (!isValid)
+                return GetResponseJson();
 
             // create UserData object, validate the columns along
             // TODO: 引用靜態參數檔，完整驗證使用者欄位
             var newUser = new UserData
             {
-                UserName = input.Username.ExecuteIfNullOrWhiteSpace(() => AddError(EmptyNotAllowed("使用者名稱"))),
-                LoginAccount = input.LoginAccount.ExecuteIfNullOrWhiteSpace(() => AddError(EmptyNotAllowed("使用者帳號"))),
+                UserName = input.Username,
+                LoginAccount = input.LoginAccount,
                 LoginPassword = input.LoginPassword,
                 Note = input.Note,
                 LoginDate = DateTime.Now,
@@ -91,12 +95,15 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 ActiveFlag = true
             };
 
-            // doesn't write to db if any error raised
-            // For postman testing: 若備註欄為特殊值時，不真正寫入資料。
-            if (HasError()) return GetResponseJson();
-
-            await DC.UserData.AddAsync(newUser);
-            await DC.SaveChangesStandardProcedureAsync(GetUid());
+            try
+            {
+                await DC.UserData.AddAsync(newUser);
+                await DC.SaveChangesStandardProcedureAsync(GetUid());
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbFailed(e));
+            } 
 
             return GetResponseJson();
         }

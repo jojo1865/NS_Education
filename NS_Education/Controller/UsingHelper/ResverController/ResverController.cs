@@ -675,6 +675,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .SelectMany(si => si.DeviceItems)
                 .SelectMany(di => di.TimeSpanItems));
 
+            // 確認設備預約時段的數量足不足夠
+            isSiteItemDeviceItemTimeSpanItemValid = isSiteItemDeviceItemTimeSpanItemValid &&
+                                                    await SubmitValidateSiteItemDeviceItemsAllTimeSpanEnough(input);
+
             // 主預約單 -> 其他收費項目列表
             bool isOtherItemValid =
                 input.OtherItems.All(item => item.StartValidate()
@@ -712,6 +716,75 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                          && isOtherItemValid
                                          && isBillItemValid
                                          && isGiveBackItemValid);
+        }
+
+        private async Task<bool> SubmitValidateSiteItemDeviceItemsAllTimeSpanEnough(Resver_Submit_Input_APIItem input)
+        {
+            bool result = true;
+            string resverDeviceTableName = DC.GetTableName<Resver_Device>();
+
+            // 先一次查完所有 BDID
+            IEnumerable<Resver_Submit_DeviceItem_Input_APIItem> allDeviceItems =
+                input.SiteItems.SelectMany(si => si.DeviceItems);
+            Dictionary<int, B_Device> devices = await DC.B_Device
+                .Include(bd => bd.Resver_Device)
+                .Include(bd => bd.Resver_Device.Select(rd => rd.Resver_Site))
+                .Where(bd =>
+                    bd.ActiveFlag && !bd.DeleteFlag &&
+                    allDeviceItems.Any(di => di.BDID == bd.BDID))
+                .ToDictionaryAsync(bd => bd.BDID, bd => bd);
+
+            // 每個場地
+            foreach (Resver_Submit_SiteItem_Input_APIItem siteItem in input.SiteItems)
+            {
+                // 每個設備
+                foreach (Resver_Submit_DeviceItem_Input_APIItem deviceItem in siteItem.DeviceItems)
+                {
+                    if (!devices.ContainsKey(deviceItem.BDID))
+                    {
+                        AddError(NotFound($"欲預約的設備 ID {deviceItem.BDID}"));
+                        result = false;
+                        continue;
+                    }
+
+                    // 查出所有對應 deviceItem.DTSID 的 DTS
+                    D_TimeSpan[] wantedTimeSpans = await DC.D_TimeSpan
+                        .Where(dts => dts.ActiveFlag)
+                        .Where(dts => !dts.DeleteFlag)
+                        .Where(dts => deviceItem.TimeSpanItems.Any(tsi => tsi.DTSID == dts.DTSID))
+                        .ToArrayAsync();
+
+                    DateTime targetDate = deviceItem.TargetDate.ParseDateTime();
+                    
+                    // 每個時段
+                    foreach (D_TimeSpan timeSpan in wantedTimeSpans)
+                    {
+                        // 計算任何有重疊時段已被預約的數量
+                        int reservedCount = devices.Values
+                            .SelectMany(bd => bd.Resver_Device)
+                            .Where(rd => !rd.DeleteFlag)
+                            .Where(rd => rd.TargetDate.Date == targetDate.Date)
+                            .Where(rd => rd.Resver_Site.RHID != input.RHID || rd.RSID != siteItem.RSID)
+                            .Where(rd => DC.M_Resver_TimeSpan
+                                .Include(rts => rts.D_TimeSpan)
+                                .Where(rts => rts.TargetTable == resverDeviceTableName)
+                                .Where(rts => rts.TargetID == rd.RDID)
+                                .AsEnumerable()
+                                .Any(rts => rts.D_TimeSpan.IsCrossingWith(timeSpan))
+                            )
+                            .Sum(rd => rd.Ct);
+
+                        int totalCt = devices[deviceItem.BDID].Ct;
+                        if (totalCt - reservedCount >= deviceItem.Ct) continue;
+
+                        AddError(
+                            $"場地 ID {siteItem.BSID} 的設備 ID {deviceItem.BDID} 在 時段 ID {timeSpan.DTSID}（{timeSpan.GetTimeRangeFormattedString()}）的可用數量不足（總數：{totalCt}，欲預約數量：{deviceItem.Ct}，已預約數量：{reservedCount}）！");
+                        result = false;
+                    }
+                }
+            }
+
+            return result;
         }
 
         private async Task<bool> SubmitValidateSiteItemsAllTimeSpanFree(Resver_Submit_Input_APIItem input)
@@ -755,8 +828,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             return isValid;
         }
 
-        private IEnumerable<M_Resver_TimeSpan> SubmitGetAllResverTimeSpanFromSiteItem(Resver_Submit_Input_APIItem input, Resver_Submit_SiteItem_Input_APIItem si)
+        private IEnumerable<M_Resver_TimeSpan> SubmitGetAllResverTimeSpanFromSiteItem(Resver_Submit_Input_APIItem input,
+            Resver_Submit_SiteItem_Input_APIItem si)
         {
+            string resverSiteTableName = DC.GetTableName<Resver_Site>();
+            DateTime targetDate = si.TargetDate.ParseDateTime();
             return DC.B_SiteData.Where(sd =>
                     sd.ActiveFlag && !sd.DeleteFlag && sd.BSID == si.BSID)
                 .AsEnumerable()
@@ -771,16 +847,15 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         sg.GroupID == si.BSID).Select(sg => sg.B_SiteData)
                     .AsEnumerable())
                 // 取得每個場地在指定日期當天的預約
-                .SelectMany(sd => sd.Resver_Site.Where(rs =>
-                    rs.RHID != input.RHID &&
-                    rs.TargetDate.Date ==
-                    si.TargetDate.ParseDateTime().Date))
+                .SelectMany(sd => sd.Resver_Site.Where(rs => rs.RHID != input.RHID)
+                    .Where(rs => !rs.DeleteFlag)
+                    .Where(rs => rs.TargetDate.Date == targetDate.Date))
                 // 取得每個場地的預約時段
                 .SelectMany(rs => DC.M_Resver_TimeSpan
                     .Include(rts => rts.D_TimeSpan)
                     .Where(rts =>
-                        rts.RHID != input.RHID && 
-                        rts.TargetTable == DC.GetTableName<Resver_Site>() &&
+                        rts.RHID != input.RHID &&
+                        rts.TargetTable == resverSiteTableName &&
                         rts.TargetID == rs.RSID)
                 );
         }

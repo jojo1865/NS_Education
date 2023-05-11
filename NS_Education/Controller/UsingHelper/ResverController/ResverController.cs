@@ -618,8 +618,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .IsValid());
 
             // 主預約單 -> 場地列表 -> 時段列表
-            bool isSiteItemTimeSpanItemValid =
-                SubmitValidateTimeSpanItems(input.SiteItems.SelectMany(si => si.TimeSpanItems));
+            bool isSiteItemTimeSpanItemValid = isSiteItemsValid 
+                                               && SubmitValidateTimeSpanItems(
+                                                   input.SiteItems.SelectMany(si => si.TimeSpanItems))
+                                               && await SubmitValidateSiteItemsAllTimeSpanFree(input)
+                ;
 
             // 主預約單 -> 場地列表 -> 行程列表
             bool isSiteItemThrowItemValid = input.SiteItems
@@ -709,6 +712,77 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                          && isOtherItemValid
                                          && isBillItemValid
                                          && isGiveBackItemValid);
+        }
+
+        private async Task<bool> SubmitValidateSiteItemsAllTimeSpanFree(Resver_Submit_Input_APIItem input)
+        {
+            bool isValid = true;
+            foreach (Resver_Submit_SiteItem_Input_APIItem si in input.SiteItems)
+            {
+                // 1. 取得這個場地當天所有 RTS，包括場地本身、場地的父場地、場地的子場地
+                M_Resver_TimeSpan[] allResverTimeSpans = SubmitGetAllResverTimeSpanFromSiteItem(input, si).ToArray();
+
+                // 2. RTS 的 DTSID = 當天已被占用的 DTSID，從輸入中抓出此類 DTSID
+                isValid &= allResverTimeSpans.Aggregate(true, (result, rts) => result & rts.StartValidate()
+                    .Validate(_ => si.TimeSpanItems.All(tsi => tsi.DTSID != rts.DTSID),
+                        () => AddError(
+                            $"場地 ID {si.BSID} 欲預約的時段 ID {rts.DTSID}（{rts.D_TimeSpan.GetTimeRangeFormattedString()})）當天已被預約了！"))
+                    .IsValid()
+                );
+
+                // 3. 所有 TimeSpanItem 的 DTS 時段不可與 allResverTimeSpans 任一者的 DTS 時段重疊
+                // 先查出所有輸入 DTSID 的 DTS 資料
+                List<D_TimeSpan> allInputDts = await DC.D_TimeSpan
+                    .Where(dts =>
+                        dts.ActiveFlag
+                        && !dts.DeleteFlag
+                        && si.TimeSpanItems.Any(tsi => tsi.DTSID == dts.DTSID)
+                    )
+                    .ToListAsync();
+
+                // 每個 DTS 和 RTS 比對一次，看是否有重疊的部分
+                foreach (D_TimeSpan dts in allInputDts)
+                {
+                    isValid &= allResverTimeSpans.Aggregate(true, (result, rts) => result & rts.StartValidate()
+                        .Validate(_ => rts.DTSID == dts.DTSID || !rts.D_TimeSpan.IsCrossingWith(dts),
+                            () => AddError(
+                                $"場地 ID {si.BSID} 欲預約的時段 ID {dts.DTSID}（{dts.GetTimeRangeFormattedString()})）與當天另一個已被預約的時段（{rts.D_TimeSpan.GetTimeRangeFormattedString()}）部分重疊！")
+                        )
+                        .IsValid());
+                }
+            }
+
+            return isValid;
+        }
+
+        private IEnumerable<M_Resver_TimeSpan> SubmitGetAllResverTimeSpanFromSiteItem(Resver_Submit_Input_APIItem input, Resver_Submit_SiteItem_Input_APIItem si)
+        {
+            return DC.B_SiteData.Where(sd =>
+                    sd.ActiveFlag && !sd.DeleteFlag && sd.BSID == si.BSID)
+                .AsEnumerable()
+                .Concat(DC.M_SiteGroup
+                    .Where(sg =>
+                        sg.ActiveFlag && !sg.DeleteFlag &&
+                        sg.MasterID == si.BSID).Select(sg => sg.B_SiteData1)
+                    .AsEnumerable())
+                .Concat(DC.M_SiteGroup
+                    .Where(sg =>
+                        sg.ActiveFlag && !sg.DeleteFlag &&
+                        sg.GroupID == si.BSID).Select(sg => sg.B_SiteData)
+                    .AsEnumerable())
+                // 取得每個場地在指定日期當天的預約
+                .SelectMany(sd => sd.Resver_Site.Where(rs =>
+                    rs.RHID != input.RHID &&
+                    rs.TargetDate.Date ==
+                    si.TargetDate.ParseDateTime().Date))
+                // 取得每個場地的預約時段
+                .SelectMany(rs => DC.M_Resver_TimeSpan
+                    .Include(rts => rts.D_TimeSpan)
+                    .Where(rts =>
+                        rts.RHID != input.RHID && 
+                        rts.TargetTable == DC.GetTableName<Resver_Site>() &&
+                        rts.TargetID == rs.RSID)
+                );
         }
 
         private bool SubmitValidatePayType(int payTypeId)

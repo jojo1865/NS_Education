@@ -68,5 +68,26 @@ namespace NS_Education.Tools.Extensions
         {
             return i >= 0;
         }
+
+        /// <summary>
+        /// 檢查兩個範圍（各有 2 個整數代表開頭與結尾）是否有重疊。僅起始點或結束點相等時不算。
+        /// </summary>
+        /// <param name="rangeA">範圍 A</param>
+        /// <param name="rangeB">範圍 B</param>
+        /// <returns>
+        /// true：存在重疊區間<br/>
+        /// false：皆無重疊
+        /// </returns>
+        public static bool IsCrossingWith(this (int start, int end) rangeA, (int start, int end) rangeB)
+        {
+            // 確定 start, end 大小值都符合預期，沒有就進行調換
+            if (rangeA.start > rangeA.end)
+                (rangeA.start, rangeA.end) = (rangeA.end, rangeA.start);
+            
+            if (rangeB.start > rangeB.end)
+                (rangeB.start, rangeB.end) = (rangeB.end, rangeB.start);
+
+            return rangeA.end > rangeB.start && rangeB.end > rangeA.start;
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace NS_Education.Tools.Extensions
         {
             return !password.IsNullOrWhiteSpace() && password.All(Char.IsLetterOrDigit);
         }
-        
+
         /// <summary>
         /// 將日期轉換為 yyyy/MM/dd HH:mm 格式
         /// </summary>
@@ -30,7 +30,7 @@ namespace NS_Education.Tools.Extensions
         {
             return datetime.ToString(IoConstants.DateTimeFormat);
         }
-        
+
         /// <summary>
         /// 將日期轉換為 yyyy/MM/dd 格式
         /// </summary>
@@ -54,23 +54,25 @@ namespace NS_Education.Tools.Extensions
         /// true：轉換成功<br/>
         /// false：轉換失敗
         /// </returns>
-        public static bool TryParseDateTime(this string s, out DateTime result, DateTimeParseType type = DateTimeParseType.Date | DateTimeParseType.DateTime)
+        public static bool TryParseDateTime(this string s, out DateTime result,
+            DateTimeParseType type = DateTimeParseType.Date | DateTimeParseType.DateTime)
         {
             result = default;
             if (s == null)
                 return false;
-            
+
             s = s.Trim();
 
             if (type.HasFlag(DateTimeParseType.DateTime) && s.Length == IoConstants.DateTimeFormat.Length)
-                return DateTime.TryParseExact(s, IoConstants.DateTimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out result);
+                return DateTime.TryParseExact(s, IoConstants.DateTimeFormat, CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeLocal, out result);
             if (type.HasFlag(DateTimeParseType.Date) && s.Length == IoConstants.DateFormat.Length)
                 return DateTime.TryParseExact(s, IoConstants.DateFormat, CultureInfo.InvariantCulture,
                     DateTimeStyles.AssumeLocal, out result);
-            
+
             return false;
         }
-        
+
         /// <summary>
         /// 將字串轉換成 DateTime，無論成功或失敗，回傳轉換結果。
         /// </summary>
@@ -80,21 +82,23 @@ namespace NS_Education.Tools.Extensions
         /// 轉換成功時：對象 DateTime<br/>
         /// 轉換失敗時：DateTime 的預設值
         /// </returns>
-        public static DateTime ParseDateTime(this string s, DateTimeParseType type = DateTimeParseType.Date | DateTimeParseType.DateTime)
+        public static DateTime ParseDateTime(this string s,
+            DateTimeParseType type = DateTimeParseType.Date | DateTimeParseType.DateTime)
         {
             DateTime result = default;
-            
+
             if (s == null)
                 return default;
-            
+
             s = s.Trim();
 
             if (type.HasFlag(DateTimeParseType.DateTime) && s.Length == IoConstants.DateTimeFormat.Length)
-                DateTime.TryParseExact(s, IoConstants.DateTimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out result);
+                DateTime.TryParseExact(s, IoConstants.DateTimeFormat, CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeLocal, out result);
             if (type.HasFlag(DateTimeParseType.Date) && s.Length == IoConstants.DateFormat.Length)
                 DateTime.TryParseExact(s, IoConstants.DateFormat, CultureInfo.InvariantCulture,
                     DateTimeStyles.AssumeLocal, out result);
-            
+
             return result;
         }
 
@@ -118,7 +122,7 @@ namespace NS_Education.Tools.Extensions
         {
             return $"{hour.ToString().PadLeft(2, '0')}:{minute.ToString().PadLeft(2, '0')}";
         }
-        
+
         /// <summary>
         /// 接受兩組開始時間與結束時間，計算兩者間差異，轉換成 n 小時 m 分鐘的格式。不支援跨日。
         /// </summary>
@@ -148,11 +152,16 @@ namespace NS_Education.Tools.Extensions
         /// <returns>分鐘數</returns>
         public static int GetMinutesUntil(this (int hour, int minute) startTime, (int hour, int minute) endTime)
         {
-            return endTime.hour * 60 + endTime.minute - startTime.hour * 60 - startTime.minute;
+            return GetMinutes(endTime) - GetMinutes(startTime);
+        }
+
+        private static int GetMinutes(this (int hour, int minute) time)
+        {
+            return time.hour * 60 + time.minute;
         }
 
         /// <summary>
-        /// 接受兩組開始時間與結束時間，計算兩者間差異分鐘數，不支援跨日。
+        /// 接受開始時間與結束時間，計算兩者間差異分鐘數，不支援跨日。
         /// </summary>
         /// <param name="startHour">起始時間的小時</param>
         /// <param name="startMinute">起始時間的分鐘</param>
@@ -162,6 +171,24 @@ namespace NS_Education.Tools.Extensions
         public static int GetMinutesBetween(int startHour, int startMinute, int endHour, int endMinute)
         {
             return startHour * 60 + startMinute - endHour * 60 - endMinute;
+        }
+
+        /// <summary>
+        /// 接受兩組開始時間與結束時間，計算兩者間是否存在重疊，不支援跨日。
+        /// </summary>
+        /// <returns>分鐘數</returns>
+        private static bool AreCrossingTimes(int startHourA, int startMinuteA, int endHourA, int endMinuteA
+            , int startHourB, int startMinuteB, int endHourB, int endMinuteB)
+        {
+            return ((startHourA, startMinuteA).GetMinutes(), (endHourA, endMinuteA).GetMinutes()).IsCrossingWith(
+                ((startHourB, startMinuteB).GetMinutes(), (endHourB, endMinuteB).GetMinutes()));
+        }
+
+        public static bool IsCrossingWith(this ((int hour, int minute) start, (int hour, int minute) end) timeA,
+            ((int hour, int minute) start, (int hour, int minute) end) timeB)
+        {
+            return AreCrossingTimes(timeA.start.hour, timeA.start.minute, timeA.end.hour, timeA.end.minute,
+                timeB.start.hour, timeB.start.minute, timeB.end.hour, timeB.end.minute);
         }
     }
 

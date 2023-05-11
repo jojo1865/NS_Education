@@ -640,6 +640,7 @@
     <Compile Include="Tools\Extensions\DecimalExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\IntExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs" />
+    <Compile Include="Tools\Extensions\SpecificTableExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\StringExtensionMethods.cs" />
     <Compile Include="Tools\Extensions\TypeExtensionMethods.cs" />

@@ -364,7 +364,7 @@ namespace NS_Education.Tools.Extensions
             if (FlagHelper<T>.HasDeleteFlag)
                 query = query.Where($"{DbConstants.DeleteFlag} == @0", true);
 
-            query = query.Where($"{idFieldName} = $0", id);
+            query = query.Where($"{idFieldName} = @0", id);
 
             return await query.AnyAsync();
         }

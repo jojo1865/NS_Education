@@ -501,6 +501,28 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(int id, bool? deleteFlag)
         {
+            // 若 deleteFlag 為 false 時，驗證是否有其他不同 UID、相同 LoginAccount、非刪除狀態的資料，如果有，打回。
+
+            if (deleteFlag is false)
+            {
+                // 先取得 UserData 以便取得 LoginAccount
+                UserData target = await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == id);
+                if (target is null)
+                {
+                    AddError(NotFound("使用者 ID"));
+                    return GetResponseJson();
+                }
+
+                bool hasOtherAccount = await DC.UserData.AnyAsync(ud =>
+                    ud.UID != id && !ud.DeleteFlag && ud.LoginAccount == target.LoginAccount);
+
+                if (hasOtherAccount)
+                {
+                    AddError("有其他非刪除資料的帳號與此使用者的帳號相同，無法復活！");
+                    return GetResponseJson();
+                }
+            }
+            
             return await _deleteItemHelper.DeleteItem(id, deleteFlag);
         }
 

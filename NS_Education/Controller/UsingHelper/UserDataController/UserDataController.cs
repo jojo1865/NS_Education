@@ -305,11 +305,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         public async Task<bool> SubmitEditValidateInput(UserData_Submit_Input_APIItem input)
         {
             int passwordMinLength = GetPasswordMinLength();
+
+            int uid = GetUid();
             
             bool isValid = await input.StartValidate()
                 .Validate(i => i.UID.IsAboveZero(), () => AddError(EmptyNotAllowed("使用者 ID")))
-                .Validate(i => !i.Username.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者名稱")))
-                .Validate(i => !i.LoginAccount.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者帳號")))
+                .Validate(i => i.Username.HasContent() && i.Username.Length.IsInBetween(1, 50), () => AddError(LengthOutOfRange("使用者名稱", 1, 50)))
+                .Validate(i => i.LoginAccount.HasContent() && i.LoginAccount.Length.IsInBetween(1, 100), () => AddError(LengthOutOfRange("使用者帳號", 1, 100)))
+                .ValidateAsync(async i => await DC.UserData.AnyAsync(ud => !ud.DeleteFlag && ud.LoginAccount == i.LoginAccount && ud.UID != uid), () => AddError(AlreadyExists("使用者帳號")))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)), () => AddError(NotFound("部門 ID")))
                 .ValidateAsync(async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)), () => AddError(NotFound("身分 ID")))
                 .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.Length.IsInBetween(1, 100), () => AddError(OutOfRange("使用者密碼", 1, 100)))

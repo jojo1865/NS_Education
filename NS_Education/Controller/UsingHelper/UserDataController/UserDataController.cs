@@ -304,8 +304,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         public async Task<bool> SubmitEditValidateInput(UserData_Submit_Input_APIItem input)
         {
-            int passwordMinLength = GetPasswordMinLength();
-
             int uid = GetUid();
             
             bool isValid = await input.StartValidate()

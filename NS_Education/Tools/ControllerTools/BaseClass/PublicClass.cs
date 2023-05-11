@@ -162,6 +162,20 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
             string maxMessage = max is null ? "" : $"，最大值為 {max}";
             return $"「{fieldName}」超出範圍{minMessage}{maxMessage}！";
         }
+        
+        /// <summary>
+        /// 回傳一串長度超出範圍時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string LengthOutOfRange(string fieldName, int? min = null, int? max = null)
+        {
+            string minMessage = min is null ? "" : $"，最小長度為 {min}";
+            string maxMessage = max is null ? "" : $"，最大長度為 {max}";
+            return $"「{fieldName}」長度不符合規定範圍{minMessage}{maxMessage}！";
+        }
 
         /// <summary>
         /// 回傳一串欄位內容過短時可使用的預設錯誤訊息字串。

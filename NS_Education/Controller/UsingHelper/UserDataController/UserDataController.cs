@@ -132,13 +132,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         #endregion
 
-        #region 錯誤訊息 - 通用
-
-        private const string UpdateUidIncorrect = "未提供欲修改的 UID 或格式不正確！";
-        private const string UserDataNotFound = "這筆使用者不存在或已被刪除！";
-
-        #endregion
-
         #region 錯誤訊息 - 註冊/更新
 
         private const string PasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
@@ -173,6 +166,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         private const string UpdatePWPasswordNotEncryptable = "密碼只允許英數字！";
         private const string DailyChangePasswordLimitExceeded = "此帳號今日已無法再修改密碼！";
+        private const string UpdatePWOriginalPasswordIncorrect = "原密碼不符，請重新確認！";
 
         #endregion
         
@@ -530,14 +524,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         #region UpdatePW
 
         /// <summary>
-        ///     更新使用者密碼。
+        /// 更新使用者密碼。
         /// </summary>
         /// <param name="input">
-        ///     <see cref="UserData_UpdatePW_Input_APIItem" />
+        /// <see cref="UserData_UpdatePW_Input_APIItem" />
         /// </param>
         /// <returns>通用回傳訊息格式</returns>
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> UpdatePW(UserData_UpdatePW_Input_APIItem input)
         {
             // 1. 驗證。
@@ -548,20 +542,48 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             int passwordMinLength = GetPasswordMinLength();
             bool isValid = input
                 .StartValidate()
-                .Validate(i => i.ID.IsAboveZero(), () => AddError(UpdateUidIncorrect))
-                .Validate(i => !i.NewPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("新密碼")))
-                .Validate(i => i.NewPassword?.Length >= passwordMinLength, () => AddError(TooShort("新密碼", passwordMinLength)))
+                .SkipIfAlreadyInvalid()
+                .Validate(i => i.OriginalPassword.HasContent(), () => AddError(EmptyNotAllowed("原始密碼")))
+                .Validate(i => i.OriginalPassword.Length.IsInBetween(1, 100), () => AddError(LengthOutOfRange("原始密碼", 1, 100)))
+                // 如果無法加密，表示密碼有意外字元，同時 API 也應該在寫入欄位前就擋掉
+                // 所以這種情況視為密碼錯誤，直接返回。
+                .Validate(i => i.OriginalPassword.IsEncryptablePassword(), () => AddError(UpdatePWOriginalPasswordIncorrect))
+                .Validate(i => i.NewPassword.HasContent(), () => AddError(EmptyNotAllowed("新密碼")))
+                .Validate(i => i.NewPassword.Length.IsInBetween(passwordMinLength, 100), () => AddError(LengthOutOfRange("新密碼", passwordMinLength, 100)))
                 .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(UpdatePWPasswordNotEncryptable))
                 .IsValid();
 
-            // 只在輸入都驗證過後才允許更新 DB
-            if (isValid)
-                await input
-                    .StartValidate(true)
-                    .ValidateAsync(async i => await UpdatePasswordForUserData(i.ID, i.NewPassword),
-                        e => AddError(e.Message));
+            if (!isValid)
+                return GetResponseJson();
 
-            // 2. 回傳通用訊息格式。
+            // 2. 查詢資料
+            int uid = GetUid();
+            UserData userData =
+                await DC.UserData.FirstOrDefaultAsync(ud => ud.ActiveFlag && !ud.DeleteFlag && ud.UID == uid);
+
+            if (userData is null)
+            {
+                AddError(NotFound("您目前的使用者 ID"));
+                return GetResponseJson();
+            }
+
+            // 3. 對照舊密碼
+            
+            bool oldPasswordIsCorrect = ValidatePassword(input.OriginalPassword, userData.LoginPassword);
+
+            if (!oldPasswordIsCorrect)
+            {
+                AddError(UpdatePWOriginalPasswordIncorrect);
+                return GetResponseJson();
+            }
+            
+            // 4. 更新 DB
+            await input
+                .StartValidate(true)
+                .ValidateAsync(async i => await UpdatePasswordForUserData(userData, i.NewPassword),
+                    e => AddError(e.Message));
+
+            // 5. 回傳通用訊息格式。
             return GetResponseJson();
         }
 
@@ -583,23 +605,18 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .FirstOrDefault();
         }
 
-        private async Task UpdatePasswordForUserData(int id, string inputPassword)
+        private async Task UpdatePasswordForUserData(UserData userData, string inputPassword)
         {
-            // 1. 查詢資料。無資料時拋錯
-            var queried = await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == id);
-            if (queried == null)
-                throw new NullReferenceException(UserDataNotFound);
-
-            // 2. 密碼沒有變時，不做任何事
+            // 1. 密碼沒有變時，不做任何事
             string newPassword = EncryptPassword(inputPassword);
-            if (newPassword == queried.LoginPassword)
+            if (newPassword == userData.LoginPassword)
                 return;
             
-            // 3. 更新資料，更新失敗時拋錯
+            // 2. 更新資料，更新失敗時拋錯
             try
             {
-                WriteUserChangePasswordLog(queried.UID, queried.LoginPassword, newPassword);
-                queried.LoginPassword = newPassword;
+                WriteUserChangePasswordLog(userData.UID, userData.LoginPassword, newPassword);
+                userData.LoginPassword = newPassword;
                 await DC.SaveChangesStandardProcedureAsync(GetUid());
             }
             catch (Exception e)

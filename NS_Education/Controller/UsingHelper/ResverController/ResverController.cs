@@ -967,17 +967,42 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 await DC.AddRangeAsync(entitiesToAdd);
                 // 這裡就手動 SaveChanges，以便作 transaction 管理
                 await DC.SaveChangesStandardProcedureAsync(GetUid());
-                transaction.Commit();
+                
+                // 如果有錯誤時，不作 commit
+                if (HasError())
+                    transaction.Commit();
+
                 return head;
             }
         }
 
+        private void AddErrorNotThisHead(int itemId, string itemName, int dataHeadId)
+        {
+            if (itemId != 0)
+                AddError($"欲更新的{itemName}（ID {itemId}）並不屬於此預約單（該{itemName}對應預約單 ID：{dataHeadId}）！");
+            else
+                AddError($"欲新增的{itemName}並不屬於此預約單（該{itemName}對應預約單 ID：{dataHeadId}）！");
+        }
+        
+        private void AddErrorNotThisThrow(int itemId, string itemName, int dataThrowId)
+        {
+            if (itemId != 0)
+                AddError($"欲更新的{itemName}（ID {itemId}）並不屬於此預約行程（該預約行程 ID：{dataThrowId}）！");
+            else
+                AddError($"欲新增的{itemName}並不屬於此預約行程（該預約行程 ID：{dataThrowId}）！");
+        }
+        
         private void SubmitPopulateHeadGiveBackItems(Resver_Submit_Input_APIItem input, Resver_Head head,
             ICollection<object> entitiesToAdd)
         {
             foreach (var item in input.GiveBackItems)
             {
                 Resver_GiveBack giveBack = SubmitFindOrCreateNew<Resver_GiveBack>(item.RGBID, entitiesToAdd);
+                if (giveBack.RHID != 0 && giveBack.RHID != head.RHID)
+                {
+                    AddErrorNotThisHead(item.RGBID, "預約回饋紀錄", giveBack.RHID);
+                    continue;
+                }
                 giveBack.RHID = head.RHID;
                 giveBack.Title = item.Title;
                 giveBack.Description = item.Description;
@@ -991,6 +1016,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             foreach (var item in input.BillItems)
             {
                 Resver_Bill bill = SubmitFindOrCreateNew<Resver_Bill>(item.RBID, entitiesToAdd);
+                if (bill.RHID != 0 && bill.RHID != head.RHID)
+                {
+                    AddErrorNotThisHead(bill.RBID, "繳費紀錄", bill.RHID);
+                    continue;
+                }
                 bill.RHID = head.RHID;
                 bill.BCID = item.BCID;
                 bill.DPTID = item.DPTID;
@@ -1008,6 +1038,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             foreach (var item in input.OtherItems)
             {
                 Resver_Other other = SubmitFindOrCreateNew<Resver_Other>(item.ROID, entitiesToAdd);
+                if (other.RHID != 0 && other.RHID != head.RHID)
+                {
+                    AddErrorNotThisHead(other.ROID, "其他收費項目", other.RHID);
+                    continue;
+                }
                 other.TargetDate = item.TargetDate.ParseDateTime().Date;
                 other.RHID = head.RHID;
                 other.DOPIID = item.DOPIID;
@@ -1028,6 +1063,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             foreach (var item in input.SiteItems)
             {
                 Resver_Site site = SubmitFindOrCreateNew<Resver_Site>(item.RSID);
+                if (site.RHID != 0 && site.RHID != head.RHID)
+                {
+                    AddErrorNotThisHead(site.RSID, "場地", site.RHID);
+                    continue;
+                }
                 site.TargetDate = item.TargetDate.ParseDateTime().Date;
                 site.RHID = head.RHID;
                 site.BSID = item.BSID;
@@ -1058,6 +1098,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             foreach (var deviceItem in item.DeviceItems)
             {
                 Resver_Device device = SubmitFindOrCreateNew<Resver_Device>(deviceItem.RDID);
+                if (device.Resver_Site.RHID != 0 && device.Resver_Site.RHID != head.RHID)
+                {
+                    AddErrorNotThisHead(device.RDID, "場地設備", device.Resver_Site.RHID);
+                    continue;
+                }
                 device.TargetDate = deviceItem.TargetDate.ParseDateTime().Date;
                 device.RSID = site.RSID;
                 device.BDID = deviceItem.BDID;
@@ -1101,6 +1146,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             foreach (var throwItem in item.ThrowItems)
             {
                 Resver_Throw throwData = SubmitFindOrCreateNew<Resver_Throw>(throwItem.RTID);
+                if (throwData.Resver_Site.RHID != 0 && throwData.Resver_Site.RHID != head.RHID)
+                {
+                    AddErrorNotThisHead(throwData.RTID, "場地行程", throwData.Resver_Site.RHID);
+                    continue;
+                }
                 throwData.TargetDate = throwItem.TargetDate.ParseDateTime().Date;
                 throwData.RSID = site.RSID;
                 throwData.BSCID = throwItem.BSCID;
@@ -1125,19 +1175,27 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             }
         }
 
-        private static void SubmitPopulateSiteItemThrowItemThrowFoodItems(Resver_Throw throwData,
+        private void SubmitPopulateSiteItemThrowItemThrowFoodItems(Resver_Throw throwData,
             Resver_Submit_ThrowItem_Input_APIItem throwItem)
         {
-            throwData.Resver_Throw_Food = throwItem.FoodItems.Select(fi => new Resver_Throw_Food
+            throwData.Resver_Throw_Food.Clear();
+
+            foreach (Resver_Submit_FoodItem_Input_APIItem foodItem in throwItem.FoodItems)
             {
-                RTID = throwData.RTID,
-                DFCID = fi.DFCID,
-                BSCID = fi.BSCID,
-                BPID = fi.BPID,
-                Ct = fi.Ct,
-                UnitPrice = fi.UnitPrice,
-                Price = fi.Price
-            }).ToList();
+                Resver_Throw_Food throwFood = SubmitFindOrCreateNew<Resver_Throw_Food>(foodItem.RTFID);
+                if (throwFood.Resver_Throw.RTID != 0 && throwFood.Resver_Throw.RTID != throwData.RTID)
+                {
+                    AddErrorNotThisThrow(throwFood.RTFID, "餐飲補充資料", throwFood.Resver_Throw.RTID);
+                    continue;
+                }
+                throwFood.RTID = throwData.RTID;
+                throwFood.DFCID = throwFood.DFCID;
+                throwFood.BSCID = throwFood.BSCID;
+                throwFood.BPID = throwFood.BPID;
+                throwFood.Ct = throwFood.Ct;
+                throwFood.UnitPrice = throwFood.UnitPrice;
+                throwFood.Price = throwFood.Price;
+            }
         }
 
         private void SubmitPopulateSiteItemThrowItemTimeSpanItems(Resver_Throw throwData,

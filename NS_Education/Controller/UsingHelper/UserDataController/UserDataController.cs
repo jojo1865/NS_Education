@@ -310,12 +310,10 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .Validate(i => i.UID.IsAboveZero(), () => AddError(EmptyNotAllowed("使用者 ID")))
                 .Validate(i => !i.Username.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者名稱")))
                 .Validate(i => !i.LoginAccount.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者帳號")))
-                .Validate(i => !i.LoginPassword.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("使用者密碼")))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)), () => AddError(NotFound("部門 ID")))
                 .ValidateAsync(async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)), () => AddError(NotFound("身分 ID")))
-                .SkipIfAlreadyInvalid()
-                .Validate(i => i.LoginPassword.Length >= passwordMinLength, () => AddError(TooShort("使用者密碼", passwordMinLength)))
-                .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
+                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.Length.IsInBetween(1, 100), () => AddError(OutOfRange("使用者密碼", 1, 100)))
+                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -332,14 +330,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             data.UserName = input.Username.IsNullOrWhiteSpace() ? data.UserName : input.Username;
             data.LoginAccount =
                 input.LoginAccount.IsNullOrWhiteSpace() ? data.LoginAccount : input.LoginAccount;
-            
-            // 如果密碼有變動時，更新密碼。
-            string newPassword = EncryptPassword(input.LoginPassword);
-            if (!input.LoginPassword.IsNullOrWhiteSpace() && newPassword != data.LoginPassword)
-            {
-                WriteUserChangePasswordLog(data.UID, data.LoginPassword, newPassword);
-                data.LoginPassword = newPassword;
-            }
 
             // Note 是可選欄位，因此呼叫者應該保持原始內容
             data.Note = input.Note;
@@ -349,6 +339,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             // 如果是管理員，才允許繼續更新後續的欄位
             if (!FilterStaticTools.HasRoleInRequest(HttpContext.Request, AuthorizeBy.Admin)) return;
 
+            // 如果密碼有變動時，更新密碼。
+            string newPassword = EncryptPassword(input.LoginPassword);
+            if (!input.LoginPassword.IsNullOrWhiteSpace() && newPassword != data.LoginPassword)
+            {
+                WriteUserChangePasswordLog(data.UID, data.LoginPassword, newPassword);
+                data.LoginPassword = newPassword;
+            }
+            
             // 只在是管理員時才允許修改啟用狀態
             data.ActiveFlag = input.ActiveFlag;
 

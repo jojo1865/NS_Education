@@ -142,8 +142,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         #region 錯誤訊息 - 註冊/更新
 
         private const string PasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
-        private const string SignUpGidIncorrect = "缺少身分 ID 或查無身分資料，無法寫入！";
-        private const string SignUpDdIdIncorrect = "缺少部門 ID 或查無部門資料，無法寫入！";
 
         #endregion
 
@@ -416,13 +414,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .ToArray();
             
             // 新密碼：所有 n 筆都不能出現
-            // 舊密碼：最新的 n-1 筆不能出現
-
+            // 舊密碼：當歷史紀錄小於 n 筆時，需要多確認第 1 筆的舊資料
+            // （第 i 筆的新資料為第 i+1 筆的舊資料，所以只有第 1 筆的舊資料需要確認）
             if (updatePasswordHistories.Any(log => log.NewPassword == newPassword) 
-                || updatePasswordHistories.Reverse().Skip(1).Any(log => log.OldPassword == newPassword))
+                || updatePasswordHistories.Length < uniquePasswordCountLimit 
+                && updatePasswordHistories.LastOrDefault()?.OldPassword == newPassword)
                 throw new Exception($"不可重覆使用前 {uniquePasswordCountLimit} 組密碼！");
 
-                // 沒有才繼續下去
+            // 沒有才繼續下去
             UserPasswordLog newLog = new UserPasswordLog
             {
                 UID = uid,

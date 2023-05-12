@@ -559,7 +559,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         /// </param>
         /// <returns>通用回傳訊息格式</returns>
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag, true)]
         public async Task<string> UpdatePW(UserData_UpdatePW_Input_APIItem input)
         {
             // 1. 驗證。

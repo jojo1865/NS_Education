@@ -37,6 +37,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private readonly RequiredPrivileges _privileges;
         private readonly string _uidFieldName;
         private readonly string _addOrEditKeyFieldName;
+        private readonly bool _ignorePasswordExpired = false;
 
         /// <summary>
         /// 套用 JWT 驗證，並且需符合指定的 Roles。<br/>
@@ -45,6 +46,29 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         /// </summary>
         /// <param name="roles">允許的 roles。（可選）忽略時，不驗證 Roles。</param>
         /// <param name="privileges">所需的群組 Flag。（可選）忽略時，不驗證群組 Flag。</param>
+        /// <param name="ignorePasswordExpired">是否允許忽略檢查密碼過期與否。</param>
+        /// <exception cref="ArgumentException">當 RequirePrivilege 指定 AddOrEdit 時拋錯。不應使用此建構式。</exception>
+        public JwtAuthFilter(AuthorizeBy roles
+            , RequirePrivilege privileges
+            , bool ignorePasswordExpired)
+        {
+            if (privileges.HasFlag(RequirePrivilege.AddOrEdit))
+                throw new ArgumentException(RequirePrivilegeAddOrEditNoFieldName);
+                    
+            _roles = AuthorizeTypeSingletonFactory.GetEnumerableByEnum(roles).ToArray();
+            _privileges = new RequiredPrivileges(privileges);
+            _uidFieldName = IoConstants.IdFieldName;
+            _addOrEditKeyFieldName = null;
+            _ignorePasswordExpired = ignorePasswordExpired;
+        }
+        
+        /// <summary>
+        /// 套用 JWT 驗證，並且需符合指定的 Roles。<br/>
+        /// 包含 UserSelf 時，會針對 Request JSON 中的欄位比對是否與 JWT Payload 相符。<br/>
+        /// 預設找的欄位名稱請參照「<see cref="IoConstants.IdFieldName"/>」。
+        /// </summary>
+        /// <param name="roles">允許的 roles。</param>
+        /// <param name="privileges">所需的群組 Flag。</param>
         /// <exception cref="ArgumentException">當 RequirePrivilege 指定 AddOrEdit 時拋錯。不應使用此建構式。</exception>
         public JwtAuthFilter(AuthorizeBy roles
             , RequirePrivilege privileges)
@@ -63,10 +87,10 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         /// 包含 UserSelf 時，會針對 Request JSON 中的欄位比對是否與 JWT Payload 相符。<br/>
         /// 可以透過 uidFieldName 指定欄位名稱。
         /// </summary>
-        /// <param name="roles">允許的 roles。（可選）忽略時，不驗證 Roles。</param>
-        /// <param name="privileges">所需的群組 Flag。（可選）忽略時，不驗證群組 Flag。</param>
-        /// <param name="uidFieldName">Request JSON 中的 UID 欄位名稱。（可選）預設值為「<see cref="IoConstants.IdFieldName"/>」。</param>
-        /// <param name="addOrEditKeyFieldName">Request JSON 中，用於判定需要新增還是修改權限的欄位名稱。通常對應某種 ID 欄位，值為 0 時視為新增。（可選）忽略時，在啟動時報錯。</param>
+        /// <param name="roles">允許的 roles。</param>
+        /// <param name="privileges">所需的群組 Flag。</param>
+        /// <param name="uidFieldName">Request JSON 中的 UID 欄位名稱。null 時，代入「<see cref="IoConstants.IdFieldName"/>」。</param>
+        /// <param name="addOrEditKeyFieldName">Request JSON 中，用於判定需要新增還是修改權限的欄位名稱。通常對應某種 ID 欄位，值為 0 時視為新增。</param>
         /// <exception cref="ArgumentException">當 RequirePrivilege 指定 AddOrEdit 卻未提供 addOrEditKeyFieldName 時拋錯。不應使用此建構式。</exception>
         public JwtAuthFilter(AuthorizeBy roles
             , RequirePrivilege privileges
@@ -92,16 +116,28 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         {
             string errorMessage = null;
             ClaimsPrincipal claims = null;
+            ICollection<B_StaticCode> safetyConfiguration;
+            
+            // 先查安全控管設定到本地
+            using (NsDbContext nsDbContext = new NsDbContext())
+            {
+                safetyConfiguration = nsDbContext.B_StaticCode
+                    .Where(sc => sc.CodeType == (int)StaticCodeType.SafetyControl && sc.ActiveFlag && !sc.DeleteFlag)
+                    .ToArray();
+            }
 
             // 1. 驗證有 Token 且解析正常無誤。
             // 2. 當設定檔要求時，驗證 Token 符合對應 UserData 的最新 Token。
             // 3. 驗證 Token 中 Claim 包含指定的 Role。
             // 4. 驗證 Privilege，所有 Flag 在任一所屬 Group 均有允許。
-            bool isValid = actionContext.StartValidate(true)
+            
+            bool isValid = actionContext.StartValidate()
+                .SkipIfAlreadyInvalid()
                 .Validate(c => ValidateTokenDecryptable(c, JwtConstants.Secret, out claims),
                     e => errorMessage = HasValidTokenFailed(e))
-                .Validate(c => ValidateTokenIsLatest(c, claims),
+                .Validate(c => ValidateTokenIsLatest(c, claims, safetyConfiguration),
                     e => errorMessage = e.Message)
+                .Validate(c => ValidateLastPasswordChange(claims, safetyConfiguration)) // 只有這裡要回傳 901，所以不做 catch
                 .Validate(c => ValidateClaimRole(c, claims),
                     () => errorMessage = HasNoRoleOrPrivilege)
                 .Validate(c => ValidatePrivileges(c, claims),
@@ -113,21 +149,57 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             throw new UnauthorizedAccessException($"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
         }
 
-        private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims)
+        private void ValidateLastPasswordChange(ClaimsPrincipal claims, ICollection<B_StaticCode> safetyConfig)
         {
-            // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
+            // 如果這個 JwtAuthFilter 設置為忽略此設定，提早折回。
+            if (_ignorePasswordExpired)
+                return;
+            
+            // 先檢查設定檔，如果值小於等於 0，不做任何驗證。
+            int forceChangeDays = GetSafetyConfigValue(safetyConfig, StaticCodeSafetyControlCode.PasswordExpireDays);
+
+            if (forceChangeDays <= 0)
+                return;
+            
+            // 驗證這個使用者距離最後一次修改密碼的天數
+            int uid = FilterStaticTools.GetUidInClaimInt(claims);
+
             using (NsDbContext nsDbContext = new NsDbContext())
             {
-                bool isEnabled = nsDbContext.B_StaticCode.Where(sc =>
-                        sc.CodeType == (int)StaticCodeType.SafetyControl && sc.ActiveFlag && !sc.DeleteFlag)
-                    .Where(sc => sc.Code == ((int)StaticCodeSafetyControlCode.IsEnforcingOneTokenOneLogin).ToString())
-                    .Select(sc => sc.SortNo)
-                    .FirstOrDefault() == 1;
+                // 作為預設值，取得帳號建立日期
+                DateTime lastChangeTime = nsDbContext.UserData
+                    .Where(ud => ud.ActiveFlag && !ud.DeleteFlag)
+                    .Select(ud => ud.CreDate)
+                    .FirstOrDefault();
+                
+                // 查詢變更密碼紀錄
+                UserPasswordLog log = nsDbContext.UserPasswordLog
+                    .Where(upl => upl.UID == uid)
+                    .Where(upl => upl.Type == (int)UserPasswordLogType.ChangePassword)
+                    .OrderByDescending(upl => upl.CreDate)
+                    .FirstOrDefault();
 
+                // 如果有任何變更密碼紀錄，才以變更密碼紀錄的日期為準
+                if (log != null)
+                    lastChangeTime = log.CreDate;
 
-                if (!isEnabled)
+                // 參數名是「有效天數」，假設值為 60，而相減正好是第 60 天，先仍視為有效
+                if ((DateTime.Today - lastChangeTime.Date).Days <= forceChangeDays)
                     return;
+                
+                // 回傳 901
+                throw new HttpException((int)CustomHttpCode.PasswordExpired, "密碼已過期！");
             }
+        }
+
+        private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims,
+            IEnumerable<B_StaticCode> safetyConfig)
+        {
+            // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
+            bool isEnabled = GetSafetyConfigValue(safetyConfig, StaticCodeSafetyControlCode.IsEnforcingOneTokenOneLogin) == 1;
+
+            if (!isEnabled)
+                return;
 
             // 驗證 Token 符合 UserData 中紀錄的 JWT
             int uid = FilterStaticTools.GetUidInClaimInt(claims);
@@ -143,6 +215,14 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 if (user.JWT != GetToken(actionExecutingContext))
                     throw new Exception(TokenExpired);
             }
+        }
+
+        private static int GetSafetyConfigValue(IEnumerable<B_StaticCode> safetyConfig, StaticCodeSafetyControlCode code)
+        {
+            return safetyConfig
+                .Where(sc => sc.Code == ((int)code).ToString())
+                .Select(sc => sc.SortNo)
+                .FirstOrDefault();
         }
 
         private bool ValidatePrivileges(ActionExecutingContext actionContext, ClaimsPrincipal claims)

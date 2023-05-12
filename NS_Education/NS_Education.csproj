@@ -659,6 +659,7 @@
     <Compile Include="Tools\Filters\ResponsePrivilegeWrapper\ResponseWrapperFilter.cs" />
     <Compile Include="Tools\RequestHelper.cs" />
     <Compile Include="Variables\CategoryType.cs" />
+    <Compile Include="Variables\CustomHttpCode.cs" />
     <Compile Include="Variables\DbConstants.cs" />
     <Compile Include="Variables\IOConstants.cs" />
     <Compile Include="Variables\JwtConstants.cs" />

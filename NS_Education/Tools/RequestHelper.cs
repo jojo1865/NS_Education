@@ -16,9 +16,16 @@ namespace NS_Education.Tools
             // 如果這是 ExceptionContext 來的，把錯誤訊息設到 Status 中
             if (filterContext is ExceptionContext context)
             {
-                context.HttpContext.Response.StatusCode = 500;
-                context.HttpContext.Response.StatusDescription =
-                    context.Exception.Message;
+                if (context.Exception is HttpException httpException)
+                {
+                    context.HttpContext.Response.StatusCode = httpException.GetHttpCode();
+                    context.HttpContext.Response.StatusDescription = httpException.InnerException?.Message ?? httpException.Message;
+                }
+                else
+                {
+                    context.HttpContext.Response.StatusCode = 500;
+                    context.HttpContext.Response.StatusDescription = context.Exception.InnerException?.Message ?? context.Exception.Message;
+                }
             }
 
             // 取得此次 action 完整的 HTTP Response 並轉成 JObject

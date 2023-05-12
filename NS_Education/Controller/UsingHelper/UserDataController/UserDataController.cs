@@ -174,6 +174,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         private const string UpdatePWPasswordNotEncryptable = "密碼只允許英數字！";
         private const string DailyChangePasswordLimitExceeded = "此帳號今日已無法再修改密碼！";
         private const string UpdatePWOriginalPasswordIncorrect = "原密碼不符，請重新確認！";
+        private const string UpdatePWNewPasswordShouldBeDifferent = "新密碼不可與原密碼相同！";
 
         #endregion
         
@@ -571,6 +572,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             bool isValid = input
                 .StartValidate()
                 .SkipIfAlreadyInvalid()
+                .Validate(i => i.OriginalPassword != i.NewPassword, () => AddError(UpdatePWNewPasswordShouldBeDifferent))
                 .Validate(i => i.OriginalPassword.HasContent(), () => AddError(EmptyNotAllowed("原始密碼")))
                 .Validate(i => i.OriginalPassword.Length.IsInBetween(1, 100), () => AddError(LengthOutOfRange("原始密碼", 1, 100)))
                 // 如果無法加密，表示密碼有意外字元，同時 API 也應該在寫入欄位前就擋掉

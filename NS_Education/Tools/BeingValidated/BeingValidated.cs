@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 namespace NS_Education.Tools.BeingValidated
 {
+    // 用於驗證物件狀態時的 Wrapper，可以透過 ExtensionMethods 的 StartValidate() 取得。
     public class BeingValidated<T> : IBeingValidated<T>
     {
         public bool IsValid() => !_isInvalid;

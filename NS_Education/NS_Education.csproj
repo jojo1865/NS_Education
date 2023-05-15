@@ -606,7 +606,9 @@
     <Compile Include="Models\Utilities\PrintReport\GetResverListByIDs2\PrintReport_GetResverListByIds2_PayItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\BeingValidated\BeingValidated.cs" />
-    <Compile Include="Tools\BeingValidated\ChainValidateHelperExtensionMethods.cs" />
+    <Compile Include="Tools\BeingValidated\BeingValidatedAsyncHelperMethods.cs" />
+    <Compile Include="Tools\BeingValidated\BeingValidatedEnumerable.cs" />
+    <Compile Include="Tools\BeingValidated\BeingValidatedHelperMethods.cs" />
     <Compile Include="Tools\BeingValidated\IBeingValidated.cs" />
     <Compile Include="Tools\ControllerTools\BaseClass\PublicClass.cs" />
     <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\ChangeActiveHelper.cs" />
@@ -660,6 +662,7 @@
     <Compile Include="Tools\Filters\ResponsePrivilegeWrapper\ResponseWrapperFilter.cs" />
     <Compile Include="Tools\RequestHelper.cs" />
     <Compile Include="Variables\CategoryType.cs" />
+    <Compile Include="Variables\CustomHttpCode.cs" />
     <Compile Include="Variables\DbConstants.cs" />
     <Compile Include="Variables\IOConstants.cs" />
     <Compile Include="Variables\JwtConstants.cs" />

@@ -61,10 +61,10 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(PartnerItem_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BPID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的合作廠商 ID")))
-                .Validate(i => i.BSCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的所屬房型類別 ID")))
-                .Validate(i => i.DHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的所屬廳別 ID")))
-                .Validate(i => i.BOCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的所屬入帳代號 ID")))
+                .Validate(i => i.BPID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選的合作廠商 ID")))
+                .Validate(i => i.BSCID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選的所屬房型類別 ID")))
+                .Validate(i => i.DHID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選的所屬廳別 ID")))
+                .Validate(i => i.BOCID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選的所屬入帳代號 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -223,11 +223,11 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(PartnerItem_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BPIID == 0, () => AddError(WrongFormat("房型 ID")))
-                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), () => AddError(NotFound("廠商 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), () => AddError(NotFound("房型類型 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.PartnerItem), () => AddError(NotFound("入帳代號 ID")))
-                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
+                .Validate(i => i.BPIID == 0, _ => AddError(WrongFormat("房型 ID")))
+                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), _ => AddError(NotFound("廠商 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), _ => AddError(NotFound("房型類型 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.PartnerItem), _ => AddError(NotFound("入帳代號 ID")))
+                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), _ => AddError(NotFound("廳別 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -258,11 +258,11 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(PartnerItem_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("房型 ID")))
-                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), () => AddError(NotFound("廠商 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), () => AddError(NotFound("房型類型 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.PartnerItem), () => AddError(NotFound("入帳代號 ID")))
-                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
+                .Validate(i => i.BPIID.IsAboveZero(), _ => AddError(EmptyNotAllowed("房型 ID")))
+                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), _ => AddError(NotFound("廠商 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), _ => AddError(NotFound("房型類型 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.PartnerItem), _ => AddError(NotFound("入帳代號 ID")))
+                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), _ => AddError(NotFound("廳別 ID")))
                 .IsValid();
             return await Task.FromResult(isValid);
         }

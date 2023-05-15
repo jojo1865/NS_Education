@@ -63,13 +63,13 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(CustomerGift_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate(true)
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
-                .Validate(i => i.SendYear.IsInBetween(1911, 9999), () => AddError(WrongFormat("贈送年分")))
+                .Validate(i => i.CID.IsZeroOrAbove(), _ => AddError(WrongFormat("客戶 ID")))
+                .Validate(i => i.SendYear.IsInBetween(1911, 9999), _ => AddError(WrongFormat("贈送年分")))
                 .Validate(i =>
                         !i.SDate.TryParseDateTime(out DateTime startDate)
                         || !i.EDate.TryParseDateTime(out DateTime endDate)
                         || endDate >= startDate
-                    , () => AddError(MinLargerThanMax("贈送日期起始日", "贈送日期結束日")))
+                    , _ => AddError(MinLargerThanMax("贈送日期起始日", "贈送日期結束日")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -196,12 +196,12 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(CustomerGift_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.CGID == 0, () => AddError(WrongFormat("禮品贈與紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
-                .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
-                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift), () => AddError(NotFound("禮品 ID")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
+                .Validate(i => i.CGID == 0, _ => AddError(WrongFormat("禮品贈與紀錄 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), _ => AddError(NotFound("客戶 ID")))
+                .Validate(i => i.Year.IsInBetween(1911, 9999), _ => AddError(WrongFormat("禮品贈送代表年分")))
+                .Validate(i => i.SendDate.TryParseDateTime(out _), _ => AddError(WrongFormat("禮品贈與時間")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift), _ => AddError(NotFound("禮品 ID")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("禮品實際名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -230,12 +230,12 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(CustomerGift_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.CGID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品贈與紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
-                .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
-                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift), () => AddError(NotFound("禮品 ID")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
+                .Validate(i => i.CGID.IsAboveZero(), _ => AddError(EmptyNotAllowed("禮品贈與紀錄 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), _ => AddError(NotFound("客戶 ID")))
+                .Validate(i => i.Year.IsInBetween(1911, 9999), _ => AddError(WrongFormat("禮品贈送代表年分")))
+                .Validate(i => i.SendDate.TryParseDateTime(out _), _ => AddError(WrongFormat("禮品贈與時間")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift), _ => AddError(NotFound("禮品 ID")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("禮品實際名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

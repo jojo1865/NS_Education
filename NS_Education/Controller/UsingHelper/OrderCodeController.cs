@@ -110,7 +110,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.CodeType >= -1,
-                    () => AddError(EmptyNotAllowed("入帳代號類別")))
+                    _ => AddError(EmptyNotAllowed("入帳代號類別")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -296,15 +296,15 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.BOCID == 0,
-                    () => AddError(WrongFormat("入帳代號 ID")))
+                    _ => AddError(WrongFormat("入帳代號 ID")))
                 .Validate(i => i.CodeType.IsInBetween(0, 9),
-                    () => AddError(OutOfRange("入帳代號類別", 0, 9)))
+                    _ => AddError(OutOfRange("入帳代號類別", 0, 9)))
                 .Validate(i => i.Code.HasContent(),
-                    () => AddError(EmptyNotAllowed("入帳代號編碼")))
+                    _ => AddError(EmptyNotAllowed("入帳代號編碼")))
                 .Validate(i => i.Title.HasContent(),
-                    () => AddError(EmptyNotAllowed("入帳代號名稱")))
+                    _ => AddError(EmptyNotAllowed("入帳代號名稱")))
                 .Validate(i => i.PrintTitle.HasContent(),
-                    () => AddError(EmptyNotAllowed("帳單列印名稱")))
+                    _ => AddError(EmptyNotAllowed("帳單列印名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -335,15 +335,15 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.BOCID.IsAboveZero(),
-                    () => AddError(WrongFormat("入帳代號 ID")))
+                    _ => AddError(WrongFormat("入帳代號 ID")))
                 .Validate(i => i.CodeType.IsInBetween(0, 9),
-                    () => AddError(OutOfRange("入帳代號類別", 0, 9)))
+                    _ => AddError(OutOfRange("入帳代號類別", 0, 9)))
                 .Validate(i => i.Code.HasContent(),
-                    () => AddError(EmptyNotAllowed("入帳代號編碼")))
+                    _ => AddError(EmptyNotAllowed("入帳代號編碼")))
                 .Validate(i => i.Title.HasContent(),
-                    () => AddError(EmptyNotAllowed("入帳代號名稱")))
+                    _ => AddError(EmptyNotAllowed("入帳代號名稱")))
                 .Validate(i => i.PrintTitle.HasContent(),
-                    () => AddError(EmptyNotAllowed("帳單列印名稱")))
+                    _ => AddError(EmptyNotAllowed("帳單列印名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

@@ -57,7 +57,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Zip_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("上層 ID")))
+                .Validate(i => i.ParentId.IsZeroOrAbove(), _ => AddError(EmptyNotAllowed("上層 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -184,14 +184,14 @@ namespace NS_Education.Controller.UsingHelper
             string[] groupNames = await SubmitGetGroupNames();
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.DZID == 0, () => AddError(WrongFormat("國籍 / 郵遞區號 ID")))
-                .Validate(i => i.ParentID.IsAboveZero(), () => AddError(EmptyNotAllowed("上層 ID")))
-                .Validate(i => i.ParentID != i.DZID, () => AddError(UnsupportedValue("上層 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼（郵遞區號）")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.GroupName.HasContent(), () => AddError(EmptyNotAllowed("層級名稱")))
+                .Validate(i => i.DZID == 0, _ => AddError(WrongFormat("國籍 / 郵遞區號 ID")))
+                .Validate(i => i.ParentID.IsAboveZero(), _ => AddError(EmptyNotAllowed("上層 ID")))
+                .Validate(i => i.ParentID != i.DZID, _ => AddError(UnsupportedValue("上層 ID")))
+                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼（郵遞區號）")))
+                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.GroupName.HasContent(), _ => AddError(EmptyNotAllowed("層級名稱")))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => groupNames.Contains(input.GroupName), () => AddError(SubmitGroupNameNotFound))
+                .Validate(i => groupNames.Contains(input.GroupName), _ => AddError(SubmitGroupNameNotFound))
                 .IsValid();
 
             return isValid;
@@ -218,14 +218,14 @@ namespace NS_Education.Controller.UsingHelper
             string[] groupNames = await SubmitGetGroupNames();
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.DZID.IsAboveZero(), () => AddError(EmptyNotAllowed("國籍 / 郵遞區號 ID")))
-                .Validate(i => i.ParentID.IsAboveZero(), () => AddError(EmptyNotAllowed("上層 ID")))
-                .Validate(i => i.ParentID != i.DZID, () => AddError(UnsupportedValue("上層 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼（郵遞區號）")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.GroupName.HasContent(), () => AddError(EmptyNotAllowed("層級名稱")))
+                .Validate(i => i.DZID.IsAboveZero(), _ => AddError(EmptyNotAllowed("國籍 / 郵遞區號 ID")))
+                .Validate(i => i.ParentID.IsAboveZero(), _ => AddError(EmptyNotAllowed("上層 ID")))
+                .Validate(i => i.ParentID != i.DZID, _ => AddError(UnsupportedValue("上層 ID")))
+                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼（郵遞區號）")))
+                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.GroupName.HasContent(), _ => AddError(EmptyNotAllowed("層級名稱")))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => groupNames.Contains(input.GroupName), () => AddError(SubmitGroupNameNotFound))
+                .Validate(i => groupNames.Contains(input.GroupName), _ => AddError(SubmitGroupNameNotFound))
                 .IsValid();
 
             return isValid;

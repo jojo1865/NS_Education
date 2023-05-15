@@ -46,7 +46,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         public async Task<bool> GetListAllValidateInput(StaticCode_GetTypeList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.Id.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之類別 ID")))
+                .Validate(i => i.Id.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之類別 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

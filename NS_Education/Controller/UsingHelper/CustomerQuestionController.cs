@@ -68,12 +68,12 @@ namespace NS_Education.Controller.UsingHelper
             DateTime sDate = default;
             DateTime eDate = default;
             bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
+                .Validate(i => i.CID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
-                    () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
+                    _ => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
                 .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
-                    () => AddError(WrongFormat("欲篩選之拜訪期間最後日期")))
-                .Validate(i => sDate.Date <= eDate.Date, () => AddError(GetListDateRangeIncorrect))
+                    _ => AddError(WrongFormat("欲篩選之拜訪期間最後日期")))
+                .Validate(i => sDate.Date <= eDate.Date, _ => AddError(GetListDateRangeIncorrect))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -205,23 +205,23 @@ namespace NS_Education.Controller.UsingHelper
             DateTime askDate = default;
             DateTime responseDate = default;
             var validation = input.StartValidate(true)
-                .Validate(i => i.CQID == 0, () => AddError(WrongFormat("問題紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(EmptyNotAllowed("客戶 ID")))
-                .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")))
-                .Validate(i => !i.AskTitle.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題主旨")))
-                .Validate(i => !i.AskDescription.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題內容")));
+                .Validate(i => i.CQID == 0, _ => AddError(WrongFormat("問題紀錄 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), _ => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.AskDate.TryParseDateTime(out askDate), _ => AddError(WrongFormat("問題發生時間")))
+                .Validate(i => !i.AskTitle.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("問題主旨")))
+                .Validate(i => !i.AskDescription.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("問題內容")));
 
             // 若傳入內容表示已回答，則回答者相關的欄位需要檢核
             if (input.ResponseFlag)
             {
                 await validation.Validate(i => !i.ResponseUser.IsNullOrWhiteSpace(),
-                        () => AddError(EmptyNotAllowed("回答者姓名")))
+                        _ => AddError(EmptyNotAllowed("回答者姓名")))
                     .Validate(i => !i.ResponseDescription.IsNullOrWhiteSpace(),
-                        () => AddError(EmptyNotAllowed("回答內容")))
+                        _ => AddError(EmptyNotAllowed("回答內容")))
                     .Validate(i => i.ResponseDate.TryParseDateTime(out responseDate),
-                        () => AddError(WrongFormat("回答時間")))
+                        _ => AddError(WrongFormat("回答時間")))
                     .Validate(i => responseDate >= askDate,
-                        () => AddError(SubmitResponseDateNotAfterAskDate));
+                        _ => AddError(SubmitResponseDateNotAfterAskDate));
             }
 
             return await validation.IsValid();
@@ -259,23 +259,23 @@ namespace NS_Education.Controller.UsingHelper
             DateTime askDate = default;
             DateTime responseDate = default;
             var validation = input.StartValidate(true)
-                .Validate(i => i.CQID.IsAboveZero(), () => AddError(EmptyNotAllowed("問題紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(EmptyNotAllowed("客戶 ID")))
-                .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")))
-                .Validate(i => !i.AskTitle.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題主旨")))
-                .Validate(i => !i.AskDescription.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("問題內容")));
+                .Validate(i => i.CQID.IsAboveZero(), _ => AddError(EmptyNotAllowed("問題紀錄 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), _ => AddError(EmptyNotAllowed("客戶 ID")))
+                .Validate(i => i.AskDate.TryParseDateTime(out askDate), _ => AddError(WrongFormat("問題發生時間")))
+                .Validate(i => !i.AskTitle.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("問題主旨")))
+                .Validate(i => !i.AskDescription.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("問題內容")));
 
             // 若傳入內容表示已回答，則回答者相關的欄位需要檢核
             if (input.ResponseFlag)
             {
                 await validation.Validate(i => !i.ResponseUser.IsNullOrWhiteSpace(),
-                        () => AddError(EmptyNotAllowed("回答者姓名")))
+                        _ => AddError(EmptyNotAllowed("回答者姓名")))
                     .Validate(i => !i.ResponseDescription.IsNullOrWhiteSpace(),
-                        () => AddError(EmptyNotAllowed("回答內容")))
+                        _ => AddError(EmptyNotAllowed("回答內容")))
                     .Validate(i => i.ResponseDate.TryParseDateTime(out responseDate),
-                        () => AddError(WrongFormat("回答時間")))
+                        _ => AddError(WrongFormat("回答時間")))
                     .Validate(i => responseDate >= askDate,
-                        () => AddError(SubmitResponseDateNotAfterAskDate));
+                        _ => AddError(SubmitResponseDateNotAfterAskDate));
             }
 
             return await validation.IsValid();

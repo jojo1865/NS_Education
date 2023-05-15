@@ -52,7 +52,6 @@ namespace NS_Education.Tools.BeingValidated
         /// 在執行驗證的中途，修改是否在已發生錯誤時跳過後續驗證的設定。
         /// </summary>
         /// <param name="setTo">欲設定的新值。（可選）忽略時，預設值為 true。</param>
-        /// <typeparam name="T">Generic Type。</typeparam>
         /// <returns>此物件本身。</returns>
         IBeingValidated<TInput, TOutput> SkipIfAlreadyInvalid(bool setTo = true);
     }

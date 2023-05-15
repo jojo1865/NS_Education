@@ -89,7 +89,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             return await Task.Run(() => input
                 .StartValidate()
                 .Validate(i => i.CodeType >= -1,
-                    _ => AddError(EmptyNotAllowed("靜態參數類別")))
+                    () => AddError(EmptyNotAllowed("靜態參數類別")))
                 .IsValid()
             );
         }
@@ -280,8 +280,8 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSCID == 0,
-                    _ => AddError(WrongFormat("靜態參數 ID")))
-                .Validate(i => i.CodeType >= 0, _ => AddError(OutOfRange("參數所屬類別", 0)))
+                    () => AddError(WrongFormat("靜態參數 ID")))
+                .Validate(i => i.CodeType >= 0, () => AddError(OutOfRange("參數所屬類別", 0)))
                 .Validate(i => i.Code.HasContent())
                 .Validate(i => i.Title.HasContent())
                 .SkipIfAlreadyInvalid()
@@ -291,14 +291,14 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                               && !sc.DeleteFlag
                                               && sc.CodeType == 0
                                               && sc.Code == sc.CodeType.ToString())
-                    , _ => AddError(NotFound("參數所屬類別")))
+                    , () => AddError(NotFound("參數所屬類別")))
                 // 同 CodeType 下不允許重複編碼的資料
                 .ValidateAsync(async i =>
                         !await DC.B_StaticCode.AnyAsync(bc => bc.ActiveFlag
                                                               && !bc.DeleteFlag
                                                               && bc.CodeType == i.CodeType
                                                               && bc.Code == i.Code)
-                    , _ => AddError(AlreadyExists("編碼")))
+                    , () => AddError(AlreadyExists("編碼")))
                 .IsValid();
 
             return isValid;
@@ -329,8 +329,8 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSCID.IsAboveZero(),
-                    _ => AddError(EmptyNotAllowed("靜態參數 ID")))
-                .Validate(i => i.CodeType >= 0, _ => AddError(OutOfRange("參數所屬類別", 0)))
+                    () => AddError(EmptyNotAllowed("靜態參數 ID")))
+                .Validate(i => i.CodeType >= 0, () => AddError(OutOfRange("參數所屬類別", 0)))
                 .Validate(i => i.Code.HasContent())
                 .Validate(i => i.Title.HasContent())
                 .SkipIfAlreadyInvalid()
@@ -340,14 +340,14 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                               && !sc.DeleteFlag
                                               && sc.CodeType == 0
                                               && sc.Code == sc.CodeType.ToString())
-                    , _ => AddError(NotFound("參數所屬類別")))
+                    , () => AddError(NotFound("參數所屬類別")))
                 // 同 CodeType 下不允許重複編碼的資料
                 .ValidateAsync(async i =>
                         !await DC.B_StaticCode.AnyAsync(bc => bc.ActiveFlag
                                                               && !bc.DeleteFlag
                                                               && bc.CodeType == i.CodeType
                                                               && bc.Code == i.Code)
-                    , _ => AddError(AlreadyExists("編碼")))
+                    , () => AddError(AlreadyExists("編碼")))
                 .IsValid();
 
             return isValid;

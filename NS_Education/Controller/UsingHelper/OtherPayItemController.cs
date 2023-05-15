@@ -181,12 +181,12 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(OtherPayItem_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DOPIID == 0, _ => AddError(WrongFormat("項目 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("代碼")))
-                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.PaidType.IsInBetween(0, 1), _ => AddError(WrongFormat("計價方式")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit), _ => AddError(NotFound("單位 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem), _ => AddError(NotFound("入帳代號 ID")))
+                .Validate(i => i.DOPIID == 0, () => AddError(WrongFormat("項目 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.PaidType.IsInBetween(0, 1), () => AddError(WrongFormat("計價方式")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit), () => AddError(NotFound("單位 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem), () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -216,12 +216,12 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(OtherPayItem_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DOPIID.IsAboveZero(), _ => AddError(EmptyNotAllowed("項目 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("代碼")))
-                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.PaidType.IsInBetween(0, 1), _ => AddError(WrongFormat("計價方式")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit), _ => AddError(NotFound("單位 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem), _ => AddError(NotFound("入帳代號 ID")))
+                .Validate(i => i.DOPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("項目 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.PaidType.IsInBetween(0, 1), () => AddError(WrongFormat("計價方式")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit), () => AddError(NotFound("單位 ID")))
+                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem), () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

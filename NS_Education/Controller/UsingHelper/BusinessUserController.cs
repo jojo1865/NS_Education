@@ -198,11 +198,11 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(BusinessUser_Submit_Input_APIItem input)
         {
             bool isInputValid = input.StartValidate()
-                .Validate(i => i.BUID == 0, _ => AddError(WrongFormat("業務 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("員工編號")))
-                .Validate(i => i.Name.HasContent(), _ => AddError(EmptyNotAllowed("姓名")))
+                .Validate(i => i.BUID == 0, () => AddError(WrongFormat("業務 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("員工編號")))
+                .Validate(i => i.Name.HasContent(), () => AddError(EmptyNotAllowed("姓名")))
                 .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count,
-                    _ => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
+                    () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
                 .IsValid();
 
             // 驗證所有 CID 都實際存在於資料庫。
@@ -211,7 +211,7 @@ namespace NS_Education.Controller.UsingHelper
                                result & item.StartValidate()
                                    .Validate(_ => 
                                            DC.Customer.Any(c => c.ActiveFlag && !c.DeleteFlag && c.CID == item.CID),
-                                       _ => AddError(NotFound($"客戶 ID {item.CID}")))
+                                       () => AddError(NotFound($"客戶 ID {item.CID}")))
                                    .IsValid()
                            );
 
@@ -243,11 +243,11 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(BusinessUser_Submit_Input_APIItem input)
         {
             bool isInputValid = input.StartValidate()
-                .Validate(i => i.BUID.IsAboveZero(), _ => AddError(EmptyNotAllowed("業務 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("員工編號")))
-                .Validate(i => i.Name.HasContent(), _ => AddError(EmptyNotAllowed("姓名")))
+                .Validate(i => i.BUID.IsAboveZero(), () => AddError(EmptyNotAllowed("業務 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("員工編號")))
+                .Validate(i => i.Name.HasContent(), () => AddError(EmptyNotAllowed("姓名")))
                 .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count,
-                    _ => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
+                    () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
                 .IsValid();
 
             // 驗證所有 CID 都實際存在於資料庫。
@@ -256,7 +256,7 @@ namespace NS_Education.Controller.UsingHelper
                                result & item.StartValidate()
                                    .Validate(_ => 
                                            DC.Customer.Any(c => c.ActiveFlag && !c.DeleteFlag && c.CID == item.CID),
-                                       _ => AddError(NotFound($"客戶 ID {item.CID}")))
+                                       () => AddError(NotFound($"客戶 ID {item.CID}")))
                                    .IsValid()
                            );
 

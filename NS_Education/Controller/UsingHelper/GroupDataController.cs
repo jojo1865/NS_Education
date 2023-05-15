@@ -165,8 +165,8 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(GroupData_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.GID == 0, _ => AddError(WrongFormat("權限 ID")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("權限名稱")))
+                .Validate(i => i.GID == 0, () => AddError(WrongFormat("權限 ID")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("權限名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -186,8 +186,8 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(GroupData_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.GID.IsAboveZero(), _ => AddError(EmptyNotAllowed("權限 ID")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("權限名稱")))
+                .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
+                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("權限名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -298,10 +298,10 @@ namespace NS_Education.Controller.UsingHelper
         private bool SubmitMenuDataValidateInput(GroupData_SubmitMenuData_Input_APIItem input)
         {
             bool isInputValid = input.StartValidate()
-                .Validate(i => i.GID.IsAboveZero(), _ => AddError(EmptyNotAllowed("權限 ID")))
-                .Validate(i => i.GroupItems.Any(), _ => AddError(EmptyNotAllowed("選單權限列表")))
+                .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
+                .Validate(i => i.GroupItems.Any(), () => AddError(EmptyNotAllowed("選單權限列表")))
                 .Validate(i => i.GroupItems.GroupBy(item => item.MDID).Count() == i.GroupItems.Count,
-                    _ => AddError(SameMdIdDetected))
+                    () => AddError(SameMdIdDetected))
                 .IsValid();
 
             // 檢查是否所有 MDID 都存在
@@ -313,7 +313,7 @@ namespace NS_Education.Controller.UsingHelper
                                                                                               md.ActiveFlag &&
                                                                                               !md.DeleteFlag &&
                                                                                               md.MDID == item.MDID),
-                                                                                      _ => AddError(
+                                                                                      () => AddError(
                                                                                           NotFound(
                                                                                               $"選單 ID {item.MDID}")))
                                                                                   .IsValid());

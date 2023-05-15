@@ -70,14 +70,14 @@ namespace NS_Education.Controller.UsingHelper
             DateTime eDate = default;
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之客戶 ID")))
-                .Validate(i => i.BUID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之業務員 ID")))
-                .Validate(i => i.BSCID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之拜訪方式 ID")))
+                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
+                .Validate(i => i.BUID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之業務員 ID")))
+                .Validate(i => i.BSCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之拜訪方式 ID")))
                 .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
-                    _ => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
+                    () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
                 .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
-                    _ => AddError(WrongFormat("欲篩選之拜訪期間最後日期")))
-                .Validate(i => sDate.Date <= eDate.Date, _ => AddError(GetListDateRangeIncorrect))
+                    () => AddError(WrongFormat("欲篩選之拜訪期間最後日期")))
+                .Validate(i => sDate.Date <= eDate.Date, () => AddError(GetListDateRangeIncorrect))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -230,13 +230,13 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(CustomerVisit_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.CVID == 0, _ => AddError(WrongFormat("拜訪紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), _ => AddError(NotFound("客戶 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod), _ => AddError(NotFound("客戶拜訪方式 ID")))
-                .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)), _ => AddError(NotFound("拜訪業務 ID")))
-                .Validate(i => i.TargetTitle.HasContent(), _ => AddError(EmptyNotAllowed("拜訪對象")))
-                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("主旨")))
-                .Validate(i => i.VisitDate.TryParseDateTime(out _), _ => AddError(WrongFormat("拜訪日期")))
+                .Validate(i => i.CVID == 0, () => AddError(WrongFormat("拜訪紀錄 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod), () => AddError(NotFound("客戶拜訪方式 ID")))
+                .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)), () => AddError(NotFound("拜訪業務 ID")))
+                .Validate(i => i.TargetTitle.HasContent(), () => AddError(EmptyNotAllowed("拜訪對象")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("主旨")))
+                .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -265,13 +265,13 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(CustomerVisit_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.CVID.IsAboveZero(), _ => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), _ => AddError(NotFound("客戶 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod), _ => AddError(NotFound("客戶拜訪方式 ID")))
-                .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)), _ => AddError(NotFound("拜訪業務 ID")))
-                .Validate(i => i.TargetTitle.HasContent(), _ => AddError(EmptyNotAllowed("拜訪對象")))
-                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("主旨")))
-                .Validate(i => i.VisitDate.TryParseDateTime(out _), _ => AddError(WrongFormat("拜訪日期")))
+                .Validate(i => i.CVID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod), () => AddError(NotFound("客戶拜訪方式 ID")))
+                .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)), () => AddError(NotFound("拜訪業務 ID")))
+                .Validate(i => i.TargetTitle.HasContent(), () => AddError(EmptyNotAllowed("拜訪對象")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("主旨")))
+                .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

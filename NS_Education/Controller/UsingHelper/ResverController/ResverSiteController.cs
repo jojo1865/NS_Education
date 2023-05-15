@@ -52,8 +52,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         public async Task<bool> GetListPagedValidateInput(Resver_GetResverSiteList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BSCID1.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之樓別 ID")))
-                .Validate(i => i.PeopleCt.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之最小可容納人數")))
+                .Validate(i => i.BSCID1.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之樓別 ID")))
+                .Validate(i => i.PeopleCt.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之最小可容納人數")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

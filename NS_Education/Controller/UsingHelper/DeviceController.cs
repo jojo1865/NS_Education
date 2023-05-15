@@ -60,9 +60,9 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Device_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之所屬分類 ID")))
-                .Validate(i => i.DHID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之所屬廳別 ID")))
-                .Validate(i => i.BOCID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之所屬入帳代號 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬分類 ID")))
+                .Validate(i => i.DHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬廳別 ID")))
+                .Validate(i => i.BOCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬入帳代號 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -229,17 +229,17 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(Device_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BDID == 0, _ => AddError(WrongFormat("設備 ID")))
+                .Validate(i => i.BDID == 0, () => AddError(WrongFormat("設備 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Device),
-                    _ => AddError(NotFound("類別 ID")))
+                    () => AddError(NotFound("類別 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
-                    _ => AddError(NotFound("單位 ID")))
+                    () => AddError(NotFound("單位 ID")))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Device),
-                    _ => AddError(NotFound("入帳代號 ID")))
+                    () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
-                    _ => AddError(NotFound("廳別 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("標題")))
+                    () => AddError(NotFound("廳別 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -274,17 +274,17 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(Device_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BDID.IsAboveZero(), _ => AddError(EmptyNotAllowed("設備 ID")))
+                .Validate(i => i.BDID.IsAboveZero(), () => AddError(EmptyNotAllowed("設備 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Device),
-                    _ => AddError(NotFound("類別 ID")))
+                    () => AddError(NotFound("類別 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
-                    _ => AddError(NotFound("單位 ID")))
+                    () => AddError(NotFound("單位 ID")))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Device),
-                    _ => AddError(NotFound("入帳代號 ID")))
+                    () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
-                    _ => AddError(NotFound("廳別 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("標題")))
+                    () => AddError(NotFound("廳別 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

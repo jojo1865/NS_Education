@@ -58,7 +58,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(PayType_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsZeroOrAbove(), _ => AddError(EmptyNotAllowed("所屬分類 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("所屬分類 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -191,10 +191,10 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(PayType_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DPTID == 0, _ => AddError(WrongFormat("付款方式 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType), _ => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.DPTID == 0, () => AddError(WrongFormat("付款方式 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType), () => AddError(NotFound("分類 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -224,10 +224,10 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(PayType_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DPTID.IsAboveZero(), _ => AddError(WrongFormat("付款方式 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType), _ => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.DPTID.IsAboveZero(), () => AddError(WrongFormat("付款方式 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType), () => AddError(NotFound("分類 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

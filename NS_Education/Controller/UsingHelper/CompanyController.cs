@@ -61,7 +61,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Company_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsZeroOrAbove(), _ => AddError(EmptyNotAllowed("資料所屬分類 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("資料所屬分類 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -195,10 +195,10 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(Company_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DCID == 0, _ => AddError(WrongFormat("公司 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), _ => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), _ => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.DCID == 0, () => AddError(WrongFormat("公司 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), () => AddError(NotFound("分類 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -220,10 +220,10 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(Company_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DCID.IsAboveZero(), _ => AddError(EmptyNotAllowed("公司 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), _ => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), _ => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), () => AddError(NotFound("分類 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

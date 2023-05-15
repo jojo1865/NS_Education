@@ -50,8 +50,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         public async Task<bool> GetListPagedValidateInput(UserLog_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.UID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之使用者 ID")))
-                .Validate(i => i.TargetID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之目標資料 ID")))
+                .Validate(i => i.UID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之使用者 ID")))
+                .Validate(i => i.TargetID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之目標資料 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

@@ -50,10 +50,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public async Task<bool> GetListPagedValidateInput(SiteData_GetListForCalendar_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.TargetYear.IsInBetween(1911, 9999), _ => AddError(WrongFormat("目標年分")))
-                .Validate(i => i.TargetMonth.IsInBetween(1, 12), _ => AddError(WrongFormat("目標月份")))
-                .Validate(i => i.BSID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之場地 ID")))
-                .Validate(i => i.CID.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選之客戶 ID")))
+                .Validate(i => i.TargetYear.IsInBetween(1911, 9999), () => AddError(WrongFormat("目標年分")))
+                .Validate(i => i.TargetMonth.IsInBetween(1, 12), () => AddError(WrongFormat("目標月份")))
+                .Validate(i => i.BSID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之場地 ID")))
+                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

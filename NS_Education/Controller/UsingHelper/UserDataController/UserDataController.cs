@@ -52,24 +52,24 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             bool isValid = await input.StartValidate()
                 .ValidateAsync(
                     async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)),
-                    _ => AddError(NotFound("權限 ID")))
+                    () => AddError(NotFound("權限 ID")))
                 .ValidateAsync(
                     async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
-                    _ => AddError(NotFound("部門 ID")))
+                    () => AddError(NotFound("部門 ID")))
                 .Validate(i => i.Username.HasContent() && i.Username.Length.IsInBetween(1, 50),
-                    _ => AddError(LengthOutOfRange("使用者名稱", 1, 50)))
+                    () => AddError(LengthOutOfRange("使用者名稱", 1, 50)))
                 .Validate(i => i.LoginAccount.HasContent() && i.LoginAccount.Length.IsInBetween(1, 100),
-                    _ => AddError(LengthOutOfRange("使用者帳號", 1, 100)))
+                    () => AddError(LengthOutOfRange("使用者帳號", 1, 100)))
                 // 驗證使用者帳號尚未被使用
                 .ValidateAsync(
                     async i => !await DC.UserData.AnyAsync(ud =>
                         !ud.DeleteFlag && ud.LoginAccount == input.LoginAccount),
-                    _ => AddError(AlreadyExists("使用者帳號")))
-                .Validate(i => i.LoginPassword.HasContent(), _ => AddError(EmptyNotAllowed("使用者密碼")))
+                    () => AddError(AlreadyExists("使用者帳號")))
+                .Validate(i => i.LoginPassword.HasContent(), () => AddError(EmptyNotAllowed("使用者密碼")))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.LoginPassword.Length.IsInBetween(passwordMinLength, 100),
-                    _ => AddError(LengthOutOfRange("使用者密碼", passwordMinLength, 100)))
-                .Validate(i => i.LoginPassword.IsEncryptablePassword(), _ => AddError(PasswordAlphanumericOnly))
+                    () => AddError(LengthOutOfRange("使用者密碼", passwordMinLength, 100)))
+                .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
                 .IsValid();
 
             if (!isValid)
@@ -199,10 +199,10 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             // 2. 確認帳號的啟用 Flag 與刪除 Flag 
             // 3. 有帳號，才驗證登入密碼
             bool isValidated = queried.StartValidate(true)
-                .Validate(q => q != null, _ => AddError(LoginAccountNotFound))
-                .Validate(q => q.ActiveFlag && !q.DeleteFlag, _ => AddError(LoginAccountNotFound))
+                .Validate(q => q != null, () => AddError(LoginAccountNotFound))
+                .Validate(q => q.ActiveFlag && !q.DeleteFlag, () => AddError(LoginAccountNotFound))
                 .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
-                    _ => AddError(LoginPasswordIncorrect))
+                    () => AddError(LoginPasswordIncorrect))
                 .IsValid();
 
             if (!isValidated)
@@ -313,14 +313,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             int uid = GetUid();
             
             bool isValid = await input.StartValidate()
-                .Validate(i => i.UID.IsAboveZero(), _ => AddError(EmptyNotAllowed("使用者 ID")))
-                .Validate(i => i.Username.HasContent() && i.Username.Length.IsInBetween(1, 50), _ => AddError(LengthOutOfRange("使用者名稱", 1, 50)))
-                .Validate(i => i.LoginAccount.HasContent() && i.LoginAccount.Length.IsInBetween(1, 100), _ => AddError(LengthOutOfRange("使用者帳號", 1, 100)))
-                .ValidateAsync(async i => await DC.UserData.AnyAsync(ud => !ud.DeleteFlag && ud.LoginAccount == i.LoginAccount && ud.UID != uid), _ => AddError(AlreadyExists("使用者帳號")))
-                .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)), _ => AddError(NotFound("部門 ID")))
-                .ValidateAsync(async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)), _ => AddError(NotFound("身分 ID")))
-                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.Length.IsInBetween(1, 100), _ => AddError(OutOfRange("使用者密碼", 1, 100)))
-                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.IsEncryptablePassword(), _ => AddError(PasswordAlphanumericOnly))
+                .Validate(i => i.UID.IsAboveZero(), () => AddError(EmptyNotAllowed("使用者 ID")))
+                .Validate(i => i.Username.HasContent() && i.Username.Length.IsInBetween(1, 50), () => AddError(LengthOutOfRange("使用者名稱", 1, 50)))
+                .Validate(i => i.LoginAccount.HasContent() && i.LoginAccount.Length.IsInBetween(1, 100), () => AddError(LengthOutOfRange("使用者帳號", 1, 100)))
+                .ValidateAsync(async i => await DC.UserData.AnyAsync(ud => !ud.DeleteFlag && ud.LoginAccount == i.LoginAccount && ud.UID != uid), () => AddError(AlreadyExists("使用者帳號")))
+                .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)), () => AddError(NotFound("部門 ID")))
+                .ValidateAsync(async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)), () => AddError(NotFound("身分 ID")))
+                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.Length.IsInBetween(1, 100), () => AddError(OutOfRange("使用者密碼", 1, 100)))
+                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -571,15 +571,15 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             bool isValid = input
                 .StartValidate()
                 .SkipIfAlreadyInvalid()
-                .Validate(i => i.OriginalPassword != i.NewPassword, _ => AddError(UpdatePWNewPasswordShouldBeDifferent))
-                .Validate(i => i.OriginalPassword.HasContent(), _ => AddError(EmptyNotAllowed("原始密碼")))
-                .Validate(i => i.OriginalPassword.Length.IsInBetween(1, 100), _ => AddError(LengthOutOfRange("原始密碼", 1, 100)))
+                .Validate(i => i.OriginalPassword != i.NewPassword, () => AddError(UpdatePWNewPasswordShouldBeDifferent))
+                .Validate(i => i.OriginalPassword.HasContent(), () => AddError(EmptyNotAllowed("原始密碼")))
+                .Validate(i => i.OriginalPassword.Length.IsInBetween(1, 100), () => AddError(LengthOutOfRange("原始密碼", 1, 100)))
                 // 如果無法加密，表示密碼有意外字元，同時 API 也應該在寫入欄位前就擋掉
                 // 所以這種情況視為密碼錯誤，直接返回。
-                .Validate(i => i.OriginalPassword.IsEncryptablePassword(), _ => AddError(UpdatePWOriginalPasswordIncorrect))
-                .Validate(i => i.NewPassword.HasContent(), _ => AddError(EmptyNotAllowed("新密碼")))
-                .Validate(i => i.NewPassword.Length.IsInBetween(passwordMinLength, 100), _ => AddError(LengthOutOfRange("新密碼", passwordMinLength, 100)))
-                .Validate(i => i.NewPassword.IsEncryptablePassword(), _ => AddError(UpdatePWPasswordNotEncryptable))
+                .Validate(i => i.OriginalPassword.IsEncryptablePassword(), () => AddError(UpdatePWOriginalPasswordIncorrect))
+                .Validate(i => i.NewPassword.HasContent(), () => AddError(EmptyNotAllowed("新密碼")))
+                .Validate(i => i.NewPassword.Length.IsInBetween(passwordMinLength, 100), () => AddError(LengthOutOfRange("新密碼", passwordMinLength, 100)))
+                .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(UpdatePWPasswordNotEncryptable))
                 .IsValid();
 
             if (!isValid)

@@ -6,7 +6,7 @@ namespace NS_Education.Tools.BeingValidated
     /// <summary>
     /// 針對 BeingValidated 使用非同步方法時的小幫手，包含一系列擴充方法
     /// </summary>
-    public static class BeingValidatedAsyncHelperMethods
+    public static class BeingValidatedTaskHelperMethods
     {
         /// <summary>
         /// 執行驗證。
@@ -26,6 +26,14 @@ namespace NS_Education.Tools.BeingValidated
             return obj.Validate(validation, onFail, onException);
         }
 
+        /// <inheritdoc cref="Validate{TInput,TOutput}(System.Threading.Tasks.Task{NS_Education.Tools.BeingValidated.IBeingValidated{TInput,TOutput}},System.Func{TInput,bool},System.Action{TInput},System.Action{TInput,System.Exception})"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> Validate<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated
+            , Func<TInput, bool> validation
+            , Action onFail = null
+            , Action<Exception> onException = null)
+            => await beingValidated.Validate(validation, _ => onFail?.Invoke(), (_, e) => onException?.Invoke(e));
+
         /// <summary>
         /// 執行驗證。
         /// </summary>
@@ -41,6 +49,13 @@ namespace NS_Education.Tools.BeingValidated
             IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return obj.Validate(validation, onException);
         }
+
+        /// <inheritdoc cref="Validate{TInput,TOutput}(System.Threading.Tasks.Task{NS_Education.Tools.BeingValidated.IBeingValidated{TInput,TOutput}},System.Action{TInput},System.Action{TInput,System.Exception})"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> Validate<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated
+            , Action<TInput> validation
+            , Action<Exception> onException)
+            => await beingValidated.Validate(validation, (_, e) => onException?.Invoke(e));
 
         /// <summary>
         /// 非同步地執行驗證。
@@ -60,6 +75,14 @@ namespace NS_Education.Tools.BeingValidated
             return await obj.ValidateAsync(validation, onFail, onException);
         }
 
+        /// <inheritdoc cref="ValidateAsync{TInput,TOutput}(System.Threading.Tasks.Task{NS_Education.Tools.BeingValidated.IBeingValidated{TInput,TOutput}},System.Func{TInput,System.Threading.Tasks.Task{bool}},System.Action{TInput},System.Action{TInput,System.Exception})"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated
+            , Func<TInput, Task<bool>> validation
+            , Action onFail = null
+            , Action<Exception> onException = null)
+            => await beingValidated.ValidateAsync(validation, _ => onFail?.Invoke(), (_, e) => onException?.Invoke(e));
+
         /// <summary>
         /// 非同步地執行驗證。
         /// </summary>
@@ -75,6 +98,13 @@ namespace NS_Education.Tools.BeingValidated
             IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return await obj.ValidateAsync(validation, onException);
         }
+
+        /// <inheritdoc cref="ValidateAsync{TInput,TOutput}(System.Threading.Tasks.Task{NS_Education.Tools.BeingValidated.IBeingValidated{TInput,TOutput}},System.Func{TInput,System.Threading.Tasks.Task},System.Action{TInput,System.Exception})"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated
+            , Func<TInput, Task> validation
+            , Action<Exception> onException)
+            => await beingValidated.ValidateAsync(validation, (_, e) => onException?.Invoke(e));
 
         /// <summary>
         /// 取得驗證結果。

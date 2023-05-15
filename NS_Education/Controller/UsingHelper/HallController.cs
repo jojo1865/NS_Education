@@ -58,7 +58,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Hall_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DDID.IsZeroOrAbove(), _ => AddError(WrongFormat("所屬部門 ID")))
+                .Validate(i => i.DDID.IsZeroOrAbove(), () => AddError(WrongFormat("所屬部門 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -205,12 +205,12 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(Hall_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DHID == 0, _ => AddError(WrongFormat("廳別 ID")))
+                .Validate(i => i.DHID == 0, () => AddError(WrongFormat("廳別 ID")))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
-                    _ => AddError(NotFound("部門 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), _ => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.CheckType.IsInBetween(0, 1), _ => AddError(UnsupportedValue("開立憑證種類")))
+                    () => AddError(NotFound("部門 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(UnsupportedValue("開立憑證種類")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -240,12 +240,12 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(Hall_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DHID.IsAboveZero(), _ => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
-                    _ => AddError(NotFound("部門 ID")))
-                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), _ => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.CheckType.IsInBetween(0, 1), _ => AddError(UnsupportedValue("開立憑證種類")))
+                    () => AddError(NotFound("部門 ID")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(UnsupportedValue("開立憑證種類")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NS_Education.Tools.BeingValidated
 {
@@ -18,6 +20,39 @@ namespace NS_Education.Tools.BeingValidated
         public static IBeingValidated<T, T> StartValidate<T>(this T target, bool skipIfAlreadyInvalid = false)
         {
             return new BeingValidated<T>(target, skipIfAlreadyInvalid);
+        }
+
+        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.Validate(Func{TInput, bool}, Action{TInput}, Action{TInput, Exception})"/>
+        public static IBeingValidated<TInput, TOutput> Validate<TInput, TOutput>(
+            this IBeingValidated<TInput, TOutput> target, Func<TInput, bool> validation, Action onFail = null,
+            Action<Exception> onException = null)
+        {
+            return target.Validate(validation, _ => onFail?.Invoke(), (_, e) => onException?.Invoke(e));
+        }
+
+        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.Validate(Action{TInput}, Action{TInput, Exception})"/>
+        public static IBeingValidated<TInput, TOutput> Validate<TInput, TOutput>(this IBeingValidated<TInput, TOutput> target, 
+            Action<TInput> validation,
+            Action<Exception> onException = null)
+        {
+            return target.Validate(validation, (_, e) => onException?.Invoke(e));
+        }
+        
+        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.ValidateAsync(Func{TInput, Task{bool}}, Action{TInput}, Action{TInput, Exception})"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(this IBeingValidated<TInput, TOutput> target,
+            Func<TInput, Task<bool>> validation,
+            Action onFail = null,
+            Action<Exception> onException = null)
+        {
+            return await target.ValidateAsync(validation, _ => onFail?.Invoke(), (_, e) => onException?.Invoke(e));
+        }
+        
+        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.ValidateAsync(Func{TInput, Task}, Action{TInput, Exception})"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(this IBeingValidated<TInput, TOutput> target,
+            Func<TInput, Task> validation,
+            Action<Exception> onException = null)
+        {
+            return await target.ValidateAsync(validation,  (_, e) => onException?.Invoke(e));
         }
 
         /// <summary>

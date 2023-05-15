@@ -16,12 +16,13 @@ namespace NS_Education.Tools.BeingValidated
         /// <param name="onFail">（可選）當驗證不通過時，執行的方法。</param>
         /// <param name="onException">（可選）當驗證過程發生 Exception 時，執行的方法。未設定時，不做任何 catch。</param>
         /// <returns>此物件本身。</returns>
-        public static async Task<IBeingValidated<T>> Validate<T>(this Task<IBeingValidated<T>> beingValidated
-            , Func<T, bool> validation
-            , Action onFail = null
-            , Action<Exception> onException = null)
+        public static async Task<IBeingValidated<TInput, TOutput>> Validate<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated
+            , Func<TInput, bool> validation
+            , Action<TInput> onFail = null
+            , Action<TInput, Exception> onException = null)
         {
-            IBeingValidated<T> obj = await beingValidated;
+            IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return obj.Validate(validation, onFail, onException);
         }
 
@@ -32,11 +33,12 @@ namespace NS_Education.Tools.BeingValidated
         /// <param name="validation">一個接收被包裝物件的類型並處理的 void 方法。</param>
         /// <param name="onException">（可選）當驗證過程發生 Exception 時，執行的方法。未設定時，不做任何 catch。</param>
         /// <returns>此物件本身。</returns>
-        public static async Task<IBeingValidated<T>> Validate<T>(this Task<IBeingValidated<T>> beingValidated
-            , Action<T> validation
-            , Action<Exception> onException = null)
+        public static async Task<IBeingValidated<TInput, TOutput>> Validate<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated
+            , Action<TInput> validation
+            , Action<TInput, Exception> onException = null)
         {
-            IBeingValidated<T> obj = await beingValidated;
+            IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return obj.Validate(validation, onException);
         }
 
@@ -48,12 +50,13 @@ namespace NS_Education.Tools.BeingValidated
         /// <param name="onFail">（可選）當驗證不通過時，執行的方法。</param>
         /// <param name="onException">（可選）當驗證過程發生 Exception 時，執行的方法。未設定時，不做任何 catch。</param>
         /// <returns>此物件本身。</returns>
-        public static async Task<IBeingValidated<T>> ValidateAsync<T>(this Task<IBeingValidated<T>> beingValidated
-            , Func<T, Task<bool>> validation
-            , Action onFail = null
-            , Action<Exception> onException = null)
+        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated
+            , Func<TInput, Task<bool>> validation
+            , Action<TInput> onFail = null
+            , Action<TInput, Exception> onException = null)
         {
-            IBeingValidated<T> obj = await beingValidated;
+            IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return await obj.ValidateAsync(validation, onFail, onException);
         }
 
@@ -64,11 +67,12 @@ namespace NS_Education.Tools.BeingValidated
         /// <param name="validation">一個接收被包裝物件的類型並處理的 void 方法。</param>
         /// <param name="onException">（可選）當驗證過程發生 Exception 時，執行的方法。未設定時，不做任何 catch。</param>
         /// <returns>此物件本身。</returns>
-        public static async Task<IBeingValidated<T>> ValidateAsync<T>(this Task<IBeingValidated<T>> beingValidated
-            , Func<T, Task> validation
-            , Action<Exception> onException = null)
+        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated
+            , Func<TInput, Task> validation
+            , Action<TInput, Exception> onException = null)
         {
-            IBeingValidated<T> obj = await beingValidated;
+            IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return await obj.ValidateAsync(validation, onException);
         }
 
@@ -79,9 +83,9 @@ namespace NS_Education.Tools.BeingValidated
         /// true：驗證通過。<br/>
         /// false：驗證失敗。
         /// </returns>
-        public static async Task<bool> IsValid<T>(this Task<IBeingValidated<T>> beingValidated)
+        public static async Task<bool> IsValid<T>(this Task<IBeingValidated<T, T>> beingValidated)
         {
-            IBeingValidated<T> obj = await beingValidated;
+            IBeingValidated<T, T> obj = await beingValidated;
             return obj.IsValid();
         }
 
@@ -90,11 +94,11 @@ namespace NS_Education.Tools.BeingValidated
         /// </summary>
         /// <param name="beingValidated">IBeingValidated 物件</param>
         /// <param name="setTo">欲設定的新值。（可選）忽略時，預設值為 true。</param>
-        /// <typeparam name="T">Generic Type。</typeparam>
         /// <returns>此物件本身。</returns>
-        public static async Task<IBeingValidated<T>> SkipIfAlreadyInvalid<T>(this Task<IBeingValidated<T>> beingValidated, bool setTo = true)
+        public static async Task<IBeingValidated<TInput, TOutput>> SkipIfAlreadyInvalid<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated, bool setTo = true)
         {
-            IBeingValidated<T> obj = await beingValidated;
+            IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return obj.SkipIfAlreadyInvalid(setTo);
         }
     }

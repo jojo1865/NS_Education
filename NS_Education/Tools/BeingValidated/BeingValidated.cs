@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace NS_Education.Tools.BeingValidated
 {
     // 用於驗證物件狀態時的 Wrapper，可以透過 ExtensionMethods 的 StartValidate() 取得。
-    public class BeingValidated<T> : IBeingValidated<T>
+    public class BeingValidated<T> : IBeingValidated<T, T>
     {
         public bool IsValid() => !_isInvalid;
         
@@ -18,7 +18,7 @@ namespace NS_Education.Tools.BeingValidated
             _skipIfInvalid = skipIfInvalid;
         }
 
-        public IBeingValidated<T> Validate(Func<T, bool> validation, Action onFail = null, Action<Exception> onException = null)
+        public IBeingValidated<T, T> Validate(Func<T, bool> validation, Action<T> onFail = null, Action<T, Exception> onException = null)
         {
             if (IsLazyAndInvalid()) return this;
 
@@ -38,23 +38,23 @@ namespace NS_Education.Tools.BeingValidated
             return this;
         }
 
-        private void DoWhenException(Action<Exception> onException, Exception e)
+        private void DoWhenException(Action<T, Exception> onException, Exception e)
         {
             _isInvalid = true;
 
             if (onException == null) throw e;
-            onException.Invoke(e);
+            onException.Invoke(_target, e);
         }
 
-        private void DoWhenFail(Action onFail)
+        private void DoWhenFail(Action<T> onFail)
         {
-            onFail?.Invoke();
+            onFail?.Invoke(_target);
             _isInvalid = true;
         }
 
         private bool IsLazyAndInvalid() => _skipIfInvalid && _isInvalid;
 
-        public IBeingValidated<T> Validate(Action<T> validation, Action<Exception> onException = null)
+        public IBeingValidated<T, T> Validate(Action<T> validation, Action<T, Exception> onException = null)
         {
             if (IsLazyAndInvalid()) return this;
 
@@ -70,7 +70,7 @@ namespace NS_Education.Tools.BeingValidated
             return this;
         }
 
-        public async Task<IBeingValidated<T>> ValidateAsync(Func<T, Task<bool>> validation, Action onFail = null, Action<Exception> onException = null)
+        public async Task<IBeingValidated<T, T>> ValidateAsync(Func<T, Task<bool>> validation, Action<T> onFail = null, Action<T, Exception> onException = null)
         {
             if (IsLazyAndInvalid()) return this;
 
@@ -90,7 +90,7 @@ namespace NS_Education.Tools.BeingValidated
             return this;
         }
 
-        public async Task<IBeingValidated<T>> ValidateAsync(Func<T, Task> validation, Action<Exception> onException = null)
+        public async Task<IBeingValidated<T, T>> ValidateAsync(Func<T, Task> validation, Action<T, Exception> onException = null)
         {
             if (IsLazyAndInvalid()) return this;
 
@@ -105,8 +105,8 @@ namespace NS_Education.Tools.BeingValidated
 
             return this;
         }
-        
-        public IBeingValidated<T> SkipIfAlreadyInvalid(bool setTo = true)
+
+        public IBeingValidated<T, T> SkipIfAlreadyInvalid(bool setTo = true)
         {
             _skipIfInvalid = setTo;
             return this;

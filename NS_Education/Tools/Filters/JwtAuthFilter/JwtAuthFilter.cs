@@ -37,7 +37,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private readonly RequiredPrivileges _privileges;
         private readonly string _uidFieldName;
         private readonly string _addOrEditKeyFieldName;
-        private readonly bool _ignorePasswordExpired = false;
+        private readonly bool _ignorePasswordExpired;
 
         /// <summary>
         /// 套用 JWT 驗證，並且需符合指定的 Roles。<br/>
@@ -134,14 +134,14 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             bool isValid = actionContext.StartValidate()
                 .SkipIfAlreadyInvalid()
                 .Validate(c => ValidateTokenDecryptable(c, JwtConstants.Secret, out claims),
-                    e => errorMessage = HasValidTokenFailed(e))
+                    (_, e) => errorMessage = HasValidTokenFailed(e))
                 .Validate(c => ValidateTokenIsLatest(c, claims, safetyConfiguration),
-                    e => errorMessage = e.Message)
+                    (_, e) => errorMessage = e.Message)
                 .Validate(c => ValidateLastPasswordChange(claims, safetyConfiguration)) // 只有這裡要回傳 901，所以不做 catch
                 .Validate(c => ValidateClaimRole(c, claims),
-                    () => errorMessage = HasNoRoleOrPrivilege)
+                    _ => errorMessage = HasNoRoleOrPrivilege)
                 .Validate(c => ValidatePrivileges(c, claims),
-                    () => errorMessage = HasNoRoleOrPrivilege)
+                    _ => errorMessage = HasNoRoleOrPrivilege)
                 .IsValid();
 
             if (isValid) return;

@@ -59,7 +59,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         public async Task<bool> GetListPagedValidateInput(Category_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.CategoryType >= -1, () => AddError(EmptyNotAllowed("分類類別")))
+                .Validate(i => i.CategoryType >= -1, _ => AddError(EmptyNotAllowed("分類類別")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -212,13 +212,13 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         public async Task<bool> SubmitAddValidateInput(Category_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BCID == 0, () => AddError(WrongFormat("分類 ID")))
-                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(UnsupportedValue("上層 ID")))
+                .Validate(i => i.BCID == 0, _ => AddError(WrongFormat("分類 ID")))
+                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, _ => AddError(UnsupportedValue("上層 ID")))
                 .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
-                    await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)), () => AddError(NotFound("上層 ID")))
-                .Validate(i => i.CategoryType.IsInBetween(0, 9), () => AddError(OutOfRange("分類所屬類別", 0, 9)))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("分類編碼")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("分類名稱")))
+                    await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)), _ => AddError(NotFound("上層 ID")))
+                .Validate(i => i.CategoryType.IsInBetween(0, 9), _ => AddError(OutOfRange("分類所屬類別", 0, 9)))
+                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("分類編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), _ => AddError(EmptyNotAllowed("分類名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -244,13 +244,13 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         public async Task<bool> SubmitEditValidateInput(Category_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
-                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(UnsupportedValue("上層 ID")))
+                .Validate(i => i.BCID.IsAboveZero(), _ => AddError(EmptyNotAllowed("分類 ID")))
+                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, _ => AddError(UnsupportedValue("上層 ID")))
                 .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
-                    await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)), () => AddError(NotFound("上層 ID")))
-                .Validate(i => i.CategoryType.IsInBetween(0, 9), () => AddError(OutOfRange("分類所屬類別", 0, 9)))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("分類編碼")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("分類名稱")))
+                    await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)), _ => AddError(NotFound("上層 ID")))
+                .Validate(i => i.CategoryType.IsInBetween(0, 9), _ => AddError(OutOfRange("分類所屬類別", 0, 9)))
+                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("分類編碼")))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), _ => AddError(EmptyNotAllowed("分類名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

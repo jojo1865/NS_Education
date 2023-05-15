@@ -164,9 +164,9 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(FoodCategory_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DFCID == 0, () => AddError(WrongFormat("餐種 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.DFCID == 0, _ => AddError(WrongFormat("餐種 ID")))
+                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("中文名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -190,9 +190,9 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(FoodCategory_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DFCID.IsAboveZero(), () => AddError(EmptyNotAllowed("餐種 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.DFCID.IsAboveZero(), _ => AddError(EmptyNotAllowed("餐種 ID")))
+                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("中文名稱")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

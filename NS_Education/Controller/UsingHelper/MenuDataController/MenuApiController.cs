@@ -58,7 +58,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         public async Task<bool> GetListAllValidateInput(MenuApi_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.MDID.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("選單 ID")))
+                .Validate(i => i.MDID.IsZeroOrAbove(), _ => AddError(EmptyNotAllowed("選單 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -109,10 +109,10 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         public async Task<bool> SubmitAddValidateInput(MenuApi_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)), () => AddError(NotFound("選單 ID")))
-                .Validate(i => i.SeqNo == 0, () => AddError(WrongFormat("API 流水號")))
-                .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("API 網址")))
-                .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), () => AddError(WrongFormat("API 屬性 ID")))
+                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)), _ => AddError(NotFound("選單 ID")))
+                .Validate(i => i.SeqNo == 0, _ => AddError(WrongFormat("API 流水號")))
+                .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("API 網址")))
+                .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), _ => AddError(WrongFormat("API 屬性 ID")))
                 .IsValid();
 
             return isValid;
@@ -136,10 +136,10 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         public async Task<bool> SubmitEditValidateInput(MenuApi_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)), () => AddError(NotFound("選單 ID")))
-                .Validate(i => i.SeqNo.IsAboveZero(), () => AddError(WrongFormat("API 流水號")))
-                .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("API 網址")))
-                .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), () => AddError(WrongFormat("API 屬性 ID")))
+                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)), _ => AddError(NotFound("選單 ID")))
+                .Validate(i => i.SeqNo.IsAboveZero(), _ => AddError(WrongFormat("API 流水號")))
+                .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("API 網址")))
+                .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), _ => AddError(WrongFormat("API 屬性 ID")))
                 .IsValid();
 
             return isValid;

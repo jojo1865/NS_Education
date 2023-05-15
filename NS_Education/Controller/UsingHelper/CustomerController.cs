@@ -63,8 +63,8 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Customer_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BSCID6.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的行業別")))
-                .Validate(i => i.BSCID4.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的區域別")))
+                .Validate(i => i.BSCID6.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選的行業別")))
+                .Validate(i => i.BSCID4.IsZeroOrAbove(), _ => AddError(WrongFormat("欲篩選的區域別")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -266,15 +266,15 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 // 驗證輸入
-                .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry), () => AddError(NotFound("行業別 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region), () => AddError(NotFound("區域別 ID")))
-                .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代號")))
+                .Validate(i => i.CID == 0, _ => AddError(WrongFormat("客戶 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry), _ => AddError(NotFound("行業別 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region), _ => AddError(NotFound("區域別 ID")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("代號")))
                 .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(),
-                    () => AddError(EmptyNotAllowed("客戶名稱")))
+                    _ => AddError(EmptyNotAllowed("客戶名稱")))
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
-                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
+                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), _ => AddError(SubmitBuIdNotFound))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -325,15 +325,15 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 // 驗證輸入
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry), () => AddError(NotFound("行業別 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region), () => AddError(NotFound("區域別 ID")))
-                .Validate(i => !i.Code.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("代號")))
+                .Validate(i => i.CID.IsZeroOrAbove(), _ => AddError(WrongFormat("客戶 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry), _ => AddError(NotFound("行業別 ID")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region), _ => AddError(NotFound("區域別 ID")))
+                .Validate(i => !i.Code.IsNullOrWhiteSpace(), _ => AddError(EmptyNotAllowed("代號")))
                 .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(),
-                    () => AddError(EmptyNotAllowed("客戶名稱")))
+                    _ => AddError(EmptyNotAllowed("客戶名稱")))
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
-                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
+                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), _ => AddError(SubmitBuIdNotFound))
                 .IsValid();
 
             return await Task.FromResult(isValid);

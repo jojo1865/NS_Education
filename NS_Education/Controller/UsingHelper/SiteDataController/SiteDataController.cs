@@ -60,7 +60,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             bool isValid = input
                 .StartValidate()
                 .Validate(i => i.BCID.IsZeroOrAbove(),
-                    () => AddError(EmptyNotAllowed("分類 ID")))
+                    _ => AddError(EmptyNotAllowed("分類 ID")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -215,25 +215,25 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public async Task<bool> SubmitAddValidateInput(SiteData_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BSID == 0, () => AddError(WrongFormat("場地 ID")))
+                .Validate(i => i.BSID == 0, _ => AddError(WrongFormat("場地 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
-                    () => AddError(NotFound("所屬分類 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
-                .Validate(i => i.MaxSize >= i.BasicSize, () => AddError("最大容納人數須大於等於一般容納人數！"))
-                .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
-                .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
-                .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
+                    _ => AddError(NotFound("所屬分類 ID")))
+                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.BasicSize >= 0, _ => AddError(WrongFormat("一般容納人數")))
+                .Validate(i => i.MaxSize >= i.BasicSize, _ => AddError("最大容納人數須大於等於一般容納人數！"))
+                .Validate(i => i.UnitPrice >= 0, _ => AddError(WrongFormat("成本費用")))
+                .Validate(i => i.InPrice >= 0, _ => AddError(WrongFormat("內部單位定價")))
+                .Validate(i => i.OutPrice >= 0, _ => AddError(WrongFormat("外部單位定價")))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
-                    () => AddError(NotFound("樓別 ID")))
+                    _ => AddError(NotFound("樓別 ID")))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID5, StaticCodeType.SiteTable),
-                    () => AddError(NotFound("桌型 ID")))
-                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
+                    _ => AddError(NotFound("桌型 ID")))
+                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), _ => AddError(NotFound("廳別 ID")))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Site),
-                    () => AddError(NotFound("入帳代號 ID")))
+                    _ => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
             return isValid;
@@ -278,25 +278,25 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public async Task<bool> SubmitEditValidateInput(SiteData_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BSID.IsAboveZero(), () => AddError(EmptyNotAllowed("場地 ID")))
+                .Validate(i => i.BSID.IsAboveZero(), _ => AddError(EmptyNotAllowed("場地 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
-                    () => AddError(NotFound("所屬分類 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
-                .Validate(i => i.MaxSize >= i.BasicSize, () => AddError("最大容納人數須大於等於一般容納人數！"))
-                .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
-                .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
-                .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
+                    _ => AddError(NotFound("所屬分類 ID")))
+                .Validate(i => i.Code.HasContent(), _ => AddError(EmptyNotAllowed("編碼")))
+                .Validate(i => i.Title.HasContent(), _ => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.BasicSize >= 0, _ => AddError(WrongFormat("一般容納人數")))
+                .Validate(i => i.MaxSize >= i.BasicSize, _ => AddError("最大容納人數須大於等於一般容納人數！"))
+                .Validate(i => i.UnitPrice >= 0, _ => AddError(WrongFormat("成本費用")))
+                .Validate(i => i.InPrice >= 0, _ => AddError(WrongFormat("內部單位定價")))
+                .Validate(i => i.OutPrice >= 0, _ => AddError(WrongFormat("外部單位定價")))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
-                    () => AddError(NotFound("樓別 ID")))
+                    _ => AddError(NotFound("樓別 ID")))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID5, StaticCodeType.SiteTable),
-                    () => AddError(NotFound("桌型 ID")))
-                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
+                    _ => AddError(NotFound("桌型 ID")))
+                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), _ => AddError(NotFound("廳別 ID")))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Site),
-                    () => AddError(NotFound("入帳代號 ID")))
+                    _ => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
             return isValid;

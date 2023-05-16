@@ -5,6 +5,7 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
+using NS_Education.Models;
 using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 
 namespace NS_Education.Tools
@@ -34,17 +35,21 @@ namespace NS_Education.Tools
             // 轉換成 ActionResult
             ContentResult newActionResult = new ContentResult
             {
-                Content = JObject.FromObject(new 
+                Content = JObject.FromObject(new FinalizedResponse
                 {
-                    Status = modify.SelectToken("Content.Status") ?? filterContext.HttpContext.Response.StatusCode,
-                    StatusMessage = modify.SelectToken("Content.StatusMessage") ??
+                    Status = modify.SelectToken("Content.Status")?.Value<int>() ?? filterContext.HttpContext.Response.StatusCode,
+                    StatusMessage = modify.SelectToken("Content.StatusMessage")?.Value<string>() ??
                                     filterContext.HttpContext.Response.StatusDescription,
-                    ApiResponse = modify.SelectToken("Content.ApiResponse") 
-                                  ?? (modify["Content"] is null 
-                                      ? "" 
-                                      : JToken.Parse(modify["Content"]?.Value<string>() ?? "")
+                    // ApiResponse 視可以取得的值決定：
+                    // |- a. 如果已經有 ApiResponse：用 ApiResponse。
+                    // |- b. 否則：視為還沒經過 Wrap，把原有的整個 Response Content 轉換成 ApiResponse。
+                    // +- c. 如果 Content 是 null：放入空字串。
+                    ApiResponse = modify.SelectToken("Content.ApiResponse")?.Value<object>()
+                                  ?? (modify["Content"] != null 
+                                      ? JToken.Parse(modify["Content"]?.Value<string>() ?? "") 
+                                      : ""
                                       ),
-                    Privileges = modify.SelectToken("Content.ApiResponse") ?? JToken.FromObject(privileges ?? Array.Empty<Privilege>())
+                    Privileges = modify.SelectToken("Content.Privileges")?.Value<List<Privilege>>() ?? privileges
                 }).ToString(),
                 ContentEncoding = Encoding.UTF8,
                 ContentType = "application/json; charset=utf-8",

@@ -962,7 +962,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                 // 開始寫入值
                 SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
-                await SubmitPopulateHeadSiteItems(input, head);
+                await SubmitPopulateHeadSiteItems(input, head, entitiesToAdd);
                 SubmitPopulateHeadOtherItems(input, head, entitiesToAdd);
                 SubmitPopulateHeadBillItems(input, head, entitiesToAdd);
                 SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
@@ -1062,7 +1062,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             }
         }
 
-        private async Task SubmitPopulateHeadSiteItems(Resver_Submit_Input_APIItem input, Resver_Head head)
+        private async Task SubmitPopulateHeadSiteItems(Resver_Submit_Input_APIItem input, Resver_Head head,
+            IList<object> entitiesToAdd)
         {
             foreach (var item in input.SiteItems)
             {
@@ -1090,7 +1091,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 await DC.SaveChangesStandardProcedureAsync(GetUid());
 
                 SubmitPopulateSiteItemTimeSpanItems(item, head, site);
-                await SubmitPopulateSiteItemThrowItems(item, head, site);
+                await SubmitPopulateSiteItemThrowItems(item, head, site, entitiesToAdd);
                 await SubmitPopulateSiteItemDeviceItems(item, head, site);
             }
         }
@@ -1144,7 +1145,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         }
 
         private async Task SubmitPopulateSiteItemThrowItems(Resver_Submit_SiteItem_Input_APIItem item,
-            Resver_Head head, Resver_Site site)
+            Resver_Head head, Resver_Site site, IList<object> entitiesToAdd)
         {
             site.Resver_Throw.Clear();
             foreach (var throwItem in item.ThrowItems)
@@ -1175,18 +1176,18 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 await DC.SaveChangesStandardProcedureAsync(GetUid());
 
                 SubmitPopulateSiteItemThrowItemTimeSpanItems(throwData, throwItem, head);
-                SubmitPopulateSiteItemThrowItemThrowFoodItems(throwData, throwItem);
+                SubmitPopulateSiteItemThrowItemThrowFoodItems(throwData, throwItem, entitiesToAdd);
             }
         }
 
         private void SubmitPopulateSiteItemThrowItemThrowFoodItems(Resver_Throw throwData,
-            Resver_Submit_ThrowItem_Input_APIItem throwItem)
+            Resver_Submit_ThrowItem_Input_APIItem throwItem, IList<object> entitiesToAdd)
         {
             throwData.Resver_Throw_Food.Clear();
 
             foreach (Resver_Submit_FoodItem_Input_APIItem foodItem in throwItem.FoodItems)
             {
-                Resver_Throw_Food throwFood = SubmitFindOrCreateNew<Resver_Throw_Food>(foodItem.RTFID);
+                Resver_Throw_Food throwFood = SubmitFindOrCreateNew<Resver_Throw_Food>(foodItem.RTFID, entitiesToAdd);
                 if (throwFood.Resver_Throw != null && throwFood.Resver_Throw.RTID != 0 && throwFood.Resver_Throw.RTID != throwData.RTID)
                 {
                     AddErrorNotThisThrow(throwFood.RTFID, "餐飲補充資料", throwFood.Resver_Throw.RTID);

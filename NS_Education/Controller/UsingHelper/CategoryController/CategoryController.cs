@@ -92,7 +92,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
             {
                 BCID = entity.BCID,
                 iCategoryType = entity.CategoryType,
-                sCategoryType = entity.CategoryType < sCategoryTypes.Length ? sCategoryTypes[entity.CategoryType] : "",
+                sCategoryType = entity.CategoryType < CategoryTypes.Length ? CategoryTypes[entity.CategoryType] : "",
                 ParentID = entity.ParentID,
                 ParentTitleC = parent?.TitleC ?? "",
                 ParentTitleE = parent?.TitleE ?? "",
@@ -122,7 +122,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         {
             Category_GetInfoById_Output_APIItem response = new Category_GetInfoById_Output_APIItem
             {
-                CategoryTypeList = CategoryTypeListController.GetCategoryTypeList(sCategoryTypes)
+                CategoryTypeList = CategoryTypeListController.GetCategoryTypeList(CategoryTypes)
             };
 
             return await Task.FromResult(GetResponseJson(response));
@@ -139,8 +139,8 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
             {
                 BCID = entity.BCID,
                 iCategoryType = entity.CategoryType,
-                sCategoryType = entity.CategoryType < sCategoryTypes.Length ? sCategoryTypes[entity.CategoryType] : "",
-                CategoryTypeList = CategoryTypeListController.GetCategoryTypeList(sCategoryTypes),
+                sCategoryType = entity.CategoryType < CategoryTypes.Length ? CategoryTypes[entity.CategoryType] : "",
+                CategoryTypeList = CategoryTypeListController.GetCategoryTypeList(CategoryTypes),
                 ParentID = entity.ParentID,
                 Code = entity.Code ?? "",
                 TitleC = entity.TitleC ?? "",

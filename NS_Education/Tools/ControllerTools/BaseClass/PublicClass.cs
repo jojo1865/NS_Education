@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
 using NS_Education.Models;
 using NS_Education.Models.Entities;
@@ -18,35 +19,31 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
     {
         public DateTime DT = DateTime.Now;
         protected internal NsDbContext DC { get; }
-        public string[] sCategoryTypes = new string[] { "通用", "公司", "部門", "場地", "備忘", "服務", "設備", "客戶", "付款類", "合作廠商" };
-        public string DateFormat = "yyyy/MM/dd";
-        public string DateTimeFormat = "yyyy/MM/dd HH:mm";
-        public string Error = "";
+        protected readonly string[] CategoryTypes = { "通用", "公司", "部門", "場地", "備忘", "服務", "設備", "客戶", "付款類", "合作廠商" };
+        private readonly ICollection<string> _errors = new List<string>();
         public PublicClass()
         {
             DC = new NsDbContext();
         }
 
-        public BaseApiResponse GetMsgClass(string sError)
+        public BaseApiResponse GetMsgClass(IEnumerable<string> errors)
         {
-            BaseApiResponse RM = new BaseApiResponse();
-            if (sError != "")
-            {
-                RM.SuccessFlag = false;
-                RM.Message = sError;
-            }
-            return RM;
+            BaseApiResponse response = new BaseApiResponse();
+            if (errors == null || !errors.Any()) return response;
+            
+            response.SuccessFlag = false;
+            response.Messages = _errors;
+            return response;
         }
 
         public string GetResponseJson()
         {
-            return ChangeJson(GetMsgClass(Error));
+            return ChangeJson(GetMsgClass(_errors));
         }
         
         public string GetResponseJson<T>(T infusable) where T : IReturnMessageInfusable
         {
-            // TODO: 這裡多餘的 cReturnMessage 應該可以避免。可重構此處 Flow
-            infusable.Infuse(GetMsgClass(Error));
+            infusable.Infuse(GetMsgClass(_errors));
             return ChangeJson(infusable);
         }
 
@@ -55,7 +52,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         protected void InitializeResponse()
         {
-            Error = "";
+            _errors.Clear();
         }
 
         /// <summary>
@@ -64,15 +61,15 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="errorMessage">錯誤訊息</param>
         protected internal void AddError(string errorMessage)
         {
-            Error += errorMessage + ";";
+            _errors.Add(errorMessage);
         }
 
         /// <summary>
         /// 回傳一串更新 DB 失敗時可用的預設錯誤字串。
         /// </summary>
-        /// <param name="fieldName">欄位名稱</param>
+        /// <param name="e">錯誤物件</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string UpdateDbFailed(Exception e = null)
+        protected static string UpdateDbFailed(Exception e = null)
         {
             return e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
         }
@@ -211,7 +208,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </returns>
         public bool HasError()
         {
-            return !Error.IsNullOrWhiteSpace();
+            return _errors?.Any() ?? false;
         }
 
         /// <summary>

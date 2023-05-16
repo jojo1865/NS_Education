@@ -39,7 +39,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
 
         public async Task<ICollection<BaseResponseRowIdTitle>> GetListLocalResults()
         {
-            return await Task.FromResult(GetCategoryTypeList(sCategoryTypes));
+            return await Task.FromResult(GetCategoryTypeList(CategoryTypes));
         }
 
         public static IList<BaseResponseRowIdTitle> GetCategoryTypeList(string[] sCategoryTypes)

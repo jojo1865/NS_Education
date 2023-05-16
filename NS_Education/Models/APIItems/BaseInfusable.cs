@@ -1,13 +1,15 @@
-﻿namespace NS_Education.Models.APIItems
+﻿using System.Collections.Generic;
+
+namespace NS_Education.Models.APIItems
 {
     public abstract class BaseInfusable : IReturnMessageInfusable
     {
         public bool SuccessFlag { get; private set; }
-        public string Message { get; private set; }
+        public IEnumerable<string> Messages { get; private set; } = new List<string>();
         public void Infuse(BaseApiResponse msg)
         {
             SuccessFlag = msg.SuccessFlag;
-            Message = msg.Message;
+            Messages = msg.Messages;
         }
     }
 }

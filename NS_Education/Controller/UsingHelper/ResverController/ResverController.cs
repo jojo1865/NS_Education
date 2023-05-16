@@ -799,13 +799,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             foreach (Resver_Submit_SiteItem_Input_APIItem si in input.SiteItems)
             {
                 // 1. 取得這個場地當天所有 RTS，包括場地本身、場地的父場地、場地的子場地
+                B_SiteData siteData =
+                    await DC.B_SiteData.FirstOrDefaultAsync(sd =>
+                        sd.ActiveFlag && !sd.DeleteFlag && sd.BSID == si.BSID);
                 M_Resver_TimeSpan[] allResverTimeSpans = SubmitGetAllResverTimeSpanFromSiteItem(input, si).ToArray();
 
                 // 2. RTS 的 DTSID = 當天已被占用的 DTSID，從輸入中抓出此類 DTSID
                 isValid &= allResverTimeSpans.Aggregate(true, (result, rts) => result & rts.StartValidate()
                     .Validate(_ => si.TimeSpanItems.All(tsi => tsi.DTSID != rts.DTSID),
                         () => AddError(
-                            $"場地 ID {si.BSID} 欲預約的時段 ID {rts.DTSID}（{rts.D_TimeSpan.GetTimeRangeFormattedString()}）當天已被預約了！"))
+                            $"{siteData?.Title ?? $"場地 ID {si.BSID}"} 欲預約的時段（{rts.D_TimeSpan.GetTimeRangeFormattedString()}）當天已被預約了！"))
                     .IsValid()
                 );
 
@@ -826,7 +829,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     isValid &= allResverTimeSpans.Aggregate(true, (result, rts) => result & rts.StartValidate()
                         .Validate(_ => rts.DTSID == dts.DTSID || !rts.D_TimeSpan.IsCrossingWith(dts),
                             () => AddError(
-                                $"場地 ID {si.BSID} 欲預約的時段 ID {dts.DTSID}（{dts.GetTimeRangeFormattedString()}）與當天另一個已被預約的時段（{rts.D_TimeSpan.GetTimeRangeFormattedString()}）部分重疊！")
+                                $"{siteData?.Title ?? $"場地 ID {si.BSID}"} 欲預約的時段（{dts.GetTimeRangeFormattedString()}）與當天另一個已被預約的時段（{rts.D_TimeSpan.GetTimeRangeFormattedString()}）部分重疊！")
                         )
                         .IsValid());
                 }

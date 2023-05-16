@@ -222,7 +222,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // 3. 寫入 DB
             try
             {
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }
             catch (Exception e)
             {
@@ -282,7 +282,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // 4. 儲存至 DB
             try
             {
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }
             catch (Exception e)
             {
@@ -426,7 +426,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             try
             {
                 menuData.SortNo = sortNo;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }
             catch (Exception e)
             {

@@ -457,7 +457,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             try
             {
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }
             catch (Exception e)
             {
@@ -518,7 +518,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             try
             {
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }
             catch (Exception e)
             {
@@ -956,7 +956,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 // 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
                 SubmitPopulateHeadValues(input, head);
                 await DC.AddAsync(head);
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
                 // 清理所有跟這張預約單有關的 ResverTimeSpan
                 head.M_Resver_TimeSpan.Clear();
 
@@ -970,7 +970,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 // 寫入 Db
                 await DC.AddRangeAsync(entitiesToAdd);
                 // 這裡就手動 SaveChanges，以便作 transaction 管理
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
                 
                 // 如果沒有錯誤，才作 commit
                 if (!HasError())
@@ -1088,7 +1088,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                 // 先儲存至 DB, 才有 RSID...
                 await DC.AddAsync(site);
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
                 SubmitPopulateSiteItemTimeSpanItems(item, head, site);
                 await SubmitPopulateSiteItemThrowItems(item, head, site, entitiesToAdd);
@@ -1124,7 +1124,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 site.Resver_Device.Add(device);
                 // 先儲存至 DB 才有 RDID...
                 await DC.Resver_Device.AddAsync(device);
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
                 // 寫入 device 的 TimeSpan
                 int sortNo = 0;
@@ -1173,7 +1173,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                 // 先儲存才有 RTID 給 Resver_TimeSpan 用...
                 await DC.AddAsync(throwData);
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
                 SubmitPopulateSiteItemThrowItemTimeSpanItems(throwData, throwItem, head);
                 SubmitPopulateSiteItemThrowItemThrowFoodItems(throwData, throwItem, entitiesToAdd);

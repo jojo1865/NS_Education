@@ -180,7 +180,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 }
 
                 // 寫 user log
-                await DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, GetUid());
+                await DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, GetUid(), Request);
 
                 response = await GetInfoByIdConvertEntityToResponse(entity);
                 await response.SetInfoFromEntity(entity, this);

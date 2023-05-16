@@ -238,7 +238,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             try
             {
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }
             catch (Exception e)
             {

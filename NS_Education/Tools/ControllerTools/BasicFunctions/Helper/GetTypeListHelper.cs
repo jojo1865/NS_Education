@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
@@ -39,7 +40,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             };
             
             // 3. 寫一筆 UserLog
-            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid());
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(), HttpContext.Current.Request);
             
             // 4. 回傳
             return _controller.GetResponseJson(response);

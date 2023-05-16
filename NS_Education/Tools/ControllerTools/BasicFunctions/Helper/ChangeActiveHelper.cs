@@ -1,6 +1,7 @@
 using System;
 using System.Data.Entity;
 using System.Threading.Tasks;
+using System.Web;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -77,7 +78,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             try
             {
                 FlagHelper.SetActiveFlag(t, activeFlagValue);
-                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid());
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(), HttpContext.Current.Request);
             }
             catch (Exception e)
             {

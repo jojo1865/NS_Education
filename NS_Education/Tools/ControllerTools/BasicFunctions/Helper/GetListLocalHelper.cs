@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using System.Web;
 using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -24,7 +25,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         public async Task<string> GetListLocal()
         {
             // 寫一筆 UserLog
-            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid());
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(), HttpContext.Current.Request);
             
             BaseResponseForList<TGetListRow> response = new BaseResponseForList<TGetListRow>
             {

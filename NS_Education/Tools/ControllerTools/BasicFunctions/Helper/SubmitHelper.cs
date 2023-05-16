@@ -1,6 +1,7 @@
 using System;
 using System.Data.Entity;
 using System.Threading.Tasks;
+using System.Web;
 using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
@@ -80,7 +81,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             try
             {
                 await Task.Run(() => _controller.DC.Set<TEntity>().Add(t));
-                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid());
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(), HttpContext.Current.Request);
             }
             catch (Exception e)
             {
@@ -112,7 +113,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 3. 儲存至 DB
             try
             {
-                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid());
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(), HttpContext.Current.Request);
             }
             catch (Exception e)
             {

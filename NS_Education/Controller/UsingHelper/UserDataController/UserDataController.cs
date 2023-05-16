@@ -98,7 +98,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             try
             {
                 await DC.UserData.AddAsync(newUser);
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }
             catch (Exception e)
             {
@@ -235,7 +235,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             await this.StartValidate()
                 .ValidateAsync(_ => UpdateJWT(queried, output.JwtToken), (_, e) => AddError(LoginJwtUpdateFailed(e)))
                 .Validate(_ => UpdateUserLoginDate(queried))
-                .ValidateAsync(_ => DC.SaveChangesStandardProcedureAsync(queried.UID),
+                .ValidateAsync(_ => DC.SaveChangesStandardProcedureAsync(queried.UID, Request),
                     (_, e) => AddError(LoginDateOrJwtUpdateFailed(e)));
 
             return GetResponseJson(output);
@@ -646,7 +646,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             {
                 WriteUserChangePasswordLog(userData.UID, userData.LoginPassword, newPassword);
                 userData.LoginPassword = newPassword;
-                await DC.SaveChangesStandardProcedureAsync(GetUid());
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }
             catch (Exception e)
             {

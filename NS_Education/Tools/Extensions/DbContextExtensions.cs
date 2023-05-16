@@ -18,15 +18,16 @@ namespace NS_Education.Tools.Extensions
     public static class DbContextExtensions
     {
         private static readonly DateTime MinimumDbDateTime = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
-        
+
         /// <summary>
         /// 儲存修改之前，自動設置 CreUid 等欄位，並寫入 UserLog。
         /// </summary>
         /// <param name="context">DbContext</param>
         /// <param name="uid">要求者的 UID。</param>
-        public static void SaveChangesStandardProcedure(this NsDbContext context, int uid)
+        /// <param name="httpRequest"></param>
+        public static void SaveChangesStandardProcedure(this NsDbContext context, int uid, HttpRequest httpRequest)
         {
-            DoStandardProcedure(context, uid);
+            DoStandardProcedure(context, uid, new HttpRequestWrapper(httpRequest));
 
             context.SaveChanges();
         }
@@ -36,10 +37,16 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="context">DbContext</param>
         /// <param name="uid">要求者的 UID。</param>
-        public static async Task SaveChangesStandardProcedureAsync(this NsDbContext context, int uid)
+        /// <param name="httpRequest"></param>
+        public static async Task SaveChangesStandardProcedureAsync(this NsDbContext context, int uid, HttpRequest httpRequest)
         {
-            DoStandardProcedure(context, uid);
+            await SaveChangesStandardProcedureAsync(context, uid, new HttpRequestWrapper(httpRequest));
+        }
 
+        public static async Task SaveChangesStandardProcedureAsync(this NsDbContext context, int uid,
+            HttpRequestBase httpRequestBase)
+        {
+            DoStandardProcedure(context, uid, httpRequestBase);
             await context.SaveChangesAsync();
         }
 
@@ -49,9 +56,10 @@ namespace NS_Education.Tools.Extensions
         /// <param name="context">DbContext</param>
         /// <param name="type">操作類型</param>
         /// <param name="uid">使用者 ID</param>
-        public static void WriteUserLogAndSave(this NsDbContext context, UserLogControlType type, int uid)
+        /// <param name="httpRequest"></param>
+        public static void WriteUserLogAndSave(this NsDbContext context, UserLogControlType type, int uid, HttpRequest httpRequest)
         {
-            context.WriteUserLog(type, uid);
+            context.WriteUserLog(type, uid, new HttpRequestWrapper(httpRequest));
 
             context.SaveChanges();
         }
@@ -62,14 +70,20 @@ namespace NS_Education.Tools.Extensions
         /// <param name="context">DbContext</param>
         /// <param name="type">操作類型</param>
         /// <param name="uid">使用者 ID</param>
-        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int uid)
+        /// <param name="httpRequest"></param>
+        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int uid, HttpRequest httpRequest)
         {
-            context.WriteUserLog(type, uid);
+            await context.WriteUserLogAndSaveAsync(type, uid, new HttpRequestWrapper(httpRequest));
+        }
+        
+        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int uid, HttpRequestBase httpRequestBase)
+        {
+            context.WriteUserLog(type, uid, httpRequestBase);
 
             await context.SaveChangesAsync();
         }
 
-        private static void DoStandardProcedure(NsDbContext context, int uid)
+        private static void DoStandardProcedure(NsDbContext context, int uid, HttpRequestBase httpRequestBase)
         {
             // write log
             context.ChangeTracker.DetectChanges();
@@ -82,7 +96,7 @@ namespace NS_Education.Tools.Extensions
                     return;
 
                 SetBasicFields(uid, change);
-                WriteUserLog(context, uid, change);
+                WriteUserLog(context, uid, change, httpRequestBase);
                 SanitizeDateColumns(change);
             }
 
@@ -130,7 +144,7 @@ namespace NS_Education.Tools.Extensions
             change.State = EntityState.Modified;
         }
 
-        private static void WriteUserLog(NsDbContext context, int uid, DbEntityEntry change)
+        private static void WriteUserLog(NsDbContext context, int uid, DbEntityEntry change, HttpRequestBase httpRequestBase)
         {
             // 取得此資料的第一個 PK 欄位（通常是流水號）
             int targetId = context.GetPrimaryKeyFromEntityEntry(change);
@@ -138,7 +152,7 @@ namespace NS_Education.Tools.Extensions
             // 依據這筆修改的狀態，指定 ControlType
             UserLogControlType controlType = GetUserLogControlType(change);
 
-            context.WriteUserLog(context.GetTableName(change), targetId, controlType, uid);
+            context.WriteUserLog(context.GetTableName(change), targetId, controlType, uid, httpRequestBase);
         }
 
         private static UserLogControlType GetUserLogControlType(DbEntityEntry change)
@@ -195,10 +209,8 @@ namespace NS_Education.Tools.Extensions
         }
 
         private static void WriteUserLog(this NsDbContext context, string targetTable, int targetId,
-            UserLogControlType controlType, int uid)
+            UserLogControlType controlType, int uid, HttpRequestBase httpRequestBase)
         {
-            HttpRequestBase request = GetCurrentRequest();
-
             context.UserLog.Add(new UserLog
             {
                 UID = uid,
@@ -206,19 +218,14 @@ namespace NS_Education.Tools.Extensions
                 TargetID = targetId,
                 ControlType = (int)controlType,
                 CreDate = DateTime.Now,
-                RequestUrl = request.Url?.PathAndQuery ?? "",
+                RequestUrl = httpRequestBase.Url?.PathAndQuery ?? "",
             });
         }
 
-        private static HttpRequestWrapper GetCurrentRequest()
-        {
-            return new HttpRequestWrapper(HttpContext.Current.Request);
-        }
-
-        private static void WriteUserLog(this NsDbContext context, UserLogControlType controlType, int uid)
+        private static void WriteUserLog(this NsDbContext context, UserLogControlType controlType, int uid, HttpRequestBase httpRequestBase)
         {
             // 未指定 targetTable 跟 targetId 時的 helper
-            context.WriteUserLog(null, 0, controlType, uid);
+            context.WriteUserLog(null, 0, controlType, uid, httpRequestBase);
         }
 
         /// <summary>

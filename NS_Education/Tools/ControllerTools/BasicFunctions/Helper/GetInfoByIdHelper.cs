@@ -1,5 +1,6 @@
 using System.Data.Entity;
 using System.Threading.Tasks;
+using System.Web;
 using NS_Education.Models.APIItems;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
@@ -46,7 +47,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             TEntity t = await _GetInfoByIdQueryResult(id);
             
             // 3. 寫 UserLog
-            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid());
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(), HttpContext.Current.Request);
             
             // 4. 有資料時, 轉換成指定格式並回傳
             if (t != null)

@@ -725,13 +725,15 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             // 先一次查完所有 BDID
             IEnumerable<Resver_Submit_DeviceItem_Input_APIItem> allDeviceItems =
-                input.SiteItems.SelectMany(si => si.DeviceItems);
+                input.SiteItems.SelectMany(si => si.DeviceItems).ToArray();
+            var inputDeviceIds = allDeviceItems.Select(di => di.BDID); 
+            
             Dictionary<int, B_Device> devices = await DC.B_Device
                 .Include(bd => bd.Resver_Device)
                 .Include(bd => bd.Resver_Device.Select(rd => rd.Resver_Site))
                 .Where(bd =>
                     bd.ActiveFlag && !bd.DeleteFlag &&
-                    allDeviceItems.Any(di => di.BDID == bd.BDID))
+                    inputDeviceIds.Any(id => id == bd.BDID))
                 .ToDictionaryAsync(bd => bd.BDID, bd => bd);
 
             // 每個場地
@@ -748,10 +750,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     }
 
                     // 查出所有對應 deviceItem.DTSID 的 DTS
+                    var allInputDtsIds = deviceItem.TimeSpanItems.Select(tsi => tsi.DTSID);
                     D_TimeSpan[] wantedTimeSpans = await DC.D_TimeSpan
                         .Where(dts => dts.ActiveFlag)
                         .Where(dts => !dts.DeleteFlag)
-                        .Where(dts => deviceItem.TimeSpanItems.Any(tsi => tsi.DTSID == dts.DTSID))
+                        .Where(dts => allInputDtsIds.Any(id => id == dts.DTSID))
                         .ToArrayAsync();
 
                     DateTime targetDate = deviceItem.TargetDate.ParseDateTime();
@@ -805,11 +808,12 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                 // 3. 所有 TimeSpanItem 的 DTS 時段不可與 allResverTimeSpans 任一者的 DTS 時段重疊
                 // 先查出所有輸入 DTSID 的 DTS 資料
+                var inputDtsIds = si.TimeSpanItems.Select(tsi => tsi.DTSID);
                 List<D_TimeSpan> allInputDts = await DC.D_TimeSpan
                     .Where(dts =>
                         dts.ActiveFlag
                         && !dts.DeleteFlag
-                        && si.TimeSpanItems.Any(tsi => tsi.DTSID == dts.DTSID)
+                        && inputDtsIds.Any(id => id == dts.DTSID)
                     )
                     .ToListAsync();
 
@@ -968,8 +972,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 // 這裡就手動 SaveChanges，以便作 transaction 管理
                 await DC.SaveChangesStandardProcedureAsync(GetUid());
                 
-                // 如果有錯誤時，不作 commit
-                if (HasError())
+                // 如果沒有錯誤，才作 commit
+                if (!HasError())
                     transaction.Commit();
 
                 return head;
@@ -1098,7 +1102,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             foreach (var deviceItem in item.DeviceItems)
             {
                 Resver_Device device = SubmitFindOrCreateNew<Resver_Device>(deviceItem.RDID);
-                if (device.Resver_Site.RHID != 0 && device.Resver_Site.RHID != head.RHID)
+                if (device.Resver_Site != null && device.Resver_Site.RHID != 0 && device.Resver_Site.RHID != head.RHID)
                 {
                     AddErrorNotThisHead(device.RDID, "場地設備", device.Resver_Site.RHID);
                     continue;
@@ -1146,7 +1150,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             foreach (var throwItem in item.ThrowItems)
             {
                 Resver_Throw throwData = SubmitFindOrCreateNew<Resver_Throw>(throwItem.RTID);
-                if (throwData.Resver_Site.RHID != 0 && throwData.Resver_Site.RHID != head.RHID)
+                if (throwData.Resver_Site != null && throwData.Resver_Site.RHID != 0 && throwData.Resver_Site.RHID != head.RHID)
                 {
                     AddErrorNotThisHead(throwData.RTID, "場地行程", throwData.Resver_Site.RHID);
                     continue;
@@ -1183,7 +1187,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             foreach (Resver_Submit_FoodItem_Input_APIItem foodItem in throwItem.FoodItems)
             {
                 Resver_Throw_Food throwFood = SubmitFindOrCreateNew<Resver_Throw_Food>(foodItem.RTFID);
-                if (throwFood.Resver_Throw.RTID != 0 && throwFood.Resver_Throw.RTID != throwData.RTID)
+                if (throwFood.Resver_Throw != null && throwFood.Resver_Throw.RTID != 0 && throwFood.Resver_Throw.RTID != throwData.RTID)
                 {
                     AddErrorNotThisThrow(throwFood.RTFID, "餐飲補充資料", throwFood.Resver_Throw.RTID);
                     continue;

@@ -27,9 +27,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
             DC = new NsDbContext();
         }
 
-        public cReturnMessage GetMsgClass(string sError)
+        public BaseApiResponse GetMsgClass(string sError)
         {
-            cReturnMessage RM = new cReturnMessage();
+            BaseApiResponse RM = new BaseApiResponse();
             if (sError != "")
             {
                 RM.SuccessFlag = false;

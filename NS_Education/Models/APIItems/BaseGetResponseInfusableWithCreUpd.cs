@@ -5,7 +5,7 @@ namespace NS_Education.Models.APIItems
         public bool SuccessFlag { get; private set; }
         public string Message { get; private set; }
 
-        public void Infuse(cReturnMessage message)
+        public void Infuse(BaseApiResponse message)
         {
             SuccessFlag = message.SuccessFlag;
             Message = message.Message;

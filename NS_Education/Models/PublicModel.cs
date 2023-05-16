@@ -11,9 +11,4 @@
         public string Title = "";
         public bool SelectFlag = false;
     }
-    public class cReturnMessage
-    {
-        public bool SuccessFlag = true;
-        public string Message = "";
-    }
 }

@@ -460,6 +460,7 @@
     <Compile Include="Models\APIItems\Zip\GetList\Zip_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\GetList\Zip_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Zip\Submit\Zip_Submit_Input_APIItem.cs" />
+    <Compile Include="Models\BaseApiResponse.cs" />
     <Compile Include="Models\Entities\BusinessUser.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -601,6 +602,7 @@
     <Compile Include="Models\Entities\UserPasswordLog.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\FinalizedResponse.cs" />
     <Compile Include="Models\IReturnMessageInfusable.cs" />
     <Compile Include="Models\PublicModel.cs" />
     <Compile Include="Models\Utilities\PrintReport\GetResverListByIDs2\PrintReport_GetResverListByIds2_PayItem.cs" />

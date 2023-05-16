@@ -290,7 +290,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                           || await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
                                               && !sc.DeleteFlag
                                               && sc.CodeType == 0
-                                              && sc.Code == sc.CodeType.ToString())
+                                              && sc.Code == i.CodeType.ToString())
                     , () => AddError(NotFound("參數所屬類別")))
                 // 同 CodeType 下不允許重複編碼的資料
                 .ValidateAsync(async i =>
@@ -339,7 +339,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                           || await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
                                               && !sc.DeleteFlag
                                               && sc.CodeType == 0
-                                              && sc.Code == sc.CodeType.ToString())
+                                              && sc.Code == i.CodeType.ToString())
                     , () => AddError(NotFound("參數所屬類別")))
                 // 同 CodeType 下不允許重複編碼的資料
                 .ValidateAsync(async i =>

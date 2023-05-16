@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetInfoById;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetList;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.Login;
@@ -499,14 +500,16 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
-        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
             // 若 deleteFlag 為 false 時，驗證是否有其他不同 UID、相同 LoginAccount、非刪除狀態的資料，如果有，打回。
-
-            if (deleteFlag is false)
+            
+            foreach (var item in input.Items)
             {
+                if (!(item.DeleteFlag is false)) continue;
+                
                 // 先取得 UserData 以便取得 LoginAccount
-                UserData target = await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == id);
+                UserData target = await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == (item.Id ?? 0));
                 if (target is null)
                 {
                     AddError(NotFound("使用者 ID"));
@@ -514,21 +517,23 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 }
 
                 bool hasOtherAccount = await DC.UserData.AnyAsync(ud =>
-                    ud.UID != id && !ud.DeleteFlag && ud.LoginAccount == target.LoginAccount);
+                    ud.UID != (item.Id ?? 0) && !ud.DeleteFlag && ud.LoginAccount == target.LoginAccount);
 
-                if (hasOtherAccount)
-                {
-                    AddError("有其他非刪除資料的帳號與此使用者的帳號相同，無法復活！");
-                    return GetResponseJson();
-                }
+                // 沒有其他帳號，通過
+                if (!hasOtherAccount) continue;
+                
+                AddError($"有其他非刪除資料的帳號與 ID {item.Id} 的帳號相同，無法復活！");
             }
+
+            if (HasError())
+                return GetResponseJson();
             
-            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+            return await _deleteItemHelper.DeleteItem(input);
         }
 
-        public IQueryable<UserData> DeleteItemQuery(int id)
+        public IQueryable<UserData> DeleteItemsQuery(IEnumerable<int> ids)
         {
-            return DC.UserData.Where(u => u.UID == id);
+            return DC.UserData.Where(u => ids.Contains(u.UID));
         }
 
         #endregion

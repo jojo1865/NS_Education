@@ -1,8 +1,10 @@
-﻿using System.Data.Entity;
+﻿using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems;
+using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.Company.GetInfoById;
 using NS_Education.Models.APIItems.Controller.Company.GetList;
 using NS_Education.Models.APIItems.Controller.Company.Submit;
@@ -165,14 +167,14 @@ namespace NS_Education.Controller.UsingHelper
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
-        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+            return await _deleteItemHelper.DeleteItem(input);
         }
 
-        public IQueryable<D_Company> DeleteItemQuery(int id)
+        public IQueryable<D_Company> DeleteItemsQuery(IEnumerable<int> ids)
         {
-            return DC.D_Company.Where(c => c.DCID == id);
+            return DC.D_Company.Where(c => ids.Contains(c.DCID));
         }
 
         #endregion

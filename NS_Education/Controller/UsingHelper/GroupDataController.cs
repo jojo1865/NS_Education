@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.GroupData;
 using NS_Education.Models.APIItems.Controller.GroupData.GetInfoById;
 using NS_Education.Models.APIItems.Controller.GroupData.GetList;
@@ -134,14 +135,14 @@ namespace NS_Education.Controller.UsingHelper
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
-        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+            return await _deleteItemHelper.DeleteItem(input);
         }
 
-        public IQueryable<GroupData> DeleteItemQuery(int id)
+        public IQueryable<GroupData> DeleteItemsQuery(IEnumerable<int> ids)
         {
-            return DC.GroupData.Where(gd => gd.GID == id);
+            return DC.GroupData.Where(gd => ids.Contains(gd.GID));
         }
 
         #endregion

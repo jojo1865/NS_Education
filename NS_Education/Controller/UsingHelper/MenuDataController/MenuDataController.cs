@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems;
+using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.MenuData.MenuData.GetInfoById;
 using NS_Education.Models.APIItems.Controller.MenuData.MenuData.GetList;
 using NS_Education.Models.APIItems.Controller.MenuData.MenuData.Submit;
@@ -235,50 +236,55 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #region DeleteItem
 
         /// <summary>
-        /// 刪除單一選單以及其下層所有選單。
+        /// 刪除單筆或多筆選單以及其下層所有選單。
         /// </summary>
-        /// <param name="id">對象資料 ID</param>
-        /// <param name="deleteFlag">
-        /// true：刪除<br/>
-        /// false：取消刪除
-        /// </param>
+        /// <param name="input">輸入資料。參照 <see cref="DeleteItem_Input_APIItem"/></param>
         /// <returns>通用回傳格式訊息</returns>
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
-        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
             // 有特殊邏輯：刪除時，需要連同子選單一同刪除，所以這裡不使用 Helper。
-            await _deleteItem(id, deleteFlag);
+            await _deleteItem(input);
 
             return GetResponseJson();
         }
 
-        private async Task _deleteItem(int id, bool? deleteFlag)
+        private async Task _deleteItem(DeleteItem_Input_APIItem input)
         {
             // 1. 驗證輸入
-            bool isValid = this.StartValidate()
-                .Validate(_ => id.IsAboveZero(), () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
-                .Validate(_ => deleteFlag != null, () => AddError(EmptyNotAllowed("DeleteFlag")))
+            
+            // 驗證是否皆為獨特 ID
+            bool isCollectionValid = input.Items.ToArray().StartValidate()
+                .Validate(items => items.GroupBy(i => i.Id).Count() == items.Length)
                 .IsValid();
-
-            if (!isValid)
+            
+            // 驗證輸入內容
+            bool isEveryElementValid = input.Items.StartValidateElements()
+                .Validate(i => i.Id != null && i.Id.IsAboveZero(), i => AddError(EmptyNotAllowed($"欲更新的預約 ID（{i.Id}）")))
+                .Validate(i => i.DeleteFlag != null, i => AddError(EmptyNotAllowed($"ID {i.Id} 的 DeleteFlag")))
+                .IsValid();
+            
+            if (!isCollectionValid || !isEveryElementValid)
                 return;
-
-            // 2. 找出資料
-            var menuData = await DC.MenuData.Where(md => md.MDID == id || md.ParentID == id).ToListAsync();
-
-            if (!menuData.Any())
+            
+            foreach (DeleteItem_Input_Row_APIItem item in input.Items)
             {
-                AddError(DataNotFound);
-                return;
-            }
+                // 2. 找出資料
+                var menuData = await DC.MenuData.Where(md => md.MDID == item.Id || md.ParentID == item.Id).ToListAsync();
 
-            // 3. 設定資料
-            foreach (MenuData data in menuData)
-            {
-                data.DeleteFlag = deleteFlag ?? throw new ArgumentNullException(nameof(deleteFlag));
-            }
+                if (!menuData.Any())
+                {
+                    AddError(NotFound($"選單 ID {item.Id}"));
+                }
 
+                // 3. 設定資料
+                foreach (MenuData data in menuData)
+                {
+                    data.DeleteFlag = item.DeleteFlag ?? throw new ArgumentNullException(nameof(DeleteItem_Input_Row_APIItem.DeleteFlag));
+                }
+            }
+            
             // 4. 儲存至 DB
             try
             {

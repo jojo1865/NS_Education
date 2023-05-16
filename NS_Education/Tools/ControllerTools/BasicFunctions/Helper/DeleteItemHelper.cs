@@ -1,7 +1,10 @@
 using System;
 using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using NS_Education.Models.APIItems.Common.DeleteItem;
+using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -30,49 +33,71 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         private static string UpdateFailed(Exception e)
             => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
-        
+
+        private const string DeleteItemRepeating = "欲刪除的 ID 存在重複資料，請確認每個 ID 只輸入一次！";
         private const string DeleteItemNotSupported = "此 Controller 的資料型態不支援設定刪除狀態功能！";
-        private const string DeleteItemInputIncorrect = "未輸入欲設定刪除狀態的 ID 或是不正確！";
-        private const string DeleteItemNotFound = "查無欲設定刪除狀態的資料！";
+        private const string DeleteItemInputIdIncorrect = "未輸入欲刪除或復活的資料 ID 或是格式不正確！";
+        private static string DeleteItemInputDeleteFlagIncorrect(int? id)
+            => id != null ? $"ID {id} 未輸入欲刪除或復活，或是格式不正確！" : "其中一筆輸入資料未輸入欲刪除或復活，或是格式不正確！";
+        private const string DeleteItemNotFound = "其中一筆或多筆欲刪除或復活的 ID 查無資料！";
 
         /// <summary>
         /// 刪除單筆資料。
         /// </summary>
-        /// <param name="id">欲刪除資料的查詢索引值</param>
-        /// <param name="deleteFlag">欲設定成的刪除狀態</param>
+        /// <param name="input">輸入資料，<see cref="DeleteItem_Input_APIItem"/></param>
         /// <returns>
         /// 成功時：通用訊息回傳格式。<br/>
         /// 輸入不正確、查無資料、DB 錯誤時：包含錯誤訊息的通用訊息回傳格式。<br/>
         /// 其他異常時：拋錯。
         /// </returns>
-        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
             if (!FlagHelper<TEntity>.HasDeleteFlag)
                 throw new NotSupportedException(DeleteItemNotSupported);
 
             // 1. 驗證輸入。
-            if (!id.IsAboveZero())
-                _controller.AddError(DeleteItemInputIncorrect);
-
-            if (deleteFlag == null)
-                _controller.AddError(_controller.EmptyNotAllowed(nameof(deleteFlag)));
+            // 驗證集合是否皆為獨特 Id
+            bool isCollectionValid = input.Items.StartValidate()
+                .Validate(items => items.GroupBy(i => i.Id).Count() == input.Items.Count(),
+                    () => _controller.AddError(DeleteItemRepeating))
+                .IsValid();
             
-            if (_controller.HasError())
+            // 驗證每個元素是否輸入正確
+
+            bool isEveryElementValid = input.Items.StartValidateElements()
+                .Validate(i => i.Id != null && i.Id.IsAboveZero(),
+                    () => _controller.AddError(DeleteItemInputIdIncorrect))
+                .Validate(i => i.DeleteFlag != null, 
+                    i => _controller.AddError(DeleteItemInputDeleteFlagIncorrect(i.Id)))
+                .IsValid();
+
+            if (!isCollectionValid || !isEveryElementValid)
                 return _controller.GetResponseJson();
-
-            // 2. 查詢資料並確認刪除狀態。
-            TEntity t = await _DeleteItemQueryResult(id);
-
-            if (t == null)
+            
+            // 驗證每個元素是否都存在於 Db
+            // ReSharper disable once PossibleInvalidOperationException
+            // 建立 ID : entity 的字典，方便之後對照輸入資料
+            var data = (await _controller.DeleteItemsQuery(input.Items.Select(i => i.Id.Value))
+                .ToArrayAsync())
+                .ToDictionary(t => _controller.DC.GetPrimaryKeyFromEntity(t), t => t);
+            
+            // 前面已經確認過每個元素都是獨特的，所以當這裡的數量不同時，表示有輸入對應不到資料（查無資料）。
+            if (data.Keys.Count != input.Items.Count())
             {
                 _controller.AddError(DeleteItemNotFound);
                 return _controller.GetResponseJson();
             }
 
-            // 3. 更新刪除狀態與更新者資訊，並存入 DB。
+            // 2. 更新刪除狀態，並存入 DB。
             try
             {
-                FlagHelper.SetDeleteFlag(t, deleteFlag ?? throw new ArgumentNullException(nameof(deleteFlag)));
+                foreach (DeleteItem_Input_Row_APIItem i in input.Items)
+                {
+                    // 前面驗證已經確認僱所有輸入值都不是 null
+                    // ReSharper disable PossibleInvalidOperationException
+                    FlagHelper.SetDeleteFlag(data[i.Id.Value], i.DeleteFlag.Value);
+                }
+                
                 await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(), HttpContext.Current.Request);
             }
             catch (Exception e)
@@ -82,11 +107,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 3. 回傳通用回傳訊息格式。
             return _controller.GetResponseJson();
-        }
-
-        private async Task<TEntity> _DeleteItemQueryResult(int id)
-        {
-            return await _controller.DeleteItemQuery(id).FirstOrDefaultAsync();
         }
 
         #endregion

@@ -6,6 +6,7 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById;
 using NS_Education.Models.APIItems.Controller.Resver.GetHeadList;
 using NS_Education.Models.APIItems.Controller.Resver.Submit;
@@ -417,14 +418,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         #region DeleteItem
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
-        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+            return await _deleteItemHelper.DeleteItem(input);
         }
 
-        public IQueryable<Resver_Head> DeleteItemQuery(int id)
+        public IQueryable<Resver_Head> DeleteItemsQuery(IEnumerable<int> ids)
         {
-            return DC.Resver_Head.Where(rh => rh.RHID == id);
+            return DC.Resver_Head.Where(rh => ids.Contains(rh.RHID));
         }
         #endregion
         

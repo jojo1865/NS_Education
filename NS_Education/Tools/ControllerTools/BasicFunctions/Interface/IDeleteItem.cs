@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems.Common.DeleteItem;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
@@ -12,23 +14,22 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         where TEntity : class
     {
         /// <summary>
-        /// 刪除單筆資料。
+        /// 刪除單筆或多筆資料。
         /// </summary>
-        /// <param name="id">欲刪除資料的查詢索引值</param>
-        /// <param name="deleteFlag">欲設定的刪除狀態新值</param>
+        /// <param name="input">使用者輸入。參照：<see cref="DeleteItem_Input_APIItem"/></param>
         /// <returns>
         /// 成功時：通用訊息回傳格式。<br/>
         /// 輸入不正確、查無資料、DB 錯誤時：包含錯誤訊息的通用訊息回傳格式。<br/>
         /// 其他異常時：拋錯。
         /// </returns>
-        Task<string> DeleteItem(int id, bool? deleteFlag);
+        Task<string> DeleteItem(DeleteItem_Input_APIItem input);
         
         /// <summary>
-        /// 刪除單筆資料的查詢。
+        /// 刪除單筆或多筆資料的查詢。
         /// </summary>
-        /// <param name="id">欲刪除資料的 ID</param>
+        /// <param name="ids">欲刪除資料的 ID</param>
         /// <returns>查詢</returns>
         [NonAction]
-        IQueryable<TEntity> DeleteItemQuery(int id);
+        IQueryable<TEntity> DeleteItemsQuery(IEnumerable<int> ids);
     }
 }

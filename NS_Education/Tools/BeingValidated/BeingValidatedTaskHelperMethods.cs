@@ -113,9 +113,9 @@ namespace NS_Education.Tools.BeingValidated
         /// true：驗證通過。<br/>
         /// false：驗證失敗。
         /// </returns>
-        public static async Task<bool> IsValid<T>(this Task<IBeingValidated<T, T>> beingValidated)
+        public static async Task<bool> IsValid<TInput, TOutput>(this Task<IBeingValidated<TInput, TOutput>> beingValidated)
         {
-            IBeingValidated<T, T> obj = await beingValidated;
+            IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return obj.IsValid();
         }
 

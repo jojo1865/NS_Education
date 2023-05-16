@@ -1,7 +1,9 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.TimeSpan.GetInfoById;
 using NS_Education.Models.APIItems.Controller.TimeSpan.GetList;
 using NS_Education.Models.APIItems.Controller.TimeSpan.Submit;
@@ -150,14 +152,14 @@ namespace NS_Education.Controller.UsingHelper
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
-        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+            return await _deleteItemHelper.DeleteItem(input);
         }
 
-        public IQueryable<D_TimeSpan> DeleteItemQuery(int id)
+        public IQueryable<D_TimeSpan> DeleteItemsQuery(IEnumerable<int> ids)
         {
-            return DC.D_TimeSpan.Where(ts => ts.DTSID == id);
+            return DC.D_TimeSpan.Where(ts => ids.Contains(ts.DTSID));
         }
 
         #endregion

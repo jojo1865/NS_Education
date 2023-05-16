@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.OtherPayItem.GetInfoById;
 using NS_Education.Models.APIItems.Controller.OtherPayItem.GetList;
 using NS_Education.Models.APIItems.Controller.OtherPayItem.Submit;
@@ -149,14 +151,14 @@ namespace NS_Education.Controller.UsingHelper
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
-        public async Task<string> DeleteItem(int id, bool? deleteFlag)
+        public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            return await _deleteItemHelper.DeleteItem(id, deleteFlag);
+            return await _deleteItemHelper.DeleteItem(input);
         }
 
-        public IQueryable<D_OtherPayItem> DeleteItemQuery(int id)
+        public IQueryable<D_OtherPayItem> DeleteItemsQuery(IEnumerable<int> ids)
         {
-            return DC.D_OtherPayItem.Where(opi => opi.DOPIID == id);
+            return DC.D_OtherPayItem.Where(opi => ids.Contains(opi.DOPIID));
         }
 
         #endregion

@@ -7,7 +7,7 @@ using NS_Education.Variables;
 
 namespace NS_Education.Models.APIItems.PrintReport.GetResverListByIds1
 {
-    public class PrintReport_GetResverListByIds1_Output_Row_APIItem : IGetResponse
+    public class PrintReport_GetResverListByIds1_Output_Row_APIItem : IGetResponseRow
 
     {
         public async Task SetInfoFromEntity<T>(T entity, PublicClass controller) where T : class

@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.OtherPayItem.GetInfoById
 {
-    public class OtherPayItem_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class OtherPayItem_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int DOPIID { get; set; }
         public string Code { get; set; }

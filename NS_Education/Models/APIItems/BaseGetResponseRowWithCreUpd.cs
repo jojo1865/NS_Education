@@ -7,7 +7,7 @@ using NS_Education.Variables;
 
 namespace NS_Education.Models.APIItems
 {
-    public abstract class BaseGetResponseWithCreUpd : IGetResponse
+    public abstract class BaseGetResponseRowWithCreUpd : IGetResponseRow
     {
         public async Task SetInfoFromEntity<T>(T entity, PublicClass controller)
             where T : class

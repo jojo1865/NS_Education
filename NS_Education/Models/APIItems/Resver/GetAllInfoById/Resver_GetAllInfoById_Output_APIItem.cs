@@ -3,7 +3,7 @@ using NS_Education.Models.APIItems.ContactType.GetList;
 
 namespace NS_Education.Models.APIItems.Resver.GetAllInfoById
 {
-    public class Resver_GetAllInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class Resver_GetAllInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int RHID { get; set; }
 

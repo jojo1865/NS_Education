@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.APIItems.Partner.GetInfoById
 {
-    public class Partner_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class Partner_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int BPID { get; set; }
         

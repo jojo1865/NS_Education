@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.UserData.UserData.GetList
 {
-    public class UserData_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class UserData_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int Uid { get; set; }
         public string Username { get; set; }

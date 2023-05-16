@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.StaticCode.GetList
 {
-    public class StaticCode_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class StaticCode_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int BSCID { get; set; }
         public int iCodeType { get; set; }

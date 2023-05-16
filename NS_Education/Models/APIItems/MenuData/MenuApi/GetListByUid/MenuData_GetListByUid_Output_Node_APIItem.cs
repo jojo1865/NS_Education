@@ -5,7 +5,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 
 namespace NS_Education.Models.APIItems.MenuData.MenuApi.GetListByUid
 {
-    public class MenuData_GetListByUid_Output_Node_APIItem : IGetResponse
+    public class MenuData_GetListByUid_Output_Node_APIItem : IGetResponseRow
     {
         public Task SetInfoFromEntity<T>(T entity, PublicClass controller) where T : class
         {

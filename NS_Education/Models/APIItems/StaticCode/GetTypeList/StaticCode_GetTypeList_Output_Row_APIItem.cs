@@ -3,7 +3,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 
 namespace NS_Education.Models.APIItems.StaticCode.GetTypeList
 {
-    public class StaticCode_GetTypeList_Output_Row_APIItem : IGetResponse
+    public class StaticCode_GetTypeList_Output_Row_APIItem : IGetResponseRow
     {
         public Task SetInfoFromEntity<T>(T entity, PublicClass controller) where T : class
         {

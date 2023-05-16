@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.MenuData.MenuData.GetInfoById
 {
-    public class MenuData_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class MenuData_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int MDID { get; set; }
         public string Title { get; set; }

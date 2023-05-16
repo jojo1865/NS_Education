@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.SiteData.GetList
 {
-    public class SiteData_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class SiteData_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int BSID { get; set; }
         

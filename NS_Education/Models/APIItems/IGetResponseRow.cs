@@ -3,7 +3,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 
 namespace NS_Education.Models.APIItems
 {
-    public interface IGetResponse
+    public interface IGetResponseRow
     {
         /// <summary>
         /// 依據實際的 DB 物件，設置此欄位的基本欄位。<br/>

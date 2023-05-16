@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.APIItems.PayType.GetInfoById
 {
-    public class PayType_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class PayType_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int DPTID { get; set; }
         public int BCID { get; set; }

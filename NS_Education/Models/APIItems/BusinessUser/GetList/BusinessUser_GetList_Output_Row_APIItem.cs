@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.APIItems.BusinessUser.GetList
 {
-    public class BusinessUser_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class BusinessUser_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int BUID { get; set; }
         public string Code { get; set; }

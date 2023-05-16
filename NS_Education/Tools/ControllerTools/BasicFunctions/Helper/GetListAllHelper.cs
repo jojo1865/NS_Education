@@ -24,7 +24,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         where TController : PublicClass, IGetListAll<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForList
-        where TGetListRow : IGetResponse
+        where TGetListRow : IGetResponseRow
     {
         private readonly TController _controller;
 

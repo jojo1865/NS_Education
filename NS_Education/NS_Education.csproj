@@ -290,10 +290,10 @@
     <Compile Include="Models\APIItems\BaseResponseForList.cs" />
     <Compile Include="Models\APIItems\BaseResponseForPagedList.cs" />
     <Compile Include="Models\APIItems\BaseResponseRowForSelectable.cs" />
-    <Compile Include="Models\APIItems\BaseGetResponseWithCreDateOnly.cs" />
-    <Compile Include="Models\APIItems\BaseGetResponseWithCreUpd.cs" />
+    <Compile Include="Models\APIItems\BaseGetResponseRowWithCreDateOnly.cs" />
+    <Compile Include="Models\APIItems\BaseGetResponseRowWithCreUpd.cs" />
     <Compile Include="Models\APIItems\BaseResponseRowIdTitle.cs" />
-    <Compile Include="Models\APIItems\BaseGetResponseInfusableWithCreUpd.cs" />
+    <Compile Include="Models\APIItems\BaseGetResponseRowInfusableWithCreUpd.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetInfoById\BusinessUser_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetList\BusinessUser_GetList_Customer_APIItem.cs" />
     <Compile Include="Models\APIItems\BusinessUser\GetList\BusinessUser_GetList_Input_APIItem.cs" />
@@ -355,7 +355,7 @@
     <Compile Include="Models\APIItems\Hall\GetList\Hall_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Hall\GetList\Hall_GetList_Output_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Hall\Submit\Hall_Submit_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\IGetResponse.cs" />
+    <Compile Include="Models\APIItems\IGetResponseRow.cs" />
     <Compile Include="Models\APIItems\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_ChildMenu_APIItem.cs" />
     <Compile Include="Models\APIItems\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_MenuApi_APIItem.cs" />
     <Compile Include="Models\APIItems\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_Node_APIItem.cs" />

@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.Hall.GetList
 {
-    public class Hall_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class Hall_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int DDID { get; set; }
         public int DHID { get; set; }

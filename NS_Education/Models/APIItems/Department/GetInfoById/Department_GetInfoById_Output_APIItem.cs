@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.Department.GetInfoById
 {
-    public class Department_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class Department_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int DDID { get; set; }
         public int DCID { get; set; }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.APIItems.StaticCode.GetInfoById
 {
-    public class StaticCode_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class StaticCode_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int BSCID { get; set; }
         public int iCodeType { get; set; }

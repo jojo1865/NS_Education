@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.APIItems.SiteData.GetListForCalendar
 {
-    public class SiteData_GetListForCalendar_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class SiteData_GetListForCalendar_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int BSID { get; set; }
         public string Code { get; set; }

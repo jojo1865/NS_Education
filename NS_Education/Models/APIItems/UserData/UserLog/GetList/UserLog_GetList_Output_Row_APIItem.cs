@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.UserData.UserLog.GetList
 {
-    public class UserLog_GetList_Output_Row_APIItem : BaseGetResponseWithCreDateOnly
+    public class UserLog_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreDateOnly
     {
         public long ULID { get; set; }
         public int UID { get; set; }

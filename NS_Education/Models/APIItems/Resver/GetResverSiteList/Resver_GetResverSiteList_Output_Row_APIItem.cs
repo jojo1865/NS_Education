@@ -4,7 +4,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 
 namespace NS_Education.Models.APIItems.Resver.GetResverSiteList
 {
-    public class Resver_GetResverSiteList_Output_Row_APIItem : IGetResponse
+    public class Resver_GetResverSiteList_Output_Row_APIItem : IGetResponseRow
     {
         public Task SetInfoFromEntity<T>(T entity, PublicClass controller) where T : class
         {

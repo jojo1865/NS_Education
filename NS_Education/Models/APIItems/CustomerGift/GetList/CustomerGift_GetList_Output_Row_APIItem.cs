@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.CustomerGift.GetList
 {
-    public class CustomerGift_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class CustomerGift_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int CGID { get; set; }
         

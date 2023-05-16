@@ -3,7 +3,7 @@ using NS_Education.Models.APIItems.Customer.GetList;
 
 namespace NS_Education.Models.APIItems.Customer.GetInfoById
 {
-    public class Customer_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class Customer_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int CID { get; set; }
         

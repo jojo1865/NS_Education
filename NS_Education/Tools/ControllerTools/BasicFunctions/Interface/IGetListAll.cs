@@ -14,7 +14,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     public interface IGetListAll<TEntity, in TGetListAllRequest, TGetListAllResponseRow>
         where TEntity : class
         where TGetListAllRequest : BaseRequestForList
-        where TGetListAllResponseRow : IGetResponse
+        where TGetListAllResponseRow : IGetResponseRow
     {
         /// <summary>
         /// 取得無分頁的整批資料列表。

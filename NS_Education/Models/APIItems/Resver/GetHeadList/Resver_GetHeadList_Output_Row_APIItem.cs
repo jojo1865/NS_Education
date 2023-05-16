@@ -3,7 +3,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 
 namespace NS_Education.Models.APIItems.Resver.GetHeadList
 {
-    public class Resver_GetHeadList_Output_Row_APIItem : IGetResponse
+    public class Resver_GetHeadList_Output_Row_APIItem : IGetResponseRow
     {
         public Task SetInfoFromEntity<T>(T entity, PublicClass controller) where T : class
         {

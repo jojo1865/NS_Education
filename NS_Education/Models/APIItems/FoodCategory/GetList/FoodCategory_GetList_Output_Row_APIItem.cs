@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.FoodCategory.GetList
 {
-    public class FoodCategory_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class FoodCategory_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int DFCID { get; set; }
         public string Code { get; set; }

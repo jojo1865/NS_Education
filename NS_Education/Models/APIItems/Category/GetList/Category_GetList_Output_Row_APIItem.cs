@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.Category.GetList
 {
-    public class Category_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class Category_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int BCID { get; set; }
         public int iCategoryType { get; set; }

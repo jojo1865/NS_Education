@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.APIItems.OrderCode.GetInfoById
 {
-    public class OrderCode_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class OrderCode_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int BOCID { get; set; }
         public int iCodeType { get; set; }

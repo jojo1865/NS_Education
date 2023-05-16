@@ -24,7 +24,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         where TController : PublicClass, IGetListPaged<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForPagedList
-        where TGetListRow : IGetResponse
+        where TGetListRow : IGetResponseRow
     {
         private readonly TController _controller;
 

@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.MenuData.MenuData.GetList
 {
-    public class MenuData_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class MenuData_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int MDID { get; set; }
         public string Title { get; set; }

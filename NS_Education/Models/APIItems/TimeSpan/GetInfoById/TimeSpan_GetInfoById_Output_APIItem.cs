@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.TimeSpan.GetInfoById
 {
-    public class TimeSpan_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class TimeSpan_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int DTSID { get; set; }
         public string Code { get; set; }

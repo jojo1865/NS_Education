@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.UserData.UserData.GetInfoById
 {
-    public class UserData_GetInfoById_Output_APIItem : BaseGetResponseInfusableWithCreUpd
+    public class UserData_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int UID { get; set; }
         public string Username { get; set; }

@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.TimeSpan.GetList
 {
-    public class TimeSpan_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class TimeSpan_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int DTSID { get; set; }
         public string Code { get; set; }

@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.Device.GetList
 {
-    public class Device_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class Device_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int BDID { get; set; }
         

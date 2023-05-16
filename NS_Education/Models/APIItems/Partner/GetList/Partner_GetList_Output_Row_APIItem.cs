@@ -1,6 +1,6 @@
 namespace NS_Education.Models.APIItems.Partner.GetList
 {
-    public class Partner_GetList_Output_Row_APIItem : BaseGetResponseWithCreUpd
+    public class Partner_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int BPID { get; set; }
         

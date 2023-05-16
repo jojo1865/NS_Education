@@ -47,9 +47,9 @@ namespace NS_Education.Tools
                     ApiResponse = modify.SelectToken("Content.ApiResponse")?.Value<object>()
                                   ?? (modify["Content"] != null 
                                       ? JToken.Parse(modify["Content"]?.Value<string>() ?? "") 
-                                      : ""
+                                      : null
                                       ),
-                    Privileges = modify.SelectToken("Content.Privileges")?.Value<List<Privilege>>() ?? privileges
+                    Privileges = modify.SelectToken("Content.Privileges")?.Value<Privilege[]>() ?? privileges ?? Array.Empty<Privilege>()
                 }).ToString(),
                 ContentEncoding = Encoding.UTF8,
                 ContentType = "application/json; charset=utf-8",

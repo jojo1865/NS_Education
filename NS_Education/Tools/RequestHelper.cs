@@ -47,7 +47,7 @@ namespace NS_Education.Tools
                     Privileges = modify.SelectToken("Content.ApiResponse") ?? JToken.FromObject(privileges ?? Array.Empty<Privilege>())
                 }).ToString(),
                 ContentEncoding = Encoding.UTF8,
-                ContentType = "Content-type: application/json; charset=utf-8",
+                ContentType = "application/json; charset=utf-8",
                 // 修改 Content 結構，修改為制式結構
             };
             
@@ -106,6 +106,7 @@ namespace NS_Education.Tools
             httpResponse.Headers.Add("Access-Control-Allow-Headers",
                 "Accepts, Content-Type, Origin, X-My-Header, Pragma, Authorization");
             httpResponse.Headers.Add("Access-Control-Allow-Method", "GET, POST");
+            httpResponse.Headers.Add("content-type", "application/json;charset=UTF-8");
         }
     }
 }

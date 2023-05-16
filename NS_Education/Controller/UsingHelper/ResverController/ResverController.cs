@@ -742,6 +742,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 每個場地
             foreach (Resver_Submit_SiteItem_Input_APIItem siteItem in input.SiteItems)
             {
+                B_SiteData siteData = await DC.B_SiteData.FirstOrDefaultAsync(sd => sd.BSID == siteItem.BSID);
                 // 每個設備
                 foreach (Resver_Submit_DeviceItem_Input_APIItem deviceItem in siteItem.DeviceItems)
                 {
@@ -761,20 +762,23 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         .ToArrayAsync();
 
                     DateTime targetDate = deviceItem.TargetDate.ParseDateTime();
-                    
+
                     // 每個時段
                     foreach (D_TimeSpan timeSpan in wantedTimeSpans)
                     {
                         // 計算此設備預約單以外的預約單中，預約了同一設備的總數量
-                        int reservedCount = devices.Values
-                            .SelectMany(bd => bd.Resver_Device)
+                        int reservedCount = DC.Resver_Device
+                            // 選出所有不是這張設備預約單的設備預約單，並且是同一天、未刪除
                             .Where(rd => !rd.DeleteFlag)
-                            .Where(rd => rd.TargetDate.Date == targetDate.Date)
-                            .Where(rd => rd.Resver_Site.RHID != input.RHID || rd.RSID != siteItem.RSID)
+                            .Where(rd => DbFunctions.TruncateTime(rd.TargetDate) == targetDate.Date)
+                            .Where(rd => rd.RDID != deviceItem.RDID)
+                            // 存到記憶體，因為接下來又要查 DB 了
+                            .ToArray()
+                            // 選出它們的 RTS
                             .Where(rd => DC.M_Resver_TimeSpan
                                 .Include(rts => rts.D_TimeSpan)
                                 .Where(rts => rts.TargetTable == resverDeviceTableName)
-                                .Where(rts => rts.TargetID != rd.RDID)
+                                .Where(rts => rts.TargetID == rd.RDID)
                                 .AsEnumerable()
                                 .Any(rts => rts.D_TimeSpan.IsCrossingWith(timeSpan))
                             )
@@ -784,7 +788,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         if (totalCt - reservedCount >= deviceItem.Ct) continue;
 
                         AddError(
-                            $"場地 ID {siteItem.BSID} 的設備 ID {deviceItem.BDID} 在 時段 ID {timeSpan.DTSID}（{timeSpan.GetTimeRangeFormattedString()}）的可用數量不足（總數：{totalCt}，欲預約數量：{deviceItem.Ct}，已預約數量：{reservedCount}）！");
+                            $"{siteData?.Title ?? $"場地 ID {siteItem.BSID}"} 欲預約的設備 {devices[deviceItem.BDID].Title} 在 {timeSpan.GetTimeRangeFormattedString()} 的可用數量不足（總數：{totalCt}，欲預約數量：{deviceItem.Ct}，已預約數量：{reservedCount}）！");
                         result = false;
                     }
                 }

@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NS_Education", "NS_Educatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NS_Education_EfStartUp", "NS_Education_EfStartUp\NS_Education_EfStartUp.csproj", "{6093C0BD-1007-456A-8D9E-04A6731DD964}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GammaApiTools", "..\GammaApiTools\GammaApiTools\GammaApiTools.csproj", "{38FB3E6E-8749-4A98-B8C7-D39BDD110128}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{6093C0BD-1007-456A-8D9E-04A6731DD964}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6093C0BD-1007-456A-8D9E-04A6731DD964}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6093C0BD-1007-456A-8D9E-04A6731DD964}.Release|Any CPU.Build.0 = Release|Any CPU
-		{38FB3E6E-8749-4A98-B8C7-D39BDD110128}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{38FB3E6E-8749-4A98-B8C7-D39BDD110128}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{38FB3E6E-8749-4A98-B8C7-D39BDD110128}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{38FB3E6E-8749-4A98-B8C7-D39BDD110128}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

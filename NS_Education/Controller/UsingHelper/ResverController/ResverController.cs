@@ -1194,12 +1194,12 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     continue;
                 }
                 throwFood.RTID = throwData.RTID;
-                throwFood.DFCID = throwFood.DFCID;
-                throwFood.BSCID = throwFood.BSCID;
-                throwFood.BPID = throwFood.BPID;
-                throwFood.Ct = throwFood.Ct;
-                throwFood.UnitPrice = throwFood.UnitPrice;
-                throwFood.Price = throwFood.Price;
+                throwFood.DFCID = foodItem.DFCID;
+                throwFood.BSCID = foodItem.BSCID;
+                throwFood.BPID = foodItem.BPID;
+                throwFood.Ct = foodItem.Ct;
+                throwFood.UnitPrice = foodItem.UnitPrice;
+                throwFood.Price = foodItem.Price;
             }
         }
 

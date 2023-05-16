@@ -19,13 +19,13 @@ namespace NS_Education.Tools
                 if (context.Exception is HttpException httpException)
                 {
                     context.HttpContext.Response.StatusCode = httpException.GetHttpCode();
-                    context.HttpContext.Response.StatusDescription = httpException.InnerException?.Message ?? httpException.Message;
                 }
                 else
                 {
                     context.HttpContext.Response.StatusCode = 500;
-                    context.HttpContext.Response.StatusDescription = context.Exception.InnerException?.Message ?? context.Exception.Message;
                 }
+
+                context.HttpContext.Response.StatusDescription = GetStatusMessage(context);
             }
 
             // 取得此次 action 完整的 HTTP Response 並轉成 JObject
@@ -56,6 +56,25 @@ namespace NS_Education.Tools
             filterContext.HttpContext.Response.StatusDescription = "OK";
 
             return newActionResult;
+        }
+
+        private static string GetStatusMessage(ExceptionContext context)
+        {
+            string result = context.Exception.Message;
+            if (context.Exception.InnerException == null) return result;
+            
+            // 取得最裡面的 InnerException，但避免無限迴圈
+            HashSet<Exception> exceptions = new HashSet<Exception>();
+            Exception curr = context.Exception;
+            
+            while (exceptions.Add(curr) && curr.InnerException != null)
+            {
+                curr = curr.InnerException;
+            }
+
+            result = curr.Message;
+
+            return result;
         }
 
         public static void AddCorsHeaders(HttpResponseBase httpResponse = null)

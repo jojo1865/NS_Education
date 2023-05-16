@@ -1,8 +1,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems.MenuData.MenuApi.GetList;
-using NS_Education.Models.APIItems.MenuData.MenuApi.Submit;
+using NS_Education.Models.APIItems.Controller.MenuData.MenuApi.GetList;
+using NS_Education.Models.APIItems.Controller.MenuData.MenuApi.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;

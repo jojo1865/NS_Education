@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems.StaticCode.GetTypeList;
+using NS_Education.Models.APIItems.Controller.StaticCode.GetTypeList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;

@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems.Department.GetInfoById;
-using NS_Education.Models.APIItems.Department.GetList;
-using NS_Education.Models.APIItems.Department.Submit;
+using NS_Education.Models.APIItems.Controller.Department.GetInfoById;
+using NS_Education.Models.APIItems.Controller.Department.GetList;
+using NS_Education.Models.APIItems.Controller.Department.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;

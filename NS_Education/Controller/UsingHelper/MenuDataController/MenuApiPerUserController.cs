@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using NS_Education.Models.APIItems;
-using NS_Education.Models.APIItems.MenuData.MenuApi.GetListByUid;
+using NS_Education.Models.APIItems.Controller.MenuData.MenuApi.GetListByUid;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Filters.JwtAuthFilter;

@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems.Zip.GetInfoById;
-using NS_Education.Models.APIItems.Zip.GetList;
-using NS_Education.Models.APIItems.Zip.Submit;
+using NS_Education.Models.APIItems.Controller.Zip.GetInfoById;
+using NS_Education.Models.APIItems.Controller.Zip.GetList;
+using NS_Education.Models.APIItems.Controller.Zip.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;

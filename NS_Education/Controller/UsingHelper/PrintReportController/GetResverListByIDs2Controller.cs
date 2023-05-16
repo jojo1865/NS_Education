@@ -4,7 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems.PrintReport.GetResverListByIds2;
+using NS_Education.Models.APIItems.Controller.PrintReport.GetResverListByIds2;
 using NS_Education.Models.Entities;
 using NS_Education.Models.Utilities.PrintReport.GetResverListByIDs2;
 using NS_Education.Tools.BeingValidated;

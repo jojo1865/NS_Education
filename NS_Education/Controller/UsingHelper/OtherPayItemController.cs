@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems.OtherPayItem.GetInfoById;
-using NS_Education.Models.APIItems.OtherPayItem.GetList;
-using NS_Education.Models.APIItems.OtherPayItem.Submit;
+using NS_Education.Models.APIItems.Controller.OtherPayItem.GetInfoById;
+using NS_Education.Models.APIItems.Controller.OtherPayItem.GetList;
+using NS_Education.Models.APIItems.Controller.OtherPayItem.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;

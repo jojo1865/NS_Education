@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems.PayType.GetInfoById;
-using NS_Education.Models.APIItems.PayType.GetList;
-using NS_Education.Models.APIItems.PayType.Submit;
+using NS_Education.Models.APIItems.Controller.PayType.GetInfoById;
+using NS_Education.Models.APIItems.Controller.PayType.GetList;
+using NS_Education.Models.APIItems.Controller.PayType.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;

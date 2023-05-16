@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems.FoodCategory.GetInfoById;
-using NS_Education.Models.APIItems.FoodCategory.GetList;
-using NS_Education.Models.APIItems.FoodCategory.Submit;
+using NS_Education.Models.APIItems.Controller.FoodCategory.GetInfoById;
+using NS_Education.Models.APIItems.Controller.FoodCategory.GetList;
+using NS_Education.Models.APIItems.Controller.FoodCategory.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;

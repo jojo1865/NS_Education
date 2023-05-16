@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems;
-using NS_Education.Models.APIItems.ContactType.GetList;
+using NS_Education.Models.APIItems.Controller.ContactType.GetList;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;

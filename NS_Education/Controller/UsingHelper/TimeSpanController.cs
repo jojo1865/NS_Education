@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems.TimeSpan.GetInfoById;
-using NS_Education.Models.APIItems.TimeSpan.GetList;
-using NS_Education.Models.APIItems.TimeSpan.Submit;
+using NS_Education.Models.APIItems.Controller.TimeSpan.GetInfoById;
+using NS_Education.Models.APIItems.Controller.TimeSpan.GetList;
+using NS_Education.Models.APIItems.Controller.TimeSpan.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;

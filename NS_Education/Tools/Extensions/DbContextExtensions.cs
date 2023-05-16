@@ -24,10 +24,10 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="context">DbContext</param>
         /// <param name="uid">要求者的 UID。</param>
-        /// <param name="httpRequest"></param>
-        public static void SaveChangesStandardProcedure(this NsDbContext context, int uid, HttpRequest httpRequest)
+        /// <param name="httpRequestBase"></param>
+        public static void SaveChangesStandardProcedure(this NsDbContext context, int uid, HttpRequestBase httpRequestBase)
         {
-            DoStandardProcedure(context, uid, new HttpRequestWrapper(httpRequest));
+            DoStandardProcedure(context, uid, httpRequestBase);
 
             context.SaveChanges();
         }
@@ -283,6 +283,10 @@ namespace NS_Education.Tools.Extensions
         {
             foreach (var entity in entities)
             {
+                // 如果已經是 tracking, 跳過
+                if (context.Entry(entity).State != EntityState.Detached)
+                    continue;
+                
                 await Task.Run(() => context.Set(entity.GetType()).Add(entity));
             }
         }
@@ -291,13 +295,6 @@ namespace NS_Education.Tools.Extensions
             where TEntity : class
         {
             await Task.Run(() => dbSet.Add(entity));
-        }
-        
-                
-        public static async Task AddRangeAsync<TEntity>(this DbSet<TEntity> dbSet, IEnumerable<TEntity> entity)
-            where TEntity : class
-        {
-            await Task.Run(() => dbSet.AddRange(entity));
         }
     }
 }

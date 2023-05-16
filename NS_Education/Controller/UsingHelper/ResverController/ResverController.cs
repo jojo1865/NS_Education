@@ -376,8 +376,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private List<Resver_GetAllInfoById_Output_ContactItem_APIItem> GetAllInfoByIdPopulateContactItems(
             Resver_Head entity)
         {
+            string tableName = DC.GetTableName<Resver_Head>();
             return DC.M_Contect.Where(c =>
-                    c.TargetTable == DC.GetTableName<Resver_Head>()
+                    c.TargetTable == tableName
                     && c.TargetID == entity.RHID)
                 .OrderBy(c => c.SortNo)
                 .Select(c => new Resver_GetAllInfoById_Output_ContactItem_APIItem
@@ -394,8 +395,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             int entityId)
             where T : class
         {
+            string tableName = DC.GetTableName<T>();
             return head.M_Resver_TimeSpan
-                .Where(rts => rts.TargetTable == DC.GetTableName<T>()
+                .Where(rts => rts.TargetTable == tableName
                               && rts.TargetID == entityId)
                 .OrderBy(rts => rts.SortNo)
                 .Select(rts => new Resver_GetAllInfoById_Output_TimeSpanItem_APIItem
@@ -953,12 +955,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             {
                 // 取得主資料
                 Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
-                // 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
                 SubmitPopulateHeadValues(input, head);
-                await DC.AddAsync(head);
-                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
+                if (head.RHID == 0)
+                {
+                    await DC.AddAsync(head);
+                    await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                }
+
                 // 清理所有跟這張預約單有關的 ResverTimeSpan
-                head.M_Resver_TimeSpan.Clear();
+                DC.M_Resver_TimeSpan.RemoveRange(head.M_Resver_TimeSpan);
 
                 // 開始寫入值
                 SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
@@ -1087,8 +1093,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 site.BSCID = item.BSCID;
 
                 // 先儲存至 DB, 才有 RSID...
-                await DC.AddAsync(site);
-                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                if (site.RSID == 0)
+                {
+                    await DC.AddAsync(site);
+                    await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                }
 
                 SubmitPopulateSiteItemTimeSpanItems(item, head, site);
                 await SubmitPopulateSiteItemThrowItems(item, head, site, entitiesToAdd);
@@ -1099,7 +1108,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private async Task SubmitPopulateSiteItemDeviceItems(Resver_Submit_SiteItem_Input_APIItem item,
             Resver_Head head, Resver_Site site)
         {
-            site.Resver_Device.Clear();
+            DC.Resver_Device.RemoveRange(site.Resver_Device.Where(rd => item.DeviceItems.All(di => di.RDID != rd.RDID)));
             foreach (var deviceItem in item.DeviceItems)
             {
                 Resver_Device device = SubmitFindOrCreateNew<Resver_Device>(deviceItem.RDID);
@@ -1123,8 +1132,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                 site.Resver_Device.Add(device);
                 // 先儲存至 DB 才有 RDID...
-                await DC.Resver_Device.AddAsync(device);
-                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                if (device.RDID == 0)
+                {
+                    await DC.Resver_Device.AddAsync(device);
+                    await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                }
 
                 // 寫入 device 的 TimeSpan
                 int sortNo = 0;
@@ -1147,7 +1159,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private async Task SubmitPopulateSiteItemThrowItems(Resver_Submit_SiteItem_Input_APIItem item,
             Resver_Head head, Resver_Site site, IList<object> entitiesToAdd)
         {
-            site.Resver_Throw.Clear();
+            DC.Resver_Throw.RemoveRange(site.Resver_Throw.Where(rt => item.ThrowItems.All(ti => ti.RTID != rt.RTID)));
             foreach (var throwItem in item.ThrowItems)
             {
                 Resver_Throw throwData = SubmitFindOrCreateNew<Resver_Throw>(throwItem.RTID);
@@ -1172,8 +1184,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 site.Resver_Throw.Add(throwData);
 
                 // 先儲存才有 RTID 給 Resver_TimeSpan 用...
-                await DC.AddAsync(throwData);
-                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                if (throwData.RTID == 0)
+                {
+                    await DC.AddAsync(throwData);
+                    await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                }
 
                 SubmitPopulateSiteItemThrowItemTimeSpanItems(throwData, throwItem, head);
                 SubmitPopulateSiteItemThrowItemThrowFoodItems(throwData, throwItem, entitiesToAdd);
@@ -1183,7 +1198,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private void SubmitPopulateSiteItemThrowItemThrowFoodItems(Resver_Throw throwData,
             Resver_Submit_ThrowItem_Input_APIItem throwItem, IList<object> entitiesToAdd)
         {
-            throwData.Resver_Throw_Food.Clear();
+            DC.Resver_Throw_Food.RemoveRange(throwData.Resver_Throw_Food.Where(rtf => throwItem.FoodItems.All(fi => fi.RTFID != rtf.RTFID)));
 
             foreach (Resver_Submit_FoodItem_Input_APIItem foodItem in throwItem.FoodItems)
             {
@@ -1245,9 +1260,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             if (!isAdd)
             {
+                string tableName = DC.GetTableName<Resver_Head>();
                 // 先清除所有原本有的 M_Contect
                 var originalContacts = DC.M_Contect
-                    .Where(c => c.TargetTable == DC.GetTableName<Resver_Head>() && c.TargetID == input.RHID)
+                    .Where(c => c.TargetTable == tableName && c.TargetID == input.RHID)
                     .AsEnumerable();
                 
                 DC.M_Contect.RemoveRange(originalContacts);
@@ -1344,6 +1360,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food)))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Head))
                 // other
                 .Include(rh => rh.Resver_Other)
                 // bill

@@ -765,7 +765,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     // 每個時段
                     foreach (D_TimeSpan timeSpan in wantedTimeSpans)
                     {
-                        // 計算任何有重疊時段已被預約的數量
+                        // 計算此設備預約單以外的預約單中，預約了同一設備的總數量
                         int reservedCount = devices.Values
                             .SelectMany(bd => bd.Resver_Device)
                             .Where(rd => !rd.DeleteFlag)
@@ -774,7 +774,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                             .Where(rd => DC.M_Resver_TimeSpan
                                 .Include(rts => rts.D_TimeSpan)
                                 .Where(rts => rts.TargetTable == resverDeviceTableName)
-                                .Where(rts => rts.TargetID == rd.RDID)
+                                .Where(rts => rts.TargetID != rd.RDID)
                                 .AsEnumerable()
                                 .Any(rts => rts.D_TimeSpan.IsCrossingWith(timeSpan))
                             )

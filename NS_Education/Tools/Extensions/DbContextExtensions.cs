@@ -258,7 +258,7 @@ namespace NS_Education.Tools.Extensions
             EntityType entityType = objectSet.EntitySet.ElementType;
 
             string tableName = entityType.MetadataProperties
-                .Where(p => p.Name == "TableName")
+                .Where(p => p.Name == "Name")
                 .Select(p => p.Value.ToString())
                 .SingleOrDefault();
 

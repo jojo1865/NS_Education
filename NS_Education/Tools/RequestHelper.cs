@@ -106,7 +106,7 @@ namespace NS_Education.Tools
             httpResponse.Headers.Add("Access-Control-Allow-Headers",
                 "Accepts, Content-Type, Origin, X-My-Header, Pragma, Authorization");
             httpResponse.Headers.Add("Access-Control-Allow-Method", "GET, POST");
-            httpResponse.Headers.Add("content-type", "application/json;charset=UTF-8");
+            httpResponse.Headers.Add("Content-Type", "application/json; charset=UTF-8");
         }
     }
 }

@@ -644,6 +644,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Validate(si => Task.Run(() => SubmitValidateStaticCode(si.BSCID, StaticCodeType.SiteTable)).Result,
                         () => AddError(NotFound($"預約場地的桌型 ID（{item.BSCID}）")))
                     .IsValid());
+            
+            // 檢查場地的總可容納人數大於等於預約單要求人數
+            IEnumerable<int> siteItemIds = input.SiteItems.Select(si => si.BSID);
+            int totalSize = await DC.B_SiteData.Where(sd => siteItemIds.Contains(sd.BSID)).SumAsync(sd => sd.MaxSize);
+
+            isSiteItemsValid = isSiteItemsValid &&
+                               input.SiteItems.StartValidate()
+                                   .Validate(si => totalSize >= input.PeopleCt,
+                                       () => AddError(TooLarge($"預約人數（{input.PeopleCt}）", totalSize)))
+                                   .IsValid();
 
             // 主預約單 -> 場地列表 -> 時段列表
             bool isSiteItemTimeSpanItemValid = isSiteItemsValid

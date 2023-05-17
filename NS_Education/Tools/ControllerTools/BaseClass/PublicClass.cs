@@ -161,6 +161,17 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
 
         /// <summary>
+        /// 回傳一串輸入值過大時可使用的預設錯誤訊息駔懺。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <param name="max">最大值</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string TooLarge(string fieldName, object max = null)
+        {
+            return max is null ? $"「{fieldName}」值太大了！" : $"「{fieldName}」不得超過 {max}！";
+        }
+
+        /// <summary>
         /// 回傳一串長度超出範圍時可使用的預設錯誤訊息字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>

@@ -604,7 +604,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             {
                 // 先確認預約單狀態，如果是已中止，直接報錯
                 Resver_Head head = await DC.Resver_Head
-                    .Include(rh => rh.BSCID12)
+                    .Include(rh => rh.B_StaticCode)
                     .FirstOrDefaultAsync(rh => rh.RHID == input.RHID);
 
                 dataCheckFlag = head?.CheckFlag ?? false;

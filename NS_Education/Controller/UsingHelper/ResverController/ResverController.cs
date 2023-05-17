@@ -71,7 +71,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         public IOrderedQueryable<Resver_Head> GetListPagedOrderedQuery(Resver_GetHeadList_Input_APIItem input)
         {
             var query = DC.Resver_Head
-                .Include(rh => rh.B_StaticCode)
+                .Include(rh => rh.B_StaticCode1)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -448,8 +448,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 return GetResponseJson();
             }
 
-            if (entity.B_StaticCode.Code != ReserveHeadState.Terminated &&
-                entity.B_StaticCode.Code != ReserveHeadState.FullyPaid)
+            if (entity.B_StaticCode1.Code != ReserveHeadState.Terminated &&
+                entity.B_StaticCode1.Code != ReserveHeadState.FullyPaid)
             {
                 AddError("已結帳或已中止的預約單無法修改確認狀態！");
                 return GetResponseJson();
@@ -481,7 +481,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 throw new ArgumentNullException(nameof(id));
             
             return await DC.Resver_Head
-                .Include(rh => rh.B_StaticCode)
+                .Include(rh => rh.B_StaticCode1)
                 // 已結帳或已中止時，不允許修改確認狀態。
                 .Where(rh => !rh.DeleteFlag && rh.RHID == id)
                 .FirstOrDefaultAsync();
@@ -518,7 +518,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 return GetResponseJson();
             }
 
-            if (entity.B_StaticCode.Code != ReserveHeadState.Terminated)
+            if (entity.B_StaticCode1.Code != ReserveHeadState.Terminated)
             {
                 AddError("已中止的預約單無法修改報到狀態！");
                 return GetResponseJson();
@@ -550,7 +550,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 throw new ArgumentNullException(nameof(id));
             
             return await DC.Resver_Head
-                .Include(rh => rh.B_StaticCode)
+                .Include(rh => rh.B_StaticCode1)
                 // 已中止時，不允許修改報到狀態。
                 .Where(rh => !rh.DeleteFlag && rh.RHID == id)
                 .FirstOrDefaultAsync();
@@ -604,12 +604,12 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             {
                 // 先確認預約單狀態，如果是已中止，直接報錯
                 Resver_Head head = await DC.Resver_Head
-                    .Include(rh => rh.B_StaticCode)
+                    .Include(rh => rh.B_StaticCode1)
                     .FirstOrDefaultAsync(rh => rh.RHID == input.RHID);
 
                 dataCheckFlag = head?.CheckFlag ?? false;
 
-                if (head != null && head.B_StaticCode.Code == ReserveHeadState.Terminated)
+                if (head != null && head.B_StaticCode1.Code == ReserveHeadState.Terminated)
                 {
                     AddError("預約單已中止，無法更新！");
                     return false;

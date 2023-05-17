@@ -1420,12 +1420,15 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         private void SubmitPopulateHeadContactItems(Resver_Submit_Input_APIItem input, Resver_Head head, ICollection<object> entitiesToAdd, bool isAdd)
         {
+            string tableName = DC.GetTableName<Resver_Head>();
             if (!isAdd)
             {
-                string tableName = DC.GetTableName<Resver_Head>();
-                // 先清除所有原本有的 M_Contect
+                IEnumerable<int> inputIds = input.ContactItems.Select(ci => ci.MID);
+                
+                // 先清除所有原本有，但不存在於本次輸入的 M_Contect
                 var originalContacts = DC.M_Contect
                     .Where(c => c.TargetTable == tableName && c.TargetID == input.RHID)
+                    .Where(c => !inputIds.Contains(c.MID))
                     .AsEnumerable();
                 
                 DC.M_Contect.RemoveRange(originalContacts);
@@ -1434,15 +1437,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             int sortNo = 0;
             foreach (var contactItem in input.ContactItems)
             {
-                M_Contect contact = new M_Contect
-                {
-                    ContectType = contactItem.ContactType,
-                    TargetTable = DC.GetTableName<Resver_Head>(),
-                    TargetID = head.RHID,
-                    ContectData = contactItem.ContactData,
-                    SortNo = ++sortNo
-                };
-                entitiesToAdd.Add(contact);
+                M_Contect contact = SubmitFindOrCreateNew<M_Contect>(contactItem.MID, entitiesToAdd);
+                contact.MID = contactItem.MID;
+                contact.ContectType = contactItem.ContactType;
+                contact.TargetTable = tableName;
+                contact.TargetID = head.RHID;
+                contact.ContectData = contactItem.ContactData;
+                contact.SortNo = ++sortNo;
             }
         }
 

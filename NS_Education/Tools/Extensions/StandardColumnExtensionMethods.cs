@@ -190,6 +190,13 @@ namespace NS_Education.Tools.Extensions
             return AreCrossingTimes(timeA.start.hour, timeA.start.minute, timeA.end.hour, timeA.end.minute,
                 timeB.start.hour, timeB.start.minute, timeB.end.hour, timeB.end.minute);
         }
+        
+        public static bool IsIncluding(this ((int hour, int minute) start, (int hour, int minute) end) timeA,
+            ((int hour, int minute) start, (int hour, int minute) end) timeB)
+        {
+            return ((timeA.start.hour, timeA.start.minute).GetMinutes(), (timeA.end.hour, timeA.end.minute).GetMinutes()).IsIncluding(
+                ((timeB.start.hour, timeB.start.minute).GetMinutes(), (timeB.end.hour, timeB.end.minute).GetMinutes()));
+        }
     }
 
     [Flags]

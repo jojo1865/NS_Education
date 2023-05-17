@@ -646,9 +646,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .IsValid());
 
             // 主預約單 -> 場地列表 -> 時段列表
-            bool isSiteItemTimeSpanItemValid = isSiteItemsValid 
+            bool isSiteItemTimeSpanItemValid = isSiteItemsValid
                                                && SubmitValidateTimeSpanItems(
-                                                   input.SiteItems.SelectMany(si => si.TimeSpanItems))
+                                                   input.SiteItems.SelectMany(si => si.TimeSpanItems), null)
                                                && await SubmitValidateSiteItemsAllTimeSpanFree(input)
                 ;
 
@@ -690,8 +690,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             // 主預約單 -> 場地列表 -> 行程列表 -> 時段列表
             bool isSiteItemThrowItemTimeSpanItemValid = isSiteItemThrowItemValid &&
-                SubmitValidateTimeSpanItems(input.SiteItems.SelectMany(si => si.ThrowItems)
-                    .SelectMany(ti => ti.TimeSpanItems));
+                                                        input.SiteItems.StartValidateElements()
+                                                            .Validate(si =>
+                                                                SubmitValidateTimeSpanItems(
+                                                                    si.ThrowItems.SelectMany(ti => ti.TimeSpanItems),
+                                                                    SubmitValidateGetTimeSpans(si.TimeSpanItems.Select(tsi => tsi.DTSID))
+                                                                )
+                                                            )
+                                                            .IsValid();
 
             // 主預約單 -> 場地列表 -> 行程列表 -> 餐飲補充列表
             bool isSiteItemThrowItemFoodItemValid = isSiteItemsValid &&
@@ -755,9 +761,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                              ));
 
             // 主預約單 -> 場地列表 -> 設備列表 -> 時段列表
-            bool isSiteItemDeviceItemTimeSpanItemValid = isSiteItemDeviceItemValid && SubmitValidateTimeSpanItems(input.SiteItems
-                .SelectMany(si => si.DeviceItems)
-                .SelectMany(di => di.TimeSpanItems));
+            bool isSiteItemDeviceItemTimeSpanItemValid = isSiteItemDeviceItemValid
+                                                         && input.SiteItems.StartValidateElements()
+                                                             .Validate(si =>
+                                                                 SubmitValidateTimeSpanItems(
+                                                                     si.DeviceItems.SelectMany(di => di.TimeSpanItems),
+                                                                     SubmitValidateGetTimeSpans(
+                                                                         si.TimeSpanItems.Select(tsi => tsi.DTSID))
+                                                                 )
+                                                             )
+                                                             .IsValid();
 
             // 確認設備預約時段的數量足不足夠
             isSiteItemDeviceItemTimeSpanItemValid = isSiteItemDeviceItemTimeSpanItemValid &&
@@ -1019,17 +1032,44 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 dfc.ActiveFlag && !dfc.DeleteFlag && dfc.DFCID == foodCategoryId);
         }
 
-        private bool SubmitValidateTimeSpanItems(IEnumerable<Resver_Submit_TimeSpanItem_Input_APIItem> items)
+        private Dictionary<int, D_TimeSpan> SubmitValidateGetTimeSpansDictionary(IEnumerable<int> DtsIds)
         {
-            return items.All(item =>
-                item.StartValidate()
-                    .Validate(tsi => Task.Run(() => SubmitValidateDataTimeSpan(tsi.DTSID)).Result, () => AddError(NotFound($"時段 ID（{item.DTSID}）")))
-                    .IsValid());
+            return DC.D_TimeSpan.Where(dts => DtsIds.Contains(dts.DTSID)).ToDictionary(dts => dts.DTSID, dts => dts);
+        }
+        
+        private IEnumerable<D_TimeSpan> SubmitValidateGetTimeSpans(IEnumerable<int> DtsIds)
+        {
+            return DC.D_TimeSpan.Where(dts => DtsIds.Contains(dts.DTSID)).ToArray();
         }
 
-        private async Task<bool> SubmitValidateDataTimeSpan(int dtsId)
+        private bool SubmitValidateTimeSpanItems(IEnumerable<Resver_Submit_TimeSpanItem_Input_APIItem> items,
+            IEnumerable<D_TimeSpan> parentTimeSpan)
         {
-            return dtsId.IsAboveZero() && await DC.D_TimeSpan.AnyAsync(dts => dts.ActiveFlag && !dts.DeleteFlag && dts.DTSID == dtsId);
+            Resver_Submit_TimeSpanItem_Input_APIItem[] itemsArray = items.ToArray();
+
+            int[] inputDtsIds = itemsArray.Select(i => i.DTSID).ToArray();
+            
+            // 查出輸入的 TimeSpanItem 的所有對應的 DTS
+            Dictionary<int, D_TimeSpan> dtsData = SubmitValidateGetTimeSpansDictionary(inputDtsIds);
+            
+            // 驗證所有 DTSID 都存在
+            bool isInputValid = inputDtsIds.StartValidateElements()
+                .Validate(id => dtsData.ContainsKey(id), id => AddError(NotFound($"預約時段 ID {id}")))
+                .IsValid();
+
+            if (!isInputValid)
+                return false;
+            
+            // 驗證所有 items 的區間都存在於 parentTimeSpan 中
+            // 如果沒有傳入 parentTimeSpan, 表示沒有限制
+            
+            if (parentTimeSpan == null)
+                return true;
+            
+            bool isValid = dtsData.Values.StartValidateElements()
+                                      .Validate(dts => parentTimeSpan.Any(parent => parent.IsIncluding(dts)), dts => AddError($"欲預約的時段（{dts.GetTimeRangeFormattedString()}）並不存在於上層項目的預約時段！"))
+                                      .IsValid();
+            return isValid;
         }
 
         private async Task<bool> SubmitValidateOrderCode(int orderCodeId, OrderCodeType codeType)

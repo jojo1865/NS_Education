@@ -32,5 +32,14 @@ namespace NS_Education.Tools.Extensions
             return ((thisDts.HourS, thisDts.MinuteS), (thisDts.HourE, thisDts.MinuteE))
                 .IsCrossingWith(((thatDts.HourS, thatDts.MinuteS), (thatDts.HourE, thatDts.MinuteE)));
         }
+
+        public static bool IsIncluding(this D_TimeSpan bigDts, D_TimeSpan smallDts)
+        {
+            if (bigDts == null || smallDts == null)
+                return false;
+            
+            return ((bigDts.HourS, bigDts.MinuteS), (bigDts.HourE, bigDts.MinuteE))
+                .IsIncluding(((smallDts.HourS, smallDts.MinuteS), (smallDts.HourE, smallDts.MinuteE)));
+        }
     }
 }

@@ -89,5 +89,26 @@ namespace NS_Education.Tools.Extensions
 
             return rangeA.end > rangeB.start && rangeB.end > rangeA.start;
         }
+        
+        /// <summary>
+        /// 檢查兩個範圍（各有 2 個整數代表開頭與結尾）中，A 是否包含了 B。完全相等時亦回傳 true。
+        /// </summary>
+        /// <param name="rangeA">範圍 A</param>
+        /// <param name="rangeB">範圍 B</param>
+        /// <returns>
+        /// true：包含<br/>
+        /// false：不包含
+        /// </returns>
+        public static bool IsIncluding(this (int start, int end) rangeA, (int start, int end) rangeB)
+        {
+            // 確定 start, end 大小值都符合預期，沒有就進行調換
+            if (rangeA.start > rangeA.end)
+                (rangeA.start, rangeA.end) = (rangeA.end, rangeA.start);
+            
+            if (rangeB.start > rangeB.end)
+                (rangeB.start, rangeB.end) = (rangeB.end, rangeB.start);
+
+            return rangeA.start <= rangeB.start && rangeB.end <= rangeA.end;
+        }
     }
 }

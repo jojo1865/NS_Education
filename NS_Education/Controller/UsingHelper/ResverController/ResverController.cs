@@ -447,8 +447,15 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 AddError(NotFound());
                 return GetResponseJson();
             }
-            
-            // 3. 修改 DB
+
+            if (entity.B_StaticCode.Code != ReserveHeadState.Terminated &&
+                entity.B_StaticCode.Code != ReserveHeadState.FullyPaid)
+            {
+                AddError("已結帳或已中止的預約單無法修改確認狀態！");
+                return GetResponseJson();
+            }
+
+                // 3. 修改 DB
             entity.CheckFlag = checkFlag ?? throw new ArgumentNullException(nameof(checkFlag));
             await ChangeCheckUpdateDb();
             
@@ -474,6 +481,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 throw new ArgumentNullException(nameof(id));
             
             return await DC.Resver_Head
+                .Include(rh => rh.B_StaticCode)
+                // 已結帳或已中止時，不允許修改確認狀態。
                 .Where(rh => !rh.DeleteFlag && rh.RHID == id)
                 .FirstOrDefaultAsync();
         }
@@ -508,7 +517,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 AddError(NotFound());
                 return GetResponseJson();
             }
-            
+
+            if (entity.B_StaticCode.Code != ReserveHeadState.Terminated)
+            {
+                AddError("已中止的預約單無法修改報到狀態！");
+                return GetResponseJson();
+            }
+
             // 3. 修改 DB
             entity.CheckInFlag = checkInFlag ?? throw new ArgumentNullException(nameof(checkInFlag));
             await ChangeCheckInUpdateDb();
@@ -535,6 +550,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 throw new ArgumentNullException(nameof(id));
             
             return await DC.Resver_Head
+                .Include(rh => rh.B_StaticCode)
+                // 已中止時，不允許修改報到狀態。
                 .Where(rh => !rh.DeleteFlag && rh.RHID == id)
                 .FirstOrDefaultAsync();
         }

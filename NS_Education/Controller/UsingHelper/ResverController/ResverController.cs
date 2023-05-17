@@ -1117,6 +1117,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             return DC.D_TimeSpan.Where(dts => DtsIds.Contains(dts.DTSID)).ToArray();
         }
 
+        /// <summary>
+        /// 驗證輸入的 TimeSpanItem 是否格式正確。<br/>
+        /// 當 parentTimeSpan 不為 null 時，驗證時段是否都包含於 parentTimeSpan 中的時段（考慮 DTSID 與實際時間）
+        /// </summary>
+        /// <param name="items">輸入</param>
+        /// <param name="parentTimeSpan">用於檢查的上層項目預約時段</param>
+        /// <returns>
+        /// true：時段皆正確。<br/>
+        /// false：有時段格式錯誤，或是不存在於上層項目預約的時段中。
+        /// </returns>
         private bool SubmitValidateTimeSpanItems(IEnumerable<Resver_Submit_TimeSpanItem_Input_APIItem> items,
             IEnumerable<D_TimeSpan> parentTimeSpan)
         {
@@ -1142,7 +1152,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 return true;
             
             bool isValid = dtsData.Values.StartValidateElements()
-                                      .Validate(dts => parentTimeSpan.Any(parent => parent.IsIncluding(dts)), dts => AddError($"欲預約的時段（{dts.GetTimeRangeFormattedString()}）並不存在於上層項目的預約時段！"))
+                                      .Validate(dts => parentTimeSpan.Any(parent => parent.DTSID == dts.DTSID || parent.IsIncluding(dts))
+                                          , dts => AddError($"欲預約的時段（{dts.GetTimeRangeFormattedString()}）並不存在於上層項目的預約時段！"))
                                       .IsValid();
             return isValid;
         }

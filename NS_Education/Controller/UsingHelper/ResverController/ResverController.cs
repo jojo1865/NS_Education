@@ -827,6 +827,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         () => AddError(WrongFormat($"付款時間（{item.PayDate}）")))
                     .IsValid());
             
+            // 已付總額不得超過 head 總價
+            isBillItemValid = isBillItemValid &&
+                              input.BillItems.StartValidate()
+                                  .Validate(billItems => billItems
+                                                             .Where(bi => bi.PayFlag)
+                                                             .Sum(bi => bi.Price)
+                                                         <= input.QuotedPrice,
+                                      () => AddError(TooLarge("繳費紀錄的已繳總額", input.QuotedPrice)))
+                                  .IsValid();
+            
             // 主預約單 -> 預約回饋紀錄列表
             bool isGiveBackItemValid =
                 input.GiveBackItems.All(item => item.StartValidate()

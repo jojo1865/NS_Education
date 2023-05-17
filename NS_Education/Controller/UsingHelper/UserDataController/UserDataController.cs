@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems.Common.DeleteItem;
+using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitDepartment;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetInfoById;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetList;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.Login;
@@ -756,6 +757,103 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     .FirstOrDefault(),
                 Note = entity.Note ?? ""
             });
+        }
+
+        #endregion
+        
+        #region BatchSubmitDepartment
+
+        /// <summary>
+        /// 更新一筆或多筆使用者的部門設定。
+        /// </summary>
+        /// <param name="input">輸入資料，參照 <see cref="UserData_BatchSubmitDepartment_Input_APIItem"/>。</param>
+        /// <returns>通用訊息回傳格式</returns>
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        public async Task<string> BatchSubmitDepartment(UserData_BatchSubmitDepartment_Input_APIItem input)
+        {
+            // 0. enumerate
+            UserData_BatchSubmitDepartment_Input_Row_APIItem[] itemsArray = input.Items?.ToArray();
+            
+            // 1. 驗證輸入
+            bool isCollectionValid = BatchSubmitDepartmentValidateCollection(itemsArray);
+
+            if (!isCollectionValid)
+                return GetResponseJson();
+
+            // 先查出所有符合輸入 UID 的 UserData，可以避免驗證和修改時重複查兩次 UserData
+            // 這裡 IDE 會認為 itemsArray 可能為 null，但在 Collection 驗證時已經排除掉此可能性，所以這裡停用警告
+            // ReSharper disable once AssignNullToNotNullAttribute
+            IEnumerable<int> inputUserIds = itemsArray.Select(i => i.UID);
+            Dictionary<int, UserData> data = await BatchSubmitDepartmentGetUserDictionary(inputUserIds);
+
+            bool isElementValid = await BatchSubmitDepartmentValidateElements(input, data);
+
+            if (!isElementValid)
+                return GetResponseJson();
+
+            // 2. 更新資料
+            BatchSubmitDepartmentUpdate(itemsArray, data);
+            
+            // 3. 寫入 DB
+            await BatchSubmitDepartmentWriteToDb();
+
+            return GetResponseJson();
+        }
+
+        private async Task BatchSubmitDepartmentWriteToDb()
+        {
+            try
+            {
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbFailed(e));
+            }
+        }
+
+        private static void BatchSubmitDepartmentUpdate(UserData_BatchSubmitDepartment_Input_Row_APIItem[] itemsArray,
+            Dictionary<int, UserData> data)
+        {
+            foreach (UserData_BatchSubmitDepartment_Input_Row_APIItem item in itemsArray)
+            {
+                data[item.UID].DDID = item.DDID;
+            }
+        }
+
+        private async Task<bool> BatchSubmitDepartmentValidateElements(UserData_BatchSubmitDepartment_Input_APIItem input, Dictionary<int, UserData> data)
+        {
+            return await input.Items.StartValidateElements()
+                .Validate(i => i.UID.IsAboveZero(),
+                    i => AddError(WrongFormat($"對象使用者 ID（{i.UID}）")))
+                .Validate(i => i.DDID.IsAboveZero(),
+                    i => AddError(EmptyNotAllowed($"部門 ID（UID：{i.UID}）")))
+                .SkipIfAlreadyInvalid()
+                .Validate(i => data.ContainsKey(i.UID),
+                    i => AddError(NotFound($"對象使用者 ID {i.UID}")))
+                .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
+                    i => AddError(NotFound($"部門 ID {i.DDID}（UID：{i.UID}）")))
+                .IsValid();
+        }
+
+        private async Task<Dictionary<int, UserData>> BatchSubmitDepartmentGetUserDictionary(IEnumerable<int> inputUserIds)
+        {
+            return await DC.UserData
+                .Where(ud => ud.ActiveFlag)
+                .Where(ud => !ud.DeleteFlag)
+                .Where(ud => inputUserIds.Contains(ud.UID))
+                .ToDictionaryAsync(ud => ud.UID, ud => ud);
+        }
+
+        private bool BatchSubmitDepartmentValidateCollection(UserData_BatchSubmitDepartment_Input_Row_APIItem[] itemsArray)
+        {
+            return itemsArray.StartValidate()
+                .Validate(items => items != null && items.Any(),
+                    () => AddError(EmptyNotAllowed("欲更新的資料")))
+                .Validate(items => items.GroupBy(i => i.UID).Count() == items.Count(),
+                    () => AddError(CopyNotAllowed("對象使用者 ID")))
+                .IsValid();
         }
 
         #endregion

@@ -153,13 +153,13 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string OutOfRange(string fieldName, int? min = null, int? max = null)
+        protected string OutOfRange(string fieldName, object min = null, object max = null)
         {
             string minMessage = min is null ? "" : $"，最小值為 {min}";
             string maxMessage = max is null ? "" : $"，最大值為 {max}";
             return $"「{fieldName}」超出範圍{minMessage}{maxMessage}！";
         }
-        
+
         /// <summary>
         /// 回傳一串長度超出範圍時可使用的預設錯誤訊息字串。
         /// </summary>

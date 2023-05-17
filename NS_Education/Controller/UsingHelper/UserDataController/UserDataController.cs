@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitDepartment;
+using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitGroup;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetInfoById;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetList;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.Login;
@@ -854,6 +855,119 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .IsValid();
         }
 
+        #endregion
+        
+        #region BatchSubmitGroup
+        
+        /// <summary>
+        /// 更新一筆或多筆使用者的角色設定。
+        /// </summary>
+        /// <param name="input">輸入資料，參照 <see cref="UserData_BatchSubmitDepartment_Input_APIItem"/>。</param>
+        /// <returns>通用訊息回傳格式</returns>
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        public async Task<string> BatchSubmitGroup(UserData_BatchSubmitGroup_Input_APIItem input)
+        {
+            /* TODO:
+             目前批量修改僅 UserData 發現兩個需求，所以先以特例方式寫，可以發現結構長得非常類似。
+             如果未來發現更多類似需求，或是這兩個頻繁需要同步修改時，須考慮 Helper化。
+            */
+            
+            // 0. enumerate
+            UserData_BatchSubmitGroup_Input_Row_APIItem[] itemsArray = input.Items?.ToArray();
+            
+            // 1. 驗證輸入
+            bool isCollectionValid = BatchSubmitGroupValidateCollection(itemsArray);
+
+            if (!isCollectionValid)
+                return GetResponseJson();
+
+            // 先查出所有符合輸入 UID 的 UserData，可以避免驗證和修改時重複查兩次 UserData
+            // 這裡 IDE 會認為 itemsArray 可能為 null，但在 Collection 驗證時已經排除掉此可能性，所以這裡停用警告
+            // ReSharper disable once AssignNullToNotNullAttribute
+            IEnumerable<int> inputUserIds = itemsArray.Select(i => i.UID);
+            Dictionary<int, UserData> data = await BatchSubmitGroupGetUserDictionary(inputUserIds);
+
+            bool isElementValid = await BatchSubmitGroupValidateElements(input, data);
+
+            if (!isElementValid)
+                return GetResponseJson();
+
+            // 2. 更新資料
+            BatchSubmitGroupUpdate(itemsArray, data);
+            
+            // 3. 寫入 DB
+            await BatchSubmitGroupWriteToDb();
+
+            return GetResponseJson();
+        }
+
+        private async Task BatchSubmitGroupWriteToDb()
+        {
+            try
+            {
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbFailed(e));
+            }
+        }
+
+        private void BatchSubmitGroupUpdate(UserData_BatchSubmitGroup_Input_Row_APIItem[] itemsArray,
+            IReadOnlyDictionary<int, UserData> data)
+        {
+            foreach (UserData_BatchSubmitGroup_Input_Row_APIItem item in itemsArray)
+            {
+                UserData user = data[item.UID];
+                // 清空 user FK
+                DC.M_Group_User.RemoveRange(user.M_Group_User);
+                
+                // 寫入新的角色
+                user.M_Group_User.Add(new M_Group_User
+                {
+                    GID = item.GID,
+                    UID = user.UID
+                });
+            }
+        }
+
+        private async Task<bool> BatchSubmitGroupValidateElements(UserData_BatchSubmitGroup_Input_APIItem input, Dictionary<int, UserData> data)
+        {
+            return await input.Items.StartValidateElements()
+                .Validate(i => i.UID.IsAboveZero(),
+                    i => AddError(WrongFormat($"對象使用者 ID（{i.UID}）")))
+                .Validate(i => i.GID.IsAboveZero(),
+                    i => AddError(EmptyNotAllowed($"角色 ID（UID：{i.UID}）")))
+                .SkipIfAlreadyInvalid()
+                .Validate(i => data.ContainsKey(i.UID),
+                    i => AddError(NotFound($"對象使用者 ID {i.UID}")))
+                .ValidateAsync(async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)),
+                    i => AddError(NotFound($"角色 ID {i.GID}（UID：{i.UID}）")))
+                .IsValid();
+        }
+
+        private async Task<Dictionary<int, UserData>> BatchSubmitGroupGetUserDictionary(IEnumerable<int> inputUserIds)
+        {
+            return await DC.UserData
+                .Include(ud => ud.M_Group_User)
+                .Where(ud => ud.ActiveFlag)
+                .Where(ud => !ud.DeleteFlag)
+                .Where(ud => inputUserIds.Contains(ud.UID))
+                .ToDictionaryAsync(ud => ud.UID, ud => ud);
+        }
+
+        private bool BatchSubmitGroupValidateCollection(UserData_BatchSubmitGroup_Input_Row_APIItem[] itemsArray)
+        {
+            return itemsArray.StartValidate()
+                .Validate(items => items != null && items.Any(),
+                    () => AddError(EmptyNotAllowed("欲更新的資料")))
+                .Validate(items => items.GroupBy(i => i.UID).Count() == items.Count(),
+                    () => AddError(CopyNotAllowed("對象使用者 ID")))
+                .IsValid();
+        }
+
+        
         #endregion
     }
 }

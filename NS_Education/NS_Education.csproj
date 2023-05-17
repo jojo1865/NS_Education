@@ -677,6 +677,7 @@
     <Compile Include="Variables\MenuApiType.cs" />
     <Compile Include="Variables\OrderCodeType.cs" />
     <Compile Include="Variables\PrivilegeConstants.cs" />
+    <Compile Include="Variables\ReserveHeadState.cs" />
     <Compile Include="Variables\StaticCodeSafetyControlCode.cs" />
     <Compile Include="Variables\StaticCodeType.cs" />
     <Compile Include="Variables\UserLogControlType.cs" />

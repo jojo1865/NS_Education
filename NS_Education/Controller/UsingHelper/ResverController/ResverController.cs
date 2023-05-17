@@ -580,7 +580,25 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private async Task<bool> SubmitValidateInput(Resver_Submit_Input_APIItem input)
         {
             bool isAdd = SubmitIsAdd(input);
-            
+            bool dataCheckFlag = false;
+
+            // 修改時，有一些值需要參照已有資料
+            if (!isAdd)
+            {
+                // 先確認預約單狀態，如果是已中止，直接報錯
+                Resver_Head head = await DC.Resver_Head
+                    .Include(rh => rh.BSCID12)
+                    .FirstOrDefaultAsync(rh => rh.RHID == input.RHID);
+
+                dataCheckFlag = head?.CheckFlag ?? false;
+
+                if (head != null && head.B_StaticCode.Code == ReserveHeadState.Terminated)
+                {
+                    AddError("預約單已中止，無法更新！");
+                    return false;
+                }
+            }
+
             DateTime headStartDate = default;
             DateTime headEndDate = default;
 
@@ -602,6 +620,25 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Validate(i => i.ContactName.HasContent(), () => AddError(EmptyNotAllowed("聯絡人名稱")))
                 .ValidateAsync(async i => await SubmitValidateMKBusinessUser(i.MK_BUID), () => AddError(NotFound("MK 業務")))
                 .ValidateAsync(async i => await SubmitValidateOPBusinessUser(i.OP_BUID), () => AddError(NotFound("OP 業務")))
+                .IsValid();
+
+            // 驗證預約單狀態調整
+            B_StaticCode resverStatusCode = await DC.B_StaticCode
+                .FirstOrDefaultAsync(bsc => bsc.BSCID == input.BSCID12);
+
+            // (1) 預約草稿：CheckFlag 為 true 時報錯
+            // (2) 已付訂金：Resver_Bill 已付未刪除的資料數量為 0 時報錯
+            // (3) 已結帳：Resver_Bill 已付總額不等於 QuotedPrice 時報錯。
+
+            isHeadValid = isHeadValid && input.StartValidate()
+                .Validate(i => resverStatusCode?.Code != ReserveHeadState.Draft || !dataCheckFlag,
+                    () => AddError("預約已確認，無法設置為預約草稿狀態！"))
+                .Validate(
+                    i => resverStatusCode?.Code != ReserveHeadState.DepositPaid || input.BillItems.Any(bi => bi.PayFlag),
+                    () => AddError("無已繳費紀錄，無法設置為已付訂金狀態！"))
+                .Validate(i => resverStatusCode?.Code != ReserveHeadState.FullyPaid
+                               || input.BillItems.Where(bi => bi.PayFlag).Sum(bi => bi.Price) == input.QuotedPrice,
+                    () => AddError("繳費紀錄中已繳總額不等於預約單總價，無法設置為已結帳狀態！"))
                 .IsValid();
             
             // short-circuit

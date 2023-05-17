@@ -59,10 +59,11 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         public IOrderedQueryable<UserLog> GetListPagedOrderedQuery(UserLog_GetList_Input_APIItem input)
         {
+            DateTime threeMonthsAgo = DateTime.Now.AddMonths(-3);
             var query = DC.UserLog
                 .Include(ul => ul.UserData)
                 // 三個月內
-                .Where(ul => DateTime.Now.AddMonths(-3) <= ul.CreDate)
+                .Where(ul => threeMonthsAgo <= ul.CreDate)
                 .AsQueryable();
 
             if (input.UID.IsAboveZero())

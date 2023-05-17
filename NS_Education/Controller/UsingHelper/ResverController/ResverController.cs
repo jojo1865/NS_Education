@@ -1175,22 +1175,28 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             {
                 // 取得主資料
                 Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
-                SubmitPopulateHeadValues(input, head);
-                // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
-                if (head.RHID == 0)
+                
+                // 已結帳時，只允許處理預約回饋紀錄的值
+                if (isAdd || head.B_StaticCode.Code != ReserveHeadState.FullyPaid)
                 {
-                    await DC.AddAsync(head);
-                    await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                    SubmitPopulateHeadValues(input, head);
+                    // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
+                    if (head.RHID == 0)
+                    {
+                        await DC.AddAsync(head);
+                        await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+                    }
+
+                    // 清理所有跟這張預約單有關的 ResverTimeSpan
+                    DC.M_Resver_TimeSpan.RemoveRange(head.M_Resver_TimeSpan);
+
+                    // 開始寫入值
+                    SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
+                    await SubmitPopulateHeadSiteItems(input, head, entitiesToAdd);
+                    SubmitPopulateHeadOtherItems(input, head, entitiesToAdd);
+                    SubmitPopulateHeadBillItems(input, head, entitiesToAdd);
                 }
 
-                // 清理所有跟這張預約單有關的 ResverTimeSpan
-                DC.M_Resver_TimeSpan.RemoveRange(head.M_Resver_TimeSpan);
-
-                // 開始寫入值
-                SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
-                await SubmitPopulateHeadSiteItems(input, head, entitiesToAdd);
-                SubmitPopulateHeadOtherItems(input, head, entitiesToAdd);
-                SubmitPopulateHeadBillItems(input, head, entitiesToAdd);
                 SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
 
                 // 寫入 Db

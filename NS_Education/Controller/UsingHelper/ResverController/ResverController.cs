@@ -635,7 +635,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 ;
 
             // 主預約單 -> 場地列表 -> 行程列表
-            bool isSiteItemThrowItemValid = input.SiteItems
+            bool isSiteItemThrowItemValid = isSiteItemsValid && 
+                input.SiteItems
                 .All(si => si.ThrowItems.All(item =>
                     item.StartValidate()
                         .Validate(ti => isAdd ? ti.RTID == 0 : ti.RTID.IsZeroOrAbove(), () => AddError(WrongFormat($"行程預約單 ID（{item.RTID}）")))
@@ -651,12 +652,12 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         .IsValid()));
 
             // 主預約單 -> 場地列表 -> 行程列表 -> 時段列表
-            bool isSiteItemThrowItemTimeSpanItemValid =
+            bool isSiteItemThrowItemTimeSpanItemValid = isSiteItemThrowItemValid &&
                 SubmitValidateTimeSpanItems(input.SiteItems.SelectMany(si => si.ThrowItems)
                     .SelectMany(ti => ti.TimeSpanItems));
 
             // 主預約單 -> 場地列表 -> 行程列表 -> 餐飲補充列表
-            bool isSiteItemThrowItemFoodItemValid =
+            bool isSiteItemThrowItemFoodItemValid = isSiteItemsValid &&
                 input.SiteItems
                     .SelectMany(si => si.ThrowItems).SelectMany(ti => ti.FoodItems)
                     .All(item =>
@@ -670,7 +671,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                             .IsValid());
 
             // 主預約單 -> 場地列表 -> 設備列表
-            bool isSiteItemDeviceItemValid =
+            bool isSiteItemDeviceItemValid = isSiteItemsValid &&
                 input.SiteItems.All(si => si.DeviceItems.All(item =>
                     item.StartValidate()
                         .Validate(di => isAdd ? di.RDID == 0 : di.RDID.IsZeroOrAbove(),
@@ -688,7 +689,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 ));
 
             // 主預約單 -> 場地列表 -> 設備列表 -> 時段列表
-            bool isSiteItemDeviceItemTimeSpanItemValid = SubmitValidateTimeSpanItems(input.SiteItems
+            bool isSiteItemDeviceItemTimeSpanItemValid = isSiteItemDeviceItemValid && SubmitValidateTimeSpanItems(input.SiteItems
                 .SelectMany(si => si.DeviceItems)
                 .SelectMany(di => di.TimeSpanItems));
 

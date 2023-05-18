@@ -448,8 +448,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 return GetResponseJson();
             }
 
-            if (entity.B_StaticCode1.Code != ReserveHeadState.Terminated &&
-                entity.B_StaticCode1.Code != ReserveHeadState.FullyPaid)
+            if (entity.B_StaticCode1.Code == ReserveHeadState.Terminated &&
+                entity.B_StaticCode1.Code == ReserveHeadState.FullyPaid)
             {
                 AddError("已結帳或已中止的預約單無法修改確認狀態！");
                 return GetResponseJson();
@@ -518,7 +518,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 return GetResponseJson();
             }
 
-            if (entity.B_StaticCode1.Code != ReserveHeadState.Terminated)
+            if (entity.B_StaticCode1.Code == ReserveHeadState.Terminated)
             {
                 AddError("已中止的預約單無法修改報到狀態！");
                 return GetResponseJson();
@@ -813,7 +813,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                              && si.TargetDate.TryParseDateTime(
                                                                  out DateTime siteTargetDate)
                                                              && deviceTargetDate.Date == siteTargetDate.Date,
-                                                         () => AddError(WrongFormat($"預約設備的預計使用日期（{item.TargetDate}）")))
+                                                         () => AddError(OutOfRange($"預約設備的預計使用日期（{item.TargetDate}）", si.TargetDate, si.TargetDate)))
                                                      .Validate(di => SubmitValidateDevice(di.BDID),
                                                          () => AddError(NotFound($"預約設備 ID（{item.BDID}）")))
                                                      .Validate(

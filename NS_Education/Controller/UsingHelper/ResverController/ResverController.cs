@@ -933,9 +933,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 // 行程
                 input.SiteItems.SelectMany(si => si.ThrowItems).Sum(ti => ti.FixedPrice) +
                 // 設備
-                input.SiteItems.SelectMany(si => si.DeviceItems).Sum(di => di.FixedPrice * di.Ct) +
+                input.SiteItems.SelectMany(si => si.DeviceItems).Sum(di => di.FixedPrice) +
                 // 其他項目
-                input.OtherItems.Sum(oi => oi.FixedPrice * oi.Ct);
+                input.OtherItems.Sum(oi => oi.FixedPrice);
 
             // 子項目所有總報價
             int subItemsQuotedPriceTotal =

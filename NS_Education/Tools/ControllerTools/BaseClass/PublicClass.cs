@@ -161,6 +161,17 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
 
         /// <summary>
+        /// 回傳一串不符合預期值時可使用的預設錯誤訊息字串。
+        /// </summary>
+        /// <param name="fieldName">欄位名稱</param>
+        /// <param name="targetValue">預期值</param>
+        /// <returns>預設錯誤訊息字串</returns>
+        protected string NotEqual(string fieldName, object targetValue)
+        {
+            return $"「{fieldName}」應等於 {targetValue}！";
+        }
+
+        /// <summary>
         /// 回傳一串輸入值過大時可使用的預設錯誤訊息駔懺。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>

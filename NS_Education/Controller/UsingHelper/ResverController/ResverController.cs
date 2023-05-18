@@ -904,17 +904,57 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         gbi => AddError(OutOfRange($"回饋分數（{gbi.PointDecimal}）", 0, 50)))
                     .IsValid();
             
-            return await Task.FromResult(isContactItemValid 
-                                         && isSiteItemsValid 
-                                         && isSiteItemTimeSpanItemValid 
-                                         && isSiteItemThrowItemValid 
-                                         && isSiteItemThrowItemTimeSpanItemValid
-                                         && isSiteItemThrowItemFoodItemValid
-                                         && isSiteItemDeviceItemValid
-                                         && isSiteItemDeviceItemTimeSpanItemValid
-                                         && isOtherItemValid
-                                         && isBillItemValid
-                                         && isGiveBackItemValid);
+            // 輸入都正確後，才計算各項目價格
+            bool isEveryPriceValid = isContactItemValid 
+                                     && isSiteItemsValid 
+                                     && isSiteItemTimeSpanItemValid 
+                                     && isSiteItemThrowItemValid 
+                                     && isSiteItemThrowItemTimeSpanItemValid
+                                     && isSiteItemThrowItemFoodItemValid
+                                     && isSiteItemDeviceItemValid
+                                     && isSiteItemDeviceItemTimeSpanItemValid
+                                     && isOtherItemValid
+                                     && isBillItemValid
+                                     && isGiveBackItemValid 
+                                     && SubmitValidateAllPrices(input);
+            
+            return await Task.FromResult(isEveryPriceValid);
+        }
+
+        private bool SubmitValidateAllPrices(Resver_Submit_Input_APIItem input)
+        {
+            // 子項目的價格都能夠修改，所以只簡單計算總定價、總報價是否符合輸入的總和
+
+            // 子項目所有總定價
+            int subItemsFixedPriceTotal =
+                // 場地
+                input.SiteItems.Sum(si => si.FixedPrice) +
+                // 行程
+                input.SiteItems.SelectMany(si => si.ThrowItems).Sum(ti => ti.FixedPrice) +
+                // 設備
+                input.SiteItems.SelectMany(si => si.DeviceItems).Sum(di => di.FixedPrice * di.Ct) +
+                // 其他項目
+                input.OtherItems.Sum(oi => oi.FixedPrice * oi.Ct);
+
+            // 子項目所有總報價
+            int subItemsQuotedPriceTotal =
+                // 場地
+                input.SiteItems.Sum(si => si.QuotedPrice) +
+                // 行程
+                input.SiteItems.SelectMany(si => si.ThrowItems).Sum(ti => ti.QuotedPrice) +
+                // 設備
+                input.SiteItems.SelectMany(si => si.DeviceItems).Sum(di => di.QuotedPrice) +
+                // 其他項目
+                input.OtherItems.Sum(oi => oi.QuotedPrice);
+
+            bool isValid = input.StartValidate()
+                .Validate(i => i.FixedPrice == subItemsFixedPriceTotal,
+                    i => AddError(NotEqual("預約單總定價", subItemsFixedPriceTotal)))
+                .Validate(i => i.QuotedPrice == subItemsQuotedPriceTotal,
+                    i => AddError(NotEqual("預約單總報價", subItemsQuotedPriceTotal)))
+                .IsValid();
+
+            return isValid;
         }
 
         private async Task<bool> SubmitValidateSiteItemDeviceItemsAllTimeSpanEnough(Resver_Submit_Input_APIItem input)

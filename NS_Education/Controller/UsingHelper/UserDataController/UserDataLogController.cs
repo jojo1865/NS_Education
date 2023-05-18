@@ -91,7 +91,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 ControlType = entity.ControlType < ControlTypes.Length 
                     ? ControlTypes[entity.ControlType]
                     : "",
-                RequestUrl = entity.RequestUrl ?? ""
+                RequestUrl = entity.RequestUrl ?? "",
+                CreDate = entity.CreDate.ToFormattedStringDateTime()
             });
         }
         #endregion

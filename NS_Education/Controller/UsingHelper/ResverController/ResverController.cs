@@ -893,16 +893,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             
             // 主預約單 -> 預約回饋紀錄列表
             bool isGiveBackItemValid =
-                input.GiveBackItems.All(item => item.StartValidate()
+                input.GiveBackItems.StartValidateElements()
                     .Validate(gbi => isAdd ? gbi.RGBID == 0 : gbi.RGBID.IsZeroOrAbove(),
-                        () => AddError(WrongFormat($"預約回饋預約單 ID（{item.RGBID}）")))
+                        gbi => AddError(WrongFormat($"預約回饋預約單 ID（{gbi.RGBID}）")))
                     .Validate(
                         gbi => gbi.RGBID == 0 || Task
-                            .Run(() => DC.Resver_Bill.ValidateIdExists(gbi.RGBID, nameof(Resver_GiveBack.RGBID))).Result,
-                        () => AddError(NotFound($"預約回饋預約單 ID（{item.RGBID}）")))
+                            .Run(() => DC.Resver_GiveBack.ValidateIdExists(gbi.RGBID, nameof(Resver_GiveBack.RGBID))).Result,
+                        gbi => AddError(NotFound($"預約回饋預約單 ID（{gbi.RGBID}）")))
                     .Validate(gbi => gbi.PointDecimal.IsInBetween(0, 50),
-                        () => AddError(OutOfRange($"回饋分數（{item.PointDecimal}）", 0, 50)))
-                    .IsValid());
+                        gbi => AddError(OutOfRange($"回饋分數（{gbi.PointDecimal}）", 0, 50)))
+                    .IsValid();
             
             return await Task.FromResult(isContactItemValid 
                                          && isSiteItemsValid 
@@ -1262,6 +1262,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private void SubmitPopulateHeadGiveBackItems(Resver_Submit_Input_APIItem input, Resver_Head head,
             ICollection<object> entitiesToAdd)
         {
+            // 刪除沒有在輸入中的 giveback
+            var inputIds = input.GiveBackItems.Select(gbi => gbi.RGBID);
+            DC.Resver_GiveBack.RemoveRange(head.Resver_GiveBack.Where(rgb => !inputIds.Contains(rgb.RGBID)));
+            
             foreach (var item in input.GiveBackItems)
             {
                 Resver_GiveBack giveBack = SubmitFindOrCreateNew<Resver_GiveBack>(item.RGBID, entitiesToAdd);

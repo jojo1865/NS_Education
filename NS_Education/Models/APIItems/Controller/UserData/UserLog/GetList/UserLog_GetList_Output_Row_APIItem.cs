@@ -8,5 +8,6 @@ namespace NS_Education.Models.APIItems.Controller.UserData.UserLog.GetList
         public string TargetTable { get; set; }
         public int TargetID { get; set; }
         public string ControlType { get; set; }
+        public string RequestUrl { get; set; }
     }
 }

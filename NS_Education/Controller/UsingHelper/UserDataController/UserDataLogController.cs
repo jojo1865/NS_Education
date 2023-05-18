@@ -90,7 +90,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 TargetID = entity.TargetID,
                 ControlType = entity.ControlType < ControlTypes.Length 
                     ? ControlTypes[entity.ControlType]
-                    : ""
+                    : "",
+                RequestUrl = entity.RequestUrl ?? ""
             });
         }
         #endregion

@@ -767,34 +767,35 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 主預約單 -> 場地列表 -> 行程列表 -> 餐飲補充列表
             bool isSiteItemThrowItemFoodItemValid = isSiteItemsValid &&
                                                     input.SiteItems
-                                                        .SelectMany(si => si.ThrowItems).SelectMany(ti => ti.FoodItems)
-                                                        .All(item =>
-                                                            item.StartValidate()
-                                                                .Validate(
-                                                                    fi => isAdd
-                                                                        ? fi.RTFID == 0
-                                                                        : fi.RTFID.IsZeroOrAbove(),
-                                                                    () => AddError(
-                                                                        WrongFormat($"行程餐飲預約單 ID（{item.RTFID}）")))
-                                                                .Validate(
-                                                                    fi => fi.RTFID == 0 || Task.Run(() =>
-                                                                        DC.Resver_Throw_Food.ValidateIdExists(fi.RTFID,
-                                                                            nameof(Resver_Throw_Food.RTFID))).Result,
-                                                                    () => AddError(
-                                                                        NotFound($"行程餐飲預約單 ID（{item.RTFID}）")))
-                                                                .Validate(fi => SubmitValidateFoodCategory(fi.DFCID),
-                                                                    () => AddError(
-                                                                        NotFound($"預約行程的餐種 ID（{item.DFCID}）")))
-                                                                .Validate(
-                                                                    fi => Task.Run(() =>
-                                                                        SubmitValidateStaticCode(fi.BSCID,
-                                                                            StaticCodeType.Cuisine)).Result,
-                                                                    () => AddError(
-                                                                        NotFound($"預約行程的餐別 ID（{item.BSCID}）")))
-                                                                .Validate(fi => SubmitValidatePartner(fi.BPID),
-                                                                    () => AddError(
-                                                                        NotFound($"預約行程的廠商 ID（{item.BPID}）")))
-                                                                .IsValid());
+                                                        .SelectMany(si => si.ThrowItems)
+                                                        .SelectMany(ti => ti.FoodItems)
+                                                        .StartValidateElements()
+                                                        .Validate(
+                                                            fi => isAdd
+                                                                ? fi.RTFID == 0
+                                                                : fi.RTFID.IsZeroOrAbove(),
+                                                            fi => AddError(
+                                                                WrongFormat($"行程餐飲預約單 ID（{fi.RTFID}）")))
+                                                        .Validate(
+                                                            fi => fi.RTFID == 0 || Task.Run(() =>
+                                                                DC.Resver_Throw_Food.ValidateIdExists(fi.RTFID,
+                                                                    nameof(Resver_Throw_Food.RTFID))).Result,
+                                                            fi => AddError(
+                                                                NotFound($"行程餐飲預約單 ID（{fi.RTFID}）")))
+                                                        .Validate(fi => SubmitValidateFoodCategory(fi.DFCID),
+                                                            fi => AddError(
+                                                                NotFound($"預約行程的餐種 ID（{fi.DFCID}）")))
+                                                        .Validate(
+                                                            fi => Task.Run(() =>
+                                                                SubmitValidateStaticCode(fi.BSCID,
+                                                                    StaticCodeType.Cuisine)).Result,
+                                                            fi => AddError(
+                                                                NotFound($"預約行程的餐別 ID（{fi.BSCID}）")))
+                                                        .Validate(fi => SubmitValidatePartner(fi.BPID),
+                                                            fi => AddError(
+                                                                NotFound($"預約行程的廠商 ID（{fi.BPID}）")))
+                                                        .IsValid()
+                ;
 
             // 主預約單 -> 場地列表 -> 設備列表
             bool isSiteItemDeviceItemValid = isSiteItemsValid &&

@@ -79,7 +79,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                           || (rh.Title != null && rh.Title.Contains(input.Keyword)));
 
             if (input.TargetDate.TryParseDateTime(out DateTime targetDate))
-                query = query.Where(rh => rh.SDate.Date >= targetDate.Date);
+                query = query.Where(rh => DbFunctions.TruncateTime(rh.SDate) >= targetDate.Date);
 
             if (input.CID.IsAboveZero())
                 query = query.Where(rh => rh.CID == input.CID);

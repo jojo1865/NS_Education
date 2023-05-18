@@ -9,6 +9,5 @@ namespace NS_Education.Models.APIItems.Controller.UserData.UserLog.GetList
         public int TargetID { get; set; }
         public string ControlType { get; set; }
         public string RequestUrl { get; set; }
-        public string CreDate { get; set; }
     }
 }

@@ -75,7 +75,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
-                query = query.Where(rh => rh.Code != null && rh.Code.Contains(input.Keyword));
+                query = query.Where(rh => (rh.Code != null && rh.Code.Contains(input.Keyword)) 
+                                          || (rh.Title != null && rh.Title.Contains(input.Keyword)));
 
             if (input.TargetDate.TryParseDateTime(out DateTime targetDate))
                 query = query.Where(rh => rh.SDate.Date >= targetDate.Date);

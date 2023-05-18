@@ -1208,7 +1208,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
                 
                 // 已結帳時，只允許處理預約回饋紀錄的值
-                if (isAdd || head.B_StaticCode.Code != ReserveHeadState.FullyPaid)
+                if (isAdd || head.B_StaticCode1.Code != ReserveHeadState.FullyPaid)
                 {
                     SubmitPopulateHeadValues(input, head);
                     // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用

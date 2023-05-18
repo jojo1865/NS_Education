@@ -76,10 +76,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 query = query.Where(ul => ul.TargetID == input.TargetID);
             
             // 由新到舊
-            return query.OrderByDescending(ul => ul.CreDate)
-                .ThenBy(ul => ul.UID)
-                .ThenBy(ul => ul.TargetTable)
-                .ThenBy(ul => ul.ULID);
+            return query.OrderByDescending(ul => ul.ULID);
         }
 
         public async Task<UserLog_GetList_Output_Row_APIItem> GetListPagedEntityToRow(UserLog entity)

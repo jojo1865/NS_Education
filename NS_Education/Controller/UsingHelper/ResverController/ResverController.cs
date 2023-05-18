@@ -669,7 +669,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Validate(ci => isAdd ? ci.MID == 0 : ci.MID.IsZeroOrAbove(),
                         () => AddError(WrongFormat($"聯絡方式對應 ID（{item.MID}）")))
                     .Validate(
-                        ci => isAdd || DC.M_Contect.Any(mc =>
+                        ci => ci.MID == 0 || DC.M_Contect.Any(mc =>
                             mc.MID == ci.MID && mc.TargetTable == headTableName && mc.TargetID == input.RHID),
                         () => AddError(NotFound($"聯絡方式對應 ID（{item.MID}）")))
                     .Validate(ci => SubmitValidateContactType(ci.ContactType),
@@ -683,7 +683,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Validate(si => isAdd ? si.RSID == 0 : si.RSID.IsZeroOrAbove(),
                         () => AddError(WrongFormat($"場地預約單 ID（{item.RSID}）")))
                     .Validate(
-                        si => isAdd || Task
+                        si => si.RSID == 0 || Task
                             .Run(() => DC.Resver_Site.ValidateIdExists(si.RSID, nameof(Resver_Site.RSID))).Result,
                         () => AddError(NotFound($"場地預約單 ID（{item.RSID}）")))
                     // 檢查所有場地的目標日期都位於 head 的日期範圍
@@ -725,7 +725,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                         .Validate(ti => isAdd ? ti.RTID == 0 : ti.RTID.IsZeroOrAbove(),
                                                             () => AddError(WrongFormat($"行程預約單 ID（{item.RTID}）")))
                                                         .Validate(
-                                                            ti => isAdd || Task.Run(() =>
+                                                            ti => ti.RTID == 0 || Task.Run(() =>
                                                                 DC.Resver_Throw.ValidateIdExists(ti.RTID,
                                                                     nameof(Resver_Throw.RTID))).Result,
                                                             () => AddError(NotFound($"行程預約單 ID（{item.RTID}）")))
@@ -777,7 +777,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                                     () => AddError(
                                                                         WrongFormat($"行程餐飲預約單 ID（{item.RTFID}）")))
                                                                 .Validate(
-                                                                    fi => isAdd || Task.Run(() =>
+                                                                    fi => fi.RTFID == 0 || Task.Run(() =>
                                                                         DC.Resver_Throw_Food.ValidateIdExists(fi.RTFID,
                                                                             nameof(Resver_Throw_Food.RTFID))).Result,
                                                                     () => AddError(
@@ -802,7 +802,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                  item.StartValidate()
                                                      .Validate(di => isAdd ? di.RDID == 0 : di.RDID.IsZeroOrAbove(),
                                                          () => AddError(WrongFormat($"設備預約單 ID（{item.RDID}）")))
-                                                     .Validate(di => isAdd || Task.Run(() =>
+                                                     .Validate(di => di.RDID == 0 || Task.Run(() =>
                                                              DC.Resver_Device.ValidateIdExists(item.RDID,
                                                                  nameof(Resver_Device.RDID))).Result
                                                          , () => AddError(NotFound($"設備預約單 ID（{item.RDID}）")))
@@ -847,7 +847,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Validate(oi => isAdd ? oi.ROID == 0 : oi.ROID.IsZeroOrAbove(),
                         () => AddError(WrongFormat($"其他收費項目預約單 ID（{item.ROID}）")))
                     .Validate(
-                        oi => isAdd || Task.Run(() =>
+                        oi => oi.ROID == 0 || Task.Run(() =>
                             DC.Resver_Other.ValidateIdExists(oi.ROID, nameof(Resver_Other.ROID))).Result,
                         () => AddError(NotFound($"其他收費項目預約單 ID（{item.ROID}）")))
                     // 檢查所有項目的日期都與主預約單相符
@@ -870,7 +870,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Validate(bi => isAdd ? bi.RBID == 0 : bi.RBID.IsZeroOrAbove(),
                         () => AddError(WrongFormat($"繳費紀錄預約單 ID（{item.RBID}）")))
                     .Validate(
-                        bi => isAdd || Task
+                        bi => bi.RBID == 0 || Task
                             .Run(() => DC.Resver_Bill.ValidateIdExists(bi.RBID, nameof(Resver_Bill.RBID))).Result,
                         () => AddError(NotFound($"繳費紀錄預約單 ID（{item.RBID}）")))
                     .Validate(bi => SubmitValidateCategory(bi.BCID, CategoryType.PayType),
@@ -897,7 +897,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Validate(gbi => isAdd ? gbi.RGBID == 0 : gbi.RGBID.IsZeroOrAbove(),
                         () => AddError(WrongFormat($"預約回饋預約單 ID（{item.RGBID}）")))
                     .Validate(
-                        gbi => isAdd || Task
+                        gbi => gbi.RGBID == 0 || Task
                             .Run(() => DC.Resver_Bill.ValidateIdExists(gbi.RGBID, nameof(Resver_GiveBack.RGBID))).Result,
                         () => AddError(NotFound($"預約回饋預約單 ID（{item.RGBID}）")))
                     .Validate(gbi => gbi.PointDecimal.IsInBetween(0, 50),

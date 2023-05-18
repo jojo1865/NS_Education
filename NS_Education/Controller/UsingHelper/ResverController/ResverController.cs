@@ -1284,6 +1284,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private void SubmitPopulateHeadBillItems(Resver_Submit_Input_APIItem input, Resver_Head head,
             ICollection<object> entitiesToAdd)
         {
+            var inputIds = input.BillItems.Select(bi => bi.RBID);
+            DC.Resver_Bill.RemoveRange(head.Resver_Bill.Where(rb => !inputIds.Contains(rb.RBID)));
             foreach (var item in input.BillItems)
             {
                 Resver_Bill bill = SubmitFindOrCreateNew<Resver_Bill>(item.RBID, entitiesToAdd);
@@ -1306,6 +1308,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private void SubmitPopulateHeadOtherItems(Resver_Submit_Input_APIItem input, Resver_Head head,
             ICollection<object> entitiesToAdd)
         {
+            var inputIds = input.OtherItems.Select(oi => oi.ROID);
+            DC.Resver_Other.RemoveRange(head.Resver_Other.Where(ro => !inputIds.Contains(ro.ROID)));
+            
             foreach (var item in input.OtherItems)
             {
                 Resver_Other other = SubmitFindOrCreateNew<Resver_Other>(item.ROID, entitiesToAdd);
@@ -1332,6 +1337,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private async Task SubmitPopulateHeadSiteItems(Resver_Submit_Input_APIItem input, Resver_Head head,
             IList<object> entitiesToAdd)
         {
+            var inputIds = input.SiteItems.Select(si => si.RSID);
+            DC.Resver_Site.RemoveRange(head.Resver_Site.Where(rs => !inputIds.Contains(rs.RSID)));
+
             foreach (var item in input.SiteItems)
             {
                 Resver_Site site = SubmitFindOrCreateNew<Resver_Site>(item.RSID);
@@ -1369,7 +1377,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private async Task SubmitPopulateSiteItemDeviceItems(Resver_Submit_SiteItem_Input_APIItem item,
             Resver_Head head, Resver_Site site)
         {
-            DC.Resver_Device.RemoveRange(site.Resver_Device.Where(rd => item.DeviceItems.All(di => di.RDID != rd.RDID)));
+            var inputIds = item.DeviceItems.Select(di => di.RDID);
+            DC.Resver_Device.RemoveRange(site.Resver_Device.Where(rd => !inputIds.Contains(rd.RDID)));
             foreach (var deviceItem in item.DeviceItems)
             {
                 Resver_Device device = SubmitFindOrCreateNew<Resver_Device>(deviceItem.RDID);

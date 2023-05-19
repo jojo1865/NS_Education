@@ -23,13 +23,13 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             => $"解密 JWT Token 失敗：{e.Message}！";
         private const string RequestHeaderLacksAuthorization = "HTTP Header 未找到 Authorization 欄位，或是 Bearer 格式不正確！";
 
-        private const string HasNoRoleOrPrivilege = "此 UID 無此權限";
+        private const string HasNoRoleOrPrivilege = "此 UID 無此權限！";
         private static string HasValidTokenFailed(Exception e)
             => $"驗證 JWT Token 時出錯：{e.Message}";
         
         private const string RequirePrivilegeAddOrEditNoFieldName = "RequirePrivilege 指定 AddOrEdit，卻沒有提供 addOrEditKeyFieldName！";
-        private const string TokenExpired = "登入已過期，請登出後重新登入。";
-        private const string UserDataNotFound = "查無對應的 UID";
+        private const string TokenExpired = "登入已過期，請重新登入！";
+        private const string UserDataNotFound = "查無對應的 UID！";
 
         #endregion
 

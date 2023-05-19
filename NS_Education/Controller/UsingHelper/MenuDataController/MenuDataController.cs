@@ -18,6 +18,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper.MenuDataController
 {
@@ -260,8 +261,15 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .IsValid();
             
             // 驗證輸入內容
+            // 先取得必須總是顯示的特例選單，如果有任何此類 Id，不允許修改。
+            int[] alwaysShowIds = await DC.MenuData
+                .Where(md => DbConstants.AlwaysShowMenuUrls.Contains(md.URL))
+                .Select(md => md.MDID)
+                .ToArrayAsync();
+            
             bool isEveryElementValid = input.Items.StartValidateElements()
-                .Validate(i => i.Id != null && i.Id.IsAboveZero(), i => AddError(EmptyNotAllowed($"欲更新的預約 ID（{i.Id}）")))
+                .Validate(i => i.Id != null && i.Id.IsAboveZero(), i => AddError(EmptyNotAllowed($"欲刪除的選單 ID（{i.Id}）")))
+                .Validate(i => !alwaysShowIds.Contains(i.Id ?? 0), i => AddError($"此選單（ID {i.Id}）禁止刪除！"))
                 .Validate(i => i.DeleteFlag != null, i => AddError(EmptyNotAllowed($"ID {i.Id} 的 DeleteFlag")))
                 .IsValid();
             

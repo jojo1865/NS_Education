@@ -79,7 +79,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                           || (rh.Title != null && rh.Title.Contains(input.Keyword)));
 
             if (input.TargetDate.TryParseDateTime(out DateTime targetDate))
-                query = query.Where(rh => DbFunctions.TruncateTime(rh.SDate) >= targetDate.Date);
+                query = query.Where(rh => DbFunctions.TruncateTime(rh.SDate) == targetDate.Date);
 
             if (input.CID.IsAboveZero())
                 query = query.Where(rh => rh.CID == input.CID);
@@ -87,8 +87,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             if (input.BSCID12.IsAboveZero())
                 query = query.Where(rh => rh.BSCID12 == input.BSCID12);
 
-            return query.OrderByDescending(rh => rh.SDate)
-                .ThenByDescending(rh => rh.EDate)
+            return query.OrderByDescending(rh => rh.EDate)
                 .ThenBy(rh => rh.RHID);
         }
 

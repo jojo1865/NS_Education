@@ -40,6 +40,12 @@ namespace NS_Education
             );
             
             routes.MapRoute(
+                name: "ResverGetResverSiteList",
+                url: "Resver/GetResverSiteList/{id}",
+                defaults: new { controller = "ResverSite", action = "GetResverSiteList", id = UrlParameter.Optional }
+            );
+            
+            routes.MapRoute(
                 name: "ResverGetAllInfoById",
                 url: "Resver/GetAllInfoById/{id}",
                 defaults: new { controller = "Resver", action = "GetInfoById", id = UrlParameter.Optional }

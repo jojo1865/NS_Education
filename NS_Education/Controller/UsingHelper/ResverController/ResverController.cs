@@ -383,6 +383,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     c.TargetTable == tableName
                     && c.TargetID == entity.RHID)
                 .OrderBy(c => c.SortNo)
+                // 回記憶體
+                .AsEnumerable()
                 .Select(c => new Resver_GetAllInfoById_Output_ContactItem_APIItem
                 {
                     MID = c.MID,

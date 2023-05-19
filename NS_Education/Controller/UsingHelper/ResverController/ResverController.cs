@@ -87,7 +87,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             if (input.BSCID12.IsAboveZero())
                 query = query.Where(rh => rh.BSCID12 == input.BSCID12);
 
-            return query.OrderByDescending(rh => rh.EDate)
+            return query.OrderByDescending(rh => rh.SDate)
+                .ThenByDescending(rh => rh.EDate)
                 .ThenBy(rh => rh.RHID);
         }
 

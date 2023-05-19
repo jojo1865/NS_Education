@@ -969,5 +969,53 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         
         #endregion
+        
+        #region Logout
+
+        /// <summary>
+        /// 執行使用者登出所需之後端處理。
+        /// </summary>
+        /// <returns>通用訊息回傳格式</returns>
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
+        public async Task<string> Logout()
+        {
+            // 1. 查出 UserData
+            int uid = GetUid();
+            UserData user = await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == uid && !ud.DeleteFlag && ud.ActiveFlag);
+            
+            // 2. 驗證若查無資料，回傳錯誤訊息
+            if (user == null)
+            {
+                AddError(NotFound($"目前登入的使用者（ID {uid}）"));
+                return GetResponseJson();
+            }
+            
+            // 3. 清空其 JWT 並存檔
+            try
+            {
+                user.JWT = String.Empty;
+                await LogoutWriteUserLogoutLog(uid);
+                await DC.SaveChangesStandardProcedureAsync(uid, Request);
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbFailed(e));
+            }
+
+            return GetResponseJson();
+        }
+
+        private async Task LogoutWriteUserLogoutLog(int uid)
+        {
+            UserPasswordLog logoutLog = new UserPasswordLog
+            {
+                UID = uid,
+                Type = (int)UserPasswordLogType.Logout
+            };
+            await DC.AddAsync(logoutLog);
+        }
+
+        #endregion
     }
 }

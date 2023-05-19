@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using WebGrease.Css.Extensions;
+
 namespace NS_Education.Variables
 {
     public static class DbConstants
@@ -15,5 +18,10 @@ namespace NS_Education.Variables
         /// 用於確認預約行程的種類是否為餐飲。
         /// </summary>
         public const string ThrowDineTitle = "餐飲";
+
+        public static readonly IReadOnlyCollection<string> AlwaysShowMenuUrls = new List<string>
+        {
+            "/appointment-management"
+        }.AsSafeReadOnly();
     }
 }

@@ -19,6 +19,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -120,7 +121,7 @@ namespace NS_Education.Controller.UsingHelper
                         Title = result.MenuData.Title ?? "",
                         ActiveFlag = result.ThisGroupMenu != null,
                         AddFlag = result.ThisGroupMenu?.AddFlag ?? false,
-                        ShowFlag = result.ThisGroupMenu?.ShowFlag ?? false,
+                        ShowFlag = DbConstants.AlwaysShowMenuUrls.Contains(result.MenuData.URL) || (result.ThisGroupMenu?.ShowFlag ?? false),
                         EditFlag = result.ThisGroupMenu?.EditFlag ?? false,
                         DeleteFlag = result.ThisGroupMenu?.DeleteFlag ?? false,
                         PrintFlag = result.ThisGroupMenu?.PringFlag ?? false
@@ -257,9 +258,15 @@ namespace NS_Education.Controller.UsingHelper
                 .Where(mgm => mgm.GID == input.GID)
                 .Where(mgm => inputIds.Contains(mgm.MDID))
                 .ToDictionaryAsync(mgm => mgm.MDID, mgm => mgm);
-
+            
             foreach (GroupData_MenuItem_APIItem item in input.GroupItems)
             {
+                // 取得 MenuData，用於判定是否為必定顯示的特例值
+                MenuData menuData = await DC.MenuData
+                    .FirstOrDefaultAsync(md => md.MDID == item.MDID && md.ActiveFlag && !md.DeleteFlag);
+
+                bool isAlwaysShow = menuData != null && DbConstants.AlwaysShowMenuUrls.Contains(menuData.URL);
+                
                 if (menuIdToGroupMenuDict.TryGetValue(item.MDID, out M_Group_Menu mgm))
                 {
                     // 有原資料，則輸入的 ActiveFlag 為
@@ -271,7 +278,7 @@ namespace NS_Education.Controller.UsingHelper
                         continue;
                     }
 
-                    mgm.ShowFlag = item.ShowFlag;
+                    mgm.ShowFlag = isAlwaysShow || item.ShowFlag;
                     mgm.AddFlag = item.AddFlag;
                     mgm.EditFlag = item.EditFlag;
                     mgm.DeleteFlag = item.DeleteFlag;
@@ -284,7 +291,7 @@ namespace NS_Education.Controller.UsingHelper
                     {
                         GID = input.GID,
                         MDID = item.MDID,
-                        ShowFlag = item.ShowFlag,
+                        ShowFlag = isAlwaysShow || item.ShowFlag,
                         AddFlag = item.AddFlag,
                         EditFlag = item.EditFlag,
                         DeleteFlag = item.DeleteFlag,

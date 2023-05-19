@@ -39,10 +39,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             
             // 2. 套用查詢
             IQueryable<B_SiteData> query = GetResverSiteListMakeQuery(input);
-            // 取得總筆數
-            int totalCount = await query.CountAsync();
-            // 切分頁
-            B_SiteData[] sites = await query.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToArrayAsync();
+            
+            B_SiteData[] sites = await query.ToArrayAsync();
             
             var queryResult = await GetResverSiteListFilterByFreeDate(input, sites);
             
@@ -64,8 +62,15 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     }).ToList()
                 };
 
+            // 取得總筆數
             response.SetByInput(input);
-            response.AllItemCt = totalCount;
+            response.AllItemCt = response.Items.Count;
+            
+            // 切分頁 ... 因為 freeDate 的處理無法在 EF 做，所以無法照一般流程丟兩次（第一次取 Count，第二次取切完的結果）
+            // 所以這支到這裡才切
+
+            response.Items = response.Items.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToList();
+                
 
             return GetResponseJson(response);
         }
@@ -85,29 +90,35 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 1. 查詢所有可用的 D_TimeSpan
             D_TimeSpan[] allDts = await DC.D_TimeSpan.Where(dts => dts.ActiveFlag && !dts.DeleteFlag).ToArrayAsync();
             string rtsTableName = DC.GetTableName<Resver_Site>();
-            
+
             foreach (B_SiteData siteData in sites.Distinct())
             {
                 // 2. 查詢所有此場地在當天已經占用的時段
                 var occupiedDts = siteData.Resver_Site
-                        .Where(rs => !rs.DeleteFlag && rs.TargetDate.Date == freeDate.Date)
-                        .SelectMany(rs => DC.M_Resver_TimeSpan
-                            .Include(rts => rts.D_TimeSpan)
-                            .Where(rts => rts.TargetTable == rtsTableName && rts.TargetID == rs.RSID))
-                        .Select(rts => rts.D_TimeSpan)
-                        .ToHashSet();
+                    .Where(rs => !rs.DeleteFlag && rs.TargetDate.Date == freeDate.Date)
+                    .SelectMany(rs => DC.M_Resver_TimeSpan
+                        .Include(rts => rts.D_TimeSpan)
+                        .Where(rts => rts.TargetTable == rtsTableName && rts.TargetID == rs.RSID))
+                    .Select(rts => rts.D_TimeSpan)
+                    .ToHashSet();
 
                 // 3. 產生回傳用物件
-                result[siteData] = allDts.Select(dts => new Resver_GetResverSiteList_TimeSpan_Output_APIItem
-                {
-                    DTSID = dts.DTSID,
-                    Title = dts.Title,
-                    AllowResverFlag = !occupiedDts.Any(rts => rts.IsCrossingWith(dts))
-                }).ToArray();
+                var rows = allDts
+                    .Select(dts => new Resver_GetResverSiteList_TimeSpan_Output_APIItem
+                    {
+                        DTSID = dts.DTSID,
+                        Title = dts.Title,
+                        AllowResverFlag = !occupiedDts.Any(rts => rts.IsCrossingWith(dts))
+                    })
+                    .ToArray();
+
+                // 如果所有時段都沒空，不加入回傳結果
+                if (!rows.Any(r => r.AllowResverFlag))
+                    continue;
+
+                result[siteData] = rows; 
             }
-
             return result;
-
         }
 
         private IOrderedQueryable<B_SiteData> GetResverSiteListMakeQuery(Resver_GetResverSiteList_Input_APIItem input)

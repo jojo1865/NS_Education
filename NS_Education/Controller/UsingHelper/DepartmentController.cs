@@ -192,7 +192,6 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DDID == 0, () => AddError(WrongFormat("部門 ID")))
                 .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)), () => AddError(EmptyNotAllowed("公司 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
@@ -204,7 +203,6 @@ namespace NS_Education.Controller.UsingHelper
             return await Task.FromResult(new D_Department
             {
                 DCID = input.DCID,
-                Code = input.Code,
                 TitleC = input.TitleC,
                 TitleE = input.TitleE,
                 PeopleCt = input.PeopleCt
@@ -220,7 +218,6 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
                 .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)), () => AddError(EmptyNotAllowed("公司 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
@@ -235,7 +232,6 @@ namespace NS_Education.Controller.UsingHelper
         public void SubmitEditUpdateDataFields(D_Department data, Department_Submit_Input_APIItem input)
         {
             data.DCID = input.DCID;
-            data.Code = input.Code;
             data.TitleC = input.TitleC;
             data.TitleE = input.TitleE;
             data.PeopleCt = input.PeopleCt;

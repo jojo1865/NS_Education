@@ -4,7 +4,6 @@ namespace NS_Education.Models.APIItems.Controller.Department.Submit
     {
         public int DDID { get; set; }
         public int DCID { get; set; }
-        public string Code { get; set; }
         public string TitleC { get; set; }
         public string TitleE { get; set; }
         public int PeopleCt { get; set; }

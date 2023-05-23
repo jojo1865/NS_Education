@@ -4,7 +4,6 @@ namespace NS_Education.Models.APIItems.Controller.Company.Submit
     {
         public int DCID { get; set; }
         public int BCID { get; set; }
-        public string Code { get; set; }
         public string TitleC { get; set; }
         public string TitleE { get; set; }
     }

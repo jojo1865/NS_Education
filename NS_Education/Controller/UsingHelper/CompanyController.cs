@@ -199,7 +199,6 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DCID == 0, () => AddError(WrongFormat("公司 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), () => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
@@ -211,7 +210,6 @@ namespace NS_Education.Controller.UsingHelper
             return await Task.FromResult(new D_Company
             {
                 BCID = input.BCID,
-                Code = input.Code,
                 TitleC = input.TitleC,
                 TitleE = input.TitleE
             });
@@ -224,7 +222,6 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), () => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
@@ -240,7 +237,6 @@ namespace NS_Education.Controller.UsingHelper
         {
             data.DCID = input.DCID;
             data.BCID = input.BCID;
-            data.Code = input.Code;
             data.TitleC = input.TitleC;
             data.TitleE = input.TitleE;
         }

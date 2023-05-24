@@ -220,7 +220,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.BSID == 0, () => AddError(WrongFormat("場地 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
                     () => AddError(NotFound("所屬分類 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
                 .Validate(i => i.MaxSize >= i.BasicSize, () => AddError("最大容納人數須大於等於一般容納人數！"))
@@ -283,7 +282,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.BSID.IsAboveZero(), () => AddError(EmptyNotAllowed("場地 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
                     () => AddError(NotFound("所屬分類 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
                 .Validate(i => i.MaxSize >= i.BasicSize, () => AddError("最大容納人數須大於等於一般容納人數！"))

@@ -270,8 +270,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry), () => AddError(NotFound("行業別 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region), () => AddError(NotFound("區域別 ID")))
-                .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(),
-                    () => AddError(EmptyNotAllowed("客戶名稱")))
+                .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
                 .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
@@ -328,8 +327,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry), () => AddError(NotFound("行業別 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region), () => AddError(NotFound("區域別 ID")))
-                .Validate(i => !i.TitleC.IsNullOrWhiteSpace() || !i.TitleE.IsNullOrWhiteSpace(),
-                    () => AddError(EmptyNotAllowed("客戶名稱")))
+                .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
                 .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))

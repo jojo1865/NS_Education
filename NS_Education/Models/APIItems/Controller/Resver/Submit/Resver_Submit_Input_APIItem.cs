@@ -7,7 +7,6 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
         public int RHID { get; set; }
         public int BSCID12 { get; set; }
         public int BSCID11 { get; set; }
-        public string Code { get; set; }
         public string Title { get; set; }
         public string SDate { get; set; }
         public string EDate { get; set; }

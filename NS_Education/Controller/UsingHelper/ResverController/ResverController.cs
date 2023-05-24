@@ -630,7 +630,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     () => AddError(NotFound("預約狀態 ID")))
                 .ValidateAsync(async i => await SubmitValidateStaticCode(i.BSCID11, StaticCodeType.ResverSource),
                     () => AddError(NotFound("預約來源 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("預約單編號")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("預約單名稱")))
                 .Validate(i => i.SDate.TryParseDateTime(out headStartDate), () => AddError(WrongFormat("預約單起始日")))
                 .Validate(i => i.EDate.TryParseDateTime(out headEndDate), () => AddError(WrongFormat("預約單結束日")))
                 .Validate(i => headEndDate.Date >= headStartDate.Date,
@@ -1603,7 +1603,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             head.BSCID12 = input.BSCID12;
             head.BSCID11 = input.BSCID11;
-            head.Code = input.Code;
             head.Title = input.Title;
             head.SDate = input.SDate.ParseDateTime().Date;
             head.EDate = input.EDate.ParseDateTime().Date;

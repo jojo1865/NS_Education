@@ -300,8 +300,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(WrongFormat("入帳代號 ID")))
                 .Validate(i => i.CodeType.IsInBetween(0, 9),
                     () => AddError(OutOfRange("入帳代號類別", 0, 9)))
-                .Validate(i => i.Code.HasContent(),
-                    () => AddError(EmptyNotAllowed("入帳代號編碼")))
                 .Validate(i => i.Title.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號名稱")))
                 .Validate(i => i.PrintTitle.HasContent(),
@@ -339,8 +337,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(WrongFormat("入帳代號 ID")))
                 .Validate(i => i.CodeType.IsInBetween(0, 9),
                     () => AddError(OutOfRange("入帳代號類別", 0, 9)))
-                .Validate(i => i.Code.HasContent(),
-                    () => AddError(EmptyNotAllowed("入帳代號編碼")))
                 .Validate(i => i.Title.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號名稱")))
                 .Validate(i => i.PrintTitle.HasContent(),

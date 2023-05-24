@@ -195,7 +195,6 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DPTID == 0, () => AddError(WrongFormat("付款方式 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType), () => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .IsValid();
 
@@ -228,7 +227,6 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DPTID.IsAboveZero(), () => AddError(WrongFormat("付款方式 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType), () => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .IsValid();
 

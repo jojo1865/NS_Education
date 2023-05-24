@@ -240,7 +240,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
                     () => AddError(NotFound("廳別 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
                 .IsValid();
 
@@ -285,7 +284,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
                     () => AddError(NotFound("廳別 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
                 .IsValid();
 

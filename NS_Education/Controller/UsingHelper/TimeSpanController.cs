@@ -187,7 +187,6 @@ namespace NS_Education.Controller.UsingHelper
             
             bool isValid = input.StartValidate()
                 .Validate(i => i.DTSID == 0, () => AddError(WrongFormat("時段 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .Validate(i => i.HourS.IsInBetween(0, 23), () => AddError(OutOfRange("起始小時", 0, 23)))
                 .Validate(i => i.HourE.IsInBetween(0, 24), () => AddError(OutOfRange("結束小時", 0, 24)))
@@ -228,7 +227,6 @@ namespace NS_Education.Controller.UsingHelper
             
             bool isValid = input.StartValidate()
                 .Validate(i => i.DTSID.IsAboveZero(), () => AddError(EmptyNotAllowed("時段 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .Validate(i => i.HourS.IsInBetween(0, 23), () => AddError(OutOfRange("起始小時", 0, 23)))
                 .Validate(i => i.HourE.IsInBetween(0, 24), () => AddError(OutOfRange("結束小時", 0, 24)))

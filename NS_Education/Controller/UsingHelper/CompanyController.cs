@@ -99,6 +99,7 @@ namespace NS_Education.Controller.UsingHelper
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",
                 DepartmentItems = entity.D_Department
+                    .Where(dd => dd.ActiveFlag && !dd.DeleteFlag)
                     .OrderBy(dd => dd.DDID)
                     .Select(dd => new BaseResponseRowIdTitle
                 {

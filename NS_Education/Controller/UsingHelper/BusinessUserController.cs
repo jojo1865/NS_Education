@@ -103,7 +103,9 @@ namespace NS_Education.Controller.UsingHelper
                 Phone = entity.Phone ?? "",
                 MKsalesFlag = entity.MKsalesFlag,
                 OPsalesFlag = entity.OPsalesFlag,
-                Items = entity.M_Customer_BusinessUser.Select(cbu => new BusinessUser_GetList_Customer_APIItem
+                Items = entity.M_Customer_BusinessUser
+                    .Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag)
+                    .Select(cbu => new BusinessUser_GetList_Customer_APIItem
                 {
                     CID = cbu.CID,
                     Code = cbu.Customer?.Code ?? "",

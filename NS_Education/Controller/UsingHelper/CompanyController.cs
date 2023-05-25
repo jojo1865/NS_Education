@@ -3,7 +3,6 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.Company.GetInfoById;
 using NS_Education.Models.APIItems.Controller.Company.GetList;
@@ -99,15 +98,16 @@ namespace NS_Education.Controller.UsingHelper
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",
                 DepartmentItems = entity.D_Department
-                    .Where(dd => dd.ActiveFlag && !dd.DeleteFlag)
                     .OrderBy(dd => dd.DDID)
-                    .Select(dd => new BaseResponseRowIdTitle
+                    .Select(dd => new Company_GetList_DepartmentItem_APIItem
                 {
                     ID = dd.DDID,
-                    Title = dd.TitleC ?? dd.TitleE ?? ""
+                    Title = dd.TitleC ?? dd.TitleE ?? "",
+                    DeleteFlag = dd.DeleteFlag
                 })
                     .ToList(),
-                DepartmentCt = entity.D_Department.Count
+                DepartmentCt = entity.D_Department
+                    .Count(dd => dd.ActiveFlag && !dd.DeleteFlag)
             });
         }
 

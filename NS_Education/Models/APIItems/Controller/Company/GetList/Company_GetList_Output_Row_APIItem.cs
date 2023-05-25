@@ -12,7 +12,7 @@ namespace NS_Education.Models.APIItems.Controller.Company.GetList
         public string TitleC { get; set; }
         public string TitleE { get; set; }
 
-        public ICollection<BaseResponseRowIdTitle> DepartmentItems { get; set; } = new List<BaseResponseRowIdTitle>();
+        public ICollection<Company_GetList_DepartmentItem_APIItem> DepartmentItems { get; set; } = new List<Company_GetList_DepartmentItem_APIItem>();
         public int DepartmentCt { get; set; }
     }
 }

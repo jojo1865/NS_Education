@@ -7,6 +7,7 @@ namespace NS_Education.Tools.BeingValidated
     public class BeingValidated<T> : IBeingValidated<T, T>
     {
         private readonly T _target;
+        private bool _forceSkip;
         private bool _isInvalid;
         private bool _skipIfInvalid;
 
@@ -14,6 +15,7 @@ namespace NS_Education.Tools.BeingValidated
         {
             _target = target;
             _skipIfInvalid = skipIfInvalid;
+            _forceSkip = false;
         }
 
         public bool IsValid() => !_isInvalid;
@@ -21,7 +23,7 @@ namespace NS_Education.Tools.BeingValidated
         public IBeingValidated<T, T> Validate(Func<T, bool> validation, Action<T> onFail = null,
             Action<T, Exception> onException = null)
         {
-            if (IsLazyAndInvalid()) return this;
+            if (CanSkip()) return this;
 
             try
             {
@@ -41,7 +43,7 @@ namespace NS_Education.Tools.BeingValidated
 
         public IBeingValidated<T, T> Validate(Action<T> validation, Action<T, Exception> onException = null)
         {
-            if (IsLazyAndInvalid()) return this;
+            if (CanSkip()) return this;
 
             try
             {
@@ -58,7 +60,7 @@ namespace NS_Education.Tools.BeingValidated
         public async Task<IBeingValidated<T, T>> ValidateAsync(Func<T, Task<bool>> validation, Action<T> onFail = null,
             Action<T, Exception> onException = null)
         {
-            if (IsLazyAndInvalid()) return this;
+            if (CanSkip()) return this;
 
             try
             {
@@ -79,7 +81,7 @@ namespace NS_Education.Tools.BeingValidated
         public async Task<IBeingValidated<T, T>> ValidateAsync(Func<T, Task> validation,
             Action<T, Exception> onException = null)
         {
-            if (IsLazyAndInvalid()) return this;
+            if (CanSkip()) return this;
 
             try
             {
@@ -100,17 +102,17 @@ namespace NS_Education.Tools.BeingValidated
         }
 
         /// <inheritdoc />
-        public IBeingValidated<T, T> SkipIf(Predicate<T> predicate)
+        public IBeingValidated<T, T> ForceSkipIf(Predicate<T> predicate)
         {
             if (predicate.Invoke(_target))
-                SkipIfAlreadyInvalid();
+                _forceSkip = true;
             return this;
         }
 
         /// <inheritdoc />
-        public IBeingValidated<T, T> StopSkipping()
+        public IBeingValidated<T, T> StopForceSkipping()
         {
-            SkipIfAlreadyInvalid(false);
+            _forceSkip = false;
             return this;
         }
 
@@ -128,6 +130,6 @@ namespace NS_Education.Tools.BeingValidated
             _isInvalid = true;
         }
 
-        private bool IsLazyAndInvalid() => _skipIfInvalid && _isInvalid;
+        private bool CanSkip() => _forceSkip || _skipIfInvalid && _isInvalid;
     }
 }

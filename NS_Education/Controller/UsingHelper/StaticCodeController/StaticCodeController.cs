@@ -314,23 +314,23 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSCID == 0,
                     () => AddError(WrongFormat("靜態參數 ID")))
-                .SkipIf(i => i.CodeType.IsAboveZero())
+                .ForceSkipIf(i => i.CodeType.IsZeroOrAbove())
                 .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
                 .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
-                .StopSkipping()
+                .StopForceSkipping()
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
-                .SkipIf(i => i.CodeType == 0)
+                .ForceSkipIf(i => i.CodeType == 0)
                 .ValidateAsync(async i =>
                         await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
                                                              && !sc.DeleteFlag
                                                              && sc.CodeType == 0
                                                              && sc.Code == i.CodeType.ToString())
                     , () => AddError(NotFound("參數所屬類別")))
-                .StopSkipping()
+                .StopForceSkipping()
                 // 若 CodeType 為 0 時，同 CodeType 下不允許重複 Code 的資料
-                .SkipIf(i => i.CodeType.IsAboveZero())
+                .ForceSkipIf(i => i.CodeType.IsAboveZero())
                 .ValidateAsync(async i =>
                         !await DC.B_StaticCode.AnyAsync(bc => !bc.DeleteFlag
                                                               && bc.CodeType == 0
@@ -365,24 +365,25 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         public async Task<bool> SubmitEditValidateInput(StaticCode_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("靜態參數 ID")))
                 .Validate(i => i.CodeType.IsZeroOrAbove(), () => AddError(OutOfRange("參數所屬類別", 0)))
-                .SkipIf(i => i.CodeType.IsAboveZero())
+                .ForceSkipIf(i => i.CodeType.IsAboveZero())
                 .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
                 .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
-                .StopSkipping()
+                .StopForceSkipping()
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
-                .SkipIf(i => i.CodeType == 0)
+                .ForceSkipIf(i => i.CodeType == 0)
                 .ValidateAsync(async i =>
                         await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
                                                              && !sc.DeleteFlag
                                                              && sc.CodeType == 0
                                                              && sc.Code == i.CodeType.ToString())
                     , () => AddError(NotFound("參數所屬類別")))
-                .StopSkipping()
+                .StopForceSkipping()
                 // 若 CodeType 為 0 時，同 CodeType 下不允許重複 Code 的資料
-                .SkipIf(i => i.CodeType.IsAboveZero())
+                .ForceSkipIf(i => i.CodeType.IsAboveZero())
                 .ValidateAsync(async i =>
                         !await DC.B_StaticCode.AnyAsync(bc => !bc.DeleteFlag
                                                               && bc.CodeType == 0

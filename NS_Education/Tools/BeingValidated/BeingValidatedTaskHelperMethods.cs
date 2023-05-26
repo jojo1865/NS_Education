@@ -133,20 +133,20 @@ namespace NS_Education.Tools.BeingValidated
             return obj.SkipIfAlreadyInvalid(setTo);
         }
 
-        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.SkipIf"/>
-        public static async Task<IBeingValidated<TInput, TOutput>> SkipIf<TInput, TOutput>(
+        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.ForceSkipIf"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> ForceSkipIf<TInput, TOutput>(
             this Task<IBeingValidated<TInput, TOutput>> beingValidated, Predicate<TInput> predicate)
         {
             IBeingValidated<TInput, TOutput> obj = await beingValidated;
-            return obj.SkipIf(predicate);
+            return obj.ForceSkipIf(predicate);
         }
 
-        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.StopSkipping"/>
-        public static async Task<IBeingValidated<TInput, TOutput>> StopSkipping<TInput, TOutput>(
+        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.StopForceSkipping"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> StopForceSkipping<TInput, TOutput>(
             this Task<IBeingValidated<TInput, TOutput>> beingValidated)
         {
             IBeingValidated<TInput, TOutput> obj = await beingValidated;
-            return obj.StopSkipping();
+            return obj.StopForceSkipping();
         }
     }
 }

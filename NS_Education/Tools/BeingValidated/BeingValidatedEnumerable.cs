@@ -108,16 +108,16 @@ namespace NS_Education.Tools.BeingValidated
 
         /// <inheritdoc />
         /// <remarks>這將檢查所有元素，只要有任一者滿足條件，就跳過後續驗證。</remarks>
-        public IBeingValidated<TElement, TEnumerable> SkipIf(Predicate<TElement> predicate)
+        public IBeingValidated<TElement, TEnumerable> ForceSkipIf(Predicate<TElement> predicate)
         {
-            _inner.SkipIf(_ => _targetEnumerable.Any(predicate.Invoke));
+            _inner.ForceSkipIf(_ => _targetEnumerable.Any(predicate.Invoke));
             return this;
         }
 
         /// <inheritdoc />
-        public IBeingValidated<TElement, TEnumerable> StopSkipping()
+        public IBeingValidated<TElement, TEnumerable> StopForceSkipping()
         {
-            SkipIfAlreadyInvalid(false);
+            _inner.StopForceSkipping();
             return this;
         }
     }

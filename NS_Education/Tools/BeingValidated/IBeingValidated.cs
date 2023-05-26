@@ -64,12 +64,12 @@ namespace NS_Education.Tools.BeingValidated
         /// </summary>
         /// <param name="predicate">指定條件</param>
         /// <returns>此物件本身。</returns>
-        IBeingValidated<TInput, TOutput> SkipIf(Predicate<TInput> predicate);
+        IBeingValidated<TInput, TOutput> ForceSkipIf(Predicate<TInput> predicate);
 
         /// <summary>
         /// 不再跳過驗證，繼續執行後續驗證。
         /// </summary>
         /// <returns>此物件本身</returns>
-        IBeingValidated<TInput, TOutput> StopSkipping();
+        IBeingValidated<TInput, TOutput> StopForceSkipping();
     }
 }

@@ -103,7 +103,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 ContactName = entity.ContactName ?? "",
                 Title = entity.Title ?? "",
                 TotalPrice = payItems.Sum(pi => pi.Price),
-                PaidPrice = entity.Resver_Bill.Where(rb => rb.PayFlag && !rb.DeleteFlag).Sum(rb => rb.Price),
+                PaidPrice = entity.Resver_Bill
+                    .Where(rb => rb.PayFlag && !rb.DeleteFlag)
+                    .Sum(rb => rb.Price),
                 Compilation = entity.Customer?.Compilation ?? "",
                 Items = GetListAllPopulatePayItems(payItems)
             };
@@ -111,7 +113,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             return await Task.FromResult(row);
         }
 
-        private static List<PrintReport_GetResverListByIds2_PayItem_APIItem> GetListAllPopulatePayItems(List<PrintReport_GetResverListByIds2_PayItem> payItems)
+        private static List<PrintReport_GetResverListByIds2_PayItem_APIItem> GetListAllPopulatePayItems(
+            List<PrintReport_GetResverListByIds2_PayItem> payItems)
         {
             // 依照 printTitle 做 group 之後，依此產生 response 內容
             return payItems.GroupBy(pi => pi.PrintTitle)

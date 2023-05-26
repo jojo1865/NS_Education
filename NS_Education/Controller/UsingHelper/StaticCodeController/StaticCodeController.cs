@@ -314,9 +314,10 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSCID == 0,
                     () => AddError(WrongFormat("靜態參數 ID")))
-                .Validate(i => i.CodeType >= 0, () => AddError(OutOfRange("參數所屬類別", 0)))
-                .Validate(i => i.Code.HasContent())
-                .Validate(i => i.Title.HasContent())
+                .Validate(i => i.CodeType.IsZeroOrAbove(), () => AddError(OutOfRange("參數所屬類別", 0)))
+                .Validate(i => i.CodeType.IsAboveZero() || i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
+                .Validate(i => i.CodeType.IsAboveZero() || i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
                 .ValidateAsync(async i => i.CodeType == 0
@@ -325,12 +326,11 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                               && sc.CodeType == 0
                                               && sc.Code == i.CodeType.ToString())
                     , () => AddError(NotFound("參數所屬類別")))
-                // 同 CodeType 下不允許重複編碼的資料
-                .ValidateAsync(async i =>
-                        !await DC.B_StaticCode.AnyAsync(bc => bc.ActiveFlag
-                                                              && !bc.DeleteFlag
-                                                              && bc.CodeType == i.CodeType
-                                                              && bc.Code == i.Code)
+                // 若 CodeType 為 0 時，同 CodeType 下不允許重複 Code 的資料
+                .ValidateAsync(async i => i.CodeType != 0
+                                          || !await DC.B_StaticCode.AnyAsync(bc => !bc.DeleteFlag
+                                              && bc.CodeType == 0
+                                              && bc.Code == i.Code)
                     , () => AddError(AlreadyExists("編碼")))
                 .IsValid();
 
@@ -361,11 +361,10 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         public async Task<bool> SubmitEditValidateInput(StaticCode_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BSCID.IsAboveZero(),
-                    () => AddError(EmptyNotAllowed("靜態參數 ID")))
-                .Validate(i => i.CodeType >= 0, () => AddError(OutOfRange("參數所屬類別", 0)))
-                .Validate(i => i.Code.HasContent())
-                .Validate(i => i.Title.HasContent())
+                .Validate(i => i.CodeType.IsZeroOrAbove(), () => AddError(OutOfRange("參數所屬類別", 0)))
+                .Validate(i => i.CodeType.IsAboveZero() || i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
+                .Validate(i => i.CodeType.IsAboveZero() || i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
                 .ValidateAsync(async i => i.CodeType == 0
@@ -374,12 +373,12 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                               && sc.CodeType == 0
                                               && sc.Code == i.CodeType.ToString())
                     , () => AddError(NotFound("參數所屬類別")))
-                // 同 CodeType 下不允許重複編碼的資料
-                .ValidateAsync(async i =>
-                        !await DC.B_StaticCode.AnyAsync(bc => bc.ActiveFlag
-                                                              && !bc.DeleteFlag
-                                                              && bc.CodeType == i.CodeType
-                                                              && bc.Code == i.Code)
+                // 若 CodeType 為 0 時，同 CodeType 下不允許重複 Code 的資料
+                .ValidateAsync(async i => i.CodeType != 0
+                                          || !await DC.B_StaticCode.AnyAsync(bc => !bc.DeleteFlag
+                                              && bc.CodeType == 0
+                                              && bc.Code == i.Code
+                                              && bc.BSCID != i.BSCID)
                     , () => AddError(AlreadyExists("編碼")))
                 .IsValid();
 

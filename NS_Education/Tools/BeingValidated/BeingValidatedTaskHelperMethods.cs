@@ -113,7 +113,8 @@ namespace NS_Education.Tools.BeingValidated
         /// true：驗證通過。<br/>
         /// false：驗證失敗。
         /// </returns>
-        public static async Task<bool> IsValid<TInput, TOutput>(this Task<IBeingValidated<TInput, TOutput>> beingValidated)
+        public static async Task<bool> IsValid<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated)
         {
             IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return obj.IsValid();
@@ -130,6 +131,22 @@ namespace NS_Education.Tools.BeingValidated
         {
             IBeingValidated<TInput, TOutput> obj = await beingValidated;
             return obj.SkipIfAlreadyInvalid(setTo);
+        }
+
+        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.SkipIf"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> SkipIf<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated, Predicate<TInput> predicate)
+        {
+            IBeingValidated<TInput, TOutput> obj = await beingValidated;
+            return obj.SkipIf(predicate);
+        }
+
+        /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.StopSkipping"/>
+        public static async Task<IBeingValidated<TInput, TOutput>> StopSkipping<TInput, TOutput>(
+            this Task<IBeingValidated<TInput, TOutput>> beingValidated)
+        {
+            IBeingValidated<TInput, TOutput> obj = await beingValidated;
+            return obj.StopSkipping();
         }
     }
 }

@@ -27,32 +27,39 @@ namespace NS_Education.Tools.BeingValidated
             this IBeingValidated<TInput, TOutput> target, Func<TInput, bool> validation, Action onFail = null,
             Action<Exception> onException = null)
         {
+            // 這個擴充方法用於當使用者不需要在 onFail 或 onException 取得輸入時，提供的語法糖，同時也是向後相容。
             return target.Validate(validation, _ => onFail?.Invoke(), (_, e) => onException?.Invoke(e));
         }
 
         /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.Validate(Action{TInput}, Action{TInput, Exception})"/>
-        public static IBeingValidated<TInput, TOutput> Validate<TInput, TOutput>(this IBeingValidated<TInput, TOutput> target, 
+        public static IBeingValidated<TInput, TOutput> Validate<TInput, TOutput>(
+            this IBeingValidated<TInput, TOutput> target,
             Action<TInput> validation,
             Action<Exception> onException = null)
         {
+            // 這個擴充方法用於當使用者不需要在 onFail 或 onException 取得輸入時，提供的語法糖，同時也是向後相容。
             return target.Validate(validation, (_, e) => onException?.Invoke(e));
         }
-        
+
         /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.ValidateAsync(Func{TInput, Task{bool}}, Action{TInput}, Action{TInput, Exception})"/>
-        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(this IBeingValidated<TInput, TOutput> target,
+        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(
+            this IBeingValidated<TInput, TOutput> target,
             Func<TInput, Task<bool>> validation,
             Action onFail = null,
             Action<Exception> onException = null)
         {
+            // 這個擴充方法用於當使用者不需要在 onFail 或 onException 取得輸入時，提供的語法糖，同時也是向後相容。
             return await target.ValidateAsync(validation, _ => onFail?.Invoke(), (_, e) => onException?.Invoke(e));
         }
-        
+
         /// <inheritdoc cref="IBeingValidated{TInput,TOutput}.ValidateAsync(Func{TInput, Task}, Action{TInput, Exception})"/>
-        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(this IBeingValidated<TInput, TOutput> target,
+        public static async Task<IBeingValidated<TInput, TOutput>> ValidateAsync<TInput, TOutput>(
+            this IBeingValidated<TInput, TOutput> target,
             Func<TInput, Task> validation,
             Action<Exception> onException = null)
         {
-            return await target.ValidateAsync(validation,  (_, e) => onException?.Invoke(e));
+            // 這個擴充方法用於當使用者不需要在 onFail 或 onException 取得輸入時，提供的語法糖，同時也是向後相容。
+            return await target.ValidateAsync(validation, (_, e) => onException?.Invoke(e));
         }
 
         /// <summary>
@@ -63,7 +70,8 @@ namespace NS_Education.Tools.BeingValidated
         /// 預設為 false。</param>
         /// <typeparam name="TElement">集合中包含元素的類型</typeparam>
         /// <returns>此物件的 BeingValidated。</returns>
-        public static IBeingValidated<TElement, IEnumerable<TElement>> StartValidateElements<TElement>(this IEnumerable<TElement> target,
+        public static IBeingValidated<TElement, IEnumerable<TElement>> StartValidateElements<TElement>(
+            this IEnumerable<TElement> target,
             bool skipIfAlreadyInvalid = false)
         {
             return new BeingValidatedEnumerable<TElement, IEnumerable<TElement>>(target, skipIfAlreadyInvalid);

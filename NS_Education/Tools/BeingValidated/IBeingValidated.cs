@@ -12,7 +12,8 @@ namespace NS_Education.Tools.BeingValidated
         /// <param name="onFail">（可選）當驗證不通過時，執行的方法。</param>
         /// <param name="onException">（可選）當驗證過程發生 Exception 時，執行的方法。未設定時，不做任何 catch。</param>
         /// <returns>此物件本身。</returns>
-        IBeingValidated<TInput, TOutput> Validate(Func<TInput, bool> validation, Action<TInput> onFail = null, Action<TInput, Exception> onException = null);
+        IBeingValidated<TInput, TOutput> Validate(Func<TInput, bool> validation, Action<TInput> onFail = null,
+            Action<TInput, Exception> onException = null);
 
         /// <summary>
         /// 執行驗證。
@@ -20,8 +21,9 @@ namespace NS_Education.Tools.BeingValidated
         /// <param name="validation">一個接收被包裝物件的類型並處理的 void 方法。</param>
         /// <param name="onException">（可選）當驗證過程發生 Exception 時，執行的方法。未設定時，不做任何 catch。</param>
         /// <returns>此物件本身。</returns>
-        IBeingValidated<TInput, TOutput> Validate(Action<TInput> validation, Action<TInput, Exception> onException = null);
-        
+        IBeingValidated<TInput, TOutput> Validate(Action<TInput> validation,
+            Action<TInput, Exception> onException = null);
+
         /// <summary>
         /// 非同步地執行驗證。
         /// </summary>
@@ -29,16 +31,18 @@ namespace NS_Education.Tools.BeingValidated
         /// <param name="onFail">（可選）當驗證不通過時，執行的方法。</param>
         /// <param name="onException">（可選）當驗證過程發生 Exception 時，執行的方法。未設定時，不做任何 catch。</param>
         /// <returns>此物件本身。</returns>
-        Task<IBeingValidated<TInput, TOutput>> ValidateAsync(Func<TInput, Task<bool>> validation, Action<TInput> onFail = null, Action<TInput, Exception> onException = null);
-        
+        Task<IBeingValidated<TInput, TOutput>> ValidateAsync(Func<TInput, Task<bool>> validation,
+            Action<TInput> onFail = null, Action<TInput, Exception> onException = null);
+
         /// <summary>
         /// 非同步地執行驗證。
         /// </summary>
         /// <param name="validation">一個接收被包裝物件的類型並處理的 void 方法。</param>
         /// <param name="onException">（可選）當驗證過程發生 Exception 時，執行的方法。未設定時，不做任何 catch。</param>
         /// <returns>此物件本身。</returns>
-        Task<IBeingValidated<TInput, TOutput>> ValidateAsync(Func<TInput, Task> validation, Action<TInput, Exception> onException = null);
-        
+        Task<IBeingValidated<TInput, TOutput>> ValidateAsync(Func<TInput, Task> validation,
+            Action<TInput, Exception> onException = null);
+
         /// <summary>
         /// 取得驗證結果。
         /// </summary>
@@ -54,5 +58,18 @@ namespace NS_Education.Tools.BeingValidated
         /// <param name="setTo">欲設定的新值。（可選）忽略時，預設值為 true。</param>
         /// <returns>此物件本身。</returns>
         IBeingValidated<TInput, TOutput> SkipIfAlreadyInvalid(bool setTo = true);
+
+        /// <summary>
+        /// 在執行驗證的中途，如果指定條件為 true 時，跳過後續驗證。
+        /// </summary>
+        /// <param name="predicate">指定條件</param>
+        /// <returns>此物件本身。</returns>
+        IBeingValidated<TInput, TOutput> SkipIf(Predicate<TInput> predicate);
+
+        /// <summary>
+        /// 不再跳過驗證，繼續執行後續驗證。
+        /// </summary>
+        /// <returns>此物件本身</returns>
+        IBeingValidated<TInput, TOutput> StopSkipping();
     }
 }

@@ -21,7 +21,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
     /// 實際 Route 請參考 RouteConfig。
     /// </summary>
     public class GetResverListByIDs1Controller : PublicClass,
-        IGetListAll<Resver_Head, PrintReport_GetResverListByIds1_Input_APIItem, PrintReport_GetResverListByIds1_Output_Row_APIItem>
+        IGetListAll<Resver_Head, PrintReport_GetResverListByIds1_Input_APIItem,
+            PrintReport_GetResverListByIds1_Output_Row_APIItem>
     {
         #region Initialization
 
@@ -30,13 +31,15 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         public GetResverListByIDs1Controller()
         {
             _getListAllHelper =
-                new GetListAllHelper<GetResverListByIDs1Controller, Resver_Head, PrintReport_GetResverListByIds1_Input_APIItem,
+                new GetListAllHelper<GetResverListByIDs1Controller, Resver_Head,
+                    PrintReport_GetResverListByIds1_Input_APIItem,
                     PrintReport_GetResverListByIds1_Output_Row_APIItem>(this);
         }
 
         #endregion
-        
+
         #region GetResverListByIDs1
+
         // 實際 Route 請參考 RouteConfig。
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
@@ -55,18 +58,19 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             // 檢查所有 RHID 是否都存在
             bool isValid = isInputValid && // short-circuit
-                              input.Id.Aggregate(true, (result, id) =>
-                                  result & // 一定走過所有資料，以便一次顯示所有找不到的錯誤訊息
-                                  id.StartValidate()
-                                      .Validate(_ => DC.Resver_Head.Any(rh => !rh.DeleteFlag && rh.RHID == id),
-                                          () => AddError(NotFound($"預約單 ID {id}")))
-                                      .IsValid()
-                              );
+                           input.Id.Aggregate(true, (result, id) =>
+                               result & // 一定走過所有資料，以便一次顯示所有找不到的錯誤訊息
+                               id.StartValidate()
+                                   .Validate(_ => DC.Resver_Head.Any(rh => !rh.DeleteFlag && rh.RHID == id),
+                                       () => AddError(NotFound($"預約單 ID {id}")))
+                                   .IsValid()
+                           );
 
             return await Task.FromResult(isValid);
         }
 
-        public IOrderedQueryable<Resver_Head> GetListAllOrderedQuery(PrintReport_GetResverListByIds1_Input_APIItem input)
+        public IOrderedQueryable<Resver_Head> GetListAllOrderedQuery(
+            PrintReport_GetResverListByIds1_Input_APIItem input)
         {
             var query = DC.Resver_Head
                 .Include(rh => rh.Customer)
@@ -93,7 +97,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .OrderBy(mc => mc.SortNo)
                 .Take(2)
                 .ToArrayAsync();
-            
+
             var row = GetListAllPopulateRow(entity, contacts);
 
             return await Task.FromResult(row);
@@ -127,19 +131,22 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             return row;
         }
 
-        private List<PrintReport_GetResverListByIds1_SiteItem_APIItem> GetListAllPopulateRowSiteItems(Resver_Head entity)
+        private List<PrintReport_GetResverListByIds1_SiteItem_APIItem> GetListAllPopulateRowSiteItems(
+            Resver_Head entity)
         {
-            return entity.Resver_Site.Select(rs => new PrintReport_GetResverListByIds1_SiteItem_APIItem
-            {
-                RSID = rs.RSID,
-                Date = rs.TargetDate.ToFormattedStringDate(),
-                SiteTitle = rs.B_SiteData?.Title ?? "",
-                TableTitle = rs.B_StaticCode?.Title ?? "",
-                FixedPrice = rs.FixedPrice,
-                QuotedPrice = rs.QuotedPrice,
-                TimeSpanItems = GetListAllPopulateRowSiteItemTimeSpanItems(entity, rs),
-                DeviceItems = GetListAllPopulateRowSiteItemDeviceItems(rs)
-            }).ToList();
+            return entity.Resver_Site
+                .Where(rs => !rs.DeleteFlag)
+                .Select(rs => new PrintReport_GetResverListByIds1_SiteItem_APIItem
+                {
+                    RSID = rs.RSID,
+                    Date = rs.TargetDate.ToFormattedStringDate(),
+                    SiteTitle = rs.B_SiteData?.Title ?? "",
+                    TableTitle = rs.B_StaticCode?.Title ?? "",
+                    FixedPrice = rs.FixedPrice,
+                    QuotedPrice = rs.QuotedPrice,
+                    TimeSpanItems = GetListAllPopulateRowSiteItemTimeSpanItems(entity, rs),
+                    DeviceItems = GetListAllPopulateRowSiteItemDeviceItems(rs)
+                }).ToList();
         }
 
         private List<PrintReport_GetResverListByIds1_TimeSpanItem_APIItem> GetListAllPopulateRowSiteItemTimeSpanItems(
@@ -160,21 +167,25 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         ? (rts.D_TimeSpan.HourE, rts.D_TimeSpan.MinuteE).ToFormattedHourAndMinute()
                         : "",
                     Minutes = rts.D_TimeSpan != null
-                        ? (rts.D_TimeSpan.HourS, rts.D_TimeSpan.MinuteS).GetMinutesUntil((rts.D_TimeSpan.HourE, rts.D_TimeSpan.MinuteE))
+                        ? (rts.D_TimeSpan.HourS, rts.D_TimeSpan.MinuteS).GetMinutesUntil((rts.D_TimeSpan.HourE,
+                            rts.D_TimeSpan.MinuteE))
                         : 0,
                 }).ToList();
         }
 
-        private static List<PrintReport_GetResverListByIds1_DeviceItem_APIItem> GetListAllPopulateRowSiteItemDeviceItems(Resver_Site rs)
+        private static List<PrintReport_GetResverListByIds1_DeviceItem_APIItem>
+            GetListAllPopulateRowSiteItemDeviceItems(Resver_Site rs)
         {
-            return rs.Resver_Device.Select(rd => new PrintReport_GetResverListByIds1_DeviceItem_APIItem
-            {
-                RDID = rd.RDID,
-                TargetDate = rd.TargetDate.ToFormattedStringDate(),
-                BD_Title = rd.B_Device.Title ?? "",
-                SortNo = rd.SortNo,
-                Note = rd.Note ?? ""
-            }).ToList();
+            return rs.Resver_Device
+                .Where(rd => !rd.DeleteFlag)
+                .Select(rd => new PrintReport_GetResverListByIds1_DeviceItem_APIItem
+                {
+                    RDID = rd.RDID,
+                    TargetDate = rd.TargetDate.ToFormattedStringDate(),
+                    BD_Title = rd.B_Device.Title ?? "",
+                    SortNo = rd.SortNo,
+                    Note = rd.Note ?? ""
+                }).ToList();
         }
 
         #endregion

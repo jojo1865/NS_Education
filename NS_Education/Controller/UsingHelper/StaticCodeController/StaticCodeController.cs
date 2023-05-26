@@ -32,7 +32,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         , ISubmit<B_StaticCode, StaticCode_Submit_Input_APIItem>
     {
         #region 共用
-        
+
         private readonly IGetListPagedHelper<StaticCode_GetList_Input_APIItem> _getListHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
@@ -248,8 +248,40 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidateInputIfCodeTypeZero(input))
+                return GetResponseJson();
             return await _deleteItemHelper.DeleteItem(input);
         }
+
+        private async Task<bool> DeleteItemValidateInputIfCodeTypeZero(DeleteItem_Input_APIItem input)
+        {
+            // 額外驗證 CodeType = 0（參數類別大類）的輸入。
+            // 如果是復活，要檢查同樣 CodeType 和 Code 的未刪除資料是否已存在，因為 CodeType = 0 的資料不允許 Code 重複。
+
+            IEnumerable<int> toReviveIds = input.Items
+                .Where(item => item.DeleteFlag is false)
+                .Where(item => item.Id != null)
+                .Select(item => item.Id.Value)
+                .Where(id => id.IsAboveZero());
+
+            B_StaticCode[] zeroTypeToReviveData = await DC.B_StaticCode
+                .Where(sc => sc.DeleteFlag)
+                .Where(sc => sc.CodeType == 0)
+                .Where(sc => toReviveIds.Contains(sc.BSCID)).ToArrayAsync();
+
+            bool isValid = zeroTypeToReviveData.StartValidateElements()
+                .Validate(toRevive
+                        => DC.B_StaticCode
+                            .Where(sc => sc.CodeType == 0)
+                            .Where(sc => sc.Code == toRevive.Code)
+                            .Where(sc => sc.BSCID != toRevive.BSCID)
+                            .Any(sc => !sc.DeleteFlag),
+                    toRevive => AddError(AlreadyExists($"代碼（{toRevive.Code}）")))
+                .IsValid();
+
+            return isValid;
+        }
+
 
         public IQueryable<B_StaticCode> DeleteItemsQuery(IEnumerable<int> ids)
         {

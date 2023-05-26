@@ -87,8 +87,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         public async Task<PrintReport_GetResverListByIds1_Output_Row_APIItem> GetListAllEntityToRow(Resver_Head entity)
         {
             // 取得這筆資料的 M_Contact
+            string tableName = DC.GetTableName<Resver_Head>();
             M_Contect[] contacts = await DC.M_Contect
-                .Where(mc => mc.TargetTable == DC.GetTableName<Resver_Head>() && mc.TargetID == entity.RHID)
+                .Where(mc => mc.TargetTable == tableName && mc.TargetID == entity.RHID)
                 .OrderBy(mc => mc.SortNo)
                 .Take(2)
                 .ToArrayAsync();

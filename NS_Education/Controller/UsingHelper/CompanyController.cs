@@ -35,7 +35,7 @@ namespace NS_Education.Controller.UsingHelper
         private readonly ISubmitHelper<Company_Submit_Input_APIItem> _submitHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
 
-        private readonly IGetInfoByIdHelper _getInfoByIdHelper; 
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public CompanyController()
         {
@@ -45,7 +45,8 @@ namespace NS_Education.Controller.UsingHelper
             _deleteItemHelper = new DeleteItemHelper<CompanyController, D_Company>(this);
             _submitHelper = new SubmitHelper<CompanyController, D_Company, Company_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<CompanyController, D_Company>(this);
-            _getInfoByIdHelper = new GetInfoByIdHelper<CompanyController, D_Company, Company_GetInfoById_Output_APIItem>(this);
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<CompanyController, D_Company, Company_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -100,14 +101,18 @@ namespace NS_Education.Controller.UsingHelper
                 DepartmentItems = entity.D_Department
                     .OrderBy(dd => dd.DDID)
                     .Select(dd => new Company_GetList_DepartmentItem_APIItem
-                {
-                    ID = dd.DDID,
-                    Title = dd.TitleC ?? dd.TitleE ?? "",
-                    DeleteFlag = dd.DeleteFlag
-                })
+                    {
+                        DDID = dd.DDID,
+                        Title_C = dd.TitleC ?? "",
+                        Title_E = dd.TitleE ?? "",
+                        PeopleCt = dd.PeopleCt,
+                        DCID = dd.DCID,
+                        DeleteFlag = dd.DeleteFlag
+                    })
                     .ToList(),
                 DepartmentCt = entity.D_Department
-                    .Count(dd => dd.ActiveFlag && !dd.DeleteFlag)
+                    .Count(dd => dd.ActiveFlag && !dd.DeleteFlag),
+                DeleteFlag = entity.DeleteFlag
             });
         }
 
@@ -195,11 +200,13 @@ namespace NS_Education.Controller.UsingHelper
         }
 
         #region Submit - Add
+
         public async Task<bool> SubmitAddValidateInput(Company_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DCID == 0, () => AddError(WrongFormat("公司 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company),
+                    () => AddError(NotFound("分類 ID")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
@@ -215,14 +222,17 @@ namespace NS_Education.Controller.UsingHelper
                 TitleE = input.TitleE
             });
         }
+
         #endregion
 
         #region Submit - Edit
+
         public async Task<bool> SubmitEditValidateInput(Company_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company), () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company),
+                    () => AddError(NotFound("分類 ID")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .IsValid();
 
@@ -241,6 +251,7 @@ namespace NS_Education.Controller.UsingHelper
             data.TitleC = input.TitleC;
             data.TitleE = input.TitleE;
         }
+
         #endregion
 
         #endregion

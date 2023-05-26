@@ -161,19 +161,6 @@ namespace NS_Education.Tools.Extensions
         }
 
         /// <summary>
-        /// 接受開始時間與結束時間，計算兩者間差異分鐘數，不支援跨日。
-        /// </summary>
-        /// <param name="startHour">起始時間的小時</param>
-        /// <param name="startMinute">起始時間的分鐘</param>
-        /// <param name="endHour">結束時間的小時</param>
-        /// <param name="endMinute">結束時間的分鐘</param>
-        /// <returns>分鐘數</returns>
-        public static int GetMinutesBetween(int startHour, int startMinute, int endHour, int endMinute)
-        {
-            return startHour * 60 + startMinute - endHour * 60 - endMinute;
-        }
-
-        /// <summary>
         /// 接受兩組開始時間與結束時間，計算兩者間是否存在重疊，不支援跨日。
         /// </summary>
         /// <returns>分鐘數</returns>

@@ -154,16 +154,13 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     DTSID = rts.DTSID,
                     Title = rts.D_TimeSpan != null ? rts.D_TimeSpan.Title ?? "" : "",
                     TimeS = rts.D_TimeSpan != null
-                        ? StandardColumnExtensionMethods.ToFormattedHourAndMinute(rts.D_TimeSpan.HourS,
-                            rts.D_TimeSpan.MinuteS)
+                        ? (rts.D_TimeSpan.HourS, rts.D_TimeSpan.MinuteS).ToFormattedHourAndMinute()
                         : "",
                     TimeE = rts.D_TimeSpan != null
-                        ? StandardColumnExtensionMethods.ToFormattedHourAndMinute(rts.D_TimeSpan.HourE,
-                            rts.D_TimeSpan.MinuteE)
+                        ? (rts.D_TimeSpan.HourE, rts.D_TimeSpan.MinuteE).ToFormattedHourAndMinute()
                         : "",
                     Minutes = rts.D_TimeSpan != null
-                        ? StandardColumnExtensionMethods.GetMinutesBetween(rts.D_TimeSpan.HourS, rts.D_TimeSpan.MinuteS,
-                            rts.D_TimeSpan.HourE, rts.D_TimeSpan.MinuteE)
+                        ? (rts.D_TimeSpan.HourS, rts.D_TimeSpan.MinuteS).GetMinutesUntil((rts.D_TimeSpan.HourE, rts.D_TimeSpan.MinuteE))
                         : 0,
                 }).ToList();
         }

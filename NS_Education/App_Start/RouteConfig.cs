@@ -22,6 +22,12 @@ namespace NS_Education
             );
 
             routes.MapRoute(
+                name: "UserDataSubmitLogKeepDays",
+                url: "UserData/SubmitLogKeepDays/{id}",
+                defaults: new { controller = "UserDataLog", action = "SubmitLogKeepDays", id = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
                 name: "UserDataGetLogKeepDays",
                 url: "UserData/GetLogKeepDays/{id}",
                 defaults: new { controller = "UserDataLog", action = "GetLogKeepDays", id = UrlParameter.Optional }

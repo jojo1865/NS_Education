@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetList;
 using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetLogKeepDays;
+using NS_Education.Models.APIItems.Controller.UserData.UserLog.SubmitLogKeepDays;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -25,6 +26,38 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
     {
         private static readonly string[] UserLogTypes = { "瀏覽", "新增", "修改", "刪除" };
         private static readonly string[] UserPasswordLogTypes = { "登入", "登出", "更改密碼" };
+
+        #region SubmitLogKeepDays
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        public async Task<string> SubmitLogKeepDays(UserLog_SubmitLogKeepDays_Input_APIItem input)
+        {
+            // 這支輸入沒有 ActiveFlag，所以不使用 Helper
+            B_StaticCode data = await DC.B_StaticCode
+                .Where(sc => sc.BSCID == DbConstants.SafetyControlLogKeepDaysBSCID)
+                .FirstOrDefaultAsync();
+
+            if (data is null)
+            {
+                AddError(NotFound());
+                return GetResponseJson();
+            }
+
+            try
+            {
+                data.SortNo = input.KeepDays;
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbFailed(e));
+            }
+
+            return GetResponseJson();
+        }
+
+        #endregion
 
         #region GetLogKeepDays
 

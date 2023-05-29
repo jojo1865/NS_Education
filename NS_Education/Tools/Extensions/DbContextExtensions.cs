@@ -250,9 +250,12 @@ namespace NS_Education.Tools.Extensions
             var objectItemCollection = ((ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace));
 
             // Get the entity type from the model that maps to the CLR type
+            // entry.Entity 有可能會是 dynamic 而回傳 proxy type, 所以在這裡嘗試取得真的 type
+            Type actualEntityType = ObjectContext.GetObjectType(entry.Entity.GetType());
+
             var entityType = metadata
                 .GetItems<EntityType>(DataSpace.OSpace)
-                .Single(e => objectItemCollection.GetClrType(e) == entry.Entity.GetType());
+                .Single(e => objectItemCollection.GetClrType(e) == actualEntityType);
 
             // Get the entity set that uses this entity type
             var entitySet = metadata

@@ -22,6 +22,12 @@ namespace NS_Education
             );
 
             routes.MapRoute(
+                name: "UserDataGetLogTypes",
+                url: "UserData/GetLogTypeList/{id}",
+                defaults: new { controller = "UserDataLog", action = "GetList", id = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
                 name: "UserDataSubmitLogKeepDays",
                 url: "UserData/SubmitLogKeepDays/{id}",
                 defaults: new { controller = "UserDataLog", action = "SubmitLogKeepDays", id = UrlParameter.Optional }
@@ -31,6 +37,12 @@ namespace NS_Education
                 name: "UserDataGetLogKeepDays",
                 url: "UserData/GetLogKeepDays/{id}",
                 defaults: new { controller = "UserDataLog", action = "GetLogKeepDays", id = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
+                name: "UserDataGetUserLogList",
+                url: "UserData/GetUserLogList/{id}",
+                defaults: new { controller = "UserDataLog", action = "GetUserLogList", id = UrlParameter.Optional }
             );
 
             routes.MapRoute(
@@ -85,12 +97,6 @@ namespace NS_Education
                 name: "SiteDataGetListForCalendar",
                 url: "SiteData/GetCalendarList/{id}",
                 defaults: new { controller = "SiteDataCalendar", action = "GetList", id = UrlParameter.Optional }
-            );
-
-            routes.MapRoute(
-                name: "UserDataGetUserLogList",
-                url: "UserData/GetUserLogList/{id}",
-                defaults: new { controller = "UserDataLog", action = "GetList", id = UrlParameter.Optional }
             );
 
             routes.MapRoute(

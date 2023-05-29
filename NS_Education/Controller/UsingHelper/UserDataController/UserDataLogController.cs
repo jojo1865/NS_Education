@@ -7,14 +7,19 @@ using System.Web.Mvc;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetList;
 using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetLogKeepDays;
+using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetTypeList;
 using NS_Education.Models.APIItems.Controller.UserData.UserLog.SubmitLogKeepDays;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
+using WebGrease.Css.Extensions;
 
 namespace NS_Education.Controller.UsingHelper.UserDataController
 {
@@ -22,10 +27,35 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
     /// 處理操作紀錄 Log 的 API。<br/>
     /// 處理的是 UserLog，但因為目前開的 Route 為 UserData，因此還是歸類在 UserDataController，
     /// </summary>
-    public class UserDataLogController : PublicClass
+    public class UserDataLogController : PublicClass,
+        IGetListLocal<UserLog_GetTypeList_Output_APIItem>
     {
         private static readonly string[] UserLogTypes = { "瀏覽", "新增", "修改", "刪除" };
         private static readonly string[] UserPasswordLogTypes = { "登入", "登出", "更改密碼" };
+
+        private static readonly IList<UserLog_GetTypeList_Output_APIItem> typeList = UserLogTypes
+            .Select((s, i) => new UserLog_GetTypeList_Output_APIItem
+            {
+                Title = s,
+                UserLogType = i
+            })
+            .Concat(UserPasswordLogTypes.Select((s, i) => new UserLog_GetTypeList_Output_APIItem
+            {
+                Title = s,
+                UserPasswordLogType = i
+            })).ToSafeReadOnlyCollection();
+
+        private readonly IGetListLocalHelper _getListLocalHelper;
+
+        #region Initialization
+
+        public UserDataLogController()
+        {
+            _getListLocalHelper =
+                new GetListLocalHelper<UserDataLogController, UserLog_GetTypeList_Output_APIItem>(this);
+        }
+
+        #endregion
 
         #region SubmitLogKeepDays
 
@@ -95,7 +125,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag, null, null)]
-        public async Task<string> GetList(UserLog_GetList_Input_APIItem input)
+        public async Task<string> GetUserLogList(UserLog_GetList_Input_APIItem input)
         {
             // 這個功能同時需要使用 UserLog 和 UserPasswordLog，所以無法使用 Helper。
             // 1. 驗證輸入
@@ -130,19 +160,30 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             UserLog_GetList_Input_APIItem input)
         {
             DateTime threeMonthsAgo = DateTime.Now.AddMonths(-3);
-            var userLogTypeFilter = UserLogTypes
-                .Where(s => s.Contains(input.EventType))
-                .Select((s, i) => i);
-            var userPasswordLogTypeFilter = UserPasswordLogTypes
-                .Where(s => s.Contains(input.EventType))
-                .Select((s, i) => i);
 
-            var userLogs = (await DC.UserLog
-                        .Include(ul => ul.UserData)
-                        .Where(ul => ul.CreDate >= threeMonthsAgo)
-                        // 不顯示瀏覽
-                        .Where(ul => ul.ControlType != (int)UserLogControlType.Show)
-                        .Where(ul => userLogTypeFilter.Contains(ul.ControlType))
+            var userLogQuery = DC.UserLog
+                .Include(ul => ul.UserData)
+                .Where(ul => ul.CreDate >= threeMonthsAgo);
+
+            // 只在另外一個輸入不是合法範圍，而本身屬於合法輸入範圍時，才套用查詢
+            // 若兩者都不合法，全查
+            // 否則，完全不查
+
+            if (input.UserLogType.IsInBetween(0, 3))
+                userLogQuery = userLogQuery.Where(ul => ul.ControlType == input.UserLogType);
+            else if (input.UserPasswordLogType.IsInBetween(0, 2))
+                userLogQuery = userLogQuery.Take(0);
+
+            var userPasswordLogQuery = DC.UserPasswordLog
+                .Include(upl => upl.UserData)
+                .Where(upl => upl.CreDate >= threeMonthsAgo);
+
+            if (input.UserPasswordLogType.IsInBetween(0, 2))
+                userPasswordLogQuery = userPasswordLogQuery.Where(upl => upl.Type == input.UserPasswordLogType);
+            else if (input.UserLogType.IsInBetween(0, 3))
+                userPasswordLogQuery = userPasswordLogQuery.Take(0);
+
+            var userLogs = (await userLogQuery
                         .ToArrayAsync())
                     .Select(ul => new UserLog_GetList_Output_Row_APIItem
                     {
@@ -160,10 +201,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     })
                 ;
 
-            var userPasswordLogs = (await DC.UserPasswordLog
-                        .Include(upl => upl.UserData)
-                        .Where(upl => upl.CreDate >= threeMonthsAgo)
-                        .Where(upl => userPasswordLogTypeFilter.Contains(upl.Type))
+            var userPasswordLogs = (await userPasswordLogQuery
                         .ToArrayAsync())
                     .Select(upl => new UserLog_GetList_Output_Row_APIItem
                     {
@@ -184,6 +222,26 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             // 由新到舊
             return result.OrderByDescending(i => i.CreDate);
+        }
+
+        #endregion
+
+        #region GetTypeList
+
+        /// <summary>
+        /// 提供「事件類型」的端點，確切 Route 請參考 RouteConfig。
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        public async Task<string> GetList()
+        {
+            return await _getListLocalHelper.GetListLocal();
+        }
+
+        /// <inheritdoc />
+        public async Task<ICollection<UserLog_GetTypeList_Output_APIItem>> GetListLocalResults()
+        {
+            return await Task.FromResult(typeList);
         }
 
         #endregion

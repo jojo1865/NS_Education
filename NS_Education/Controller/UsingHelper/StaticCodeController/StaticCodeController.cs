@@ -16,6 +16,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
@@ -232,6 +233,12 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            if (!FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin) && id == 14)
+            {
+                AddError(NoPrivilege());
+                return GetResponseJson();
+            }
+
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
         }
 
@@ -248,9 +255,29 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            // 驗證大類復活
             if (!await DeleteItemValidateInputIfCodeTypeZero(input))
                 return GetResponseJson();
+
+            // 驗證安全控管類僅管理員可以做
+            if (!FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin) &&
+                await DeleteItemInputHasSafetyControl(input))
+            {
+                AddError(NoPrivilege());
+                return GetResponseJson();
+            }
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemInputHasSafetyControl(DeleteItem_Input_APIItem input)
+        {
+            const int safetyControlInt = (int)StaticCodeType.SafetyControl;
+
+            var inputIds = input.Items.Select(i => i.Id);
+            return await DC.B_StaticCode
+                .Where(sc => inputIds.Contains(sc.BSCID))
+                .AnyAsync(sc => sc.CodeType == safetyControlInt);
         }
 
         private async Task<bool> DeleteItemValidateInputIfCodeTypeZero(DeleteItem_Input_APIItem input)
@@ -314,13 +341,11 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSCID == 0,
                     () => AddError(WrongFormat("靜態參數 ID")))
-                .ForceSkipIf(i => i.CodeType.IsZeroOrAbove())
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
-                .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
-                .StopForceSkipping()
+                .Validate(i => i.CodeType.IsZeroOrAbove(), () => AddError(OutOfRange("參數所屬類別", 0)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .SkipIfAlreadyInvalid()
-                // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
+                // 若 CodeType 不為 0 時：
+                // +- a. 必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
                 .ForceSkipIf(i => i.CodeType == 0)
                 .ValidateAsync(async i =>
                         await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
@@ -329,8 +354,19 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                                              && sc.Code == i.CodeType.ToString())
                     , () => AddError(NotFound("參數所屬類別")))
                 .StopForceSkipping()
-                // 若 CodeType 為 0 時，同 CodeType 下不允許重複 Code 的資料
+
+                // 若 CodeType 為 14 時：
+                // +- a. 只有管理員才允許
+                .ForceSkipIf(i => i.CodeType != (int)StaticCodeType.SafetyControl)
+                .Validate(i => FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin),
+                    () => AddError(NoPrivilege()))
+                .StopForceSkipping()
+                // 若 CodeType 為 0 時：
+                // |- a. 檢查 Code 必須皆為數字
+                // +- b. 同 CodeType 下不允許重複 Code 的資料
                 .ForceSkipIf(i => i.CodeType.IsAboveZero())
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
+                .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
                 .ValidateAsync(async i =>
                         !await DC.B_StaticCode.AnyAsync(bc => !bc.DeleteFlag
                                                               && bc.CodeType == 0
@@ -367,13 +403,10 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("靜態參數 ID")))
                 .Validate(i => i.CodeType.IsZeroOrAbove(), () => AddError(OutOfRange("參數所屬類別", 0)))
-                .ForceSkipIf(i => i.CodeType.IsAboveZero())
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
-                .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
-                .StopForceSkipping()
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .SkipIfAlreadyInvalid()
-                // 若 CodeType 不為 0 時，必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
+                // 若 CodeType 不為 0 時：
+                // +- a. 必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
                 .ForceSkipIf(i => i.CodeType == 0)
                 .ValidateAsync(async i =>
                         await DC.B_StaticCode.AnyAsync(sc => sc.ActiveFlag
@@ -382,13 +415,24 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                                              && sc.Code == i.CodeType.ToString())
                     , () => AddError(NotFound("參數所屬類別")))
                 .StopForceSkipping()
-                // 若 CodeType 為 0 時，同 CodeType 下不允許重複 Code 的資料
+
+                // 若 CodeType 為安全控管時：
+                // +- a. 只有管理員才允許
+                .ForceSkipIf(i => i.CodeType != (int)StaticCodeType.SafetyControl)
+                .Validate(i => FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin),
+                    () => AddError(NoPrivilege()))
+                .StopForceSkipping()
+                // 若 CodeType 為 0 時：
+                // |- a. 檢查 Code 必須皆為數字
+                // +- b. 同 CodeType 下不允許重複 Code 的資料
                 .ForceSkipIf(i => i.CodeType.IsAboveZero())
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
+                .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
                 .ValidateAsync(async i =>
                         !await DC.B_StaticCode.AnyAsync(bc => !bc.DeleteFlag
                                                               && bc.CodeType == 0
                                                               && bc.Code == i.Code
-                                                              && bc.BSCID != i.BSCID)
+                                                              && bc.BSCID == i.BSCID)
                     , () => AddError(AlreadyExists("編碼")))
                 .IsValid();
 

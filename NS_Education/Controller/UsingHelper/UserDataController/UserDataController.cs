@@ -37,6 +37,12 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         ISubmit<UserData, UserData_Submit_Input_APIItem>,
         IChangeActive<UserData>
     {
+        #region 錯誤訊息 - 註冊/更新
+
+        private const string PasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
+
+        #endregion
+
         #region SignUp
 
         /// <summary>
@@ -51,7 +57,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             InitializeResponse();
 
             int passwordMinLength = GetPasswordMinLength();
-            
+
             bool isValid = await input.StartValidate()
                 .ValidateAsync(
                     async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)),
@@ -84,7 +90,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             {
                 UserName = input.Username,
                 LoginAccount = input.LoginAccount,
-                LoginPassword = input.LoginPassword,
+                LoginPassword = EncryptPassword(input.LoginPassword),
                 Note = input.Note,
                 LoginDate = DateTime.Now,
                 DDID = input.DDID,
@@ -106,7 +112,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             catch (Exception e)
             {
                 AddError(UpdateDbFailed(e));
-            } 
+            }
 
             return GetResponseJson();
         }
@@ -142,12 +148,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         #endregion
 
-        #region 錯誤訊息 - 註冊/更新
-
-        private const string PasswordAlphanumericOnly = "使用者密碼只允許半形英文字母、數字！";
-
-        #endregion
-
         #region 錯誤訊息 - 登入
 
         private const string LoginAccountNotFound = "查無此使用者帳號，請重新確認！";
@@ -157,7 +157,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             return $"更新 JWT 時失敗，錯誤訊息：{e.Message}！";
         }
-        
+
         private static string LoginDateOrJwtUpdateFailed(Exception e)
         {
             return $"更新 JWT 或登入時間時失敗，錯誤訊息：{e.Message}！";
@@ -178,7 +178,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         private const string UpdatePWNewPasswordShouldBeDifferent = "新密碼不可與原密碼相同！";
 
         #endregion
-        
+
         #region Login
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             };
 
             await DC.UserPasswordLog.AddAsync(newLog);
-            
+
             user.JWT = jwt;
         }
 
@@ -315,13 +315,22 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.UID.IsAboveZero(), () => AddError(EmptyNotAllowed("使用者 ID")))
-                .Validate(i => i.Username.HasContent() && i.Username.Length.IsInBetween(1, 50), () => AddError(LengthOutOfRange("使用者名稱", 1, 50)))
-                .Validate(i => i.LoginAccount.HasContent() && i.LoginAccount.Length.IsInBetween(1, 100), () => AddError(LengthOutOfRange("使用者帳號", 1, 100)))
-                .ValidateAsync(async i => !await DC.UserData.AnyAsync(ud => !ud.DeleteFlag && ud.LoginAccount == i.LoginAccount && ud.UID != input.UID), () => AddError(AlreadyExists("使用者帳號")))
-                .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)), () => AddError(NotFound("部門 ID")))
-                .ValidateAsync(async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)), () => AddError(NotFound("身分 ID")))
-                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.Length.IsInBetween(1, 100), () => AddError(OutOfRange("使用者密碼", 1, 100)))
-                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
+                .Validate(i => i.Username.HasContent() && i.Username.Length.IsInBetween(1, 50),
+                    () => AddError(LengthOutOfRange("使用者名稱", 1, 50)))
+                .Validate(i => i.LoginAccount.HasContent() && i.LoginAccount.Length.IsInBetween(1, 100),
+                    () => AddError(LengthOutOfRange("使用者帳號", 1, 100)))
+                .ValidateAsync(
+                    async i => !await DC.UserData.AnyAsync(ud =>
+                        !ud.DeleteFlag && ud.LoginAccount == i.LoginAccount && ud.UID != input.UID),
+                    () => AddError(AlreadyExists("使用者帳號")))
+                .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
+                    () => AddError(NotFound("部門 ID")))
+                .ValidateAsync(async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)),
+                    () => AddError(NotFound("身分 ID")))
+                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.Length.IsInBetween(1, 100),
+                    () => AddError(OutOfRange("使用者密碼", 1, 100)))
+                .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.IsEncryptablePassword(),
+                    () => AddError(PasswordAlphanumericOnly))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -354,7 +363,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 WriteUserChangePasswordLog(data.UID, data.LoginPassword, newPassword);
                 data.LoginPassword = newPassword;
             }
-            
+
             // 只在是管理員時才允許修改啟用狀態
             data.ActiveFlag = input.ActiveFlag;
 
@@ -413,12 +422,12 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .OrderByDescending(log => log.CreDate)
                 .Take(uniquePasswordCountLimit)
                 .ToArray();
-            
+
             // 新密碼：所有 n 筆都不能出現
             // 舊密碼：當歷史紀錄小於 n 筆時，需要多確認第 1 筆的舊資料
             // （第 i 筆的新資料為第 i+1 筆的舊資料，所以只有第 1 筆的舊資料需要確認）
-            if (updatePasswordHistories.Any(log => log.NewPassword == newPassword) 
-                || updatePasswordHistories.Length < uniquePasswordCountLimit 
+            if (updatePasswordHistories.Any(log => log.NewPassword == newPassword)
+                || updatePasswordHistories.Length < uniquePasswordCountLimit
                 && updatePasswordHistories.LastOrDefault()?.OldPassword == newPassword)
                 throw new Exception($"不可重覆使用前 {uniquePasswordCountLimit} 組密碼！");
 
@@ -503,11 +512,11 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
             // 若 deleteFlag 為 false 時，驗證是否有其他不同 UID、相同 LoginAccount、非刪除狀態的資料，如果有，打回。
-            
+
             foreach (var item in input.Items)
             {
                 if (!(item.DeleteFlag is false)) continue;
-                
+
                 // 先取得 UserData 以便取得 LoginAccount
                 UserData target = await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == (item.Id ?? 0));
                 if (target is null)
@@ -521,13 +530,13 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
                 // 沒有其他帳號，通過
                 if (!hasOtherAccount) continue;
-                
+
                 AddError($"有其他非刪除資料的帳號與 ID {item.Id} 的帳號相同，無法復活！");
             }
 
             if (HasError())
                 return GetResponseJson();
-            
+
             return await _deleteItemHelper.DeleteItem(input);
         }
 
@@ -576,14 +585,18 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             bool isValid = input
                 .StartValidate()
                 .SkipIfAlreadyInvalid()
-                .Validate(i => i.OriginalPassword != i.NewPassword, () => AddError(UpdatePWNewPasswordShouldBeDifferent))
+                .Validate(i => i.OriginalPassword != i.NewPassword,
+                    () => AddError(UpdatePWNewPasswordShouldBeDifferent))
                 .Validate(i => i.OriginalPassword.HasContent(), () => AddError(EmptyNotAllowed("原始密碼")))
-                .Validate(i => i.OriginalPassword.Length.IsInBetween(1, 100), () => AddError(LengthOutOfRange("原始密碼", 1, 100)))
+                .Validate(i => i.OriginalPassword.Length.IsInBetween(1, 100),
+                    () => AddError(LengthOutOfRange("原始密碼", 1, 100)))
                 // 如果無法加密，表示密碼有意外字元，同時 API 也應該在寫入欄位前就擋掉
                 // 所以這種情況視為密碼錯誤，直接返回。
-                .Validate(i => i.OriginalPassword.IsEncryptablePassword(), () => AddError(UpdatePWOriginalPasswordIncorrect))
+                .Validate(i => i.OriginalPassword.IsEncryptablePassword(),
+                    () => AddError(UpdatePWOriginalPasswordIncorrect))
                 .Validate(i => i.NewPassword.HasContent(), () => AddError(EmptyNotAllowed("新密碼")))
-                .Validate(i => i.NewPassword.Length.IsInBetween(passwordMinLength, 100), () => AddError(LengthOutOfRange("新密碼", passwordMinLength, 100)))
+                .Validate(i => i.NewPassword.Length.IsInBetween(passwordMinLength, 100),
+                    () => AddError(LengthOutOfRange("新密碼", passwordMinLength, 100)))
                 .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(UpdatePWPasswordNotEncryptable))
                 .IsValid();
 
@@ -602,7 +615,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             }
 
             // 3. 對照舊密碼
-            
+
             bool oldPasswordIsCorrect = ValidatePassword(input.OriginalPassword, userData.LoginPassword);
 
             if (!oldPasswordIsCorrect)
@@ -610,7 +623,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 AddError(UpdatePWOriginalPasswordIncorrect);
                 return GetResponseJson();
             }
-            
+
             // 4. 更新 DB
             await input
                 .StartValidate(true)
@@ -645,7 +658,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             string newPassword = EncryptPassword(inputPassword);
             if (newPassword == userData.LoginPassword)
                 return;
-            
+
             // 2. 更新資料，更新失敗時拋錯
             try
             {
@@ -759,7 +772,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         }
 
         #endregion
-        
+
         #region BatchSubmitDepartment
 
         /// <summary>
@@ -773,7 +786,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             // 0. enumerate
             UserData_BatchSubmitDepartment_Input_Row_APIItem[] itemsArray = input.Items?.ToArray();
-            
+
             // 1. 驗證輸入
             bool isCollectionValid = BatchSubmitDepartmentValidateCollection(itemsArray);
 
@@ -793,7 +806,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             // 2. 更新資料
             BatchSubmitDepartmentUpdate(itemsArray, data);
-            
+
             // 3. 寫入 DB
             await BatchSubmitDepartmentWriteToDb();
 
@@ -821,7 +834,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             }
         }
 
-        private async Task<bool> BatchSubmitDepartmentValidateElements(UserData_BatchSubmitDepartment_Input_APIItem input, Dictionary<int, UserData> data)
+        private async Task<bool> BatchSubmitDepartmentValidateElements(
+            UserData_BatchSubmitDepartment_Input_APIItem input, Dictionary<int, UserData> data)
         {
             return await input.Items.StartValidateElements()
                 .Validate(i => i.UID.IsAboveZero(),
@@ -836,7 +850,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .IsValid();
         }
 
-        private async Task<Dictionary<int, UserData>> BatchSubmitDepartmentGetUserDictionary(IEnumerable<int> inputUserIds)
+        private async Task<Dictionary<int, UserData>> BatchSubmitDepartmentGetUserDictionary(
+            IEnumerable<int> inputUserIds)
         {
             return await DC.UserData
                 .Where(ud => ud.ActiveFlag)
@@ -845,7 +860,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .ToDictionaryAsync(ud => ud.UID, ud => ud);
         }
 
-        private bool BatchSubmitDepartmentValidateCollection(UserData_BatchSubmitDepartment_Input_Row_APIItem[] itemsArray)
+        private bool BatchSubmitDepartmentValidateCollection(
+            UserData_BatchSubmitDepartment_Input_Row_APIItem[] itemsArray)
         {
             return itemsArray.StartValidate()
                 .Validate(items => items != null && items.Any(),
@@ -856,9 +872,9 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         }
 
         #endregion
-        
+
         #region BatchSubmitGroup
-        
+
         /// <summary>
         /// 更新一筆或多筆使用者的角色設定。
         /// </summary>
@@ -872,10 +888,10 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
              目前批量修改僅 UserData 發現兩個需求，所以先以特例方式寫，可以發現結構長得非常類似。
              如果未來發現更多類似需求，或是這兩個頻繁需要同步修改時，須考慮 Helper化。
             */
-            
+
             // 0. enumerate
             UserData_BatchSubmitGroup_Input_Row_APIItem[] itemsArray = input.Items?.ToArray();
-            
+
             // 1. 驗證輸入
             bool isCollectionValid = BatchSubmitGroupValidateCollection(itemsArray);
 
@@ -895,7 +911,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             // 2. 更新資料
             BatchSubmitGroupUpdate(itemsArray, data);
-            
+
             // 3. 寫入 DB
             await BatchSubmitGroupWriteToDb();
 
@@ -922,7 +938,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 UserData user = data[item.UID];
                 // 清空 user FK
                 DC.M_Group_User.RemoveRange(user.M_Group_User);
-                
+
                 // 寫入新的角色
                 user.M_Group_User.Add(new M_Group_User
                 {
@@ -932,7 +948,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             }
         }
 
-        private async Task<bool> BatchSubmitGroupValidateElements(UserData_BatchSubmitGroup_Input_APIItem input, Dictionary<int, UserData> data)
+        private async Task<bool> BatchSubmitGroupValidateElements(UserData_BatchSubmitGroup_Input_APIItem input,
+            Dictionary<int, UserData> data)
         {
             return await input.Items.StartValidateElements()
                 .Validate(i => i.UID.IsAboveZero(),
@@ -967,9 +984,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .IsValid();
         }
 
-        
         #endregion
-        
+
         #region Logout
 
         /// <summary>
@@ -982,15 +998,16 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             // 1. 查出 UserData
             int uid = GetUid();
-            UserData user = await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == uid && !ud.DeleteFlag && ud.ActiveFlag);
-            
+            UserData user =
+                await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == uid && !ud.DeleteFlag && ud.ActiveFlag);
+
             // 2. 驗證若查無資料，回傳錯誤訊息
             if (user == null)
             {
                 AddError(NotFound($"目前登入的使用者（ID {uid}）"));
                 return GetResponseJson();
             }
-            
+
             // 3. 清空其 JWT 並存檔
             try
             {

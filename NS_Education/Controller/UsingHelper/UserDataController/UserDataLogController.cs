@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetList;
+using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetLogKeepDays;
+using NS_Education.Models.Entities;
 using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
@@ -23,6 +25,38 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
     {
         private static readonly string[] UserLogTypes = { "瀏覽", "新增", "修改", "刪除" };
         private static readonly string[] UserPasswordLogTypes = { "登入", "登出", "更改密碼" };
+
+        #region GetLogKeepDays
+
+        /// <summary>
+        /// 處理取得紀錄保留天數的設定值的端點，實際 Route 請參照 RouteConfig。
+        /// </summary>
+        /// <returns>紀錄保留天數（通用訊息回傳格式）</returns>
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        public async Task<string> GetLogKeepDays()
+        {
+            // 無輸入，無法使用 helper。
+            // 1. 查詢資料
+            B_StaticCode keepDaysStaticCode =
+                await DC.B_StaticCode.FirstOrDefaultAsync(sc => sc.BSCID == DbConstants.SafetyControlLogKeepDaysBSCID);
+
+            if (keepDaysStaticCode == null)
+            {
+                AddError(NotFound());
+                return GetResponseJson();
+            }
+
+            // 2. 轉成回傳物件，設值，回傳
+            UserLog_GetLogKeepDays_Output_APIItem response = new UserLog_GetLogKeepDays_Output_APIItem
+            {
+                KeepDays = keepDaysStaticCode.SortNo
+            };
+
+            return GetResponseJson(response);
+        }
+
+        #endregion
 
         #region GetList
 

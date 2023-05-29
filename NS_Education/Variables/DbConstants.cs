@@ -15,6 +15,11 @@ namespace NS_Education.Variables
         public const int MkSalesMappingType = 1;
 
         /// <summary>
+        /// 用於取得安全控管設定中，紀錄保留天數的資料。寫死一個 ID。
+        /// </summary>
+        public const int SafetyControlLogKeepDaysBSCID = 122;
+
+        /// <summary>
         /// 用於確認預約行程的種類是否為餐飲。
         /// </summary>
         public const string ThrowDineTitle = "餐飲";

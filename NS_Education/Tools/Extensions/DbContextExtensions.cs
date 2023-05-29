@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
@@ -25,7 +26,8 @@ namespace NS_Education.Tools.Extensions
         /// <param name="context">DbContext</param>
         /// <param name="uid">要求者的 UID。</param>
         /// <param name="httpRequestBase"></param>
-        public static void SaveChangesStandardProcedure(this NsDbContext context, int uid, HttpRequestBase httpRequestBase)
+        public static void SaveChangesStandardProcedure(this NsDbContext context, int uid,
+            HttpRequestBase httpRequestBase)
         {
             DoStandardProcedure(context, uid, httpRequestBase);
 
@@ -38,7 +40,8 @@ namespace NS_Education.Tools.Extensions
         /// <param name="context">DbContext</param>
         /// <param name="uid">要求者的 UID。</param>
         /// <param name="httpRequest"></param>
-        public static async Task SaveChangesStandardProcedureAsync(this NsDbContext context, int uid, HttpRequest httpRequest)
+        public static async Task SaveChangesStandardProcedureAsync(this NsDbContext context, int uid,
+            HttpRequest httpRequest)
         {
             await SaveChangesStandardProcedureAsync(context, uid, new HttpRequestWrapper(httpRequest));
         }
@@ -57,7 +60,8 @@ namespace NS_Education.Tools.Extensions
         /// <param name="type">操作類型</param>
         /// <param name="uid">使用者 ID</param>
         /// <param name="httpRequest"></param>
-        public static void WriteUserLogAndSave(this NsDbContext context, UserLogControlType type, int uid, HttpRequest httpRequest)
+        public static void WriteUserLogAndSave(this NsDbContext context, UserLogControlType type, int uid,
+            HttpRequest httpRequest)
         {
             context.WriteUserLog(type, uid, new HttpRequestWrapper(httpRequest));
 
@@ -71,12 +75,14 @@ namespace NS_Education.Tools.Extensions
         /// <param name="type">操作類型</param>
         /// <param name="uid">使用者 ID</param>
         /// <param name="httpRequest"></param>
-        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int uid, HttpRequest httpRequest)
+        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int uid,
+            HttpRequest httpRequest)
         {
             await context.WriteUserLogAndSaveAsync(type, uid, new HttpRequestWrapper(httpRequest));
         }
-        
-        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int uid, HttpRequestBase httpRequestBase)
+
+        public static async Task WriteUserLogAndSaveAsync(this NsDbContext context, UserLogControlType type, int uid,
+            HttpRequestBase httpRequestBase)
         {
             context.WriteUserLog(type, uid, httpRequestBase);
 
@@ -139,12 +145,13 @@ namespace NS_Education.Tools.Extensions
         private static void SetIfEntityHasProperty(this DbEntityEntry change, string propertyName, object newValue)
         {
             change.Entity.SetIfHasProperty(propertyName, newValue);
-            
+
             if (change.State != EntityState.Unchanged) return;
             change.State = EntityState.Modified;
         }
 
-        private static void WriteUserLog(NsDbContext context, int uid, DbEntityEntry change, HttpRequestBase httpRequestBase)
+        private static void WriteUserLog(NsDbContext context, int uid, DbEntityEntry change,
+            HttpRequestBase httpRequestBase)
         {
             // 取得此資料的第一個 PK 欄位（通常是流水號）
             int targetId = context.GetPrimaryKeyFromEntityEntry(change);
@@ -173,9 +180,9 @@ namespace NS_Education.Tools.Extensions
 
             // 如果是 DeleteFlag 改成 true, 視為刪除
             object deleteFlagString = change.Entity.GetType().GetProperty(DbConstants.DeleteFlag);
-            if (bool.TryParse(deleteFlagString?.ToString(), out bool deleteFlag) 
-                && change.State.HasFlag(EntityState.Modified) 
-                && change.OriginalValues[DbConstants.DeleteFlag] is false 
+            if (bool.TryParse(deleteFlagString?.ToString(), out bool deleteFlag)
+                && change.State.HasFlag(EntityState.Modified)
+                && change.OriginalValues[DbConstants.DeleteFlag] is false
                 && deleteFlag)
                 controlType = UserLogControlType.Delete;
             return controlType;
@@ -185,9 +192,9 @@ namespace NS_Education.Tools.Extensions
         {
             return context.GetPrimaryKeyFromEntity(entityEntry.Entity);
         }
-        
+
         public static int GetPrimaryKeyFromEntity<TEntity>(this NsDbContext context, TEntity entity)
-        where TEntity : class
+            where TEntity : class
         {
             // 從 Entity 找出 PK 並找出手上物件的該欄位值，如果有任何 null 時，回傳 0
             // 通常如果是 false，表示 context 中還沒有追蹤這個物件（PK = 0），所以回傳 0
@@ -204,7 +211,7 @@ namespace NS_Education.Tools.Extensions
                 .EntityKeyValues?
                 .Select(kv => kv.Value)
                 .FirstOrDefault();
-            
+
             return result is int i ? i : 0;
         }
 
@@ -222,7 +229,8 @@ namespace NS_Education.Tools.Extensions
             });
         }
 
-        private static void WriteUserLog(this NsDbContext context, UserLogControlType controlType, int uid, HttpRequestBase httpRequestBase)
+        private static void WriteUserLog(this NsDbContext context, UserLogControlType controlType, int uid,
+            HttpRequestBase httpRequestBase)
         {
             // 未指定 targetTable 跟 targetId 時的 helper
             context.WriteUserLog(null, 0, controlType, uid, httpRequestBase);
@@ -236,19 +244,38 @@ namespace NS_Education.Tools.Extensions
         /// <returns>Table 名。</returns>
         private static string GetTableName(this NsDbContext context, DbEntityEntry entry)
         {
-            var objectContext = ((IObjectContextAdapter)context).ObjectContext;
+            var metadata = ((IObjectContextAdapter)context).ObjectContext.MetadataWorkspace;
 
-            // Get the type of the entity associated with the entry
-            var entityType = entry.Entity.GetType();
+            // Get the part of the model that contains info about the actual CLR types
+            var objectItemCollection = ((ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace));
 
-            // Get the entity set name from the entity's metadata
-            var entitySet = objectContext.MetadataWorkspace
-                .GetItemCollection(DataSpace.SSpace)
-                .GetItems<EntityContainer>()
-                .SelectMany(c => c.BaseEntitySets.Where(e => e.ElementType.Name == entityType.Name))
+            // Get the entity type from the model that maps to the CLR type
+            var entityType = metadata
+                .GetItems<EntityType>(DataSpace.OSpace)
+                .Single(e => objectItemCollection.GetClrType(e) == entry.Entity.GetType());
+
+            // Get the entity set that uses this entity type
+            var entitySet = metadata
+                .GetItems<EntityContainer>(DataSpace.CSpace)
+                .Single()
+                .EntitySets
+                .Single(s => s.ElementType.Name == entityType.Name);
+
+            // Find the mapping between conceptual and storage model for this entity set
+            var mapping = metadata.GetItems<EntityContainerMapping>(DataSpace.CSSpace)
+                .Single()
+                .EntitySetMappings
+                .Single(s => s.EntitySet == entitySet);
+
+            // Find the storage entity sets (tables) that the entity is mapped
+            var tables = mapping
+                .EntityTypeMappings.Single()
+                .Fragments;
+
+            // Return the table name from the storage entity set
+            return tables
+                .Select(f => (string)f.StoreEntitySet.MetadataProperties["Table"].Value ?? f.StoreEntitySet.Name)
                 .FirstOrDefault();
-
-            return entitySet?.Table ?? "";
         }
 
         /// <summary>
@@ -277,7 +304,7 @@ namespace NS_Education.Tools.Extensions
         {
             await Task.Run(() => context.Set(entity.GetType()).Add(entity));
         }
-        
+
         public static async Task AddRangeAsync<TEntity>(this NsDbContext context, IEnumerable<TEntity> entities)
             where TEntity : class
         {
@@ -286,11 +313,11 @@ namespace NS_Education.Tools.Extensions
                 // 如果已經是 tracking, 跳過
                 if (context.Entry(entity).State != EntityState.Detached)
                     continue;
-                
+
                 await Task.Run(() => context.Set(entity.GetType()).Add(entity));
             }
         }
-        
+
         public static async Task AddAsync<TEntity>(this DbSet<TEntity> dbSet, TEntity entity)
             where TEntity : class
         {

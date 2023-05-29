@@ -681,6 +681,7 @@
     <Compile Include="Variables\ReserveHeadState.cs" />
     <Compile Include="Variables\StaticCodeSafetyControlCode.cs" />
     <Compile Include="Variables\StaticCodeType.cs" />
+    <Compile Include="Variables\TableCommentDictionary.cs"/>
     <Compile Include="Variables\UserLogControlType.cs" />
     <Compile Include="Variables\UserPasswordLogType.cs" />
   </ItemGroup>

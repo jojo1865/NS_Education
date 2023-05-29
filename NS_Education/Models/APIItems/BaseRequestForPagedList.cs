@@ -18,14 +18,14 @@ namespace NS_Education.Models.APIItems
         /// </summary>
         public int CutPage { get; set; }
 
-        private int CutPageOrDefault => CutPage == 0 ? IoConstants.DefaultCutPage : CutPage; 
-        
+        private int CutPageOrDefault => CutPage == 0 ? IoConstants.DefaultCutPage : CutPage;
+
         /// <summary>
         /// 依據目前的 NowPage 和 CutPage，回傳 0-based 的查詢 index。
         /// </summary>
         /// <returns>0-based index</returns>
         public int GetStartIndex()
-            => (Math.Max(0, NowPage - 1)) * CutPageOrDefault;
+            => Math.Max(0, NowPage - 1) * CutPageOrDefault;
 
         /// <summary>
         /// 依據目前的 NowPage 與 CutPage，回傳應取得多少筆資料。<br/>

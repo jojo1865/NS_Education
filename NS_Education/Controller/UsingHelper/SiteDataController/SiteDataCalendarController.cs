@@ -109,6 +109,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public async Task<SiteData_GetListForCalendar_Output_Row_APIItem> GetListPagedEntityToRow(Resver_Site entity)
         {
+            string targetTableName = DC.GetTableName<Resver_Site>();
+
             return await Task.FromResult(new SiteData_GetListForCalendar_Output_Row_APIItem
                 {
                     BSID = entity.BSID,
@@ -122,7 +124,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     CID = entity.Resver_Head?.CID ?? 0,
                     CustomerTitle = entity.Resver_Head?.CustomerTitle ?? "",
                     TargetDate = entity.TargetDate.ToFormattedStringDate(),
-                    Items = entity.Resver_Head?.M_Resver_TimeSpan.Select(rts =>
+                    Items = entity.Resver_Head?.M_Resver_TimeSpan
+                        .Where(rts => rts.TargetTable == targetTableName)
+                        .Where(rts => rts.TargetID == entity.RSID)
+                        .Select(rts =>
                             new SiteData_GetListForCalendar_TimeSpan_APIItem
                             {
                                 DTSID = rts.DTSID,

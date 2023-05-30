@@ -350,7 +350,15 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
+            bool isBusinessUserContactValid = input.Items.StartValidateElements()
+                .Validate(item => item.ContactType == -1 || item.ContactType.IsInBetween(0, 3),
+                    item => AddError(UnsupportedValue($"業務（ID：{item.BUID}）聯絡方式類型")))
+                .Validate(item => item.ContactType == -1 || item.ContactData.HasContent(),
+                    item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容")))
+                .IsValid();
+
+            return await Task.FromResult(isValid && isBusinessUserContactValid);
         }
 
         public async Task<Customer> SubmitCreateData(Customer_Submit_Input_APIItem input)
@@ -394,6 +402,17 @@ namespace NS_Education.Controller.UsingHelper
             await EditContactAndAddIfNew(newData, input.ContactType1, input.ContactData1, 1);
             await EditContactAndAddIfNew(newData, input.ContactType2, input.ContactData2, 2);
 
+            // 寫業務的 M_Contect
+            foreach (M_Customer_BusinessUser cbu in newData.M_Customer_BusinessUser)
+            {
+                Customer_Submit_BUID_APIItem thisInput = input.Items.FirstOrDefault(i => i.BUID == cbu.BUID);
+
+                if (thisInput is null)
+                    continue;
+
+                await EditContactAndAddIfNew(cbu, thisInput.ContactType, thisInput.ContactData, 1);
+            }
+
             // 寫一筆 M_Address
 
             var address = new M_Address();
@@ -405,7 +424,20 @@ namespace NS_Education.Controller.UsingHelper
             return newData;
         }
 
-        private async Task EditContactAndAddIfNew(Customer entity, int contactType, string contactData, int sortNo)
+        private async Task EditContactAndAddIfNew(Customer customer, int contactType, string contactData, int sortNo)
+        {
+            await EditContactAndAddIfNew(DC.GetTableName<Customer>(), customer.CID, contactType, contactData, sortNo);
+        }
+
+        private async Task EditContactAndAddIfNew(M_Customer_BusinessUser customerBusinessUser, int contactType,
+            string contactData, int sortNo)
+        {
+            await EditContactAndAddIfNew(DC.GetTableName<M_Customer_BusinessUser>(), customerBusinessUser.MID,
+                contactType, contactData, sortNo);
+        }
+
+        private async Task EditContactAndAddIfNew(string tableName, int targetId, int contactType, string contactData,
+            int sortNo)
         {
             if (!Enum.GetValues(typeof(ContactType)).Cast<int>().Contains(contactType))
                 return;
@@ -413,21 +445,20 @@ namespace NS_Education.Controller.UsingHelper
             if (contactData.IsNullOrWhiteSpace())
                 return;
 
-            string targetTableName = DC.GetTableName<Customer>();
             M_Contect contact = null;
 
-            if (entity.CID.IsAboveZero())
+            if (targetId.IsAboveZero())
             {
                 contact = DC.M_Contect
-                    .Where(c => c.TargetTable == targetTableName)
-                    .Where(c => c.TargetID == entity.CID)
+                    .Where(c => c.TargetTable == tableName)
+                    .Where(c => c.TargetID == targetId)
                     .FirstOrDefault(c => c.SortNo == sortNo);
             }
 
             contact = contact ?? new M_Contect();
             contact.ContectType = contactType;
-            contact.TargetTable = targetTableName;
-            contact.TargetID = entity.CID;
+            contact.TargetTable = tableName;
+            contact.TargetID = targetId;
             contact.ContectData = contactData;
             contact.SortNo = sortNo;
 
@@ -558,9 +589,19 @@ namespace NS_Education.Controller.UsingHelper
             Task.Run(() => EditContactAndAddIfNew(data, input.ContactType2, input.ContactData2, 2)).GetAwaiter()
                 .GetResult();
 
-            // 更新 M_Address
-            string targetTableName = DC.GetTableName<Customer>();
+            // 寫業務的 M_Contect
+            foreach (M_Customer_BusinessUser cbu in data.M_Customer_BusinessUser)
+            {
+                Customer_Submit_BUID_APIItem thisInput = input.Items.FirstOrDefault(i => i.BUID == cbu.BUID);
 
+                if (thisInput is null)
+                    continue;
+
+                Task.Run(() => EditContactAndAddIfNew(cbu, thisInput.ContactType, thisInput.ContactData, 1))
+                    .GetAwaiter().GetResult();
+            }
+
+            // 更新 M_Address
             M_Address address = Task.Run(() => GetAddresses(data.CID)).Result.FirstOrDefault() ?? new M_Address();
             SetAddressValues(input, data, address);
 

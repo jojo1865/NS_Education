@@ -264,6 +264,7 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit
 
         private const string SubmitBuIdNotFound = "其中一筆或多筆業務 ID 查無資料！";
+        private const string AddressTitle = "客戶地址";
 
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Customer_Submit_Input_APIItem.CID))]
@@ -299,6 +300,12 @@ namespace NS_Education.Controller.UsingHelper
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region),
                     () => AddError(NotFound("區域別 ID")))
                 .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
+                .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID")))
+                .ForceSkipIf(i => i.DZID <= 0)
+                .ValidateAsync(async i => await DC.D_Zip.ValidateIdExists(i.DZID, nameof(D_Zip.DZID)),
+                    () => AddError(NotFound("國籍與郵遞區號 ID")))
+                .StopForceSkipping()
+
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
                 .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
@@ -309,7 +316,7 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<Customer> SubmitCreateData(Customer_Submit_Input_APIItem input)
         {
-            return await Task.FromResult(new Customer
+            Customer newData = new Customer
             {
                 BSCID6 = input.BSCID6,
                 BSCID4 = input.BSCID4,
@@ -333,7 +340,36 @@ namespace NS_Education.Controller.UsingHelper
                         MappingType = GetBusinessUserMappingType(item.BUID), SortNo = index + 1,
                         ActiveFlag = true
                     }).ToList()
-            });
+            };
+
+            // 先寫進 DB, 不然沒有 TargetId 可以用
+
+            await DC.AddAsync(newData);
+            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+
+            // 寫一筆 M_Address
+
+            var address = new M_Address();
+            SetAddressValues(input, newData, address);
+
+            await DC.AddAsync(address);
+            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+
+            return newData;
+        }
+
+        private void SetAddressValues(Customer_Submit_Input_APIItem input, Customer customer, M_Address addressToEdit)
+        {
+            addressToEdit.Title = AddressTitle;
+            addressToEdit.TargetTable = DC.GetTableName<Customer>();
+            addressToEdit.TargetID = customer.CID;
+            addressToEdit.DZID = input.DZID;
+            addressToEdit.ZipCode = DC.D_Zip
+                .Where(z => z.ActiveFlag && !z.DeleteFlag && z.DZID == input.DZID)
+                .Select(z => z.Code)
+                .FirstOrDefault();
+            addressToEdit.Address = input.Address;
+            addressToEdit.SortNo = 1;
         }
 
         private int GetBusinessUserMappingType(int buId)
@@ -360,6 +396,12 @@ namespace NS_Education.Controller.UsingHelper
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region),
                     () => AddError(NotFound("區域別 ID")))
                 .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
+                .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID")))
+                .ForceSkipIf(i => i.DZID <= 0)
+                .ValidateAsync(async i => await DC.D_Zip.ValidateIdExists(i.DZID, nameof(D_Zip.DZID)),
+                    () => AddError(NotFound("國籍與郵遞區號 ID")))
+                .StopForceSkipping()
+
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
                 .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
@@ -376,8 +418,17 @@ namespace NS_Education.Controller.UsingHelper
         public void SubmitEditUpdateDataFields(Customer data, Customer_Submit_Input_APIItem input)
         {
             // 先刪除所有舊有的 M_Customer_BusinessUser
-            DC.M_Customer_BusinessUser.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu =>
-                cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.CID));
+            var allInputBuIds = input.Items.ToDictionary(item => item.BUID, item => item);
+            var allAlreadyExistingCustomerBusinessUser = data.M_Customer_BusinessUser
+                .Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag)
+                .Where(cbu => allInputBuIds.ContainsKey(cbu.BUID))
+                .ToArray();
+
+            DC.M_Customer_BusinessUser.RemoveRange(
+                data.M_Customer_BusinessUser.Except(allAlreadyExistingCustomerBusinessUser));
+
+            var inputBuIdsToCreate =
+                allInputBuIds.Keys.Except(allAlreadyExistingCustomerBusinessUser.Select(item => item.BUID));
 
             // 更新資料
             data.BSCID6 = input.BSCID6;
@@ -395,14 +446,24 @@ namespace NS_Education.Controller.UsingHelper
             data.BillFlag = input.BillFlag;
             data.InFlag = input.InFlag;
             data.PotentialFlag = input.PotentialFlag;
-            data.M_Customer_BusinessUser = input.Items.Select(
-                (item, index) => new M_Customer_BusinessUser
+            data.M_Customer_BusinessUser = data.M_Customer_BusinessUser.Concat(inputBuIdsToCreate.Select(
+                (id, index) => new M_Customer_BusinessUser
                 {
-                    BUID = item.BUID,
-                    MappingType = GetBusinessUserMappingType(item.BUID),
+                    CID = data.CID,
+                    BUID = id,
+                    MappingType = GetBusinessUserMappingType(id),
                     SortNo = index + 1,
                     ActiveFlag = true
-                }).ToList();
+                })).ToList();
+
+            // 更新 M_Address
+            string targetTableName = DC.GetTableName<Customer>();
+
+            M_Address address = Task.Run(() => GetAddresses(data.CID)).Result.FirstOrDefault() ?? new M_Address();
+            SetAddressValues(input, data, address);
+
+            if (!address.MID.IsAboveZero())
+                DC.M_Address.Add(address);
         }
 
         #endregion

@@ -11,6 +11,8 @@ namespace NS_Education.Models.APIItems.Controller.Customer.Submit
         public string Compilation { get; set; }
         public string TitleC { get; set; }
         public string TitleE { get; set; }
+        public int DZID { get; set; } = 0;
+        public string Address { get; set; }
         public string Email { get; set; }
         public string InvoiceTitle { get; set; }
         public string ContactName { get; set; }

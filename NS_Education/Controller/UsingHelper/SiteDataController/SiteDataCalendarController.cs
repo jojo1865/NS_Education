@@ -59,12 +59,18 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.RHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之預約單 ID")))
                 .SkipIfAlreadyInvalid()
+                .ForceSkipIf(i => i.BSID <= 0)
                 .ValidateAsync(async i => await DC.B_SiteData.ValidateIdExists(i.BSID, nameof(B_SiteData.BSID)),
                     () => AddError(NotFound("欲篩選之場地 ID")))
+                .StopForceSkipping()
+                .ForceSkipIf(i => i.CID <= 0)
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     () => AddError(NotFound("欲篩選之客戶 ID")))
+                .StopForceSkipping()
+                .ForceSkipIf(i => i.RHID <= 0)
                 .ValidateAsync(async i => await DC.Resver_Head.ValidateIdExists(i.RHID, nameof(Resver_Head.RHID)),
                     () => AddError(NotFound("欲篩選之預約單 ID")))
+                .StopForceSkipping()
                 .IsValid();
 
             return await Task.FromResult(isValid);

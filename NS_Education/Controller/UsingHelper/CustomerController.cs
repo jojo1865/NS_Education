@@ -27,6 +27,22 @@ namespace NS_Education.Controller.UsingHelper
         IDeleteItem<Customer>,
         ISubmit<Customer, Customer_Submit_Input_APIItem>
     {
+        #region 通用
+
+        public async Task<IEnumerable<M_Address>> GetAddresses(int customerId)
+        {
+            string targetTableName = DC.GetTableName<Customer>();
+
+            M_Address[] addresses = await DC.M_Address
+                .Where(a => a.TargetTable == targetTableName)
+                .Where(a => a.TargetID == customerId)
+                .ToArrayAsync();
+
+            return addresses;
+        }
+
+        #endregion
+
         #region Initialization
 
         private readonly IGetListPagedHelper<Customer_GetList_Input_APIItem> _getListPagedHelper;
@@ -104,7 +120,8 @@ namespace NS_Education.Controller.UsingHelper
             // ResverType 為 1 時，只找有預約過的客戶
             if (input.ResverType.IsInBetween(0, 1))
                 query = query.Where(c =>
-                    c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft) == (input.ResverType == 1));
+                    c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft) ==
+                    (input.ResverType == 1));
 
             return query.OrderBy(c => c.CID);
         }
@@ -131,7 +148,8 @@ namespace NS_Education.Controller.UsingHelper
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
+                ResverCt = entity.Resver_Head.Count(rh =>
+                    !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
@@ -160,6 +178,8 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<Customer_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(Customer entity)
         {
+            M_Address address = (await GetAddresses(entity.CID)).FirstOrDefault();
+
             return await Task.FromResult(new Customer_GetInfoById_Output_APIItem
             {
                 CID = entity.CID,
@@ -175,6 +195,8 @@ namespace NS_Education.Controller.UsingHelper
                 Compilation = entity.Compilation ?? "",
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",
+                DZID = address?.DZID ?? 0,
+                Address = address?.Address ?? "",
                 Email = entity.Email ?? "",
                 InvoiceTitle = entity.InvoiceTitle ?? "",
                 ContactName = entity.ContectName ?? "",
@@ -184,7 +206,8 @@ namespace NS_Education.Controller.UsingHelper
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
+                ResverCt = entity.Resver_Head.Count(rh =>
+                    !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
@@ -195,7 +218,8 @@ namespace NS_Education.Controller.UsingHelper
         private static List<Customer_GetList_BusinessUser_APIItem> GetBusinessUserListFromEntity(Customer entity)
         {
             return entity.M_Customer_BusinessUser
-                .Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.BusinessUser.ActiveFlag && !cbu.BusinessUser.DeleteFlag)
+                .Where(cbu =>
+                    cbu.ActiveFlag && !cbu.DeleteFlag && cbu.BusinessUser.ActiveFlag && !cbu.BusinessUser.DeleteFlag)
                 .Select(cbu => new Customer_GetList_BusinessUser_APIItem
                 {
                     BUID = cbu.BUID,
@@ -268,8 +292,12 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry), () => AddError(NotFound("行業別 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region), () => AddError(NotFound("區域別 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry),
+                    () => AddError(NotFound("行業別 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region),
+                    () => AddError(NotFound("區域別 ID")))
                 .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
@@ -325,8 +353,12 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry), () => AddError(NotFound("行業別 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region), () => AddError(NotFound("區域別 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry),
+                    () => AddError(NotFound("行業別 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region),
+                    () => AddError(NotFound("區域別 ID")))
                 .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
@@ -344,7 +376,8 @@ namespace NS_Education.Controller.UsingHelper
         public void SubmitEditUpdateDataFields(Customer data, Customer_Submit_Input_APIItem input)
         {
             // 先刪除所有舊有的 M_Customer_BusinessUser
-            DC.M_Customer_BusinessUser.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.CID));
+            DC.M_Customer_BusinessUser.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu =>
+                cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.CID));
 
             // 更新資料
             data.BSCID6 = input.BSCID6;
@@ -366,7 +399,7 @@ namespace NS_Education.Controller.UsingHelper
                 (item, index) => new M_Customer_BusinessUser
                 {
                     BUID = item.BUID,
-                    MappingType = GetBusinessUserMappingType(item.BUID), 
+                    MappingType = GetBusinessUserMappingType(item.BUID),
                     SortNo = index + 1,
                     ActiveFlag = true
                 }).ToList();

@@ -6,23 +6,25 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetInfoById
     public class Customer_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int CID { get; set; }
-        
+
         public int BSCID6 { get; set; }
         public string BSC6_Title { get; set; }
 
         public ICollection<BaseResponseRowForSelectable> BSC6_List { get; set; } =
             new List<BaseResponseRowForSelectable>();
-        
+
         public int BSCID4 { get; set; }
         public string BSC4_Title { get; set; }
-        
+
         public ICollection<BaseResponseRowForSelectable> BSC4_List { get; set; } =
             new List<BaseResponseRowForSelectable>();
-        
+
         public string Code { get; set; }
         public string Compilation { get; set; }
         public string TitleC { get; set; }
         public string TitleE { get; set; }
+        public int DZID { get; set; }
+        public string Address { get; set; }
         public string Email { get; set; }
         public string InvoiceTitle { get; set; }
         public string ContactName { get; set; }

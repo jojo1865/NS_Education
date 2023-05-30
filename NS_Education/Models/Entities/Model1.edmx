@@ -425,6 +425,19 @@
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="M_Address">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="60" />
+          <Property Name="TargetTable" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="TargetID" Type="int" Nullable="false" />
+          <Property Name="ZID" Type="int" Nullable="false" />
+          <Property Name="ZipCode" Type="varchar" MaxLength="10" />
+          <Property Name="Address" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="SortNo" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="M_Contect">
           <Key>
             <PropertyRef Name="MID" />
@@ -1713,6 +1726,7 @@
           <EntitySet Name="D_TimeSpan" EntityType="Self.D_TimeSpan" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="D_Zip" EntityType="Self.D_Zip" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="M_Address" EntityType="Self.M_Address" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Contect" EntityType="Self.M_Contect" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Customer_BusinessUser" EntityType="Self.M_Customer_BusinessUser" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Customer_Category" EntityType="Self.M_Customer_Category" Schema="dbo" store:Type="Tables" />
@@ -2546,6 +2560,19 @@
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="M_Group_Menu" Relationship="Self.FK_M_Group_Menu_GroupData" FromRole="GroupData" ToRole="M_Group_Menu" />
           <NavigationProperty Name="M_Group_User" Relationship="Self.FK_M_Group_User_GroupData" FromRole="GroupData" ToRole="M_Group_User" />
+        </EntityType>
+        <EntityType Name="M_Address">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Title" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
+          <Property Name="TargetTable" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TargetID" Type="Int32" Nullable="false" />
+          <Property Name="ZID" Type="Int32" Nullable="false" />
+          <Property Name="ZipCode" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Address" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="SortNo" Type="Int32" Nullable="false" />
         </EntityType>
         <EntityType Name="M_Contect">
           <Key>
@@ -3892,6 +3919,7 @@
           <EntitySet Name="D_TimeSpan" EntityType="Self.D_TimeSpan" />
           <EntitySet Name="D_Zip" EntityType="Self.D_Zip" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" />
+          <EntitySet Name="M_Address" EntityType="Self.M_Address" />
           <EntitySet Name="M_Contect" EntityType="Self.M_Contect" />
           <EntitySet Name="M_Customer_BusinessUser" EntityType="Self.M_Customer_BusinessUser" />
           <EntitySet Name="M_Customer_Category" EntityType="Self.M_Customer_Category" />
@@ -4654,6 +4682,20 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="M_Address">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Address">
+              <MappingFragment StoreEntitySet="M_Address">
+                <ScalarProperty Name="MID" ColumnName="MID" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="TargetTable" ColumnName="TargetTable" />
+                <ScalarProperty Name="TargetID" ColumnName="TargetID" />
+                <ScalarProperty Name="ZID" ColumnName="ZID" />
+                <ScalarProperty Name="ZipCode" ColumnName="ZipCode" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="SortNo" ColumnName="SortNo" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

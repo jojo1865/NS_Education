@@ -46,6 +46,7 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<D_TimeSpan> D_TimeSpan { get; set; }
         public virtual DbSet<D_Zip> D_Zip { get; set; }
         public virtual DbSet<GroupData> GroupData { get; set; }
+        public virtual DbSet<M_Address> M_Address { get; set; }
         public virtual DbSet<M_Contect> M_Contect { get; set; }
         public virtual DbSet<M_Customer_BusinessUser> M_Customer_BusinessUser { get; set; }
         public virtual DbSet<M_Customer_Category> M_Customer_Category { get; set; }

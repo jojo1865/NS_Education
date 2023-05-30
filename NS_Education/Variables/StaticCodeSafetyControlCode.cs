@@ -8,7 +8,7 @@ namespace NS_Education.Variables
         PasswordExpireDays = 4,
         SuspendIfLoginFailTooMuch = 5,
         WarnChangePasswordInDays = 6,
-        IdlSecondsBeforeScreenSaver = 7,
+        IdleSecondsBeforeScreenSaver = 7,
         EnforceOneSessionPerUser = 8,
         NewSessionTerminatesOld = 9,
         PersistSecurityControlErrors = 10,

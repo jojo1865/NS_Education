@@ -273,6 +273,7 @@
     <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs2Controller.cs" />
     <Compile Include="Controller\UsingHelper\ResverController\ResverController.cs" />
     <Compile Include="Controller\UsingHelper\ResverController\ResverSiteController.cs" />
+    <Compile Include="Controller\UsingHelper\SafetyControlController.cs"/>
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs" />
     <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs" />
     <Compile Include="Controller\UsingHelper\StaticCodeController\StaticCodeController.cs" />
@@ -424,6 +425,7 @@
     <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_SiteItem_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_ThrowItem_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_TimeSpanItem_Input_APIItem.cs" />
+      <Compile Include="Models\APIItems\Controller\SafetyControl\GetList\SafetyControl_GetList_Output_APIItem.cs"/>
     <Compile Include="Models\APIItems\Controller\SiteData\GetInfoById\SiteData_GetInfoById_Output_APIItem.cs" />
     <Compile Include="Models\APIItems\Controller\SiteData\GetInfoById\SiteData_GetInfoById_Output_GroupList_Row_APIItem.cs" />
     <Compile Include="Models\APIItems\Controller\SiteData\GetListForCalendar\SiteData_GetListForCalendar_Input_APIItem.cs" />
@@ -431,16 +433,16 @@
     <Compile Include="Models\APIItems\Controller\SiteData\GetListForCalendar\SiteData_GetListForCalendar_TimeSpan_APIItem.cs" />
     <Compile Include="Models\APIItems\Controller\SiteData\GetList\SiteData_GetList_Input_APIItem.cs" />
     <Compile Include="Models\APIItems\Controller\SiteData\GetList\SiteData_GetList_Output_Row_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_GroupList_Row_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetInfoById\StaticCode_GetInfoById_Output_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetList\StaticCode_GetList_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetList\StaticCode_GetList_Output_Row_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetTypeList\StaticCode_GetTypeList_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetTypeList\StaticCode_GetTypeList_Output_Row_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\StaticCode\Submit\StaticCode_Submit_Input_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\TimeSpan\D_TimeSpan_APIItem.cs" />
-    <Compile Include="Models\APIItems\Controller\TimeSpan\GetInfoById\TimeSpan_GetInfoById_Output_APIItem.cs" />
+      <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_GroupList_Row_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\StaticCode\GetInfoById\StaticCode_GetInfoById_Output_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\StaticCode\GetList\StaticCode_GetList_Input_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\StaticCode\GetList\StaticCode_GetList_Output_Row_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\StaticCode\GetTypeList\StaticCode_GetTypeList_Input_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\StaticCode\GetTypeList\StaticCode_GetTypeList_Output_Row_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\StaticCode\Submit\StaticCode_Submit_Input_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\TimeSpan\D_TimeSpan_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\TimeSpan\GetInfoById\TimeSpan_GetInfoById_Output_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\TimeSpan\GetList\TimeSpan_GetList_Input_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\TimeSpan\GetList\TimeSpan_GetList_Output_Row_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\TimeSpan\Submit\TimeSpan_Submit_Input_APIItem.cs"/>
@@ -774,7 +776,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\APIItems\Controller" />
     <Folder Include="Views\Category\" />
     <Folder Include="Views\GetInfo\" />
     <Folder Include="Views\Hall\" />

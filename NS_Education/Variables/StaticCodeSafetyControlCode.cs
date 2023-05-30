@@ -6,6 +6,13 @@ namespace NS_Education.Variables
         PasswordChangeDailyLimit = 2,
         PasswordNoReuseCount = 3,
         PasswordExpireDays = 4,
-        IsEnforcingOneSessionPerUser = 8
+        SuspendIfLoginFailTooMuch = 5,
+        WarnChangePasswordInDays = 6,
+        IdlSecondsBeforeScreenSaver = 7,
+        EnforceOneSessionPerUser = 8,
+        NewSessionTerminatesOld = 9,
+        PersistSecurityControlErrors = 10,
+        UserLogKeepDays = 11,
+        LoginFailLimit = 12
     }
 }

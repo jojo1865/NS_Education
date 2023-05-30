@@ -182,7 +182,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         {
             // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
             bool isEnabled =
-                GetSafetyConfigValue(safetyConfig, StaticCodeSafetyControlCode.IsEnforcingOneSessionPerUser) == 1;
+                GetSafetyConfigValue(safetyConfig, StaticCodeSafetyControlCode.EnforceOneSessionPerUser) == 1;
 
             if (!isEnabled)
                 return;

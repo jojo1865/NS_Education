@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -312,6 +313,14 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("區域別 ID")))
                 .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
                 .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID")))
+                .ForceSkipIf(i => i.ContactType1 == -1)
+                .Validate(i => i.ContactType1.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 1 的類型")))
+                .Validate(i => i.ContactData1.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式 1 的內容")))
+                .StopForceSkipping()
+                .ForceSkipIf(i => i.ContactType2 == -1)
+                .Validate(i => i.ContactType2.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 2 的類型")))
+                .Validate(i => i.ContactData2.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式 2 的內容")))
+                .StopForceSkipping()
                 .ForceSkipIf(i => i.DZID <= 0)
                 .ValidateAsync(async i => await DC.D_Zip.ValidateIdExists(i.DZID, nameof(D_Zip.DZID)),
                     () => AddError(NotFound("國籍與郵遞區號 ID")))
@@ -338,7 +347,11 @@ namespace NS_Education.Controller.UsingHelper
                 Email = input.Email,
                 InvoiceTitle = input.InvoiceTitle,
                 ContectName = input.ContactName,
-                ContectPhone = input.ContactPhone,
+                ContectPhone = input.ContactType1 == (int)ContactType.Phone
+                    ? input.ContactData1
+                    : input.ContactType2 == (int)ContactType.Phone
+                        ? input.ContactData2
+                        : null,
                 Website = input.Website,
                 Note = input.Note,
                 BillFlag = input.BillFlag,
@@ -358,6 +371,10 @@ namespace NS_Education.Controller.UsingHelper
             await DC.AddAsync(newData);
             await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
+            // 寫 M_Contect
+            await EditContactAndAddIfNew(newData, input.ContactType1, input.ContactData1, 1);
+            await EditContactAndAddIfNew(newData, input.ContactType2, input.ContactData2, 2);
+
             // 寫一筆 M_Address
 
             var address = new M_Address();
@@ -367,6 +384,36 @@ namespace NS_Education.Controller.UsingHelper
             await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
             return newData;
+        }
+
+        private async Task EditContactAndAddIfNew(Customer entity, int contactType, string contactData, int sortNo)
+        {
+            if (!Enum.GetValues(typeof(ContactType)).Cast<int>().Contains(contactType))
+                return;
+
+            if (contactData.IsNullOrWhiteSpace())
+                return;
+
+            string targetTableName = DC.GetTableName<Customer>();
+            M_Contect contact = null;
+
+            if (entity.CID.IsAboveZero())
+            {
+                contact = DC.M_Contect
+                    .Where(c => c.TargetTable == targetTableName)
+                    .Where(c => c.TargetID == entity.CID)
+                    .FirstOrDefault(c => c.SortNo == sortNo);
+            }
+
+            contact = contact ?? new M_Contect();
+            contact.ContectType = contactType;
+            contact.TargetTable = targetTableName;
+            contact.TargetID = entity.CID;
+            contact.ContectData = contactData;
+            contact.SortNo = sortNo;
+
+            if (contact.MID == 0)
+                await DC.M_Contect.AddAsync(contact);
         }
 
         private void SetAddressValues(Customer_Submit_Input_APIItem input, Customer customer, M_Address addressToEdit)
@@ -415,6 +462,14 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("區域別 ID")))
                 .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
                 .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID")))
+                .ForceSkipIf(i => i.ContactType1 == -1)
+                .Validate(i => i.ContactType1.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 1 的類型")))
+                .Validate(i => i.ContactData1.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式 1 的內容")))
+                .StopForceSkipping()
+                .ForceSkipIf(i => i.ContactType2 == -1)
+                .Validate(i => i.ContactType2.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 2 的類型")))
+                .Validate(i => i.ContactData2.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式 2 的內容")))
+                .StopForceSkipping()
                 .ForceSkipIf(i => i.DZID <= 0)
                 .ValidateAsync(async i => await DC.D_Zip.ValidateIdExists(i.DZID, nameof(D_Zip.DZID)),
                     () => AddError(NotFound("國籍與郵遞區號 ID")))
@@ -458,7 +513,11 @@ namespace NS_Education.Controller.UsingHelper
             data.Email = input.Email ?? data.Email;
             data.InvoiceTitle = input.InvoiceTitle ?? data.InvoiceTitle;
             data.ContectName = input.ContactName ?? data.ContectName;
-            data.ContectPhone = input.ContactPhone ?? data.ContectPhone;
+            data.ContectPhone = input.ContactType1 == (int)ContactType.Phone
+                ? input.ContactData1
+                : input.ContactType2 == (int)ContactType.Phone
+                    ? input.ContactData2
+                    : data.ContectPhone;
             data.Website = input.Website ?? data.Website;
             data.Note = input.Note ?? data.Note;
             data.BillFlag = input.BillFlag;
@@ -473,6 +532,12 @@ namespace NS_Education.Controller.UsingHelper
                     SortNo = index + 1,
                     ActiveFlag = true
                 })).ToList();
+
+            // 寫 M_Contect
+            Task.Run(() => EditContactAndAddIfNew(data, input.ContactType1, input.ContactData1, 1)).GetAwaiter()
+                .GetResult();
+            Task.Run(() => EditContactAndAddIfNew(data, input.ContactType2, input.ContactData2, 2)).GetAwaiter()
+                .GetResult();
 
             // 更新 M_Address
             string targetTableName = DC.GetTableName<Customer>();

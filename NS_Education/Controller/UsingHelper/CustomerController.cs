@@ -228,16 +228,34 @@ namespace NS_Education.Controller.UsingHelper
             });
         }
 
-        private static List<Customer_GetList_BusinessUser_APIItem> GetBusinessUserListFromEntity(Customer entity)
+        private List<Customer_GetList_BusinessUser_APIItem> GetBusinessUserListFromEntity(Customer entity)
         {
-            return entity.M_Customer_BusinessUser
-                .Where(cbu =>
-                    cbu.ActiveFlag && !cbu.DeleteFlag && cbu.BusinessUser.ActiveFlag && !cbu.BusinessUser.DeleteFlag)
-                .Select(cbu => new Customer_GetList_BusinessUser_APIItem
+            List<Customer_GetList_BusinessUser_APIItem> result = new List<Customer_GetList_BusinessUser_APIItem>();
+
+            foreach (M_Customer_BusinessUser cbu in entity.M_Customer_BusinessUser
+                         .Where(cbu =>
+                             cbu.ActiveFlag && !cbu.DeleteFlag && cbu.BusinessUser.ActiveFlag &&
+                             !cbu.BusinessUser.DeleteFlag))
+            {
+                // 取得 M_Contact, 否則用預設的聯絡方式
+                string targetTableName = DC.GetTableName<M_Customer_BusinessUser>();
+                M_Contect contact = DC.M_Contect
+                    .Where(c => c.TargetTable == targetTableName)
+                    .FirstOrDefault(c => c.TargetID == entity.CID);
+
+                Customer_GetList_BusinessUser_APIItem newItem = new Customer_GetList_BusinessUser_APIItem
                 {
                     BUID = cbu.BUID,
-                    Name = cbu.BusinessUser?.Name ?? ""
-                }).ToList();
+                    Name = cbu.BusinessUser?.Name ?? "",
+                    ContactType = contact?.ContectType ?? (int)ContactType.Phone,
+                    // ContectData 是 string, 有可能有 contact 但 contactData 卻是 null, 所以這裡不能用 elvis
+                    ContactData = contact != null ? contact.ContectData : cbu.BusinessUser?.Phone ?? ""
+                };
+
+                result.Add(newItem);
+            }
+
+            return result;
         }
 
         #endregion

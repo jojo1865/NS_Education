@@ -224,8 +224,11 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 ;
 
             var result = userLogs
-                .Concat(userPasswordLogs)
-                .Where(i => i.EventType.Contains(input.Keyword) || i.Description.Contains(input.Keyword));
+                .Concat(userPasswordLogs);
+
+            if (input.Keyword.HasContent())
+                result = result.Where(i =>
+                    i.EventType.Contains(input.Keyword) || i.Description.Contains(input.Keyword));
 
             // 由新到舊
             return result.OrderByDescending(i => i.CreDate);

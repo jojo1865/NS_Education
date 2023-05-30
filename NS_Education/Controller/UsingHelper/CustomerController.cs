@@ -180,6 +180,14 @@ namespace NS_Education.Controller.UsingHelper
         {
             M_Address address = (await GetAddresses(entity.CID)).FirstOrDefault();
 
+            string tableName = DC.GetTableName<Customer>();
+            M_Contect[] contacts = await DC.M_Contect
+                .Where(c => c.TargetTable == tableName)
+                .Where(c => c.TargetID == entity.CID)
+                .ToArrayAsync();
+
+            // M_Contect 有可能會有 0, 1, 2 筆或以上, 最多只處理兩筆
+
             return await Task.FromResult(new Customer_GetInfoById_Output_APIItem
             {
                 CID = entity.CID,
@@ -200,7 +208,10 @@ namespace NS_Education.Controller.UsingHelper
                 Email = entity.Email ?? "",
                 InvoiceTitle = entity.InvoiceTitle ?? "",
                 ContactName = entity.ContectName ?? "",
-                ContactPhone = entity.ContectPhone ?? "",
+                ContactType1 = contacts.Length > 0 ? contacts[0].ContectType : -1,
+                ContactData1 = contacts.Length > 0 ? contacts[0].ContectData ?? "" : "",
+                ContactType2 = contacts.Length > 1 ? contacts[1].ContectType : -1,
+                ContactData2 = contacts.Length > 1 ? contacts[1].ContectData ?? "" : "",
                 Website = entity.Website ?? "",
                 Note = entity.Note ?? "",
                 BillFlag = entity.BillFlag,

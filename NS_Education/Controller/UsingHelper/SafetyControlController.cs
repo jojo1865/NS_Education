@@ -27,6 +27,8 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
         public async Task<string> Submit(SafetyControl_Submit_Input_APIItem input)
         {
+            // 這個 API 需要一次更新所有安全控管設定，因此不使用 Helper
+
             // 1. 驗證輸入
             input.StartValidate()
                 .Validate(i => i.PasswordMinLength.IsAboveZero(),

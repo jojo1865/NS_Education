@@ -83,6 +83,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Include(rs => rs.Resver_Head.M_Resver_TimeSpan)
                 .Include(rs => rs.Resver_Head.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
                 .Include(rs => rs.B_SiteData)
+                .Include(rs => rs.B_SiteData.M_SiteGroup)
+                .Include(rs => rs.B_SiteData.M_SiteGroup1)
+                .Include(rs => rs.B_SiteData.M_SiteGroup.Select(sg => sg.B_SiteData1))
+                .Include(rs => rs.B_SiteData.M_SiteGroup1.Select(sg => sg.B_SiteData))
                 .AsQueryable();
 
             // 年份和月份
@@ -94,8 +98,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 query = query.Where(rs => rs.RHID == input.RHID);
 
             // 場地 ID
+            // 包含父場地與子場地
             if (input.BSID.IsAboveZero())
-                query = query.Where(rs => rs.BSID == input.BSID);
+                query = query.Where(rs => rs.BSID == input.BSID
+                                          || rs.B_SiteData.M_SiteGroup.Any(sg => sg.B_SiteData1.BSID == input.BSID)
+                                          || rs.B_SiteData.M_SiteGroup1.Any(sg => sg.B_SiteData.BSID == input.BSID));
 
             // 客戶 ID
             if (input.CID.IsAboveZero())

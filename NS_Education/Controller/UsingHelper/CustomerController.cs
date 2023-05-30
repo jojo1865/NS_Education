@@ -363,7 +363,11 @@ namespace NS_Education.Controller.UsingHelper
             addressToEdit.Title = AddressTitle;
             addressToEdit.TargetTable = DC.GetTableName<Customer>();
             addressToEdit.TargetID = customer.CID;
-            addressToEdit.DZID = input.DZID;
+
+            // 只在有給值時帶入，否則存為 null
+            if (input.DZID.IsAboveZero())
+                addressToEdit.DZID = input.DZID;
+
             addressToEdit.ZipCode = DC.D_Zip
                 .Where(z => z.ActiveFlag && !z.DeleteFlag && z.DZID == input.DZID)
                 .Select(z => z.Code)

@@ -259,11 +259,10 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             if (!await DeleteItemValidateInputIfCodeTypeZero(input))
                 return GetResponseJson();
 
-            // 驗證安全控管類僅管理員可以做
-            if (!FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin) &&
-                await DeleteItemInputHasSafetyControl(input))
+            // 不允許刪除安全控管設定
+            if (await DeleteItemInputHasSafetyControl(input))
             {
-                AddError(NoPrivilege());
+                AddError(UnsupportedValue("資料 ID"));
                 return GetResponseJson();
             }
 
@@ -355,12 +354,10 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                     , () => AddError(NotFound("參數所屬類別")))
                 .StopForceSkipping()
 
-                // 若 CodeType 為 14 時：
-                // +- a. 只有管理員才允許
-                .ForceSkipIf(i => i.CodeType != (int)StaticCodeType.SafetyControl)
-                .Validate(i => FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin),
-                    () => AddError(NoPrivilege()))
-                .StopForceSkipping()
+                // 若 CodeType 為 14（安全控管）時，不允許處理
+                // 使用者應該改用安全控管專用的 Submit API
+                .Validate(i => i.CodeType != (int)StaticCodeType.SafetyControl,
+                    () => AddError(UnsupportedValue("參數所屬類別")))
                 // 若 CodeType 為 0 時：
                 // |- a. 檢查 Code 必須皆為數字
                 // +- b. 同 CodeType 下不允許重複 Code 的資料
@@ -416,12 +413,10 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                     , () => AddError(NotFound("參數所屬類別")))
                 .StopForceSkipping()
 
-                // 若 CodeType 為安全控管時：
-                // +- a. 只有管理員才允許
-                .ForceSkipIf(i => i.CodeType != (int)StaticCodeType.SafetyControl)
-                .Validate(i => FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin),
-                    () => AddError(NoPrivilege()))
-                .StopForceSkipping()
+                // 若 CodeType 為 14（安全控管）時，不允許處理
+                // 使用者應該改用安全控管專用的 Submit API
+                .Validate(i => i.CodeType != (int)StaticCodeType.SafetyControl,
+                    () => AddError(UnsupportedValue("參數所屬類別")))
                 // 若 CodeType 為 0 時：
                 // |- a. 檢查 Code 必須皆為數字
                 // +- b. 同 CodeType 下不允許重複 Code 的資料

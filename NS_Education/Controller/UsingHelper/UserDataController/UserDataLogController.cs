@@ -161,26 +161,31 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             DateTime threeMonthsAgo = DateTime.Now.AddMonths(-3);
 
+            // 有以下幾種情況：
+            // |- a. UserLogType 不合法，UserPasswordLogType 不合法：不篩選，全查
+            // |- b. UserLogType 合法，UserPasswordLogType 不合法：只查 UserLog 並套用篩選
+            // |- c. UserLogType 不合法，UserPasswordLogType 合法：只查 UserPasswordLog 並套用篩選
+            // +- d. UserLogType 合法，UserPasswordLogType 合法：兩個都查並套用篩選
+
             var userLogQuery = DC.UserLog
                 .Include(ul => ul.UserData)
                 .Where(ul => ul.CreDate >= threeMonthsAgo);
 
-            // 只在另外一個輸入不是合法範圍，而本身屬於合法輸入範圍時，才套用查詢
-            // 若兩者都不合法，全查
-            // 否則，完全不查
+            bool isUserLogTypeValid = input.UserLogType.IsInBetween(0, 3);
+            bool isUserPasswordLogTypeValid = input.UserPasswordLogType.IsInBetween(0, 2);
 
-            if (input.UserLogType.IsInBetween(0, 3))
+            if (isUserLogTypeValid)
                 userLogQuery = userLogQuery.Where(ul => ul.ControlType == input.UserLogType);
-            else if (input.UserPasswordLogType.IsInBetween(0, 2))
+            else if (isUserPasswordLogTypeValid)
                 userLogQuery = userLogQuery.Take(0);
 
             var userPasswordLogQuery = DC.UserPasswordLog
                 .Include(upl => upl.UserData)
                 .Where(upl => upl.CreDate >= threeMonthsAgo);
 
-            if (input.UserPasswordLogType.IsInBetween(0, 2))
+            if (isUserPasswordLogTypeValid)
                 userPasswordLogQuery = userPasswordLogQuery.Where(upl => upl.Type == input.UserPasswordLogType);
-            else if (input.UserLogType.IsInBetween(0, 3))
+            else if (isUserLogTypeValid)
                 userPasswordLogQuery = userPasswordLogQuery.Take(0);
 
             var userLogs = (await userLogQuery

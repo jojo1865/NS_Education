@@ -432,13 +432,19 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public void SubmitEditUpdateDataFields(B_SiteData data, SiteData_Submit_Input_APIItem input)
         {
-            // 1. 將所有舊資料設為刪除狀態
-            // TODO: 找出有效率方法，只處理真的需要新增或刪除的資料
-            foreach (var oldData in data.M_SiteGroup)
-            {
-                oldData.ActiveFlag = false;
-                oldData.DeleteFlag = true;
-            }
+            // 1. 將所有舊資料刪除
+
+            // 先找出已存在關係資料的 BSID
+            var inputBySiteIds = input.GroupList.ToDictionary(item => item.BSID, item => item);
+            var alreadyExistingInputs = data.M_SiteGroup
+                .Where(sg => inputBySiteIds.ContainsKey(sg.GroupID))
+                .ToArray();
+
+            // 刪除所有 alreadyExistingInputs 以外的資料 - 這些舊資料沒有出現在新輸入中，表示要刪除
+            DC.M_SiteGroup.RemoveRange(data.M_SiteGroup.Except(alreadyExistingInputs));
+
+            var alreadyExistingInputsIds = alreadyExistingInputs.Select(aei => aei.GroupID);
+            var newInputs = input.GroupList.Where(item => !alreadyExistingInputsIds.Contains(item.BSID));
 
             // 3. 修改資料
             data.BCID = input.BCID;
@@ -458,7 +464,22 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.PhoneExt2 = input.PhoneExt2;
             data.PhoneExt3 = input.PhoneExt3;
             data.Note = input.Note;
-            data.M_SiteGroup = data.M_SiteGroup.Concat(input.GroupList
+
+            // 把舊資料改好
+            foreach (M_SiteGroup siteGroup in data.M_SiteGroup)
+            {
+                if (!inputBySiteIds.ContainsKey(siteGroup.GroupID))
+                    continue;
+
+                SiteData_Submit_Input_GroupList_Row_APIItem item = inputBySiteIds[siteGroup.GroupID];
+
+                siteGroup.SortNo = item.SortNo;
+                siteGroup.ActiveFlag = true;
+                siteGroup.DeleteFlag = false;
+            }
+
+            // 加入新資料
+            data.M_SiteGroup = data.M_SiteGroup.Concat(newInputs
                     .Select(item => new M_SiteGroup
                     {
                         GroupID = item.BSID,

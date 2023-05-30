@@ -182,10 +182,11 @@ namespace NS_Education.Controller.UsingHelper
             M_Address address = (await GetAddresses(entity.CID)).FirstOrDefault();
 
             string tableName = DC.GetTableName<Customer>();
-            M_Contect[] contacts = await DC.M_Contect
+            var contacts = DC.M_Contect
                 .Where(c => c.TargetTable == tableName)
-                .Where(c => c.TargetID == entity.CID)
-                .ToArrayAsync();
+                .Where(c => c.TargetID == entity.CID);
+            M_Contect contact1 = contacts.FirstOrDefault(c => c.SortNo == 1);
+            M_Contect contact2 = contacts.FirstOrDefault(c => c.SortNo == 2);
 
             // M_Contect 有可能會有 0, 1, 2 筆或以上, 最多只處理兩筆
 
@@ -209,10 +210,10 @@ namespace NS_Education.Controller.UsingHelper
                 Email = entity.Email ?? "",
                 InvoiceTitle = entity.InvoiceTitle ?? "",
                 ContactName = entity.ContectName ?? "",
-                ContactType1 = contacts.Length > 0 ? contacts[0].ContectType : -1,
-                ContactData1 = contacts.Length > 0 ? contacts[0].ContectData ?? "" : "",
-                ContactType2 = contacts.Length > 1 ? contacts[1].ContectType : -1,
-                ContactData2 = contacts.Length > 1 ? contacts[1].ContectData ?? "" : "",
+                ContactType1 = contact1?.ContectType ?? -1,
+                ContactData1 = contact1?.ContectData ?? "",
+                ContactType2 = contact2?.ContectType ?? -1,
+                ContactData2 = contact2?.ContectData ?? "",
                 Website = entity.Website ?? "",
                 Note = entity.Note ?? "",
                 BillFlag = entity.BillFlag,

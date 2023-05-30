@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.SiteData.GetInfoById;
 using NS_Education.Models.APIItems.Controller.SiteData.GetList;
@@ -21,7 +23,6 @@ using NS_Education.Variables;
 namespace NS_Education.Controller.UsingHelper.SiteDataController
 {
     public class SiteDataController : PublicClass,
-        IGetListPaged<B_SiteData, SiteData_GetList_Input_APIItem, SiteData_GetList_Output_Row_APIItem>,
         IGetInfoById<B_SiteData, SiteData_GetInfoById_Output_APIItem>,
         IChangeActive<B_SiteData>,
         IDeleteItem<B_SiteData>,
@@ -29,7 +30,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
     {
         #region Initialization
 
-        private readonly IGetListPagedHelper<SiteData_GetList_Input_APIItem> _getListHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
@@ -37,8 +37,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public SiteDataController()
         {
-            _getListHelper = new GetListPagedHelper<SiteDataController, B_SiteData, SiteData_GetList_Input_APIItem,
-                SiteData_GetList_Output_Row_APIItem>(this);
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<SiteDataController, B_SiteData, SiteData_GetInfoById_Output_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<SiteDataController, B_SiteData>(this);
@@ -54,15 +52,118 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(SiteData_GetList_Input_APIItem input)
         {
-            return await _getListHelper.GetPagedList(input);
+            // 因為要透過時段檢查可租借日期，無法使用 helper
+
+            // 1. 輸入驗證
+            if (!await GetListPagedValidateInput(input))
+                return GetResponseJson();
+
+            // 2. 篩選資料並查詢（不包括 TargetDate 的處理）
+            B_SiteData[] queryResult = await GetListPagedOrderedQuery(input).ToArrayAsync();
+
+            // 3. 依據 TargetDate 做篩選
+            B_SiteData[] filteredResult = (await GetListFilterByTargetDate(input.TargetDate, queryResult)).ToArray();
+
+            BaseResponseForPagedList<SiteData_GetList_Output_Row_APIItem> responseForPagedList =
+                new BaseResponseForPagedList<SiteData_GetList_Output_Row_APIItem>
+                {
+                    Items = filteredResult
+                        .Skip(input.GetStartIndex())
+                        .Take(input.GetTakeRowCount())
+                        .Select(sd => Task.Run(() => GetListPagedEntityToRow(sd)).Result)
+                        .ToList(),
+                    NowPage = input.NowPage,
+                    CutPage = input.CutPage,
+                    AllItemCt = filteredResult.Length
+                };
+
+            return GetResponseJson(responseForPagedList);
+        }
+
+        private async Task<IEnumerable<B_SiteData>> GetListFilterByTargetDate(string inputTargetDate,
+            B_SiteData[] queryResult)
+        {
+            if (!inputTargetDate.TryParseDateTime(out DateTime targetDate))
+                return queryResult;
+
+            targetDate = targetDate.Date;
+            IList<B_SiteData> result = new List<B_SiteData>();
+
+            string resverSiteTableName = DC.GetTableName<Resver_Site>();
+
+            // 查詢所有 DTS
+            D_TimeSpan[] allDts = await DC.D_TimeSpan
+                .Where(dts => dts.ActiveFlag && !dts.DeleteFlag)
+                .ToArrayAsync();
+
+            foreach (B_SiteData data in queryResult)
+            {
+                // 取得指定日期當天所有跟 data 有關的 Resver_Site
+                // 包含父場地和子場地
+                Resver_Site[] sameDayResverSites = data
+                    .Resver_Site
+                    .Concat(data.M_SiteGroup
+                        .Where(sg => sg.ActiveFlag && !sg.DeleteFlag)
+                        .Select(asMaster => asMaster.B_SiteData1)
+                        .SelectMany(child => child.Resver_Site))
+                    .Concat(data.M_SiteGroup1
+                        .Where(sg => sg.ActiveFlag && !sg.DeleteFlag)
+                        .Select(asChild => asChild.B_SiteData)
+                        .SelectMany(master => master.Resver_Site))
+                    .Where(rs => !rs.DeleteFlag)
+                    .Where(rs => rs.TargetDate.Date == targetDate)
+                    .ToArray();
+
+                // 如果沒有 resver site, 則已確認可用
+                if (sameDayResverSites.Length == 0)
+                {
+                    result.Add(data);
+                    continue;
+                }
+
+                // 查詢所有跟 Resver_Site 有關的 Resver_TimeSpan
+                IEnumerable<int> resverSiteIds = sameDayResverSites.Select(rs => rs.RSID);
+
+                D_TimeSpan[] resverTimeSpans = await DC.M_Resver_TimeSpan
+                        .Include(rts => rts.D_TimeSpan)
+                        .Where(rts => rts.TargetTable == resverSiteTableName)
+                        .Where(rts => resverSiteIds.Contains(rts.TargetID))
+                        .Select(rts => rts.D_TimeSpan)
+                        .Where(dts => dts.ActiveFlag && !dts.DeleteFlag)
+                        .ToArrayAsync()
+                    ;
+
+                // 只要有任一 DTS 沒有被占用，就 Add
+                if (!resverTimeSpans.All(rts => allDts.Any(dts => dts.IsCrossingWith(rts))))
+                    result.Add(data);
+            }
+
+            return result;
         }
 
         public async Task<bool> GetListPagedValidateInput(SiteData_GetList_Input_APIItem input)
         {
-            bool isValid = input
+            bool isValid = await input
                 .StartValidate()
                 .Validate(i => i.BCID.IsZeroOrAbove(),
                     () => AddError(EmptyNotAllowed("分類 ID")))
+                .ForceSkipIf(i => i.BCID <= 0)
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
+                    () => AddError(NotFound("分類 ID")))
+                .StopForceSkipping()
+                .Validate(i => i.BSCID1.IsZeroOrAbove(),
+                    () => AddError(WrongFormat("樓層別")))
+                .ForceSkipIf(i => i.BSCID1 <= 0)
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
+                    () => AddError(NotFound("樓層別 ID")))
+                .StopForceSkipping()
+                .Validate(i => i.Capacity.IsZeroOrAbove(),
+                    () => AddError(WrongFormat("容納人數")))
+                .ForceSkipIf(i => i.TargetDate.IsNullOrWhiteSpace())
+                .Validate(i => i.TargetDate.TryParseDateTime(out _),
+                    () => AddError(WrongFormat("可租借日期")))
+                .StopForceSkipping()
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -70,13 +171,33 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public IOrderedQueryable<B_SiteData> GetListPagedOrderedQuery(SiteData_GetList_Input_APIItem input)
         {
-            var query = DC.B_SiteData.Include(sd => sd.B_Category).AsQueryable();
+            var query = DC.B_SiteData
+                .Include(sd => sd.B_Category)
+                .Include(sd => sd.Resver_Site)
+                .Include(sd => sd.M_SiteGroup)
+                .Include(sd =>
+                    sd.M_SiteGroup.Select(asMaster => asMaster.B_SiteData1).Select(child => child.Resver_Site))
+                .Include(sd => sd.M_SiteGroup1)
+                .Include(sd =>
+                    sd.M_SiteGroup1.Select(asChild => asChild.B_SiteData).Select(master => master.Resver_Site))
+                .AsQueryable();
 
-            if (!input.Keyword.IsNullOrWhiteSpace())
+            if (input.Keyword.HasContent())
                 query = query.Where(sd => sd.Title.Contains(input.Keyword) || sd.Code.Contains(input.Keyword));
 
-            if (input.BCID > 0)
+            if (input.BCID.IsAboveZero())
                 query = query.Where(sd => sd.BCID == input.BCID);
+
+            if (input.BSCID1.IsAboveZero())
+                query = query.Where(sd => sd.BSCID1 == input.BSCID1);
+
+            if (input.Capacity.IsAboveZero())
+                query = query.Where(sd => sd.MaxSize >= input.Capacity);
+
+            if (input.ActiveFlag.IsInBetween(0, 1))
+                query = query.Where(sd => sd.ActiveFlag == (input.ActiveFlag == 1));
+
+            query = query.Where(sd => sd.DeleteFlag == (input.DeleteFlag == 1));
 
             return query.OrderBy(sd => sd.BSID);
         }
@@ -338,12 +459,12 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.PhoneExt3 = input.PhoneExt3;
             data.Note = input.Note;
             data.M_SiteGroup = data.M_SiteGroup.Concat(input.GroupList
-                .Select(item => new M_SiteGroup
-                {
-                    GroupID = item.BSID,
-                    SortNo = item.SortNo,
-                    ActiveFlag = true
-                }))
+                    .Select(item => new M_SiteGroup
+                    {
+                        GroupID = item.BSID,
+                        SortNo = item.SortNo,
+                        ActiveFlag = true
+                    }))
                 .ToArray();
         }
 

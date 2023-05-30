@@ -433,7 +433,7 @@
           <Property Name="Title" Type="nvarchar" MaxLength="60" />
           <Property Name="TargetTable" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="TargetID" Type="int" Nullable="false" />
-          <Property Name="ZID" Type="int" Nullable="false" />
+          <Property Name="DZID" Type="int" />
           <Property Name="ZipCode" Type="varchar" MaxLength="10" />
           <Property Name="Address" Type="nvarchar" MaxLength="200" Nullable="false" />
           <Property Name="SortNo" Type="int" Nullable="false" />
@@ -1616,6 +1616,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="M_Address_D_Zip_DZID_fk">
+          <End Role="D_Zip" Type="Self.D_Zip" Multiplicity="0..1" />
+          <End Role="M_Address" Type="Self.M_Address" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="D_Zip">
+              <PropertyRef Name="DZID" />
+            </Principal>
+            <Dependent Role="M_Address">
+              <PropertyRef Name="DZID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="M_Customer_BusinessUser_BusinessUser_BUID_fk">
           <End Role="BusinessUser" Type="Self.BusinessUser" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -2015,6 +2027,10 @@
           <AssociationSet Name="FK_UserPasswordLog_UserData" Association="Self.FK_UserPasswordLog_UserData">
             <End Role="UserData" EntitySet="UserData" />
             <End Role="UserPasswordLog" EntitySet="UserPasswordLog" />
+          </AssociationSet>
+          <AssociationSet Name="M_Address_D_Zip_DZID_fk" Association="Self.M_Address_D_Zip_DZID_fk">
+            <End Role="D_Zip" EntitySet="D_Zip" />
+            <End Role="M_Address" EntitySet="M_Address" />
           </AssociationSet>
           <AssociationSet Name="M_Customer_BusinessUser_BusinessUser_BUID_fk" Association="Self.M_Customer_BusinessUser_BusinessUser_BUID_fk">
             <End Role="BusinessUser" EntitySet="BusinessUser" />
@@ -2545,6 +2561,7 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="M_Address" Relationship="Self.M_Address_D_Zip_DZID_fk" FromRole="D_Zip" ToRole="M_Address" />
         </EntityType>
         <EntityType Name="GroupData">
           <Key>
@@ -2569,10 +2586,11 @@
           <Property Name="Title" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
           <Property Name="TargetTable" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="TargetID" Type="Int32" Nullable="false" />
-          <Property Name="ZID" Type="Int32" Nullable="false" />
+          <Property Name="DZID" Type="Int32" />
           <Property Name="ZipCode" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="Address" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="SortNo" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="D_Zip" Relationship="Self.M_Address_D_Zip_DZID_fk" FromRole="M_Address" ToRole="D_Zip" />
         </EntityType>
         <EntityType Name="M_Contect">
           <Key>
@@ -3701,6 +3719,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="M_Address_D_Zip_DZID_fk">
+          <End Role="D_Zip" Type="Self.D_Zip" Multiplicity="0..1" />
+          <End Role="M_Address" Type="Self.M_Address" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="D_Zip">
+              <PropertyRef Name="DZID" />
+            </Principal>
+            <Dependent Role="M_Address">
+              <PropertyRef Name="DZID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_M_Group_Menu_GroupData">
           <End Role="GroupData" Type="Self.GroupData" Multiplicity="1" />
           <End Role="M_Group_Menu" Type="Self.M_Group_Menu" Multiplicity="*" />
@@ -4176,6 +4206,10 @@
           <AssociationSet Name="FK_M_ResverSiteTimeSpan_D_TimeSpan" Association="Self.FK_M_ResverSiteTimeSpan_D_TimeSpan">
             <End Role="D_TimeSpan" EntitySet="D_TimeSpan" />
             <End Role="M_Resver_TimeSpan" EntitySet="M_Resver_TimeSpan" />
+          </AssociationSet>
+          <AssociationSet Name="M_Address_D_Zip_DZID_fk" Association="Self.M_Address_D_Zip_DZID_fk">
+            <End Role="D_Zip" EntitySet="D_Zip" />
+            <End Role="M_Address" EntitySet="M_Address" />
           </AssociationSet>
           <AssociationSet Name="FK_M_Group_Menu_GroupData" Association="Self.FK_M_Group_Menu_GroupData">
             <End Role="GroupData" EntitySet="GroupData" />
@@ -4692,7 +4726,7 @@
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="TargetTable" ColumnName="TargetTable" />
                 <ScalarProperty Name="TargetID" ColumnName="TargetID" />
-                <ScalarProperty Name="ZID" ColumnName="ZID" />
+                <ScalarProperty Name="DZID" ColumnName="DZID" />
                 <ScalarProperty Name="ZipCode" ColumnName="ZipCode" />
                 <ScalarProperty Name="Address" ColumnName="Address" />
                 <ScalarProperty Name="SortNo" ColumnName="SortNo" />

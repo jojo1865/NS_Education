@@ -18,9 +18,11 @@ namespace NS_Education.Models.Entities
         public string Title { get; set; }
         public string TargetTable { get; set; }
         public int TargetID { get; set; }
-        public int ZID { get; set; }
+        public Nullable<int> DZID { get; set; }
         public string ZipCode { get; set; }
         public string Address { get; set; }
         public int SortNo { get; set; }
+    
+        public virtual D_Zip D_Zip { get; set; }
     }
 }

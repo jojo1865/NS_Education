@@ -14,6 +14,12 @@ namespace NS_Education.Models.Entities
     
     public partial class D_Zip
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public D_Zip()
+        {
+            this.M_Address = new HashSet<M_Address>();
+        }
+    
         public int DZID { get; set; }
         public int ParentID { get; set; }
         public string Code { get; set; }
@@ -26,5 +32,8 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<M_Address> M_Address { get; set; }
     }
 }

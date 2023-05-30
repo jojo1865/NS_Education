@@ -366,12 +366,15 @@ namespace NS_Education.Controller.UsingHelper
 
             // 只在有給值時帶入，否則存為 null
             if (input.DZID.IsAboveZero())
+            {
                 addressToEdit.DZID = input.DZID;
 
-            addressToEdit.ZipCode = DC.D_Zip
-                .Where(z => z.ActiveFlag && !z.DeleteFlag && z.DZID == input.DZID)
-                .Select(z => z.Code)
-                .FirstOrDefault();
+                addressToEdit.ZipCode = DC.D_Zip
+                    .Where(z => z.ActiveFlag && !z.DeleteFlag && z.DZID == input.DZID)
+                    .Select(z => z.Code)
+                    .FirstOrDefault();
+            }
+
             addressToEdit.Address = input.Address;
             addressToEdit.SortNo = 1;
         }

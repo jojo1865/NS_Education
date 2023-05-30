@@ -17,27 +17,12 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 {
     public class JwtAuthFilter : ActionFilterAttribute
     {
-        #region 錯誤訊息
-
-        private static string DecodeTokenFailed(Exception e)
-            => $"解密 JWT Token 失敗：{e.Message}！";
-        private const string RequestHeaderLacksAuthorization = "HTTP Header 未找到 Authorization 欄位，或是 Bearer 格式不正確！";
-
-        private const string HasNoRoleOrPrivilege = "此 UID 無此權限！";
-        private static string HasValidTokenFailed(Exception e)
-            => $"驗證 JWT Token 時出錯：{e.Message}";
-        
-        private const string RequirePrivilegeAddOrEditNoFieldName = "RequirePrivilege 指定 AddOrEdit，卻沒有提供 addOrEditKeyFieldName！";
-        private const string TokenExpired = "登入已過期，請重新登入！";
-        private const string UserDataNotFound = "查無對應的 UID！";
-
-        #endregion
-
-        private readonly IAuthorizeType[] _roles;
-        private readonly RequiredPrivileges _privileges;
-        private readonly string _uidFieldName;
         private readonly string _addOrEditKeyFieldName;
         private readonly bool _ignorePasswordExpired;
+        private readonly RequiredPrivileges _privileges;
+
+        private readonly IAuthorizeType[] _roles;
+        private readonly string _uidFieldName;
 
         /// <summary>
         /// 套用 JWT 驗證，並且需符合指定的 Roles。<br/>
@@ -54,14 +39,14 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         {
             if (privileges.HasFlag(RequirePrivilege.AddOrEdit))
                 throw new ArgumentException(RequirePrivilegeAddOrEditNoFieldName);
-                    
+
             _roles = AuthorizeTypeSingletonFactory.GetEnumerableByEnum(roles).ToArray();
             _privileges = new RequiredPrivileges(privileges);
             _uidFieldName = IoConstants.IdFieldName;
             _addOrEditKeyFieldName = null;
             _ignorePasswordExpired = ignorePasswordExpired;
         }
-        
+
         /// <summary>
         /// 套用 JWT 驗證，並且需符合指定的 Roles。<br/>
         /// 包含 UserSelf 時，會針對 Request JSON 中的欄位比對是否與 JWT Payload 相符。<br/>
@@ -75,13 +60,13 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         {
             if (privileges.HasFlag(RequirePrivilege.AddOrEdit))
                 throw new ArgumentException(RequirePrivilegeAddOrEditNoFieldName);
-                    
+
             _roles = AuthorizeTypeSingletonFactory.GetEnumerableByEnum(roles).ToArray();
             _privileges = new RequiredPrivileges(privileges);
             _uidFieldName = IoConstants.IdFieldName;
             _addOrEditKeyFieldName = null;
         }
-        
+
         /// <summary>
         /// 套用 JWT 驗證，並且需符合指定的 Roles。<br/>
         /// 包含 UserSelf 時，會針對 Request JSON 中的欄位比對是否與 JWT Payload 相符。<br/>
@@ -99,7 +84,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         {
             if (privileges.HasFlag(RequirePrivilege.AddOrEdit) && addOrEditKeyFieldName.IsNullOrWhiteSpace())
                 throw new ArgumentException(RequirePrivilegeAddOrEditNoFieldName);
-                    
+
             _roles = AuthorizeTypeSingletonFactory.GetEnumerableByEnum(roles).ToArray();
             _privileges = new RequiredPrivileges(privileges);
             _uidFieldName = uidFieldName ?? IoConstants.IdFieldName;
@@ -117,7 +102,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             string errorMessage = null;
             ClaimsPrincipal claims = null;
             ICollection<B_StaticCode> safetyConfiguration;
-            
+
             // 先查安全控管設定到本地
             using (NsDbContext nsDbContext = new NsDbContext())
             {
@@ -130,7 +115,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             // 2. 當設定檔要求時，驗證 Token 符合對應 UserData 的最新 Token。
             // 3. 驗證 Token 中 Claim 包含指定的 Role。
             // 4. 驗證 Privilege，所有 Flag 在任一所屬 Group 均有允許。
-            
+
             bool isValid = actionContext.StartValidate()
                 .SkipIfAlreadyInvalid()
                 .Validate(c => ValidateTokenDecryptable(c, JwtConstants.Secret, out claims),
@@ -154,13 +139,13 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             // 如果這個 JwtAuthFilter 設置為忽略此設定，提早折回。
             if (_ignorePasswordExpired)
                 return;
-            
+
             // 先檢查設定檔，如果值小於等於 0，不做任何驗證。
             int forceChangeDays = GetSafetyConfigValue(safetyConfig, StaticCodeSafetyControlCode.PasswordExpireDays);
 
             if (forceChangeDays <= 0)
                 return;
-            
+
             // 驗證這個使用者距離最後一次修改密碼的天數
             int uid = FilterStaticTools.GetUidInClaimInt(claims);
 
@@ -171,7 +156,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                     .Where(ud => ud.ActiveFlag && !ud.DeleteFlag)
                     .Select(ud => ud.CreDate)
                     .FirstOrDefault();
-                
+
                 // 查詢變更密碼紀錄
                 UserPasswordLog log = nsDbContext.UserPasswordLog
                     .Where(upl => upl.UID == uid)
@@ -186,7 +171,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 // 參數名是「有效天數」，假設值為 60，而相減正好是第 60 天，先仍視為有效
                 if ((DateTime.Today - lastChangeTime.Date).Days <= forceChangeDays)
                     return;
-                
+
                 // 回傳 901
                 throw new HttpException((int)CustomHttpCode.PasswordExpired, "密碼已過期！");
             }
@@ -196,7 +181,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             IEnumerable<B_StaticCode> safetyConfig)
         {
             // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
-            bool isEnabled = GetSafetyConfigValue(safetyConfig, StaticCodeSafetyControlCode.IsEnforcingOneTokenOneLogin) == 1;
+            bool isEnabled =
+                GetSafetyConfigValue(safetyConfig, StaticCodeSafetyControlCode.IsEnforcingOneSessionPerUser) == 1;
 
             if (!isEnabled)
                 return;
@@ -217,7 +203,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             }
         }
 
-        private static int GetSafetyConfigValue(IEnumerable<B_StaticCode> safetyConfig, StaticCodeSafetyControlCode code)
+        private static int GetSafetyConfigValue(IEnumerable<B_StaticCode> safetyConfig,
+            StaticCodeSafetyControlCode code)
         {
             return safetyConfig
                 .Where(sc => sc.Code == ((int)code).ToString())
@@ -240,13 +227,16 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             using (NsDbContext nsDbContext = new NsDbContext())
             {
                 string contextUri = FilterStaticTools.GetContextUri(actionContext);
-                
+
                 var query = nsDbContext.UserData
                         .Include(u => u.M_Group_User)
                         .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData))
                         .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData).Select(g => g.M_Group_Menu))
-                        .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData).Select(g => g.M_Group_Menu.Select(mgm => mgm.MenuData)))
-                        .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData).Select(g => g.M_Group_Menu.Select(mgm => mgm.MenuData).Select(md => md.MenuAPI)))
+                        .Include(u =>
+                            u.M_Group_User.Select(mgu => mgu.GroupData)
+                                .Select(g => g.M_Group_Menu.Select(mgm => mgm.MenuData)))
+                        .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData).Select(g =>
+                            g.M_Group_Menu.Select(mgm => mgm.MenuData).Select(md => md.MenuAPI)))
                         .Where(u => u.UID == uid && u.ActiveFlag && !u.DeleteFlag)
                         .SelectMany(u => u.M_Group_User)
                         .Select(groupUser => groupUser.GroupData)
@@ -267,11 +257,11 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private bool HasAllFlagsInDb(ActionExecutingContext actionContext, List<M_Group_Menu> queried)
         {
             bool showFlagOk = !_privileges.RequireShowFlag;
-            bool addFlagOk = !_privileges.RequireAddFlag; 
+            bool addFlagOk = !_privileges.RequireAddFlag;
             bool editFlagOk = !_privileges.RequireEditFlag;
             bool deleteFlagOk = !_privileges.RequireDeleteFlag;
             bool printFlagOk = !_privileges.RequirePrintFlag;
-            
+
             // 當有 AddOrEditFlag 時, 特別處理 addFlag/editFlag 和 request 欄位
             if (_privileges.RequireAddOrEditFlag)
             {
@@ -297,8 +287,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private bool AddOrEditNeedsAddFlag(ActionExecutingContext actionContext)
         {
             return FilterStaticTools
-                .GetFieldInRequest(actionContext.HttpContext.Request, _addOrEditKeyFieldName)?
-                .Trim() 
+                       .GetFieldInRequest(actionContext.HttpContext.Request, _addOrEditKeyFieldName)?
+                       .Trim()
                    == IoConstants.IdValueWhenSubmit;
         }
 
@@ -338,13 +328,15 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         /// <exception cref="NotImplementedException"></exception>
         private bool ValidateUserIdInRequest(ControllerContext context, ClaimsPrincipal claims)
         {
-            string uidInRequest = FilterStaticTools.GetFieldInRequest(context.HttpContext.Request, _uidFieldName)?.Trim();
+            string uidInRequest =
+                FilterStaticTools.GetFieldInRequest(context.HttpContext.Request, _uidFieldName)?.Trim();
             string uidInClaim = FilterStaticTools.GetUidInClaim(claims);
 
             return String.Equals(uidInClaim, uidInRequest);
         }
 
-        public static void ValidateTokenDecryptable(ControllerContext actionContext, string secret, out ClaimsPrincipal claims)
+        public static void ValidateTokenDecryptable(ControllerContext actionContext, string secret,
+            out ClaimsPrincipal claims)
         {
             claims = null;
 
@@ -372,5 +364,25 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         {
             return actionContext.HttpContext.Request.Headers["Authorization"]?.StartsWith("Bearer") ?? false;
         }
+
+        #region 錯誤訊息
+
+        private static string DecodeTokenFailed(Exception e)
+            => $"解密 JWT Token 失敗：{e.Message}！";
+
+        private const string RequestHeaderLacksAuthorization = "HTTP Header 未找到 Authorization 欄位，或是 Bearer 格式不正確！";
+
+        private const string HasNoRoleOrPrivilege = "此 UID 無此權限！";
+
+        private static string HasValidTokenFailed(Exception e)
+            => $"驗證 JWT Token 時出錯：{e.Message}";
+
+        private const string RequirePrivilegeAddOrEditNoFieldName =
+            "RequirePrivilege 指定 AddOrEdit，卻沒有提供 addOrEditKeyFieldName！";
+
+        private const string TokenExpired = "登入已過期，請重新登入！";
+        private const string UserDataNotFound = "查無對應的 UID！";
+
+        #endregion
     }
 }

@@ -10,20 +10,22 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
-    public class ContactTypeController : 
-        PublicClass, 
+    public class ContactTypeController :
+        PublicClass,
         IGetListLocal<ContactType_GetList_Output_Row_APIItem>
     {
         private readonly IGetListLocalHelper _getListLocalHelper;
 
         public ContactTypeController()
         {
-            _getListLocalHelper = new GetListLocalHelper<ContactTypeController, ContactType_GetList_Output_Row_APIItem>(this);
+            _getListLocalHelper =
+                new GetListLocalHelper<ContactTypeController, ContactType_GetList_Output_Row_APIItem>(this);
         }
-        
+
         #region GetList
 
         private static readonly ICollection<ContactType_GetList_Output_Row_APIItem> ContactTypes =
@@ -31,22 +33,22 @@ namespace NS_Education.Controller.UsingHelper
             {
                 new ContactType_GetList_Output_Row_APIItem
                 {
-                    ID = 0,
+                    ID = (int)ContactType.Phone,
                     Title = "電話"
                 },
                 new ContactType_GetList_Output_Row_APIItem
                 {
-                    ID = 1,
+                    ID = (int)ContactType.Fax,
                     Title = "傳真"
                 },
                 new ContactType_GetList_Output_Row_APIItem
                 {
-                    ID = 2,
+                    ID = (int)ContactType.Mobile,
                     Title = "手機"
                 },
                 new ContactType_GetList_Output_Row_APIItem
                 {
-                    ID = 3,
+                    ID = (int)ContactType.Line,
                     Title = "LINE"
                 },
             }.AsReadOnly();
@@ -61,8 +63,11 @@ namespace NS_Education.Controller.UsingHelper
         /// </returns>
         public static string GetContactTypeTitle(int contactTypeId)
         {
-            return contactTypeId > 0 && ContactTypes.Count > contactTypeId ? ContactTypes.ElementAt(contactTypeId).Title : null;
+            return contactTypeId > 0 && ContactTypes.Count > contactTypeId
+                ? ContactTypes.ElementAt(contactTypeId).Title
+                : null;
         }
+
         /// <summary>
         /// 提供給其他需要用到通訊方式下拉選單的功能用。
         /// </summary>
@@ -71,7 +76,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             return ContactTypes;
         }
-        
+
         /// <summary>
         /// 提供給其他需要用到通訊方式下拉可選選單的功能用。
         /// </summary>
@@ -97,7 +102,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             return await Task.FromResult(ContactTypes);
         }
-        
+
         #endregion
     }
 }

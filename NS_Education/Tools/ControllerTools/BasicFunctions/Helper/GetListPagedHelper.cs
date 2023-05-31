@@ -114,12 +114,18 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             int takeRow = input.ReverseOrder
                 ? input.GetTakeRowCount() + Math.Min(0, startIndex)
                 : input.GetTakeRowCount();
+
+            // 如果 takeRow 小於等於 0，表示查不到資料，直接返回
+
+            if (takeRow <= 0)
+                return (0, new List<TEntity>());
+
             // 把小於 0 的 startIndex 轉成 0
             startIndex = Math.Max(0, startIndex);
 
             var resultList = await query
                 .Skip(startIndex)
-                .Take(Math.Max(0, takeRow))
+                .Take(takeRow)
                 .ToListAsync();
 
             return (startIndex, resultList);

@@ -1,3 +1,5 @@
+using NS_Education.Variables;
+
 namespace NS_Education.Models.APIItems
 {
     /// <summary>
@@ -14,16 +16,20 @@ namespace NS_Education.Models.APIItems
         /// 每頁顯示筆數。
         /// </summary>
         public int CutPage { get; set; }
-        
+
+        private int CutPageOrDefault => CutPage == 0 ? IoConstants.DefaultCutPage : CutPage;
+
         /// <summary>
         /// 查詢結果全部總共幾筆。
         /// </summary>
         public int AllItemCt { get; set; }
-        
+
         /// <summary>
         /// 查詢結果全部總共幾分頁。 
         /// </summary>
-        public int AllPageCt => NowPage == 0 || AllItemCt == 0 ? 0 : (AllItemCt / CutPage + (AllItemCt % CutPage == 0 ? 0 : 1));
+        public int AllPageCt => NowPage == 0 || AllItemCt == 0
+            ? 0
+            : (AllItemCt / CutPageOrDefault + (AllItemCt % CutPageOrDefault == 0 ? 0 : 1));
 
         /// <summary>
         /// 將一些來自於輸入資料的值帶入本物件。

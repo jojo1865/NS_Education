@@ -101,12 +101,15 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(c => c.M_Customer_BusinessUser.Select(cbu => cbu.BusinessUser))
                 .AsQueryable();
 
-            if (!input.Keyword.IsNullOrWhiteSpace())
+            if (input.Keyword.HasContent())
                 query = query.Where(c =>
                     c.TitleC.Contains(input.Keyword)
                     || c.TitleE.Contains(input.Keyword)
                     || c.Compilation.Contains(input.Keyword)
                     || c.Code.Contains(input.Keyword));
+
+            if (input.ContactName.HasContent())
+                query = query.Where(c => c.ContectName.Contains(input.ContactName));
 
             if (input.BSCID6.IsAboveZero())
                 query = query.Where(c => c.BSCID6 == input.BSCID6);

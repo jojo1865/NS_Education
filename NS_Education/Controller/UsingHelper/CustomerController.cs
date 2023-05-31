@@ -241,7 +241,7 @@ namespace NS_Education.Controller.UsingHelper
                 string targetTableName = DC.GetTableName<M_Customer_BusinessUser>();
                 M_Contect contact = DC.M_Contect
                     .Where(c => c.TargetTable == targetTableName)
-                    .FirstOrDefault(c => c.TargetID == entity.CID);
+                    .FirstOrDefault(c => c.TargetID == cbu.MID);
 
                 Customer_GetList_BusinessUser_APIItem newItem = new Customer_GetList_BusinessUser_APIItem
                 {

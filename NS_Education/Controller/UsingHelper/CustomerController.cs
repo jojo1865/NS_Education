@@ -154,7 +154,7 @@ namespace NS_Education.Controller.UsingHelper
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
-                Items = GetBusinessUserListFromEntity(entity)
+                BusinessUsers = GetBusinessUserListFromEntity(entity)
             });
         }
 

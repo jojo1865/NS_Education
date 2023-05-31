@@ -5,13 +5,13 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetList
     public class Customer_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int CID { get; set; }
-        
+
         public int BSCID6 { get; set; }
         public string BSC6_Title { get; set; }
-        
+
         public int BSCID4 { get; set; }
         public string BSC4_Title { get; set; }
-        
+
         public string Code { get; set; }
         public string Compilation { get; set; }
         public string TitleC { get; set; }
@@ -30,7 +30,7 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetList
         public int QuestionCt { get; set; }
         public int GiftCt { get; set; }
 
-        public ICollection<Customer_GetList_BusinessUser_APIItem> Items { get; set; } =
+        public ICollection<Customer_GetList_BusinessUser_APIItem> BusinessUsers { get; set; } =
             new List<Customer_GetList_BusinessUser_APIItem>();
     }
 }

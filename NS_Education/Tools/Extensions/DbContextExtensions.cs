@@ -20,6 +20,8 @@ namespace NS_Education.Tools.Extensions
     {
         private static readonly DateTime MinimumDbDateTime = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
 
+        private static readonly IDictionary<Type, string> EntityTypeTableNames = new Dictionary<Type, string>();
+
         /// <summary>
         /// 儲存修改之前，自動設置 CreUid 等欄位，並寫入 UserLog。
         /// </summary>
@@ -159,7 +161,8 @@ namespace NS_Education.Tools.Extensions
             // 依據這筆修改的狀態，指定 ControlType
             UserLogControlType controlType = GetUserLogControlType(change);
 
-            context.WriteUserLog(context.GetTableName(change), targetId, controlType, uid, httpRequestBase);
+            context.WriteUserLog(context.GetTableName(change.Entity.GetType()), targetId, controlType, uid,
+                httpRequestBase);
         }
 
         private static UserLogControlType GetUserLogControlType(DbEntityEntry change)
@@ -240,20 +243,24 @@ namespace NS_Education.Tools.Extensions
         /// 取得一種物件在 DbContext 中對應的 Table 名。
         /// </summary>
         /// <param name="context">DbContext</param>
-        /// <param name="entry">物件的 EntityEntry </param>
+        /// <param name="entityType">物件的類型</param>
         /// <returns>Table 名。</returns>
-        private static string GetTableName(this NsDbContext context, DbEntityEntry entry)
+        private static string GetTableName(this DbContext context, Type entityType)
         {
+            // 先從庫存拿
+            if (EntityTypeTableNames.ContainsKey(entityType))
+                return EntityTypeTableNames[entityType];
+
             var metadata = ((IObjectContextAdapter)context).ObjectContext.MetadataWorkspace;
 
             // Get the part of the model that contains info about the actual CLR types
-            var objectItemCollection = ((ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace));
+            var objectItemCollection = (ObjectItemCollection)metadata.GetItemCollection(DataSpace.OSpace);
 
             // Get the entity type from the model that maps to the CLR type
             // entry.Entity 有可能會是 dynamic 而回傳 proxy type, 所以在這裡嘗試取得真的 type
-            Type actualEntityType = ObjectContext.GetObjectType(entry.Entity.GetType());
+            Type actualEntityType = ObjectContext.GetObjectType(entityType);
 
-            var entityType = metadata
+            var entityClrType = metadata
                 .GetItems<EntityType>(DataSpace.OSpace)
                 .Single(e => objectItemCollection.GetClrType(e) == actualEntityType);
 
@@ -262,7 +269,7 @@ namespace NS_Education.Tools.Extensions
                 .GetItems<EntityContainer>(DataSpace.CSpace)
                 .Single()
                 .EntitySets
-                .Single(s => s.ElementType.Name == entityType.Name);
+                .Single(s => s.ElementType.Name == entityClrType.Name);
 
             // Find the mapping between conceptual and storage model for this entity set
             var mapping = metadata.GetItems<EntityContainerMapping>(DataSpace.CSSpace)
@@ -276,9 +283,13 @@ namespace NS_Education.Tools.Extensions
                 .Fragments;
 
             // Return the table name from the storage entity set
-            return tables
+            string result = tables
                 .Select(f => (string)f.StoreEntitySet.MetadataProperties["Table"].Value ?? f.StoreEntitySet.Name)
                 .FirstOrDefault();
+
+            EntityTypeTableNames[entityType] = result;
+
+            return result;
         }
 
         /// <summary>
@@ -290,16 +301,7 @@ namespace NS_Education.Tools.Extensions
         public static string GetTableName<T>(this NsDbContext context)
             where T : class
         {
-            ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
-            ObjectSet<T> objectSet = objectContext.CreateObjectSet<T>();
-            EntityType entityType = objectSet.EntitySet.ElementType;
-
-            string tableName = entityType.MetadataProperties
-                .Where(p => p.Name == "Name")
-                .Select(p => p.Value.ToString())
-                .SingleOrDefault();
-
-            return tableName;
+            return context.GetTableName(typeof(T));
         }
 
         public static async Task AddAsync<TEntity>(this NsDbContext context, TEntity entity)

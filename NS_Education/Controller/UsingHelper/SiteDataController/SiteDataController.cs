@@ -209,7 +209,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     .ThenByDescending(sd => sd.BSID);
         }
 
-        public async Task<SiteData_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_SiteData entity, int index)
+        public Task<SiteData_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_SiteData entity, int index)
         {
             SiteData_GetList_Output_Row_APIItem output = new SiteData_GetList_Output_Row_APIItem
             {
@@ -233,7 +233,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             output.SetIndex(index);
 
-            return output;
+            return Task.FromResult(output);
         }
 
         #endregion

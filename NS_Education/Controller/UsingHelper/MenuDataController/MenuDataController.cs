@@ -34,7 +34,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #endregion
 
         #region Initialization
-        
+
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         private readonly ISubmitHelper<MenuData_Submit_Input_APIItem> _submitHelper;
@@ -67,13 +67,13 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // 4 ParentId 2 SortNo 1
             // 5 ParentId 2 SortNo 2
             //
-            // 因為每筆資料需要取得 Parent，不符合域設步驟
+            // 因為每筆資料需要取得 Parent，不符合預設步驟
             // 所以，無法使用 helper
 
             // 1. 驗證輸入
             if (!await GetListAllValidateInput(input))
                 return GetResponseJson();
-            
+
             // 2. 查詢資料
             // 依照 MDID 做成 dictionary, 並依照 parentId 做成 lookup
             var list = await GetListAllQuery(input).ToListAsync();
@@ -86,7 +86,8 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
             // 3. 重新排序
             // 如果 parent 在 dictionary 中找不到，表示這是一個 parent，所以由 parent 開始長
-            foreach (var parent in lookup.Where(grouping => !dictionary.ContainsKey(grouping.Key)).OrderBy(g => g.Key).SelectMany(g => g))
+            foreach (var parent in lookup.Where(grouping => !dictionary.ContainsKey(grouping.Key)).OrderBy(g => g.Key)
+                         .SelectMany(g => g))
             {
                 // 先把 parent 放進去
                 response.Items.Add(await GetListAllEntityToRow(parent));
@@ -101,7 +102,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                     response.Items.Add(await GetListAllEntityToRow(children));
                 }
             }
-            
+
             // 4. 回傳結果
             return GetResponseJson(response);
         }
@@ -124,7 +125,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
             if (input.ActiveFlag > -1)
                 query = query.Where(md => md.ActiveFlag == (input.ActiveFlag == 1));
-            
+
             return query.Where(md => md.DeleteFlag == (input.DeleteFlag == 1));
         }
 
@@ -221,7 +222,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 AddError($"此選單（ID {id}）禁止停用！");
                 return;
             }
-            
+
             foreach (MenuData data in menuData)
             {
                 data.ActiveFlag = activeFlag ?? throw new ArgumentNullException(nameof(activeFlag));
@@ -260,32 +261,34 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         private async Task _deleteItem(DeleteItem_Input_APIItem input)
         {
             // 1. 驗證輸入
-            
+
             // 驗證是否皆為獨特 ID
             bool isCollectionValid = input.Items.ToArray().StartValidate()
                 .Validate(items => items.GroupBy(i => i.Id).Count() == items.Length)
                 .IsValid();
-            
+
             // 驗證輸入內容
             // 先取得必須總是顯示的特例選單，如果有任何此類 Id，不允許修改。
             int[] alwaysShowIds = await DC.MenuData
                 .Where(md => DbConstants.AlwaysShowMenuUrls.Contains(md.URL))
                 .Select(md => md.MDID)
                 .ToArrayAsync();
-            
+
             bool isEveryElementValid = input.Items.StartValidateElements()
                 .Validate(i => i.Id != null && i.Id.IsAboveZero(), i => AddError(EmptyNotAllowed($"欲刪除的選單 ID（{i.Id}）")))
                 .Validate(i => i.DeleteFlag != null, i => AddError(EmptyNotAllowed($"ID {i.Id} 的 DeleteFlag")))
-                .Validate(i => !alwaysShowIds.Contains(i.Id ?? 0) && i.DeleteFlag is true, i => AddError($"此選單（ID {i.Id}）禁止刪除！"))
+                .Validate(i => !alwaysShowIds.Contains(i.Id ?? 0) && i.DeleteFlag is true,
+                    i => AddError($"此選單（ID {i.Id}）禁止刪除！"))
                 .IsValid();
-            
+
             if (!isCollectionValid || !isEveryElementValid)
                 return;
-            
+
             foreach (DeleteItem_Input_Row_APIItem item in input.Items)
             {
                 // 2. 找出資料
-                var menuData = await DC.MenuData.Where(md => md.MDID == item.Id || md.ParentID == item.Id).ToListAsync();
+                var menuData = await DC.MenuData.Where(md => md.MDID == item.Id || md.ParentID == item.Id)
+                    .ToListAsync();
 
                 if (!menuData.Any())
                 {
@@ -295,10 +298,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 // 3. 設定資料
                 foreach (MenuData data in menuData)
                 {
-                    data.DeleteFlag = item.DeleteFlag ?? throw new ArgumentNullException(nameof(DeleteItem_Input_Row_APIItem.DeleteFlag));
+                    data.DeleteFlag = item.DeleteFlag ??
+                                      throw new ArgumentNullException(nameof(DeleteItem_Input_Row_APIItem.DeleteFlag));
                 }
             }
-            
+
             // 4. 儲存至 DB
             try
             {
@@ -410,7 +414,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #endregion
 
         #endregion
-        
+
         #region ChangeSortNo
 
         [HttpGet]
@@ -432,7 +436,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
             if (!isValid)
                 return;
-            
+
             // 2. 查出資料
             MenuData menuData = await DC.MenuData.FirstOrDefaultAsync(md => md.MDID == id && !md.DeleteFlag);
 
@@ -441,7 +445,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 AddError(DataNotFound);
                 return;
             }
-            
+
             // 3. 修改資料並儲存
             try
             {

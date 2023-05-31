@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -20,7 +21,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
     /// <typeparam name="TEntity">掌管資料類型</typeparam>
     /// <typeparam name="TGetListRequest">傳入物件類型</typeparam>
     /// <typeparam name="TGetListRow">回傳時，List 中子物件的類型</typeparam>
-    public class GetListPagedHelper<TController, TEntity, TGetListRequest, TGetListRow> : IGetListPagedHelper<TGetListRequest>
+    public class
+        GetListPagedHelper<TController, TEntity, TGetListRequest, TGetListRow> : IGetListPagedHelper<TGetListRequest>
         where TController : PublicClass, IGetListPaged<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForPagedList
@@ -36,7 +38,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         #region GetPagedList
 
         private const string GetPagedListInputIncorrect = "輸入格式錯誤或缺少欄位，請檢查資料內容！";
-        
+
         public async Task<string> GetPagedList(TGetListRequest input)
         {
             // 1. 驗證輸入
@@ -44,7 +46,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             if (!inputValidated && !_controller.HasError())
                 _controller.AddError(GetPagedListInputIncorrect);
-            
+
             if (_controller.HasError())
                 return _controller.GetResponseJson();
 
@@ -59,8 +61,9 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson();
 
             // 4. 寫一筆 UserLog
-            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(), HttpContext.Current.Request);
-            
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(),
+                HttpContext.Current.Request);
+
             // 5. 按指定格式回傳結果
             // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。（如：取得 Username）
             List<TGetListRow> rows = new List<TGetListRow>();
@@ -80,11 +83,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             , BaseResponseForPagedList<TGetListRow> response)
         {
             IQueryable<TEntity> query = _controller.GetListPagedOrderedQuery(input);
-            
+
             // Filter by ActiveFlag
             if (input.ActiveFlag.IsInBetween(0, 1))
                 query = FlagHelper.FilterByInputActiveFlag(query, input.ActiveFlag == 1);
-            
+
             // Filter by DeleteFlag
             query = FlagHelper.FilterByInputDeleteFlag(query, input.DeleteFlag == 1);
 
@@ -94,11 +97,25 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             response.AllItemCt = totalRows;
 
             // 2. 再回傳實際資料
+            // 如果是倒序時，
+            // |- a. 起始 index: 由最後減回來，並多減一頁的筆數
+            // +- b. 取的筆數: index 大於等於 0 時，照一般處理；否則，加上 index（如 index 為 -2，表示向左溢出 2 筆，即最後一頁只有 n-2 筆）
+            int startIndex = input.OrderByAscending
+                ? input.GetStartIndex()
+                : totalRows - input.GetStartIndex() - input.GetTakeRowCount();
+            int takeRow = input.OrderByAscending
+                ? input.GetTakeRowCount()
+                : input.GetTakeRowCount() + Math.Min(0, startIndex); // 雖然正序時不會出現 startIndex < 0 的情況，但為求可讀性，這裡的三元式不作簡化
 
-            return await query
-                .Skip(input.GetStartIndex())
-                .Take(input.GetTakeRowCount())
+            var resultList = await query
+                .Skip(Math.Max(0, startIndex)) // 確保沒有負數的情況
+                .Take(Math.Max(0, takeRow))
                 .ToListAsync();
+
+            if (!input.OrderByAscending)
+                resultList.Reverse();
+
+            return resultList;
         }
 
         #endregion

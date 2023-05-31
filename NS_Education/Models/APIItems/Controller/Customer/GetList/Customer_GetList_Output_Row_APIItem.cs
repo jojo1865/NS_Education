@@ -19,7 +19,6 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetList
         public string Email { get; set; }
         public string InvoiceTitle { get; set; }
         public string ContactName { get; set; }
-        public string ContactPhone { get; set; }
         public string Website { get; set; }
         public string Note { get; set; }
         public bool BillFlag { get; set; }
@@ -32,5 +31,8 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetList
 
         public ICollection<Customer_GetList_BusinessUser_APIItem> BusinessUsers { get; set; } =
             new List<Customer_GetList_BusinessUser_APIItem>();
+
+        public ICollection<Customer_GetList_Contact_APIItem> Contacts { get; set; } =
+            new List<Customer_GetList_Contact_APIItem>();
     }
 }

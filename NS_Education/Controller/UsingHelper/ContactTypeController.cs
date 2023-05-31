@@ -63,7 +63,7 @@ namespace NS_Education.Controller.UsingHelper
         /// </returns>
         public static string GetContactTypeTitle(int contactTypeId)
         {
-            return contactTypeId > 0 && ContactTypes.Count > contactTypeId
+            return contactTypeId >= 0 && ContactTypes.Count > contactTypeId
                 ? ContactTypes.ElementAt(contactTypeId).Title
                 : null;
         }

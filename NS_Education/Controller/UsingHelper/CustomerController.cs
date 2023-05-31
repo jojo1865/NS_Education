@@ -129,6 +129,7 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<Customer_GetList_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity)
         {
+            string customerTableName = DC.GetTableName<Customer>();
             return await Task.FromResult(new Customer_GetList_Output_Row_APIItem
             {
                 CID = entity.CID,
@@ -143,7 +144,6 @@ namespace NS_Education.Controller.UsingHelper
                 Email = entity.Email ?? "",
                 InvoiceTitle = entity.InvoiceTitle ?? "",
                 ContactName = entity.ContectName ?? "",
-                ContactPhone = entity.ContectPhone ?? "",
                 Website = entity.Website ?? "",
                 Note = entity.Note ?? "",
                 BillFlag = entity.BillFlag,
@@ -154,7 +154,17 @@ namespace NS_Education.Controller.UsingHelper
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
-                BusinessUsers = GetBusinessUserListFromEntity(entity)
+                BusinessUsers = GetBusinessUserListFromEntity(entity),
+                Contacts = DC.M_Contect
+                    .Where(c => c.TargetTable == customerTableName)
+                    .Where(c => c.TargetID == entity.CID)
+                    .OrderBy(c => c.SortNo)
+                    .AsEnumerable()
+                    .Select(c => new Customer_GetList_Contact_APIItem
+                    {
+                        ContactType = ContactTypeController.GetContactTypeTitle(c.ContectType) ?? "",
+                        ContactData = c.ContectData
+                    }).ToList()
             });
         }
 

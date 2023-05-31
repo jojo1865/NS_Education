@@ -45,11 +45,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             var queryResult = await GetResverSiteListFilterByFreeDate(input, sites);
 
             // 3. 轉換成輸出結果
+            int index = input.ReverseOrder ? queryResult.Count - 1 : 0;
             BaseResponseForPagedList<Resver_GetResverSiteList_Output_Row_APIItem> response =
                 new BaseResponseForPagedList<Resver_GetResverSiteList_Output_Row_APIItem>
                 {
                     Items = queryResult.Keys.Select(bs => new Resver_GetResverSiteList_Output_Row_APIItem
                     {
+                        Index = input.ReverseOrder ? index-- : index++,
                         BSID = bs.BSID,
                         Code = bs.Code ?? "",
                         Title = bs.Title ?? "",

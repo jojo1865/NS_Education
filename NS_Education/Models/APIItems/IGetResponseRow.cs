@@ -13,5 +13,11 @@ namespace NS_Education.Models.APIItems
         /// <param name="controller">Controller 物件</param>
         Task SetInfoFromEntity<T>(T entity, PublicClass controller)
             where T : class;
+
+        /// <summary>
+        /// 設定此資訊在列表中為第幾筆。
+        /// </summary>
+        /// <param name="index">第幾筆</param>
+        void SetIndex(int index);
     }
 }

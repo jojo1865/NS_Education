@@ -230,7 +230,16 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 result = result.Where(i =>
                     i.EventType.Contains(input.Keyword) || i.Description.Contains(input.Keyword));
 
-            return !input.ReverseOrder ? result.OrderByDescending(i => i.CreDate) : result.OrderBy(i => i.CreDate);
+            result = result.OrderBy(i => i.CreDate);
+
+            int index = 0;
+            var resultItems = result.ToArray();
+            foreach (UserLog_GetList_Output_Row_APIItem item in resultItems)
+            {
+                item.SetIndex(index++);
+            }
+
+            return input.ReverseOrder ? resultItems.Reverse() : resultItems;
         }
 
         #endregion

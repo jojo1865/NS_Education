@@ -11,6 +11,7 @@ namespace NS_Education.Models.APIItems.Controller.UserData.UserLog.GetList
         public string Actor { get; set; }
         public string EventType { get; set; }
         public string Description { get; set; }
+        public int Index { get; private set; }
 
         [JsonIgnore] internal DateTime CreDate { get; set; }
 
@@ -19,6 +20,12 @@ namespace NS_Education.Models.APIItems.Controller.UserData.UserLog.GetList
         {
             // 這個物件沒有任何普遍性欄位需要設定。
             return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public void SetIndex(int index)
+        {
+            Index = index;
         }
     }
 }

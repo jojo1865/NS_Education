@@ -83,6 +83,10 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = input.StartValidate()
                 .Validate(i => i.BSCID6.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的行業別")))
                 .Validate(i => i.BSCID4.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的區域別")))
+                .ForceSkipIf(i => i.OrderBy == 0)
+                .Validate(i => Enum.TryParse<Customer_GetList_OrderBy>(i.OrderBy.ToString(), out _),
+                    () => AddError(UnsupportedValue("排序方式")))
+                .StopForceSkipping()
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -126,6 +130,28 @@ namespace NS_Education.Controller.UsingHelper
                 query = query.Where(c =>
                     c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft) ==
                     (input.ResverType == 1));
+
+            if (Enum.TryParse(input.OrderBy.ToString(), out Customer_GetList_OrderBy orderBy))
+            {
+                switch (orderBy)
+                {
+                    case Customer_GetList_OrderBy.ResverCt:
+                        query = query
+                            .OrderByDescending(c => c.Resver_Head
+                                .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                            );
+                        break;
+                    case Customer_GetList_OrderBy.QuotedPrice:
+                        query = query
+                            .OrderBy(c => c.Resver_Head
+                                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                                .Sum(rh => rh.QuotedPrice)
+                            );
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
 
             return query.OrderBy(c => c.CID);
         }

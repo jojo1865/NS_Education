@@ -64,13 +64,15 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             // 3. 依據 TargetDate 做篩選
             B_SiteData[] filteredResult = (await GetListFilterByTargetDate(input.TargetDate, queryResult)).ToArray();
 
+            int index = input.GetStartIndex();
+
             BaseResponseForPagedList<SiteData_GetList_Output_Row_APIItem> responseForPagedList =
                 new BaseResponseForPagedList<SiteData_GetList_Output_Row_APIItem>
                 {
                     Items = filteredResult
                         .Skip(input.GetStartIndex())
                         .Take(input.GetTakeRowCount())
-                        .Select(sd => Task.Run(() => GetListPagedEntityToRow(sd)).Result)
+                        .Select(sd => Task.Run(() => GetListPagedEntityToRow(sd, index++)).Result)
                         .ToList(),
                     NowPage = input.NowPage,
                     CutPage = input.CutPage,
@@ -207,9 +209,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     .ThenByDescending(sd => sd.BSID);
         }
 
-        public async Task<SiteData_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_SiteData entity)
+        public async Task<SiteData_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_SiteData entity, int index)
         {
-            return await Task.FromResult(new SiteData_GetList_Output_Row_APIItem
+            SiteData_GetList_Output_Row_APIItem output = new SiteData_GetList_Output_Row_APIItem
             {
                 BSID = entity.BSID,
                 BCID = entity.BCID,
@@ -227,7 +229,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 PhoneExt2 = entity.PhoneExt2 ?? "",
                 PhoneExt3 = entity.PhoneExt3 ?? "",
                 Note = entity.Note
-            });
+            };
+
+            output.SetIndex(index);
+
+            return output;
         }
 
         #endregion

@@ -84,7 +84,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.BSCID6.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的行業別")))
                 .Validate(i => i.BSCID4.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的區域別")))
                 .ForceSkipIf(i => i.OrderBy == 0)
-                .Validate(i => Enum.TryParse<Customer_GetList_OrderBy>(i.OrderBy.ToString(), out _),
+                .Validate(i => Enum.IsDefined(typeof(Customer_GetList_OrderBy), i.OrderBy),
                     () => AddError(UnsupportedValue("排序方式")))
                 .StopForceSkipping()
                 .IsValid();
@@ -131,9 +131,9 @@ namespace NS_Education.Controller.UsingHelper
                     c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft) ==
                     (input.ResverType == 1));
 
-            if (Enum.TryParse(input.OrderBy.ToString(), out Customer_GetList_OrderBy orderBy))
+            if (Enum.IsDefined(typeof(Customer_GetList_OrderBy), input.OrderBy))
             {
-                switch (orderBy)
+                switch (Enum.Parse(typeof(Customer_GetList_OrderBy), input.OrderBy.ToString()))
                 {
                     case Customer_GetList_OrderBy.ResverCt:
                         query = query

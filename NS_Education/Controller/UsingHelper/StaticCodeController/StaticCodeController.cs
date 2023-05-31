@@ -109,7 +109,8 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             return query
                 .OrderBy(q => q.CodeType)
                 .ThenBy(q => q.SortNo)
-                .ThenBy(q => q.Code);
+                .ThenBy(q => q.Code)
+                .ThenBy(q => q.BSCID);
         }
 
         public async Task<StaticCode_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_StaticCode entity)

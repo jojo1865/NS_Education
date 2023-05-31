@@ -129,7 +129,8 @@ namespace NS_Education.Controller.UsingHelper
 
             return query.OrderBy(oc => oc.CodeType)
                 .ThenBy(oc => oc.SortNo)
-                .ThenBy(oc => oc.Code);
+                .ThenBy(oc => oc.Code)
+                .ThenBy(oc => oc.BOCID);
         }
 
         public async Task<OrderCode_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_OrderCode entity)
@@ -201,7 +202,7 @@ namespace NS_Education.Controller.UsingHelper
                     AddError(GetInfoByIdNotFound);
                     return GetResponseJson();
                 }
-                
+
                 // 寫 UserLog
                 await DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, GetUid(), Request);
 

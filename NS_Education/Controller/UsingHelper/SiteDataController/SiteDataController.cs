@@ -64,20 +64,23 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             // 3. 依據 TargetDate 做篩選
             B_SiteData[] filteredResult = (await GetListFilterByTargetDate(input.TargetDate, queryResult)).ToArray();
 
-            int index = input.GetStartIndex();
+            (int skip, int take) = input.CalculateSkipAndTake(filteredResult.Length);
 
             BaseResponseForPagedList<SiteData_GetList_Output_Row_APIItem> responseForPagedList =
                 new BaseResponseForPagedList<SiteData_GetList_Output_Row_APIItem>
                 {
                     Items = filteredResult
-                        .Skip(input.GetStartIndex())
-                        .Take(input.GetTakeRowCount())
-                        .Select(sd => Task.Run(() => GetListPagedEntityToRow(sd, index++)).Result)
-                        .ToList(),
+                        .Skip(skip)
+                        .Take(take)
+                        .Select(sd => Task.Run(() => GetListPagedEntityToRow(sd, skip++)).Result)
+                        .ToArray(),
                     NowPage = input.NowPage,
                     CutPage = input.CutPage,
                     AllItemCt = filteredResult.Length
                 };
+
+            if (input.ReverseOrder)
+                responseForPagedList.Items = responseForPagedList.Items.Reverse().ToArray();
 
             return GetResponseJson(responseForPagedList);
         }
@@ -201,12 +204,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             query = query.Where(sd => sd.DeleteFlag == (input.DeleteFlag == 1));
 
-            return !input.ReverseOrder
-                ? query
-                    .OrderBy(sd => sd.Code)
-                    .ThenBy(sd => sd.BSID)
-                : query.OrderByDescending(sd => sd.Code)
-                    .ThenByDescending(sd => sd.BSID);
+            return query
+                .OrderBy(sd => sd.Code)
+                .ThenBy(sd => sd.BSID);
         }
 
         public Task<SiteData_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_SiteData entity, int index)

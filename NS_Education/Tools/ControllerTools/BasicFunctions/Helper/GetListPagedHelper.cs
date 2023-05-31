@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -108,36 +107,14 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             if (totalRows == 0 || input.NowPage > response.AllPageCt)
                 return (0, new List<TEntity>());
 
-            // 正序
-            // 1 2 3 4 5 6 7 8 9 0
-            // +---+ +---+ +---+ +
-
-            // 反序
-            // 1 2 3 4 5 6 7 8 9 0
-            // + +---+ +---+ +---+
-
-            int left, right;
-
-            if (!input.ReverseOrder)
-            {
-                // 正序時，照內建算式取值
-                left = input.GetStartIndex();
-                right = left + input.GetTakeRowCount();
-            }
-            else
-            {
-                // 正序時，從後方算回來，取得 right
-                // 統一轉成 0-index 計算
-                right = totalRows - 1 - input.GetStartIndex();
-                left = Math.Max(0, right - (input.GetTakeRowCount() - 1));
-            }
+            (int skip, int take) = input.CalculateSkipAndTake(totalRows);
 
             var resultList = await query
-                .Skip(left)
-                .Take(right - left + 1) // right 和 left 是 0-index
+                .Skip(skip)
+                .Take(take)
                 .ToListAsync();
 
-            return (left, resultList);
+            return (skip, resultList);
         }
 
         #endregion

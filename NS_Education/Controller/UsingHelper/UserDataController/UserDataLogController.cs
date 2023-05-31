@@ -230,8 +230,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 result = result.Where(i =>
                     i.EventType.Contains(input.Keyword) || i.Description.Contains(input.Keyword));
 
-            // 由新到舊
-            return result.OrderByDescending(i => i.CreDate);
+            return input.OrderByAscending ? result.OrderBy(i => i.CreDate) : result.OrderByDescending(i => i.CreDate);
         }
 
         #endregion

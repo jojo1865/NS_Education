@@ -30,20 +30,20 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 這個功能有特殊需求：當輸入 freeDate 時需要用 Resver_TimeSpan 篩選，但 RTS 並不是直接 FK 關係，
             // 不好在 Helper 製作 Query 的過程中表示。
             // 因此，這裡不使用 Helper。
-            
+
             // 1. 驗證輸入
             bool isValid = await GetResverSiteListValidateInput(input);
 
             if (!isValid)
                 return GetResponseJson();
-            
+
             // 2. 套用查詢
             IQueryable<B_SiteData> query = GetResverSiteListMakeQuery(input);
-            
+
             B_SiteData[] sites = await query.ToArrayAsync();
-            
+
             var queryResult = await GetResverSiteListFilterByFreeDate(input, sites);
-            
+
             // 3. 轉換成輸出結果
             BaseResponseForPagedList<Resver_GetResverSiteList_Output_Row_APIItem> response =
                 new BaseResponseForPagedList<Resver_GetResverSiteList_Output_Row_APIItem>
@@ -65,27 +65,29 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 取得總筆數
             response.SetByInput(input);
             response.AllItemCt = response.Items.Count;
-            
+
             // 切分頁 ... 因為 freeDate 的處理無法在 EF 做，所以無法照一般流程丟兩次（第一次取 Count，第二次取切完的結果）
             // 所以這支到這裡才切
 
             response.Items = response.Items.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToList();
-                
+
 
             return GetResponseJson(response);
         }
 
-        private async Task<Dictionary<B_SiteData, Resver_GetResverSiteList_TimeSpan_Output_APIItem[]>> GetResverSiteListFilterByFreeDate(
-            Resver_GetResverSiteList_Input_APIItem input, 
-            B_SiteData[] sites)
+        private async Task<Dictionary<B_SiteData, Resver_GetResverSiteList_TimeSpan_Output_APIItem[]>>
+            GetResverSiteListFilterByFreeDate(
+                Resver_GetResverSiteList_Input_APIItem input,
+                B_SiteData[] sites)
         {
             // 如果沒有 FreeDate，直接傳一個 B_SiteData : empty 的 LookUp
             if (!input.FreeDate.TryParseDateTime(out DateTime freeDate))
-                return sites.ToDictionary(sd => sd, sd => Array.Empty<Resver_GetResverSiteList_TimeSpan_Output_APIItem>());
+                return sites.ToDictionary(sd => sd,
+                    sd => Array.Empty<Resver_GetResverSiteList_TimeSpan_Output_APIItem>());
 
             Dictionary<B_SiteData, Resver_GetResverSiteList_TimeSpan_Output_APIItem[]> result =
                 new Dictionary<B_SiteData, Resver_GetResverSiteList_TimeSpan_Output_APIItem[]>();
-            
+
             // 有 FreeDate
             // 1. 查詢所有可用的 D_TimeSpan
             D_TimeSpan[] allDts = await DC.D_TimeSpan.Where(dts => dts.ActiveFlag && !dts.DeleteFlag).ToArrayAsync();
@@ -116,8 +118,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 if (!rows.Any(r => r.AllowResverFlag))
                     continue;
 
-                result[siteData] = rows; 
+                result[siteData] = rows;
             }
+
             return result;
         }
 
@@ -138,8 +141,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 query = query.Where(sd => sd.ActiveFlag == (input.ActiveFlag == 1));
 
             query = query.Where(sd => sd.DeleteFlag == (input.DeleteFlag == 1));
-            
-            return query.OrderBy(sd => sd.BSID);
+
+            return input.OrderByAscending ? query.OrderBy(sd => sd.BSID) : query.OrderByDescending(sd => sd.BSID);
         }
 
         private async Task<bool> GetResverSiteListValidateInput(Resver_GetResverSiteList_Input_APIItem input)
@@ -147,9 +150,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             return await input.StartValidate()
                 .Validate(i => i.FreeDate.IsNullOrWhiteSpace() || i.FreeDate.TryParseDateTime(out _),
                     () => AddError(WrongFormat("欲篩選之有空日期")))
-                .Validate(i => i.BSCID1.IsZeroOrAbove(), 
+                .Validate(i => i.BSCID1.IsZeroOrAbove(),
                     () => AddError(WrongFormat("欲篩選之樓別 ID")))
-                .ValidateAsync(async i => i.BSCID1 == 0 || await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
+                .ValidateAsync(
+                    async i => i.BSCID1 == 0 ||
+                               await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
                     i => AddError(NotFound($"欲篩選之樓別 ID（{i.BSCID1}）")))
                 .Validate(i => i.PeopleCt.IsZeroOrAbove(),
                     () => AddError(WrongFormat("欲篩選之可容納人數")))

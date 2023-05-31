@@ -199,7 +199,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             query = query.Where(sd => sd.DeleteFlag == (input.DeleteFlag == 1));
 
-            return query.OrderBy(sd => sd.BSID);
+            return input.OrderByAscending ? query.OrderBy(sd => sd.BSID) : query.OrderByDescending(sd => sd.BSID);
         }
 
         public async Task<SiteData_GetList_Output_Row_APIItem> GetListPagedEntityToRow(B_SiteData entity)

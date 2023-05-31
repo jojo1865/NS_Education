@@ -100,10 +100,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 如果是倒序時，
             // |- a. 起始 index: 由最後減回來，並多減一頁的筆數
             // +- b. 取的筆數: index 大於等於 0 時，照一般處理；否則，加上 index（如 index 為 -2，表示向左溢出 2 筆，即最後一頁只有 n-2 筆）
-            int startIndex = input.OrderByAscending
+            int startIndex = input.ReverseOrder
                 ? input.GetStartIndex()
                 : totalRows - input.GetStartIndex() - input.GetTakeRowCount();
-            int takeRow = input.OrderByAscending
+            int takeRow = input.ReverseOrder
                 ? input.GetTakeRowCount()
                 : input.GetTakeRowCount() + Math.Min(0, startIndex); // 雖然正序時不會出現 startIndex < 0 的情況，但為求可讀性，這裡的三元式不作簡化
 
@@ -112,7 +112,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 .Take(Math.Max(0, takeRow))
                 .ToListAsync();
 
-            if (!input.OrderByAscending)
+            if (!input.ReverseOrder)
                 resultList.Reverse();
 
             return resultList;

@@ -142,7 +142,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             query = query.Where(sd => sd.DeleteFlag == (input.DeleteFlag == 1));
 
-            return input.OrderByAscending ? query.OrderBy(sd => sd.BSID) : query.OrderByDescending(sd => sd.BSID);
+            return input.ReverseOrder ? query.OrderBy(sd => sd.BSID) : query.OrderByDescending(sd => sd.BSID);
         }
 
         private async Task<bool> GetResverSiteListValidateInput(Resver_GetResverSiteList_Input_APIItem input)

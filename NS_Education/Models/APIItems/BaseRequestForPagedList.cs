@@ -20,9 +20,9 @@ namespace NS_Education.Models.APIItems
         private int CutPageOrDefault => CutPage == 0 ? IoConstants.DefaultCutPage : CutPage;
 
         /// <summary>
-        /// 查詢時，是否採正序排序。
+        /// 查詢時，是否將預設排序倒轉。
         /// </summary>
-        public bool OrderByAscending { get; set; } = true;
+        public bool ReverseOrder { get; set; } = true;
 
         /// <summary>
         /// 取得是否啟用分頁處理。

@@ -103,8 +103,8 @@ namespace NS_Education.Controller.UsingHelper
             if (input.ResponseType.IsInBetween(0, 1))
                 query = query.Where(cq => cq.ResponseFlag == (input.ResponseType == 1));
 
-            return query.OrderBy(cq => cq.ResponseFlag)
-                .ThenByDescending(cq => cq.AskDate)
+            return query.OrderByDescending(cq => cq.AskDate)
+                .ThenBy(cq => cq.ResponseFlag)
                 .ThenBy(cq => cq.CQID);
         }
 
@@ -187,9 +187,10 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit
 
         private string SubmitResponseDateNotAfterAskDate = "回答時間不得小於問題發生時間！";
-        
+
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(CustomerQuestion_Submit_Input_APIItem.CQID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null,
+            nameof(CustomerQuestion_Submit_Input_APIItem.CQID))]
         public async Task<string> Submit(CustomerQuestion_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);
@@ -208,7 +209,8 @@ namespace NS_Education.Controller.UsingHelper
             DateTime responseDate = default;
             var validation = input.StartValidate(true)
                 .Validate(i => i.CQID == 0, () => AddError(WrongFormat("問題紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
+                    () => AddError(EmptyNotAllowed("客戶 ID")))
                 .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")));
 
             // 若傳入內容表示已回答，則回答者相關的欄位需要檢核
@@ -230,12 +232,12 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<CustomerQuestion> SubmitCreateData(CustomerQuestion_Submit_Input_APIItem input)
         {
             input.AskDate.TryParseDateTime(out var askDate);
-            
+
             // 只在已回答狀態時才處理 ResponseDate
             DateTime responseDate = default;
             if (input.ResponseFlag)
                 input.ResponseDate.TryParseDateTime(out responseDate);
-            
+
             return await Task.FromResult(new CustomerQuestion
             {
                 CID = input.CID,
@@ -260,7 +262,8 @@ namespace NS_Education.Controller.UsingHelper
             DateTime responseDate = default;
             var validation = input.StartValidate(true)
                 .Validate(i => i.CQID.IsAboveZero(), () => AddError(EmptyNotAllowed("問題紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(EmptyNotAllowed("客戶 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
+                    () => AddError(EmptyNotAllowed("客戶 ID")))
                 .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")));
 
             // 若傳入內容表示已回答，則回答者相關的欄位需要檢核
@@ -287,12 +290,12 @@ namespace NS_Education.Controller.UsingHelper
         public void SubmitEditUpdateDataFields(CustomerQuestion data, CustomerQuestion_Submit_Input_APIItem input)
         {
             input.AskDate.TryParseDateTime(out var askDate);
-            
+
             // 只在已回答狀態時才處理 ResponseDate
             DateTime responseDate = default;
             if (input.ResponseFlag)
                 input.ResponseDate.TryParseDateTime(out responseDate);
-            
+
             data.CID = input.CID;
             data.AskDate = askDate;
             data.AskTitle = input.AskTitle;

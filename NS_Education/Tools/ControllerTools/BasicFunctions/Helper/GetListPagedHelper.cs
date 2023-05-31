@@ -103,42 +103,41 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             response.AllItemCt = totalRows;
 
             // 2. 再回傳實際資料
-            // 如果是倒序時，
-            // |- a. 起始 index: 由最後減回來，並多減一頁的筆數
-            // +- b. 取的筆數: index 大於等於 0 時，照一般處理；否則，加上 index（如 index 為 -2，表示向左溢出 2 筆，即最後一頁只有 n-2 筆）
-            int startIndex = input.ReverseOrder
-                ? GetEndIndex(input, totalRows) - input.GetTakeRowCount() + 1
-                : GetStartIndex(input); // 0-index - 1-index, 作補正
 
-            // 最多只拿到 TakeRowCount 筆；當 startIndex 小於 0 時（最後一頁資料不滿 TakeRowCount 筆時），加上 startIndex 作為補正
-            int takeRow = input.ReverseOrder
-                ? input.GetTakeRowCount() + Math.Min(0, startIndex)
-                : input.GetTakeRowCount();
-
-            // 如果 takeRow 小於等於 0，表示查不到資料，直接返回
-
-            if (takeRow <= 0)
+            // 當查詢頁數超出總頁數時，直接回傳空清單
+            if (totalRows == 0 || input.NowPage > response.AllPageCt)
                 return (0, new List<TEntity>());
 
-            // 把小於 0 的 startIndex 轉成 0
-            startIndex = Math.Max(0, startIndex);
+            // 正序
+            // 1 2 3 4 5 6 7 8 9 0
+            // +---+ +---+ +---+ +
+
+            // 反序
+            // 1 2 3 4 5 6 7 8 9 0
+            // + +---+ +---+ +---+
+
+            int left, right;
+
+            if (!input.ReverseOrder)
+            {
+                // 正序時，照內建算式取值
+                left = input.GetStartIndex();
+                right = left + input.GetTakeRowCount();
+            }
+            else
+            {
+                // 正序時，從後方算回來，取得 right
+                // 統一轉成 0-index 計算
+                right = totalRows - 1 - input.GetStartIndex();
+                left = Math.Max(0, right - (input.GetTakeRowCount() - 1));
+            }
 
             var resultList = await query
-                .Skip(startIndex)
-                .Take(takeRow)
+                .Skip(left)
+                .Take(right - left + 1) // right 和 left 是 0-index
                 .ToListAsync();
 
-            return (startIndex, resultList);
-        }
-
-        private static int GetStartIndex(TGetListRequest input)
-        {
-            return input.GetStartIndex();
-        }
-
-        private static int GetEndIndex(TGetListRequest input, int totalRows)
-        {
-            return totalRows - input.GetStartIndex() - 1;
+            return (left, resultList);
         }
 
         #endregion

@@ -199,7 +199,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             query = query.Where(sd => sd.DeleteFlag == (input.DeleteFlag == 1));
 
-            return input.ReverseOrder
+            return !input.ReverseOrder
                 ? query
                     .OrderBy(sd => sd.Code)
                     .ThenBy(sd => sd.BSID)

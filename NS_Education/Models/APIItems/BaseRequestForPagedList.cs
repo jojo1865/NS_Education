@@ -22,7 +22,7 @@ namespace NS_Education.Models.APIItems
         /// <summary>
         /// 查詢時，是否將預設排序倒轉。
         /// </summary>
-        public bool ReverseOrder { get; set; } = true;
+        public bool ReverseOrder { get; set; } = false;
 
         /// <summary>
         /// 取得是否啟用分頁處理。

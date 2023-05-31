@@ -1,4 +1,3 @@
-using System;
 using NS_Education.Variables;
 
 namespace NS_Education.Models.APIItems
@@ -26,7 +25,7 @@ namespace NS_Education.Models.APIItems
         public bool OrderByAscending { get; set; } = true;
 
         /// <summary>
-        /// 取得是否不採分頁處理的布林值。
+        /// 取得是否啟用分頁處理。
         /// </summary>
         public bool IsPagingEnabled => NowPage > 0;
 
@@ -40,10 +39,10 @@ namespace NS_Education.Models.APIItems
         /// <summary>
         /// 依據目前的 NowPage
         /// 與 CutPage，回傳應取得多少筆資料。<br/>
-        /// 當 NowPage 為 0 時，顯示所有資料。 
+        /// 當不啟用分頁功能時，回傳一百筆資料。 
         /// </summary>
         /// <returns>應取得多少筆資料</returns>
         public int GetTakeRowCount()
-            => IsPagingEnabled ? CutPageOrDefault : Int32.MaxValue;
+            => IsPagingEnabled ? CutPageOrDefault : 100;
     }
 }

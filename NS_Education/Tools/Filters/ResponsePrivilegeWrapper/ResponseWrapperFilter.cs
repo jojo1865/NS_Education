@@ -131,7 +131,8 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
         private static void WrapResponse(ActionExecutedContext filterContext, IEnumerable<Privilege> privileges)
         {
             // 取得此次 action 完整的 HTTP Response 並轉成 JObject
-            filterContext.Result = RequestHelper.CreateWrappedResponse(filterContext, filterContext.Result, privileges);
+            filterContext.Result =
+                ResponseHelper.CreateWrappedResponse(filterContext, filterContext.Result, privileges);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace NS_Education.Tools.Filters.ExceptionHandlerFilter
     {
         public void OnException(ExceptionContext filterContext)
         {
-            filterContext.Result = RequestHelper.CreateWrappedResponse(filterContext, filterContext.Result);
+            filterContext.Result = ResponseHelper.CreateWrappedResponse(filterContext, filterContext.Result);
             filterContext.ExceptionHandled = true;
         }
     }

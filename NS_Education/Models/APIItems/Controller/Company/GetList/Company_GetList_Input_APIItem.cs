@@ -4,5 +4,6 @@ namespace NS_Education.Models.APIItems.Controller.Company.GetList
     {
         public string Keyword { get; set; }
         public int BCID { get; set; }
+        public int DepartmentDeleteFlag { get; set; } = 0;
     }
 }

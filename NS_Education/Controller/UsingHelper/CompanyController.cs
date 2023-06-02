@@ -53,10 +53,13 @@ namespace NS_Education.Controller.UsingHelper
 
         #region GetList
 
+        private int departmentDeleteFlag = 0;
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(Company_GetList_Input_APIItem input)
         {
+            departmentDeleteFlag = input.DepartmentDeleteFlag;
             return await _getListPagedHelper.GetPagedList(input);
         }
 
@@ -109,6 +112,7 @@ namespace NS_Education.Controller.UsingHelper
                         DCID = dd.DCID,
                         DeleteFlag = dd.DeleteFlag
                     })
+                    .Where(dd => departmentDeleteFlag == -1 || dd.DeleteFlag == (departmentDeleteFlag == 1))
                     .ToList(),
                 DepartmentCt = entity.D_Department
                     .Count(dd => dd.ActiveFlag && !dd.DeleteFlag),

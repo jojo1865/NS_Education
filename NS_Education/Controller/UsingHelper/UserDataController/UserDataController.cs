@@ -699,6 +699,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             var query = DC.UserData
                 .Include(u => u.D_Department)
                 .Include(u => u.D_Department.M_Department_Category)
+                .Include(u => u.D_Department.D_Company)
                 .Include(u => u.M_Group_User)
                 .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData))
                 .AsQueryable();
@@ -721,7 +722,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             {
                 Uid = entity.UID,
                 Username = entity.UserName,
-                Department = entity.D_Department?.TitleC,
+                Company = entity.D_Department?.D_Company?.TitleC ?? entity.D_Department?.D_Company?.TitleE ?? "",
+                Department = entity.D_Department?.TitleC ?? entity.D_Department?.TitleE ?? "",
                 // 目前系統每個使用者只會有一個 Group
                 Role = entity.M_Group_User
                     .OrderBy(mgu => mgu.MID)

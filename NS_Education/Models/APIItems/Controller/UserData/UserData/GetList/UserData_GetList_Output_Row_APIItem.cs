@@ -4,6 +4,7 @@ namespace NS_Education.Models.APIItems.Controller.UserData.UserData.GetList
     {
         public int Uid { get; set; }
         public string Username { get; set; }
+        public string Company { get; set; }
         public string Department { get; set; }
         public string Role { get; set; }
     }

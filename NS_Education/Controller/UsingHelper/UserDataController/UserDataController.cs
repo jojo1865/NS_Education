@@ -723,7 +723,12 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 Username = entity.UserName,
                 Department = entity.D_Department?.TitleC,
                 // 目前系統每個使用者只會有一個 Group
-                Role = entity.M_Group_User.FirstOrDefault()?.GroupData?.Title ?? ""
+                Role = entity.M_Group_User
+                    .OrderBy(mgu => mgu.MID)
+                    .FirstOrDefault(mgu => mgu.GroupData != null
+                                           && !mgu.GroupData.DeleteFlag
+                                           && mgu.GroupData.ActiveFlag)
+                    ?.GroupData.Title ?? ""
             });
         }
 
@@ -936,7 +941,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             foreach (UserData_BatchSubmitGroup_Input_Row_APIItem item in itemsArray)
             {
                 UserData user = data[item.UID];
-                // 清空 user FK
+                // 清空既有的 groupUser, 因為目前每個 user 實際上只需要支援一個 groupUser
                 DC.M_Group_User.RemoveRange(user.M_Group_User);
 
                 // 寫入新的角色

@@ -30,7 +30,8 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
             {
                 JwtAuthFilter.JwtAuthFilter.ValidateTokenDecryptable(filterContext, JwtConstants.Secret, out claims);
             }
-            catch {
+            catch
+            {
                 // 解密失敗或取不到 JWT 時，不回傳任何權限資訊
                 WrapResponse(filterContext, null);
                 return;
@@ -40,21 +41,23 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
             // Query 1: 找出目前所在的 MenuData 底下所有 MenuAPI
             string contextUri = FilterStaticTools.GetContextUri(filterContext);
             var menuApis = context.MenuData
-                .Include(menuData => menuData.MenuAPI)
-                .Include(menuData => menuData.MenuAPI.Select(api => api.MenuData))
-                .Where(mainMenu => mainMenu.ActiveFlag
-                                   && !mainMenu.DeleteFlag
-                                   && contextUri.Contains(mainMenu.URL))
-                .SelectMany(mainMenu => mainMenu.MenuAPI)
+                    .Include(menuData => menuData.MenuAPI)
+                    .Include(menuData => menuData.MenuAPI.Select(api => api.MenuData))
+                    .Where(mainMenu => mainMenu.ActiveFlag
+                                       && !mainMenu.DeleteFlag
+                                       && contextUri.Contains(mainMenu.URL))
+                    .SelectMany(mainMenu => mainMenu.MenuAPI)
                 ;
 
             // Query 2: 將 menuAPI 對應回 m_group_menu, 確認 user 有無權限
             int uidInClaim = FilterStaticTools.GetUidInClaimInt(claims);
-            var queryResult  = context.M_Group_Menu
+            var queryResult = context.M_Group_Menu
                 .Include(groupMenu => groupMenu.GroupData)
                 .Include(groupMenu => groupMenu.GroupData.M_Group_User)
                 .Include(groupMenu => groupMenu.GroupData.M_Group_User.Select(mgu => mgu.UserData))
                 .Include(groupMenu => groupMenu.MenuData)
+                .Where(groupMenu => groupMenu.GroupData.ActiveFlag
+                                    && !groupMenu.GroupData.DeleteFlag)
                 // 選出所有此 user 擁有權限的 groupMenu
                 .Where(groupMenu
                     => groupMenu.GroupData.M_Group_User
@@ -68,7 +71,7 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
                     menuApi => menuApi.MenuData.URL,
                     (groupMenu, menuApi) => new Privilege
                     {
-                        Url = menuApi.APIURL, 
+                        Url = menuApi.APIURL,
                         ShowFlag = groupMenu.ShowFlag,
                         AddFlag = groupMenu.AddFlag,
                         EditFlag = groupMenu.EditFlag,
@@ -76,12 +79,12 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
                         PrintFlag = groupMenu.PringFlag
                     })
                 .ToList();
-            
+
             // 特殊處理：
             // 當擁有包含 / 為 URL 的權限時，讓所有其他權限也考量此權限的 flags
             var rootPrivileges = queryResult
                 .Where(p => p.Url == PrivilegeConstants.RootAccessUrl)
-            // 整合此 user 所有 / 為 URL 的權限
+                // 整合此 user 所有 / 為 URL 的權限
                 .GroupBy(p => p.Url)
                 .Select(g => new Privilege
                 {
@@ -98,8 +101,8 @@ namespace NS_Education.Tools.Filters.ResponsePrivilegeWrapper
                         (acc, curr) => acc || curr.PrintFlag)
                 })
                 // 只會有一筆
-                .FirstOrDefault();            
-            
+                .FirstOrDefault();
+
             // 以 URL 為單位，做 grouping 並彙整此 user 所有 group 的權限
             // 意思是只要使用者所屬的任一 group 有權限就是有權限
             // 在最終回傳給前端的回覆中，避免包含最高權限

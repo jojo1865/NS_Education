@@ -240,10 +240,9 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                         .Where(u => u.UID == uid && u.ActiveFlag && !u.DeleteFlag)
                         .SelectMany(u => u.M_Group_User)
                         .Select(groupUser => groupUser.GroupData)
+                        .Where(group => group.ActiveFlag && !group.DeleteFlag)
                         .SelectMany(group => group.M_Group_Menu)
-                        .Where(groupMenu => groupMenu.GroupData.ActiveFlag
-                                            && !groupMenu.GroupData.DeleteFlag
-                                            && groupMenu.MenuData.ActiveFlag
+                        .Where(groupMenu => groupMenu.MenuData.ActiveFlag
                                             && !groupMenu.MenuData.DeleteFlag
                                             && contextUri.Contains(groupMenu.MenuData.URL)
                         )

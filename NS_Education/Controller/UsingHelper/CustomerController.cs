@@ -289,9 +289,10 @@ namespace NS_Education.Controller.UsingHelper
                     ContactType = contact?.ContectType ?? (int)ContactType.Phone,
                     // ContectData 是 string, 有可能有 contact 但 contactData 卻是 null, 所以這裡不能用 elvis
                     ContactData = contact != null ? contact.ContectData : cbu.BusinessUser?.Phone ?? "",
-                    // TODO: Magic Numbers, 待修正
-                    MKSalesFlag = cbu.MappingType == 1 || cbu.MappingType == 3,
-                    OPSalesFlag = cbu.MappingType == 2 || cbu.MappingType == 3
+                    MKSalesFlag = cbu.MappingType == DbConstants.MkSalesMappingType ||
+                                  cbu.MappingType == DbConstants.OpAndMkSalesMappingType,
+                    OPSalesFlag = cbu.MappingType == DbConstants.OpSalesMappingType ||
+                                  cbu.MappingType == DbConstants.OpAndMkSalesMappingType,
                 };
 
                 result.Add(newItem);

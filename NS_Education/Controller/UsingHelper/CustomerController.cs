@@ -288,7 +288,10 @@ namespace NS_Education.Controller.UsingHelper
                     Name = cbu.BusinessUser?.Name ?? "",
                     ContactType = contact?.ContectType ?? (int)ContactType.Phone,
                     // ContectData 是 string, 有可能有 contact 但 contactData 卻是 null, 所以這裡不能用 elvis
-                    ContactData = contact != null ? contact.ContectData : cbu.BusinessUser?.Phone ?? ""
+                    ContactData = contact != null ? contact.ContectData : cbu.BusinessUser?.Phone ?? "",
+                    // TODO: Magic Numbers, 待修正
+                    MKSalesFlag = cbu.MappingType == 1 || cbu.MappingType == 3,
+                    OPSalesFlag = cbu.MappingType == 2 || cbu.MappingType == 3
                 };
 
                 result.Add(newItem);
@@ -363,6 +366,8 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
+                .Validate(i => i.Code is null || i.Code.Length.IsInBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry),
                     () => AddError(NotFound("行業別 ID")))
@@ -427,7 +432,7 @@ namespace NS_Education.Controller.UsingHelper
                     (item, index) => new M_Customer_BusinessUser
                     {
                         BUID = item.BUID,
-                        MappingType = GetBusinessUserMappingType(item.BUID), SortNo = index + 1,
+                        MappingType = GetBusinessUserMappingType(item), SortNo = index + 1,
                         ActiveFlag = true
                     }).ToList()
             };
@@ -526,12 +531,16 @@ namespace NS_Education.Controller.UsingHelper
             addressToEdit.SortNo = 1;
         }
 
-        private int GetBusinessUserMappingType(int buId)
+        private int GetBusinessUserMappingType(Customer_Submit_BUID_APIItem input)
         {
-            return DC.BusinessUser
-                .Where(bu => bu.BUID == buId && bu.ActiveFlag && !bu.DeleteFlag)
-                .Select(bu => bu.OPsalesFlag ? 2 : bu.MKsalesFlag ? 1 : 0)
-                .FirstOrDefault();
+            if (input.MKSalesFlag && input.OPSalesFlag)
+                return 3;
+            if (input.OPSalesFlag)
+                return 2;
+            if (input.MKSalesFlag)
+                return 1;
+
+            return 0;
         }
 
         #endregion
@@ -543,6 +552,8 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
+                .Validate(i => i.Code is null || i.Code.Length.IsInBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry),
                     () => AddError(NotFound("行業別 ID")))
@@ -584,13 +595,13 @@ namespace NS_Education.Controller.UsingHelper
             var allAlreadyExistingCustomerBusinessUser = data.M_Customer_BusinessUser
                 .Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag)
                 .Where(cbu => allInputBuIds.ContainsKey(cbu.BUID))
-                .ToArray();
+                .ToDictionary(cbu => cbu.BUID, cbu => cbu);
 
             DC.M_Customer_BusinessUser.RemoveRange(
-                data.M_Customer_BusinessUser.Except(allAlreadyExistingCustomerBusinessUser));
+                data.M_Customer_BusinessUser.Except(allAlreadyExistingCustomerBusinessUser.Values));
 
             var inputBuIdsToCreate =
-                allInputBuIds.Keys.Except(allAlreadyExistingCustomerBusinessUser.Select(item => item.BUID));
+                allInputBuIds.Where(kvp => !allAlreadyExistingCustomerBusinessUser.ContainsKey(kvp.Key));
 
             // 更新資料
             data.BSCID6 = input.BSCID6;
@@ -612,13 +623,23 @@ namespace NS_Education.Controller.UsingHelper
             data.BillFlag = input.BillFlag;
             data.InFlag = input.InFlag;
             data.PotentialFlag = input.PotentialFlag;
+
+            // 修改舊資料
+            foreach (M_Customer_BusinessUser alreadyExisting in data.M_Customer_BusinessUser)
+            {
+                alreadyExisting.MappingType = GetBusinessUserMappingType(allInputBuIds[alreadyExisting.BUID]);
+            }
+
+            int originalMaxSortNo = data.M_Customer_BusinessUser.Max(cbu => cbu.SortNo);
+
+            // 增加新資料
             data.M_Customer_BusinessUser = data.M_Customer_BusinessUser.Concat(inputBuIdsToCreate.Select(
-                (id, index) => new M_Customer_BusinessUser
+                (kvp, index) => new M_Customer_BusinessUser
                 {
                     CID = data.CID,
-                    BUID = id,
-                    MappingType = GetBusinessUserMappingType(id),
-                    SortNo = index + 1,
+                    BUID = kvp.Key,
+                    MappingType = GetBusinessUserMappingType(kvp.Value),
+                    SortNo = originalMaxSortNo + 1 + index,
                     ActiveFlag = true
                 })).ToList();
 

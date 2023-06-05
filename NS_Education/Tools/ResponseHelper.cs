@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Validation;
+using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
@@ -27,16 +29,26 @@ namespace NS_Education.Tools
             // 如果這是 ExceptionContext 來的，把錯誤訊息設到 Status 中
             if (filterContext is ExceptionContext context)
             {
+                context.HttpContext.Response.StatusDescription = null;
                 if (context.Exception is HttpException httpException)
                 {
                     context.HttpContext.Response.StatusCode = httpException.GetHttpCode();
+                }
+                else if (context.Exception is DbEntityValidationException dbEntityValidationException)
+                {
+                    context.HttpContext.Response.StatusCode = 200;
+                    context.HttpContext.Response.StatusDescription = String.Join(", ",
+                        dbEntityValidationException.EntityValidationErrors
+                            .SelectMany(e => e.ValidationErrors)
+                            .Select(e => e.ErrorMessage));
                 }
                 else
                 {
                     context.HttpContext.Response.StatusCode = 500;
                 }
 
-                context.HttpContext.Response.StatusDescription = GetExceptionActualMessage(context);
+                context.HttpContext.Response.StatusDescription = context.HttpContext.Response.StatusDescription ??
+                                                                 GetExceptionActualMessage(context);
             }
 
             // 取得此次 action 完整的 HTTP Response 並轉成 JObject

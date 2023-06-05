@@ -6,5 +6,7 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetList
         public string Name { get; set; }
         public int ContactType { get; set; }
         public string ContactData { get; set; }
+        public bool MKSalesFlag { get; set; }
+        public bool OPSalesFlag { get; set; }
     }
 }

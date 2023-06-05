@@ -276,7 +276,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             // 先刪除所有舊有的 M_Customer_BusinessUser
             DC.M_Customer_BusinessUser.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu =>
-                cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.BUID));
+                cbu.ActiveFlag && !cbu.DeleteFlag && cbu.BUID == input.BUID));
 
             data.Code = input.Code;
             data.Name = input.Name;

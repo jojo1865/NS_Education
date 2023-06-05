@@ -106,12 +106,12 @@ namespace NS_Education.Controller.UsingHelper
                 Items = entity.M_Customer_BusinessUser
                     .Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag)
                     .Select(cbu => new BusinessUser_GetList_Customer_APIItem
-                {
-                    CID = cbu.CID,
-                    Code = cbu.Customer?.Code ?? "",
-                    TitleC = cbu.Customer?.TitleC ?? "",
-                    TitleE = cbu.Customer?.TitleE ?? ""
-                }).ToList()
+                    {
+                        CID = cbu.CID,
+                        Code = cbu.Customer?.Code ?? "",
+                        TitleC = cbu.Customer?.TitleC ?? "",
+                        TitleE = cbu.Customer?.TitleE ?? ""
+                    }).ToList()
             });
         }
 
@@ -186,7 +186,8 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(BusinessUser_Submit_Input_APIItem.BUID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null,
+            nameof(BusinessUser_Submit_Input_APIItem.BUID))]
         public async Task<string> Submit(BusinessUser_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);
@@ -212,7 +213,7 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = isInputValid &&
                            input.Items.Aggregate(true, (result, item) =>
                                result & item.StartValidate()
-                                   .Validate(_ => 
+                                   .Validate(_ =>
                                            DC.Customer.Any(c => c.ActiveFlag && !c.DeleteFlag && c.CID == item.CID),
                                        () => AddError(NotFound($"客戶 ID {item.CID}")))
                                    .IsValid()
@@ -233,7 +234,7 @@ namespace NS_Education.Controller.UsingHelper
                 M_Customer_BusinessUser = input.Items.Select((item, index) => new M_Customer_BusinessUser
                 {
                     CID = item.CID,
-                    MappingType = input.OPsalesFlag ? DbConstants.OpSalesMappingType : input.MKsalesFlag ? DbConstants.MkSalesMappingType : 0,
+                    MappingType = GetMappingType(input),
                     SortNo = index + 1
                 }).ToList()
             });
@@ -256,7 +257,7 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = isInputValid &&
                            input.Items.Aggregate(true, (result, item) =>
                                result & item.StartValidate()
-                                   .Validate(_ => 
+                                   .Validate(_ =>
                                            DC.Customer.Any(c => c.ActiveFlag && !c.DeleteFlag && c.CID == item.CID),
                                        () => AddError(NotFound($"客戶 ID {item.CID}")))
                                    .IsValid()
@@ -274,8 +275,9 @@ namespace NS_Education.Controller.UsingHelper
         public void SubmitEditUpdateDataFields(BusinessUser data, BusinessUser_Submit_Input_APIItem input)
         {
             // 先刪除所有舊有的 M_Customer_BusinessUser
-            DC.M_Customer_BusinessUser.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu => cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.BUID));
-            
+            DC.M_Customer_BusinessUser.RemoveRange(DC.M_Customer_BusinessUser.Where(cbu =>
+                cbu.ActiveFlag && !cbu.DeleteFlag && cbu.CID == data.BUID));
+
             data.Code = input.Code;
             data.Name = input.Name;
             data.Phone = input.Phone;
@@ -284,11 +286,17 @@ namespace NS_Education.Controller.UsingHelper
             data.M_Customer_BusinessUser = input.Items.Select((item, index) => new M_Customer_BusinessUser
             {
                 CID = item.CID,
-                MappingType = input.OPsalesFlag ? DbConstants.OpSalesMappingType :
-                    input.MKsalesFlag ? DbConstants.MkSalesMappingType : 0,
+                MappingType = GetMappingType(input),
                 SortNo = index + 1,
                 ActiveFlag = true
             }).ToList();
+        }
+
+        private static int GetMappingType(BusinessUser_Submit_Input_APIItem input)
+        {
+            return input.OPsalesFlag && input.MKsalesFlag ? DbConstants.OpAndMkSalesMappingType :
+                input.OPsalesFlag ? DbConstants.OpSalesMappingType :
+                input.MKsalesFlag ? DbConstants.MkSalesMappingType : 0;
         }
 
         #endregion

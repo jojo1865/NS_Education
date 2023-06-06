@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
@@ -131,7 +132,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
             if (isValid) return;
 
-            throw new UnauthorizedAccessException($"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
+            throw new HttpException((int)HttpStatusCode.Unauthorized,
+                $"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
         }
 
         private void ValidateLastPasswordChange(ClaimsPrincipal claims, ICollection<B_StaticCode> safetyConfig)

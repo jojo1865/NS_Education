@@ -44,11 +44,12 @@ namespace NS_Education.Controller.UsingHelper
             _deleteItemHelper = new DeleteItemHelper<TimeSpanController, D_TimeSpan>(this);
             _submitHelper = new SubmitHelper<TimeSpanController, D_TimeSpan, TimeSpan_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<TimeSpanController, D_TimeSpan>(this);
-            _getInfoByIdHelper = new GetInfoByIdHelper<TimeSpanController, D_TimeSpan, TimeSpan_GetInfoById_Output_APIItem>(this);
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<TimeSpanController, D_TimeSpan, TimeSpan_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
-        
+
         #region GetList
 
         [HttpGet]
@@ -167,6 +168,7 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit
 
         private const string SubmitWrongStartTime = "起始時間應小於等於結束時間！";
+
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(TimeSpan_Submit_Input_APIItem.DTSID))]
         public async Task<string> Submit(TimeSpan_Submit_Input_APIItem input)
@@ -180,14 +182,16 @@ namespace NS_Education.Controller.UsingHelper
         }
 
         #region Submit - Add
+
         public async Task<bool> SubmitAddValidateInput(TimeSpan_Submit_Input_APIItem input)
         {
-
             decimal priceRate = 0m;
-            
+
             bool isValid = input.StartValidate()
                 .Validate(i => i.DTSID == 0, () => AddError(WrongFormat("時段 ID")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
                 .Validate(i => i.HourS.IsInBetween(0, 23), () => AddError(OutOfRange("起始小時", 0, 23)))
                 .Validate(i => i.HourE.IsInBetween(0, 24), () => AddError(OutOfRange("結束小時", 0, 24)))
                 .Validate(i => i.MinuteS.IsInBetween(0, 59), () => AddError(OutOfRange("起始分鐘", 0, 59)))
@@ -218,16 +222,20 @@ namespace NS_Education.Controller.UsingHelper
                 PriceRatePercentage = (int)(decimal.Parse(input.PriceRate) * 100m) // 小數後會被捨去
             });
         }
+
         #endregion
 
         #region Submit - Edit
+
         public async Task<bool> SubmitEditValidateInput(TimeSpan_Submit_Input_APIItem input)
         {
             decimal priceRate = 0m;
-            
+
             bool isValid = input.StartValidate()
                 .Validate(i => i.DTSID.IsAboveZero(), () => AddError(EmptyNotAllowed("時段 ID")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
                 .Validate(i => i.HourS.IsInBetween(0, 23), () => AddError(OutOfRange("起始小時", 0, 23)))
                 .Validate(i => i.HourE.IsInBetween(0, 24), () => AddError(OutOfRange("結束小時", 0, 24)))
                 .Validate(i => i.MinuteS.IsInBetween(0, 59), () => AddError(OutOfRange("起始分鐘", 0, 59)))
@@ -260,6 +268,7 @@ namespace NS_Education.Controller.UsingHelper
             data.MinuteE = input.MinuteE;
             data.PriceRatePercentage = (int)(decimal.Parse(input.PriceRate) * 100m); // 小數後會被捨去
         }
+
         #endregion
 
         #endregion

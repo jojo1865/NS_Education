@@ -8,6 +8,7 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetList
         public int BUID { get; set; } = 0;
         public int ResverType { get; set; } = -1;
         public string ContactName { get; set; }
+        public string ContactData { get; set; }
 
         public int OrderBy { get; set; } = 0;
     }

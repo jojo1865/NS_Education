@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.Customer.GetInfoById;
 using NS_Education.Models.APIItems.Controller.Customer.GetList;
@@ -22,7 +23,6 @@ using NS_Education.Variables;
 namespace NS_Education.Controller.UsingHelper
 {
     public class CustomerController : PublicClass,
-        IGetListPaged<Customer, Customer_GetList_Input_APIItem, Customer_GetList_Output_Row_APIItem>,
         IGetInfoById<Customer, Customer_GetInfoById_Output_APIItem>,
         IChangeActive<Customer>,
         IDeleteItem<Customer>,
@@ -46,7 +46,6 @@ namespace NS_Education.Controller.UsingHelper
 
         #region Initialization
 
-        private readonly IGetListPagedHelper<Customer_GetList_Input_APIItem> _getListPagedHelper;
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
         private readonly IDeleteItemHelper _deleteItemHelper;
@@ -54,9 +53,6 @@ namespace NS_Education.Controller.UsingHelper
 
         public CustomerController()
         {
-            _getListPagedHelper =
-                new GetListPagedHelper<CustomerController, Customer, Customer_GetList_Input_APIItem,
-                    Customer_GetList_Output_Row_APIItem>(this);
             _getInfoByIdHelper =
                 new GetInfoByIdHelper<CustomerController, Customer, Customer_GetInfoById_Output_APIItem>(this);
             _changeActiveHelper =
@@ -75,7 +71,53 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(Customer_GetList_Input_APIItem input)
         {
-            return await _getListPagedHelper.GetPagedList(input);
+            // 這個端點需要用 M_Contect，因此無法用 helper
+
+            // 1. 輸入驗證
+            if (!await GetListPagedValidateInput(input))
+                return GetResponseJson();
+
+            // 2. 查資料
+            IOrderedQueryable<Customer> query = GetListPagedOrderedQuery(input);
+
+            // join M_Contect
+            string targetTableName = DC.GetTableName<Customer>();
+            var joinedQuery = query.GroupJoin(DC.M_Contect.Where(mc => mc.TargetTable == targetTableName),
+                c => c.CID,
+                mc => mc.TargetID,
+                (c, mc) => new { Customer = c, Contacts = mc }
+            );
+
+            if (input.ContactData.HasContent())
+                joinedQuery = joinedQuery.Where(j => j.Contacts.Any(c => c.ContectData.Contains(input.ContactData)));
+
+            var response = new BaseResponseForPagedList<Customer_GetList_Output_Row_APIItem>();
+            response.SetByInput(input);
+            response.AllItemCt = await joinedQuery.CountAsync();
+
+            (int skip, int take) = input.CalculateSkipAndTake(response.AllItemCt);
+
+            var queryResult = await joinedQuery.Skip(skip).Take(take).ToListAsync();
+
+            var list = new List<Customer_GetList_Output_Row_APIItem>();
+
+            int index = 0;
+            foreach (var result in queryResult)
+            {
+                Customer_GetList_Output_Row_APIItem row =
+                    await GetListPagedEntityToRow(result.Customer, result.Contacts);
+                row.SetIndex(index++);
+                await row.SetInfoFromEntity(result.Customer, this);
+
+                if (input.ReverseOrder)
+                    list.Insert(0, row);
+                else
+                    list.Add(row);
+            }
+
+            response.Items = list;
+
+            return GetResponseJson(response);
         }
 
         public async Task<bool> GetListPagedValidateInput(Customer_GetList_Input_APIItem input)
@@ -156,7 +198,8 @@ namespace NS_Education.Controller.UsingHelper
             return query.OrderBy(c => c.CID);
         }
 
-        public async Task<Customer_GetList_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity)
+        public async Task<Customer_GetList_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity,
+            IEnumerable<M_Contect> contacts)
         {
             string customerTableName = DC.GetTableName<Customer>();
             return await Task.FromResult(new Customer_GetList_Output_Row_APIItem
@@ -184,11 +227,7 @@ namespace NS_Education.Controller.UsingHelper
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
                 BusinessUsers = GetBusinessUserListFromEntity(entity),
-                Contacts = DC.M_Contect
-                    .Where(c => c.TargetTable == customerTableName)
-                    .Where(c => c.TargetID == entity.CID)
-                    .OrderBy(c => c.SortNo)
-                    .AsEnumerable()
+                Contacts = contacts
                     .Select(c => new Customer_GetList_Contact_APIItem
                     {
                         ContactType = ContactTypeController.GetContactTypeTitle(c.ContectType) ?? "",

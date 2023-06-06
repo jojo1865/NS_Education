@@ -243,9 +243,8 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                         .Where(group => group.ActiveFlag && !group.DeleteFlag)
                         .SelectMany(group => group.M_Group_Menu)
                         .Where(groupMenu => groupMenu.MenuData.ActiveFlag
-                                            && !groupMenu.MenuData.DeleteFlag
-                                            && contextUri.Contains(groupMenu.MenuData.URL)
-                        )
+                                            && !groupMenu.MenuData.DeleteFlag)
+                        .Where(groupMenu => groupMenu.MenuData.MenuAPI.Any(api => contextUri.Contains(api.APIURL)))
                     ;
 
                 // 4. 具備所有所需 Flags 時，才回傳 true。

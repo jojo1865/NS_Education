@@ -45,7 +45,8 @@ namespace NS_Education.Controller.UsingHelper
             _deleteItemHelper = new DeleteItemHelper<DepartmentController, D_Department>(this);
             _submitHelper = new SubmitHelper<DepartmentController, D_Department, Department_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<DepartmentController, D_Department>(this);
-            _getInfoByIdHelper = new GetInfoByIdHelper<DepartmentController, D_Department, Department_GetInfoById_Output_APIItem>(this);
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<DepartmentController, D_Department, Department_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -191,8 +192,11 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DDID == 0, () => AddError(WrongFormat("部門 ID")))
-                .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)), () => AddError(EmptyNotAllowed("公司 ID")))
+                .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)),
+                    () => AddError(EmptyNotAllowed("公司 ID")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -217,8 +221,11 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
-                .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)), () => AddError(EmptyNotAllowed("公司 ID")))
+                .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)),
+                    () => AddError(EmptyNotAllowed("公司 ID")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

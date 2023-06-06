@@ -305,6 +305,14 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(EmptyNotAllowed("入帳代號名稱")))
                 .Validate(i => i.PrintTitle.HasContent(),
                     () => AddError(EmptyNotAllowed("帳單列印名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(OutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(OutOfRange("名稱", 1, 60)))
+                .Validate(i => i.PrintTitle.HasLengthBetween(1, 100),
+                    () => AddError(OutOfRange("帳單列印名稱", 1, 100)))
+                .Validate(i => i.PrintNote.HasLengthBetween(0, 100),
+                    () => AddError(OutOfRange("帳單列印說明", 0, 100)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -342,6 +350,14 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(EmptyNotAllowed("入帳代號名稱")))
                 .Validate(i => i.PrintTitle.HasContent(),
                     () => AddError(EmptyNotAllowed("帳單列印名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(OutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(OutOfRange("名稱", 1, 60)))
+                .Validate(i => i.PrintTitle.HasLengthBetween(1, 100),
+                    () => AddError(OutOfRange("帳單列印名稱", 1, 100)))
+                .Validate(i => i.PrintNote.HasLengthBetween(0, 100),
+                    () => AddError(OutOfRange("帳單列印說明", 0, 100)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

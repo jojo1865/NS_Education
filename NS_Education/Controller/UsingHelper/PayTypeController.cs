@@ -43,7 +43,8 @@ namespace NS_Education.Controller.UsingHelper
             _deleteItemHelper = new DeleteItemHelper<PayTypeController, D_PayType>(this);
             _submitHelper = new SubmitHelper<PayTypeController, D_PayType, PayType_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<PayTypeController, D_PayType>(this);
-            _getInfoByIdHelper = new GetInfoByIdHelper<PayTypeController, D_PayType, PayType_GetInfoById_Output_APIItem>(this);
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<PayTypeController, D_PayType, PayType_GetInfoById_Output_APIItem>(this);
         }
 
         #endregion
@@ -194,8 +195,14 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DPTID == 0, () => AddError(WrongFormat("付款方式 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType), () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType),
+                    () => AddError(NotFound("分類 ID")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
+                .Validate(i => i.AccountingNo.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("會計科目代號", 0, 10)))
+                .Validate(i => i.CustomerNo.HasLengthBetween(0, 20), () => AddError(LengthOutOfRange("客戶代號", 0, 20)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -226,8 +233,14 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DPTID.IsAboveZero(), () => AddError(WrongFormat("付款方式 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType), () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType),
+                    () => AddError(NotFound("分類 ID")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
+                .Validate(i => i.AccountingNo.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("會計科目代號", 0, 10)))
+                .Validate(i => i.CustomerNo.HasLengthBetween(0, 20), () => AddError(LengthOutOfRange("客戶代號", 0, 20)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

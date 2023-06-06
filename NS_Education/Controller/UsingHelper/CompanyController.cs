@@ -212,6 +212,8 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company),
                     () => AddError(NotFound("分類 ID")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -238,6 +240,8 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company),
                     () => AddError(NotFound("分類 ID")))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

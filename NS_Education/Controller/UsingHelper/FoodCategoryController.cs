@@ -33,7 +33,7 @@ namespace NS_Education.Controller.UsingHelper
 
         private readonly IChangeActiveHelper _changeActiveHelper;
 
-        private readonly IGetInfoByIdHelper _getInfoByIdHelper; 
+        private readonly IGetInfoByIdHelper _getInfoByIdHelper;
 
         public FoodCategoryController()
         {
@@ -41,9 +41,12 @@ namespace NS_Education.Controller.UsingHelper
                 new GetListPagedHelper<FoodCategoryController, D_FoodCategory, FoodCategory_GetList_Input_APIItem,
                     FoodCategory_GetList_Output_Row_APIItem>(this);
             _deleteItemHelper = new DeleteItemHelper<FoodCategoryController, D_FoodCategory>(this);
-            _submitHelper = new SubmitHelper<FoodCategoryController, D_FoodCategory, FoodCategory_Submit_Input_APIItem>(this);
+            _submitHelper =
+                new SubmitHelper<FoodCategoryController, D_FoodCategory, FoodCategory_Submit_Input_APIItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<FoodCategoryController, D_FoodCategory>(this);
-            _getInfoByIdHelper = new GetInfoByIdHelper<FoodCategoryController, D_FoodCategory, FoodCategory_GetInfoById_Output_APIItem>(this);
+            _getInfoByIdHelper =
+                new GetInfoByIdHelper<FoodCategoryController, D_FoodCategory, FoodCategory_GetInfoById_Output_APIItem>(
+                    this);
         }
 
         #endregion
@@ -101,7 +104,8 @@ namespace NS_Education.Controller.UsingHelper
             return DC.D_FoodCategory.Where(fc => fc.DFCID == id);
         }
 
-        public async Task<FoodCategory_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(D_FoodCategory entity)
+        public async Task<FoodCategory_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(
+            D_FoodCategory entity)
         {
             return await Task.FromResult(new FoodCategory_GetInfoById_Output_APIItem
             {
@@ -150,7 +154,8 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(FoodCategory_Submit_Input_APIItem.DFCID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null,
+            nameof(FoodCategory_Submit_Input_APIItem.DFCID))]
         public async Task<string> Submit(FoodCategory_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);
@@ -162,12 +167,14 @@ namespace NS_Education.Controller.UsingHelper
         }
 
         #region Submit - Add
-        
+
         public async Task<bool> SubmitAddValidateInput(FoodCategory_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.DFCID == 0, () => AddError(WrongFormat("餐種 ID")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -183,9 +190,9 @@ namespace NS_Education.Controller.UsingHelper
                 Price = input.Price
             });
         }
-        
+
         #endregion
-        
+
         #region Submit - Edit
 
         public async Task<bool> SubmitEditValidateInput(FoodCategory_Submit_Input_APIItem input)
@@ -193,6 +200,8 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = input.StartValidate()
                 .Validate(i => i.DFCID.IsAboveZero(), () => AddError(EmptyNotAllowed("餐種 ID")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -210,7 +219,7 @@ namespace NS_Education.Controller.UsingHelper
             data.UnitPrice = input.UnitPrice;
             data.Price = input.Price;
         }
-        
+
         #endregion
 
         #endregion

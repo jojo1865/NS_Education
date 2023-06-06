@@ -41,11 +41,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // |- a. 選擇所有 LookUp key，對應的所有 MenuData 即為父 MenuData
             // |- b. 第二層為 LookUp 中此父親的 Values (子 MenuData)
             // +- c. 第三層為各子 MenuData 的 MenuAPI
-            
+
             // Response 物件
             BaseResponseForList<MenuData_GetListByUid_Output_Node_APIItem> response =
                 new BaseResponseForList<MenuData_GetListByUid_Output_Node_APIItem>();
-            
+
             // 遞迴產生 nodes 時的暫存區
             Dictionary<int, MenuData_GetListByUid_Output_Node_APIItem> createdNodes =
                 new Dictionary<int, MenuData_GetListByUid_Output_Node_APIItem>();
@@ -54,7 +54,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             {
                 MenuData_GetListByUid_Output_Node_APIItem parentMenuApiItem =
                     CreateNode(grouping.Key, menuDataDict, parentToChildrenLookUp, createdNodes);
-                
+
                 response.Items.Add(parentMenuApiItem);
             }
 
@@ -74,7 +74,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         {
             if (createdNodes == null)
                 createdNodes = new Dictionary<int, MenuData_GetListByUid_Output_Node_APIItem>();
-            
+
             // Parent 可能是 null - 表示所擁有的權限中，沒有父層選單的權限，只有子層選單權限。
             menuDataDict.TryGetValue(thisNodeId, out MenuData parentMenuOrNull);
 
@@ -102,9 +102,9 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                             CreateNode(child.MDID, menuDataDict, parentToChildrenLookUp, createdNodes)).ToList() ??
                         new List<MenuData_GetListByUid_Output_Node_APIItem>(),
                 Apis = parentMenuOrNull?.MenuAPI
-                           .Where(api => api.MenuData.ActiveFlag 
+                           .Where(api => api.MenuData.ActiveFlag
                                          && !api.MenuData.DeleteFlag
-                                         && api.MenuData.M_Group_Menu.Any(mgm => 
+                                         && api.MenuData.M_Group_Menu.Any(mgm =>
                                              mgm.GroupData.ActiveFlag
                                              && !mgm.GroupData.DeleteFlag
                                              && mgm.GroupData.M_Group_User.Any(mgu => mgu.UID == GetUid())
@@ -141,6 +141,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         private IOrderedQueryable<MenuData> GetListAllOrderedQuery()
         {
             // 如果是 Admin 或擁有 / 權限的人，回傳所有選單。否則才進行篩選
+            int uid = GetUid();
             var menuData = DC.UserData
                 .Include(ud => ud.M_Group_User)
                 .Include(ud => ud.M_Group_User.Select(mgu => mgu.GroupData))
@@ -148,7 +149,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Include(ud => ud.M_Group_User.Select(mgu => mgu.GroupData.M_Group_Menu.Select(mgm => mgm.MenuData)))
                 // UserData
                 .Where(ud => ud.ActiveFlag && !ud.DeleteFlag)
-                .Where(ud => ud.UID == GetUid())
+                .Where(ud => ud.UID == uid)
                 .SelectMany(ud => ud.M_Group_User)
                 // Group
                 .Select(mgu => mgu.GroupData)
@@ -171,7 +172,8 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Include(md => md.MenuAPI.Select(api => api.MenuData))
                 .Include(md => md.MenuAPI.Select(api => api.MenuData.M_Group_Menu))
                 .Include(md => md.MenuAPI.Select(api => api.MenuData.M_Group_Menu.Select(mgm => mgm.GroupData)))
-                .Include(md => md.MenuAPI.Select(api => api.MenuData.M_Group_Menu.Select(mgm => mgm.GroupData).Select(gd => gd.M_Group_User)));
+                .Include(md => md.MenuAPI.Select(api =>
+                    api.MenuData.M_Group_Menu.Select(mgm => mgm.GroupData).Select(gd => gd.M_Group_User)));
 
             return query.OrderBy(md => md.SortNo)
                 .ThenBy(md => md.URL)

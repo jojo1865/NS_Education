@@ -28,7 +28,7 @@ namespace NS_Education.Tools
             // 如果這是 ExceptionContext 來的，把錯誤訊息設到 Status 中
             if (filterContext is ExceptionContext context)
             {
-                context.HttpContext.Response.StatusDescription = null;
+                string forceMessage = null;
                 if (context.Exception is HttpException httpException)
                 {
                     context.HttpContext.Response.StatusCode = httpException.GetHttpCode();
@@ -36,7 +36,7 @@ namespace NS_Education.Tools
                 else if (context.Exception is DbEntityValidationException dbEntityValidationException)
                 {
                     context.HttpContext.Response.StatusCode = 200;
-                    context.HttpContext.Response.StatusDescription = String.Join(", ",
+                    forceMessage = String.Join(", ",
                         dbEntityValidationException.EntityValidationErrors
                             .SelectMany(e => e.ValidationErrors)
                             .Select(e => e.ErrorMessage));
@@ -46,7 +46,7 @@ namespace NS_Education.Tools
                     context.HttpContext.Response.StatusCode = 500;
                 }
 
-                context.HttpContext.Response.StatusDescription = context.HttpContext.Response.StatusDescription ??
+                context.HttpContext.Response.StatusDescription = forceMessage ??
                                                                  GetExceptionActualMessage(context);
             }
 

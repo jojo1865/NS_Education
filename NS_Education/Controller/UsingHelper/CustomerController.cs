@@ -125,10 +125,6 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = input.StartValidate()
                 .Validate(i => i.BSCID6.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的行業別")))
                 .Validate(i => i.BSCID4.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選的區域別")))
-                .ForceSkipIf(i => i.OrderBy == 0)
-                .Validate(i => Enum.IsDefined(typeof(Customer_GetList_OrderBy), i.OrderBy),
-                    () => AddError(UnsupportedValue("排序方式")))
-                .StopForceSkipping()
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -173,35 +169,12 @@ namespace NS_Education.Controller.UsingHelper
                     c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft) ==
                     (input.ResverType == 1));
 
-            if (Enum.IsDefined(typeof(Customer_GetList_OrderBy), input.OrderBy))
-            {
-                switch (Enum.Parse(typeof(Customer_GetList_OrderBy), input.OrderBy.ToString()))
-                {
-                    case Customer_GetList_OrderBy.ResverCt:
-                        query = query
-                            .OrderByDescending(c => c.Resver_Head
-                                .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
-                            );
-                        break;
-                    case Customer_GetList_OrderBy.QuotedPrice:
-                        query = query
-                            .OrderBy(c => c.Resver_Head
-                                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
-                                .Sum(rh => rh.QuotedPrice)
-                            );
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
             return query.OrderBy(c => c.CID);
         }
 
         public async Task<Customer_GetList_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity,
             IEnumerable<M_Contect> contacts)
         {
-            string customerTableName = DC.GetTableName<Customer>();
             return await Task.FromResult(new Customer_GetList_Output_Row_APIItem
             {
                 CID = entity.CID,

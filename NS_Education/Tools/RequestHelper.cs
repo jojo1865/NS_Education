@@ -23,6 +23,8 @@ namespace NS_Education.Tools
 
             if (!string.IsNullOrWhiteSpace(originHeader))
             {
+                if (originHeader.EndsWith("/"))
+                    originHeader = originHeader.Substring(0, originHeader.Length - 1);
                 httpResponse.Headers.Remove("Access-Control-Allow-Origin");
                 httpResponse.Headers.Add("Access-Control-Allow-Origin", originHeader);
             }

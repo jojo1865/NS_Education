@@ -20,7 +20,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
 
-namespace NS_Education.Controller.UsingHelper
+namespace NS_Education.Controller.UsingHelper.CustomerController
 {
     public class CustomerController : PublicClass,
         IGetInfoById<Customer, Customer_GetInfoById_Output_APIItem>,

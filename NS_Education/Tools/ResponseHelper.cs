@@ -7,7 +7,6 @@ using System.Web;
 using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
 using NS_Education.Models;
-using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
 
 namespace NS_Education.Tools
 {
@@ -24,7 +23,7 @@ namespace NS_Education.Tools
         /// </summary>
         /// <remarks>關於格式的說明，詳見 API 文件</remarks>
         internal static ActionResult CreateWrappedResponse(ControllerContext filterContext,
-            ActionResult originalActionResult, IEnumerable<Privilege> privileges = null)
+            ActionResult originalActionResult)
         {
             // 如果這是 ExceptionContext 來的，把錯誤訊息設到 Status 中
             if (filterContext is ExceptionContext context)
@@ -71,9 +70,7 @@ namespace NS_Education.Tools
                                   ?? (modify["Content"] != null
                                       ? JToken.Parse(modify["Content"]?.Value<string>() ?? "")
                                       : null
-                                  ),
-                    Privileges = modify.SelectToken("Content.Privileges")?.Value<Privilege[]>() ??
-                                 privileges ?? Array.Empty<Privilege>()
+                                  )
                 }).ToString(),
                 ContentEncoding = Encoding.UTF8,
                 ContentType = "application/json; charset=utf-8",

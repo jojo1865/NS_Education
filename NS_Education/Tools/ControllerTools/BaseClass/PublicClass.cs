@@ -10,11 +10,11 @@ using Newtonsoft.Json;
 using NS_Education.Models;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.Filters;
-using NS_Education.Tools.Filters.ResponsePrivilegeWrapper;
+using NS_Education.Tools.Filters.FinalizeResponseFilter;
 
 namespace NS_Education.Tools.ControllerTools.BaseClass
 {
-    [ResponseWrapperFilter(Order = Int32.MaxValue)]
+    [FinalizeResponseFilter(Order = Int32.MaxValue)]
     public class PublicClass : System.Web.Mvc.Controller
     {
         private readonly ICollection<string> _errors = new List<string>();

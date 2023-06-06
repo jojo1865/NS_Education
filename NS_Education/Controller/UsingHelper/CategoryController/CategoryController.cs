@@ -115,7 +115,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         public async Task<string> GetInfoById(int id)
         {
             // 特殊邏輯：如果 id 為 0，回傳一個空的
-            return id == 0 
+            return id == 0
                 ? await GetInfoByIdZero()
                 : await _getInfoByIdHelper.GetInfoById(id);
         }
@@ -186,7 +186,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         #endregion
 
         #region Submit
-        
+
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Category_Submit_Input_APIItem.BCID))]
         public async Task<string> Submit(Category_Submit_Input_APIItem input)
@@ -198,7 +198,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         {
             return input.BCID == 0;
         }
-        
+
         private async Task<int> GetNewSortNo(Category_Submit_Input_APIItem input)
         {
             int newSortNo = await DC.B_Category
@@ -217,9 +217,13 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
                 .Validate(i => i.BCID == 0, () => AddError(WrongFormat("分類 ID")))
                 .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(UnsupportedValue("上層 ID")))
                 .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
-                    await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)), () => AddError(NotFound("上層 ID")))
+                        await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)),
+                    () => AddError(NotFound("上層 ID")))
                 .Validate(i => i.CategoryType.IsInBetween(0, 9), () => AddError(OutOfRange("分類所屬類別", 0, 9)))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("分類名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -248,9 +252,13 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(UnsupportedValue("上層 ID")))
                 .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
-                    await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)), () => AddError(NotFound("上層 ID")))
+                        await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)),
+                    () => AddError(NotFound("上層 ID")))
                 .Validate(i => i.CategoryType.IsInBetween(0, 9), () => AddError(OutOfRange("分類所屬類別", 0, 9)))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("分類名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -269,7 +277,9 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
             data.TitleC = input.TitleC ?? data.TitleC;
             data.TitleE = input.TitleE ?? data.TitleE;
             // 只在 CategoryType 變更時才生成新的 SortNo
-            data.SortNo = input.CategoryType == data.CategoryType ? data.SortNo : Task.Run(() => GetNewSortNo(input)).Result;
+            data.SortNo = input.CategoryType == data.CategoryType
+                ? data.SortNo
+                : Task.Run(() => GetNewSortNo(input)).Result;
         }
 
         #endregion

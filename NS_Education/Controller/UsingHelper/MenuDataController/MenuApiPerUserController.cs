@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -22,6 +23,8 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         private static readonly string[] ApiTypes = { "瀏覽", "新增", "修改", "刪除", "匯出", "登入/登出" };
 
         #region GetList
+
+        private bool UserHasRootAccess = false;
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
@@ -67,6 +70,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             return GetResponseJson(response);
         }
 
+        [SuppressMessage("ReSharper", "ArrangeRedundantParentheses")]
         private MenuData_GetListByUid_Output_Node_APIItem CreateNode(int thisNodeId,
             IDictionary<int, MenuData> menuDataDict,
             ILookup<int, MenuData> parentToChildrenLookUp,
@@ -85,6 +89,42 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                     out MenuData_GetListByUid_Output_Node_APIItem result))
                 return result;
 
+            int uid = GetUid();
+
+            bool rootShow = false;
+            bool rootAdd = false;
+            bool rootEdit = false;
+            bool rootDelete = false;
+            bool rootPrint = false;
+
+            if (UserHasRootAccess)
+            {
+                // aggregate 所有屬於這個 user 的 root privileges, 作為 boolean 判斷用
+                UserData user = DC.UserData
+                    .Include(ud => ud.M_Group_User)
+                    .Include(ud => ud.M_Group_User.Select(mgu => mgu.GroupData))
+                    .Include(ud => ud.M_Group_User.Select(mgu => mgu.GroupData.M_Group_Menu))
+                    .Include(
+                        ud => ud.M_Group_User.Select(mgu => mgu.GroupData.M_Group_Menu.Select(mgm => mgm.MenuData)))
+                    .Single(ud => ud.ActiveFlag && !ud.DeleteFlag && ud.UID == uid);
+
+                IEnumerable<M_Group_Menu> groupMenus = user.M_Group_User
+                    .Select(mgu => mgu.GroupData)
+                    .Where(g => g.ActiveFlag && !g.DeleteFlag)
+                    .SelectMany(g => g.M_Group_Menu)
+                    .Where(mgm => mgm.MenuData.ActiveFlag && !mgm.MenuData.DeleteFlag)
+                    .Where(mgm => mgm.MenuData.URL == PrivilegeConstants.RootAccessUrl);
+
+                foreach (var mgm in groupMenus)
+                {
+                    rootShow = rootShow || mgm.ShowFlag;
+                    rootAdd = rootAdd || mgm.AddFlag;
+                    rootEdit = rootEdit || mgm.EditFlag;
+                    rootDelete = rootDelete || mgm.DeleteFlag;
+                    rootPrint = rootPrint || mgm.PringFlag;
+                }
+            }
+
             // 建立新的 Node
             MenuData_GetListByUid_Output_Node_APIItem newNode = new MenuData_GetListByUid_Output_Node_APIItem
             {
@@ -102,19 +142,29 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                             CreateNode(child.MDID, menuDataDict, parentToChildrenLookUp, createdNodes)).ToList() ??
                         new List<MenuData_GetListByUid_Output_Node_APIItem>(),
                 Apis = parentMenuOrNull?.MenuAPI
-                           .Where(api => api.MenuData.ActiveFlag
-                                         && !api.MenuData.DeleteFlag
-                                         && api.MenuData.M_Group_Menu.Any(mgm =>
-                                             mgm.GroupData.ActiveFlag
-                                             && !mgm.GroupData.DeleteFlag
-                                             && mgm.GroupData.M_Group_User.Any(mgu => mgu.UID == GetUid())
-                                             // APIType 對照 M_Group_Menu，只有擁有所須權限 flag 時才能計入
-                                             && (api.APIType != (int)MenuApiType.Add || mgm.AddFlag)
-                                             && (api.APIType != (int)MenuApiType.Delete || mgm.DeleteFlag)
-                                             && (api.APIType != (int)MenuApiType.Edit || mgm.EditFlag)
-                                             && (api.APIType != (int)MenuApiType.Print || mgm.PringFlag)
-                                             && (api.APIType != (int)MenuApiType.Show || mgm.ShowFlag)
-                                         )
+                           .Where(api =>
+                               // 先判斷管理員權限
+                               (UserHasRootAccess && (api.APIType != (int)MenuApiType.Add || rootAdd)
+                                                  && (api.APIType != (int)MenuApiType.Delete || rootDelete)
+                                                  && (api.APIType != (int)MenuApiType.Edit || rootEdit)
+                                                  && (api.APIType != (int)MenuApiType.Print || rootPrint)
+                                                  && (api.APIType != (int)MenuApiType.Show || rootShow))
+                               ||
+                               // 如果沒有管理員權限,再用 MenuData 回溯到 M_Group_Menu 確認權限
+                               (
+                                   api.MenuData.ActiveFlag
+                                   && !api.MenuData.DeleteFlag
+                                   && api.MenuData.M_Group_Menu.Any(mgm =>
+                                       mgm.GroupData.ActiveFlag
+                                       && !mgm.GroupData.DeleteFlag
+                                       && mgm.GroupData.M_Group_User.Any(mgu => mgu.UID == uid)
+                                       && (api.APIType != (int)MenuApiType.Add || mgm.AddFlag)
+                                       && (api.APIType != (int)MenuApiType.Delete || mgm.DeleteFlag)
+                                       && (api.APIType != (int)MenuApiType.Edit || mgm.EditFlag)
+                                       && (api.APIType != (int)MenuApiType.Print || mgm.PringFlag)
+                                       && (api.APIType != (int)MenuApiType.Show || mgm.ShowFlag)
+                                   )
+                               )
                            )
                            .Select(menuApi => new MenuData_GetListByUid_Output_MenuApi_APIItem
                            {
@@ -162,9 +212,9 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Select(mgm => mgm.MenuData)
                 .Where(md => md.ActiveFlag && !md.DeleteFlag);
 
-            bool hasRootAccess = menuData.Any(md => md.URL == PrivilegeConstants.RootAccessUrl);
+            UserHasRootAccess = menuData.Any(md => md.URL == PrivilegeConstants.RootAccessUrl);
 
-            var query = hasRootAccess
+            var query = UserHasRootAccess
                 ? DC.MenuData.AsQueryable()
                 : menuData;
 

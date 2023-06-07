@@ -28,38 +28,44 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         {
             _controller = controller;
         }
-        
+
         #region Submit
-        
+
         private static string UpdateFailed(Exception e)
             => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
 
         private const string SubmitAddValidateFailed = "欲新增資料的輸入格式不符！";
         private const string SubmitEditValidateFailed = "欲更新資料的輸入格式不符！";
         private const string SubmitEditNotFound = "查無欲更新的資料！";
-        
+
         public async Task<string> Submit(TSubmitRequest input)
         {
             // 1. 依據實作內容判定此次 Submit 為新增還是更新。
             // 2. 依據新增或更新模式，進行個別的輸入驗證。
             // |- a. 驗證通過時：執行邏輯。
             // +- b. 驗證失敗，且無錯誤訊息時：自動加上預設錯誤訊息。
-            
-            if (_controller.SubmitIsAdd(input))
+
+            using (var transaction = _controller.DC.Database.BeginTransaction())
             {
-                if (await _controller.SubmitAddValidateInput(input))
-                    await _SubmitAdd(input);
-                else if (!_controller.HasError())
-                    _controller.AddError(SubmitAddValidateFailed);
+                if (_controller.SubmitIsAdd(input))
+                {
+                    if (await _controller.SubmitAddValidateInput(input))
+                        await _SubmitAdd(input);
+                    else if (!_controller.HasError())
+                        _controller.AddError(SubmitAddValidateFailed);
+                }
+                else
+                {
+                    if (await _controller.SubmitEditValidateInput(input))
+                        await _SubmitEdit(input);
+                    else if (!_controller.HasError())
+                        _controller.AddError(SubmitEditValidateFailed);
+                }
+
+                if (!_controller.HasError())
+                    transaction.Commit();
             }
-            else
-            {
-                if (await _controller.SubmitEditValidateInput(input))
-                    await _SubmitEdit(input);
-                else if (!_controller.HasError())
-                    _controller.AddError(SubmitEditValidateFailed);
-            }
-            
+
             // 3. 回傳通用回傳訊息格式。
 
             return _controller.GetResponseJson();
@@ -77,11 +83,12 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 否則，儲存至DB。
             if (_controller.DC.GetPrimaryKeyFromEntity(t) != 0)
                 return;
-            
+
             try
             {
                 await Task.Run(() => _controller.DC.Set<TEntity>().Add(t));
-                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(), HttpContext.Current.Request);
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(),
+                    HttpContext.Current.Request);
             }
             catch (Exception e)
             {
@@ -113,7 +120,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 3. 儲存至 DB
             try
             {
-                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(), HttpContext.Current.Request);
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(),
+                    HttpContext.Current.Request);
             }
             catch (Exception e)
             {

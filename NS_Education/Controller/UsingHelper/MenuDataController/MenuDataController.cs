@@ -341,14 +341,13 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .ValidateAsync(
                     async i => i.ParentId == 0 || await DC.MenuData.ValidateIdExists(i.ParentId, nameof(MenuData.MDID)),
                     () => AddError(NotFound("上層選單 ID")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("選單名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("選單名稱", 1, 50)))
                 .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序")))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.StartsWith("/") && !i.Url.EndsWith("/"),
                     () => AddError(WrongFormat("選單目標網址")))
                 .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.Length.IsInBetween(0, 300),
                     () => AddError(TooLong("選單目標網址")))
-                .Validate(i => i.Title.Length.IsInBetween(0, 50), () => AddError(TooLong("選單名稱")))
                 .IsValid();
 
             return isValid;
@@ -383,14 +382,13 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .ValidateAsync(
                     async i => i.ParentId == 0 || await DC.MenuData.ValidateIdExists(i.ParentId, nameof(MenuData.MDID)),
                     () => AddError(NotFound("上層選單 ID")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("選單名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("選單名稱", 1, 50)))
                 .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序")))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.StartsWith("/") && !i.Url.EndsWith("/"),
                     () => AddError(WrongFormat("選單目標網址")))
                 .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.Length.IsInBetween(0, 300),
                     () => AddError(TooLong("選單目標網址")))
-                .Validate(i => i.Title.Length.IsInBetween(0, 50), () => AddError(TooLong("選單名稱")))
                 .IsValid();
 
             return isValid;

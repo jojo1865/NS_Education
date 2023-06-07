@@ -454,12 +454,15 @@ namespace NS_Education.Controller.UsingHelper
 
             // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
-                .Validate(item => item.ContactType == -1 || item.ContactType.IsInBetween(0, 3),
+                .ForceSkipIf(item => item.ContactType == -1)
+                .Validate(item => item.ContactType.IsInBetween(0, 3),
                     item => AddError(UnsupportedValue($"業務（ID：{item.BUID}）聯絡方式類型")))
-                .Validate(item => item.ContactType == -1 || item.ContactData.HasContent(),
+                .Validate(item => item.ContactData.HasContent(),
                     item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容")))
+                .Validate(item => item.ContactData.HasLengthBetween(1, 30),
+                    item => AddError(LengthOutOfRange($"業務（ID：{item.BUID}）聯絡方式內容", 1, 30)))
+                .StopForceSkipping()
                 .IsValid();
-
             return await Task.FromResult(isValid && isBusinessUserContactValid);
         }
 
@@ -656,7 +659,20 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
+            bool isBusinessUserContactValid = input.Items.StartValidateElements()
+                .ForceSkipIf(item => item.ContactType == -1)
+                .Validate(item => item.ContactType.IsInBetween(0, 3),
+                    item => AddError(UnsupportedValue($"業務（ID：{item.BUID}）聯絡方式類型")))
+                .Validate(item => item.ContactData.HasContent(),
+                    item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容")))
+                .Validate(item => item.ContactData.HasLengthBetween(1, 30),
+                    item => AddError(LengthOutOfRange($"業務（ID：{item.BUID}）聯絡方式內容", 1, 30)))
+                .StopForceSkipping()
+                .IsValid();
+
+
+            return await Task.FromResult(isValid && isBusinessUserContactValid);
         }
 
         public IQueryable<Customer> SubmitEditQuery(Customer_Submit_Input_APIItem input)

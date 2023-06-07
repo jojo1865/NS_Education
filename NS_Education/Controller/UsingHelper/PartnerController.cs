@@ -125,7 +125,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             return await _getInfoByIdHelper.GetInfoById(id);
         }
-        
+
         public IQueryable<B_Partner> GetInfoByIdQuery(int id)
         {
             return DC.B_Partner
@@ -219,12 +219,15 @@ namespace NS_Education.Controller.UsingHelper
 
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BPID == 0, () => AddError(WrongFormat("廠商 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner), () => AddError(NotFound("分類 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region), () => AddError(NotFound("區域 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner),
+                    () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region),
+                    () => AddError(NotFound("區域 ID")))
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("名稱")))
                 .Validate(i => !i.Compilation.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("統一編號")))
-                .Validate(i => i.Email is null || i.Email.Length.IsInBetween(0, 100), () => AddError(TooLong("E-Mail")))
+                .Validate(i => i.Email.HasLengthBetween(0, 100), () => AddError(LengthOutOfRange("E-Mail", 0, 100)))
                 .Validate(i => !i.CleanFlag || i.CleanSDate.TryParseDateTime(out startDate),
                     () => AddError(WrongFormat("清潔合約起始日")))
                 .Validate(i => !i.CleanFlag || i.CleanEDate.TryParseDateTime(out endDate),
@@ -232,8 +235,8 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => !i.CleanFlag || endDate >= startDate,
                     () => AddError(MinLargerThanMax("清潔合約起始日", "清潔合約結束日")))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => i.Code.Length.IsInBetween(1, 10), () => AddError(TooLong("代碼")))
-                .Validate(i => i.Title.Length.IsInBetween(1, 60), () => AddError(TooLong("名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("代碼", 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("名稱", 1, 60)))
                 .Validate(i => i.Compilation.Length == 8, () => AddError(WrongFormat("統一編號")))
                 .IsValid();
 
@@ -269,22 +272,27 @@ namespace NS_Education.Controller.UsingHelper
 
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BPID.IsAboveZero(), () => AddError(EmptyNotAllowed("廠商 ID")))
-                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner), () => AddError(NotFound("分類 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region), () => AddError(NotFound("區域 ID")))
+                .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Partner),
+                    () => AddError(NotFound("分類 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Region),
+                    () => AddError(NotFound("區域 ID")))
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
                 .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("名稱")))
                 .Validate(i => !i.Compilation.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("統一編號")))
-                .Validate(i => i.Email is null || i.Email.Length.IsInBetween(0, 100), () => AddError(TooLong("E-Mail")))
-                .Validate(i => !i.CleanFlag || i.CleanSDate.TryParseDateTime(out startDate), () => AddError(WrongFormat("清潔合約起始日")))
-                .Validate(i => !i.CleanFlag || i.CleanEDate.TryParseDateTime(out endDate), () => AddError(WrongFormat("清潔合約結束日")))
-                .Validate(i => !i.CleanFlag || endDate >= startDate, () => AddError(MinLargerThanMax("清潔合約起始日", "清潔合約結束日")))
+                .Validate(i => i.Email.HasLengthBetween(0, 100), () => AddError(LengthOutOfRange("E-Mail", 0, 100)))
+                .Validate(i => !i.CleanFlag || i.CleanSDate.TryParseDateTime(out startDate),
+                    () => AddError(WrongFormat("清潔合約起始日")))
+                .Validate(i => !i.CleanFlag || i.CleanEDate.TryParseDateTime(out endDate),
+                    () => AddError(WrongFormat("清潔合約結束日")))
+                .Validate(i => !i.CleanFlag || endDate >= startDate,
+                    () => AddError(MinLargerThanMax("清潔合約起始日", "清潔合約結束日")))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => i.Code.Length.IsInBetween(1, 10), () => AddError(TooLong("代碼")))
-                .Validate(i => i.Title.Length.IsInBetween(1, 60), () => AddError(TooLong("名稱")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("代碼", 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("名稱", 1, 60)))
                 .Validate(i => i.Compilation.Length == 8, () => AddError(WrongFormat("統一編號")))
-                .Validate(i => i.Compilation.All(Char.IsNumber), () => AddError(WrongFormat("統一編號")))
                 .IsValid();
-            
+
             return isValid;
         }
 

@@ -352,12 +352,17 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.BSID == 0, () => AddError(WrongFormat("場地 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
                     () => AddError(NotFound("所屬分類 ID")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 0, 60)))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
                 .Validate(i => i.MaxSize >= i.BasicSize, () => AddError("最大容納人數須大於等於一般容納人數！"))
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
                 .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
                 .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
+                .Validate(i => i.PhoneExt1.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 1", 0, 6)))
+                .Validate(i => i.PhoneExt2.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 2", 0, 6)))
+                .Validate(i => i.PhoneExt3.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 3", 0, 6)))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
                     () => AddError(NotFound("樓別 ID")))
@@ -414,12 +419,17 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.BSID.IsAboveZero(), () => AddError(EmptyNotAllowed("場地 ID")))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
                     () => AddError(NotFound("所屬分類 ID")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 0, 60)))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
                 .Validate(i => i.MaxSize >= i.BasicSize, () => AddError("最大容納人數須大於等於一般容納人數！"))
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
                 .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
                 .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
+                .Validate(i => i.PhoneExt1.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 1", 0, 6)))
+                .Validate(i => i.PhoneExt2.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 2", 0, 6)))
+                .Validate(i => i.PhoneExt3.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 3", 0, 6)))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
                     () => AddError(NotFound("樓別 ID")))

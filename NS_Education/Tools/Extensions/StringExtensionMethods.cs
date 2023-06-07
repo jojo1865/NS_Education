@@ -24,12 +24,20 @@ namespace NS_Education.Tools.Extensions
         {
             return !String.IsNullOrWhiteSpace(s);
         }
-        
+
+        public static bool HasLengthBetween(this string s, int min, int max)
+        {
+            if (s == null && min <= 0)
+                return true;
+
+            return s != null && s.Length.IsInBetween(min, max);
+        }
+
         public static bool IsNullOrWhiteSpace(this string s)
         {
             return String.IsNullOrWhiteSpace(s);
         }
-        
+
         public static string SanitizeForResponseStatusMessage(this string s)
         {
             return s.Replace("\r", "").Replace("\n", "");

@@ -164,7 +164,7 @@ namespace NS_Education.Controller.UsingHelper
         #endregion
 
         #region DeleteItem
-        
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
@@ -182,7 +182,8 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(CustomerGift_Submit_Input_APIItem.CGID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null,
+            nameof(CustomerGift_Submit_Input_APIItem.CGID))]
         public async Task<string> Submit(CustomerGift_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);
@@ -199,11 +200,13 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.CGID == 0, () => AddError(WrongFormat("禮品贈與紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
+                    () => AddError(NotFound("客戶 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift), () => AddError(NotFound("禮品 ID")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
+                    () => AddError(NotFound("禮品 ID")))
+                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -212,7 +215,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<CustomerGift> SubmitCreateData(CustomerGift_Submit_Input_APIItem input)
         {
             input.SendDate.TryParseDateTime(out DateTime sendDate);
-            
+
             return await Task.FromResult(new CustomerGift
             {
                 CID = input.CID,
@@ -233,11 +236,13 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.CGID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品贈與紀錄 ID")))
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)), () => AddError(NotFound("客戶 ID")))
+                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
+                    () => AddError(NotFound("客戶 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift), () => AddError(NotFound("禮品 ID")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("禮品實際名稱")))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
+                    () => AddError(NotFound("禮品 ID")))
+                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -251,7 +256,7 @@ namespace NS_Education.Controller.UsingHelper
         public void SubmitEditUpdateDataFields(CustomerGift data, CustomerGift_Submit_Input_APIItem input)
         {
             input.SendDate.TryParseDateTime(out DateTime sendDate);
-            
+
             data.CID = input.CID;
             data.Year = input.Year;
             data.SendDate = sendDate;

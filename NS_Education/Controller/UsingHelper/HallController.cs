@@ -210,7 +210,10 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.DHID == 0, () => AddError(WrongFormat("廳別 ID")))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
                     () => AddError(NotFound("部門 ID")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
                 .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(UnsupportedValue("開立憑證種類")))
                 .IsValid();
 
@@ -244,7 +247,10 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
                     () => AddError(NotFound("部門 ID")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
                 .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(UnsupportedValue("開立憑證種類")))
                 .IsValid();
 

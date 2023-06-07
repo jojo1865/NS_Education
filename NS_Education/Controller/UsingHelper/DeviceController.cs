@@ -232,6 +232,15 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BDID == 0, () => AddError(WrongFormat("設備 ID")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("標題", 1, 60)))
+                .Validate(i => i.SupplierTitle.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("供應商名稱", 0, 100)))
+                .Validate(i => i.SupplierTitle.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("供應商聯絡人", 0, 100)))
+                .Validate(i => i.SupplierPhone.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("供應商服務電話", 0, 30)))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Device),
                     () => AddError(NotFound("類別 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
@@ -240,7 +249,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
                     () => AddError(NotFound("廳別 ID")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -276,6 +284,15 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BDID.IsAboveZero(), () => AddError(EmptyNotAllowed("設備 ID")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
+                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("標題", 1, 60)))
+                .Validate(i => i.SupplierTitle.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("供應商名稱", 0, 100)))
+                .Validate(i => i.SupplierTitle.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("供應商聯絡人", 0, 100)))
+                .Validate(i => i.SupplierPhone.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("供應商服務電話", 0, 30)))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Device),
                     () => AddError(NotFound("類別 ID")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
@@ -284,7 +301,6 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
                     () => AddError(NotFound("廳別 ID")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

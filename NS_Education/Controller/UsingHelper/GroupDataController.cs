@@ -121,7 +121,8 @@ namespace NS_Education.Controller.UsingHelper
                         Title = result.MenuData.Title ?? "",
                         ActiveFlag = result.ThisGroupMenu != null,
                         AddFlag = result.ThisGroupMenu?.AddFlag ?? false,
-                        ShowFlag = DbConstants.AlwaysShowMenuUrls.Contains(result.MenuData.URL) || (result.ThisGroupMenu?.ShowFlag ?? false),
+                        ShowFlag = DbConstants.AlwaysShowMenuUrls.Contains(result.MenuData.URL) ||
+                                   (result.ThisGroupMenu?.ShowFlag ?? false),
                         EditFlag = result.ThisGroupMenu?.EditFlag ?? false,
                         DeleteFlag = result.ThisGroupMenu?.DeleteFlag ?? false,
                         PrintFlag = result.ThisGroupMenu?.PringFlag ?? false
@@ -161,14 +162,15 @@ namespace NS_Education.Controller.UsingHelper
         {
             return input.GID == 0;
         }
-        
+
         #region Submit - Add
 
         public async Task<bool> SubmitAddValidateInput(GroupData_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.GID == 0, () => AddError(WrongFormat("權限 ID")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("權限名稱")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("權限名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("權限名稱", 1, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -181,15 +183,17 @@ namespace NS_Education.Controller.UsingHelper
                 Title = input.Title
             });
         }
-        
+
         #endregion
 
         #region Submit - Edit
+
         public async Task<bool> SubmitEditValidateInput(GroupData_Submit_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
-                .Validate(i => !i.Title.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("權限名稱")))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("權限名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("權限名稱", 1, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -204,12 +208,13 @@ namespace NS_Education.Controller.UsingHelper
         {
             data.Title = input.Title;
         }
-        
+
         #endregion
+
         #endregion
-        
+
         #region SubmitMenuData
-        
+
         private const string SameMdIdDetected = "發現重覆的 MDID，請檢查輸入內容！";
 
         /// <summary>
@@ -231,7 +236,7 @@ namespace NS_Education.Controller.UsingHelper
 
             // 3. 更新 DB
             await SubmitMenuDataWriteDb();
-            
+
             // 4. 回傳資料
             return GetResponseJson();
         }
@@ -258,7 +263,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Where(mgm => mgm.GID == input.GID)
                 .Where(mgm => inputIds.Contains(mgm.MDID))
                 .ToDictionaryAsync(mgm => mgm.MDID, mgm => mgm);
-            
+
             foreach (GroupData_MenuItem_APIItem item in input.GroupItems)
             {
                 // 取得 MenuData，用於判定是否為必定顯示的特例值
@@ -266,7 +271,7 @@ namespace NS_Education.Controller.UsingHelper
                     .FirstOrDefaultAsync(md => md.MDID == item.MDID && md.ActiveFlag && !md.DeleteFlag);
 
                 bool isAlwaysShow = menuData != null && DbConstants.AlwaysShowMenuUrls.Contains(menuData.URL);
-                
+
                 if (menuIdToGroupMenuDict.TryGetValue(item.MDID, out M_Group_Menu mgm))
                 {
                     // 有原資料，則輸入的 ActiveFlag 為

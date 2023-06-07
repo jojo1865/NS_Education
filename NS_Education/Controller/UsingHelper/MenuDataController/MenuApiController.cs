@@ -109,9 +109,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         public async Task<bool> SubmitAddValidateInput(MenuApi_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)), () => AddError(NotFound("選單 ID")))
+                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)),
+                    () => AddError(NotFound("選單 ID")))
                 .Validate(i => i.SeqNo == 0, () => AddError(WrongFormat("API 流水號")))
-                .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("API 網址")))
+                .Validate(i => i.ApiUrl.HasContent(), () => AddError(EmptyNotAllowed("API 網址")))
+                .Validate(i => i.ApiUrl.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("API 網址", 1, 100)))
                 .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), () => AddError(WrongFormat("API 屬性 ID")))
                 .IsValid();
 
@@ -128,7 +130,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 Note = input.Note
             });
         }
-        
+
         #endregion
 
         #region Submit - Edit
@@ -136,9 +138,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         public async Task<bool> SubmitEditValidateInput(MenuApi_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)), () => AddError(NotFound("選單 ID")))
+                .ValidateAsync(async i => await DC.MenuData.ValidateIdExists(input.MDID, nameof(MenuData.MDID)),
+                    () => AddError(NotFound("選單 ID")))
                 .Validate(i => i.SeqNo.IsAboveZero(), () => AddError(WrongFormat("API 流水號")))
-                .Validate(i => !i.ApiUrl.IsNullOrWhiteSpace(), () => AddError(EmptyNotAllowed("API 網址")))
+                .Validate(i => i.ApiUrl.HasContent(), () => AddError(EmptyNotAllowed("API 網址")))
+                .Validate(i => i.ApiUrl.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("API 網址", 1, 100)))
                 .Validate(i => i.APIType.IsInBetween(0, ApiTypes.Length), () => AddError(WrongFormat("API 屬性 ID")))
                 .IsValid();
 

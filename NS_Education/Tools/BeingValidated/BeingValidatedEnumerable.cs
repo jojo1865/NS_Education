@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace NS_Education.Tools.BeingValidated
@@ -10,6 +9,7 @@ namespace NS_Education.Tools.BeingValidated
     {
         private readonly IBeingValidated<TEnumerable, TEnumerable> _inner;
         private readonly TEnumerable _targetEnumerable;
+        private Predicate<TElement> _forceSkipCondition = null;
 
         public BeingValidatedEnumerable(TEnumerable target, bool skipIfAlreadyInvalid = false)
         {
@@ -29,6 +29,9 @@ namespace NS_Education.Tools.BeingValidated
         {
             foreach (TElement element in _targetEnumerable)
             {
+                if (NeedForceSkipping(element))
+                    continue;
+
                 _inner.Validate(_ => validation.Invoke(element),
                     _ => onFail?.Invoke(element),
                     (_, e) => onException?.Invoke(element, e));
@@ -48,6 +51,9 @@ namespace NS_Education.Tools.BeingValidated
         {
             foreach (TElement element in _targetEnumerable)
             {
+                if (NeedForceSkipping(element))
+                    continue;
+
                 _inner.Validate(_ => validation.Invoke(element),
                     (_, e) => onException?.Invoke(element, e));
             }
@@ -68,6 +74,9 @@ namespace NS_Education.Tools.BeingValidated
         {
             foreach (TElement element in _targetEnumerable)
             {
+                if (NeedForceSkipping(element))
+                    continue;
+
                 await _inner.ValidateAsync(async _ => await validation.Invoke(element),
                     _ => onFail?.Invoke(element),
                     (_, e) => onException?.Invoke(element, e));
@@ -88,6 +97,9 @@ namespace NS_Education.Tools.BeingValidated
         {
             foreach (TElement element in _targetEnumerable)
             {
+                if (NeedForceSkipping(element))
+                    continue;
+
                 await _inner.ValidateAsync(async _ => await validation.Invoke(element),
                     (_, e) => onException?.Invoke(element, e));
             }
@@ -110,15 +122,20 @@ namespace NS_Education.Tools.BeingValidated
         /// <remarks>這將檢查所有元素，只要有任一者滿足條件，就跳過後續驗證。</remarks>
         public IBeingValidated<TElement, TEnumerable> ForceSkipIf(Predicate<TElement> predicate)
         {
-            _inner.ForceSkipIf(_ => _targetEnumerable.Any(predicate.Invoke));
+            _forceSkipCondition = predicate;
             return this;
         }
 
         /// <inheritdoc />
         public IBeingValidated<TElement, TEnumerable> StopForceSkipping()
         {
-            _inner.StopForceSkipping();
+            _forceSkipCondition = null;
             return this;
+        }
+
+        private bool NeedForceSkipping(TElement element)
+        {
+            return _forceSkipCondition?.Invoke(element) ?? false;
         }
     }
 }

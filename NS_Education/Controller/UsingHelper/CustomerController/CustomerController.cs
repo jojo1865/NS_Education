@@ -379,15 +379,33 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
-                .Validate(i => i.Code is null || i.Code.Length.IsInBetween(0, 10),
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
                     () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Compilation.IsNullOrWhiteSpace() || i.Compilation.Length == 8,
+                    () => AddError(WrongFormat("統一編號")))
+                .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
+                .Validate(i => i.TitleC.HasLengthBetween(1, 50),
+                    () => AddError(LengthOutOfRange("客戶名稱（中文）", 1, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("客戶名稱（英文）", 0, 100)))
+                .Validate(i => i.Address.HasLengthBetween(0, 200),
+                    () => AddError(LengthOutOfRange("地址", 0, 200)))
+                .Validate(i => i.Email.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("Email", 0, 100)))
+                .Validate(i => i.InvoiceTitle.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("發票抬頭", 0, 50)))
+                .Validate(i => i.ContactName.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("聯絡人名稱", 0, 50)))
+                .Validate(i => i.ContactData1.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("聯絡方式 1 的內容", 0, 30)))
+                .Validate(i => i.ContactData2.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("聯絡方式 2 的內容", 0, 30)))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry),
                     () => AddError(NotFound("行業別 ID")))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region),
                     () => AddError(NotFound("區域別 ID")))
-                .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
                 .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID")))
                 .ForceSkipIf(i => i.ContactType1 == -1)
                 .Validate(i => i.ContactType1.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 1 的類型")))
@@ -409,12 +427,15 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
-                .Validate(item => item.ContactType == -1 || item.ContactType.IsInBetween(0, 3),
+                .ForceSkipIf(item => item.ContactType == -1)
+                .Validate(item => item.ContactType.IsInBetween(0, 3),
                     item => AddError(UnsupportedValue($"業務（ID：{item.BUID}）聯絡方式類型")))
-                .Validate(item => item.ContactType == -1 || item.ContactData.HasContent(),
+                .Validate(item => item.ContactData.HasContent(),
                     item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容")))
+                .Validate(item => item.ContactData.HasLengthBetween(1, 30),
+                    item => AddError(LengthOutOfRange($"業務（ID：{item.BUID}）聯絡方式內容", 1, 30)))
+                .StopForceSkipping()
                 .IsValid();
-
             return await Task.FromResult(isValid && isBusinessUserContactValid);
         }
 
@@ -565,15 +586,33 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
-                .Validate(i => i.Code is null || i.Code.Length.IsInBetween(0, 10),
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
                     () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Compilation.IsNullOrWhiteSpace() || i.Compilation.Length == 8,
+                    () => AddError(WrongFormat("統一編號")))
+                .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
+                .Validate(i => i.TitleC.HasLengthBetween(1, 50),
+                    () => AddError(LengthOutOfRange("客戶名稱（中文）", 1, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("客戶名稱（英文）", 0, 100)))
+                .Validate(i => i.Address.HasLengthBetween(0, 200),
+                    () => AddError(LengthOutOfRange("地址", 0, 200)))
+                .Validate(i => i.Email.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("Email", 0, 100)))
+                .Validate(i => i.InvoiceTitle.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("發票抬頭", 0, 50)))
+                .Validate(i => i.ContactName.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("聯絡人名稱", 0, 50)))
+                .Validate(i => i.ContactData1.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("聯絡方式 1 的內容", 0, 30)))
+                .Validate(i => i.ContactData2.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("聯絡方式 2 的內容", 0, 30)))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID6, StaticCodeType.Industry),
                     () => AddError(NotFound("行業別 ID")))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region),
                     () => AddError(NotFound("區域別 ID")))
-                .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
                 .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID")))
                 .ForceSkipIf(i => i.ContactType1 == -1)
                 .Validate(i => i.ContactType1.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 1 的類型")))
@@ -593,7 +632,20 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
+            bool isBusinessUserContactValid = input.Items.StartValidateElements()
+                .ForceSkipIf(item => item.ContactType == -1)
+                .Validate(item => item.ContactType.IsInBetween(0, 3),
+                    item => AddError(UnsupportedValue($"業務（ID：{item.BUID}）聯絡方式類型")))
+                .Validate(item => item.ContactData.HasContent(),
+                    item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容")))
+                .Validate(item => item.ContactData.HasLengthBetween(1, 30),
+                    item => AddError(LengthOutOfRange($"業務（ID：{item.BUID}）聯絡方式內容", 1, 30)))
+                .StopForceSkipping()
+                .IsValid();
+
+
+            return await Task.FromResult(isValid && isBusinessUserContactValid);
         }
 
         public IQueryable<Customer> SubmitEditQuery(Customer_Submit_Input_APIItem input)

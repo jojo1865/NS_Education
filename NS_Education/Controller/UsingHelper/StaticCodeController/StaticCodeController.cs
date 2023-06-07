@@ -342,7 +342,9 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 .Validate(i => i.BSCID == 0,
                     () => AddError(WrongFormat("靜態參數 ID")))
                 .Validate(i => i.CodeType.IsZeroOrAbove(), () => AddError(OutOfRange("參數所屬類別", 0)))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("名稱", 0, 100)))
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時：
                 // +- a. 必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
@@ -401,7 +403,9 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("靜態參數 ID")))
                 .Validate(i => i.CodeType.IsZeroOrAbove(), () => AddError(OutOfRange("參數所屬類別", 0)))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("名稱", 0, 100)))
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時：
                 // +- a. 必須已存在 CodeType = 0 而 Code = input.CodeType 的資料

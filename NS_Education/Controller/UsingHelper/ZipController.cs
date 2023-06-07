@@ -26,7 +26,6 @@ namespace NS_Education.Controller.UsingHelper
         IDeleteItem<D_Zip>,
         ISubmit<D_Zip, Zip_Submit_Input_APIItem>
     {
-
         #region Initialization
 
         private readonly IGetListPagedHelper<Zip_GetList_Input_APIItem> _getListPagedHelper;
@@ -135,7 +134,6 @@ namespace NS_Education.Controller.UsingHelper
             return DC.D_Zip.Where(z => z.DZID == id);
         }
 
-
         #endregion
 
         #region DeleteItem
@@ -167,7 +165,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             return input.DZID == 0;
         }
-        
+
         private async Task<string[]> SubmitGetGroupNames()
         {
             string[] groupNames = await DC.B_StaticCode
@@ -180,7 +178,7 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit - Add
 
         private const string SubmitGroupNameNotFound = "層級名稱於靜態參數檔中找不到對應資料！";
-        
+
         public async Task<bool> SubmitAddValidateInput(Zip_Submit_Input_APIItem input)
         {
             string[] groupNames = await SubmitGetGroupNames();
@@ -189,9 +187,12 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.DZID == 0, () => AddError(WrongFormat("國籍 / 郵遞區號 ID")))
                 .Validate(i => i.ParentID.IsAboveZero(), () => AddError(EmptyNotAllowed("上層 ID")))
                 .Validate(i => i.ParentID != i.DZID, () => AddError(UnsupportedValue("上層 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼（郵遞區號）")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼（郵遞區號）", 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .Validate(i => i.GroupName.HasContent(), () => AddError(EmptyNotAllowed("層級名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("中文名稱", 1, 100)))
+                .Validate(i => i.GroupName.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("層級", 1, 100)))
+                .Validate(i => i.Note.HasLengthBetween(0, 1000), () => AddError(LengthOutOfRange("備註", 0, 1000)))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => groupNames.Contains(input.GroupName), () => AddError(SubmitGroupNameNotFound))
                 .IsValid();
@@ -210,9 +211,9 @@ namespace NS_Education.Controller.UsingHelper
                 Note = input.Note
             });
         }
-        
+
         #endregion
-        
+
         #region Submit - Edit
 
         public async Task<bool> SubmitEditValidateInput(Zip_Submit_Input_APIItem input)
@@ -223,9 +224,12 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.DZID.IsAboveZero(), () => AddError(EmptyNotAllowed("國籍 / 郵遞區號 ID")))
                 .Validate(i => i.ParentID.IsAboveZero(), () => AddError(EmptyNotAllowed("上層 ID")))
                 .Validate(i => i.ParentID != i.DZID, () => AddError(UnsupportedValue("上層 ID")))
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("編碼（郵遞區號）")))
+                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼（郵遞區號）", 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
                 .Validate(i => i.GroupName.HasContent(), () => AddError(EmptyNotAllowed("層級名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("中文名稱", 1, 100)))
+                .Validate(i => i.GroupName.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("層級", 1, 100)))
+                .Validate(i => i.Note.HasLengthBetween(0, 1000), () => AddError(LengthOutOfRange("備註", 0, 1000)))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => groupNames.Contains(input.GroupName), () => AddError(SubmitGroupNameNotFound))
                 .IsValid();
@@ -246,7 +250,7 @@ namespace NS_Education.Controller.UsingHelper
             data.GroupName = input.GroupName ?? data.GroupName;
             data.Note = input.Note;
         }
-        
+
         #endregion
 
         #endregion

@@ -143,6 +143,11 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .Include(c => c.M_Customer_BusinessUser.Select(cbu => cbu.BusinessUser))
                 .AsQueryable();
 
+            if (input.ActiveFlag.IsInBetween(0, 1))
+                query = query.Where(c => c.ActiveFlag == (input.ActiveFlag == 1));
+
+            query = query.Where(c => c.DeleteFlag == (input.DeleteFlag == 1));
+
             if (input.Keyword.HasContent())
                 query = query.Where(c =>
                     c.TitleC.Contains(input.Keyword)

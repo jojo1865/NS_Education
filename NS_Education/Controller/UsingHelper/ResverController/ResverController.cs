@@ -657,6 +657,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .ValidateAsync(async i => await SubmitValidateCustomerId(i.CID), () => AddError(NotFound("客戶")))
                 .Validate(i => i.CustomerTitle.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱")))
                 .Validate(i => i.ContactName.HasContent(), () => AddError(EmptyNotAllowed("聯絡人名稱")))
+                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("預約單名稱", 1, 100)))
+                .Validate(i => i.CustomerTitle.HasLengthBetween(1, 100),
+                    () => AddError(LengthOutOfRange("客戶名稱", 1, 100)))
+                .Validate(i => i.ContactName.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("聯絡人名稱", 1, 50)))
+                .Validate(i => i.MK_Phone.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("MK 業務電話", 0, 50)))
+                .Validate(i => i.OP_Phone.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("OP 業務電話", 0, 50)))
+                .Validate(i => i.Note.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("備註", 0, 10)))
                 .ValidateAsync(async i => await SubmitValidateMKBusinessUser(i.MK_BUID),
                     () => AddError(NotFound("MK 業務")))
                 .ValidateAsync(async i => await SubmitValidateOPBusinessUser(i.OP_BUID),
@@ -700,6 +707,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Validate(ci => SubmitValidateContactType(ci.ContactType),
                         () => AddError(NotFound($"聯絡方式編號（{item.ContactType}）")))
                     .Validate(ci => ci.ContactData.HasContent(), () => AddError(EmptyNotAllowed($"聯絡方式內容")))
+                    .Validate(ci => ci.ContactData.HasLengthBetween(1, 30),
+                        () => AddError(LengthOutOfRange("聯絡方式內容", 1, 30)))
                     .IsValid());
 
             // 主預約單 -> 場地列表
@@ -723,6 +732,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         () => AddError(NotFound($"預約場地的入帳代號 ID（{item.BOCID}）")))
                     .Validate(si => Task.Run(() => SubmitValidateStaticCode(si.BSCID, StaticCodeType.SiteTable)).Result,
                         () => AddError(NotFound($"預約場地的桌型 ID（{item.BSCID}）")))
+                    .Validate(si => si.PrintTitle.HasLengthBetween(0, 100),
+                        () => AddError(LengthOutOfRange("帳單列印名稱", 0, 100)))
+                    .Validate(si => si.PrintNote.HasLengthBetween(0, 100),
+                        () => AddError(LengthOutOfRange("帳單列印說明", 0, 100)))
                     .IsValid());
 
             // 檢查場地的總可容納人數大於等於預約單要求人數
@@ -776,6 +789,12 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                                         OrderCodeType.Throw))
                                                                 .Result,
                                                             () => AddError(NotFound($"預約行程的入帳代號 ID（{item.BOCID}）")))
+                                                        .Validate(ti => ti.Title.HasLengthBetween(1, 100),
+                                                            () => AddError(LengthOutOfRange("行程名稱", 1, 100)))
+                                                        .Validate(ti => ti.PrintTitle.HasLengthBetween(0, 100),
+                                                            () => AddError(LengthOutOfRange("行程的帳單列印名稱", 0, 100)))
+                                                        .Validate(ti => ti.PrintNote.HasLengthBetween(0, 100),
+                                                            () => AddError(LengthOutOfRange("行程的帳單列印說明", 0, 100)))
                                                         .IsValid()));
 
             // 主預約單 -> 場地列表 -> 行程列表 -> 時段列表
@@ -850,6 +869,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                                      OrderCodeType.Device))
                                                              .Result,
                                                          () => AddError(NotFound($"預約設備的入帳代號 ID（{item.BOCID}）")))
+                                                     .Validate(di => di.PrintTitle.HasLengthBetween(0, 100),
+                                                         () => AddError(LengthOutOfRange("預約設備的帳單列印名稱")))
+                                                     .Validate(di => di.PrintNote.HasLengthBetween(0, 100),
+                                                         () => AddError(LengthOutOfRange("預約設備的帳單列印說明")))
                                                      .IsValid()
                                              ));
 
@@ -890,6 +913,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Validate(
                         oi => Task.Run(() => SubmitValidateOrderCode(oi.BOCID, OrderCodeType.OtherPayItem)).Result,
                         () => AddError(NotFound($"其他收費項目的入帳代號 ID（{item.BOCID}）")))
+                    .Validate(oi => oi.PrintTitle.HasLengthBetween(0, 100),
+                        () => AddError(LengthOutOfRange("其他收費項目的帳單列印名稱", 0, 100)))
+                    .Validate(oi => oi.PrintNote.HasLengthBetween(0, 100),
+                        () => AddError(LengthOutOfRange("其他收費項目的帳單列印說明", 0, 100)))
                     .IsValid());
 
             // 主預約單 -> 繳費紀錄列表
@@ -931,6 +958,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         gbi => AddError(NotFound($"預約回饋預約單 ID（{gbi.RGBID}）")))
                     .Validate(gbi => gbi.PointDecimal.IsInBetween(0, 50),
                         gbi => AddError(OutOfRange($"回饋分數（{gbi.PointDecimal}）", 0, 50)))
+                    .Validate(gbi => gbi.Title.HasLengthBetween(0, 100),
+                        () => AddError(LengthOutOfRange("預約回饋的標題", 0, 100)))
+                    .Validate(gbi => gbi.Description.HasLengthBetween(0, 100),
+                        () => AddError(LengthOutOfRange("預約回饋的內容", 0, 100)))
                     .IsValid();
 
             // 輸入都正確後，才計算各項目價格

@@ -210,7 +210,7 @@ namespace NS_Education.Controller.UsingHelper
             var validation = input.StartValidate(true)
                     .Validate(i => i.CQID == 0, () => AddError(WrongFormat("問題紀錄 ID")))
                     .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
-                        () => AddError(EmptyNotAllowed("客戶 ID")))
+                        () => AddError(NotFound("客戶 ID")))
                     .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")))
                     .Validate(i => i.AskTitle.HasLengthBetween(0, 100), () => AddError(LengthOutOfRange("主旨", 0, 100)))
                     .Validate(i => i.AskArea.HasLengthBetween(0, 100), () => AddError(LengthOutOfRange("地點", 0, 100)))
@@ -268,7 +268,7 @@ namespace NS_Education.Controller.UsingHelper
             var validation = input.StartValidate(true)
                     .Validate(i => i.CQID.IsAboveZero(), () => AddError(EmptyNotAllowed("問題紀錄 ID")))
                     .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
-                        () => AddError(EmptyNotAllowed("客戶 ID")))
+                        () => AddError(NotFound("客戶 ID")))
                     .Validate(i => i.AskDate.TryParseDateTime(out askDate), () => AddError(WrongFormat("問題發生時間")))
                     .Validate(i => i.AskTitle.HasLengthBetween(0, 100), () => AddError(LengthOutOfRange("主旨", 0, 100)))
                     .Validate(i => i.AskArea.HasLengthBetween(0, 100), () => AddError(LengthOutOfRange("地點", 0, 100)))

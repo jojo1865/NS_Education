@@ -1,5 +1,4 @@
 using System;
-using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems.Controller.Health.Ping;
@@ -9,17 +8,23 @@ namespace NS_Education.Controller.UsingHelper
 {
     public class HealthController : PublicClass
     {
+        private const string DbConnectionFail = "DB 連線失敗！";
+
         [HttpGet]
         public async Task<string> Ping()
         {
             // 檢查 DB
             try
             {
-                await DC.UserData.AnyAsync();
+                int test = await DC.Database.SqlQuery<int>("SELECT 1").FirstAsync();
+                if (test != 1)
+                {
+                    AddError(DbConnectionFail);
+                }
             }
             catch (Exception e)
             {
-                AddError("DB 連線失敗！");
+                AddError(DbConnectionFail);
                 AddError(e.Message);
             }
 

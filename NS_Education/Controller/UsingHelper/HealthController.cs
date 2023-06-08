@@ -2,6 +2,7 @@ using System;
 using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NS_Education.Models.APIItems.Controller.Health.Ping;
 using NS_Education.Tools.ControllerTools.BaseClass;
 
 namespace NS_Education.Controller.UsingHelper
@@ -22,7 +23,12 @@ namespace NS_Education.Controller.UsingHelper
                 AddError(e.Message);
             }
 
-            return GetResponseJson();
+            Health_Ping_Output_APIItem response = new Health_Ping_Output_APIItem
+            {
+                Pong = "Pong!"
+            };
+
+            return GetResponseJson(response);
         }
     }
 }

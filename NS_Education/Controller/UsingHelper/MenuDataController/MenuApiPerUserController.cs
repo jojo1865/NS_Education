@@ -8,6 +8,7 @@ using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.MenuData.MenuApi.GetListByUid;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
@@ -130,11 +131,12 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             {
                 MDID = thisNodeId,
                 Title = parentMenuOrNull?.Title ?? "",
-                URL = children?
+                URL = parentMenuOrNull?.URL.HasContent() ?? false
+                    ? parentMenuOrNull.URL
+                    : children?
                           .OrderBy(child => child.SortNo)
                           .Select(child => child.URL)
                           .FirstOrDefault()
-                      ?? parentMenuOrNull?.URL
                       ?? "",
                 SortNo = parentMenuOrNull?.SortNo ?? 0,
                 // 這裡在做遞迴

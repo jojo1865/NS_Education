@@ -240,7 +240,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             var output = new UserData_Login_Output_APIItem
             {
                 UID = queried.UID,
-                Username = queried.UserName
+                Username = queried.UserName,
+                CookieName = JwtConstants.CookieName
             };
 
             // 1. 更新 JWT 欄位

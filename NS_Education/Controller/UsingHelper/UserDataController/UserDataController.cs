@@ -230,17 +230,19 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             Response.Cookies.Add(new HttpCookie(JwtConstants.CookieName)
             {
-                Secure = true,
+                Secure = false,
                 HttpOnly = true,
                 Expires = DateTime.Now.AddMinutes(JwtConstants.ExpireMinutes),
                 Value = jwt,
-                SameSite = SameSiteMode.None
+                Path = Request.Url?.Host == "localhost" ? "localhost" : "/",
+                SameSite = SameSiteMode.Lax
             });
 
             var output = new UserData_Login_Output_APIItem
             {
                 UID = queried.UID,
                 Username = queried.UserName,
+                JwtToken = jwt,
                 CookieName = JwtConstants.CookieName
             };
 

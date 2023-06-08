@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.Ajax.Utilities;
 using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Variables;
@@ -16,8 +17,12 @@ namespace NS_Education.Tools.Filters
 
         public static string GetJwtToken(HttpRequestBase request)
         {
-            // 跳過開頭的 [Bearer ] 共 7 個字元
-            return request.Cookies.Get(JwtConstants.CookieName)?.Value;
+            // 找 cookie, 如果沒有, 找 Header
+            string token = request.Cookies.Get(JwtConstants.CookieName)?.Value;
+
+            if (token.IsNullOrWhiteSpace())
+                token = request.Headers["Authorization"].Substring(7);
+            return token;
         }
 
         public static bool HasRoleInRequest(HttpRequestBase request, AuthorizeBy role)

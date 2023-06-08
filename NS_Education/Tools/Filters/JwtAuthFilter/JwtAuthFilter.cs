@@ -341,15 +341,24 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             out ClaimsPrincipal claims)
         {
             claims = null;
+            string token;
 
-            // 1. 驗證 Header 中是否有 Authorization
-            if (!HasCookie(actionContext))
+            // 1. 驗證是否拿得到 token
+            try
+            {
+                token = GetToken(actionContext);
+                if (token.IsNullOrWhiteSpace())
+                    throw new Exception();
+            }
+            catch (Exception)
+            {
                 throw new HttpRequestValidationException(RequestHeaderLacksAuthorization);
+            }
 
             // 2. 驗證 Token 是否可正常解密
             try
             {
-                claims = JwtHelper.DecodeToken(GetToken(actionContext), secret);
+                claims = JwtHelper.DecodeToken(token, secret);
             }
             catch (Exception e)
             {
@@ -372,7 +381,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private static string DecodeTokenFailed(Exception e)
             => $"解密 JWT Token 失敗：{e.Message}！";
 
-        private const string RequestHeaderLacksAuthorization = "HTTP Header 未找到 Authorization 欄位，或是 Bearer 格式不正確！";
+        private const string RequestHeaderLacksAuthorization = "從 Cookie 或 Header 都找不到 JWT！";
 
         private const string HasNoRoleOrPrivilege = "此 UID 無此權限！";
 

@@ -228,15 +228,16 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             string jwt = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims);
 
-            Response.Cookies.Add(new HttpCookie(JwtConstants.CookieName)
+            var cookie = new HttpCookie(JwtConstants.CookieName)
             {
-                Secure = false,
+                Secure = true,
                 HttpOnly = true,
-                Expires = DateTime.Now.AddMinutes(JwtConstants.ExpireMinutes),
+                Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
                 Value = jwt,
-                Path = Request.Url?.Host == "localhost" ? "localhost" : "/",
-                SameSite = SameSiteMode.Lax
-            });
+                SameSite = SameSiteMode.None
+            };
+
+            Response.Cookies.Add(cookie);
 
             var output = new UserData_Login_Output_APIItem
             {

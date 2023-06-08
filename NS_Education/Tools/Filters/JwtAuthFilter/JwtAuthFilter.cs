@@ -371,11 +371,6 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             return FilterStaticTools.GetJwtToken(actionContext.HttpContext.Request);
         }
 
-        private static bool HasCookie(ControllerContext actionContext)
-        {
-            return actionContext.HttpContext.Request.Cookies.Get(JwtConstants.CookieName) != null;
-        }
-
         #region 錯誤訊息
 
         private static string DecodeTokenFailed(Exception e)

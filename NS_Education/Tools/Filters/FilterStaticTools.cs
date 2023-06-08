@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.Ajax.Utilities;
 using NS_Education.Tools.Encryption;
+using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Variables;
 
@@ -20,8 +20,13 @@ namespace NS_Education.Tools.Filters
             // 找 cookie, 如果沒有, 找 Header
             string token = request.Cookies.Get(JwtConstants.CookieName)?.Value;
 
-            if (token.IsNullOrWhiteSpace())
+            if (token.HasContent()) return token;
+
+            string header = request.Headers["Authorization"];
+
+            if (header.HasContent() && header.StartsWith("Bearer "))
                 token = request.Headers["Authorization"].Substring(7);
+
             return token;
         }
 

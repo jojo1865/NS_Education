@@ -6,6 +6,7 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitDepartment;
@@ -225,18 +226,28 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             if (queried.M_Group_User.Any(groupUser => groupUser.GID == JwtConstants.AdminGid))
                 claims.Add(new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.Admin.GetRoleValue()));
 
+            string jwt = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims);
+
+            Response.Cookies.Add(new HttpCookie(JwtConstants.CookieName)
+            {
+                Secure = true,
+                HttpOnly = true,
+                Expires = DateTime.Now.AddMinutes(JwtConstants.ExpireMinutes),
+                Value = jwt,
+                SameSite = SameSiteMode.None
+            });
+
             var output = new UserData_Login_Output_APIItem
             {
                 UID = queried.UID,
-                Username = queried.UserName,
-                JwtToken = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims)
+                Username = queried.UserName
             };
 
             // 1. 更新 JWT 欄位
             // 2. 更新 LoginDate
             // 3. 儲存至 DB
             await this.StartValidate()
-                .ValidateAsync(_ => UpdateJWT(queried, output.JwtToken), (_, e) => AddError(LoginJwtUpdateFailed(e)))
+                .ValidateAsync(_ => UpdateJWT(queried, jwt), (_, e) => AddError(LoginJwtUpdateFailed(e)))
                 .Validate(_ => UpdateUserLoginDate(queried))
                 .ValidateAsync(_ => DC.SaveChangesStandardProcedureAsync(queried.UID, Request),
                     (_, e) => AddError(LoginDateOrJwtUpdateFailed(e)));
@@ -1025,6 +1036,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             catch (Exception e)
             {
                 AddError(UpdateDbFailed(e));
+            }
+
+            // 4. 如果都順利，清空使用者的 cookie
+            if (!HasError())
+            {
+                HttpCookie cookie = Response.Cookies[JwtConstants.CookieName];
+                if (cookie != null)
+                    cookie.Expires = DateTime.Now.AddDays(-1);
             }
 
             return GetResponseJson();

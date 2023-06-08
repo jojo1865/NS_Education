@@ -343,7 +343,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             claims = null;
 
             // 1. 驗證 Header 中是否有 Authorization
-            if (!HasBearerAuthorization(actionContext))
+            if (!HasCookie(actionContext))
                 throw new HttpRequestValidationException(RequestHeaderLacksAuthorization);
 
             // 2. 驗證 Token 是否可正常解密
@@ -359,12 +359,12 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
         private static string GetToken(ControllerContext actionContext)
         {
-            return FilterStaticTools.GetJwtTokenInHeader(actionContext.HttpContext.Request);
+            return FilterStaticTools.GetJwtToken(actionContext.HttpContext.Request);
         }
 
-        private static bool HasBearerAuthorization(ControllerContext actionContext)
+        private static bool HasCookie(ControllerContext actionContext)
         {
-            return actionContext.HttpContext.Request.Headers["Authorization"]?.StartsWith("Bearer") ?? false;
+            return actionContext.HttpContext.Request.Cookies.Get(JwtConstants.CookieName) != null;
         }
 
         #region 錯誤訊息

@@ -14,22 +14,24 @@ namespace NS_Education.Tools.Filters
             return context.HttpContext.Request.Url?.AbsoluteUri ?? "";
         }
 
-        public static string GetJwtTokenInHeader(HttpRequestBase request)
+        public static string GetJwtToken(HttpRequestBase request)
         {
             // 跳過開頭的 [Bearer ] 共 7 個字元
-            return request.Headers["Authorization"]?.Substring(7);
+            return request.Cookies.Get(JwtConstants.CookieName)?.Value;
         }
+
         public static bool HasRoleInRequest(HttpRequestBase request, AuthorizeBy role)
         {
             return AuthorizeTypeSingletonFactory
                 .GetByType(role)
-                .IsRoleInClaim(JwtHelper.DecodeToken(GetJwtTokenInHeader(request), JwtConstants.Secret));
+                .IsRoleInClaim(JwtHelper.DecodeToken(GetJwtToken(request), JwtConstants.Secret));
         }
-        
+
         public static string GetUidInClaim(ClaimsPrincipal claims)
         {
             return claims.FindFirst(JwtConstants.UidClaimType)?.Value.Trim();
         }
+
         public static int GetUidInClaimInt(ClaimsPrincipal claims)
         {
             return int.Parse(GetUidInClaim(claims));
@@ -37,7 +39,7 @@ namespace NS_Education.Tools.Filters
 
         public static int GetUidInRequestInt(HttpRequestBase request)
         {
-            return GetUidInClaimInt(JwtHelper.DecodeToken(GetJwtTokenInHeader(request), JwtConstants.Secret));
+            return GetUidInClaimInt(JwtHelper.DecodeToken(GetJwtToken(request), JwtConstants.Secret));
         }
 
         public static string GetFieldInRequest(HttpRequestBase request, string fieldName)

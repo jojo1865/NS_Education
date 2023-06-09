@@ -165,7 +165,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.Items.StartValidateElements()
                 .Validate(i => i.Id != DbConstants.FallbackGroupDataGID || i.DeleteFlag != true,
-                    i => AddError(UnsupportedValue($"欲刪除的權限 ID（{i.Id}）")))
+                    i => AddError(FallbackGroupUpdateNotAllowed))
                 .IsValid();
 
             return isValid;
@@ -246,6 +246,12 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, null, nameof(GroupData_Submit_Input_APIItem.GID))]
         public async Task<string> Submit(GroupData_Submit_Input_APIItem input)
         {
+            if (input.GID == DbConstants.FallbackGroupDataGID)
+            {
+                AddError(FallbackGroupUpdateNotAllowed);
+                return GetResponseJson();
+            }
+
             return await _submitHelper.Submit(input);
         }
 
@@ -316,6 +322,7 @@ namespace NS_Education.Controller.UsingHelper
         #region SubmitMenuData
 
         private const string SameMdIdDetected = "發現重覆的 MDID，請檢查輸入內容！";
+        private const string FallbackGroupUpdateNotAllowed = "不允許更新預設權限！";
 
         /// <summary>
         /// 新增/更新權限對應單一選單的 API 權限。
@@ -328,6 +335,12 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<string> SubmitMenuData(GroupData_SubmitMenuData_Input_APIItem input)
         {
             // 1. 驗證輸入
+            if (input.GID == DbConstants.FallbackGroupDataGID)
+            {
+                AddError(FallbackGroupUpdateNotAllowed);
+                return GetResponseJson();
+            }
+
             if (!SubmitMenuDataValidateInput(input))
                 return GetResponseJson();
 

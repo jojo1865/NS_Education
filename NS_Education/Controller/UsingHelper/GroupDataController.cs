@@ -157,7 +157,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Where(gd => toReviveIds.Contains(gd.GID))
                 .ToArrayAsync();
 
-            IEnumerable<string> toReviveNames = toReviveData.Select(rd => rd.Title);
+            string[] toReviveNames = toReviveData.Select(rd => rd.Title).ToArray();
 
             foreach (KeyValuePair<string, int> kvp in toReviveNames.GroupBy(s => s)
                          .Select(g => new KeyValuePair<string, int>(g.Key, g.Count()))
@@ -171,6 +171,7 @@ namespace NS_Education.Controller.UsingHelper
 
             string[] aliveSameNames = await DC.GroupData.Where(gd => !gd.DeleteFlag)
                 .Where(gd => !toReviveIds.Contains(gd.GID))
+                .Where(gd => toReviveNames.Contains(gd.Title))
                 .Select(gd => gd.Title)
                 .ToArrayAsync();
 

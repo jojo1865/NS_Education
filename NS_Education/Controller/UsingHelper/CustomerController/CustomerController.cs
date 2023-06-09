@@ -174,7 +174,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft) ==
                     (input.ResverType == 1));
 
-            return query.OrderBy(c => c.CID);
+            return query.OrderBy(c => c.Code)
+                .ThenBy(c => c.CID);
         }
 
         public async Task<Customer_GetList_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity,

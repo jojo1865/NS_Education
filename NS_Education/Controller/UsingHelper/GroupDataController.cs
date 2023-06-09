@@ -207,13 +207,18 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitAddValidateInput(GroupData_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.GID == 0, () => AddError(WrongFormat("權限 ID")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("權限名稱")))
                 .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("權限名稱", 1, 50)))
+                .SkipIfAlreadyInvalid()
+                .ValidateAsync(
+                    async i => !await DC.GroupData.AnyAsync(gd =>
+                        !gd.DeleteFlag && gd.Title == i.Title && gd.GID != i.GID),
+                    () => AddError(CopyNotAllowed("權限名稱")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            return isValid;
         }
 
         public async Task<GroupData> SubmitCreateData(GroupData_Submit_Input_APIItem input)
@@ -230,13 +235,17 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitEditValidateInput(GroupData_Submit_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
+            bool isValid = await input.StartValidate()
                 .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("權限名稱")))
                 .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("權限名稱", 1, 50)))
+                .ValidateAsync(
+                    async i => !await DC.GroupData.AnyAsync(gd =>
+                        !gd.DeleteFlag && gd.Title == i.Title && gd.GID != i.GID),
+                    () => AddError(CopyNotAllowed("權限名稱")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            return isValid;
         }
 
         public IQueryable<GroupData> SubmitEditQuery(GroupData_Submit_Input_APIItem input)

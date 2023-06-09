@@ -234,8 +234,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             {
                 UID = queried.UID,
                 Username = queried.UserName,
-                JwtToken = jwt,
-                CookieName = JwtConstants.CookieName
+                JwtToken = jwt
             };
 
             // 1. 更新 JWT 欄位

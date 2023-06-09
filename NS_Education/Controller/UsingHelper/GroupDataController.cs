@@ -139,7 +139,47 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidateReviveNoSameNameData(input))
+            {
+                return GetResponseJson();
+            }
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateReviveNoSameNameData(DeleteItem_Input_APIItem input)
+        {
+            // 1. 查詢所有要復活的資料
+            IEnumerable<DeleteItem_Input_Row_APIItem> toRevive = input.Items.Where(i => i.DeleteFlag == false);
+            IEnumerable<int> toReviveIds = toRevive.Where(r => r.Id != null).Select(r => r.Id.Value);
+
+            GroupData[] toReviveData = await DC.GroupData.Where(gd => gd.DeleteFlag)
+                .Where(gd => toReviveIds.Contains(gd.GID))
+                .ToArrayAsync();
+
+            IEnumerable<string> toReviveNames = toReviveData.Select(rd => rd.Title);
+
+            foreach (KeyValuePair<string, int> kvp in toReviveNames.GroupBy(s => s)
+                         .Select(g => new KeyValuePair<string, int>(g.Key, g.Count()))
+                         .Where(g => g.Value > 1))
+            {
+                AddError(CopyNotAllowed($"權限名稱（{kvp.Key}）"));
+            }
+
+            if (HasError())
+                return false;
+
+            string[] aliveSameNames = await DC.GroupData.Where(gd => !gd.DeleteFlag)
+                .Where(gd => !toReviveIds.Contains(gd.GID))
+                .Select(gd => gd.Title)
+                .ToArrayAsync();
+
+            foreach (string aliveSameName in aliveSameNames)
+            {
+                AddError(CopyNotAllowed($"權限名稱（{aliveSameName}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<GroupData> DeleteItemsQuery(IEnumerable<int> ids)

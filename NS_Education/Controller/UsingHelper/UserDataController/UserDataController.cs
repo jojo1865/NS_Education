@@ -228,16 +228,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             string jwt = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims);
 
-            var cookie = new HttpCookie(JwtConstants.CookieName)
-            {
-                Secure = true,
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
-                Value = jwt,
-                SameSite = SameSiteMode.None
-            };
-
-            Response.Cookies.Add(cookie);
+            LoginWriteCookie(jwt);
 
             var output = new UserData_Login_Output_APIItem
             {
@@ -257,6 +248,36 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     (_, e) => AddError(LoginDateOrJwtUpdateFailed(e)));
 
             return GetResponseJson(output);
+        }
+
+        private void LoginWriteCookie(string jwt)
+        {
+            bool isHttps = Request.Url?.Scheme == "https";
+            HttpCookie cookie;
+            if (isHttps)
+            {
+                cookie = new HttpCookie(JwtConstants.CookieName)
+                {
+                    Secure = true,
+                    HttpOnly = true,
+                    Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
+                    Value = jwt,
+                    SameSite = SameSiteMode.None
+                };
+            }
+            else
+            {
+                cookie = new HttpCookie(JwtConstants.CookieName)
+                {
+                    Secure = false,
+                    HttpOnly = true,
+                    Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
+                    Value = jwt,
+                    SameSite = SameSiteMode.Lax
+                };
+            }
+
+            Response.Cookies.Add(cookie);
         }
 
         /// <summary>

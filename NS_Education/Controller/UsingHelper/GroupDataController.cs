@@ -124,11 +124,16 @@ namespace NS_Education.Controller.UsingHelper
                         MDID = result.MenuData.MDID,
                         Title = result.MenuData.Title ?? "",
                         ActiveFlag = result.IsSpecialMenu || result.ThisGroupMenu != null,
-                        AddFlag = result.IsSpecialMenu || (result.ThisGroupMenu?.AddFlag ?? false),
-                        ShowFlag = result.IsSpecialMenu || (result.ThisGroupMenu?.ShowFlag ?? false),
-                        EditFlag = result.IsSpecialMenu || (result.ThisGroupMenu?.EditFlag ?? false),
+                        AddFlag = result.ThisGroupMenu?.AddFlag ?? false,
+                        ShowFlag = result.ThisGroupMenu?.ShowFlag ?? false,
+                        EditFlag = result.ThisGroupMenu?.EditFlag ?? false,
                         DeleteFlag = result.ThisGroupMenu?.DeleteFlag ?? false,
-                        PrintFlag = result.ThisGroupMenu?.PringFlag ?? false
+                        PrintFlag = result.ThisGroupMenu?.PringFlag ?? false,
+                        AddFlagReadOnly = result.IsSpecialMenu,
+                        ShowFlagReadOnly = result.IsSpecialMenu,
+                        EditFlagReadOnly = result.IsSpecialMenu,
+                        DeleteFlagReadOnly = false,
+                        PrintFlagReadOnly = false
                     })
                     .ToList()
             });

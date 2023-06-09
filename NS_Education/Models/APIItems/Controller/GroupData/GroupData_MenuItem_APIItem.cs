@@ -10,5 +10,10 @@ namespace NS_Education.Models.APIItems.Controller.GroupData
         public bool EditFlag { get; set; }
         public bool DeleteFlag { get; set; }
         public bool PrintFlag { get; set; }
+        public bool AddFlagReadOnly { get; set; }
+        public bool ShowFlagReadOnly { get; set; }
+        public bool EditFlagReadOnly { get; set; }
+        public bool DeleteFlagReadOnly { get; set; }
+        public bool PrintFlagReadOnly { get; set; }
     }
 }

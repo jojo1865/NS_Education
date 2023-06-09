@@ -25,9 +25,7 @@ namespace NS_Education.Variables
         /// </summary>
         public const string ThrowDineTitle = "餐飲";
 
-        public const int FallbackGroupDataGID = 2;
-
-        public static readonly IReadOnlyCollection<string> AlwaysShowMenuUrls = new List<string>
+        public static readonly IReadOnlyCollection<string> AlwaysShowAddEditMenuUrls = new List<string>
         {
             "/appointment-management"
         }.AsSafeReadOnly();

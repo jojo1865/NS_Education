@@ -24,7 +24,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         #region GetList
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
         public async Task<string> GetResverSiteList(Resver_GetResverSiteList_Input_APIItem input)
         {
             // 這個功能有特殊需求：當輸入 freeDate 時需要用 Resver_TimeSpan 篩選，但 RTS 並不是直接 FK 關係，

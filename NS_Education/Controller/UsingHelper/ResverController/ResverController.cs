@@ -55,7 +55,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         // route 請參照 RouteConfig
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
         public async Task<string> GetList(Resver_GetHeadList_Input_APIItem input)
         {
             return await _getListPagedHelper.GetPagedList(input);
@@ -118,7 +118,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         // 確切 route 請參照 RouteConfig
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
         public async Task<string> GetInfoById(int id)
         {
             return await _getInfoByIdHelper.GetInfoById(id);
@@ -451,7 +451,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         #region ChangeCheck
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
         public async Task<string> ChangeCheck(int? id, bool? checkFlag)
         {
             // 1. 驗證輸入
@@ -521,7 +521,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         #region ChangeCheckIn
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
         public async Task<string> ChangeCheckIn(int? id, bool? checkInFlag)
         {
             // 1. 驗證輸入
@@ -591,7 +591,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Resver_Submit_Input_APIItem.RHID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None, null, nameof(Resver_Submit_Input_APIItem.RHID))]
         public async Task<string> Submit(Resver_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);

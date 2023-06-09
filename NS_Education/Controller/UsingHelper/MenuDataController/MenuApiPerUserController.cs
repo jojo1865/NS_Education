@@ -37,6 +37,17 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // 所有有權限的 MDID : MenuData
             IDictionary<int, MenuData> menuDataDict = await query.ToDictionaryAsync(md => md.MDID, md => md);
 
+            // 加入需要特殊處理的 MDID
+            MenuData[] specialMenus = await DC.MenuData
+                .Where(md =>
+                    md.ActiveFlag && !md.DeleteFlag && DbConstants.AlwaysShowAddEditMenuUrls.Contains(md.URL))
+                .ToArrayAsync();
+
+            foreach (MenuData specialMenu in specialMenus)
+            {
+                menuDataDict[specialMenu.MDID] = specialMenu;
+            }
+
             // ParentID : MenuData
             ILookup<int, MenuData> parentToChildrenLookUp =
                 menuDataDict.ToLookup(kvp => kvp.Value.ParentID, kvp => kvp.Value);
@@ -56,15 +67,13 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
             foreach (IGrouping<int, MenuData> grouping in parentToChildrenLookUp)
             {
-                MenuData_GetListByUid_Output_Node_APIItem parentMenuApiItem =
-                    CreateNode(grouping.Key, menuDataDict, parentToChildrenLookUp, createdNodes);
-
-                response.Items.Add(parentMenuApiItem);
+                CreateNode(grouping.Key, menuDataDict, parentToChildrenLookUp, createdNodes);
             }
 
-            // 只從沒有找到 parent 的權限開始長
-            // 在這裡才做 Where, 而不是產生 List 過程中不放進去, 因為有可能先處理到有 parent 的上層選單（中間層）
-            response.Items = response.Items.Where(item => item.Parent == null)
+            // createdNodes 的 key 是所有人的 parentId
+            // 所以 0 會有一筆空資料 (MDID = 0, 其他欄位為預設)
+            // 而 createdNodes[0].Items 就是實際的樹
+            response.Items = createdNodes[0].Items
                 .OrderBy(item => item.SortNo)
                 .ToList();
 
@@ -81,7 +90,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 createdNodes = new Dictionary<int, MenuData_GetListByUid_Output_Node_APIItem>();
 
             // Parent 可能是 null - 表示所擁有的權限中，沒有父層選單的權限，只有子層選單權限。
-            menuDataDict.TryGetValue(thisNodeId, out MenuData parentMenuOrNull);
+            menuDataDict.TryGetValue(thisNodeId, out MenuData thisNodeOrNull);
 
             var children = parentToChildrenLookUp.FirstOrDefault(g => g.Key == thisNodeId);
 
@@ -126,26 +135,34 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 }
             }
 
+            bool isASpecialMenu = thisNodeOrNull != null &&
+                                  DbConstants.AlwaysShowAddEditMenuUrls.Contains(thisNodeOrNull.URL);
+
             // 建立新的 Node
             MenuData_GetListByUid_Output_Node_APIItem newNode = new MenuData_GetListByUid_Output_Node_APIItem
             {
                 MDID = thisNodeId,
-                Title = parentMenuOrNull?.Title ?? "",
-                URL = parentMenuOrNull?.URL.HasContent() ?? false
-                    ? parentMenuOrNull.URL
+                Title = thisNodeOrNull?.Title ?? "",
+                URL = thisNodeOrNull?.URL.HasContent() ?? false
+                    ? thisNodeOrNull.URL
                     : children?
                           .OrderBy(child => child.SortNo)
                           .Select(child => child.URL)
                           .FirstOrDefault()
                       ?? "",
-                SortNo = parentMenuOrNull?.SortNo ?? 0,
+                SortNo = thisNodeOrNull?.SortNo ?? 0,
                 // 這裡在做遞迴
                 Items = children?.Select(child =>
                             CreateNode(child.MDID, menuDataDict, parentToChildrenLookUp, createdNodes)).ToList() ??
                         new List<MenuData_GetListByUid_Output_Node_APIItem>(),
-                Apis = parentMenuOrNull?.MenuAPI
+                Apis = thisNodeOrNull?.MenuAPI
                            .Where(api =>
-                               // 先判斷管理員權限
+                               // 如果是特殊的選單（如預約管理），必定有瀏覽新增修改
+                               (isASpecialMenu
+                                && (api.APIType != (int)MenuApiType.Delete || rootDelete)
+                                && (api.APIType != (int)MenuApiType.Print || rootPrint))
+                               ||
+                               // 判斷管理員權限
                                (UserHasRootAccess && (api.APIType != (int)MenuApiType.Add || rootAdd)
                                                   && (api.APIType != (int)MenuApiType.Delete || rootDelete)
                                                   && (api.APIType != (int)MenuApiType.Edit || rootEdit)

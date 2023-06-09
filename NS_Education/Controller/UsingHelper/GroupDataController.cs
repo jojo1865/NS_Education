@@ -114,16 +114,19 @@ namespace NS_Education.Controller.UsingHelper
                     .Where(md => md.ActiveFlag && !md.DeleteFlag)
                     .AsEnumerable()
                     .Select(md => new
-                        { MenuData = md, ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID) })
+                    {
+                        MenuData = md,
+                        ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID),
+                        IsSpecialMenu = DbConstants.AlwaysShowAddEditMenuUrls.Contains(md.URL)
+                    })
                     .Select(result => new GroupData_MenuItem_APIItem
                     {
                         MDID = result.MenuData.MDID,
                         Title = result.MenuData.Title ?? "",
-                        ActiveFlag = result.ThisGroupMenu != null,
-                        AddFlag = result.ThisGroupMenu?.AddFlag ?? false,
-                        ShowFlag = DbConstants.AlwaysShowMenuUrls.Contains(result.MenuData.URL) ||
-                                   (result.ThisGroupMenu?.ShowFlag ?? false),
-                        EditFlag = result.ThisGroupMenu?.EditFlag ?? false,
+                        ActiveFlag = result.IsSpecialMenu || result.ThisGroupMenu != null,
+                        AddFlag = result.IsSpecialMenu || (result.ThisGroupMenu?.AddFlag ?? false),
+                        ShowFlag = result.IsSpecialMenu || (result.ThisGroupMenu?.ShowFlag ?? false),
+                        EditFlag = result.IsSpecialMenu || (result.ThisGroupMenu?.EditFlag ?? false),
                         DeleteFlag = result.ThisGroupMenu?.DeleteFlag ?? false,
                         PrintFlag = result.ThisGroupMenu?.PringFlag ?? false
                     })
@@ -139,62 +142,14 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            if (!DeleteItemValidateNoFallback(input))
-            {
-                return GetResponseJson();
-            }
-
             if (!await DeleteItemValidateReviveNoSameNameData(input))
             {
                 return GetResponseJson();
             }
 
-            using (var transaction = DC.Database.BeginTransaction())
-            {
-                await _deleteItemHelper.DeleteItem(input);
-                await DeleteItemSwitchAllUsersToFallbackGroup(input);
-
-                if (!HasError())
-                    transaction.Commit();
-            }
+            await _deleteItemHelper.DeleteItem(input);
 
             return GetResponseJson();
-        }
-
-        private bool DeleteItemValidateNoFallback(DeleteItem_Input_APIItem input)
-        {
-            bool isValid = input.Items.StartValidateElements()
-                .Validate(i => i.Id != DbConstants.FallbackGroupDataGID || i.DeleteFlag != true,
-                    i => AddError(FallbackGroupUpdateNotAllowed))
-                .IsValid();
-
-            return isValid;
-        }
-
-        private async Task DeleteItemSwitchAllUsersToFallbackGroup(DeleteItem_Input_APIItem input)
-        {
-            // 先確認預設權限是否存在
-            if (!await DC.GroupData.ValidateIdExists(DbConstants.FallbackGroupDataGID, nameof(GroupData.GID)))
-            {
-                AddError($"查無預設角色，導致無法執行刪除。請確認 DB 中是否存在 GID = {DbConstants.FallbackGroupDataGID} 的資料！");
-                return;
-            }
-
-            // 修改所有 groupmenus
-            IEnumerable<int> IdsToDelete = input.Items
-                .Where(i => i.DeleteFlag is true)
-                .Select(g => g.Id ?? 0);
-
-            M_Group_User[] groupUserToSwitch = await DC.M_Group_User
-                .Where(mgu => IdsToDelete.Contains(mgu.GID))
-                .ToArrayAsync();
-
-            foreach (M_Group_User mgu in groupUserToSwitch)
-            {
-                mgu.GID = DbConstants.FallbackGroupDataGID;
-            }
-
-            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
         }
 
         private async Task<bool> DeleteItemValidateReviveNoSameNameData(DeleteItem_Input_APIItem input)
@@ -246,12 +201,6 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, null, nameof(GroupData_Submit_Input_APIItem.GID))]
         public async Task<string> Submit(GroupData_Submit_Input_APIItem input)
         {
-            if (input.GID == DbConstants.FallbackGroupDataGID)
-            {
-                AddError(FallbackGroupUpdateNotAllowed);
-                return GetResponseJson();
-            }
-
             return await _submitHelper.Submit(input);
         }
 
@@ -322,7 +271,6 @@ namespace NS_Education.Controller.UsingHelper
         #region SubmitMenuData
 
         private const string SameMdIdDetected = "發現重覆的 MDID，請檢查輸入內容！";
-        private const string FallbackGroupUpdateNotAllowed = "不允許更新預設權限！";
 
         /// <summary>
         /// 新增/更新權限對應單一選單的 API 權限。
@@ -335,12 +283,6 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<string> SubmitMenuData(GroupData_SubmitMenuData_Input_APIItem input)
         {
             // 1. 驗證輸入
-            if (input.GID == DbConstants.FallbackGroupDataGID)
-            {
-                AddError(FallbackGroupUpdateNotAllowed);
-                return GetResponseJson();
-            }
-
             if (!SubmitMenuDataValidateInput(input))
                 return GetResponseJson();
 
@@ -383,7 +325,7 @@ namespace NS_Education.Controller.UsingHelper
                 MenuData menuData = await DC.MenuData
                     .FirstOrDefaultAsync(md => md.MDID == item.MDID && md.ActiveFlag && !md.DeleteFlag);
 
-                bool isAlwaysShow = menuData != null && DbConstants.AlwaysShowMenuUrls.Contains(menuData.URL);
+                bool isAlwaysShow = menuData != null && DbConstants.AlwaysShowAddEditMenuUrls.Contains(menuData.URL);
 
                 if (menuIdToGroupMenuDict.TryGetValue(item.MDID, out M_Group_Menu mgm))
                 {

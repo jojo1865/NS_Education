@@ -139,12 +139,62 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!DeleteItemValidateNoFallback(input))
+            {
+                return GetResponseJson();
+            }
+
             if (!await DeleteItemValidateReviveNoSameNameData(input))
             {
                 return GetResponseJson();
             }
 
-            return await _deleteItemHelper.DeleteItem(input);
+            using (var transaction = DC.Database.BeginTransaction())
+            {
+                await _deleteItemHelper.DeleteItem(input);
+                await DeleteItemSwitchAllUsersToFallbackGroup(input);
+
+                if (!HasError())
+                    transaction.Commit();
+            }
+
+            return GetResponseJson();
+        }
+
+        private bool DeleteItemValidateNoFallback(DeleteItem_Input_APIItem input)
+        {
+            bool isValid = input.Items.StartValidateElements()
+                .Validate(i => i.Id != DbConstants.FallbackGroupDataGID || i.DeleteFlag != true,
+                    i => AddError(UnsupportedValue($"欲刪除的權限 ID（{i.Id}）")))
+                .IsValid();
+
+            return isValid;
+        }
+
+        private async Task DeleteItemSwitchAllUsersToFallbackGroup(DeleteItem_Input_APIItem input)
+        {
+            // 先確認預設權限是否存在
+            if (!await DC.GroupData.ValidateIdExists(DbConstants.FallbackGroupDataGID, nameof(GroupData.GID)))
+            {
+                AddError($"查無預設角色，導致無法執行刪除。請確認 DB 中是否存在 GID = {DbConstants.FallbackGroupDataGID} 的資料！");
+                return;
+            }
+
+            // 修改所有 groupmenus
+            IEnumerable<int> IdsToDelete = input.Items
+                .Where(i => i.DeleteFlag is true)
+                .Select(g => g.Id ?? 0);
+
+            M_Group_User[] groupUserToSwitch = await DC.M_Group_User
+                .Where(mgu => IdsToDelete.Contains(mgu.GID))
+                .ToArrayAsync();
+
+            foreach (M_Group_User mgu in groupUserToSwitch)
+            {
+                mgu.GID = DbConstants.FallbackGroupDataGID;
+            }
+
+            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
         }
 
         private async Task<bool> DeleteItemValidateReviveNoSameNameData(DeleteItem_Input_APIItem input)

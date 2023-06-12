@@ -2,9 +2,10 @@ namespace NS_Education.Models.Errors.InputValidationErrors
 {
     public sealed class WrongFormatError : BaseInputValidationError
     {
-        public WrongFormatError(string fieldName)
+        public WrongFormatError(string fieldName = null)
         {
-            AddAdditionalValues(ErrorField.FieldName, fieldName);
+            if (fieldName != null)
+                AddAdditionalValues(ErrorField.FieldName, fieldName);
         }
 
         public override int ErrorCodeInt => 5;

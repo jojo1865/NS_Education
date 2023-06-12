@@ -149,7 +149,7 @@ namespace NS_Education.Controller.UsingHelper
             // 2. 驗證數量相符
             if (result.Keys.Count != knownCodes.Count)
             {
-                AddError(
+                AddError(1,
                     $"後端約定的安全控管參數數量（{knownCodes.Count}）與資料庫未刪除的安全控管參數數量（{result.Keys.Count}）不符！請確認資料庫是否有重複資料，或刪除了既有的安全參數設定！");
             }
 

@@ -20,7 +20,7 @@ namespace NS_Education.Models.Errors.InputValidationErrors
         {
             string min = GetAdditionalValueFormatted(ErrorField.MinLength);
             string max = GetAdditionalValueFormatted(ErrorField.MaxLength);
-            return $"{GetAdditionalValueFormatted(ErrorField.FieldName)}欄位不支援輸入的值"
+            return $"{GetAdditionalValueFormatted(ErrorField.FieldName)}欄位輸入值超出支援的長度"
                    + (min != null ? $"，最小值{min}" : "")
                    + (max != null ? $"，最大值{max}" : "")
                    + "！";

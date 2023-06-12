@@ -1,13 +1,10 @@
-using System;
-using NS_Education.Tools.Extensions;
-
 namespace NS_Education.Models.Errors.DataValidationErrors
 {
     public sealed class DataAlreadyExistsError : BaseDataValidationError
     {
-        public DataAlreadyExistsError(Exception exception)
+        public DataAlreadyExistsError(string fieldName)
         {
-            AddAdditionalValues(ErrorField.FieldName, exception.GetActualMessage());
+            AddAdditionalValues(ErrorField.FieldName, fieldName);
         }
 
         public override int ErrorCodeInt => 3;

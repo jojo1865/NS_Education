@@ -19,9 +19,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         where TController : PublicClass, IChangeActive<TEntity>
         where TEntity : class
     {
-        private static string UpdateFailed(Exception e)
-            => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
-        
         private readonly TController _controller;
 
         public ChangeActiveHelper(TController controller)
@@ -29,13 +26,13 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             _controller = controller;
         }
 
+        private static string UpdateFailed(Exception e)
+            => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
+
         #region ChangeActive
 
         private const string ChangeActiveNotSupported = "此 Controller 的資料型態不支援啟用/停用功能！";
-        private const string ChangeActiveInputIdIncorrect = "未輸入欲更新的 ID 或是不正確！";
-        private const string ChangeActiveInputFlagNotFound = "未提供啟用狀態的新值！";
-        private const string ChangeActiveNotFound = "查無欲更新的資料！";
-        
+
         /// <summary>
         /// 修改資料的啟用/停用狀態。
         /// </summary>
@@ -54,14 +51,14 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 1. 驗證輸入。
             if (!id.IsAboveZero())
-                _controller.AddError(ChangeActiveInputIdIncorrect);
+                _controller.AddError(_controller.EmptyNotAllowed("ID"));
 
             if (activeFlag is null)
-                _controller.AddError(ChangeActiveInputFlagNotFound);
+                _controller.AddError(_controller.EmptyNotAllowed("啟用狀態的新值"));
 
             if (_controller.HasError())
                 return _controller.GetResponseJson();
-            
+
             // ReSharper disable once PossibleInvalidOperationException
             bool activeFlagValue = activeFlag.Value;
 
@@ -70,7 +67,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             if (t == null)
             {
-                _controller.AddError(ChangeActiveNotFound);
+                _controller.AddError(_controller.NotFound());
                 return _controller.GetResponseJson();
             }
 
@@ -78,11 +75,12 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             try
             {
                 FlagHelper.SetActiveFlag(t, activeFlagValue);
-                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(), HttpContext.Current.Request);
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(),
+                    HttpContext.Current.Request);
             }
             catch (Exception e)
             {
-                _controller.AddError(UpdateFailed(e));
+                _controller.AddError(_controller.UpdateDbFailed(e));
             }
 
             // 4. 回傳。

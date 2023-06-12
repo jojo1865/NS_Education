@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NS_Education.Models;
 using NS_Education.Models.Entities;
+using NS_Education.Models.Errors;
+using NS_Education.Models.Errors.AuthorizationErrors;
+using NS_Education.Models.Errors.DataValidationErrors;
+using NS_Education.Models.Errors.InputValidationErrors;
 using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.FinalizeResponseFilter;
 
@@ -17,7 +21,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
     [FinalizeResponseFilter(Order = Int32.MaxValue)]
     public class PublicClass : System.Web.Mvc.Controller
     {
-        private readonly ICollection<string> _errors = new List<string>();
+        private readonly ICollection<BaseError> _errors = new List<BaseError>();
         protected readonly string[] CategoryTypes = { "通用", "公司", "部門", "場地", "備忘", "服務", "設備", "客戶", "付款類", "合作廠商" };
 
         /// <summary>
@@ -35,7 +39,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
 
         protected internal NsDbContext DC { get; }
 
-        public BaseApiResponse GetMsgClass(IEnumerable<string> errors)
+        public BaseApiResponse GetMsgClass(IEnumerable<BaseError> errors)
         {
             BaseApiResponse response = new BaseApiResponse();
             if (errors == null || !errors.Any()) return response;
@@ -67,19 +71,25 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <summary>
         /// 加入錯誤訊息。
         /// </summary>
-        /// <param name="errorMessage">錯誤訊息</param>
-        protected internal void AddError(string errorMessage)
+        /// <param name="error">錯誤</param>
+        protected internal void AddError(BaseError error)
         {
-            _errors.Add(errorMessage);
+            _errors.Add(error);
+        }
+
+        protected internal void AddError(int code, string message,
+            params KeyValuePair<ErrorField, object>[] additionalValues)
+        {
+            _errors.Add(new BusinessError(code, message, additionalValues));
         }
 
         /// <summary>
         /// 回傳一串缺少權限時可用的預設錯誤字串。
         /// </summary>
         /// <returns>預設錯誤訊息字串</returns>
-        protected internal string NoPrivilege()
+        protected internal InsufficientPrivilegeError NoPrivilege()
         {
-            return "權限不足以進行此操作！";
+            return new InsufficientPrivilegeError();
         }
 
         /// <summary>
@@ -87,9 +97,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         /// <param name="e">錯誤物件</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected static string UpdateDbFailed(Exception e = null)
+        protected internal UpdateDbFailedError UpdateDbFailed(Exception e = null)
         {
-            return e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
+            return new UpdateDbFailedError(e);
         }
 
         /// <summary>
@@ -97,9 +107,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         /// <param name="fieldName">（可選）欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string NotFound(string fieldName = null)
+        protected internal DataNotFoundError NotFound(string fieldName = null)
         {
-            return fieldName is null ? "查無資料！" : $"「{fieldName}」查無對應資料！";
+            return new DataNotFoundError(fieldName);
         }
 
         /// <summary>
@@ -107,9 +117,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         /// <param name="keyFieldName">（可選）用於判定重覆的欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string AlreadyExists(string keyFieldName = null)
+        protected DataAlreadyExistsError AlreadyExists(string keyFieldName = null)
         {
-            return keyFieldName is null ? "已存在相同資料！" : $"已存在「{keyFieldName}」包含相同值的資料！";
+            return new DataAlreadyExistsError(keyFieldName);
         }
 
         /// <summary>
@@ -118,9 +128,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="keyFieldName">（可選）用於判定重覆的子欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string CopyNotAllowed(string fieldName, string keyFieldName = null)
+        protected internal CopyNotAllowedError CopyNotAllowed(string fieldName, string keyFieldName = null)
         {
-            return keyFieldName is null ? $"「{fieldName}」不允許包含重複的資料！" : $"「{fieldName}」中不允許「{keyFieldName}」有任何重複資料！";
+            return new CopyNotAllowedError(fieldName, keyFieldName);
         }
 
         /// <summary>
@@ -128,9 +138,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string UnsupportedValue(string fieldName)
+        protected NotSupportedValueError NotSupportedValue(string fieldName)
         {
-            return $"{fieldName} 不支援這個輸入值，請重新確認。";
+            return new NotSupportedValueError(fieldName);
         }
 
         /// <summary>
@@ -139,9 +149,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="minFieldName">最小值的欄位名稱</param>
         /// <param name="maxFieldName">最大值的欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected internal string MinLargerThanMax(string minFieldName, string maxFieldName)
+        protected internal MinLargerThanMaxError MinLargerThanMax(string minFieldName, string maxFieldName)
         {
-            return $"「{minFieldName}」必須小於等於「{maxFieldName}」！";
+            return new MinLargerThanMaxError(minFieldName, maxFieldName);
         }
 
         /// <summary>
@@ -149,9 +159,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected internal string EmptyNotAllowed(string fieldName)
+        protected internal EmptyNotAllowedError EmptyNotAllowed(string fieldName)
         {
-            return $"「{fieldName}」未輸入或格式不正確！";
+            return new EmptyNotAllowedError(fieldName);
         }
 
         /// <summary>
@@ -159,9 +169,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string WrongFormat(string fieldName)
+        protected WrongFormatError WrongFormat(string fieldName)
         {
-            return $"「{fieldName}」格式不正確！";
+            return new WrongFormatError(fieldName);
         }
 
         /// <summary>
@@ -171,11 +181,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string OutOfRange(string fieldName, object min = null, object max = null)
+        protected ValueOutOfRangeError OutOfRange(string fieldName, object min = null, object max = null)
         {
-            string minMessage = min is null ? "" : $"，最小值為 {min}";
-            string maxMessage = max is null ? "" : $"，最大值為 {max}";
-            return $"「{fieldName}」超出範圍{minMessage}{maxMessage}！";
+            return new ValueOutOfRangeError(fieldName, min, max);
         }
 
         /// <summary>
@@ -184,9 +192,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="targetValue">預期值</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string NotEqual(string fieldName, object targetValue)
+        protected ExpectedValueError ExpectedValue(string fieldName, object targetValue)
         {
-            return $"「{fieldName}」應等於 {targetValue}！";
+            return new ExpectedValueError(fieldName, targetValue);
         }
 
         /// <summary>
@@ -195,9 +203,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="max">最大值</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string TooLarge(string fieldName, object max = null)
+        protected ValueTooLargeError TooLarge(string fieldName, object max = null)
         {
-            return max is null ? $"「{fieldName}」值太大了！" : $"「{fieldName}」不得超過 {max}！";
+            return new ValueTooLargeError(fieldName, max);
         }
 
         /// <summary>
@@ -207,24 +215,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string LengthOutOfRange(string fieldName, int? min = null, int? max = null)
+        protected LengthOutOfRangeError LengthOutOfRange(string fieldName, int? min = null, int? max = null)
         {
-            string minMessage = min is null ? "" : $"，最小長度為 {min}";
-            string maxMessage = max is null ? "" : $"，最大長度為 {max}";
-            return $"「{fieldName}」長度不符合規定範圍{minMessage}{maxMessage}！";
-        }
-
-        /// <summary>
-        /// 回傳一串欄位內容過短時可使用的預設錯誤訊息字串。
-        /// </summary>
-        /// <param name="fieldName">欄位名稱</param>
-        /// <param name="length">（可選）長度</param>
-        /// <returns>預設錯誤訊息字串</returns>
-        protected string TooShort(string fieldName, int? length = null)
-        {
-            return length == null
-                ? $"「{fieldName}」低於最小長度！"
-                : $"「{fieldName}」不得低於 {length} 個字！";
+            return new LengthOutOfRangeError(fieldName, min, max);
         }
 
         /// <summary>
@@ -233,11 +226,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="length">（可選）長度</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string TooLong(string fieldName, int? length = null)
+        protected LengthTooLongError TooLong(string fieldName, int? length = null)
         {
-            return length == null
-                ? $"「{fieldName}」超過最大長度！"
-                : $"「{fieldName}」不得超過 {length} 個字！";
+            return new LengthTooLongError(fieldName, length);
         }
 
         /// <summary>

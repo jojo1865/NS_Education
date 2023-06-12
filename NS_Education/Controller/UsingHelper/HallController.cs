@@ -214,7 +214,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
                 .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
-                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(UnsupportedValue("開立憑證種類")))
+                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(NotSupportedValue("開立憑證種類")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -251,7 +251,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
                 .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
                 .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
-                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(UnsupportedValue("開立憑證種類")))
+                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(NotSupportedValue("開立憑證種類")))
                 .IsValid();
 
             return await Task.FromResult(isValid);

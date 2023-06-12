@@ -198,7 +198,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.MinuteE.IsInBetween(0, 59), () => AddError(OutOfRange("結束分鐘", 0, 59)))
                 .Validate(
                     i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
-                    () => AddError(SubmitWrongStartTime))
+                    () => AddError(MinLargerThanMax("起始時間", "結束時間")))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.PriceRate.HasContent(), () => AddError(EmptyNotAllowed("價格基數")))
                 .Validate(i => i.PriceRate.HasLengthBetween(1, 6), () => AddError(LengthOutOfRange("價格基數", 1, 6)))
@@ -243,7 +243,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.MinuteE.IsInBetween(0, 59), () => AddError(OutOfRange("結束分鐘", 0, 59)))
                 .Validate(
                     i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
-                    () => AddError(SubmitWrongStartTime))
+                    () => AddError(MinLargerThanMax("起始時間", "結束時間")))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.PriceRate.HasContent(), () => AddError(EmptyNotAllowed("價格基數")))
                 .Validate(i => i.PriceRate.HasLengthBetween(1, 6), () => AddError(LengthOutOfRange("價格基數", 1, 6)))

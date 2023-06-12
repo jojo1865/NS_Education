@@ -79,7 +79,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.LoginPassword.Length.IsInBetween(passwordMinLength, 100),
                     () => AddError(LengthOutOfRange("使用者密碼", passwordMinLength, 100)))
-                .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(PasswordAlphanumericOnly))
+                .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(1, PasswordAlphanumericOnly))
                 .IsValid();
 
             if (!isValid)
@@ -203,10 +203,10 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             // 2. 確認帳號的啟用 Flag 與刪除 Flag 
             // 3. 有帳號，才驗證登入密碼
             bool isValidated = queried.StartValidate(true)
-                .Validate(q => q != null, () => AddError(LoginAccountNotFound))
-                .Validate(q => q.ActiveFlag && !q.DeleteFlag, () => AddError(LoginAccountNotFound))
+                .Validate(q => q != null, () => AddError(NotFound("使用者帳號")))
+                .Validate(q => q.ActiveFlag && !q.DeleteFlag, () => AddError(NotFound("使用者帳號")))
                 .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
-                    () => AddError(LoginPasswordIncorrect))
+                    () => AddError(1, LoginPasswordIncorrect))
                 .IsValid();
 
             if (!isValidated)
@@ -241,10 +241,10 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             // 2. 更新 LoginDate
             // 3. 儲存至 DB
             await this.StartValidate()
-                .ValidateAsync(_ => UpdateJWT(queried, jwt), (_, e) => AddError(LoginJwtUpdateFailed(e)))
+                .ValidateAsync(_ => UpdateJWT(queried, jwt), (_, e) => AddError(UpdateDbFailed(e)))
                 .Validate(_ => UpdateUserLoginDate(queried))
                 .ValidateAsync(_ => DC.SaveChangesStandardProcedureAsync(queried.UID, Request),
-                    (_, e) => AddError(LoginDateOrJwtUpdateFailed(e)));
+                    (_, e) => AddError(UpdateDbFailed(e)));
 
             return GetResponseJson(output);
         }
@@ -365,7 +365,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.Length.IsInBetween(1, 100),
                     () => AddError(OutOfRange("使用者密碼", 1, 100)))
                 .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.IsEncryptablePassword(),
-                    () => AddError(PasswordAlphanumericOnly))
+                    () => AddError(1, PasswordAlphanumericOnly))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -566,7 +566,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 // 沒有其他帳號，通過
                 if (!hasOtherAccount) continue;
 
-                AddError($"有其他非刪除資料的帳號與 ID {item.Id} 的帳號相同，無法復活！");
+                AddError(AlreadyExists("欲復活的使用者帳號"));
             }
 
             if (HasError())
@@ -621,18 +621,18 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .StartValidate()
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.OriginalPassword != i.NewPassword,
-                    () => AddError(UpdatePWNewPasswordShouldBeDifferent))
+                    () => AddError(1, UpdatePWNewPasswordShouldBeDifferent))
                 .Validate(i => i.OriginalPassword.HasContent(), () => AddError(EmptyNotAllowed("原始密碼")))
                 .Validate(i => i.OriginalPassword.Length.IsInBetween(1, 100),
                     () => AddError(LengthOutOfRange("原始密碼", 1, 100)))
                 // 如果無法加密，表示密碼有意外字元，同時 API 也應該在寫入欄位前就擋掉
                 // 所以這種情況視為密碼錯誤，直接返回。
                 .Validate(i => i.OriginalPassword.IsEncryptablePassword(),
-                    () => AddError(UpdatePWOriginalPasswordIncorrect))
+                    () => AddError(2, UpdatePWOriginalPasswordIncorrect))
                 .Validate(i => i.NewPassword.HasContent(), () => AddError(EmptyNotAllowed("新密碼")))
                 .Validate(i => i.NewPassword.Length.IsInBetween(passwordMinLength, 100),
                     () => AddError(LengthOutOfRange("新密碼", passwordMinLength, 100)))
-                .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(UpdatePWPasswordNotEncryptable))
+                .Validate(i => i.NewPassword.IsEncryptablePassword(), () => AddError(3, UpdatePWPasswordNotEncryptable))
                 .IsValid();
 
             if (!isValid)
@@ -655,7 +655,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             if (!oldPasswordIsCorrect)
             {
-                AddError(UpdatePWOriginalPasswordIncorrect);
+                AddError(2, UpdatePWOriginalPasswordIncorrect);
                 return GetResponseJson();
             }
 
@@ -663,7 +663,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             await input
                 .StartValidate(true)
                 .ValidateAsync(async i => await UpdatePasswordForUserData(userData, i.NewPassword),
-                    (_, e) => AddError(e.Message));
+                    (_, e) => AddError(UpdateDbFailed(e)));
 
             // 5. 回傳通用訊息格式。
             return GetResponseJson();

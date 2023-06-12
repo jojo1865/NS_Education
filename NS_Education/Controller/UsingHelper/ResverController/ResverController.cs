@@ -470,7 +470,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             if (entity.B_StaticCode1.Code == ReserveHeadState.Terminated &&
                 entity.B_StaticCode1.Code == ReserveHeadState.FullyPaid)
             {
-                AddError("已結帳或已中止的預約單無法修改確認狀態！");
+                AddError(1, "已結帳或已中止的預約單無法修改確認狀態！");
                 return GetResponseJson();
             }
 
@@ -539,7 +539,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             if (entity.B_StaticCode1.Code == ReserveHeadState.Terminated)
             {
-                AddError("已中止的預約單無法修改報到狀態！");
+                AddError(1, "已中止的預約單無法修改報到狀態！");
                 return GetResponseJson();
             }
 
@@ -580,7 +580,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             bool isValid = this.StartValidate()
                 .Validate(_ => id > 0, () => AddError(EmptyNotAllowed("欲更新的預約 ID")))
                 .Validate(_ => checkInFlag != null, () => AddError(EmptyNotAllowed("報到狀態")))
-                .Validate(_ => checkInFlag != false, () => AddError(UnsupportedValue("報到狀態")))
+                .Validate(_ => checkInFlag != false, () => AddError(NotSupportedValue("報到狀態")))
                 .IsValid();
 
             return isValid;
@@ -631,7 +631,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                 if (head != null && head.B_StaticCode1.Code == ReserveHeadState.Terminated)
                 {
-                    AddError("預約單已中止，無法更新！");
+                    AddError(1, "預約單已中止，無法更新！");
                     return false;
                 }
             }
@@ -680,14 +680,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             isHeadValid = isHeadValid && input.StartValidate()
                 .Validate(i => resverStatusCode?.Code != ReserveHeadState.Draft || !dataCheckFlag,
-                    () => AddError("預約已確認，無法設置為預約草稿狀態！"))
+                    () => AddError(11, "預約已確認，無法設置為預約草稿狀態！"))
                 .Validate(
                     i => resverStatusCode?.Code != ReserveHeadState.DepositPaid ||
                          input.BillItems.Any(bi => bi.PayFlag),
-                    () => AddError("無已繳費紀錄，無法設置為已付訂金狀態！"))
+                    () => AddError(12, "無已繳費紀錄，無法設置為已付訂金狀態！"))
                 .Validate(i => resverStatusCode?.Code != ReserveHeadState.FullyPaid
                                || input.BillItems.Where(bi => bi.PayFlag).Sum(bi => bi.Price) == input.QuotedPrice,
-                    () => AddError("繳費紀錄中已繳總額不等於預約單總價，無法設置為已結帳狀態！"))
+                    () => AddError(13, "繳費紀錄中已繳總額不等於預約單總價，無法設置為已結帳狀態！"))
                 .IsValid();
 
             // short-circuit
@@ -1009,9 +1009,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             bool isValid = input.StartValidate()
                 .Validate(i => i.FixedPrice == subItemsFixedPriceTotal,
-                    i => AddError(NotEqual("預約單總定價", subItemsFixedPriceTotal)))
+                    i => AddError(ExpectedValue("預約單總定價", subItemsFixedPriceTotal)))
                 .Validate(i => i.QuotedPrice == subItemsQuotedPriceTotal,
-                    i => AddError(NotEqual("預約單總報價", subItemsQuotedPriceTotal)))
+                    i => AddError(ExpectedValue("預約單總報價", subItemsQuotedPriceTotal)))
                 .IsValid();
 
             return isValid;
@@ -1083,7 +1083,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         int totalCt = devices[deviceItem.BDID].Ct;
                         if (totalCt - reservedCount >= deviceItem.Ct) continue;
 
-                        AddError(
+                        AddError(21,
                             $"{siteData?.Title ?? $"場地 ID {siteItem.BSID}"} 欲預約的設備 {devices[deviceItem.BDID].Title} 在 {timeSpan.GetTimeRangeFormattedString()} 的可用數量不足（總數：{totalCt}，欲預約數量：{deviceItem.Ct}，已預約數量：{reservedCount}）！");
                         result = false;
                     }
@@ -1109,7 +1109,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 isValid &= allResverTimeSpans
                     .StartValidateElements()
                     .Validate(rts => si.TimeSpanItems.All(tsi => tsi.DTSID != rts.DTSID),
-                        rts => AddError(
+                        rts => AddError(22,
                             $"{siteData?.Title ?? $"場地 ID {si.BSID}"} 欲預約的時段（{rts.D_TimeSpan.GetTimeRangeFormattedString()}）當天已被預約了！")
                     )
                     .IsValid();
@@ -1134,7 +1134,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         .Where(rts => rts.TargetID != si.RSID)
                         .Aggregate(true, (result, rts) => result & rts.StartValidate()
                             .Validate(_ => rts.DTSID == dts.DTSID || !rts.D_TimeSpan.IsCrossingWith(dts),
-                                () => AddError(
+                                () => AddError(23,
                                     $"{siteData?.Title ?? $"場地 ID {si.BSID}"} 欲預約的時段（{dts.GetTimeRangeFormattedString()}）與當天另一個已被預約的時段（{rts.D_TimeSpan.GetTimeRangeFormattedString()}）部分重疊！")
                             )
                             .IsValid());
@@ -1259,7 +1259,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             bool isValid = dtsData.Values.StartValidateElements()
                 .Validate(dts => parentTimeSpan.Any(parent => parent.DTSID == dts.DTSID || parent.IsIncluding(dts))
-                    , dts => AddError($"欲預約的時段（{dts.GetTimeRangeFormattedString()}）並不存在於上層項目的預約時段！"))
+                    , dts => AddError(2, $"欲預約的時段（{dts.GetTimeRangeFormattedString()}）並不存在於上層項目的預約時段！"))
                 .IsValid();
             return isValid;
         }
@@ -1353,17 +1353,17 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private void AddErrorNotThisHead(int itemId, string itemName, int dataHeadId)
         {
             if (itemId != 0)
-                AddError($"欲更新的{itemName}（ID {itemId}）並不屬於此預約單（該{itemName}對應預約單 ID：{dataHeadId}）！");
+                AddError(3, $"欲更新的{itemName}（ID {itemId}）並不屬於此預約單（該{itemName}對應預約單 ID：{dataHeadId}）！");
             else
-                AddError($"欲新增的{itemName}並不屬於此預約單（該{itemName}對應預約單 ID：{dataHeadId}）！");
+                AddError(3, $"欲新增的{itemName}並不屬於此預約單（該{itemName}對應預約單 ID：{dataHeadId}）！");
         }
 
         private void AddErrorNotThisThrow(int itemId, string itemName, int dataThrowId)
         {
             if (itemId != 0)
-                AddError($"欲更新的{itemName}（ID {itemId}）並不屬於此預約行程（該預約行程 ID：{dataThrowId}）！");
+                AddError(3, $"欲更新的{itemName}（ID {itemId}）並不屬於此預約行程（該預約行程 ID：{dataThrowId}）！");
             else
-                AddError($"欲新增的{itemName}並不屬於此預約行程（該預約行程 ID：{dataThrowId}）！");
+                AddError(3, $"欲新增的{itemName}並不屬於此預約行程（該預約行程 ID：{dataThrowId}）！");
         }
 
         private void SubmitPopulateHeadGiveBackItems(Resver_Submit_Input_APIItem input, Resver_Head head,

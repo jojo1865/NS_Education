@@ -28,27 +28,28 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         {
             _controller = controller;
         }
-        
+
         #region GetInfoByID
 
         private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或是值不正確！";
         private const string GetInfoByIdNotFound = "查無欲查詢的資料！";
-        
+
         public async Task<string> GetInfoById(int id)
         {
             // 1. 驗證輸入資料
             if (!id.IsAboveZero())
             {
-                _controller.AddError(GetInfoByIdInputIncorrect);
+                _controller.AddError(_controller.EmptyNotAllowed("欲查詢的 ID"));
                 return _controller.GetResponseJson();
             }
 
             // 2. 取得單筆資料
             TEntity t = await _GetInfoByIdQueryResult(id);
-            
+
             // 3. 寫 UserLog
-            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(), HttpContext.Current.Request);
-            
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(),
+                HttpContext.Current.Request);
+
             // 4. 有資料時, 轉換成指定格式並回傳
             if (t != null)
             {
@@ -58,7 +59,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             }
 
             // 5. 無資料時, 回傳錯誤
-            _controller.AddError(GetInfoByIdNotFound);
+            _controller.AddError(_controller.NotFound());
             return _controller.GetResponseJson();
         }
 

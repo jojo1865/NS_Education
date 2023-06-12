@@ -134,9 +134,6 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
 
         #region GetInfoById
 
-        private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或格式有誤！";
-        private const string GetInfoByIdNotFound = "查無指定的資料！";
-
         private readonly StaticCode_GetInfoById_Output_APIItem _getInfoByIdDummyOutput =
             new StaticCode_GetInfoById_Output_APIItem
             {
@@ -159,7 +156,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             // 1. 驗證輸入
             if (id < -1)
             {
-                AddError(GetInfoByIdInputIncorrect);
+                AddError(WrongFormat("欲查詢的 ID"));
                 return GetResponseJson();
             }
 
@@ -178,7 +175,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
 
                 if (entity == null)
                 {
-                    AddError(GetInfoByIdNotFound);
+                    AddError(NotFound());
                     return GetResponseJson();
                 }
 
@@ -263,7 +260,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             // 不允許刪除安全控管設定
             if (await DeleteItemInputHasSafetyControl(input))
             {
-                AddError(UnsupportedValue("資料 ID"));
+                AddError(NotSupportedValue("資料 ID"));
                 return GetResponseJson();
             }
 
@@ -360,7 +357,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 // 若 CodeType 為 14（安全控管）時，不允許處理
                 // 使用者應該改用安全控管專用的 Submit API
                 .Validate(i => i.CodeType != (int)StaticCodeType.SafetyControl,
-                    () => AddError(UnsupportedValue("參數所屬類別")))
+                    () => AddError(NotSupportedValue("參數所屬類別")))
                 // 若 CodeType 為 0 時：
                 // |- a. 檢查 Code 必須皆為數字
                 // +- b. 同 CodeType 下不允許重複 Code 的資料
@@ -421,7 +418,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 // 若 CodeType 為 14（安全控管）時，不允許處理
                 // 使用者應該改用安全控管專用的 Submit API
                 .Validate(i => i.CodeType != (int)StaticCodeType.SafetyControl,
-                    () => AddError(UnsupportedValue("參數所屬類別")))
+                    () => AddError(NotSupportedValue("參數所屬類別")))
                 // 若 CodeType 為 0 時：
                 // |- a. 檢查 Code 必須皆為數字
                 // +- b. 同 CodeType 下不允許重複 Code 的資料

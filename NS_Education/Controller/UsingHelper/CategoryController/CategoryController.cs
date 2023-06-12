@@ -215,7 +215,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BCID == 0, () => AddError(WrongFormat("分類 ID")))
-                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(UnsupportedValue("上層 ID")))
+                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(NotSupportedValue("上層 ID")))
                 .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
                         await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)),
                     () => AddError(NotFound("上層 ID")))
@@ -250,7 +250,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BCID.IsAboveZero(), () => AddError(EmptyNotAllowed("分類 ID")))
-                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(UnsupportedValue("上層 ID")))
+                .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID, () => AddError(NotSupportedValue("上層 ID")))
                 .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
                         await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)),
                     () => AddError(NotFound("上層 ID")))

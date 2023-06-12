@@ -3,6 +3,7 @@ using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Web;
 using NS_Education.Models.APIItems;
+using NS_Education.Models.Errors.InputValidationErrors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -31,13 +32,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         #region Submit
 
-        private static string UpdateFailed(Exception e)
-            => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
-
-        private const string SubmitAddValidateFailed = "欲新增資料的輸入格式不符！";
-        private const string SubmitEditValidateFailed = "欲更新資料的輸入格式不符！";
-        private const string SubmitEditNotFound = "查無欲更新的資料！";
-
         public async Task<string> Submit(TSubmitRequest input)
         {
             // 1. 依據實作內容判定此次 Submit 為新增還是更新。
@@ -52,14 +46,14 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                     if (await _controller.SubmitAddValidateInput(input))
                         await _SubmitAdd(input);
                     else if (!_controller.HasError())
-                        _controller.AddError(SubmitAddValidateFailed);
+                        _controller.AddError(new WrongFormatError());
                 }
                 else
                 {
                     if (await _controller.SubmitEditValidateInput(input))
                         await _SubmitEdit(input);
                     else if (!_controller.HasError())
-                        _controller.AddError(SubmitEditValidateFailed);
+                        _controller.AddError(new WrongFormatError());
                 }
 
                 if (!_controller.HasError())
@@ -92,7 +86,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             }
             catch (Exception e)
             {
-                _controller.AddError(UpdateFailed(e));
+                _controller.AddError(_controller.UpdateDbFailed(e));
             }
         }
 
@@ -109,7 +103,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             if (data == null)
             {
-                _controller.AddError(SubmitEditNotFound);
+                _controller.AddError(_controller.NotFound());
                 return;
             }
 
@@ -125,7 +119,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             }
             catch (Exception e)
             {
-                _controller.AddError(UpdateFailed(e));
+                _controller.AddError(_controller.UpdateDbFailed(e));
             }
         }
 

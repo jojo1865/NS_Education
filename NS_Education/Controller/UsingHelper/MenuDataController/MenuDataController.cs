@@ -28,7 +28,6 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
     {
         #region Common
 
-        private static string UpdateDbError(Exception e) => $"更新資料庫時失敗，請確認伺服器狀態：{e.Message}";
         private const string DataNotFound = "查無符合條件的資料！";
 
         #endregion
@@ -214,12 +213,12 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
             if (!menuData.Any())
             {
-                AddError(DataNotFound);
+                AddError(NotFound());
             }
 
             if (menuData.Any(md => DbConstants.AlwaysShowAddEditMenuUrls.Contains(md.URL)) && activeFlag is false)
             {
-                AddError($"此選單（ID {id}）禁止停用！");
+                AddError(NotSupportedValue($"權限 ID（{id}）"));
                 return;
             }
 
@@ -235,7 +234,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             }
             catch (Exception e)
             {
-                AddError(UpdateDbError(e));
+                AddError(UpdateDbFailed(e));
             }
         }
 
@@ -278,7 +277,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Validate(i => i.Id != null && i.Id.IsAboveZero(), i => AddError(EmptyNotAllowed($"欲刪除的選單 ID（{i.Id}）")))
                 .Validate(i => i.DeleteFlag != null, i => AddError(EmptyNotAllowed($"ID {i.Id} 的 DeleteFlag")))
                 .Validate(i => !alwaysShowIds.Contains(i.Id ?? 0) && i.DeleteFlag is true,
-                    i => AddError($"此選單（ID {i.Id}）禁止刪除！"))
+                    i => AddError(NotSupportedValue($"選單 ID（{i.Id}）")))
                 .IsValid();
 
             if (!isCollectionValid || !isEveryElementValid)
@@ -310,7 +309,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             }
             catch (Exception e)
             {
-                AddError(UpdateDbError(e));
+                AddError(UpdateDbFailed(e));
             }
         }
 
@@ -337,7 +336,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             bool isValid = await input.StartValidate()
                 .Validate(i => i.MDID == 0, () => AddError(WrongFormat("選單 ID")))
                 .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(OutOfRange("上層選單 ID", 0)))
-                .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID, () => AddError(UnsupportedValue("上層選單 ID")))
+                .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID, () => AddError(NotSupportedValue("上層選單 ID")))
                 .ValidateAsync(
                     async i => i.ParentId == 0 || await DC.MenuData.ValidateIdExists(i.ParentId, nameof(MenuData.MDID)),
                     () => AddError(NotFound("上層選單 ID")))
@@ -378,7 +377,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             bool isValid = await input.StartValidate()
                 .Validate(i => i.MDID.IsAboveZero(), () => AddError(EmptyNotAllowed("選單 ID")))
                 .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(OutOfRange("上層選單 ID", 0)))
-                .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID, () => AddError(UnsupportedValue("上層選單 ID")))
+                .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID, () => AddError(NotSupportedValue("上層選單 ID")))
                 .ValidateAsync(
                     async i => i.ParentId == 0 || await DC.MenuData.ValidateIdExists(i.ParentId, nameof(MenuData.MDID)),
                     () => AddError(NotFound("上層選單 ID")))
@@ -440,7 +439,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
             if (menuData == null)
             {
-                AddError(DataNotFound);
+                AddError(NotFound());
                 return;
             }
 
@@ -452,7 +451,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             }
             catch (Exception e)
             {
-                AddError(UpdateDbError(e));
+                AddError(UpdateDbFailed(e));
             }
         }
 

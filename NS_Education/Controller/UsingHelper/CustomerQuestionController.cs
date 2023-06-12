@@ -75,7 +75,7 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
                 .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
                     () => AddError(WrongFormat("欲篩選之拜訪期間最後日期")))
-                .Validate(i => sDate.Date <= eDate.Date, () => AddError(GetListDateRangeIncorrect))
+                .Validate(i => sDate.Date <= eDate.Date, () => AddError(MinLargerThanMax("問題發生起始日期", "問題發生最後日期")))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -228,7 +228,7 @@ namespace NS_Education.Controller.UsingHelper
                     .Validate(i => i.ResponseDate.TryParseDateTime(out responseDate),
                         () => AddError(WrongFormat("回答時間")))
                     .Validate(i => responseDate >= askDate,
-                        () => AddError(SubmitResponseDateNotAfterAskDate));
+                        () => AddError(MinLargerThanMax("發生時間", "回答時間")));
             }
 
             return await validation.IsValid();
@@ -286,7 +286,7 @@ namespace NS_Education.Controller.UsingHelper
                     .Validate(i => i.ResponseDate.TryParseDateTime(out responseDate),
                         () => AddError(WrongFormat("回答時間")))
                     .Validate(i => responseDate >= askDate,
-                        () => AddError(SubmitResponseDateNotAfterAskDate));
+                        () => AddError(MinLargerThanMax("發生時間", "回答時間")));
             }
 
             return await validation.IsValid();

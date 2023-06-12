@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using NS_Education.Models.APIItems;
+using NS_Education.Models.Errors.InputValidationErrors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -36,15 +37,13 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         #region GetAllList
 
-        private const string GetPagedListInputIncorrect = "輸入格式錯誤或缺少欄位，請檢查資料內容！";
-
         public async Task<string> GetAllList(TGetListRequest input)
         {
             // 1. 驗證輸入
             bool inputValidated = await _controller.GetListAllValidateInput(input);
 
             if (!inputValidated && !_controller.HasError())
-                _controller.AddError(GetPagedListInputIncorrect);
+                _controller.AddError(new WrongFormatError());
 
             if (_controller.HasError())
                 return _controller.GetResponseJson();

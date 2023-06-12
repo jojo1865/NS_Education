@@ -374,7 +374,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
                 .Validate(i => i.GroupItems.Any(), () => AddError(EmptyNotAllowed("選單權限列表")))
                 .Validate(i => i.GroupItems.GroupBy(item => item.MDID).Count() == i.GroupItems.Count,
-                    () => AddError(SameMdIdDetected))
+                    () => AddError(CopyNotAllowed("選單 ID")))
                 .IsValid();
 
             // 檢查是否所有 MDID 都存在

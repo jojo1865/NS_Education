@@ -180,7 +180,7 @@ namespace NS_Education.Controller.UsingHelper
             // 1. 驗證輸入
             if (!id.IsZeroOrAbove())
             {
-                AddError(GetInfoByIdInputIncorrect);
+                AddError(WrongFormat("欲查詢的 ID"));
                 return GetResponseJson();
             }
 
@@ -199,7 +199,7 @@ namespace NS_Education.Controller.UsingHelper
 
                 if (entity == null)
                 {
-                    AddError(GetInfoByIdNotFound);
+                    AddError(NotFound());
                     return GetResponseJson();
                 }
 

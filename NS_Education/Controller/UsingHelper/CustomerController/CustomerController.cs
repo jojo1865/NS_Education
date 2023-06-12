@@ -414,11 +414,11 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     () => AddError(NotFound("區域別 ID")))
                 .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID")))
                 .ForceSkipIf(i => i.ContactType1 == -1)
-                .Validate(i => i.ContactType1.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 1 的類型")))
+                .Validate(i => i.ContactType1.IsInBetween(0, 3), () => AddError(NotSupportedValue("聯絡方式 1 的類型")))
                 .Validate(i => i.ContactData1.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式 1 的內容")))
                 .StopForceSkipping()
                 .ForceSkipIf(i => i.ContactType2 == -1)
-                .Validate(i => i.ContactType2.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 2 的類型")))
+                .Validate(i => i.ContactType2.IsInBetween(0, 3), () => AddError(NotSupportedValue("聯絡方式 2 的類型")))
                 .Validate(i => i.ContactData2.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式 2 的內容")))
                 .StopForceSkipping()
                 .ForceSkipIf(i => i.DZID <= 0)
@@ -428,14 +428,14 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
-                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
+                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(NotFound("業務 ID")))
                 .IsValid();
 
             // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
                 .ForceSkipIf(item => item.ContactType == -1)
                 .Validate(item => item.ContactType.IsInBetween(0, 3),
-                    item => AddError(UnsupportedValue($"業務（ID：{item.BUID}）聯絡方式類型")))
+                    item => AddError(NotSupportedValue($"業務（ID：{item.BUID}）聯絡方式類型")))
                 .Validate(item => item.ContactData.HasContent(),
                     item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容")))
                 .Validate(item => item.ContactData.HasLengthBetween(1, 30),
@@ -621,11 +621,11 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     () => AddError(NotFound("區域別 ID")))
                 .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID")))
                 .ForceSkipIf(i => i.ContactType1 == -1)
-                .Validate(i => i.ContactType1.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 1 的類型")))
+                .Validate(i => i.ContactType1.IsInBetween(0, 3), () => AddError(NotSupportedValue("聯絡方式 1 的類型")))
                 .Validate(i => i.ContactData1.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式 1 的內容")))
                 .StopForceSkipping()
                 .ForceSkipIf(i => i.ContactType2 == -1)
-                .Validate(i => i.ContactType2.IsInBetween(0, 3), () => AddError(UnsupportedValue("聯絡方式 2 的類型")))
+                .Validate(i => i.ContactType2.IsInBetween(0, 3), () => AddError(NotSupportedValue("聯絡方式 2 的類型")))
                 .Validate(i => i.ContactData2.HasContent(), () => AddError(EmptyNotAllowed("聯絡方式 2 的內容")))
                 .StopForceSkipping()
                 .ForceSkipIf(i => i.DZID <= 0)
@@ -635,14 +635,14 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
                 // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
                 .SkipIfAlreadyInvalid()
-                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(SubmitBuIdNotFound))
+                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items), () => AddError(NotFound("業務 ID")))
                 .IsValid();
 
             // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
                 .ForceSkipIf(item => item.ContactType == -1)
                 .Validate(item => item.ContactType.IsInBetween(0, 3),
-                    item => AddError(UnsupportedValue($"業務（ID：{item.BUID}）聯絡方式類型")))
+                    item => AddError(NotSupportedValue($"業務（ID：{item.BUID}）聯絡方式類型")))
                 .Validate(item => item.ContactData.HasContent(),
                     item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容")))
                 .Validate(item => item.ContactData.HasLengthBetween(1, 30),

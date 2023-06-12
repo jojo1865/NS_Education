@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.Linq;
 using System.Text;
@@ -7,6 +6,7 @@ using System.Web;
 using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
 using NS_Education.Models;
+using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Tools
 {
@@ -86,21 +86,7 @@ namespace NS_Education.Tools
 
         private static string GetExceptionActualMessage(ExceptionContext context)
         {
-            string result = context.Exception.Message;
-            if (context.Exception.InnerException == null) return result;
-
-            // 取得最裡面的 InnerException，但避免無限迴圈
-            HashSet<Exception> exceptions = new HashSet<Exception>();
-            Exception curr = context.Exception;
-
-            while (exceptions.Add(curr) && curr.InnerException != null)
-            {
-                curr = curr.InnerException;
-            }
-
-            result = curr.Message;
-
-            return result;
+            return context.Exception.GetActualMessage();
         }
     }
 }

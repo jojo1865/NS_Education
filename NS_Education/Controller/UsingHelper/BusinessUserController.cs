@@ -88,6 +88,9 @@ namespace NS_Education.Controller.UsingHelper
             if (input.OPType.IsInBetween(0, 1))
                 query = query.Where(bu => bu.OPsalesFlag == (input.OPType == 1));
 
+            if (input.Phone.HasContent())
+                query = query.Where(bu => bu.Phone.Contains(input.Phone));
+
             return query.OrderBy(bu => bu.Code)
                 .ThenBy(bu => bu.Name)
                 .ThenBy(bu => bu.BUID);

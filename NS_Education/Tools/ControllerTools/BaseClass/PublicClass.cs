@@ -55,14 +55,6 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
 
         /// <summary>
-        /// 清空 Error。
-        /// </summary>
-        protected void InitializeResponse()
-        {
-            _errors.Clear();
-        }
-
-        /// <summary>
         /// 加入錯誤訊息。
         /// </summary>
         /// <param name="errorMessage">錯誤訊息</param>

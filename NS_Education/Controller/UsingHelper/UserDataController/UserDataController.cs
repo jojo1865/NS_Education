@@ -54,8 +54,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddFlag)]
         public async Task<string> SignUp(UserData_Submit_Input_APIItem input)
         {
-            InitializeResponse();
-
             int passwordMinLength = GetPasswordMinLength();
 
             bool isValid = await input.StartValidate()
@@ -188,8 +186,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         [HttpPost]
         public async Task<string> Login(UserData_Login_Input_APIItem input)
         {
-            InitializeResponse();
-
             // 驗證
             var queried = !input.LoginAccount.IsNullOrWhiteSpace()
                 ? await DC.UserData

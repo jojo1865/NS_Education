@@ -261,7 +261,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     HttpOnly = true,
                     Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
                     Value = jwt,
-                    SameSite = SameSiteMode.None
+                    SameSite = SameSiteMode.Lax
                 };
             }
             else

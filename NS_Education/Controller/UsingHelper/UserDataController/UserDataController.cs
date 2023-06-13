@@ -252,29 +252,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         private void LoginWriteCookie(string jwt)
         {
             bool isHttps = Request.Url?.Scheme == "https";
-            HttpCookie cookie;
-            if (isHttps)
+            HttpCookie cookie = new HttpCookie(JwtConstants.CookieName)
             {
-                cookie = new HttpCookie(JwtConstants.CookieName)
-                {
-                    Secure = true,
-                    HttpOnly = true,
-                    Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
-                    Value = jwt,
-                    SameSite = SameSiteMode.Lax
-                };
-            }
-            else
-            {
-                cookie = new HttpCookie(JwtConstants.CookieName)
-                {
-                    Secure = false,
-                    HttpOnly = true,
-                    Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
-                    Value = jwt,
-                    SameSite = SameSiteMode.Lax
-                };
-            }
+                Secure = isHttps,
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
+                Value = jwt,
+                SameSite = SameSiteMode.Strict
+            };
 
             Response.Cookies.Add(cookie);
         }

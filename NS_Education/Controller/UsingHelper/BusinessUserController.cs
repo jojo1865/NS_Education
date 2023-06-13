@@ -91,7 +91,8 @@ namespace NS_Education.Controller.UsingHelper
             if (input.Phone.HasContent())
                 query = query.Where(bu => bu.Phone.Contains(input.Phone));
 
-            return query.OrderBy(bu => bu.Code)
+            return query.OrderBy(bu => bu.Code.Length)
+                .ThenBy(bu => bu.Code)
                 .ThenBy(bu => bu.Name)
                 .ThenBy(bu => bu.BUID);
         }

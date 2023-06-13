@@ -51,7 +51,8 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             StaticCodeTypes = DC.B_StaticCode
                 .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
                 .Where(sc => sc.CodeType == 0)
-                .OrderBy(sc => sc.Code)
+                .OrderBy(sc => sc.Code.Length)
+                .ThenBy(sc => sc.Code)
                 .ThenBy(sc => sc.SortNo)
                 // EF 不支援 GroupBy，所以回到本地在記憶體做
                 .AsEnumerable()
@@ -109,6 +110,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             return query
                 .OrderBy(q => q.CodeType)
                 .ThenBy(q => q.SortNo)
+                .ThenBy(q => q.Code.Length)
                 .ThenBy(q => q.Code)
                 .ThenBy(q => q.BSCID);
         }

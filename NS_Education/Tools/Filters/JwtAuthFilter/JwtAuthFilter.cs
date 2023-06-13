@@ -376,7 +376,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private static string DecodeTokenFailed(Exception e)
             => $"解密 JWT Token 失敗：{e.Message}！";
 
-        private const string RequestHeaderLacksAuthorization = "從 Cookie 或 Header 都找不到 JWT！";
+        private const string RequestHeaderLacksAuthorization = "從 Header 找不到 JWT！";
 
         private const string HasNoRoleOrPrivilege = "此 UID 無此權限！";
 

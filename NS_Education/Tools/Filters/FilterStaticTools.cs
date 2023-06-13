@@ -17,10 +17,7 @@ namespace NS_Education.Tools.Filters
 
         public static string GetJwtToken(HttpRequestBase request)
         {
-            // 找 cookie, 如果沒有, 找 Header
-            string token = request.Cookies.Get(JwtConstants.CookieName)?.Value;
-
-            if (token.HasContent()) return token;
+            string token = null;
 
             string header = request.Headers["Authorization"];
 

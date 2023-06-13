@@ -6,7 +6,6 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitDepartment;
@@ -228,8 +227,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             string jwt = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims);
 
-            LoginWriteCookie(jwt);
-
             var output = new UserData_Login_Output_APIItem
             {
                 UID = queried.UID,
@@ -247,21 +244,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     (_, e) => AddError(LoginDateOrJwtUpdateFailed(e)));
 
             return GetResponseJson(output);
-        }
-
-        private void LoginWriteCookie(string jwt)
-        {
-            bool isHttps = Request.Url?.Scheme == "https";
-            HttpCookie cookie = new HttpCookie(JwtConstants.CookieName)
-            {
-                Secure = isHttps,
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
-                Value = jwt,
-                SameSite = SameSiteMode.Strict
-            };
-
-            Response.Cookies.Add(cookie);
         }
 
         /// <summary>
@@ -1045,14 +1027,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             catch (Exception e)
             {
                 AddError(UpdateDbFailed(e));
-            }
-
-            // 4. 如果都順利，清空使用者的 cookie
-            if (!HasError())
-            {
-                HttpCookie cookie = Response.Cookies[JwtConstants.CookieName];
-                if (cookie != null)
-                    cookie.Expires = DateTime.Now.AddDays(-1);
             }
 
             return GetResponseJson();

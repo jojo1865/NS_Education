@@ -93,10 +93,10 @@ namespace NS_Education.Controller.UsingHelper
             query = query.Where(cg => cg.Year == input.SendYear);
 
             if (input.SDate.TryParseDateTime(out DateTime startDate))
-                query = query.Where(cg => cg.SendDate.Date >= startDate.Date);
+                query = query.Where(cg => DbFunctions.TruncateTime(cg.SendDate) >= startDate.Date);
 
             if (input.EDate.TryParseDateTime(out DateTime endDate))
-                query = query.Where(cg => cg.SendDate.Date <= endDate.Date);
+                query = query.Where(cg => DbFunctions.TruncateTime(cg.SendDate) <= endDate.Date);
 
             return query.OrderByDescending(cg => cg.SendDate)
                 .ThenBy(cg => cg.CID)

@@ -104,10 +104,10 @@ namespace NS_Education.Controller.UsingHelper
                 query = query.Where(cv => cv.BSCID == input.BSCID);
 
             if (input.SDate.TryParseDateTime(out DateTime sDate))
-                query = query.Where(cv => cv.VisitDate.Date >= sDate.Date);
+                query = query.Where(cv => DbFunctions.TruncateTime(cv.VisitDate) >= sDate.Date);
 
             if (input.EDate.TryParseDateTime(out DateTime eDate))
-                query = query.Where(cv => cv.VisitDate.Date <= eDate.Date);
+                query = query.Where(cv => DbFunctions.TruncateTime(cv.VisitDate) <= eDate.Date);
 
             return query.OrderByDescending(cv => cv.VisitDate)
                 .ThenBy(cv => cv.CID)

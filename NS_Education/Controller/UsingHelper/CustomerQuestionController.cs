@@ -95,10 +95,10 @@ namespace NS_Education.Controller.UsingHelper
                 query = query.Where(cq => cq.CID == input.CID);
 
             if (input.SDate.TryParseDateTime(out DateTime sDate))
-                query = query.Where(cq => cq.AskDate.Date >= sDate.Date);
+                query = query.Where(cq => DbFunctions.TruncateTime(cq.AskDate) >= sDate.Date);
 
             if (input.EDate.TryParseDateTime(out DateTime eDate))
-                query = query.Where(cq => cq.AskDate.Date <= eDate.Date);
+                query = query.Where(cq => DbFunctions.TruncateTime(cq.AskDate) <= eDate.Date);
 
             if (input.ResponseType.IsInBetween(0, 1))
                 query = query.Where(cq => cq.ResponseFlag == (input.ResponseType == 1));

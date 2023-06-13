@@ -85,7 +85,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 return GetResponseJson();
 
             // create UserData object, validate the columns along
-            // TODO: 引用靜態參數檔，完整驗證使用者欄位
             var newUser = new UserData
             {
                 UserName = input.Username,
@@ -895,7 +894,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             /* TODO:
              目前批量修改僅 UserData 發現兩個需求，所以先以特例方式寫，可以發現結構長得非常類似。
-             如果未來發現更多類似需求，或是這兩個頻繁需要同步修改時，須考慮 Helper化。
+             如果未來發現更多類似需求，或是這兩個頻繁需要同步修改時，須考慮 Helper 化。
             */
 
             // 0. enumerate

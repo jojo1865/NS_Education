@@ -26,8 +26,6 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// </summary>
         private int? _uid;
 
-        public DateTime DT = DateTime.Now;
-
         public PublicClass()
         {
             DC = new NsDbContext();

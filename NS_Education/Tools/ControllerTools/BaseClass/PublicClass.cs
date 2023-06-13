@@ -33,7 +33,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
 
         protected internal NsDbContext DC { get; }
 
-        public BaseApiResponse GetMsgClass(IEnumerable<string> errors)
+        public BaseApiResponse GetApiResponse(IEnumerable<string> errors)
         {
             BaseApiResponse response = new BaseApiResponse();
             if (errors == null || !errors.Any()) return response;
@@ -45,12 +45,12 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
 
         public string GetResponseJson()
         {
-            return ChangeJson(GetMsgClass(_errors));
+            return ChangeJson(GetApiResponse(_errors));
         }
 
         public string GetResponseJson<T>(T infusable) where T : IReturnMessageInfusable
         {
-            infusable.Infuse(GetMsgClass(_errors));
+            infusable.Infuse(GetApiResponse(_errors));
             return ChangeJson(infusable);
         }
 

@@ -11,16 +11,19 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
 
         public ICollection<BaseResponseRowForSelectable> DOPI_List { get; set; } =
             new List<BaseResponseRowForSelectable>();
-        
+
         public int BSCID { get; set; }
         public string BSC_Title { get; set; }
-        
+
+        public ICollection<BaseResponseRowForSelectable> BSC_List { get; set; } =
+            new List<BaseResponseRowForSelectable>();
+
         public int BOCID { get; set; }
         public string BOC_Code { get; set; }
 
         public ICollection<BaseResponseRowForSelectable> BOC_List { get; set; } =
             new List<BaseResponseRowForSelectable>();
-        
+
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }
         public int UnitPrice { get; set; }

@@ -88,8 +88,11 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(cq => cq.Customer)
                 .AsQueryable();
 
-            if (!input.Keyword.IsNullOrWhiteSpace())
-                query = query.Where(cq => cq.AskTitle.Contains(input.Keyword) || cq.AskArea.Contains(input.Keyword));
+            if (input.QuestionTitle.HasContent())
+                query = query.Where(cq => cq.AskTitle.Contains(input.QuestionTitle));
+
+            if (input.Area.HasContent())
+                query = query.Where(cq => cq.AskArea.Contains(input.Area));
 
             if (input.CID.IsAboveZero())
                 query = query.Where(cq => cq.CID == input.CID);

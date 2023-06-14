@@ -110,11 +110,12 @@ namespace NS_Education.Controller.UsingHelper
             if (input.EDate.TryParseDateTime(out DateTime eDate))
                 query = query.Where(cv => DbFunctions.TruncateTime(cv.VisitDate) <= eDate.Date);
 
+            // 這裡的條件要跟 Customer.GetDealtReservationCount 的條件一致，否則會與系統中其他同樣性質的欄位結果不同
             if (input.HasReservation != null)
                 query = query.Where(cv => cv.Customer.Resver_Head
-                                              .Any(rh => !rh.DeleteFlag &&
-                                                         rh.B_StaticCode.Code != ReserveHeadState.Draft) ==
-                                          input.HasReservation);
+                    .AsQueryable()
+                    .Where(ResverHeadExpression.IsDealtExpression)
+                    .Any() == input.HasReservation);
 
             return query.OrderByDescending(cv => cv.VisitDate)
                 .ThenBy(cv => cv.CID)

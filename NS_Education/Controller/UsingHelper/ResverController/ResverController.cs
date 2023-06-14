@@ -894,31 +894,34 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                     await SubmitValidateSiteItemDeviceItemsAllTimeSpanEnough(input);
 
             // 主預約單 -> 其他收費項目列表
-            bool isOtherItemValid =
-                input.OtherItems.All(item => item.StartValidate()
+            bool isOtherItemValid = await
+                input.OtherItems.StartValidateElements()
                     .Validate(oi => isAdd ? oi.ROID == 0 : oi.ROID.IsZeroOrAbove(),
-                        () => AddError(WrongFormat($"其他收費項目預約單 ID（{item.ROID}）")))
+                        item => AddError(WrongFormat($"其他收費項目預約單 ID（{item.ROID}）")))
                     .Validate(
                         oi => oi.ROID == 0 || Task.Run(() =>
                             DC.Resver_Other.ValidateIdExists(oi.ROID, nameof(Resver_Other.ROID))).Result,
-                        () => AddError(NotFound($"其他收費項目預約單 ID（{item.ROID}）")))
+                        item => AddError(NotFound($"其他收費項目預約單 ID（{item.ROID}）")))
                     // 檢查所有項目的日期都與主預約單相符
                     .Validate(oi => oi.TargetDate.TryParseDateTime(out DateTime otherItemDate)
                                     && headStartDate.Date <= otherItemDate.Date
                                     && otherItemDate.Date <= headEndDate.Date,
-                        () => AddError(OutOfRange($"其他收費項目的預計使用日期（{item.TargetDate}）",
+                        item => AddError(OutOfRange($"其他收費項目的預計使用日期（{item.TargetDate}）",
                             headStartDate.ToFormattedStringDate(), headEndDate.ToFormattedStringDate()))
                     )
                     .Validate(oi => SubmitValidateOtherPayItem(oi.DOPIID),
-                        () => AddError(NotFound($"其他收費項目 ID（{item.DOPIID}）")))
-                    .Validate(
-                        oi => Task.Run(() => SubmitValidateOrderCode(oi.BOCID, OrderCodeType.OtherPayItem)).Result,
-                        () => AddError(NotFound($"其他收費項目的入帳代號 ID（{item.BOCID}）")))
+                        item => AddError(NotFound($"其他收費項目 ID（{item.DOPIID}）")))
+                    .ValidateAsync(
+                        async oi => await SubmitValidateOrderCode(oi.BOCID, OrderCodeType.OtherPayItem),
+                        item => AddError(NotFound($"其他收費項目的入帳代號 ID（{item.BOCID}）")))
+                    .ValidateAsync(
+                        async oi => await DC.B_StaticCode.ValidateStaticCodeExists(oi.BSCID, StaticCodeType.Unit),
+                        item => AddError(NotFound($"其他收費項目的單位別 ID（{item.BSCID}）")))
                     .Validate(oi => oi.PrintTitle.HasLengthBetween(0, 100),
-                        () => AddError(LengthOutOfRange("其他收費項目的帳單列印名稱", 0, 100)))
+                        item => AddError(LengthOutOfRange("其他收費項目的帳單列印名稱", 0, 100)))
                     .Validate(oi => oi.PrintNote.HasLengthBetween(0, 100),
-                        () => AddError(LengthOutOfRange("其他收費項目的帳單列印說明", 0, 100)))
-                    .IsValid());
+                        item => AddError(LengthOutOfRange("其他收費項目的帳單列印說明", 0, 100)))
+                    .IsValid();
 
             // 主預約單 -> 繳費紀錄列表
             bool isBillItemValid =
@@ -1436,6 +1439,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 other.RHID = head.RHID;
                 other.DOPIID = item.DOPIID;
                 other.BOCID = item.BOCID;
+                other.BSCID = item.BSCID;
                 other.PrintTitle = item.PrintTitle;
                 other.PrintNote = item.PrintNote;
                 other.UnitPrice = item.UnitPrice;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -242,7 +243,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 Price = rb.Price,
                 Note = rb.Note ?? "",
                 PayFlag = rb.PayFlag,
-                PayDate = rb.PayDate.ToFormattedStringDateTime()
+                PayDate = rb.PayFlag ? rb.PayDate.ToFormattedStringDateTime() : ""
             }).ToList();
         }
 
@@ -930,7 +931,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         () => AddError(NotFound($"繳費類別 ID（{item.BCID}）")))
                     .Validate(bi => SubmitValidatePayType(bi.DPTID),
                         () => AddError(NotFound($"繳費紀錄的付款方式 ID（{item.DPTID}）")))
-                    .Validate(bi => bi.PayDate.TryParseDateTime(out _, DateTimeParseType.DateTime),
+                    .Validate(
+                        bi => bi.PayDate.IsNullOrWhiteSpace() ||
+                              bi.PayDate.TryParseDateTime(out _, DateTimeParseType.DateTime),
                         () => AddError(WrongFormat($"付款時間（{item.PayDate}）")))
                     .IsValid());
 
@@ -1407,7 +1410,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 bill.Price = item.Price;
                 bill.Note = item.Note;
                 bill.PayFlag = item.PayFlag;
-                bill.PayDate = item.PayDate.ParseDateTime();
+                bill.PayDate = item.PayDate.HasContent() ? item.PayDate.ParseDateTime() : SqlDateTime.MinValue.Value;
                 bill.CheckUID = head.UpdUID;
             }
         }

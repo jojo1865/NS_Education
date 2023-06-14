@@ -8,5 +8,6 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetList
         public string SDate { get; set; }
         public string EDate { get; set; }
         public int BSCID { get; set; }
+        public bool? HasReservation { get; set; } = null;
     }
 }

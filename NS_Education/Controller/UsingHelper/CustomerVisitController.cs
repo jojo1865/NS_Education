@@ -87,6 +87,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             var query = DC.CustomerVisit
                 .Include(cv => cv.Customer)
+                .Include(cv => cv.Customer.Resver_Head)
                 .Include(cv => cv.B_StaticCode)
                 .Include(cv => cv.BusinessUser)
                 .AsQueryable();
@@ -108,6 +109,9 @@ namespace NS_Education.Controller.UsingHelper
 
             if (input.EDate.TryParseDateTime(out DateTime eDate))
                 query = query.Where(cv => DbFunctions.TruncateTime(cv.VisitDate) <= eDate.Date);
+
+            if (input.HasReservation != null)
+                query = query.Where(cv => cv.Customer.Resver_Head.Any(rh => !rh.DeleteFlag) == input.HasReservation);
 
             return query.OrderByDescending(cv => cv.VisitDate)
                 .ThenBy(cv => cv.CID)
@@ -131,7 +135,8 @@ namespace NS_Education.Controller.UsingHelper
                 Title = entity.Title ?? "",
                 VisitDate = entity.VisitDate.ToFormattedStringDate(),
                 Description = entity.Description ?? "",
-                AfterNote = entity.AfterNote ?? ""
+                AfterNote = entity.AfterNote ?? "",
+                HasReservation = entity.Customer?.Resver_Head.Any(rh => !rh.DeleteFlag) ?? false
             });
         }
 

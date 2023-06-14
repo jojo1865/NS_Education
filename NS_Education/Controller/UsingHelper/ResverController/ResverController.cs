@@ -257,8 +257,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 DOPIID = ro.DOPIID,
                 DOPI_Title = ro.D_OtherPayItem?.Title ?? "",
                 DOPI_List = Task.Run(() => DC.D_OtherPayItem.GetOtherPayItemSelectable(ro.DOPIID)).Result,
-                BSCID = ro.D_OtherPayItem?.BSCID ?? 0,
-                BSC_Title = ro.D_OtherPayItem?.B_StaticCode?.Title ?? "",
+                BSCID = ro.BSCID,
+                BSC_Title = ro.B_StaticCode?.Title ?? "",
                 BOCID = ro.BOCID,
                 BOC_Code = ro.B_OrderCode?.Code ?? "",
                 BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(ro.B_OrderCode?.CodeType, ro.BOCID))

@@ -32,8 +32,10 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public int BSCID { get; set; }
     
         public virtual B_OrderCode B_OrderCode { get; set; }
+        public virtual B_StaticCode B_StaticCode { get; set; }
         public virtual D_OtherPayItem D_OtherPayItem { get; set; }
         public virtual Resver_Head Resver_Head { get; set; }
     }

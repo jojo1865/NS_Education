@@ -33,6 +33,7 @@ namespace NS_Education.Models.Entities
             this.Resver_Site = new HashSet<Resver_Site>();
             this.Resver_Throw = new HashSet<Resver_Throw>();
             this.Resver_Throw_Food = new HashSet<Resver_Throw_Food>();
+            this.Resver_Other = new HashSet<Resver_Other>();
         }
     
         public int BSCID { get; set; }
@@ -80,5 +81,7 @@ namespace NS_Education.Models.Entities
         public virtual ICollection<Resver_Throw> Resver_Throw { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Throw_Food> Resver_Throw_Food { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Resver_Other> Resver_Other { get; set; }
     }
 }

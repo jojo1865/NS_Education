@@ -681,6 +681,7 @@
           <Property Name="CreUID" Type="int" Nullable="false" />
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
+          <Property Name="BSCID" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Resver_Site">
           <Key>
@@ -1733,6 +1734,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_Other_B_StaticCode_BSCID_fk">
+          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
+          <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_StaticCode">
+              <PropertyRef Name="BSCID" />
+            </Principal>
+            <Dependent Role="Resver_Other">
+              <PropertyRef Name="BSCID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="db_NS_EducationModelStoreContainer">
           <EntitySet Name="B_Category" EntityType="Self.B_Category" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="B_Device" EntityType="Self.B_Device" Schema="dbo" store:Type="Tables" />
@@ -2081,6 +2094,10 @@
             <End Role="Customer" EntitySet="Customer" />
             <End Role="Resver_Head" EntitySet="Resver_Head" />
           </AssociationSet>
+          <AssociationSet Name="Resver_Other_B_StaticCode_BSCID_fk" Association="Self.Resver_Other_B_StaticCode_BSCID_fk">
+            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
+            <End Role="Resver_Other" EntitySet="Resver_Other" />
+          </AssociationSet>
         </EntityContainer>
       </Schema>
     </edmx:StorageModels>
@@ -2295,6 +2312,7 @@
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Site" />
           <NavigationProperty Name="Resver_Throw" Relationship="Self.FK_Resver_Throw_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Throw" />
           <NavigationProperty Name="Resver_Throw_Food" Relationship="Self.FK_Resver_Throw_D_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Throw_Food" />
+          <NavigationProperty Name="Resver_Other" Relationship="Self.Resver_Other_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="Resver_Other" />
         </EntityType>
         <EntityType Name="BusinessUser">
           <Key>
@@ -2892,7 +2910,9 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <Property Name="BSCID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="B_OrderCode" Relationship="Self.FK_Resver_Other_B_OrderCode" FromRole="Resver_Other" ToRole="B_OrderCode" />
+          <NavigationProperty Name="B_StaticCode" Relationship="Self.Resver_Other_B_StaticCode_BSCID_fk" FromRole="Resver_Other" ToRole="B_StaticCode" />
           <NavigationProperty Name="D_OtherPayItem" Relationship="Self.FK_Resver_Other_D_OtherPayItem" FromRole="Resver_Other" ToRole="D_OtherPayItem" />
           <NavigationProperty Name="Resver_Head" Relationship="Self.FK_Resver_Other_Resver_Head" FromRole="Resver_Other" ToRole="Resver_Head" />
         </EntityType>
@@ -3525,6 +3545,18 @@
               <PropertyRef Name="BSCID" />
             </Principal>
             <Dependent Role="Resver_Throw_Food">
+              <PropertyRef Name="BSCID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="Resver_Other_B_StaticCode_BSCID_fk">
+          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
+          <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_StaticCode">
+              <PropertyRef Name="BSCID" />
+            </Principal>
+            <Dependent Role="Resver_Other">
               <PropertyRef Name="BSCID" />
             </Dependent>
           </ReferentialConstraint>
@@ -4178,6 +4210,10 @@
           <AssociationSet Name="FK_Resver_Throw_D_B_StaticCode" Association="Self.FK_Resver_Throw_D_B_StaticCode">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Resver_Throw_Food" EntitySet="Resver_Throw_Food" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Other_B_StaticCode_BSCID_fk" Association="Self.Resver_Other_B_StaticCode_BSCID_fk">
+            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
+            <End Role="Resver_Other" EntitySet="Resver_Other" />
           </AssociationSet>
           <AssociationSet Name="FK_CustomerVisit_BusinessUser" Association="Self.FK_CustomerVisit_BusinessUser">
             <End Role="BusinessUser" EntitySet="BusinessUser" />
@@ -5033,6 +5069,7 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+                <ScalarProperty Name="BSCID" ColumnName="BSCID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

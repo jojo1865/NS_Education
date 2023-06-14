@@ -294,7 +294,7 @@
       <Compile Include="Models\APIItems\BaseResponseForPagedList.cs"/>
       <Compile Include="Models\APIItems\BaseResponseRowForSelectable.cs"/>
       <Compile Include="Models\APIItems\BaseGetResponseRowWithCreDateOnly.cs"/>
-    <Compile Include="Models\APIItems\BaseGetResponseRowWithCreUpd.cs" />
+      <Compile Include="Models\APIItems\BaseGetResponseRowWithCreUpd.cs"/>
       <Compile Include="Models\APIItems\BaseResponseRowIdTitle.cs"/>
       <Compile Include="Models\APIItems\BaseGetResponseRowInfusableWithCreUpd.cs"/>
       <Compile Include="Models\APIItems\BaseInfusable.cs"/>
@@ -664,6 +664,7 @@
     <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs" />
     <Compile Include="Tools\Encryption\JwtHelper.cs" />
     <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs" />
+      <Compile Include="Tools\Extensions\CustomerExtension.cs"/>
     <Compile Include="Tools\Extensions\DbContextExtensions.cs" />
     <Compile Include="Tools\Extensions\DecimalExtensionMethods.cs" />
       <Compile Include="Tools\Extensions\BaseRequestForPagedListExtension.cs"/>

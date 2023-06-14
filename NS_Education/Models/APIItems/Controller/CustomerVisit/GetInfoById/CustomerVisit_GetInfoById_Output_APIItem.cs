@@ -31,6 +31,7 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById
         public string Description { get; set; }
         public string AfterNote { get; set; }
 
+        public bool HasReservation { get; set; }
         public int? BSCID15 { get; set; }
         public string BSCID15_Title { get; set; }
 

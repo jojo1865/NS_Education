@@ -201,8 +201,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(rh =>
-                    !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
+                ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
@@ -277,8 +276,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(rh =>
-                    !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
+                ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),

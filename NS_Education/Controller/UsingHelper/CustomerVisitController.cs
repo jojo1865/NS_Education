@@ -111,7 +111,10 @@ namespace NS_Education.Controller.UsingHelper
                 query = query.Where(cv => DbFunctions.TruncateTime(cv.VisitDate) <= eDate.Date);
 
             if (input.HasReservation != null)
-                query = query.Where(cv => cv.Customer.Resver_Head.Any(rh => !rh.DeleteFlag) == input.HasReservation);
+                query = query.Where(cv => cv.Customer.Resver_Head
+                                              .Any(rh => !rh.DeleteFlag &&
+                                                         rh.B_StaticCode.Code != ReserveHeadState.Draft) ==
+                                          input.HasReservation);
 
             return query.OrderByDescending(cv => cv.VisitDate)
                 .ThenBy(cv => cv.CID)
@@ -136,7 +139,7 @@ namespace NS_Education.Controller.UsingHelper
                 VisitDate = entity.VisitDate.ToFormattedStringDate(),
                 Description = entity.Description ?? "",
                 AfterNote = entity.AfterNote ?? "",
-                HasReservation = entity.Customer?.Resver_Head.Any(rh => !rh.DeleteFlag) ?? false
+                HasReservation = entity.Customer?.GetDealtReservationCount() > 0
             });
         }
 
@@ -164,6 +167,8 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<CustomerVisit_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(
             CustomerVisit entity)
         {
+            bool hasReservation = entity.Customer?.GetDealtReservationCount() > 0;
+
             return new CustomerVisit_GetInfoById_Output_APIItem
             {
                 CVID = entity.CVID,
@@ -182,10 +187,13 @@ namespace NS_Education.Controller.UsingHelper
                 VisitDate = entity.VisitDate.ToFormattedStringDate(),
                 Description = entity.Description ?? "",
                 AfterNote = entity.AfterNote ?? "",
-                BSCID15 = entity.BSCID15,
-                BSCID15_Title = entity.B_StaticCode?.Title ?? "",
-                BSCID15_List =
-                    await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason, entity.BSCID15 ?? 0)
+                HasReservation = hasReservation,
+                BSCID15 = hasReservation ? null : entity.BSCID15,
+                BSCID15_Title = (hasReservation ? null : entity.B_StaticCode?.Title) ?? "",
+                BSCID15_List = hasReservation
+                    ? new List<BaseResponseRowForSelectable>()
+                    : await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason,
+                        entity.BSCID15 ?? 0)
             };
         }
 

@@ -781,16 +781,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                                 SubmitValidateStaticCode(ti.BSCID,
                                                                     StaticCodeType.ResverThrow)).Result,
                                                             () => AddError(WrongFormat($"預約類型（{item.BSCID}）")))
-                                                        .Validate(ti => ti.Title.HasContent(),
-                                                            () => AddError(EmptyNotAllowed("行程名稱")))
                                                         .Validate(
                                                             ti => Task.Run(() =>
                                                                     SubmitValidateOrderCode(ti.BOCID,
                                                                         OrderCodeType.Throw))
                                                                 .Result,
                                                             () => AddError(NotFound($"預約行程的入帳代號 ID（{item.BOCID}）")))
-                                                        .Validate(ti => ti.Title.HasLengthBetween(1, 100),
-                                                            () => AddError(LengthOutOfRange("行程名稱", 1, 100)))
+                                                        .Validate(ti => ti.Title.HasLengthBetween(0, 100),
+                                                            () => AddError(LengthOutOfRange("行程名稱", 0, 100)))
                                                         .Validate(ti => ti.PrintTitle.HasLengthBetween(0, 100),
                                                             () => AddError(LengthOutOfRange("行程的帳單列印名稱", 0, 100)))
                                                         .Validate(ti => ti.PrintNote.HasLengthBetween(0, 100),

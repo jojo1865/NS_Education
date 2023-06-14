@@ -127,6 +127,7 @@ namespace NS_Education.Controller.UsingHelper
                 OutPrice = entity.OutPrice,
                 PaidType = entity.PaidType,
                 BSCID = entity.BSCID,
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.Unit, entity.BSCID),
                 BOCID = entity.BOCID
             });
         }

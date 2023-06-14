@@ -182,6 +182,7 @@ namespace NS_Education.Controller.UsingHelper
                 VisitDate = entity.VisitDate.ToFormattedStringDate(),
                 Description = entity.Description ?? "",
                 AfterNote = entity.AfterNote ?? "",
+                BSCID15 = entity.BSCID15,
                 BSCID15_Title = entity.B_StaticCode?.Title ?? "",
                 BSCID15_List =
                     await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason, entity.BSCID15 ?? 0)

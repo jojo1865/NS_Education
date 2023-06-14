@@ -4,50 +4,50 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="7e740833e216458e9347880a12d65e6f" Name="Diagram1">
-        <EntityTypeShape EntityType="db_NS_EducationModel.B_Category" Width="1.5" PointX="0.75" PointY="40.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.B_Device" Width="1.5" PointX="3" PointY="34" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.B_OrderCode" Width="1.5" PointX="0.75" PointY="27.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.B_Partner" Width="1.5" PointX="6" PointY="34.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.B_PartnerItem" Width="1.5" PointX="11.25" PointY="29.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.B_SiteData" Width="1.5" PointX="9" PointY="33.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.B_StaticCode" Width="1.5" PointX="0.75" PointY="34" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.BusinessUser" Width="1.5" PointX="6" PointY="50.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.Customer" Width="1.5" PointX="3" PointY="54" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.CustomerGift" Width="1.5" PointX="5.25" PointY="40.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.CustomerQuestion" Width="1.5" PointX="5.25" PointY="55.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.CustomerVisit" Width="1.5" PointX="5.25" PointY="45.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.D_Company" Width="1.5" PointX="1.5" PointY="67.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.D_Department" Width="1.5" PointX="1.5" PointY="61.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.D_FoodCategory" Width="1.5" PointX="6" PointY="24.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.D_Hall" Width="1.5" PointX="0.75" PointY="46.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.D_OtherPayItem" Width="1.5" PointX="3" PointY="28.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.D_PayType" Width="1.5" PointX="11.25" PointY="59" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.D_TimeSpan" Width="1.5" PointX="8.25" PointY="60.375" IsExpanded="true" />
+      <Diagram DiagramId="f82865e02efc4a77bedaabfc89e4fa79" Name="Diagram1">
+        <EntityTypeShape EntityType="db_NS_EducationModel.B_Category" Width="1.5" PointX="0.75" PointY="22" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.B_Device" Width="1.5" PointX="3" PointY="34.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.B_OrderCode" Width="1.5" PointX="0.75" PointY="27.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.B_Partner" Width="1.5" PointX="6" PointY="34.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.B_PartnerItem" Width="1.5" PointX="11.25" PointY="29.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.B_SiteData" Width="1.5" PointX="9" PointY="33.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.B_StaticCode" Width="1.5" PointX="0.75" PointY="34.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.BusinessUser" Width="1.5" PointX="3" PointY="45.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.Customer" Width="1.5" PointX="3" PointY="54.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.CustomerGift" Width="1.5" PointX="8.25" PointY="45.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.CustomerQuestion" Width="1.5" PointX="5.25" PointY="55.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.CustomerVisit" Width="1.5" PointX="11.25" PointY="45.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.D_Company" Width="1.5" PointX="1.5" PointY="67.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.D_Department" Width="1.5" PointX="1.5" PointY="62.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.D_FoodCategory" Width="1.5" PointX="9" PointY="29.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.D_Hall" Width="1.5" PointX="0.75" PointY="41.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.D_OtherPayItem" Width="1.5" PointX="3" PointY="29" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.D_PayType" Width="1.5" PointX="11.25" PointY="55.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.D_TimeSpan" Width="1.5" PointX="8.25" PointY="65.5" IsExpanded="true" />
         <EntityTypeShape EntityType="db_NS_EducationModel.D_Zip" Width="1.5" PointX="2.75" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.GroupData" Width="1.5" PointX="3.75" PointY="70.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.GroupData" Width="1.5" PointX="6.75" PointY="75" IsExpanded="true" />
         <EntityTypeShape EntityType="db_NS_EducationModel.M_Address" Width="1.5" PointX="5" PointY="1.375" IsExpanded="true" />
         <EntityTypeShape EntityType="db_NS_EducationModel.M_Contect" Width="1.5" PointX="5.75" PointY="5.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.M_Customer_BusinessUser" Width="1.5" PointX="8.25" PointY="55.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.M_Customer_Category" Width="1.5" PointX="8.25" PointY="51.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.M_Department_Category" Width="1.5" PointX="10.75" PointY="51" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.M_Group_Menu" Width="1.5" PointX="14" PointY="34.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.M_Group_User" Width="1.5" PointX="6" PointY="63.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.M_Resver_TimeSpan" Width="1.5" PointX="10.5" PointY="45.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.M_SiteGroup" Width="1.5" PointX="11.25" PointY="35.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.M_Customer_BusinessUser" Width="1.5" PointX="8.25" PointY="55.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.M_Customer_Category" Width="1.5" PointX="8.25" PointY="52.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.M_Department_Category" Width="1.5" PointX="7.75" PointY="41.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.M_Group_Menu" Width="1.5" PointX="14" PointY="33.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.M_Group_User" Width="1.5" PointX="9" PointY="70.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.M_Resver_TimeSpan" Width="1.5" PointX="10.5" PointY="50.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.M_SiteGroup" Width="1.5" PointX="11.25" PointY="35.625" IsExpanded="true" />
         <EntityTypeShape EntityType="db_NS_EducationModel.MenuAPI" Width="1.5" PointX="3" PointY="6.5" IsExpanded="true" />
         <EntityTypeShape EntityType="db_NS_EducationModel.MenuData" Width="1.5" PointX="0.75" PointY="2.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Bill" Width="1.5" PointX="13.5" PointY="45.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Device" Width="1.5" PointX="5.25" PointY="28.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_GiveBack" Width="1.5" PointX="10.5" PointY="54.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Head" Width="1.5" PointX="8.25" PointY="43.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Other" Width="1.5" PointX="11.5" PointY="39.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Site" Width="1.5" PointX="14.25" PointY="38.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Throw" Width="1.5" PointX="16.5" PointY="36.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Throw_Food" Width="1.5" PointX="8.25" PointY="29.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.UserData" Width="1.5" PointX="3.75" PointY="65.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.UserLog" Width="1.5" PointX="6" PointY="67.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="db_NS_EducationModel.UserPasswordLog" Width="1.5" PointX="6" PointY="71.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Bill" Width="1.5" PointX="13.5" PointY="50.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Device" Width="1.5" PointX="5.25" PointY="28.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_GiveBack" Width="1.5" PointX="7.5" PointY="60.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Head" Width="1.5" PointX="5.25" PointY="43.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Other" Width="1.5" PointX="13.5" PointY="37.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Site" Width="1.5" PointX="14.25" PointY="43.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Throw" Width="1.5" PointX="16.5" PointY="39.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.Resver_Throw_Food" Width="1.5" PointX="11.25" PointY="39.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.UserData" Width="1.5" PointX="3.75" PointY="65.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.UserLog" Width="1.5" PointX="6" PointY="68.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="db_NS_EducationModel.UserPasswordLog" Width="1.5" PointX="6" PointY="71.375" IsExpanded="true" />
         <AssociationConnector Association="db_NS_EducationModel.FK_B_Device_B_Category" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.FK_B_Partner_B_Category" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.FK_B_SiteData_B_Category" ManuallyRouted="false" />
@@ -80,6 +80,7 @@
         <AssociationConnector Association="db_NS_EducationModel.M_SiteGroup_B_SiteData_BSID_fk" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.M_SiteGroup_B_SiteData_BSID_fk_2" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.CustomerGift_B_StaticCode_BSCID_fk" ManuallyRouted="false" />
+        <AssociationConnector Association="db_NS_EducationModel.CustomerVisit_B_StaticCode_BSCID_fk" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.D_OtherPayItem_B_StaticCode_BSCID_fk" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.FK_Customer_B_StaticCode4" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.FK_Customer_B_StaticCode6" ManuallyRouted="false" />

@@ -15,6 +15,7 @@ namespace NS_Education.Variables
         ResverSource = 11,
         ResverStatus = 12,
         ZipCodeLevel = 13,
-        SafetyControl = 14
+        SafetyControl = 14,
+        NoDealReason = 15
     }
 }

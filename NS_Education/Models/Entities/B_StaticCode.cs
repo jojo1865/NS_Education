@@ -23,10 +23,11 @@ namespace NS_Education.Models.Entities
             this.B_SiteData = new HashSet<B_SiteData>();
             this.B_SiteData1 = new HashSet<B_SiteData>();
             this.CustomerGift = new HashSet<CustomerGift>();
+            this.CustomerVisit = new HashSet<CustomerVisit>();
             this.D_OtherPayItem = new HashSet<D_OtherPayItem>();
             this.Customer = new HashSet<Customer>();
             this.Customer1 = new HashSet<Customer>();
-            this.CustomerVisit = new HashSet<CustomerVisit>();
+            this.CustomerVisit1 = new HashSet<CustomerVisit>();
             this.Resver_Head = new HashSet<Resver_Head>();
             this.Resver_Head1 = new HashSet<Resver_Head>();
             this.Resver_Site = new HashSet<Resver_Site>();
@@ -60,13 +61,15 @@ namespace NS_Education.Models.Entities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CustomerGift> CustomerGift { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CustomerVisit> CustomerVisit { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<D_OtherPayItem> D_OtherPayItem { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Customer> Customer { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Customer> Customer1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CustomerVisit> CustomerVisit { get; set; }
+        public virtual ICollection<CustomerVisit> CustomerVisit1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Head> Resver_Head { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

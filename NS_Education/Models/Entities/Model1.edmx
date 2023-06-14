@@ -260,6 +260,7 @@
           <Property Name="CreUID" Type="int" Nullable="false" />
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
+          <Property Name="BSCID15" Type="int" />
         </EntityType>
         <EntityType Name="D_Company">
           <Key>
@@ -747,7 +748,7 @@
           <Property Name="UID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="UserName" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="LoginAccount" Type="nvarchar" MaxLength="100" Nullable="false" />
-          <Property Name="LoginPassword" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="LoginPassword" Type="nvarchar(max)" Nullable="false" />
           <Property Name="DDID" Type="int" Nullable="false" />
           <Property Name="Note" Type="nvarchar(max)" />
           <Property Name="ActiveFlag" Type="bit" Nullable="false" />
@@ -791,6 +792,18 @@
             </Principal>
             <Dependent Role="CustomerGift">
               <PropertyRef Name="BSCID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="CustomerVisit_B_StaticCode_BSCID_fk">
+          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="0..1" />
+          <End Role="CustomerVisit" Type="Self.CustomerVisit" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_StaticCode">
+              <PropertyRef Name="BSCID" />
+            </Principal>
+            <Dependent Role="CustomerVisit">
+              <PropertyRef Name="BSCID15" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1191,7 +1204,9 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_M_Group_Menu_GroupData">
-          <End Role="GroupData" Type="Self.GroupData" Multiplicity="1" />
+          <End Role="GroupData" Type="Self.GroupData" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="M_Group_Menu" Type="Self.M_Group_Menu" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="GroupData">
@@ -1203,7 +1218,9 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_M_Group_Menu_MenuData">
-          <End Role="MenuData" Type="Self.MenuData" Multiplicity="1" />
+          <End Role="MenuData" Type="Self.MenuData" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="M_Group_Menu" Type="Self.M_Group_Menu" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="MenuData">
@@ -1764,6 +1781,10 @@
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="CustomerGift" EntitySet="CustomerGift" />
           </AssociationSet>
+          <AssociationSet Name="CustomerVisit_B_StaticCode_BSCID_fk" Association="Self.CustomerVisit_B_StaticCode_BSCID_fk">
+            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
+            <End Role="CustomerVisit" EntitySet="CustomerVisit" />
+          </AssociationSet>
           <AssociationSet Name="D_OtherPayItem_B_OrderCode_BOCID_fk" Association="Self.D_OtherPayItem_B_OrderCode_BOCID_fk">
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
             <End Role="D_OtherPayItem" EntitySet="D_OtherPayItem" />
@@ -2264,10 +2285,11 @@
           <NavigationProperty Name="B_SiteData" Relationship="Self.FK_B_SiteData_B_StaticCode1" FromRole="B_StaticCode" ToRole="B_SiteData" />
           <NavigationProperty Name="B_SiteData1" Relationship="Self.FK_B_SiteData_B_StaticCode5" FromRole="B_StaticCode" ToRole="B_SiteData" />
           <NavigationProperty Name="CustomerGift" Relationship="Self.CustomerGift_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="CustomerGift" />
+          <NavigationProperty Name="CustomerVisit" Relationship="Self.CustomerVisit_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="CustomerVisit" />
           <NavigationProperty Name="D_OtherPayItem" Relationship="Self.D_OtherPayItem_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="D_OtherPayItem" />
           <NavigationProperty Name="Customer" Relationship="Self.FK_Customer_B_StaticCode4" FromRole="B_StaticCode" ToRole="Customer" />
           <NavigationProperty Name="Customer1" Relationship="Self.FK_Customer_B_StaticCode6" FromRole="B_StaticCode" ToRole="Customer" />
-          <NavigationProperty Name="CustomerVisit" Relationship="Self.FK_CustomerVisit_B_StaticCode" FromRole="B_StaticCode" ToRole="CustomerVisit" />
+          <NavigationProperty Name="CustomerVisit1" Relationship="Self.FK_CustomerVisit_B_StaticCode" FromRole="B_StaticCode" ToRole="CustomerVisit" />
           <NavigationProperty Name="Resver_Head" Relationship="Self.FK_Resver_Head_B_StaticCode11" FromRole="B_StaticCode" ToRole="Resver_Head" />
           <NavigationProperty Name="Resver_Head1" Relationship="Self.FK_Resver_Head_B_StaticCode12" FromRole="B_StaticCode" ToRole="Resver_Head" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Site" />
@@ -2389,7 +2411,9 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_CustomerVisit_B_StaticCode" FromRole="CustomerVisit" ToRole="B_StaticCode" />
+          <Property Name="BSCID15" Type="Int32" />
+          <NavigationProperty Name="B_StaticCode" Relationship="Self.CustomerVisit_B_StaticCode_BSCID_fk" FromRole="CustomerVisit" ToRole="B_StaticCode" />
+          <NavigationProperty Name="B_StaticCode1" Relationship="Self.FK_CustomerVisit_B_StaticCode" FromRole="CustomerVisit" ToRole="B_StaticCode" />
           <NavigationProperty Name="BusinessUser" Relationship="Self.FK_CustomerVisit_BusinessUser" FromRole="CustomerVisit" ToRole="BusinessUser" />
           <NavigationProperty Name="Customer" Relationship="Self.FK_CustomerVisit_Customer" FromRole="CustomerVisit" ToRole="Customer" />
         </EntityType>
@@ -2952,7 +2976,7 @@
           <Property Name="UID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="UserName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="LoginAccount" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="LoginPassword" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="LoginPassword" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="DDID" Type="Int32" Nullable="false" />
           <Property Name="Note" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="ActiveFlag" Type="Boolean" Nullable="false" />
@@ -3385,6 +3409,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="CustomerVisit_B_StaticCode_BSCID_fk">
+          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="0..1" />
+          <End Role="CustomerVisit" Type="Self.CustomerVisit" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_StaticCode">
+              <PropertyRef Name="BSCID" />
+            </Principal>
+            <Dependent Role="CustomerVisit">
+              <PropertyRef Name="BSCID15" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="D_OtherPayItem_B_StaticCode_BSCID_fk">
           <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
           <End Role="D_OtherPayItem" Type="Self.D_OtherPayItem" Multiplicity="*" />
@@ -3732,7 +3768,9 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_M_Group_Menu_GroupData">
-          <End Role="GroupData" Type="Self.GroupData" Multiplicity="1" />
+          <End Role="GroupData" Type="Self.GroupData" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="M_Group_Menu" Type="Self.M_Group_Menu" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="GroupData">
@@ -3756,7 +3794,9 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_M_Group_Menu_MenuData">
-          <End Role="MenuData" Type="Self.MenuData" Multiplicity="1" />
+          <End Role="MenuData" Type="Self.MenuData" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="M_Group_Menu" Type="Self.M_Group_Menu" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="MenuData">
@@ -4098,6 +4138,10 @@
           <AssociationSet Name="CustomerGift_B_StaticCode_BSCID_fk" Association="Self.CustomerGift_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="CustomerGift" EntitySet="CustomerGift" />
+          </AssociationSet>
+          <AssociationSet Name="CustomerVisit_B_StaticCode_BSCID_fk" Association="Self.CustomerVisit_B_StaticCode_BSCID_fk">
+            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
+            <End Role="CustomerVisit" EntitySet="CustomerVisit" />
           </AssociationSet>
           <AssociationSet Name="D_OtherPayItem_B_StaticCode_BSCID_fk" Association="Self.D_OtherPayItem_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
@@ -4543,6 +4587,7 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+                <ScalarProperty Name="BSCID15" ColumnName="BSCID15" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

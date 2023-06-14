@@ -28,8 +28,10 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public Nullable<int> BSCID15 { get; set; }
     
         public virtual B_StaticCode B_StaticCode { get; set; }
+        public virtual B_StaticCode B_StaticCode1 { get; set; }
         public virtual BusinessUser BusinessUser { get; set; }
         public virtual Customer Customer { get; set; }
     }

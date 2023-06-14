@@ -88,7 +88,7 @@ namespace NS_Education.Controller.UsingHelper
             var query = DC.CustomerVisit
                 .Include(cv => cv.Customer)
                 .Include(cv => cv.Customer.Resver_Head)
-                .Include(cv => cv.B_StaticCode)
+                .Include(cv => cv.B_StaticCode1)
                 .Include(cv => cv.BusinessUser)
                 .AsQueryable();
 
@@ -128,7 +128,7 @@ namespace NS_Education.Controller.UsingHelper
                 C_TitleC = entity.Customer?.TitleC ?? "",
                 C_TitleE = entity.Customer?.TitleE ?? "",
                 BSCID = entity.BSCID,
-                BSC_Title = entity.B_StaticCode?.Title ?? "",
+                BSC_Title = entity.B_StaticCode1?.Title ?? "",
                 BUID = entity.BUID,
                 BU_Name = entity.BusinessUser?.Name ?? "",
                 TargetTitle = entity.TargetTitle ?? "",
@@ -156,6 +156,7 @@ namespace NS_Education.Controller.UsingHelper
             return DC.CustomerVisit
                 .Include(cv => cv.Customer)
                 .Include(cv => cv.B_StaticCode)
+                .Include(cv => cv.B_StaticCode1)
                 .Include(cv => cv.BusinessUser)
                 .Where(cv => cv.CVID == id);
         }
@@ -171,8 +172,8 @@ namespace NS_Education.Controller.UsingHelper
                 C_TitleE = entity.Customer?.TitleE ?? "",
                 C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
                 BSCID = entity.BSCID,
-                BSC_Title = entity.B_StaticCode?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID),
+                BSC_Title = entity.B_StaticCode1?.Title ?? "",
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType, entity.BSCID),
                 BUID = entity.BUID,
                 BU_Name = entity.BusinessUser?.Name ?? "",
                 BU_List = await GetSelectedBusinessUserList(entity.BUID),
@@ -180,7 +181,10 @@ namespace NS_Education.Controller.UsingHelper
                 Title = entity.Title ?? "",
                 VisitDate = entity.VisitDate.ToFormattedStringDate(),
                 Description = entity.Description ?? "",
-                AfterNote = entity.AfterNote ?? ""
+                AfterNote = entity.AfterNote ?? "",
+                NoDealReason = entity.B_StaticCode?.Title ?? "",
+                NoDealReasons_List =
+                    await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason, entity.BSCID15 ?? 0)
             };
         }
 

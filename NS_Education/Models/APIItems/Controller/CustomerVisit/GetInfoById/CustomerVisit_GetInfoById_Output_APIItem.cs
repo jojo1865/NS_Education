@@ -8,12 +8,16 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById
         public int CID { get; set; }
         public string C_TitleC { get; set; }
         public string C_TitleE { get; set; }
-        public ICollection<BaseResponseRowForSelectable> C_List { get; set; } = new List<BaseResponseRowForSelectable>();
-        
+
+        public ICollection<BaseResponseRowForSelectable> C_List { get; set; } =
+            new List<BaseResponseRowForSelectable>();
+
         public int BSCID { get; set; }
         public string BSC_Title { get; set; }
-        public ICollection<BaseResponseRowForSelectable> BSC_List { get; set; } = new List<BaseResponseRowForSelectable>();
-        
+
+        public ICollection<BaseResponseRowForSelectable> BSC_List { get; set; } =
+            new List<BaseResponseRowForSelectable>();
+
         public int BUID { get; set; }
         public string BU_Name { get; set; }
 
@@ -22,9 +26,14 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById
 
         public string TargetTitle { get; set; }
         public string Title { get; set; }
-        
+
         public string VisitDate { get; set; }
         public string Description { get; set; }
         public string AfterNote { get; set; }
+
+        public string NoDealReason { get; set; }
+
+        public ICollection<BaseResponseRowForSelectable> NoDealReasons_List { get; set; } =
+            new List<BaseResponseRowForSelectable>();
     }
 }

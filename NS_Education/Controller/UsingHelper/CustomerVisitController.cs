@@ -242,6 +242,12 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.CVID == 0, () => AddError(WrongFormat("拜訪紀錄 ID")))
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     () => AddError(NotFound("客戶 ID")))
+                .ForceSkipIf(i => i.BSCID15 == null)
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID15 ?? 0,
+                        StaticCodeType.NoDealReason),
+                    () => AddError(NotFound("未成交原因 ID")))
+                .StopForceSkipping()
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod),
                     () => AddError(NotFound("客戶拜訪方式 ID")))
@@ -268,7 +274,8 @@ namespace NS_Education.Controller.UsingHelper
                 VisitDate = visitDate,
                 Title = input.Title,
                 Description = input.Description,
-                AfterNote = input.AfterNote
+                AfterNote = input.AfterNote,
+                BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default
             });
         }
 
@@ -282,6 +289,12 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.CVID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     () => AddError(NotFound("客戶 ID")))
+                .ForceSkipIf(i => i.BSCID15 is null)
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID15 ?? 0,
+                        StaticCodeType.NoDealReason),
+                    () => AddError(NotFound("未成交原因 ID")))
+                .StopForceSkipping()
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod),
                     () => AddError(NotFound("客戶拜訪方式 ID")))
@@ -314,6 +327,8 @@ namespace NS_Education.Controller.UsingHelper
             data.Title = input.Title;
             data.Description = input.Description;
             data.AfterNote = input.AfterNote;
+
+            data.BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default;
         }
 
         #endregion

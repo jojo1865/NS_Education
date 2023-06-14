@@ -31,9 +31,9 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById
         public string Description { get; set; }
         public string AfterNote { get; set; }
 
-        public string NoDealReason { get; set; }
+        public string BSCID15_Title { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> NoDealReasons_List { get; set; } =
+        public ICollection<BaseResponseRowForSelectable> BSCID15_List { get; set; } =
             new List<BaseResponseRowForSelectable>();
     }
 }

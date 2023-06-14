@@ -182,8 +182,8 @@ namespace NS_Education.Controller.UsingHelper
                 VisitDate = entity.VisitDate.ToFormattedStringDate(),
                 Description = entity.Description ?? "",
                 AfterNote = entity.AfterNote ?? "",
-                NoDealReason = entity.B_StaticCode?.Title ?? "",
-                NoDealReasons_List =
+                BSCID15_Title = entity.B_StaticCode?.Title ?? "",
+                BSCID15_List =
                     await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason, entity.BSCID15 ?? 0)
             };
         }

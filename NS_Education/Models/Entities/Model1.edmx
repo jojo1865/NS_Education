@@ -622,12 +622,12 @@
           <Property Name="RHID" Type="int" Nullable="false" />
           <Property Name="Title" Type="nvarchar" MaxLength="100" />
           <Property Name="Description" Type="nvarchar(max)" />
-          <Property Name="PointDecimal" Type="int" Nullable="false" />
           <Property Name="DeleteFlag" Type="bit" Nullable="false" />
           <Property Name="CreDate" Type="datetime" Nullable="false" />
           <Property Name="CreUID" Type="int" Nullable="false" />
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
+          <Property Name="BSCID16" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Resver_Head">
           <Key>
@@ -1698,6 +1698,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_GiveBack_B_StaticCode_BSCID_fk">
+          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
+          <End Role="Resver_GiveBack" Type="Self.Resver_GiveBack" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_StaticCode">
+              <PropertyRef Name="BSCID" />
+            </Principal>
+            <Dependent Role="Resver_GiveBack">
+              <PropertyRef Name="BSCID16" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="Resver_Head_BusinessUser_BUID_fk">
           <End Role="BusinessUser" Type="Self.BusinessUser" Multiplicity="1" />
           <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="*" />
@@ -2082,6 +2094,10 @@
             <End Role="B_SiteData" EntitySet="B_SiteData" />
             <End Role="M_SiteGroup" EntitySet="M_SiteGroup" />
           </AssociationSet>
+          <AssociationSet Name="Resver_GiveBack_B_StaticCode_BSCID_fk" Association="Self.Resver_GiveBack_B_StaticCode_BSCID_fk">
+            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
+            <End Role="Resver_GiveBack" EntitySet="Resver_GiveBack" />
+          </AssociationSet>
           <AssociationSet Name="Resver_Head_BusinessUser_BUID_fk" Association="Self.Resver_Head_BusinessUser_BUID_fk">
             <End Role="BusinessUser" EntitySet="BusinessUser" />
             <End Role="Resver_Head" EntitySet="Resver_Head" />
@@ -2312,6 +2328,7 @@
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Site" />
           <NavigationProperty Name="Resver_Throw" Relationship="Self.FK_Resver_Throw_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Throw" />
           <NavigationProperty Name="Resver_Throw_Food" Relationship="Self.FK_Resver_Throw_D_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Throw_Food" />
+          <NavigationProperty Name="Resver_GiveBack" Relationship="Self.Resver_GiveBack_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="Resver_GiveBack" />
           <NavigationProperty Name="Resver_Other" Relationship="Self.Resver_Other_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="Resver_Other" />
         </EntityType>
         <EntityType Name="BusinessUser">
@@ -2840,12 +2857,13 @@
           <Property Name="RHID" Type="Int32" Nullable="false" />
           <Property Name="Title" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="PointDecimal" Type="Int32" Nullable="false" />
           <Property Name="DeleteFlag" Type="Boolean" Nullable="false" />
           <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <Property Name="BSCID16" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="B_StaticCode" Relationship="Self.Resver_GiveBack_B_StaticCode_BSCID_fk" FromRole="Resver_GiveBack" ToRole="B_StaticCode" />
           <NavigationProperty Name="Resver_Head" Relationship="Self.FK_Resver_GiveBack_Resver_Head" FromRole="Resver_GiveBack" ToRole="Resver_Head" />
         </EntityType>
         <EntityType Name="Resver_Head">
@@ -3549,6 +3567,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_GiveBack_B_StaticCode_BSCID_fk">
+          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
+          <End Role="Resver_GiveBack" Type="Self.Resver_GiveBack" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_StaticCode">
+              <PropertyRef Name="BSCID" />
+            </Principal>
+            <Dependent Role="Resver_GiveBack">
+              <PropertyRef Name="BSCID16" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="Resver_Other_B_StaticCode_BSCID_fk">
           <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
           <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
@@ -4210,6 +4240,10 @@
           <AssociationSet Name="FK_Resver_Throw_D_B_StaticCode" Association="Self.FK_Resver_Throw_D_B_StaticCode">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Resver_Throw_Food" EntitySet="Resver_Throw_Food" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_GiveBack_B_StaticCode_BSCID_fk" Association="Self.Resver_GiveBack_B_StaticCode_BSCID_fk">
+            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
+            <End Role="Resver_GiveBack" EntitySet="Resver_GiveBack" />
           </AssociationSet>
           <AssociationSet Name="Resver_Other_B_StaticCode_BSCID_fk" Association="Self.Resver_Other_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
@@ -5008,12 +5042,12 @@
                 <ScalarProperty Name="RHID" ColumnName="RHID" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
-                <ScalarProperty Name="PointDecimal" ColumnName="PointDecimal" />
                 <ScalarProperty Name="DeleteFlag" ColumnName="DeleteFlag" />
                 <ScalarProperty Name="CreDate" ColumnName="CreDate" />
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+                <ScalarProperty Name="BSCID16" ColumnName="BSCID16" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

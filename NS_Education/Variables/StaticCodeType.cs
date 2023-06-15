@@ -16,6 +16,7 @@ namespace NS_Education.Variables
         ResverStatus = 12,
         ZipCodeLevel = 13,
         SafetyControl = 14,
-        NoDealReason = 15
+        NoDealReason = 15,
+        GiveBackScore = 16
     }
 }

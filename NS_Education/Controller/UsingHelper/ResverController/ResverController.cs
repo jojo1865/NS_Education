@@ -169,6 +169,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Include(rs => rs.Resver_Bill.Select(rb => rb.D_PayType))
                 // GiveBack
                 .Include(rb => rb.Resver_GiveBack)
+                .Include(rb => rb.Resver_GiveBack.Select(rg => rg.B_StaticCode))
                 .Where(rh => rh.RHID == id);
         }
 
@@ -224,7 +225,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 RGBID = gb.RGBID,
                 Title = gb.Title ?? "",
                 Description = gb.Description ?? "",
-                PointDecimal = gb.PointDecimal
+                BSCID16 = gb.BSCID16,
+                BSCID16_Title = gb.B_StaticCode?.Title ?? ""
             }).ToList();
         }
 
@@ -953,17 +955,19 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                   .IsValid();
 
             // 主預約單 -> 預約回饋紀錄列表
-            bool isGiveBackItemValid =
+            bool isGiveBackItemValid = await
                 input.GiveBackItems.StartValidateElements()
                     .Validate(gbi => isAdd ? gbi.RGBID == 0 : gbi.RGBID.IsZeroOrAbove(),
                         gbi => AddError(WrongFormat($"預約回饋預約單 ID（{gbi.RGBID}）")))
-                    .Validate(
-                        gbi => gbi.RGBID == 0 || Task
-                            .Run(() => DC.Resver_GiveBack.ValidateIdExists(gbi.RGBID, nameof(Resver_GiveBack.RGBID)))
-                            .Result,
+                    .ValidateAsync(
+                        async gbi =>
+                            gbi.RGBID == 0 ||
+                            await DC.Resver_GiveBack.ValidateIdExists(gbi.RGBID, nameof(Resver_GiveBack.RGBID)),
                         gbi => AddError(NotFound($"預約回饋預約單 ID（{gbi.RGBID}）")))
-                    .Validate(gbi => gbi.PointDecimal.IsInBetween(0, 50),
-                        gbi => AddError(OutOfRange($"回饋分數（{gbi.PointDecimal}）", 0, 50)))
+                    .ValidateAsync(
+                        async gbi =>
+                            await DC.B_StaticCode.ValidateStaticCodeExists(gbi.BSCID16, StaticCodeType.GiveBackScore),
+                        gbi => AddError(NotFound($"回饋分數 ID（{gbi.BSCID16}）")))
                     .Validate(gbi => gbi.Title.HasLengthBetween(0, 100),
                         () => AddError(LengthOutOfRange("預約回饋的標題", 0, 100)))
                     .Validate(gbi => gbi.Description.HasLengthBetween(0, 100),
@@ -1379,7 +1383,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             var inputIds = input.GiveBackItems.Select(gbi => gbi.RGBID);
             DC.Resver_GiveBack.RemoveRange(head.Resver_GiveBack.Where(rgb => !inputIds.Contains(rgb.RGBID)));
 
-            foreach (var item in input.GiveBackItems)
+            foreach (Resver_Submit_GiveBackItem_Input_APIItem item in input.GiveBackItems)
             {
                 Resver_GiveBack giveBack = SubmitFindOrCreateNew<Resver_GiveBack>(item.RGBID, entitiesToAdd);
                 if (giveBack.RHID != 0 && giveBack.RHID != head.RHID)
@@ -1391,7 +1395,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 giveBack.RHID = head.RHID;
                 giveBack.Title = item.Title;
                 giveBack.Description = item.Description;
-                giveBack.PointDecimal = item.PointDecimal;
+                giveBack.BSCID16 = item.BSCID16;
             }
         }
 

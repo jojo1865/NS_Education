@@ -59,7 +59,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             bool isValid = await input.StartValidate()
                 .ValidateAsync(
                     async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)),
-                    () => AddError(NotFound("權限 ID")))
+                    () => AddError(NotFound("角色 ID")))
                 .ValidateAsync(
                     async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
                     () => AddError(NotFound("部門 ID")))
@@ -322,8 +322,9 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     () => AddError(AlreadyExists("使用者帳號")))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
                     () => AddError(NotFound("部門 ID")))
-                .ValidateAsync(async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)),
-                    () => AddError(NotFound("身分 ID")))
+                .ValidateAsync(
+                    async i => i.GID == 0 || await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)),
+                    () => AddError(NotFound("角色 ID")))
                 .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.Length.IsInBetween(1, 100),
                     () => AddError(OutOfRange("使用者密碼", 1, 100)))
                 .Validate(i => i.LoginPassword.IsNullOrWhiteSpace() || i.LoginPassword.IsEncryptablePassword(),
@@ -371,6 +372,10 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             // 3. 將唯一一筆 M_Group_User 指向 input 指定的 GID。
 
             var groupUsers = DC.M_Group_User.Where(gu => gu.UID == data.UID).ToList();
+
+            // 如果 GID = 0，不處理
+            if (input.GID == 0)
+                return;
 
             // 無資料時，新增一筆資料
             if (!groupUsers.Any())

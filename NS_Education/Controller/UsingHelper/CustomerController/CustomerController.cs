@@ -653,7 +653,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
         public IQueryable<Customer> SubmitEditQuery(Customer_Submit_Input_APIItem input)
         {
-            return DC.Customer.Where(c => c.CID == input.CID);
+            return DC.Customer
+                .Include(c => c.M_Customer_BusinessUser)
+                .Where(c => c.CID == input.CID);
         }
 
         public void SubmitEditUpdateDataFields(Customer data, Customer_Submit_Input_APIItem input)
@@ -698,7 +700,10 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 alreadyExisting.MappingType = GetBusinessUserMappingType(allInputBuIds[alreadyExisting.BUID]);
             }
 
-            int originalMaxSortNo = data.M_Customer_BusinessUser.Max(cbu => cbu.SortNo);
+            int originalMaxSortNo = data.M_Customer_BusinessUser
+                .Select(cbu => cbu.SortNo)
+                .OrderBy(sortNo => sortNo)
+                .FirstOrDefault();
 
             // 增加新資料
             data.M_Customer_BusinessUser = data.M_Customer_BusinessUser.Concat(inputBuIdsToCreate.Select(

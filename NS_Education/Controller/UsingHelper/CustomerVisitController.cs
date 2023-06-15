@@ -70,7 +70,6 @@ namespace NS_Education.Controller.UsingHelper
             DateTime eDate = default;
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.BUID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之業務員 ID")))
                 .Validate(i => i.BSCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之拜訪方式 ID")))
                 .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
@@ -95,8 +94,8 @@ namespace NS_Education.Controller.UsingHelper
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(cv => cv.Title.Contains(input.Keyword) || cv.TargetTitle.Contains(input.Keyword));
 
-            if (input.CID.IsAboveZero())
-                query = query.Where(cv => cv.CID == input.CID);
+            if (input.CustomerTitleC.HasContent())
+                query = query.Where(cv => cv.Customer.TitleC.Contains(input.CustomerTitleC));
 
             if (input.BUID.IsAboveZero())
                 query = query.Where(cv => cv.BUID == input.BUID);

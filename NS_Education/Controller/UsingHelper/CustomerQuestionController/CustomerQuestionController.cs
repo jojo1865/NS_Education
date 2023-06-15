@@ -70,7 +70,6 @@ namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
             DateTime sDate = default;
             DateTime eDate = default;
             bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
                     () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
                 .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
@@ -94,8 +93,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
             if (input.Area.HasContent())
                 query = query.Where(cq => cq.AskArea.Contains(input.Area));
 
-            if (input.CID.IsAboveZero())
-                query = query.Where(cq => cq.CID == input.CID);
+            if (input.CustomerTitleC.HasContent())
+                query = query.Where(cq => cq.Customer.TitleC.Contains(input.CustomerTitleC));
 
             if (input.SDate.TryParseDateTime(out DateTime sDate))
                 query = query.Where(cq => DbFunctions.TruncateTime(cq.AskDate) >= sDate.Date);

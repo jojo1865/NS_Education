@@ -27,14 +27,15 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
 
         public StaticCodeTypeListController()
         {
-            _getListAllHelper = new GetListAllHelper<StaticCodeTypeListController, B_StaticCode, StaticCode_GetTypeList_Input_APIItem,
-                StaticCode_GetTypeList_Output_Row_APIItem>(this);
+            _getListAllHelper =
+                new GetListAllHelper<StaticCodeTypeListController, B_StaticCode, StaticCode_GetTypeList_Input_APIItem,
+                    StaticCode_GetTypeList_Output_Row_APIItem>(this);
         }
 
         #endregion
-        
+
         #region GetTypeList
-        
+
         // 實際 Route 請參考 RouteConfig
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
@@ -60,6 +61,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 query = query.Where(sc => sc.CodeType == input.Id);
 
             return query.OrderBy(sc => sc.SortNo)
+                .ThenBy(sc => sc.Code.Length)
                 .ThenBy(sc => sc.Code)
                 .ThenBy(sc => sc.BSCID);
         }
@@ -75,6 +77,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 SortNo = entity.SortNo
             });
         }
+
         #endregion
     }
 }

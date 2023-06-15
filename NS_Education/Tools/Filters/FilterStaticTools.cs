@@ -15,12 +15,21 @@ namespace NS_Education.Tools.Filters
             return context.HttpContext.Request.Url?.AbsoluteUri ?? "";
         }
 
+        /// <summary>
+        /// 從 Request Header 中取得 JwtToken。
+        /// </summary>
+        /// <param name="request">Request</param>
+        /// <returns>
+        /// 具 Authorization header 時：Jwt 的字串。<br/>
+        /// 否則：null。
+        /// </returns>
         public static string GetJwtToken(HttpRequestBase request)
         {
-            // 找 cookie, 如果沒有, 找 Header
-            string token = request.Cookies.Get(JwtConstants.CookieName)?.Value;
+            // JWT Bearer 方式可以避免 CSRF 攻擊。但是，如果這裡有任何形式的自動處理行為（如配合登入端點，自動把 JWT 讀/寫到 Cookie），
+            // 就會失去這樣的保護作用。
+            // 所以，在修改這裡的取值機制前，請先確認是否會破壞這樣的保護機制。
 
-            if (token.HasContent()) return token;
+            string token = null;
 
             string header = request.Headers["Authorization"];
 

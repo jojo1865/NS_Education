@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace NS_Education.Models.APIItems.Controller.OtherPayItem.GetInfoById
 {
     public class OtherPayItem_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
@@ -11,6 +13,10 @@ namespace NS_Education.Models.APIItems.Controller.OtherPayItem.GetInfoById
         public int OutPrice { get; set; }
         public int PaidType { get; set; }
         public int BSCID { get; set; }
+
+        public IEnumerable<BaseResponseRowForSelectable> BSC_List { get; set; } =
+            new List<BaseResponseRowForSelectable>();
+
         public int BOCID { get; set; }
     }
 }

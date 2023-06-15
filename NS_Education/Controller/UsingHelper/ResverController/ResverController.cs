@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -168,6 +169,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Include(rs => rs.Resver_Bill.Select(rb => rb.D_PayType))
                 // GiveBack
                 .Include(rb => rb.Resver_GiveBack)
+                .Include(rb => rb.Resver_GiveBack.Select(rg => rg.B_StaticCode))
                 .Where(rh => rh.RHID == id);
         }
 
@@ -223,7 +225,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 RGBID = gb.RGBID,
                 Title = gb.Title ?? "",
                 Description = gb.Description ?? "",
-                PointDecimal = gb.PointDecimal
+                BSCID16 = gb.BSCID16,
+                BSCID16_Title = gb.B_StaticCode?.Title ?? ""
             }).ToList();
         }
 
@@ -242,7 +245,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 Price = rb.Price,
                 Note = rb.Note ?? "",
                 PayFlag = rb.PayFlag,
-                PayDate = rb.PayDate.ToFormattedStringDateTime()
+                PayDate = rb.PayFlag ? rb.PayDate.ToFormattedStringDateTime() : ""
             }).ToList();
         }
 
@@ -256,8 +259,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 DOPIID = ro.DOPIID,
                 DOPI_Title = ro.D_OtherPayItem?.Title ?? "",
                 DOPI_List = Task.Run(() => DC.D_OtherPayItem.GetOtherPayItemSelectable(ro.DOPIID)).Result,
-                BSCID = ro.D_OtherPayItem?.BSCID ?? 0,
-                BSC_Title = ro.D_OtherPayItem?.B_StaticCode?.Title ?? "",
+                BSCID = ro.BSCID,
+                BSC_Title = ro.B_StaticCode?.Title ?? "",
+                BSC_List = Task.Run(() => DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.Unit, ro.BSCID))
+                    .Result,
                 BOCID = ro.BOCID,
                 BOC_Code = ro.B_OrderCode?.Code ?? "",
                 BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(ro.B_OrderCode?.CodeType, ro.BOCID))
@@ -781,16 +786,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                                 SubmitValidateStaticCode(ti.BSCID,
                                                                     StaticCodeType.ResverThrow)).Result,
                                                             () => AddError(WrongFormat($"預約類型（{item.BSCID}）")))
-                                                        .Validate(ti => ti.Title.HasContent(),
-                                                            () => AddError(EmptyNotAllowed("行程名稱")))
                                                         .Validate(
                                                             ti => Task.Run(() =>
                                                                     SubmitValidateOrderCode(ti.BOCID,
                                                                         OrderCodeType.Throw))
                                                                 .Result,
                                                             () => AddError(NotFound($"預約行程的入帳代號 ID（{item.BOCID}）")))
-                                                        .Validate(ti => ti.Title.HasLengthBetween(1, 100),
-                                                            () => AddError(LengthOutOfRange("行程名稱", 1, 100)))
+                                                        .Validate(ti => ti.Title.HasLengthBetween(0, 100),
+                                                            () => AddError(LengthOutOfRange("行程名稱", 0, 100)))
                                                         .Validate(ti => ti.PrintTitle.HasLengthBetween(0, 100),
                                                             () => AddError(LengthOutOfRange("行程的帳單列印名稱", 0, 100)))
                                                         .Validate(ti => ti.PrintNote.HasLengthBetween(0, 100),
@@ -893,31 +896,34 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                     await SubmitValidateSiteItemDeviceItemsAllTimeSpanEnough(input);
 
             // 主預約單 -> 其他收費項目列表
-            bool isOtherItemValid =
-                input.OtherItems.All(item => item.StartValidate()
+            bool isOtherItemValid = await
+                input.OtherItems.StartValidateElements()
                     .Validate(oi => isAdd ? oi.ROID == 0 : oi.ROID.IsZeroOrAbove(),
-                        () => AddError(WrongFormat($"其他收費項目預約單 ID（{item.ROID}）")))
+                        item => AddError(WrongFormat($"其他收費項目預約單 ID（{item.ROID}）")))
                     .Validate(
                         oi => oi.ROID == 0 || Task.Run(() =>
                             DC.Resver_Other.ValidateIdExists(oi.ROID, nameof(Resver_Other.ROID))).Result,
-                        () => AddError(NotFound($"其他收費項目預約單 ID（{item.ROID}）")))
+                        item => AddError(NotFound($"其他收費項目預約單 ID（{item.ROID}）")))
                     // 檢查所有項目的日期都與主預約單相符
                     .Validate(oi => oi.TargetDate.TryParseDateTime(out DateTime otherItemDate)
                                     && headStartDate.Date <= otherItemDate.Date
                                     && otherItemDate.Date <= headEndDate.Date,
-                        () => AddError(OutOfRange($"其他收費項目的預計使用日期（{item.TargetDate}）",
+                        item => AddError(OutOfRange($"其他收費項目的預計使用日期（{item.TargetDate}）",
                             headStartDate.ToFormattedStringDate(), headEndDate.ToFormattedStringDate()))
                     )
                     .Validate(oi => SubmitValidateOtherPayItem(oi.DOPIID),
-                        () => AddError(NotFound($"其他收費項目 ID（{item.DOPIID}）")))
-                    .Validate(
-                        oi => Task.Run(() => SubmitValidateOrderCode(oi.BOCID, OrderCodeType.OtherPayItem)).Result,
-                        () => AddError(NotFound($"其他收費項目的入帳代號 ID（{item.BOCID}）")))
+                        item => AddError(NotFound($"其他收費項目 ID（{item.DOPIID}）")))
+                    .ValidateAsync(
+                        async oi => await SubmitValidateOrderCode(oi.BOCID, OrderCodeType.OtherPayItem),
+                        item => AddError(NotFound($"其他收費項目的入帳代號 ID（{item.BOCID}）")))
+                    .ValidateAsync(
+                        async oi => await DC.B_StaticCode.ValidateStaticCodeExists(oi.BSCID, StaticCodeType.Unit),
+                        item => AddError(NotFound($"其他收費項目的單位別 ID（{item.BSCID}）")))
                     .Validate(oi => oi.PrintTitle.HasLengthBetween(0, 100),
-                        () => AddError(LengthOutOfRange("其他收費項目的帳單列印名稱", 0, 100)))
+                        item => AddError(LengthOutOfRange("其他收費項目的帳單列印名稱", 0, 100)))
                     .Validate(oi => oi.PrintNote.HasLengthBetween(0, 100),
-                        () => AddError(LengthOutOfRange("其他收費項目的帳單列印說明", 0, 100)))
-                    .IsValid());
+                        item => AddError(LengthOutOfRange("其他收費項目的帳單列印說明", 0, 100)))
+                    .IsValid();
 
             // 主預約單 -> 繳費紀錄列表
             bool isBillItemValid =
@@ -932,7 +938,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         () => AddError(NotFound($"繳費類別 ID（{item.BCID}）")))
                     .Validate(bi => SubmitValidatePayType(bi.DPTID),
                         () => AddError(NotFound($"繳費紀錄的付款方式 ID（{item.DPTID}）")))
-                    .Validate(bi => bi.PayDate.TryParseDateTime(out _, DateTimeParseType.DateTime),
+                    .Validate(
+                        bi => bi.PayDate.IsNullOrWhiteSpace() ||
+                              bi.PayDate.TryParseDateTime(out _, DateTimeParseType.DateTime),
                         () => AddError(WrongFormat($"付款時間（{item.PayDate}）")))
                     .IsValid());
 
@@ -947,17 +955,19 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                   .IsValid();
 
             // 主預約單 -> 預約回饋紀錄列表
-            bool isGiveBackItemValid =
+            bool isGiveBackItemValid = await
                 input.GiveBackItems.StartValidateElements()
                     .Validate(gbi => isAdd ? gbi.RGBID == 0 : gbi.RGBID.IsZeroOrAbove(),
                         gbi => AddError(WrongFormat($"預約回饋預約單 ID（{gbi.RGBID}）")))
-                    .Validate(
-                        gbi => gbi.RGBID == 0 || Task
-                            .Run(() => DC.Resver_GiveBack.ValidateIdExists(gbi.RGBID, nameof(Resver_GiveBack.RGBID)))
-                            .Result,
+                    .ValidateAsync(
+                        async gbi =>
+                            gbi.RGBID == 0 ||
+                            await DC.Resver_GiveBack.ValidateIdExists(gbi.RGBID, nameof(Resver_GiveBack.RGBID)),
                         gbi => AddError(NotFound($"預約回饋預約單 ID（{gbi.RGBID}）")))
-                    .Validate(gbi => gbi.PointDecimal.IsInBetween(0, 50),
-                        gbi => AddError(OutOfRange($"回饋分數（{gbi.PointDecimal}）", 0, 50)))
+                    .ValidateAsync(
+                        async gbi =>
+                            await DC.B_StaticCode.ValidateStaticCodeExists(gbi.BSCID16, StaticCodeType.GiveBackScore),
+                        gbi => AddError(NotFound($"回饋分數 ID（{gbi.BSCID16}）")))
                     .Validate(gbi => gbi.Title.HasLengthBetween(0, 100),
                         () => AddError(LengthOutOfRange("預約回饋的標題", 0, 100)))
                     .Validate(gbi => gbi.Description.HasLengthBetween(0, 100),
@@ -1373,7 +1383,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             var inputIds = input.GiveBackItems.Select(gbi => gbi.RGBID);
             DC.Resver_GiveBack.RemoveRange(head.Resver_GiveBack.Where(rgb => !inputIds.Contains(rgb.RGBID)));
 
-            foreach (var item in input.GiveBackItems)
+            foreach (Resver_Submit_GiveBackItem_Input_APIItem item in input.GiveBackItems)
             {
                 Resver_GiveBack giveBack = SubmitFindOrCreateNew<Resver_GiveBack>(item.RGBID, entitiesToAdd);
                 if (giveBack.RHID != 0 && giveBack.RHID != head.RHID)
@@ -1385,7 +1395,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 giveBack.RHID = head.RHID;
                 giveBack.Title = item.Title;
                 giveBack.Description = item.Description;
-                giveBack.PointDecimal = item.PointDecimal;
+                giveBack.BSCID16 = item.BSCID16;
             }
         }
 
@@ -1409,7 +1419,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 bill.Price = item.Price;
                 bill.Note = item.Note;
                 bill.PayFlag = item.PayFlag;
-                bill.PayDate = item.PayDate.ParseDateTime();
+                bill.PayDate = item.PayDate.HasContent() ? item.PayDate.ParseDateTime() : SqlDateTime.MinValue.Value;
                 bill.CheckUID = head.UpdUID;
             }
         }
@@ -1433,6 +1443,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 other.RHID = head.RHID;
                 other.DOPIID = item.DOPIID;
                 other.BOCID = item.BOCID;
+                other.BSCID = item.BSCID;
                 other.PrintTitle = item.PrintTitle;
                 other.PrintNote = item.PrintNote;
                 other.UnitPrice = item.UnitPrice;

@@ -255,7 +255,8 @@
       <Compile Include="Controller\UsingHelper\CustomerController\CustomerController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerController\CustomerRankingController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerGiftController.cs"/>
-      <Compile Include="Controller\UsingHelper\CustomerQuestionController.cs"/>
+      <Compile Include="Controller\UsingHelper\CustomerQuestionController\CustomerQuestionController.cs"/>
+      <Compile Include="Controller\UsingHelper\CustomerQuestionController\CustomerQuestionUniqueAreasController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerVisitController.cs"/>
       <Compile Include="Controller\UsingHelper\DepartmentController.cs"/>
       <Compile Include="Controller\UsingHelper\DeviceController.cs"/>
@@ -325,6 +326,7 @@
       <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetInfoById\CustomerQuestion_GetInfoById_Output_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetList\CustomerQuestion_GetList_Input_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetList\CustomerQuestion_GetList_Output_Row_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetUniqueAreas\CustomerQuestion_GetUniqueAreas_Input_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerQuestion\Submit\CustomerQuestion_Submit_Input_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerVisit\GetInfoById\CustomerVisit_GetInfoById_Output_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerVisit\GetList\CustomerVisit_GetList_Input_APIItem.cs"/>
@@ -492,16 +494,16 @@
           <DependentUpon>Model1.tt</DependentUpon>
       </Compile>
       <Compile Include="Models\Entities\B_OrderCode.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_Partner.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_PartnerItem.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_SiteData.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\B_Partner.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\B_PartnerItem.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\B_SiteData.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Entities\B_StaticCode.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -617,97 +619,76 @@
     <Compile Include="Models\Entities\Resver_Throw_Food.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-      <Compile Include="Models\Entities\UserData.cs">
-          <DependentUpon>Model1.tt</DependentUpon>
-      </Compile>
-      <Compile Include="Models\Entities\UserLog.cs">
-          <DependentUpon>Model1.tt</DependentUpon>
-      </Compile>
-      <Compile Include="Models\Entities\UserPasswordLog.cs">
-          <DependentUpon>Model1.tt</DependentUpon>
-      </Compile>
-      <Compile Include="Models\Errors\AuthorizationErrors\BaseAuthorizationError.cs"/>
-      <Compile Include="Models\Errors\AuthorizationErrors\InsufficientPrivilegeError.cs"/>
-      <Compile Include="Models\Errors\BaseError.cs"/>
-      <Compile Include="Models\Errors\BusinessError.cs"/>
-      <Compile Include="Models\Errors\DataValidationErrors\BaseDataValidationError.cs"/>
-      <Compile Include="Models\Errors\DataValidationErrors\DataAlreadyExistsError.cs"/>
-      <Compile Include="Models\Errors\DataValidationErrors\DataNotFoundError.cs"/>
-      <Compile Include="Models\Errors\DataValidationErrors\UpdateDbFailedError.cs"/>
-      <Compile Include="Models\Errors\ErrorField.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\BaseInputValidationError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\CopyNotAllowedError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\EmptyNotAllowedError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\ExpectedValueError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\LengthOutOfRangeError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\LengthTooLongError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\MinLargerThanMaxError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\NotSupportedValueError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\ValueOutOfRangeError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\ValueTooLargeError.cs"/>
-      <Compile Include="Models\Errors\InputValidationErrors\WrongFormatError.cs"/>
-      <Compile Include="Models\FinalizedResponse.cs"/>
-      <Compile Include="Models\IReturnMessageInfusable.cs"/>
-      <Compile Include="Models\PublicModel.cs"/>
-      <Compile Include="Models\Utilities\PrintReport\GetResverListByIDs2\PrintReport_GetResverListByIds2_PayItem.cs"/>
-      <Compile Include="Properties\AssemblyInfo.cs"/>
-      <Compile Include="Tools\BeingValidated\BeingValidated.cs"/>
-      <Compile Include="Tools\BeingValidated\BeingValidatedTaskHelperMethods.cs"/>
-      <Compile Include="Tools\BeingValidated\BeingValidatedEnumerable.cs"/>
-      <Compile Include="Tools\BeingValidated\BeingValidatedHelperMethods.cs"/>
-      <Compile Include="Tools\BeingValidated\IBeingValidated.cs"/>
-      <Compile Include="Tools\ControllerTools\BaseClass\PublicClass.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\ChangeActiveHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Common\FlagHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\DeleteItemHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetInfoByIdHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListAllHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListLocalHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListPagedHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetTypeListHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IChangeActiveHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IDeleteItemHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetInfoByIdHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListAllHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListLocalHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListPagedHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetTypeListHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\ISubmitHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\SubmitHelper.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IChangeActive.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItem.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetInfoByID.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListAll.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListLocal.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListPaged.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetTypeList.cs"/>
-      <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs"/>
-      <Compile Include="Tools\Encryption\JwtHelper.cs"/>
-      <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs"/>
-      <Compile Include="Tools\Extensions\DbContextExtensions.cs"/>
-      <Compile Include="Tools\Extensions\DecimalExtensionMethods.cs"/>
-      <Compile Include="Tools\Extensions\BaseRequestForPagedListExtension.cs"/>
-      <Compile Include="Tools\Extensions\ExceptionExtensions.cs"/>
-      <Compile Include="Tools\Extensions\IntExtensionMethods.cs"/>
-      <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs"/>
-      <Compile Include="Tools\Extensions\SpecificTableExtensionMethods.cs"/>
-      <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs"/>
-      <Compile Include="Tools\Extensions\StringExtensionMethods.cs"/>
-      <Compile Include="Tools\Extensions\TypeExtensionMethods.cs"/>
-      <Compile Include="Tools\Filters\ExceptionHandlerFilter\ExceptionHandlerFilter.cs"/>
-      <Compile Include="Tools\Filters\FilterStaticTools.cs"/>
+    <Compile Include="Models\Entities\UserData.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Entities\UserLog.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Entities\UserPasswordLog.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FinalizedResponse.cs" />
+    <Compile Include="Models\IReturnMessageInfusable.cs" />
+    <Compile Include="Models\PublicModel.cs" />
+    <Compile Include="Models\Utilities\PrintReport\GetResverListByIDs2\PrintReport_GetResverListByIds2_PayItem.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\BeingValidated\BeingValidated.cs" />
+    <Compile Include="Tools\BeingValidated\BeingValidatedTaskHelperMethods.cs" />
+    <Compile Include="Tools\BeingValidated\BeingValidatedEnumerable.cs" />
+    <Compile Include="Tools\BeingValidated\BeingValidatedHelperMethods.cs" />
+    <Compile Include="Tools\BeingValidated\IBeingValidated.cs" />
+    <Compile Include="Tools\ControllerTools\BaseClass\PublicClass.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\ChangeActiveHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Common\FlagHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\DeleteItemHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetInfoByIdHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListAllHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListLocalHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListPagedHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetTypeListHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IChangeActiveHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IDeleteItemHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetInfoByIdHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListAllHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListLocalHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListPagedHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetTypeListHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\ISubmitHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\SubmitHelper.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IChangeActive.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItem.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetInfoByID.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListAll.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListLocal.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListPaged.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetTypeList.cs" />
+    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs" />
+    <Compile Include="Tools\Encryption\JwtHelper.cs" />
+    <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs" />
+      <Compile Include="Tools\Extensions\CustomerExtension.cs"/>
+    <Compile Include="Tools\Extensions\DbContextExtensions.cs" />
+    <Compile Include="Tools\Extensions\DecimalExtensionMethods.cs" />
+    <Compile Include="Tools\Extensions\IntExtensionMethods.cs" />
+    <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs" />
+    <Compile Include="Tools\Extensions\SpecificTableExtensionMethods.cs" />
+    <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs" />
+    <Compile Include="Tools\Extensions\StringExtensionMethods.cs" />
+    <Compile Include="Tools\Extensions\TypeExtensionMethods.cs" />
+    <Compile Include="Tools\Filters\ExceptionHandlerFilter\ExceptionHandlerFilter.cs" />
+    <Compile Include="Tools\Filters\FilterStaticTools.cs" />
       <Compile Include="Tools\Filters\FinalizeResponseFilter\FinalizeResponseFilter.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeBy.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeTypeSingletonFactory.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AdminRole.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AnyRole.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\IAuthorizeType.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\RoleConstants.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\UserRole.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\JwtAuthFilter.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequiredPrivileges.cs"/>
-      <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequirePrivilege.cs"/>
-      <Compile Include="Tools\RequestHelper.cs"/>
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeBy.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeTypeSingletonFactory.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AdminRole.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AnyRole.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\IAuthorizeType.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\RoleConstants.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\UserRole.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\JwtAuthFilter.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequiredPrivileges.cs" />
+    <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequirePrivilege.cs" />
+    <Compile Include="Tools\RequestHelper.cs" />
       <Compile Include="Tools\ResponseHelper.cs"/>
     <Compile Include="Variables\CategoryType.cs" />
       <Compile Include="Variables\ContactType.cs"/>
@@ -719,6 +700,7 @@
     <Compile Include="Variables\OrderCodeType.cs" />
     <Compile Include="Variables\PrivilegeConstants.cs" />
     <Compile Include="Variables\ReserveHeadState.cs" />
+      <Compile Include="Variables\ResverHeadExpression.cs"/>
     <Compile Include="Variables\StaticCodeSafetyControlCode.cs" />
     <Compile Include="Variables\StaticCodeType.cs" />
       <Compile Include="Variables\TableCommentDictionary.cs"/>

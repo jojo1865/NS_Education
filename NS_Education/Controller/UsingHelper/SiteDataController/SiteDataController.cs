@@ -204,8 +204,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             query = query.Where(sd => sd.DeleteFlag == (input.DeleteFlag == 1));
 
-            return query
-                .OrderBy(sd => sd.Code)
+            return query.OrderBy(sd => sd.Code.Length)
+                .ThenBy(sd => sd.Code)
                 .ThenBy(sd => sd.BSID);
         }
 

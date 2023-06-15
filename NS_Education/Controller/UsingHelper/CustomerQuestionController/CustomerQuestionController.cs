@@ -18,7 +18,7 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controller.UsingHelper
+namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
 {
     public class CustomerQuestionController : PublicClass,
         IGetListPaged<CustomerQuestion, CustomerQuestion_GetList_Input_APIItem,
@@ -70,7 +70,6 @@ namespace NS_Education.Controller.UsingHelper
             DateTime sDate = default;
             DateTime eDate = default;
             bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
                     () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
                 .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
@@ -88,17 +87,20 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(cq => cq.Customer)
                 .AsQueryable();
 
-            if (!input.Keyword.IsNullOrWhiteSpace())
-                query = query.Where(cq => cq.AskTitle.Contains(input.Keyword) || cq.AskArea.Contains(input.Keyword));
+            if (input.QuestionTitle.HasContent())
+                query = query.Where(cq => cq.AskTitle.Contains(input.QuestionTitle));
 
-            if (input.CID.IsAboveZero())
-                query = query.Where(cq => cq.CID == input.CID);
+            if (input.Area.HasContent())
+                query = query.Where(cq => cq.AskArea.Contains(input.Area));
+
+            if (input.CustomerTitleC.HasContent())
+                query = query.Where(cq => cq.Customer.TitleC.Contains(input.CustomerTitleC));
 
             if (input.SDate.TryParseDateTime(out DateTime sDate))
-                query = query.Where(cq => cq.AskDate.Date >= sDate.Date);
+                query = query.Where(cq => DbFunctions.TruncateTime(cq.AskDate) >= sDate.Date);
 
             if (input.EDate.TryParseDateTime(out DateTime eDate))
-                query = query.Where(cq => cq.AskDate.Date <= eDate.Date);
+                query = query.Where(cq => DbFunctions.TruncateTime(cq.AskDate) <= eDate.Date);
 
             if (input.ResponseType.IsInBetween(0, 1))
                 query = query.Where(cq => cq.ResponseFlag == (input.ResponseType == 1));

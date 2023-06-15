@@ -70,7 +70,6 @@ namespace NS_Education.Controller.UsingHelper
             DateTime eDate = default;
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.BUID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之業務員 ID")))
                 .Validate(i => i.BSCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之拜訪方式 ID")))
                 .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
@@ -87,15 +86,16 @@ namespace NS_Education.Controller.UsingHelper
         {
             var query = DC.CustomerVisit
                 .Include(cv => cv.Customer)
-                .Include(cv => cv.B_StaticCode)
+                .Include(cv => cv.Customer.Resver_Head)
+                .Include(cv => cv.B_StaticCode1)
                 .Include(cv => cv.BusinessUser)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(cv => cv.Title.Contains(input.Keyword) || cv.TargetTitle.Contains(input.Keyword));
 
-            if (input.CID.IsAboveZero())
-                query = query.Where(cv => cv.CID == input.CID);
+            if (input.CustomerTitleC.HasContent())
+                query = query.Where(cv => cv.Customer.TitleC.Contains(input.CustomerTitleC));
 
             if (input.BUID.IsAboveZero())
                 query = query.Where(cv => cv.BUID == input.BUID);
@@ -104,10 +104,17 @@ namespace NS_Education.Controller.UsingHelper
                 query = query.Where(cv => cv.BSCID == input.BSCID);
 
             if (input.SDate.TryParseDateTime(out DateTime sDate))
-                query = query.Where(cv => cv.VisitDate.Date >= sDate.Date);
+                query = query.Where(cv => DbFunctions.TruncateTime(cv.VisitDate) >= sDate.Date);
 
             if (input.EDate.TryParseDateTime(out DateTime eDate))
-                query = query.Where(cv => cv.VisitDate.Date <= eDate.Date);
+                query = query.Where(cv => DbFunctions.TruncateTime(cv.VisitDate) <= eDate.Date);
+
+            // 這裡的條件要跟 Customer.GetDealtReservationCount 的條件一致，否則會與系統中其他同樣性質的欄位結果不同
+            if (input.HasReservation != null)
+                query = query.Where(cv => cv.Customer.Resver_Head
+                    .AsQueryable()
+                    .Where(ResverHeadExpression.IsDealtExpression)
+                    .Any() == input.HasReservation);
 
             return query.OrderByDescending(cv => cv.VisitDate)
                 .ThenBy(cv => cv.CID)
@@ -124,14 +131,15 @@ namespace NS_Education.Controller.UsingHelper
                 C_TitleC = entity.Customer?.TitleC ?? "",
                 C_TitleE = entity.Customer?.TitleE ?? "",
                 BSCID = entity.BSCID,
-                BSC_Title = entity.B_StaticCode?.Title ?? "",
+                BSC_Title = entity.B_StaticCode1?.Title ?? "",
                 BUID = entity.BUID,
                 BU_Name = entity.BusinessUser?.Name ?? "",
                 TargetTitle = entity.TargetTitle ?? "",
                 Title = entity.Title ?? "",
                 VisitDate = entity.VisitDate.ToFormattedStringDate(),
                 Description = entity.Description ?? "",
-                AfterNote = entity.AfterNote ?? ""
+                AfterNote = entity.AfterNote ?? "",
+                HasReservation = entity.Customer?.GetDealtReservationCount() > 0
             });
         }
 
@@ -151,6 +159,7 @@ namespace NS_Education.Controller.UsingHelper
             return DC.CustomerVisit
                 .Include(cv => cv.Customer)
                 .Include(cv => cv.B_StaticCode)
+                .Include(cv => cv.B_StaticCode1)
                 .Include(cv => cv.BusinessUser)
                 .Where(cv => cv.CVID == id);
         }
@@ -158,6 +167,8 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<CustomerVisit_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(
             CustomerVisit entity)
         {
+            bool hasReservation = entity.Customer?.GetDealtReservationCount() > 0;
+
             return new CustomerVisit_GetInfoById_Output_APIItem
             {
                 CVID = entity.CVID,
@@ -166,8 +177,8 @@ namespace NS_Education.Controller.UsingHelper
                 C_TitleE = entity.Customer?.TitleE ?? "",
                 C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
                 BSCID = entity.BSCID,
-                BSC_Title = entity.B_StaticCode?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID),
+                BSC_Title = entity.B_StaticCode1?.Title ?? "",
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType, entity.BSCID),
                 BUID = entity.BUID,
                 BU_Name = entity.BusinessUser?.Name ?? "",
                 BU_List = await GetSelectedBusinessUserList(entity.BUID),
@@ -175,7 +186,14 @@ namespace NS_Education.Controller.UsingHelper
                 Title = entity.Title ?? "",
                 VisitDate = entity.VisitDate.ToFormattedStringDate(),
                 Description = entity.Description ?? "",
-                AfterNote = entity.AfterNote ?? ""
+                AfterNote = entity.AfterNote ?? "",
+                HasReservation = hasReservation,
+                BSCID15 = hasReservation ? null : entity.BSCID15,
+                BSCID15_Title = (hasReservation ? null : entity.B_StaticCode?.Title) ?? "",
+                BSCID15_List = hasReservation
+                    ? new List<BaseResponseRowForSelectable>()
+                    : await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason,
+                        entity.BSCID15 ?? 0)
             };
         }
 
@@ -233,6 +251,12 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.CVID == 0, () => AddError(WrongFormat("拜訪紀錄 ID")))
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     () => AddError(NotFound("客戶 ID")))
+                .ForceSkipIf(i => i.BSCID15 == null)
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID15 ?? 0,
+                        StaticCodeType.NoDealReason),
+                    () => AddError(NotFound("未成交原因 ID")))
+                .StopForceSkipping()
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod),
                     () => AddError(NotFound("客戶拜訪方式 ID")))
@@ -259,7 +283,8 @@ namespace NS_Education.Controller.UsingHelper
                 VisitDate = visitDate,
                 Title = input.Title,
                 Description = input.Description,
-                AfterNote = input.AfterNote
+                AfterNote = input.AfterNote,
+                BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default
             });
         }
 
@@ -273,6 +298,12 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.CVID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     () => AddError(NotFound("客戶 ID")))
+                .ForceSkipIf(i => i.BSCID15 is null)
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID15 ?? 0,
+                        StaticCodeType.NoDealReason),
+                    () => AddError(NotFound("未成交原因 ID")))
+                .StopForceSkipping()
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod),
                     () => AddError(NotFound("客戶拜訪方式 ID")))
@@ -305,6 +336,8 @@ namespace NS_Education.Controller.UsingHelper
             data.Title = input.Title;
             data.Description = input.Description;
             data.AfterNote = input.AfterNote;
+
+            data.BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default;
         }
 
         #endregion

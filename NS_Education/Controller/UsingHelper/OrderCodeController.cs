@@ -52,7 +52,8 @@ namespace NS_Education.Controller.UsingHelper
             OrderCodeTypes = DC.B_OrderCode
                 .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
                 .Where(sc => sc.CodeType == 0)
-                .OrderBy(sc => sc.Code)
+                .OrderBy(sc => sc.Code.Length)
+                .ThenBy(sc => sc.Code)
                 .ThenBy(sc => sc.SortNo)
                 // EF 不支援 GroupBy，所以回到本地在記憶體做
                 .AsEnumerable()
@@ -129,6 +130,7 @@ namespace NS_Education.Controller.UsingHelper
 
             return query.OrderBy(oc => oc.CodeType)
                 .ThenBy(oc => oc.SortNo)
+                .ThenBy(oc => oc.Code.Length)
                 .ThenBy(oc => oc.Code)
                 .ThenBy(oc => oc.BOCID);
         }

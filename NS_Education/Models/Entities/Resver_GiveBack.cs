@@ -18,13 +18,14 @@ namespace NS_Education.Models.Entities
         public int RHID { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public int PointDecimal { get; set; }
         public bool DeleteFlag { get; set; }
         public System.DateTime CreDate { get; set; }
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public int BSCID16 { get; set; }
     
+        public virtual B_StaticCode B_StaticCode { get; set; }
         public virtual Resver_Head Resver_Head { get; set; }
     }
 }

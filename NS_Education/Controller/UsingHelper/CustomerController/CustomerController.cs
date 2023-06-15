@@ -174,8 +174,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft) ==
                     (input.ResverType == 1));
 
-            return query.OrderBy(c => c.Code)
-                .ThenBy(c => c.CID);
+            return query.OrderBy(c => c.CID);
         }
 
         public async Task<Customer_GetList_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity,
@@ -200,8 +199,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(rh =>
-                    !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
+                ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
@@ -276,8 +274,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 BillFlag = entity.BillFlag,
                 InFlag = entity.InFlag,
                 PotentialFlag = entity.PotentialFlag,
-                ResverCt = entity.Resver_Head.Count(rh =>
-                    !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
+                ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
                 GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
@@ -656,7 +653,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
         public IQueryable<Customer> SubmitEditQuery(Customer_Submit_Input_APIItem input)
         {
-            return DC.Customer.Where(c => c.CID == input.CID);
+            return DC.Customer
+                .Include(c => c.M_Customer_BusinessUser)
+                .Where(c => c.CID == input.CID);
         }
 
         public void SubmitEditUpdateDataFields(Customer data, Customer_Submit_Input_APIItem input)
@@ -701,7 +700,10 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 alreadyExisting.MappingType = GetBusinessUserMappingType(allInputBuIds[alreadyExisting.BUID]);
             }
 
-            int originalMaxSortNo = data.M_Customer_BusinessUser.Max(cbu => cbu.SortNo);
+            int originalMaxSortNo = data.M_Customer_BusinessUser
+                .Select(cbu => cbu.SortNo)
+                .OrderBy(sortNo => sortNo)
+                .FirstOrDefault();
 
             // 增加新資料
             data.M_Customer_BusinessUser = data.M_Customer_BusinessUser.Concat(inputBuIdsToCreate.Select(

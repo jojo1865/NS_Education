@@ -6,7 +6,6 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitDepartment;
@@ -55,8 +54,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddFlag)]
         public async Task<string> SignUp(UserData_Submit_Input_APIItem input)
         {
-            InitializeResponse();
-
             int passwordMinLength = GetPasswordMinLength();
 
             bool isValid = await input.StartValidate()
@@ -86,7 +83,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 return GetResponseJson();
 
             // create UserData object, validate the columns along
-            // TODO: 引用靜態參數檔，完整驗證使用者欄位
             var newUser = new UserData
             {
                 UserName = input.Username,
@@ -190,8 +186,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         [HttpPost]
         public async Task<string> Login(UserData_Login_Input_APIItem input)
         {
-            InitializeResponse();
-
             // 驗證
             var queried = !input.LoginAccount.IsNullOrWhiteSpace()
                 ? await DC.UserData
@@ -228,8 +222,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             string jwt = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims);
 
-            LoginWriteCookie(jwt);
-
             var output = new UserData_Login_Output_APIItem
             {
                 UID = queried.UID,
@@ -247,36 +239,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     (_, e) => AddError(UpdateDbFailed(e)));
 
             return GetResponseJson(output);
-        }
-
-        private void LoginWriteCookie(string jwt)
-        {
-            bool isHttps = Request.Url?.Scheme == "https";
-            HttpCookie cookie;
-            if (isHttps)
-            {
-                cookie = new HttpCookie(JwtConstants.CookieName)
-                {
-                    Secure = true,
-                    HttpOnly = true,
-                    Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
-                    Value = jwt,
-                    SameSite = SameSiteMode.None
-                };
-            }
-            else
-            {
-                cookie = new HttpCookie(JwtConstants.CookieName)
-                {
-                    Secure = false,
-                    HttpOnly = true,
-                    Expires = DateTime.UtcNow.AddMinutes(JwtConstants.ExpireMinutes),
-                    Value = jwt,
-                    SameSite = SameSiteMode.Lax
-                };
-            }
-
-            Response.Cookies.Add(cookie);
         }
 
         /// <summary>
@@ -928,7 +890,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             /* TODO:
              目前批量修改僅 UserData 發現兩個需求，所以先以特例方式寫，可以發現結構長得非常類似。
-             如果未來發現更多類似需求，或是這兩個頻繁需要同步修改時，須考慮 Helper化。
+             如果未來發現更多類似需求，或是這兩個頻繁需要同步修改時，須考慮 Helper 化。
             */
 
             // 0. enumerate
@@ -1060,14 +1022,6 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             catch (Exception e)
             {
                 AddError(UpdateDbFailed(e));
-            }
-
-            // 4. 如果都順利，清空使用者的 cookie
-            if (!HasError())
-            {
-                HttpCookie cookie = Response.Cookies[JwtConstants.CookieName];
-                if (cookie != null)
-                    cookie.Expires = DateTime.Now.AddDays(-1);
             }
 
             return GetResponseJson();

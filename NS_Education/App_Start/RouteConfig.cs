@@ -22,6 +22,13 @@ namespace NS_Education
             );
 
             routes.MapRoute(
+                name: "CustomerQuestionGetUniqueAreas",
+                url: "CustomerQuestion/GetUniqueAreas/{id}",
+                defaults: new
+                    { controller = "CustomerQuestionUniqueAreas", action = "GetList", id = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
                 name: "CustomerGetRankings",
                 url: "Customer/GetRankings/{id}",
                 defaults: new { controller = "CustomerRanking", action = "GetList", id = UrlParameter.Optional }

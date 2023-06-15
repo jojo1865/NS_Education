@@ -75,7 +75,8 @@ namespace NS_Education.Controller.UsingHelper
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(opi => opi.Title.Contains(input.Keyword) || opi.Code.Contains(input.Keyword));
 
-            return query.OrderBy(opi => opi.Code)
+            return query.OrderBy(opi => opi.Code.Length)
+                .ThenBy(opi => opi.Code)
                 .ThenBy(opi => opi.DOPIID);
         }
 
@@ -126,6 +127,7 @@ namespace NS_Education.Controller.UsingHelper
                 OutPrice = entity.OutPrice,
                 PaidType = entity.PaidType,
                 BSCID = entity.BSCID,
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.Unit, entity.BSCID),
                 BOCID = entity.BOCID
             });
         }

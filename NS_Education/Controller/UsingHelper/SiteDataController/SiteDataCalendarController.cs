@@ -56,16 +56,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.TargetYear.IsInBetween(1911, 9999), () => AddError(WrongFormat("目標年分")))
                 .Validate(i => i.TargetMonth.IsInBetween(1, 12), () => AddError(WrongFormat("目標月份")))
                 .Validate(i => i.BSID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之場地 ID")))
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID")))
                 .Validate(i => i.RHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之預約單 ID")))
                 .SkipIfAlreadyInvalid()
                 .ForceSkipIf(i => i.BSID <= 0)
                 .ValidateAsync(async i => await DC.B_SiteData.ValidateIdExists(i.BSID, nameof(B_SiteData.BSID)),
                     () => AddError(NotFound("欲篩選之場地 ID")))
-                .StopForceSkipping()
-                .ForceSkipIf(i => i.CID <= 0)
-                .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
-                    () => AddError(NotFound("欲篩選之客戶 ID")))
                 .StopForceSkipping()
                 .ForceSkipIf(i => i.RHID <= 0)
                 .ValidateAsync(async i => await DC.Resver_Head.ValidateIdExists(i.RHID, nameof(Resver_Head.RHID)),
@@ -80,6 +75,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         {
             var query = DC.Resver_Site
                 .Include(rs => rs.Resver_Head)
+                .Include(rs => rs.Resver_Head.Customer)
                 .Include(rs => rs.Resver_Head.M_Resver_TimeSpan)
                 .Include(rs => rs.Resver_Head.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
                 .Include(rs => rs.B_SiteData)
@@ -104,9 +100,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                                           || rs.B_SiteData.M_SiteGroup.Any(sg => sg.B_SiteData1.BSID == input.BSID)
                                           || rs.B_SiteData.M_SiteGroup1.Any(sg => sg.B_SiteData.BSID == input.BSID));
 
-            // 客戶 ID
-            if (input.CID.IsAboveZero())
-                query = query.Where(rs => rs.Resver_Head.CID == input.CID);
+            // 客戶名稱
+            if (input.CustomerTitleC.HasContent())
+                query = query.Where(rs =>
+                    rs.Resver_Head.CustomerTitle.Contains(input.CustomerTitleC) ||
+                    rs.Resver_Head.Customer.TitleC.Contains(input.CustomerTitleC));
 
             return query.OrderBy(rs => rs.TargetDate)
                 .ThenBy(rs => rs.SortNo)

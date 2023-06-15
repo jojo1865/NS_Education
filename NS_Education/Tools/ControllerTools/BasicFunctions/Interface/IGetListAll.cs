@@ -14,7 +14,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     public interface IGetListAll<TEntity, in TGetListAllRequest, TGetListAllResponseRow>
         where TEntity : class
         where TGetListAllRequest : BaseRequestForList
-        where TGetListAllResponseRow : IGetResponseRow
     {
         /// <summary>
         /// 取得無分頁的整批資料列表。
@@ -26,7 +25,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// 意外錯誤時：拋錯。
         /// </returns>
         Task<string> GetList(TGetListAllRequest input);
-        
+
         /// <summary>
         /// 驗證取得列表的輸入資料。<br/>
         /// 當此方法回傳 false 時，回到主方法後就會提早回傳。

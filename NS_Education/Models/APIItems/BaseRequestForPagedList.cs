@@ -1,3 +1,4 @@
+using System;
 using NS_Education.Variables;
 
 namespace NS_Education.Models.APIItems
@@ -44,5 +45,34 @@ namespace NS_Education.Models.APIItems
         /// <returns>應取得多少筆資料</returns>
         public int GetTakeRowCount()
             => IsPagingEnabled ? CutPageOrDefault : 100;
+
+        public (int skip, int take) CalculateSkipAndTake(int totalRows)
+        {
+            // 正序
+            // 1 2 3 4 5 6 7 8 9 0
+            // +---+ +---+ +---+ +
+
+            // 反序
+            // 1 2 3 4 5 6 7 8 9 0
+            // + +---+ +---+ +---+
+
+            int left, right;
+
+            if (!ReverseOrder)
+            {
+                // 正序時，照內建算式取值
+                left = GetStartIndex();
+                right = left + GetTakeRowCount() - 1;
+            }
+            else
+            {
+                // 倒序時，從後方算回來，取得 right
+                // 統一轉成 0-index 計算
+                right = totalRows - 1 - GetStartIndex();
+                left = Math.Max(0, right - (GetTakeRowCount() - 1));
+            }
+
+            return (left, right - left + 1);
+        }
     }
 }

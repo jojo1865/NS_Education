@@ -25,6 +25,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         where TController : PublicClass, IGetListAll<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForList
+        where TGetListRow : IGetResponseRow
     {
         private readonly TController _controller;
 
@@ -66,12 +67,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             foreach (var entity in queryResult)
             {
                 var row = Task.Run(() => _controller.GetListAllEntityToRow(entity)).Result;
-                if (row is IGetResponseRow getResponseRow)
-                {
-                    await getResponseRow.SetInfoFromEntity(entity, _controller);
-                    getResponseRow.SetIndex(index++);
-                }
-
+                await row.SetInfoFromEntity(entity, _controller);
+                row.SetIndex(index++);
                 rows.Add(row);
             }
 

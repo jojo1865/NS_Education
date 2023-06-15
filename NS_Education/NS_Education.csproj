@@ -254,7 +254,6 @@
       <Compile Include="Controller\UsingHelper\ContactTypeController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerController\CustomerController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerController\CustomerRankingController.cs"/>
-      <Compile Include="Controller\UsingHelper\CustomerController\CustomerUniqueNamesController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerGiftController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerQuestionController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerVisitController.cs"/>
@@ -340,7 +339,6 @@
       <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_OrderBy.cs"/>
       <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_Output_Contact_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_Output_Row_APIItem.cs"/>
-      <Compile Include="Models\APIItems\Controller\Customer\GetUniqueNames\Customer_GetUniqueNames_Input_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\Customer\Submit\Customer_Submit_BUID_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\Customer\Submit\Customer_Submit_Input_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\Department\D_Department_APIItem.cs"/>

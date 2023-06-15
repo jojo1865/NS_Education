@@ -18,7 +18,7 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
-namespace NS_Education.Controller.UsingHelper
+namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
 {
     public class CustomerQuestionController : PublicClass,
         IGetListPaged<CustomerQuestion, CustomerQuestion_GetList_Input_APIItem,

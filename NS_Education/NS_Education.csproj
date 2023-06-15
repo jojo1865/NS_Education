@@ -256,7 +256,8 @@
       <Compile Include="Controller\UsingHelper\CustomerController\CustomerRankingController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerController\CustomerUniqueNamesController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerGiftController.cs"/>
-      <Compile Include="Controller\UsingHelper\CustomerQuestionController.cs"/>
+      <Compile Include="Controller\UsingHelper\CustomerQuestionController\CustomerQuestionController.cs"/>
+      <Compile Include="Controller\UsingHelper\CustomerQuestionController\CustomerQuestionUniqueAreasController.cs"/>
       <Compile Include="Controller\UsingHelper\CustomerVisitController.cs"/>
       <Compile Include="Controller\UsingHelper\DepartmentController.cs"/>
       <Compile Include="Controller\UsingHelper\DeviceController.cs"/>
@@ -326,6 +327,7 @@
       <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetInfoById\CustomerQuestion_GetInfoById_Output_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetList\CustomerQuestion_GetList_Input_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetList\CustomerQuestion_GetList_Output_Row_APIItem.cs"/>
+      <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetUniqueAreas\CustomerQuestion_GetUniqueAreas_Input_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerQuestion\Submit\CustomerQuestion_Submit_Input_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerVisit\GetInfoById\CustomerVisit_GetInfoById_Output_APIItem.cs"/>
       <Compile Include="Models\APIItems\Controller\CustomerVisit\GetList\CustomerVisit_GetList_Input_APIItem.cs"/>

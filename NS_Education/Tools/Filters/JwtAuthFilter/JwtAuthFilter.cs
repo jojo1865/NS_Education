@@ -157,6 +157,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 // 作為預設值，取得帳號建立日期
                 DateTime lastChangeTime = nsDbContext.UserData
                     .Where(ud => ud.ActiveFlag && !ud.DeleteFlag)
+                    .Where(ud => ud.UID == uid)
                     .Select(ud => ud.CreDate)
                     .FirstOrDefault();
 

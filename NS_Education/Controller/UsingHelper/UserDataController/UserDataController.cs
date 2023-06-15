@@ -727,7 +727,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     .FirstOrDefault(mgu => mgu.GroupData != null
                                            && !mgu.GroupData.DeleteFlag
                                            && mgu.GroupData.ActiveFlag)
-                    ?.GroupData.Title ?? ""
+                    ?.GroupData.Title ?? IoConstants.DefaultRole
             });
         }
 

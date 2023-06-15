@@ -15,7 +15,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 namespace NS_Education.Controller.UsingHelper.CustomerController
 {
     public class CustomerUniqueNamesController : PublicClass,
-        IGetListAll<Customer, Customer_GetUniqueNames_Input_APIItem, string>
+        IGetListAll<Customer, Customer_GetUniqueNames_Input_APIItem, Customer_GetUniqueNames_Output_Row_APIItem>
     {
         #region Initialization
 
@@ -25,7 +25,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         {
             _getListAllHelper =
                 new GetListAllHelper<CustomerUniqueNamesController, Customer, Customer_GetUniqueNames_Input_APIItem,
-                    string>(this);
+                    Customer_GetUniqueNames_Output_Row_APIItem>(this);
         }
 
         #endregion
@@ -80,9 +80,13 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         }
 
         /// <inheritdoc />
-        public async Task<string> GetListAllEntityToRow(Customer entity)
+        public async Task<Customer_GetUniqueNames_Output_Row_APIItem> GetListAllEntityToRow(Customer entity)
         {
-            return await Task.FromResult(entity.TitleC);
+            return await Task.FromResult(new Customer_GetUniqueNames_Output_Row_APIItem
+            {
+                CID = entity.CID,
+                TitleC = entity.TitleC ?? ""
+            });
         }
 
         #endregion

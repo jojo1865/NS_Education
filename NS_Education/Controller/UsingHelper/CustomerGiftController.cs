@@ -221,7 +221,7 @@ namespace NS_Education.Controller.UsingHelper
             {
                 CID = input.CID,
                 Year = input.Year,
-                SendDate = sendDate,
+                SendDate = sendDate.Date,
                 BSCID = input.BSCID,
                 Title = input.Title,
                 Ct = input.Ct,
@@ -260,7 +260,7 @@ namespace NS_Education.Controller.UsingHelper
 
             data.CID = input.CID;
             data.Year = input.Year;
-            data.SendDate = sendDate;
+            data.SendDate = sendDate.Date;
             data.BSCID = input.BSCID;
             data.Title = input.Title;
             data.Ct = input.Ct;

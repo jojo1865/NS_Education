@@ -166,7 +166,12 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 MDID = entity.MDID,
                 Title = entity.Title ?? "",
                 URL = entity.URL ?? "",
-                SortNo = entity.SortNo
+                SortNo = entity.SortNo,
+                AlwaysAllowShow = entity.AlwaysAllowShow,
+                AlwaysAllowAdd = entity.AlwaysAllowAdd,
+                AlwaysAllowEdit = entity.AlwaysAllowEdit,
+                AlwaysAllowDelete = entity.AlwaysAllowDelete,
+                AlwaysAllowPrint = entity.AlwaysAllowPring
             });
         }
 

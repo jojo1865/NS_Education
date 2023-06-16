@@ -9,8 +9,8 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById
         public string C_TitleC { get; set; }
         public string C_TitleE { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> C_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CustomerVisit_CustomerSelectable> C_List { get; set; } =
+            new List<CustomerVisit_CustomerSelectable>();
 
         public int BSCID { get; set; }
         public string BSC_Title { get; set; }

@@ -111,7 +111,7 @@ namespace NS_Education.Controller.UsingHelper
                 C_TitleC = entity.Customer?.TitleC ?? "",
                 C_TitleE = entity.Customer?.TitleE ?? "",
                 Year = entity.Year,
-                SendDate = entity.SendDate.ToFormattedStringDateTime(),
+                SendDate = entity.SendDate.ToFormattedStringDate(),
                 BSCID = entity.BSCID,
                 BSC_Code = entity.B_StaticCode?.Code ?? "",
                 BSC_Title = entity.B_StaticCode?.Title ?? "",

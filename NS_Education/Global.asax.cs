@@ -29,6 +29,8 @@ namespace NS_Education
 
         protected void Application_BeginRequest()
         {
+            RequestHelper.AddCorsHeaders();
+
             // 檢查是否存在此端點
             bool hasEndpoint = RequestHelper.HasEndpoint();
             bool isOptions = Request.HttpMethod == "OPTIONS";
@@ -45,9 +47,6 @@ namespace NS_Education
                 Response.Close();
                 return;
             }
-
-            // 處理 CORS Request
-            RequestHelper.AddCorsHeaders();
 
             if (isOptions)
             {

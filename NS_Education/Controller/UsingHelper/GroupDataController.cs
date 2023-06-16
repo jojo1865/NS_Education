@@ -321,7 +321,7 @@ namespace NS_Education.Controller.UsingHelper
             // 輸入的 MDID
             IEnumerable<int> inputIds = input.GroupItems.Select(item => item.MDID).ToHashSet();
 
-            // 依據輸入的 MDID 建立 MDID to MenuData 字典
+            // 依據輸入的 MDID 建立 MDID to M_GroupMenu 字典
             Dictionary<int, M_Group_Menu> menuIdToGroupMenuDict = await DC.M_Group_Menu
                 .Where(mgm => mgm.GID == input.GID)
                 .Where(mgm => inputIds.Contains(mgm.MDID))
@@ -395,15 +395,15 @@ namespace NS_Education.Controller.UsingHelper
             bool isAllFlagsCorrect = isAllMdIdValid &&
                                      input.GroupItems.StartValidateElements()
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowShow || item.ShowFlag,
-                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許瀏覽", true)))
+                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許瀏覽", "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowAdd || item.AddFlag,
-                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許新增", true)))
+                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許新增", "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowEdit || item.EditFlag,
-                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許更新", true)))
+                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許更新", "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowDelete || item.DeleteFlag,
-                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許刪除", true)))
+                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許刪除", "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowPring || item.PrintFlag,
-                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許匯出", true)))
+                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許匯出", "允許")))
                                          .IsValid();
 
             return isInputValid && isAllMdIdValid && isAllFlagsCorrect;

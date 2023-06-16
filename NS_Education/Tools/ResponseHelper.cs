@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
@@ -17,8 +18,7 @@ namespace NS_Education.Tools
         /// {<br/>
         ///   Status: int, <br/>
         ///   StatusMessage: string, <br/>
-        ///   ApiResponse: object, <br/>
-        ///   Privileges: array<br/>
+        ///   ApiResponse: object
         /// }
         /// </summary>
         /// <remarks>關於格式的說明，詳見 API 文件</remarks>
@@ -82,6 +82,31 @@ namespace NS_Education.Tools
             filterContext.HttpContext.Response.StatusDescription = "OK";
 
             return newActionResult;
+        }
+
+        /// <summary>
+        /// 把 API Response 依以下格式回傳：<br/>
+        /// {<br/>
+        ///   Status: int, <br/>
+        ///   StatusMessage: string, <br/>
+        ///   ApiResponse: object
+        /// }
+        /// </summary>
+        /// <remarks>關於格式的說明，詳見 API 文件</remarks>
+        internal static void SetErrorResponse(HttpStatusCode statusCode, string message, HttpResponse response)
+        {
+            string content = JObject.FromObject(new FinalizedResponse
+            {
+                Status = (int)statusCode,
+                StatusMessage = message,
+                ApiResponse = null
+            }).ToString();
+
+            response.ClearContent();
+            response.Write(content);
+
+            response.StatusCode = 200;
+            response.StatusDescription = "OK";
         }
 
         private static string GetExceptionActualMessage(ExceptionContext context)

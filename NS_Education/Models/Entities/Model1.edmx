@@ -571,6 +571,11 @@
           <Property Name="CreUID" Type="int" Nullable="false" />
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
+          <Property Name="AlwaysAllowShow" Type="bit" Nullable="false" />
+          <Property Name="AlwaysAllowAdd" Type="bit" Nullable="false" />
+          <Property Name="AlwaysAllowEdit" Type="bit" Nullable="false" />
+          <Property Name="AlwaysAllowDelete" Type="bit" Nullable="false" />
+          <Property Name="AlwaysAllowPring" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="Resver_Bill">
           <Key>
@@ -2798,6 +2803,11 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <Property Name="AlwaysAllowShow" Type="Boolean" Nullable="false" DefaultValue="false" />
+          <Property Name="AlwaysAllowAdd" Type="Boolean" Nullable="false" DefaultValue="false" />
+          <Property Name="AlwaysAllowEdit" Type="Boolean" Nullable="false" DefaultValue="false" />
+          <Property Name="AlwaysAllowDelete" Type="Boolean" Nullable="false" DefaultValue="false" />
+          <Property Name="AlwaysAllowPring" Type="Boolean" Nullable="false" DefaultValue="false" />
           <NavigationProperty Name="M_Group_Menu" Relationship="Self.FK_M_Group_Menu_MenuData" FromRole="MenuData" ToRole="M_Group_Menu" />
           <NavigationProperty Name="MenuAPI" Relationship="Self.FK_MenuAPI_MenuData" FromRole="MenuData" ToRole="MenuAPI" />
         </EntityType>
@@ -4988,6 +4998,11 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+                <ScalarProperty Name="AlwaysAllowShow" ColumnName="AlwaysAllowShow" />
+                <ScalarProperty Name="AlwaysAllowAdd" ColumnName="AlwaysAllowAdd" />
+                <ScalarProperty Name="AlwaysAllowEdit" ColumnName="AlwaysAllowEdit" />
+                <ScalarProperty Name="AlwaysAllowDelete" ColumnName="AlwaysAllowDelete" />
+                <ScalarProperty Name="AlwaysAllowPring" ColumnName="AlwaysAllowPring" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

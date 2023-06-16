@@ -19,7 +19,6 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
-using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -116,24 +115,28 @@ namespace NS_Education.Controller.UsingHelper
                     .Select(md => new
                     {
                         MenuData = md,
-                        ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID),
-                        IsSpecialMenu = DbConstants.AlwaysShowAddEditMenuUrls.Contains(md.URL)
+                        ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID)
                     })
                     .Select(result => new GroupData_MenuItem_APIItem
                     {
                         MDID = result.MenuData.MDID,
                         Title = result.MenuData.Title ?? "",
-                        ActiveFlag = result.IsSpecialMenu || result.ThisGroupMenu != null,
-                        AddFlag = result.IsSpecialMenu || (result.ThisGroupMenu?.AddFlag ?? false),
-                        ShowFlag = result.IsSpecialMenu || (result.ThisGroupMenu?.ShowFlag ?? false),
-                        EditFlag = result.IsSpecialMenu || (result.ThisGroupMenu?.EditFlag ?? false),
-                        DeleteFlag = result.ThisGroupMenu?.DeleteFlag ?? false,
-                        PrintFlag = result.ThisGroupMenu?.PringFlag ?? false,
-                        AddFlagReadOnly = result.IsSpecialMenu,
-                        ShowFlagReadOnly = result.IsSpecialMenu,
-                        EditFlagReadOnly = result.IsSpecialMenu,
-                        DeleteFlagReadOnly = false,
-                        PrintFlagReadOnly = false
+                        ActiveFlag = result.ThisGroupMenu != null
+                                     && (result.MenuData.AlwaysAllowShow
+                                         || result.MenuData.AlwaysAllowAdd
+                                         || result.MenuData.AlwaysAllowEdit
+                                         || result.MenuData.AlwaysAllowDelete
+                                         || result.MenuData.AlwaysAllowPring),
+                        AddFlag = result.MenuData.AlwaysAllowAdd || (result.ThisGroupMenu?.AddFlag ?? false),
+                        ShowFlag = result.MenuData.AlwaysAllowShow || (result.ThisGroupMenu?.ShowFlag ?? false),
+                        EditFlag = result.MenuData.AlwaysAllowEdit || (result.ThisGroupMenu?.EditFlag ?? false),
+                        DeleteFlag = result.MenuData.AlwaysAllowDelete || (result.ThisGroupMenu?.DeleteFlag ?? false),
+                        PrintFlag = result.MenuData.AlwaysAllowPring || (result.ThisGroupMenu?.PringFlag ?? false),
+                        AddFlagReadOnly = result.MenuData.AlwaysAllowAdd,
+                        ShowFlagReadOnly = result.MenuData.AlwaysAllowShow,
+                        EditFlagReadOnly = result.MenuData.AlwaysAllowEdit,
+                        DeleteFlagReadOnly = result.MenuData.AlwaysAllowDelete,
+                        PrintFlagReadOnly = result.MenuData.AlwaysAllowPring
                     })
                     .ToList()
             });
@@ -288,7 +291,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<string> SubmitMenuData(GroupData_SubmitMenuData_Input_APIItem input)
         {
             // 1. 驗證輸入
-            if (!SubmitMenuDataValidateInput(input))
+            if (!await SubmitMenuDataValidateInput(input))
                 return GetResponseJson();
 
             // 2. 更新 M_Group_Menu
@@ -330,8 +333,6 @@ namespace NS_Education.Controller.UsingHelper
                 MenuData menuData = await DC.MenuData
                     .FirstOrDefaultAsync(md => md.MDID == item.MDID && md.ActiveFlag && !md.DeleteFlag);
 
-                bool isAlwaysShow = menuData != null && DbConstants.AlwaysShowAddEditMenuUrls.Contains(menuData.URL);
-
                 if (menuIdToGroupMenuDict.TryGetValue(item.MDID, out M_Group_Menu mgm))
                 {
                     // 有原資料，則輸入的 ActiveFlag 為
@@ -343,11 +344,11 @@ namespace NS_Education.Controller.UsingHelper
                         continue;
                     }
 
-                    mgm.ShowFlag = isAlwaysShow || item.ShowFlag;
-                    mgm.AddFlag = item.AddFlag;
-                    mgm.EditFlag = item.EditFlag;
-                    mgm.DeleteFlag = item.DeleteFlag;
-                    mgm.PringFlag = item.PrintFlag;
+                    mgm.ShowFlag = (menuData?.AlwaysAllowShow ?? false) || item.ShowFlag;
+                    mgm.AddFlag = (menuData?.AlwaysAllowAdd ?? false) || item.AddFlag;
+                    mgm.EditFlag = (menuData?.AlwaysAllowEdit ?? false) || item.EditFlag;
+                    mgm.DeleteFlag = (menuData?.AlwaysAllowDelete ?? false) || item.DeleteFlag;
+                    mgm.PringFlag = (menuData?.AlwaysAllowPring ?? false) || item.PrintFlag;
                 }
                 else if (item.ActiveFlag)
                 {
@@ -356,11 +357,11 @@ namespace NS_Education.Controller.UsingHelper
                     {
                         GID = input.GID,
                         MDID = item.MDID,
-                        ShowFlag = isAlwaysShow || item.ShowFlag,
-                        AddFlag = item.AddFlag,
-                        EditFlag = item.EditFlag,
-                        DeleteFlag = item.DeleteFlag,
-                        PringFlag = item.PrintFlag
+                        ShowFlag = (menuData?.AlwaysAllowShow ?? false) || item.ShowFlag,
+                        AddFlag = (menuData?.AlwaysAllowAdd ?? false) || item.AddFlag,
+                        EditFlag = (menuData?.AlwaysAllowEdit ?? false) || item.EditFlag,
+                        DeleteFlag = (menuData?.AlwaysAllowDelete ?? false) || item.DeleteFlag,
+                        PringFlag = (menuData?.AlwaysAllowPring ?? false) || item.PrintFlag
                     };
 
                     await DC.M_Group_Menu.AddAsync(newEntity);
@@ -368,7 +369,7 @@ namespace NS_Education.Controller.UsingHelper
             }
         }
 
-        private bool SubmitMenuDataValidateInput(GroupData_SubmitMenuData_Input_APIItem input)
+        private async Task<bool> SubmitMenuDataValidateInput(GroupData_SubmitMenuData_Input_APIItem input)
         {
             bool isInputValid = input.StartValidate()
                 .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
@@ -378,20 +379,34 @@ namespace NS_Education.Controller.UsingHelper
                 .IsValid();
 
             // 檢查是否所有 MDID 都存在
-            bool isValid = isInputValid &&
-                           input.GroupItems.Aggregate(true, (result, item) => result &
-                                                                              item.StartValidate()
-                                                                                  .Validate(_ =>
-                                                                                          DC.MenuData.Any(md =>
-                                                                                              md.ActiveFlag &&
-                                                                                              !md.DeleteFlag &&
-                                                                                              md.MDID == item.MDID),
-                                                                                      () => AddError(
-                                                                                          NotFound(
-                                                                                              $"選單 ID {item.MDID}")))
-                                                                                  .IsValid());
+            var inputMdIds = input.GroupItems.Select(gi => gi.MDID);
 
-            return isValid;
+            Dictionary<int, MenuData> allMenuData = await DC.MenuData.Where(md => md.ActiveFlag && !md.DeleteFlag)
+                .Where(md => inputMdIds.Contains(md.MDID))
+                .ToDictionaryAsync(md => md.MDID, md => md);
+
+            bool isAllMdIdValid = isInputValid &&
+                                  input.GroupItems.StartValidateElements()
+                                      .Validate(item => allMenuData.Any(kvp => kvp.Key == item.MDID),
+                                          item => AddError(NotFound($"選單 ID {item.MDID}")))
+                                      .IsValid();
+
+            // 檢查所有 MD 的 flag 沒有與 Always flags 衝突
+            bool isAllFlagsCorrect = isAllMdIdValid &&
+                                     input.GroupItems.StartValidateElements()
+                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowShow || item.ShowFlag,
+                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許瀏覽", true)))
+                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowAdd || item.AddFlag,
+                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許新增", true)))
+                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowEdit || item.EditFlag,
+                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許更新", true)))
+                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowDelete || item.DeleteFlag,
+                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許刪除", true)))
+                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowPring || item.PrintFlag,
+                                             item => AddError(NotEqual($"選單（ID：{item.MDID}）是否允許匯出", true)))
+                                         .IsValid();
+
+            return isInputValid && isAllMdIdValid && isAllFlagsCorrect;
         }
 
         #endregion

@@ -18,7 +18,6 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
-using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper.MenuDataController
 {
@@ -217,7 +216,9 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 AddError(DataNotFound);
             }
 
-            if (menuData.Any(md => DbConstants.AlwaysShowAddEditMenuUrls.Contains(md.URL)) && activeFlag is false)
+            if (menuData.Any(md =>
+                    md.AlwaysAllowShow || md.AlwaysAllowAdd || md.AlwaysAllowEdit || md.AlwaysAllowDelete ||
+                    md.AlwaysAllowPring) && activeFlag is false)
             {
                 AddError($"此選單（ID {id}）禁止停用！");
                 return;
@@ -270,7 +271,9 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // 驗證輸入內容
             // 先取得必須總是顯示的特例選單，如果有任何此類 Id，不允許修改。
             int[] alwaysShowIds = await DC.MenuData
-                .Where(md => DbConstants.AlwaysShowAddEditMenuUrls.Contains(md.URL))
+                .Where(md =>
+                    md.AlwaysAllowShow || md.AlwaysAllowAdd || md.AlwaysAllowEdit || md.AlwaysAllowDelete ||
+                    md.AlwaysAllowPring)
                 .Select(md => md.MDID)
                 .ToArrayAsync();
 

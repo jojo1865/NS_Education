@@ -47,7 +47,7 @@ namespace NS_Education
                 }
 
                 Response.Flush();
-                Response.Close();
+                Response.Close(); // 避免 IIS Server 繼續寫入 Response
                 return;
             }
 

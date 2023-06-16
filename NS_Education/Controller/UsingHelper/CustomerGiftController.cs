@@ -204,7 +204,7 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     () => AddError(NotFound("客戶 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
-                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
+                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與日期")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     () => AddError(NotFound("禮品 ID")))
                 .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
@@ -240,7 +240,7 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     () => AddError(NotFound("客戶 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
-                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與時間")))
+                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與日期")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     () => AddError(NotFound("禮品 ID")))
                 .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))

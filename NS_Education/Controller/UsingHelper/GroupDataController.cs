@@ -395,15 +395,20 @@ namespace NS_Education.Controller.UsingHelper
             bool isAllFlagsCorrect = isAllMdIdValid &&
                                      input.GroupItems.StartValidateElements()
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowShow || item.ShowFlag,
-                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許瀏覽", "允許")))
+                                             item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許瀏覽",
+                                                 "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowAdd || item.AddFlag,
-                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許新增", "允許")))
+                                             item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許新增",
+                                                 "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowEdit || item.EditFlag,
-                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許更新", "允許")))
+                                             item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許更新",
+                                                 "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowDelete || item.DeleteFlag,
-                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許刪除", "允許")))
+                                             item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許刪除",
+                                                 "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowPring || item.PrintFlag,
-                                             item => AddError(NotEqual($"{allMenuData[item.MDID].Title}是否允許匯出", "允許")))
+                                             item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許匯出",
+                                                 "允許")))
                                          .IsValid();
 
             return isInputValid && isAllMdIdValid && isAllFlagsCorrect;

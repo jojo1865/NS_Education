@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
 using NS_Education.Models;
+using NS_Education.Models.Errors;
 using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Tools
@@ -33,8 +34,11 @@ namespace NS_Education.Tools
             ActionResult originalActionResult)
         {
             // 如果這是 ExceptionContext 來的，把錯誤訊息設到 Status 中
+            Exception exception = null;
+
             if (filterContext is ExceptionContext context)
             {
+                exception = context.Exception;
                 string forceMessage = null;
                 if (context.Exception is HttpException httpException)
                 {
@@ -79,7 +83,13 @@ namespace NS_Education.Tools
                                       : new BaseApiResponse
                                       {
                                           SuccessFlag = false,
-                                          Messages = new[] { filterContext.HttpContext.Response.StatusDescription }
+                                          Messages = new[]
+                                          {
+                                              exception != null
+                                                  ? new SystemError(exception)
+                                                  : new SystemError(
+                                                      filterContext.HttpContext.Response.StatusDescription)
+                                          }
                                       }
                                   )
                 }).ToString(),
@@ -113,7 +123,7 @@ namespace NS_Education.Tools
                 ApiResponse = new BaseApiResponse
                 {
                     SuccessFlag = false,
-                    Messages = new[] { message }
+                    Messages = new[] { new SystemError(message) }
                 }
             }).ToString();
 

@@ -18,6 +18,6 @@ namespace NS_Education.Models.Errors
 
         public override char ErrorType => 'S';
         public override int ErrorCodeInt => 1;
-        public override string ErrorMessage => "系統異常";
+        public override string ErrorMessage => "系統異常，請連絡系統管理員處理！";
     }
 }

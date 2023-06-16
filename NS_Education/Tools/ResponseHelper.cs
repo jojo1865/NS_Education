@@ -114,16 +114,17 @@ namespace NS_Education.Tools
         /// }
         /// </summary>
         /// <remarks>關於格式的說明，詳見 API 文件</remarks>
-        internal static void SetErrorResponse(HttpStatusCode statusCode, string message, HttpResponse response)
+        internal static void SetErrorResponse(HttpResponse response, SystemError error,
+            HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
         {
             string content = JObject.FromObject(new FinalizedResponse
             {
                 Status = (int)statusCode,
-                StatusMessage = message,
+                StatusMessage = error.ErrorMessage,
                 ApiResponse = new BaseApiResponse
                 {
                     SuccessFlag = false,
-                    Messages = new[] { new SystemError(message) }
+                    Messages = new[] { error }
                 }
             }).ToString();
 

@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using Microsoft.IdentityModel.Logging;
+using NS_Education.Models.Errors;
 using NS_Education.Tools;
 
 namespace NS_Education
@@ -39,8 +40,10 @@ namespace NS_Education
             {
                 if (!isOptions)
                 {
-                    ResponseHelper.SetErrorResponse(HttpStatusCode.NotFound,
-                        $"查無此端點：「{HttpContext.Current.Request.Url.AbsolutePath}」！", Response);
+                    ResponseHelper.SetErrorResponse(Response,
+                        new SystemError(new HttpException((int)HttpStatusCode.NotFound,
+                            $"查無此端點：「{HttpContext.Current.Request.Url.AbsolutePath}」！")),
+                        HttpStatusCode.NotFound);
                 }
 
                 Response.Flush();

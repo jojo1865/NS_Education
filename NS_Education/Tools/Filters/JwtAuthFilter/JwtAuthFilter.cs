@@ -157,6 +157,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 // 作為預設值，取得帳號建立日期
                 DateTime lastChangeTime = nsDbContext.UserData
                     .Where(ud => ud.ActiveFlag && !ud.DeleteFlag)
+                    .Where(ud => ud.UID == uid)
                     .Select(ud => ud.CreDate)
                     .FirstOrDefault();
 
@@ -273,11 +274,11 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
             foreach (M_Group_Menu gm in queried)
             {
-                showFlagOk |= gm.ShowFlag;
-                addFlagOk |= gm.AddFlag;
-                editFlagOk |= gm.EditFlag;
-                deleteFlagOk |= gm.DeleteFlag;
-                printFlagOk |= gm.PringFlag;
+                showFlagOk |= gm.ShowFlag || gm.MenuData.AlwaysAllowShow;
+                addFlagOk |= gm.AddFlag || gm.MenuData.AlwaysAllowAdd;
+                editFlagOk |= gm.EditFlag || gm.MenuData.AlwaysAllowEdit;
+                deleteFlagOk |= gm.DeleteFlag || gm.MenuData.AlwaysAllowDelete;
+                printFlagOk |= gm.PringFlag || gm.MenuData.AlwaysAllowPring;
 
                 if (showFlagOk && addFlagOk && editFlagOk && deleteFlagOk && printFlagOk)
                     return true;

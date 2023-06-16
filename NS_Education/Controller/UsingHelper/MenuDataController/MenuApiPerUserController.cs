@@ -39,8 +39,10 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
             // 加入需要特殊處理的 MDID
             MenuData[] specialMenus = await DC.MenuData
+                .Where(md => md.ActiveFlag && !md.DeleteFlag)
                 .Where(md =>
-                    md.ActiveFlag && !md.DeleteFlag && DbConstants.AlwaysShowAddEditMenuUrls.Contains(md.URL))
+                    md.AlwaysAllowShow || md.AlwaysAllowAdd || md.AlwaysAllowEdit || md.AlwaysAllowDelete ||
+                    md.AlwaysAllowPring)
                 .ToArrayAsync();
 
             foreach (MenuData specialMenu in specialMenus)
@@ -135,8 +137,12 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 }
             }
 
-            bool isASpecialMenu = thisNodeOrNull != null &&
-                                  DbConstants.AlwaysShowAddEditMenuUrls.Contains(thisNodeOrNull.URL);
+            bool isASpecialMenu = thisNodeOrNull != null
+                                  && (thisNodeOrNull.AlwaysAllowShow
+                                      || thisNodeOrNull.AlwaysAllowAdd
+                                      || thisNodeOrNull.AlwaysAllowEdit
+                                      || thisNodeOrNull.AlwaysAllowDelete
+                                      || thisNodeOrNull.AlwaysAllowPring);
 
             // 建立新的 Node
             MenuData_GetListByUid_Output_Node_APIItem newNode = new MenuData_GetListByUid_Output_Node_APIItem
@@ -159,8 +165,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                            .Where(api =>
                                // 如果是特殊的選單（如預約管理），必定有瀏覽新增修改
                                (isASpecialMenu
-                                && (api.APIType != (int)MenuApiType.Delete || rootDelete)
-                                && (api.APIType != (int)MenuApiType.Print || rootPrint))
+                                && (api.APIType != (int)MenuApiType.Show || thisNodeOrNull.AlwaysAllowShow)
+                                && (api.APIType != (int)MenuApiType.Add || thisNodeOrNull.AlwaysAllowAdd)
+                                && (api.APIType != (int)MenuApiType.Edit || thisNodeOrNull.AlwaysAllowEdit)
+                                && (api.APIType != (int)MenuApiType.Delete || thisNodeOrNull.AlwaysAllowDelete)
+                                && (api.APIType != (int)MenuApiType.Print || thisNodeOrNull.AlwaysAllowPring))
                                ||
                                // 判斷管理員權限
                                (UserHasRootAccess && (api.APIType != (int)MenuApiType.Add || rootAdd)

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -17,19 +18,38 @@ namespace NS_Education
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
-            
-            #if DEBUG
-                // 預設行為會在 Log 不顯示機敏資料 (PII)。
-                IdentityModelEventSource.ShowPII = true; 
-            #endif
+
+            MvcHandler.DisableMvcResponseHeader = true;
+
+#if DEBUG
+            // 預設行為會在 Log 不顯示機敏資料 (PII)。
+            IdentityModelEventSource.ShowPII = true;
+#endif
         }
 
         protected void Application_BeginRequest()
         {
-            // 處理 CORS Request
             RequestHelper.AddCorsHeaders();
 
-            if (Request.HttpMethod == "OPTIONS") {
+            // 檢查是否存在此端點
+            bool hasEndpoint = RequestHelper.HasEndpoint();
+            bool isOptions = Request.HttpMethod == "OPTIONS";
+
+            if (!hasEndpoint)
+            {
+                if (!isOptions)
+                {
+                    ResponseHelper.SetErrorResponse(HttpStatusCode.NotFound,
+                        $"查無此端點：「{HttpContext.Current.Request.Url.AbsolutePath}」！", Response);
+                }
+
+                Response.Flush();
+                Response.Close();
+                return;
+            }
+
+            if (isOptions)
+            {
                 // 如果是 OPTIONS，即刻回傳
                 Response.Flush();
             }

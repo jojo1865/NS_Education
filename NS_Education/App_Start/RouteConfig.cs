@@ -10,138 +10,118 @@ namespace NS_Education
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
-                name: "404-NotFound",
-                url: "NotFound",
-                defaults: new { controller = "Error", action = "NotFound" }
-            );
-
-            routes.MapRoute(
-                name: "500-Error",
-                url: "Error",
-                defaults: new { controller = "Error", action = "Error" }
-            );
-
-            routes.MapRoute(
                 name: "CustomerQuestionGetUniqueAreas",
-                url: "CustomerQuestion/GetUniqueAreas/{id}",
+                url: "CustomerQuestion/GetUniqueAreas",
                 defaults: new
-                    { controller = "CustomerQuestionUniqueAreas", action = "GetList", id = UrlParameter.Optional }
+                    { controller = "CustomerQuestionUniqueAreas", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "CustomerGetRankings",
-                url: "Customer/GetRankings/{id}",
-                defaults: new { controller = "CustomerRanking", action = "GetList", id = UrlParameter.Optional }
+                url: "Customer/GetRankings",
+                defaults: new { controller = "CustomerRanking", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "UserDataGetLogTypes",
-                url: "UserData/GetLogTypeList/{id}",
-                defaults: new { controller = "UserDataLog", action = "GetList", id = UrlParameter.Optional }
+                url: "UserData/GetLogTypeList",
+                defaults: new { controller = "UserDataLog", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "UserDataSubmitLogKeepDays",
-                url: "UserData/SubmitLogKeepDays/{id}",
-                defaults: new { controller = "UserDataLog", action = "SubmitLogKeepDays", id = UrlParameter.Optional }
+                url: "UserData/SubmitLogKeepDays",
+                defaults: new { controller = "UserDataLog", action = "SubmitLogKeepDays" }
             );
 
             routes.MapRoute(
                 name: "UserDataGetLogKeepDays",
-                url: "UserData/GetLogKeepDays/{id}",
-                defaults: new { controller = "UserDataLog", action = "GetLogKeepDays", id = UrlParameter.Optional }
+                url: "UserData/GetLogKeepDays",
+                defaults: new { controller = "UserDataLog", action = "GetLogKeepDays" }
             );
 
             routes.MapRoute(
                 name: "UserDataGetUserLogList",
-                url: "UserData/GetUserLogList/{id}",
-                defaults: new { controller = "UserDataLog", action = "GetUserLogList", id = UrlParameter.Optional }
+                url: "UserData/GetUserLogList",
+                defaults: new { controller = "UserDataLog", action = "GetUserLogList" }
             );
 
             routes.MapRoute(
                 name: "PrintReportGetResverListByIDs1",
-                url: "PrintReport/GetResverListByIDs1/{id}",
-                defaults: new { controller = "GetResverListByIDs1", action = "GetList", id = UrlParameter.Optional }
+                url: "PrintReport/GetResverListByIDs1",
+                defaults: new { controller = "GetResverListByIDs1", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "PrintReportGetResverListByIDs2",
-                url: "PrintReport/GetResverListByIDs2/{id}",
-                defaults: new { controller = "GetResverListByIDs2", action = "GetList", id = UrlParameter.Optional }
+                url: "PrintReport/GetResverListByIDs2",
+                defaults: new { controller = "GetResverListByIDs2", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "StaticCodeGetTypeList",
-                url: "StaticCode/GetTypeList/{id}",
-                defaults: new { controller = "StaticCodeTypeList", action = "GetList", id = UrlParameter.Optional }
+                url: "StaticCode/GetTypeList",
+                defaults: new { controller = "StaticCodeTypeList", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "ResverGetResverSiteList",
-                url: "Resver/GetResverSiteList/{id}",
-                defaults: new { controller = "ResverSite", action = "GetResverSiteList", id = UrlParameter.Optional }
+                url: "Resver/GetResverSiteList",
+                defaults: new { controller = "ResverSite", action = "GetResverSiteList" }
             );
 
             routes.MapRoute(
                 name: "ResverGetAllInfoById",
-                url: "Resver/GetAllInfoById/{id}",
-                defaults: new { controller = "Resver", action = "GetInfoById", id = UrlParameter.Optional }
+                url: "Resver/GetAllInfoById",
+                defaults: new { controller = "Resver", action = "GetInfoById" }
             );
 
             routes.MapRoute(
                 name: "ResverGetHeadList",
-                url: "Resver/GetHeadList/{id}",
-                defaults: new { controller = "Resver", action = "GetList", id = UrlParameter.Optional }
+                url: "Resver/GetHeadList",
+                defaults: new { controller = "Resver", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "CategoryGetTypeList",
-                url: "Category/GetTypeList/{id}",
-                defaults: new { controller = "CategoryTypeList", action = "GetList", id = UrlParameter.Optional }
+                url: "Category/GetTypeList",
+                defaults: new { controller = "CategoryTypeList", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "SiteDataGetTableList",
-                url: "SiteData/GetTableList/{id}",
-                defaults: new { controller = "SiteData", action = "GetList", id = UrlParameter.Optional }
+                url: "SiteData/GetTableList",
+                defaults: new { controller = "SiteData", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "SiteDataGetListForCalendar",
-                url: "SiteData/GetCalendarList/{id}",
-                defaults: new { controller = "SiteDataCalendar", action = "GetList", id = UrlParameter.Optional }
+                url: "SiteData/GetCalendarList",
+                defaults: new { controller = "SiteDataCalendar", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "MenuDataGetListForApi",
-                url: "MenuData/GetAPIList/{id}",
-                defaults: new { controller = "MenuApi", action = "GetList", id = UrlParameter.Optional }
+                url: "MenuData/GetAPIList",
+                defaults: new { controller = "MenuApi", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "MenuDataSubmitForApi",
-                url: "MenuData/SubmitAPI/{id}",
-                defaults: new { controller = "MenuApi", action = "Submit", id = UrlParameter.Optional }
+                url: "MenuData/SubmitAPI",
+                defaults: new { controller = "MenuApi", action = "Submit" }
             );
 
             routes.MapRoute(
                 name: "MenuDataGetListByUid",
-                url: "MenuData/GetListByUID/{id}",
-                defaults: new { controller = "MenuApiPerUser", action = "GetList", id = UrlParameter.Optional }
+                url: "MenuData/GetListByUID",
+                defaults: new { controller = "MenuApiPerUser", action = "GetList" }
             );
 
             routes.MapRoute(
                 name: "Default",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
-            );
-
-            //Catch All InValid (NotFound) Routes
-
-            routes.MapRoute(
-                name: "NotFound",
-                url: "{*url}",
-                defaults: new { controller = "Error", action = "InternalError", id = UrlParameter.Optional }
+                url: "{controller}/{action}",
+                defaults: new { controller = "Home", action = "Index" }
             );
         }
     }

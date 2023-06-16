@@ -1,6 +1,7 @@
 using System;
 using System.Data.Entity.Validation;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
@@ -10,6 +11,13 @@ using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Tools
 {
+    /// <summary>
+    /// 這是專門處理 Response 包裝的工具。<br/>
+    /// 主要功能之一是確保 HTTP Response 的 StatusCode 必定為 200。<br/>
+    /// 原因是這個 API 以 ASP.NET MVC 5 危機底建成，然後在 IIS Server 上跑，<br/>
+    /// 當不是 200 時，IIS 可能會自己回傳 BIG-5 格式的 html，造成編碼有問題。<br/>
+    /// 所以，透過這樣的設計，盡量降低 IIS 干涉。
+    /// </summary>
     internal static class ResponseHelper
     {
         /// <summary>
@@ -17,8 +25,7 @@ namespace NS_Education.Tools
         /// {<br/>
         ///   Status: int, <br/>
         ///   StatusMessage: string, <br/>
-        ///   ApiResponse: object, <br/>
-        ///   Privileges: array<br/>
+        ///   ApiResponse: object
         /// }
         /// </summary>
         /// <remarks>關於格式的說明，詳見 API 文件</remarks>
@@ -65,11 +72,15 @@ namespace NS_Education.Tools
                     // ApiResponse 視可以取得的值決定：
                     // |- a. 如果已經有 ApiResponse：用 ApiResponse。
                     // |- b. 否則：視為還沒經過 Wrap，把原有的整個 Response Content 轉換成 ApiResponse。
-                    // +- c. 如果 Content 是 null：放入空字串。
+                    // +- c. 如果 Content 是 null：建立預設內容。
                     ApiResponse = modify.SelectToken("Content.ApiResponse")?.Value<object>()
                                   ?? (modify["Content"] != null
-                                      ? JToken.Parse(modify["Content"]?.Value<string>() ?? "")
-                                      : null
+                                      ? (object)JToken.Parse(modify["Content"]?.Value<string>() ?? "")
+                                      : new BaseApiResponse
+                                      {
+                                          SuccessFlag = false,
+                                          Messages = new[] { filterContext.HttpContext.Response.StatusDescription }
+                                      }
                                   )
                 }).ToString(),
                 ContentEncoding = Encoding.UTF8,
@@ -82,6 +93,35 @@ namespace NS_Education.Tools
             filterContext.HttpContext.Response.StatusDescription = "OK";
 
             return newActionResult;
+        }
+
+        /// <summary>
+        /// 把 API Response 依以下格式回傳：<br/>
+        /// {<br/>
+        ///   Status: int, <br/>
+        ///   StatusMessage: string, <br/>
+        ///   ApiResponse: object
+        /// }
+        /// </summary>
+        /// <remarks>關於格式的說明，詳見 API 文件</remarks>
+        internal static void SetErrorResponse(HttpStatusCode statusCode, string message, HttpResponse response)
+        {
+            string content = JObject.FromObject(new FinalizedResponse
+            {
+                Status = (int)statusCode,
+                StatusMessage = message,
+                ApiResponse = new BaseApiResponse
+                {
+                    SuccessFlag = false,
+                    Messages = new[] { message }
+                }
+            }).ToString();
+
+            response.ClearContent();
+            response.Write(content);
+
+            response.StatusCode = 200;
+            response.StatusDescription = "OK";
         }
 
         private static string GetExceptionActualMessage(ExceptionContext context)

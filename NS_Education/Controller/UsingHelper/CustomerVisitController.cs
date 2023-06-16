@@ -175,7 +175,7 @@ namespace NS_Education.Controller.UsingHelper
                 CID = entity.CID,
                 C_TitleC = entity.Customer?.TitleC ?? "",
                 C_TitleE = entity.Customer?.TitleE ?? "",
-                C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
+                C_List = await DC.Customer.GetCustomerSelectableWithHasReservation(entity.CID),
                 BSCID = entity.BSCID,
                 BSC_Title = entity.B_StaticCode1?.Title ?? "",
                 BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType, entity.BSCID),

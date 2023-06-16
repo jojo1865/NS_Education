@@ -17,6 +17,11 @@ namespace NS_Education.Models.Entities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public MenuData()
         {
+            this.AlwaysAllowShow = false;
+            this.AlwaysAllowAdd = false;
+            this.AlwaysAllowEdit = false;
+            this.AlwaysAllowDelete = false;
+            this.AlwaysAllowPring = false;
             this.M_Group_Menu = new HashSet<M_Group_Menu>();
             this.MenuAPI = new HashSet<MenuAPI>();
         }
@@ -32,6 +37,11 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public bool AlwaysAllowShow { get; set; }
+        public bool AlwaysAllowAdd { get; set; }
+        public bool AlwaysAllowEdit { get; set; }
+        public bool AlwaysAllowDelete { get; set; }
+        public bool AlwaysAllowPring { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<M_Group_Menu> M_Group_Menu { get; set; }

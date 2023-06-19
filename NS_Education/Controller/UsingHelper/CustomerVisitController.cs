@@ -212,6 +212,7 @@ namespace NS_Education.Controller.UsingHelper
                         BSCID = mcg.GiftSending.BSCID,
                         BSC_Code = mcg.GiftSending.B_StaticCode?.Code ?? "",
                         BSC_Title = mcg.GiftSending.B_StaticCode?.Title ?? "",
+                        Title = mcg.GiftSending.Title ?? "",
                         Ct = mcg.Ct,
                         Note = mcg.Note ?? ""
                     }).ToList()
@@ -297,7 +298,7 @@ namespace NS_Education.Controller.UsingHelper
                     i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     i => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.BSC_Title.HasLengthBetween(1, 100),
+                .Validate(i => i.Title.HasLengthBetween(1, 100),
                     i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
                 .Validate(i => i.Ct > 0,
                     i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 0)))
@@ -337,7 +338,7 @@ namespace NS_Education.Controller.UsingHelper
                         Year = i.Year,
                         SendDate = i.SendDate.ParseDateTime().Date,
                         BSCID = i.BSCID,
-                        Title = i.BSC_Title,
+                        Title = i.Title,
                         Note = i.Note
                     }
                 }).ToList()
@@ -379,7 +380,7 @@ namespace NS_Education.Controller.UsingHelper
                     i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     i => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.BSC_Title.HasLengthBetween(1, 100),
+                .Validate(i => i.Title.HasLengthBetween(1, 100),
                     i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
                 .Validate(i => i.Ct > 0,
                     i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 1)))
@@ -434,7 +435,7 @@ namespace NS_Education.Controller.UsingHelper
                     Year = i.Year,
                     SendDate = i.SendDate.ParseDateTime().Date,
                     BSCID = i.BSCID,
-                    Title = i.BSC_Title,
+                    Title = i.Title,
                     Note = i.Note
                 }
             }).ToList();

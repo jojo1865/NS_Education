@@ -8,6 +8,7 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById
         public int BSCID { get; set; }
         public string BSC_Code { get; set; }
         public string BSC_Title { get; set; }
+        public string Title { get; set; }
         public int Ct { get; set; }
         public string Note { get; set; }
     }

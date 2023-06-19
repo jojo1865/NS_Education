@@ -289,7 +289,28 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            // 驗證沒有任兩筆資料的贈送日期、贈送年份、禮品 ID 皆相同
+            bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
+                .Validate(i => i.SendDate.TryParseDateTime(out _),
+                    i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
+                .Validate(i => i.Year.IsInBetween(1911, 9999),
+                    i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
+                    i => AddError(NotFound("禮品 ID")))
+                .Validate(i => i.BSC_Title.HasLengthBetween(1, 100),
+                    i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
+                .Validate(i => i.Ct > 0,
+                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 0)))
+                .IsValid();
+
+            bool isGiftSendingsUnique = isGiftSendingsValid && input.GiftSendings
+                .GroupBy(i => new { DateTime = i.SendDate.ParseDateTime().Date, i.Year, i.BSCID })
+                .Count() == input.GiftSendings.Count;
+
+            if (!isGiftSendingsUnique)
+                AddError(CopyNotAllowed("贈送日期、贈送年份、禮品 ID"));
+
+            return isValid && isGiftSendingsValid && isGiftSendingsUnique;
         }
 
         public async Task<CustomerVisit> SubmitCreateData(CustomerVisit_Submit_Input_APIItem input)
@@ -305,7 +326,21 @@ namespace NS_Education.Controller.UsingHelper
                 Title = input.Title,
                 Description = input.Description,
                 AfterNote = input.AfterNote,
-                BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default
+                BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default,
+                M_Customer_Gift = input.GiftSendings.Select(i => new M_Customer_Gift
+                {
+                    CID = input.CID,
+                    Ct = i.Ct,
+                    Note = i.Note,
+                    GiftSending = new GiftSending
+                    {
+                        Year = i.Year,
+                        SendDate = i.SendDate.ParseDateTime().Date,
+                        BSCID = i.BSCID,
+                        Title = i.BSC_Title,
+                        Note = i.Note
+                    }
+                }).ToList()
             });
         }
 
@@ -319,7 +354,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.CVID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     () => AddError(NotFound("客戶 ID")))
-                .ForceSkipIf(i => i.BSCID15 is null)
+                .ForceSkipIf(i => i.BSCID15 == null)
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID15 ?? 0,
                         StaticCodeType.NoDealReason),
@@ -336,12 +371,36 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            // 驗證沒有任兩筆資料的贈送日期、贈送年份、禮品 ID 皆相同
+            bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
+                .Validate(i => i.SendDate.TryParseDateTime(out _),
+                    i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
+                .Validate(i => i.Year.IsInBetween(1911, 9999),
+                    i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
+                    i => AddError(NotFound("禮品 ID")))
+                .Validate(i => i.BSC_Title.HasLengthBetween(1, 100),
+                    i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
+                .Validate(i => i.Ct > 0,
+                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 0)))
+                .IsValid();
+
+            bool isGiftSendingsUnique = isGiftSendingsValid && input.GiftSendings
+                .GroupBy(i => new { DateTime = i.SendDate.ParseDateTime().Date, i.Year, i.BSCID })
+                .Count() == input.GiftSendings.Count;
+
+            if (!isGiftSendingsUnique)
+                AddError(CopyNotAllowed("贈送日期、贈送年份、禮品 ID"));
+
+            return isValid && isGiftSendingsValid && isGiftSendingsUnique;
         }
 
         public IQueryable<CustomerVisit> SubmitEditQuery(CustomerVisit_Submit_Input_APIItem input)
         {
-            return DC.CustomerVisit.Where(cv => cv.CVID == input.CVID);
+            return DC.CustomerVisit
+                .Include(cv => cv.M_Customer_Gift)
+                .Include(cv => cv.M_Customer_Gift.Select(mcg => mcg.GiftSending))
+                .Where(cv => cv.CVID == input.CVID);
         }
 
         public void SubmitEditUpdateDataFields(CustomerVisit data, CustomerVisit_Submit_Input_APIItem input)
@@ -359,6 +418,26 @@ namespace NS_Education.Controller.UsingHelper
             data.AfterNote = input.AfterNote;
 
             data.BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default;
+
+            // 清理舊的所有 M_Customer_Gift，並寫新的。
+            M_Customer_Gift[] toRemove = data.M_Customer_Gift.ToArray();
+            DC.M_Customer_Gift.RemoveRange(toRemove);
+            DC.GiftSending.RemoveRange(toRemove.Select(mcg => mcg.GiftSending));
+
+            data.M_Customer_Gift = input.GiftSendings.Select(i => new M_Customer_Gift
+            {
+                CID = input.CID,
+                Ct = i.Ct,
+                Note = i.Note,
+                GiftSending = new GiftSending
+                {
+                    Year = i.Year,
+                    SendDate = i.SendDate.ParseDateTime().Date,
+                    BSCID = i.BSCID,
+                    Title = i.BSC_Title,
+                    Note = i.Note
+                }
+            }).ToList();
         }
 
         #endregion

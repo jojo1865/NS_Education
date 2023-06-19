@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace NS_Education.Models.APIItems.Controller.CustomerVisit.Submit
 {
     public class CustomerVisit_Submit_Input_APIItem : BaseRequestForSubmit
@@ -13,5 +15,8 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.Submit
         public string VisitDate { get; set; }
         public string Description { get; set; }
         public string AfterNote { get; set; }
+
+        public ICollection<CustomerVisit_Submit_GiftSendings_Row_APIItem> GiftSendings { get; set; } =
+            new List<CustomerVisit_Submit_GiftSendings_Row_APIItem>();
     }
 }

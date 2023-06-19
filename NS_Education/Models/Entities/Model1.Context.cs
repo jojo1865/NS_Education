@@ -54,6 +54,7 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<M_Group_Menu> M_Group_Menu { get; set; }
         public virtual DbSet<M_Group_User> M_Group_User { get; set; }
         public virtual DbSet<M_Resver_TimeSpan> M_Resver_TimeSpan { get; set; }
+        public virtual DbSet<M_Site_Device> M_Site_Device { get; set; }
         public virtual DbSet<M_SiteGroup> M_SiteGroup { get; set; }
         public virtual DbSet<MenuAPI> MenuAPI { get; set; }
         public virtual DbSet<MenuData> MenuData { get; set; }

@@ -18,6 +18,7 @@ namespace NS_Education.Models.Entities
         public B_Device()
         {
             this.Resver_Device = new HashSet<Resver_Device>();
+            this.M_Site_Device = new HashSet<M_Site_Device>();
         }
     
         public int BDID { get; set; }
@@ -49,5 +50,7 @@ namespace NS_Education.Models.Entities
         public virtual D_Hall D_Hall { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Device> Resver_Device { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<M_Site_Device> M_Site_Device { get; set; }
     }
 }

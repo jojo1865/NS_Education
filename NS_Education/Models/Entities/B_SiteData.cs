@@ -18,6 +18,7 @@ namespace NS_Education.Models.Entities
         public B_SiteData()
         {
             this.Resver_Site = new HashSet<Resver_Site>();
+            this.M_Site_Device = new HashSet<M_Site_Device>();
             this.M_SiteGroup = new HashSet<M_SiteGroup>();
             this.M_SiteGroup1 = new HashSet<M_SiteGroup>();
         }
@@ -54,6 +55,8 @@ namespace NS_Education.Models.Entities
         public virtual D_Hall D_Hall { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Site> Resver_Site { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<M_Site_Device> M_Site_Device { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<M_SiteGroup> M_SiteGroup { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

@@ -530,6 +530,19 @@
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="M_Site_Device">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BSID" Type="int" Nullable="false" />
+          <Property Name="BDID" Type="int" Nullable="false" />
+          <Property Name="Ct" Type="int" Nullable="false" />
+          <Property Name="CreDate" Type="datetime" Nullable="false" />
+          <Property Name="CreUID" Type="int" Nullable="false" />
+          <Property Name="UpdDate" Type="int" Nullable="false" />
+          <Property Name="UpdUID" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="M_SiteGroup">
           <Key>
             <PropertyRef Name="MID" />
@@ -1679,6 +1692,34 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="M_Site_Device_B_Device_BDID_fk">
+          <End Role="B_Device" Type="Self.B_Device" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Site_Device" Type="Self.M_Site_Device" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_Device">
+              <PropertyRef Name="BDID" />
+            </Principal>
+            <Dependent Role="M_Site_Device">
+              <PropertyRef Name="BDID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="M_Site_Device_B_SiteData_BSID_fk">
+          <End Role="B_SiteData" Type="Self.B_SiteData" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Site_Device" Type="Self.M_Site_Device" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_SiteData">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="M_Site_Device">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="M_SiteGroup_B_SiteData_BSID_fk">
           <End Role="B_SiteData" Type="Self.B_SiteData" Multiplicity="1" />
           <End Role="M_SiteGroup" Type="Self.M_SiteGroup" Multiplicity="*" />
@@ -1793,6 +1834,7 @@
           <EntitySet Name="M_Group_Menu" EntityType="Self.M_Group_Menu" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Group_User" EntityType="Self.M_Group_User" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Resver_TimeSpan" EntityType="Self.M_Resver_TimeSpan" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="M_Site_Device" EntityType="Self.M_Site_Device" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_SiteGroup" EntityType="Self.M_SiteGroup" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MenuAPI" EntityType="Self.MenuAPI" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MenuData" EntityType="Self.MenuData" Schema="dbo" store:Type="Tables" />
@@ -2091,6 +2133,14 @@
             <End Role="Customer" EntitySet="Customer" />
             <End Role="M_Customer_BusinessUser" EntitySet="M_Customer_BusinessUser" />
           </AssociationSet>
+          <AssociationSet Name="M_Site_Device_B_Device_BDID_fk" Association="Self.M_Site_Device_B_Device_BDID_fk">
+            <End Role="B_Device" EntitySet="B_Device" />
+            <End Role="M_Site_Device" EntitySet="M_Site_Device" />
+          </AssociationSet>
+          <AssociationSet Name="M_Site_Device_B_SiteData_BSID_fk" Association="Self.M_Site_Device_B_SiteData_BSID_fk">
+            <End Role="B_SiteData" EntitySet="B_SiteData" />
+            <End Role="M_Site_Device" EntitySet="M_Site_Device" />
+          </AssociationSet>
           <AssociationSet Name="M_SiteGroup_B_SiteData_BSID_fk" Association="Self.M_SiteGroup_B_SiteData_BSID_fk">
             <End Role="B_SiteData" EntitySet="B_SiteData" />
             <End Role="M_SiteGroup" EntitySet="M_SiteGroup" />
@@ -2182,6 +2232,7 @@
           <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_B_Device_B_StaticCode" FromRole="B_Device" ToRole="B_StaticCode" />
           <NavigationProperty Name="D_Hall" Relationship="Self.FK_B_Device_D_Hall" FromRole="B_Device" ToRole="D_Hall" />
           <NavigationProperty Name="Resver_Device" Relationship="Self.FK_Resver_Device_B_Device" FromRole="B_Device" ToRole="Resver_Device" />
+          <NavigationProperty Name="M_Site_Device" Relationship="Self.M_Site_Device_B_Device_BDID_fk" FromRole="B_Device" ToRole="M_Site_Device" />
         </EntityType>
         <EntityType Name="B_OrderCode">
           <Key>
@@ -2298,6 +2349,7 @@
           <NavigationProperty Name="B_StaticCode1" Relationship="Self.FK_B_SiteData_B_StaticCode5" FromRole="B_SiteData" ToRole="B_StaticCode" />
           <NavigationProperty Name="D_Hall" Relationship="Self.FK_B_SiteData_D_Hall" FromRole="B_SiteData" ToRole="D_Hall" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_B_SiteData" FromRole="B_SiteData" ToRole="Resver_Site" />
+          <NavigationProperty Name="M_Site_Device" Relationship="Self.M_Site_Device_B_SiteData_BSID_fk" FromRole="B_SiteData" ToRole="M_Site_Device" />
           <NavigationProperty Name="M_SiteGroup" Relationship="Self.M_SiteGroup_B_SiteData_BSID_fk" FromRole="B_SiteData" ToRole="M_SiteGroup" />
           <NavigationProperty Name="M_SiteGroup1" Relationship="Self.M_SiteGroup_B_SiteData_BSID_fk_2" FromRole="B_SiteData" ToRole="M_SiteGroup" />
         </EntityType>
@@ -2759,6 +2811,21 @@
           <NavigationProperty Name="D_TimeSpan" Relationship="Self.FK_M_ResverSiteTimeSpan_D_TimeSpan" FromRole="M_Resver_TimeSpan" ToRole="D_TimeSpan" />
           <NavigationProperty Name="Resver_Head" Relationship="Self.FK_M_Resver_TimeSpan_Resver_Head" FromRole="M_Resver_TimeSpan" ToRole="Resver_Head" />
         </EntityType>
+        <EntityType Name="M_Site_Device">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BSID" Type="Int32" Nullable="false" />
+          <Property Name="BDID" Type="Int32" Nullable="false" />
+          <Property Name="Ct" Type="Int32" Nullable="false" />
+          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreUID" Type="Int32" Nullable="false" />
+          <Property Name="UpdDate" Type="Int32" Nullable="false" />
+          <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="B_Device" Relationship="Self.M_Site_Device_B_Device_BDID_fk" FromRole="M_Site_Device" ToRole="B_Device" />
+          <NavigationProperty Name="B_SiteData" Relationship="Self.M_Site_Device_B_SiteData_BSID_fk" FromRole="M_Site_Device" ToRole="B_SiteData" />
+        </EntityType>
         <EntityType Name="M_SiteGroup">
           <Key>
             <PropertyRef Name="MID" />
@@ -2803,11 +2870,11 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
-          <Property Name="AlwaysAllowShow" Type="Boolean" Nullable="false" DefaultValue="false" />
-          <Property Name="AlwaysAllowAdd" Type="Boolean" Nullable="false" DefaultValue="false" />
-          <Property Name="AlwaysAllowEdit" Type="Boolean" Nullable="false" DefaultValue="false" />
-          <Property Name="AlwaysAllowDelete" Type="Boolean" Nullable="false" DefaultValue="false" />
-          <Property Name="AlwaysAllowPring" Type="Boolean" Nullable="false" DefaultValue="false" />
+          <Property Name="AlwaysAllowShow" Type="Boolean" Nullable="false" />
+          <Property Name="AlwaysAllowAdd" Type="Boolean" Nullable="false" />
+          <Property Name="AlwaysAllowEdit" Type="Boolean" Nullable="false" />
+          <Property Name="AlwaysAllowDelete" Type="Boolean" Nullable="false" />
+          <Property Name="AlwaysAllowPring" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="M_Group_Menu" Relationship="Self.FK_M_Group_Menu_MenuData" FromRole="MenuData" ToRole="M_Group_Menu" />
           <NavigationProperty Name="MenuAPI" Relationship="Self.FK_MenuAPI_MenuData" FromRole="MenuData" ToRole="MenuAPI" />
         </EntityType>
@@ -3213,6 +3280,20 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="M_Site_Device_B_Device_BDID_fk">
+          <End Role="B_Device" Type="Self.B_Device" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Site_Device" Type="Self.M_Site_Device" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_Device">
+              <PropertyRef Name="BDID" />
+            </Principal>
+            <Dependent Role="M_Site_Device">
+              <PropertyRef Name="BDID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="D_OtherPayItem_B_OrderCode_BOCID_fk">
           <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="D_OtherPayItem" Type="Self.D_OtherPayItem" Multiplicity="*" />
@@ -3417,6 +3498,20 @@
               <PropertyRef Name="BSID" />
             </Principal>
             <Dependent Role="Resver_Site">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="M_Site_Device_B_SiteData_BSID_fk">
+          <End Role="B_SiteData" Type="Self.B_SiteData" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Site_Device" Type="Self.M_Site_Device" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_SiteData">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="M_Site_Device">
               <PropertyRef Name="BSID" />
             </Dependent>
           </ReferentialConstraint>
@@ -4069,6 +4164,7 @@
           <EntitySet Name="M_Group_Menu" EntityType="Self.M_Group_Menu" />
           <EntitySet Name="M_Group_User" EntityType="Self.M_Group_User" />
           <EntitySet Name="M_Resver_TimeSpan" EntityType="Self.M_Resver_TimeSpan" />
+          <EntitySet Name="M_Site_Device" EntityType="Self.M_Site_Device" />
           <EntitySet Name="M_SiteGroup" EntityType="Self.M_SiteGroup" />
           <EntitySet Name="MenuAPI" EntityType="Self.MenuAPI" />
           <EntitySet Name="MenuData" EntityType="Self.MenuData" />
@@ -4130,6 +4226,10 @@
           <AssociationSet Name="FK_Resver_Device_B_Device" Association="Self.FK_Resver_Device_B_Device">
             <End Role="B_Device" EntitySet="B_Device" />
             <End Role="Resver_Device" EntitySet="Resver_Device" />
+          </AssociationSet>
+          <AssociationSet Name="M_Site_Device_B_Device_BDID_fk" Association="Self.M_Site_Device_B_Device_BDID_fk">
+            <End Role="B_Device" EntitySet="B_Device" />
+            <End Role="M_Site_Device" EntitySet="M_Site_Device" />
           </AssociationSet>
           <AssociationSet Name="D_OtherPayItem_B_OrderCode_BOCID_fk" Association="Self.D_OtherPayItem_B_OrderCode_BOCID_fk">
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
@@ -4198,6 +4298,10 @@
           <AssociationSet Name="FK_Resver_Site_B_SiteData" Association="Self.FK_Resver_Site_B_SiteData">
             <End Role="B_SiteData" EntitySet="B_SiteData" />
             <End Role="Resver_Site" EntitySet="Resver_Site" />
+          </AssociationSet>
+          <AssociationSet Name="M_Site_Device_B_SiteData_BSID_fk" Association="Self.M_Site_Device_B_SiteData_BSID_fk">
+            <End Role="B_SiteData" EntitySet="B_SiteData" />
+            <End Role="M_Site_Device" EntitySet="M_Site_Device" />
           </AssociationSet>
           <AssociationSet Name="M_SiteGroup_B_SiteData_BSID_fk" Association="Self.M_SiteGroup_B_SiteData_BSID_fk">
             <End Role="B_SiteData" EntitySet="B_SiteData" />
@@ -4949,6 +5053,20 @@
                 <ScalarProperty Name="TargetID" ColumnName="TargetID" />
                 <ScalarProperty Name="DTSID" ColumnName="DTSID" />
                 <ScalarProperty Name="SortNo" ColumnName="SortNo" />
+                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
+                <ScalarProperty Name="CreUID" ColumnName="CreUID" />
+                <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
+                <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="M_Site_Device">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Site_Device">
+              <MappingFragment StoreEntitySet="M_Site_Device">
+                <ScalarProperty Name="MID" ColumnName="MID" />
+                <ScalarProperty Name="BSID" ColumnName="BSID" />
+                <ScalarProperty Name="BDID" ColumnName="BDID" />
+                <ScalarProperty Name="Ct" ColumnName="Ct" />
                 <ScalarProperty Name="CreDate" ColumnName="CreDate" />
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />

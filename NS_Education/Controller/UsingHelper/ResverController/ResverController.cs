@@ -1040,6 +1040,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             Dictionary<int, B_Device> devices = await DC.B_Device
                 .Include(bd => bd.Resver_Device)
                 .Include(bd => bd.Resver_Device.Select(rd => rd.Resver_Site))
+                .Include(bd => bd.M_Site_Device)
                 .Where(bd =>
                     bd.ActiveFlag && !bd.DeleteFlag &&
                     inputDeviceIds.Any(id => id == bd.BDID))
@@ -1075,11 +1076,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         // 計算此設備預約單以外的預約單中，在同一場地預約了同一設備的總數量
                         int reservedCount = DC.Resver_Device
                             .Include(rs => rs.Resver_Site)
-                            // 選出所有不是這張設備預約單的設備預約單，同場地，並且是同一天、未刪除
+                            .Include(rs => rs.Resver_Site.B_SiteData)
+                            .Include(rs => rs.Resver_Site.B_SiteData.M_SiteGroup1)
+                            // 選出所有不是這張設備預約單的設備預約單，同場地或者其子場地，並且是同一天、未刪除
                             .Where(rd => !rd.DeleteFlag)
                             .Where(rd => DbFunctions.TruncateTime(rd.TargetDate) == targetDate.Date)
                             .Where(rd => rd.RDID != deviceItem.RDID)
-                            .Where(rd => rd.Resver_Site.BSID == siteItem.BSID)
+                            .Where(rd => rd.Resver_Site.BSID == siteItem.BSID
+                                         || rd.Resver_Site.B_SiteData.M_SiteGroup1.Any(child =>
+                                             child.MasterID == siteItem.BSID))
+                            .Where(rd => rd.Resver_Site.B_SiteData.ActiveFlag && !rd.Resver_Site.B_SiteData.DeleteFlag)
                             // 存到記憶體，因為接下來又要查 DB 了
                             .ToArray()
                             // 選出它們的 RTS
@@ -1092,10 +1098,22 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                             )
                             .Sum(rd => rd.Ct);
 
+                        // 總可用數量，取用
+                        // 1. 該設備在此場地的數量
+                        // 2. 該設備在此場地之子場地的數量
+                        // 之總和
+
+                        // 取得所有子場地的 BSIDs
+                        var childSites = DC.M_SiteGroup.Where(msg => msg.MasterID == siteItem.BSID)
+                            .Select(msg => msg.B_SiteData1)
+                            .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
+                            .Select(sd => sd.BSID)
+                            .Distinct()
+                            .ToHashSet();
+
                         int totalCt = devices[deviceItem.BDID].M_Site_Device
-                            .Where(msd => msd.BSID == siteItem.BSID)
-                            .Select(msd => msd.Ct)
-                            .FirstOrDefault();
+                            .Where(msd => msd.BSID == siteItem.BSID || childSites.Contains(msd.BSID))
+                            .Sum(msd => (int?)msd.Ct) ?? 0;
 
                         if (totalCt - reservedCount >= deviceItem.Ct) continue;
 

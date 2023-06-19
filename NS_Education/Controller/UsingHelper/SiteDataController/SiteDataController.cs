@@ -252,8 +252,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             return DC.B_SiteData
                 .Include(sd => sd.M_SiteGroup)
                 .Include(sd => sd.M_SiteGroup.Select(sg => sg.B_SiteData1))
+                .Include(sd => sd.M_SiteGroup.Select(sg => sg.B_SiteData1).Select(child => child.M_Site_Device))
                 .Include(sd => sd.M_Site_Device)
                 .Include(sd => sd.M_Site_Device.Select(msd => msd.B_Device))
+                .Include(sd => sd.M_Site_Device.Select(msd => msd.B_SiteData))
                 .Where(sd => sd.BSID == id);
         }
 
@@ -296,12 +298,22 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     .OrderBy(siteGroup => siteGroup.SortNo)
                     .ToList(),
                 Devices = entity.M_Site_Device
+                    .Concat(entity.M_SiteGroup
+                        .Select(msg => msg.B_SiteData1)
+                        .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
+                        .SelectMany(sd => sd.M_Site_Device))
+                    .Where(msd => msd.B_SiteData.ActiveFlag && !msd.B_SiteData.DeleteFlag)
+                    .Where(msd => msd.B_Device.ActiveFlag && !msd.B_Device.DeleteFlag)
                     .Select(msd => new SiteData_GetInfoById_Output_Device_Row_APIItem
                     {
                         BDID = msd.BDID,
-                        Code = msd.B_Device?.Code ?? "",
-                        Title = msd.B_Device?.Title ?? "",
-                        Ct = msd.Ct
+                        BSID = msd.BSID,
+                        BD_Code = msd.B_Device?.Code ?? "",
+                        BD_Title = msd.B_Device?.Title ?? "",
+                        BS_Code = msd.B_SiteData?.Code ?? "",
+                        BS_Title = msd.B_SiteData?.Title ?? "",
+                        Ct = msd.Ct,
+                        IsImplicit = msd.BSID != entity.BSID
                     }).ToList(),
             };
         }

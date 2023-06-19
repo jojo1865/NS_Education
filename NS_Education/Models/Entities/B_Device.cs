@@ -28,7 +28,6 @@ namespace NS_Education.Models.Entities
         public int DHID { get; set; }
         public string Code { get; set; }
         public string Title { get; set; }
-        private int Ct { get; set; }
         public int UnitPrice { get; set; }
         public int InPrice { get; set; }
         public int OutPrice { get; set; }

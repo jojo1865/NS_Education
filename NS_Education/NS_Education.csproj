@@ -495,16 +495,16 @@
           <DependentUpon>Model1.tt</DependentUpon>
       </Compile>
       <Compile Include="Models\Entities\B_OrderCode.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_Partner.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_PartnerItem.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_SiteData.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\B_Partner.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\B_PartnerItem.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\B_SiteData.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Entities\B_StaticCode.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -578,15 +578,15 @@
     <Compile Include="Models\Entities\M_Customer_BusinessUser.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Entities\M_Customer_Category.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Department_Category.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Group_Menu.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
+      <Compile Include="Models\Entities\M_Customer_Category.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\M_Department_Category.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\M_Group_Menu.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
       <Compile Include="Models\Entities\M_Group_User.cs">
           <DependentUpon>Model1.tt</DependentUpon>
       </Compile>
@@ -609,16 +609,16 @@
           <DependentUpon>Model1.tt</DependentUpon>
       </Compile>
       <Compile Include="Models\Entities\Resver_Head.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Other.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Site.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Throw.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\Resver_Other.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\Resver_Site.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Entities\Resver_Throw.cs">
+          <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Entities\Resver_Throw_Food.cs">
       <DependentUpon>Model1.tt</DependentUpon>

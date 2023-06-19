@@ -420,10 +420,11 @@ namespace NS_Education.Controller.UsingHelper
 
             data.BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default;
 
-            // 清理舊的所有 M_Customer_Gift，並寫新的。
-            M_Customer_Gift[] toRemove = data.M_Customer_Gift.ToArray();
-            DC.M_Customer_Gift.RemoveRange(toRemove);
-            DC.GiftSending.RemoveRange(toRemove.Select(mcg => mcg.GiftSending));
+            // 清理舊的所有 GiftSending 與 M_Customer_Gift，並寫新的。
+            // GiftSending 和 M_Customer_Gift 之間是 CASCADE，所以可以直接 RemoveRange。
+            GiftSending[] toRemove = data.M_Customer_Gift.Select(mcg => mcg.GiftSending).ToArray();
+            if (toRemove.Any())
+                DC.GiftSending.RemoveRange(toRemove);
 
             data.M_Customer_Gift = input.GiftSendings.Select(i => new M_Customer_Gift
             {

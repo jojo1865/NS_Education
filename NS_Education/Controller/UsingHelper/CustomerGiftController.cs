@@ -65,7 +65,8 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(CustomerGift_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate(true)
-                .Validate(i => i.SendYear.IsInBetween(1911, 9999), () => AddError(WrongFormat("贈送年分")))
+                .Validate(i => i.SendYear == 0 || i.SendYear.IsInBetween(1911, 9999),
+                    () => AddError(OutOfRange("贈送年分", 1911, 9999)))
                 .Validate(i =>
                         !i.SDate.TryParseDateTime(out DateTime startDate)
                         || !i.EDate.TryParseDateTime(out DateTime endDate)
@@ -89,7 +90,8 @@ namespace NS_Education.Controller.UsingHelper
             if (input.CustomerTitleC.HasContent())
                 query = query.Where(cg => cg.Customer.TitleC.Contains(input.CustomerTitleC));
 
-            query = query.Where(cg => cg.Year == input.SendYear);
+            if (input.SendYear.IsAboveZero())
+                query = query.Where(cg => cg.Year == input.SendYear);
 
             if (input.SDate.TryParseDateTime(out DateTime startDate))
                 query = query.Where(cg => DbFunctions.TruncateTime(cg.SendDate) >= startDate.Date);

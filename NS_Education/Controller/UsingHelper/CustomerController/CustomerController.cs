@@ -414,8 +414,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10),
-                    () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Code.HasLengthBetween(1, 10),
+                    () => AddError(LengthOutOfRange("客戶代號", 1, 10)))
                 .ValidateAsync(async i => !await DC.Customer.AnyAsync(c => c.Code == i.Code && !c.DeleteFlag),
                     () => AddError(AlreadyExists("客戶代號")))
                 .Validate(i => i.Compilation.IsNullOrWhiteSpace() || i.Compilation.Length == 8,
@@ -623,8 +623,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10),
-                    () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Code.HasLengthBetween(1, 10),
+                    () => AddError(LengthOutOfRange("客戶代號", 1, 10)))
                 .ValidateAsync(
                     async i => !await DC.Customer.AnyAsync(c => c.Code == i.Code && !c.DeleteFlag && c.CID != i.CID),
                     () => AddError(AlreadyExists("客戶代號")))

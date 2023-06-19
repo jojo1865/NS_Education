@@ -252,6 +252,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             return DC.B_SiteData
                 .Include(sd => sd.M_SiteGroup)
                 .Include(sd => sd.M_SiteGroup.Select(sg => sg.B_SiteData1))
+                .Include(sd => sd.M_Site_Device)
+                .Include(sd => sd.M_Site_Device.Select(msd => msd.B_Device))
                 .Where(sd => sd.BSID == id);
         }
 
@@ -292,7 +294,15 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                         SortNo = siteGroup.SortNo
                     })
                     .OrderBy(siteGroup => siteGroup.SortNo)
-                    .ToList()
+                    .ToList(),
+                Devices = entity.M_Site_Device
+                    .Select(msd => new SiteData_GetInfoById_Output_Device_Row_APIItem
+                    {
+                        BDID = msd.BDID,
+                        Code = msd.B_Device?.Code ?? "",
+                        Title = msd.B_Device?.Title ?? "",
+                        Ct = msd.Ct
+                    }).ToList(),
             };
         }
 

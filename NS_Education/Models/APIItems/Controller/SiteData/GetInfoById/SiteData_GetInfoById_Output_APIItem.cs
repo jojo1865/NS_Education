@@ -22,18 +22,23 @@ namespace NS_Education.Models.APIItems.Controller.SiteData.GetInfoById
 
         public ICollection<BaseResponseRowForSelectable> FloorList { get; set; } =
             new List<BaseResponseRowForSelectable>();
-        
+
         public int BSCID5 { get; set; }
+
         public ICollection<BaseResponseRowForSelectable> TableList { get; set; } =
             new List<BaseResponseRowForSelectable>();
-        
+
         public int DHID { get; set; }
+
         public ICollection<BaseResponseRowForSelectable> HallList { get; set; } =
             new List<BaseResponseRowForSelectable>();
-        
+
         public int BOCID { get; set; }
 
         public ICollection<SiteData_GetInfoById_Output_GroupList_Row_APIItem> Items { get; set; } =
             new List<SiteData_GetInfoById_Output_GroupList_Row_APIItem>();
+
+        public ICollection<SiteData_GetInfoById_Output_Device_Row_APIItem> Devices { get; set; } =
+            new List<SiteData_GetInfoById_Output_Device_Row_APIItem>();
     }
 }

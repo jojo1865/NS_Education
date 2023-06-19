@@ -138,7 +138,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .Include(c => c.B_StaticCode1)
                 .Include(c => c.CustomerVisit)
                 .Include(c => c.CustomerQuestion)
-                .Include(c => c.CustomerGift)
+                .Include(c => c.M_Customer_Gift)
+                .Include(c => c.M_Customer_Gift.Select(mcg => mcg.CustomerVisit))
                 .Include(c => c.M_Customer_BusinessUser)
                 .Include(c => c.M_Customer_BusinessUser.Select(cbu => cbu.BusinessUser))
                 .AsQueryable();
@@ -202,7 +203,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
-                GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
+                GiftCt = entity.M_Customer_Gift.Count(cg => !cg.GiftSending.DeleteFlag),
                 BusinessUsers = GetBusinessUserListFromEntity(entity),
                 Contacts = contacts
                     .Select(c => new Customer_GetList_Contact_APIItem
@@ -229,6 +230,10 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             return DC.Customer
                 .Include(c => c.B_StaticCode)
                 .Include(c => c.B_StaticCode1)
+                .Include(c => c.CustomerVisit)
+                .Include(c => c.CustomerQuestion)
+                .Include(c => c.M_Customer_Gift)
+                .Include(c => c.M_Customer_Gift.Select(mcg => mcg.CustomerVisit))
                 .Where(c => c.CID == id);
         }
 
@@ -277,7 +282,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
-                GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
+                GiftCt = entity.M_Customer_Gift.Count(cg => !cg.GiftSending.DeleteFlag),
                 Items = GetBusinessUserListFromEntity(entity)
             });
         }

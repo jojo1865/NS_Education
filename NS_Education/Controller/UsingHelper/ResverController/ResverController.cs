@@ -1074,7 +1074,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     foreach (D_TimeSpan timeSpan in wantedTimeSpans)
                     {
                         // 計算此設備預約單以外的預約單中，在同一場地預約了同一設備的總數量
-                        int reservedCount = DC.Resver_Device
+                        Resver_Device[] otherResverDevices = await DC.Resver_Device
                             .Include(rs => rs.Resver_Site)
                             .Include(rs => rs.Resver_Site.B_SiteData)
                             .Include(rs => rs.Resver_Site.B_SiteData.M_SiteGroup1)
@@ -1087,15 +1087,21 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                              child.MasterID == siteItem.BSID))
                             .Where(rd => rd.Resver_Site.B_SiteData.ActiveFlag && !rd.Resver_Site.B_SiteData.DeleteFlag)
                             // 存到記憶體，因為接下來又要查 DB 了
-                            .ToArray()
-                            // 選出它們的 RTS
-                            .Where(rd => DC.M_Resver_TimeSpan
-                                .Include(rts => rts.D_TimeSpan)
-                                .Where(rts => rts.TargetTable == resverDeviceTableName)
-                                .Where(rts => rts.TargetID == rd.RDID)
-                                .AsEnumerable()
-                                .Any(rts => rts.D_TimeSpan.IsCrossingWith(timeSpan))
-                            )
+                            .ToArrayAsync();
+
+                        IEnumerable<int> otherResverDeviceIds = otherResverDevices.Select(ord => ord.RDID);
+
+                        // 選出它們的 RTS，當發現重疊時段時，計入 reservedCount
+                        IEnumerable<int> crossingResverDeviceIds = DC.M_Resver_TimeSpan
+                            .Include(rts => rts.D_TimeSpan)
+                            .Where(rts => rts.TargetTable == resverDeviceTableName)
+                            .Where(rts => otherResverDeviceIds.Contains(rts.TargetID))
+                            .AsEnumerable()
+                            .Where(rts => rts.D_TimeSpan.IsCrossingWith(timeSpan))
+                            .Select(rts => rts.TargetID);
+
+                        int reservedCount = DC.Resver_Device
+                            .Where(rd => crossingResverDeviceIds.Contains(rd.RDID))
                             .Sum(rd => rd.Ct);
 
                         // 總可用數量，取用

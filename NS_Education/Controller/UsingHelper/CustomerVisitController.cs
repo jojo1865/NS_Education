@@ -390,7 +390,7 @@ namespace NS_Education.Controller.UsingHelper
                 .GroupBy(i => new { DateTime = i.SendDate.ParseDateTime().Date, i.Year, i.BSCID })
                 .Count() == input.GiftSendings.Count;
 
-            if (!isGiftSendingsUnique)
+            if (isGiftSendingsValid && !isGiftSendingsUnique)
                 AddError(CopyNotAllowed("贈送日期、贈送年份、禮品 ID"));
 
             return isValid && isGiftSendingsValid && isGiftSendingsUnique;

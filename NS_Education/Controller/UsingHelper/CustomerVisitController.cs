@@ -382,7 +382,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.BSC_Title.HasLengthBetween(1, 100),
                     i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
                 .Validate(i => i.Ct > 0,
-                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 0)))
+                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 1)))
                 .IsValid();
 
             bool isGiftSendingsUnique = isGiftSendingsValid && input.GiftSendings

@@ -1102,7 +1102,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                         int reservedCount = DC.Resver_Device
                             .Where(rd => crossingResverDeviceIds.Contains(rd.RDID))
-                            .Sum(rd => rd.Ct);
+                            .Sum(rd => (int?)rd.Ct) ?? 0;
 
                         // 總可用數量，取用
                         // 1. 該設備在此場地的數量

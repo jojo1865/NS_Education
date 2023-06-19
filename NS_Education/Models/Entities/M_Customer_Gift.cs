@@ -12,23 +12,21 @@ namespace NS_Education.Models.Entities
     using System;
     using System.Collections.Generic;
     
-    public partial class CustomerGift
+    public partial class M_Customer_Gift
     {
-        public int CGID { get; set; }
+        public int MID { get; set; }
         public int CID { get; set; }
-        public int Year { get; set; }
-        public System.DateTime SendDate { get; set; }
-        public int BSCID { get; set; }
-        public string Title { get; set; }
+        public int GSID { get; set; }
+        public Nullable<int> CVID { get; set; }
         public int Ct { get; set; }
         public string Note { get; set; }
-        public bool DeleteFlag { get; set; }
         public System.DateTime CreDate { get; set; }
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
     
-        public virtual B_StaticCode B_StaticCode { get; set; }
         public virtual Customer Customer { get; set; }
+        public virtual CustomerVisit CustomerVisit { get; set; }
+        public virtual GiftSending GiftSending { get; set; }
     }
 }

@@ -34,7 +34,6 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<B_StaticCode> B_StaticCode { get; set; }
         public virtual DbSet<BusinessUser> BusinessUser { get; set; }
         public virtual DbSet<Customer> Customer { get; set; }
-        public virtual DbSet<CustomerGift> CustomerGift { get; set; }
         public virtual DbSet<CustomerQuestion> CustomerQuestion { get; set; }
         public virtual DbSet<CustomerVisit> CustomerVisit { get; set; }
         public virtual DbSet<D_Company> D_Company { get; set; }
@@ -45,11 +44,13 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<D_PayType> D_PayType { get; set; }
         public virtual DbSet<D_TimeSpan> D_TimeSpan { get; set; }
         public virtual DbSet<D_Zip> D_Zip { get; set; }
+        public virtual DbSet<GiftSending> GiftSending { get; set; }
         public virtual DbSet<GroupData> GroupData { get; set; }
         public virtual DbSet<M_Address> M_Address { get; set; }
         public virtual DbSet<M_Contect> M_Contect { get; set; }
         public virtual DbSet<M_Customer_BusinessUser> M_Customer_BusinessUser { get; set; }
         public virtual DbSet<M_Customer_Category> M_Customer_Category { get; set; }
+        public virtual DbSet<M_Customer_Gift> M_Customer_Gift { get; set; }
         public virtual DbSet<M_Department_Category> M_Department_Category { get; set; }
         public virtual DbSet<M_Group_Menu> M_Group_Menu { get; set; }
         public virtual DbSet<M_Group_User> M_Group_User { get; set; }

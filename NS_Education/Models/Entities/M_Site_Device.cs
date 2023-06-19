@@ -20,7 +20,7 @@ namespace NS_Education.Models.Entities
         public int Ct { get; set; }
         public System.DateTime CreDate { get; set; }
         public int CreUID { get; set; }
-        public int UpdDate { get; set; }
+        public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
     
         public virtual B_Device B_Device { get; set; }

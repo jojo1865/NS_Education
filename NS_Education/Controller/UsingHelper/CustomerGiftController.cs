@@ -151,7 +151,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             return await Task.FromResult(new CustomerGift_GetInfoById_Output_APIItem
             {
-                GSID = 0,
+                GSID = entity.GSID,
                 Year = entity.Year,
                 SendDate = entity.SendDate.ToFormattedStringDate(),
                 BSCID = entity.BSCID,

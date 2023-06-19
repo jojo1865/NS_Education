@@ -161,6 +161,9 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(cv => cv.B_StaticCode)
                 .Include(cv => cv.B_StaticCode1)
                 .Include(cv => cv.BusinessUser)
+                .Include(cv => cv.M_Customer_Gift)
+                .Include(cv => cv.M_Customer_Gift.Select(mcg => mcg.GiftSending))
+                .Include(cv => cv.M_Customer_Gift.Select(mcg => mcg.GiftSending.B_StaticCode))
                 .Where(cv => cv.CVID == id);
         }
 
@@ -178,7 +181,8 @@ namespace NS_Education.Controller.UsingHelper
                 C_List = await DC.Customer.GetCustomerSelectableWithHasReservation(entity.CID),
                 BSCID = entity.BSCID,
                 BSC_Title = entity.B_StaticCode1?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType, entity.BSCID),
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType,
+                    entity.BSCID),
                 BUID = entity.BUID,
                 BU_Name = entity.BusinessUser?.Name ?? "",
                 BU_List = await GetSelectedBusinessUserList(entity.BUID),
@@ -188,12 +192,29 @@ namespace NS_Education.Controller.UsingHelper
                 Description = entity.Description ?? "",
                 AfterNote = entity.AfterNote ?? "",
                 HasReservation = hasReservation,
-                BSCID15 = hasReservation ? null : entity.BSCID15,
-                BSCID15_Title = (hasReservation ? null : entity.B_StaticCode?.Title) ?? "",
+                BSCID15 = hasReservation
+                    ? null
+                    : entity.BSCID15,
+                BSCID15_Title = (hasReservation
+                                    ? null
+                                    : entity.B_StaticCode?.Title) ??
+                                "",
                 BSCID15_List = hasReservation
                     ? new List<BaseResponseRowForSelectable>()
                     : await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason,
-                        entity.BSCID15 ?? 0)
+                        entity.BSCID15 ?? 0),
+                GiftSendings = entity.M_Customer_Gift.Select(mcg =>
+                    new CustomerVisit_GetInfoById_GiftSendings_Row_APIItem
+                    {
+                        MID = mcg.MID,
+                        SendDate = mcg.GiftSending.SendDate.ToFormattedStringDate(),
+                        Year = mcg.GiftSending.Year,
+                        BSCID = mcg.GiftSending.BSCID,
+                        BSC_Code = mcg.GiftSending.B_StaticCode?.Code ?? "",
+                        BSC_Title = mcg.GiftSending.B_StaticCode?.Title ?? "",
+                        Ct = mcg.Ct,
+                        Note = mcg.Note ?? ""
+                    }).ToList()
             };
         }
 

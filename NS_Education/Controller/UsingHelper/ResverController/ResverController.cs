@@ -1035,7 +1035,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 先一次查完所有 BDID
             IEnumerable<Resver_Submit_DeviceItem_Input_APIItem> allDeviceItems =
                 input.SiteItems.SelectMany(si => si.DeviceItems).ToArray();
-            var inputDeviceIds = allDeviceItems.Select(di => di.BDID);
+            IEnumerable<int> inputDeviceIds = allDeviceItems
+                .Select(di => di.BDID)
+                .AsEnumerable();
 
             Dictionary<int, B_Device> devices = await DC.B_Device
                 .Include(bd => bd.Resver_Device)
@@ -1089,7 +1091,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                             // 存到記憶體，因為接下來又要查 DB 了
                             .ToArrayAsync();
 
-                        IEnumerable<int> otherResverDeviceIds = otherResverDevices.Select(ord => ord.RDID);
+                        IEnumerable<int> otherResverDeviceIds = otherResverDevices
+                            .Select(ord => ord.RDID)
+                            .AsEnumerable();
 
                         // 選出它們的 RTS，當發現重疊時段時，計入 reservedCount
                         IEnumerable<int> crossingResverDeviceIds = DC.M_Resver_TimeSpan
@@ -1109,17 +1113,23 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         // 2. 該設備在此場地之子場地的數量
                         // 之總和
 
-                        // 取得所有子場地的 BSIDs
-                        var childSites = DC.M_SiteGroup.Where(msg => msg.MasterID == siteItem.BSID)
+                        int totalCt = devices[deviceItem.BDID].M_Site_Device
+                            .Where(msd => msd.BSID == siteItem.BSID)
+                            .Sum(msd => (int?)msd.Ct) ?? 0;
+
+                        // 所有子場地此設備的庫存
+                        int implicitCt = await DC.M_SiteGroup
+                            .Include(msg => msg.B_SiteData1)
+                            .Include(msg => msg.B_SiteData1.M_Site_Device)
+                            .Where(msg => msg.MasterID == siteItem.BSID)
+                            .Where(msg => msg.ActiveFlag && !msg.DeleteFlag)
                             .Select(msg => msg.B_SiteData1)
                             .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
-                            .Select(sd => sd.BSID)
-                            .Distinct()
-                            .ToHashSet();
+                            .SelectMany(sd => sd.M_Site_Device)
+                            .Where(msd => msd.BDID == deviceItem.BDID)
+                            .SumAsync(msd => (int?)msd.Ct) ?? 0;
 
-                        int totalCt = devices[deviceItem.BDID].M_Site_Device
-                            .Where(msd => msd.BSID == siteItem.BSID || childSites.Contains(msd.BSID))
-                            .Sum(msd => (int?)msd.Ct) ?? 0;
+                        totalCt += implicitCt;
 
                         if (totalCt - reservedCount >= deviceItem.Ct) continue;
 
@@ -1349,45 +1359,37 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             bool isAdd = SubmitIsAdd(input);
             IList<object> entitiesToAdd = new List<object>();
 
-            using (var transaction = DC.Database.BeginTransaction())
+            // 取得主資料
+            Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
+
+            // 已結帳時，只允許處理預約回饋紀錄的值
+            if (isAdd || head.B_StaticCode1.Code != ReserveHeadState.FullyPaid)
             {
-                // 取得主資料
-                Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
-
-                // 已結帳時，只允許處理預約回饋紀錄的值
-                if (isAdd || head.B_StaticCode1.Code != ReserveHeadState.FullyPaid)
+                SubmitPopulateHeadValues(input, head);
+                // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
+                if (head.RHID == 0)
                 {
-                    SubmitPopulateHeadValues(input, head);
-                    // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
-                    if (head.RHID == 0)
-                    {
-                        await DC.AddAsync(head);
-                        await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
-                    }
-
-                    // 清理所有跟這張預約單有關的 ResverTimeSpan
-                    DC.M_Resver_TimeSpan.RemoveRange(head.M_Resver_TimeSpan);
-
-                    // 開始寫入值
-                    SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
-                    await SubmitPopulateHeadSiteItems(input, head, entitiesToAdd);
-                    SubmitPopulateHeadOtherItems(input, head, entitiesToAdd);
-                    SubmitPopulateHeadBillItems(input, head, entitiesToAdd);
+                    await DC.AddAsync(head);
+                    await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
                 }
 
-                SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
+                // 清理所有跟這張預約單有關的 ResverTimeSpan
+                DC.M_Resver_TimeSpan.RemoveRange(head.M_Resver_TimeSpan);
 
-                // 寫入 Db
-                await DC.AddRangeAsync(entitiesToAdd);
-                // 這裡就手動 SaveChanges，以便作 transaction 管理
-                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
-
-                // 如果沒有錯誤，才作 commit
-                if (!HasError())
-                    transaction.Commit();
-
-                return head;
+                // 開始寫入值
+                SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
+                await SubmitPopulateHeadSiteItems(input, head, entitiesToAdd);
+                SubmitPopulateHeadOtherItems(input, head, entitiesToAdd);
+                SubmitPopulateHeadBillItems(input, head, entitiesToAdd);
             }
+
+            SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
+
+            // 寫入 Db
+            await DC.AddRangeAsync(entitiesToAdd);
+            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+
+            return head;
         }
 
         private void AddErrorNotThisHead(int itemId, string itemName, int dataHeadId)

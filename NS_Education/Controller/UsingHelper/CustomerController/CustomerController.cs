@@ -340,7 +340,39 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidateNoSameCodeExistingForRevive(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateNoSameCodeExistingForRevive(DeleteItem_Input_APIItem input)
+        {
+            // 針對復活的資料，檢查是否有任何同樣代號的資料正處於非刪除狀態
+            // 如果有，不允許復活
+
+            IEnumerable<int?> reviveIds = input.Items
+                .Where(i => i.DeleteFlag == false)
+                .Select(i => i.Id)
+                .Distinct();
+
+            Dictionary<string, int> reviveData = await DC.Customer
+                .Where(c => c.DeleteFlag)
+                .Where(c => reviveIds.Contains(c.CID))
+                .ToDictionaryAsync(c => c.Code, c => c.CID);
+
+            HashSet<string> reviveCodes = reviveData.Keys.ToHashSet();
+
+            Customer[] duplicateCodeData = await DC.Customer
+                .Where(c => !c.DeleteFlag && reviveCodes.Contains(c.Code))
+                .ToArrayAsync();
+
+            foreach (Customer dupe in duplicateCodeData)
+            {
+                AddError(AlreadyExists($"客戶代號（{dupe.Code}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<Customer> DeleteItemsQuery(IEnumerable<int> ids)

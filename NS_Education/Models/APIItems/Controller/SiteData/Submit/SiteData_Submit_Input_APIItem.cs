@@ -25,5 +25,8 @@ namespace NS_Education.Models.APIItems.Controller.SiteData.Submit
 
         public List<SiteData_Submit_Input_GroupList_Row_APIItem> GroupList { get; set; } =
             new List<SiteData_Submit_Input_GroupList_Row_APIItem>();
+
+        public List<SiteData_Submit_Input_Devices_Row_APIItem> Devices { get; set; } =
+            new List<SiteData_Submit_Input_Devices_Row_APIItem>();
     }
 }

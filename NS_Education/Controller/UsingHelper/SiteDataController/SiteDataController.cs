@@ -396,7 +396,17 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
-            return isValid;
+            bool isDevicesValid = isValid && await input.Devices.StartValidateElements()
+                .Validate(d => d.BSID == 0, () => AddError(NotEqual("設備的場地 ID", 0)))
+                .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
+                    d => AddError(NotFound($"設備 ID（{d.BDID}）")))
+                .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", 0)))
+                .IsValid();
+
+            bool isDevicesUnique = isDevicesValid &&
+                                   input.Devices.Select(d => d.BDID).Distinct().Count() == input.Devices.Count;
+
+            return isValid && isDevicesValid && isDevicesUnique;
         }
 
         public async Task<B_SiteData> SubmitCreateData(SiteData_Submit_Input_APIItem input)
@@ -427,6 +437,12 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     ActiveFlag = true
                 }).ToArray()
             };
+
+            newEntry.M_Site_Device = input.Devices.Select(d => new M_Site_Device
+            {
+                BDID = d.BDID,
+                Ct = d.Ct
+            }).ToList();
 
             return await Task.FromResult(newEntry);
         }
@@ -463,19 +479,30 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
-            return isValid;
+            bool isDevicesValid = isValid && await input.Devices.StartValidateElements()
+                .Validate(d => d.BSID == input.BSID, () => AddError(NotEqual("設備的場地 ID", input.BSID)))
+                .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
+                    d => AddError(NotFound($"設備 ID（{d.BDID}）")))
+                .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", 0)))
+                .IsValid();
+
+            bool isDevicesUnique = isDevicesValid &&
+                                   input.Devices.Select(d => d.BDID).Distinct().Count() == input.Devices.Count;
+
+            return isValid && isDevicesValid && isDevicesUnique;
         }
 
         public IQueryable<B_SiteData> SubmitEditQuery(SiteData_Submit_Input_APIItem input)
         {
             return DC.B_SiteData
                 .Include(sd => sd.M_SiteGroup)
+                .Include(sd => sd.M_Site_Device)
                 .Where(sd => sd.BSID == input.BSID);
         }
 
         public void SubmitEditUpdateDataFields(B_SiteData data, SiteData_Submit_Input_APIItem input)
         {
-            // 1. 將所有舊資料刪除
+            // 1. 將所有 SiteGroup 的舊資料刪除
 
             // 先找出已存在關係資料的 BSID
             var inputBySiteIds = input.GroupList.ToDictionary(item => item.BSID, item => item);
@@ -487,7 +514,20 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             DC.M_SiteGroup.RemoveRange(data.M_SiteGroup.Except(alreadyExistingInputs));
 
             var alreadyExistingInputsIds = alreadyExistingInputs.Select(aei => aei.GroupID);
-            var newInputs = input.GroupList.Where(item => !alreadyExistingInputsIds.Contains(item.BSID));
+            var newSiteGroupInputs = input.GroupList.Where(item => !alreadyExistingInputsIds.Contains(item.BSID));
+
+            // 2. 將所有 SiteDevice 的舊資料刪除
+            // 先找出已存在同樣 BDID 的資料
+            var inputByDeviceIds = input.Devices.ToDictionary(item => item.BDID, item => item);
+            var alreadyExistingDevices = data.M_Site_Device
+                .Where(msd => inputByDeviceIds.ContainsKey(msd.BDID))
+                .ToArray();
+
+            var alreadyExistingDeviceIds = alreadyExistingDevices.Select(aed => aed.BDID);
+            var newDeviceInputs = input.Devices.Where(item => !alreadyExistingDeviceIds.Contains(item.BDID));
+
+            // 山除所有 alreadyExistingDevices 以外的資料
+            DC.M_Site_Device.RemoveRange(data.M_Site_Device.Except(alreadyExistingDevices));
 
             // 3. 修改資料
             data.BCID = input.BCID;
@@ -508,7 +548,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.PhoneExt3 = input.PhoneExt3;
             data.Note = input.Note;
 
-            // 把舊資料改好
+            // 把 M_SiteGroup 的舊資料改好
             foreach (M_SiteGroup siteGroup in data.M_SiteGroup)
             {
                 if (!inputBySiteIds.ContainsKey(siteGroup.GroupID))
@@ -521,8 +561,19 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 siteGroup.DeleteFlag = false;
             }
 
-            // 加入新資料
-            data.M_SiteGroup = data.M_SiteGroup.Concat(newInputs
+            // same goes for devices
+            foreach (M_Site_Device siteDevice in data.M_Site_Device)
+            {
+                if (!inputByDeviceIds.ContainsKey(siteDevice.BDID))
+                    continue;
+
+                SiteData_Submit_Input_Devices_Row_APIItem item = inputByDeviceIds[siteDevice.BDID];
+
+                siteDevice.Ct = item.Ct;
+            }
+
+            // 加入 M_SiteGroup 的新資料
+            data.M_SiteGroup = data.M_SiteGroup.Concat(newSiteGroupInputs
                     .Select(item => new M_SiteGroup
                     {
                         GroupID = item.BSID,
@@ -530,6 +581,16 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                         ActiveFlag = true
                     }))
                 .ToArray();
+
+            // 加入 M_Site_Device 的新資料
+            data.M_Site_Device = data.M_Site_Device.Concat(newDeviceInputs
+                .Select(item => new M_Site_Device
+                {
+                    BSID = item.BSID,
+                    BDID = item.BDID,
+                    Ct = item.Ct
+                })
+            ).ToArray();
         }
 
         #endregion

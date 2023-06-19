@@ -77,6 +77,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(d => d.B_StaticCode)
                 .Include(d => d.B_OrderCode)
                 .Include(d => d.D_Hall)
+                .Include(d => d.M_Site_Device)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -113,7 +114,7 @@ namespace NS_Education.Controller.UsingHelper
                 DH_Title = entity.D_Hall?.TitleC ?? entity.D_Hall?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
-                Ct = entity.Ct,
+                Ct = entity.M_Site_Device.Sum(msd => msd.Ct),
                 UnitPrice = entity.UnitPrice,
                 InPrice = entity.InPrice,
                 OutPrice = entity.OutPrice,
@@ -143,6 +144,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(d => d.B_StaticCode)
                 .Include(d => d.B_OrderCode)
                 .Include(d => d.D_Hall)
+                .Include(d => d.M_Site_Device)
                 .Where(d => d.BDID == id);
         }
 
@@ -166,7 +168,7 @@ namespace NS_Education.Controller.UsingHelper
                 DH_List = await DC.D_Hall.GetHallSelectable(entity.DHID),
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
-                Ct = entity.Ct,
+                Ct = entity.M_Site_Device.Sum(msd => msd.Ct),
                 UnitPrice = entity.UnitPrice,
                 InPrice = entity.InPrice,
                 OutPrice = entity.OutPrice,
@@ -264,7 +266,6 @@ namespace NS_Education.Controller.UsingHelper
                 DHID = input.DHID,
                 Code = input.Code,
                 Title = input.Title,
-                Ct = input.Ct,
                 UnitPrice = input.UnitPrice,
                 InPrice = input.InPrice,
                 OutPrice = input.OutPrice,
@@ -319,7 +320,6 @@ namespace NS_Education.Controller.UsingHelper
             data.DHID = input.DHID;
             data.Code = input.Code ?? data.Code;
             data.Title = input.Title ?? data.Title;
-            data.Ct = input.Ct;
             data.UnitPrice = input.UnitPrice;
             data.InPrice = input.InPrice;
             data.OutPrice = input.OutPrice;

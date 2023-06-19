@@ -3,7 +3,7 @@ namespace NS_Education.Models.APIItems.Controller.Device.Submit
     public class Device_Submit_Input_APIItem : BaseRequestForSubmit
     {
         public int BDID { get; set; }
-        
+
         public int BCID { get; set; }
 
         public int BSCID { get; set; }
@@ -14,7 +14,6 @@ namespace NS_Education.Models.APIItems.Controller.Device.Submit
 
         public string Code { get; set; }
         public string Title { get; set; }
-        public int Ct { get; set; }
         public int UnitPrice { get; set; }
         public int InPrice { get; set; }
         public int OutPrice { get; set; }

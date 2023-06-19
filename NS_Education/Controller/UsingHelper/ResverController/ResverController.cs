@@ -1072,12 +1072,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     // 每個時段
                     foreach (D_TimeSpan timeSpan in wantedTimeSpans)
                     {
-                        // 計算此設備預約單以外的預約單中，預約了同一設備的總數量
+                        // 計算此設備預約單以外的預約單中，在同一場地預約了同一設備的總數量
                         int reservedCount = DC.Resver_Device
-                            // 選出所有不是這張設備預約單的設備預約單，並且是同一天、未刪除
+                            .Include(rs => rs.Resver_Site)
+                            // 選出所有不是這張設備預約單的設備預約單，同場地，並且是同一天、未刪除
                             .Where(rd => !rd.DeleteFlag)
                             .Where(rd => DbFunctions.TruncateTime(rd.TargetDate) == targetDate.Date)
                             .Where(rd => rd.RDID != deviceItem.RDID)
+                            .Where(rd => rd.Resver_Site.BSID == siteItem.BSID)
                             // 存到記憶體，因為接下來又要查 DB 了
                             .ToArray()
                             // 選出它們的 RTS
@@ -1090,7 +1092,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                             )
                             .Sum(rd => rd.Ct);
 
-                        int totalCt = devices[deviceItem.BDID].Ct;
+                        int totalCt = devices[deviceItem.BDID].M_Site_Device
+                            .Where(msd => msd.BSID == siteItem.BSID)
+                            .Select(msd => msd.Ct)
+                            .FirstOrDefault();
+
                         if (totalCt - reservedCount >= deviceItem.Ct) continue;
 
                         AddError(

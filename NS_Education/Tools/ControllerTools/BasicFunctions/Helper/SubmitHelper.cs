@@ -60,23 +60,32 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                        ? _controller.DC.Database.BeginTransaction(_isolationLevel.Value)
                        : _controller.DC.Database.BeginTransaction())
             {
-                if (_controller.SubmitIsAdd(input))
+                try
                 {
-                    if (await _controller.SubmitAddValidateInput(input))
-                        await _SubmitAdd(input);
-                    else if (!_controller.HasError())
-                        _controller.AddError(SubmitAddValidateFailed);
+                    if (_controller.SubmitIsAdd(input))
+                    {
+                        if (await _controller.SubmitAddValidateInput(input))
+                            await _SubmitAdd(input);
+                        else if (!_controller.HasError())
+                            _controller.AddError(SubmitAddValidateFailed);
+                    }
+                    else
+                    {
+                        if (await _controller.SubmitEditValidateInput(input))
+                            await _SubmitEdit(input);
+                        else if (!_controller.HasError())
+                            _controller.AddError(SubmitEditValidateFailed);
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    if (await _controller.SubmitEditValidateInput(input))
-                        await _SubmitEdit(input);
-                    else if (!_controller.HasError())
-                        _controller.AddError(SubmitEditValidateFailed);
+                    _controller.AddError(UpdateFailed(e));
                 }
 
                 if (!_controller.HasError())
                     transaction.Commit();
+                else
+                    transaction.Rollback();
             }
 
             // 3. 回傳通用回傳訊息格式。

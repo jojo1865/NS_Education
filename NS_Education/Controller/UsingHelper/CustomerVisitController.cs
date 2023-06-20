@@ -323,7 +323,7 @@ namespace NS_Education.Controller.UsingHelper
                 BSCID = input.BSCID,
                 BUID = input.BUID,
                 TargetTitle = input.TargetTitle,
-                VisitDate = visitDate,
+                VisitDate = visitDate.Date,
                 Title = input.Title,
                 Description = input.Description,
                 AfterNote = input.AfterNote,
@@ -414,7 +414,7 @@ namespace NS_Education.Controller.UsingHelper
             data.TargetTitle = input.TargetTitle;
 
             input.VisitDate.TryParseDateTime(out DateTime visitDate);
-            data.VisitDate = visitDate;
+            data.VisitDate = visitDate.Date;
 
             data.Title = input.Title;
             data.Description = input.Description;

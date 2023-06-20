@@ -328,22 +328,20 @@ namespace NS_Education.Controller.UsingHelper
                 Description = input.Description,
                 AfterNote = input.AfterNote,
                 BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default,
-                M_Customer_Gift = input.GiftSendings.Any()
-                    ? input.GiftSendings.Select(i => new M_Customer_Gift
+                M_Customer_Gift = input.GiftSendings.Select(i => new M_Customer_Gift
+                {
+                    CID = input.CID,
+                    Ct = i.Ct,
+                    Note = i.Note,
+                    GiftSending = new GiftSending
                     {
-                        CID = input.CID,
-                        Ct = i.Ct,
-                        Note = i.Note,
-                        GiftSending = new GiftSending
-                        {
-                            Year = i.Year,
-                            SendDate = i.SendDate.ParseDateTime().Date,
-                            BSCID = i.BSCID,
-                            Title = i.Title,
-                            Note = i.Note
-                        }
-                    }).ToList()
-                    : new List<M_Customer_Gift>()
+                        Year = i.Year,
+                        SendDate = i.SendDate.ParseDateTime().Date,
+                        BSCID = i.BSCID,
+                        Title = i.Title,
+                        Note = i.Note
+                    }
+                }).ToList()
             });
         }
 
@@ -428,22 +426,20 @@ namespace NS_Education.Controller.UsingHelper
             if (toRemove.Any())
                 DC.GiftSending.RemoveRange(toRemove);
 
-            data.M_Customer_Gift = input.GiftSendings.Any()
-                ? input.GiftSendings.Select(i => new M_Customer_Gift
+            data.M_Customer_Gift = input.GiftSendings.Select(i => new M_Customer_Gift
+            {
+                CID = input.CID,
+                Ct = i.Ct,
+                Note = i.Note,
+                GiftSending = new GiftSending
                 {
-                    CID = input.CID,
-                    Ct = i.Ct,
-                    Note = i.Note,
-                    GiftSending = new GiftSending
-                    {
-                        Year = i.Year,
-                        SendDate = i.SendDate.ParseDateTime().Date,
-                        BSCID = i.BSCID,
-                        Title = i.Title,
-                        Note = i.Note
-                    }
-                }).ToList()
-                : new List<M_Customer_Gift>();
+                    Year = i.Year,
+                    SendDate = i.SendDate.ParseDateTime().Date,
+                    BSCID = i.BSCID,
+                    Title = i.Title,
+                    Note = i.Note
+                }
+            }).ToList();
         }
 
         #endregion

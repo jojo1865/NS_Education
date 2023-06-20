@@ -290,7 +290,6 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
-            // 驗證沒有任兩筆資料的贈送日期、贈送年份、禮品 ID 皆相同
             bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
                 .Validate(i => i.SendDate.TryParseDateTime(out _),
                     i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
@@ -298,24 +297,18 @@ namespace NS_Education.Controller.UsingHelper
                     i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     i => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.Title.HasLengthBetween(1, 100),
-                    i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
                 .Validate(i => i.Ct > 0,
                     i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 0)))
                 .IsValid();
 
-            bool isGiftSendingsUnique = isGiftSendingsValid && input.GiftSendings
-                .GroupBy(i => new { DateTime = i.SendDate.ParseDateTime().Date, i.Year, i.BSCID })
-                .Count() == input.GiftSendings.Count;
-
-            if (isGiftSendingsValid && !isGiftSendingsUnique)
-                AddError(CopyNotAllowed("贈送日期、贈送年份、禮品 ID"));
-
-            return isValid && isGiftSendingsValid && isGiftSendingsUnique;
+            return isValid && isGiftSendingsValid;
         }
 
         public async Task<CustomerVisit> SubmitCreateData(CustomerVisit_Submit_Input_APIItem input)
         {
+            IDictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending> inputToGiftSending =
+                await SubmitGetInputToGiftSending(input);
+
             input.VisitDate.TryParseDateTime(out DateTime visitDate);
             return await Task.FromResult(new CustomerVisit
             {
@@ -333,16 +326,39 @@ namespace NS_Education.Controller.UsingHelper
                     CID = input.CID,
                     Ct = i.Ct,
                     Note = i.Note,
-                    GiftSending = new GiftSending
-                    {
-                        Year = i.Year,
-                        SendDate = i.SendDate.ParseDateTime().Date,
-                        BSCID = i.BSCID,
-                        Title = i.Title,
-                        Note = i.Note
-                    }
+                    GiftSending = inputToGiftSending[i]
                 }).ToList()
             });
+        }
+
+        private async Task<IDictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending>>
+            SubmitGetInputToGiftSending(CustomerVisit_Submit_Input_APIItem input)
+        {
+            // 如果有贈禮：
+            // 找出所有相同贈送日期、贈送年份、禮品 ID 的 GiftSending
+            // 如果找不到對應資料，就新增一筆 GiftSending
+
+            IDictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending> inputToGiftSending
+                = new Dictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending>();
+
+            foreach (CustomerVisit_Submit_GiftSendings_Row_APIItem gsi in input.GiftSendings)
+            {
+                DateTime sendDate = gsi.SendDate.ParseDateTime().Date;
+
+                GiftSending data = await DC.GiftSending.Where(gs => !gs.DeleteFlag)
+                    .Where(gs => gs.Year == gsi.Year)
+                    .Where(gs => gs.BSCID == gsi.BSCID)
+                    .Where(gs => DbFunctions.TruncateTime(gs.SendDate) == sendDate)
+                    .FirstOrDefaultAsync() ?? new GiftSending();
+
+                data.Year = gsi.Year;
+                data.SendDate = sendDate;
+                data.BSCID = gsi.BSCID;
+
+                inputToGiftSending[gsi] = data;
+            }
+
+            return inputToGiftSending;
         }
 
         #endregion
@@ -372,7 +388,6 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
-            // 驗證沒有任兩筆資料的贈送日期、贈送年份、禮品 ID 皆相同
             bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
                 .Validate(i => i.SendDate.TryParseDateTime(out _),
                     i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
@@ -380,20 +395,11 @@ namespace NS_Education.Controller.UsingHelper
                     i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     i => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.Title.HasLengthBetween(1, 100),
-                    i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
                 .Validate(i => i.Ct > 0,
                     i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 1)))
                 .IsValid();
 
-            bool isGiftSendingsUnique = isGiftSendingsValid && input.GiftSendings
-                .GroupBy(i => new { DateTime = i.SendDate.ParseDateTime().Date, i.Year, i.BSCID })
-                .Count() == input.GiftSendings.Count;
-
-            if (isGiftSendingsValid && !isGiftSendingsUnique)
-                AddError(CopyNotAllowed("贈送日期、贈送年份、禮品 ID"));
-
-            return isValid && isGiftSendingsValid && isGiftSendingsUnique;
+            return isValid && isGiftSendingsValid;
         }
 
         public IQueryable<CustomerVisit> SubmitEditQuery(CustomerVisit_Submit_Input_APIItem input)
@@ -420,25 +426,19 @@ namespace NS_Education.Controller.UsingHelper
 
             data.BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default;
 
-            // 清理舊的所有 GiftSending 與 M_Customer_Gift，並寫新的。
-            // GiftSending 和 M_Customer_Gift 之間是 CASCADE，所以可以直接 RemoveRange。
-            GiftSending[] toRemove = data.M_Customer_Gift.Select(mcg => mcg.GiftSending).ToArray();
-            if (toRemove.Any())
-                DC.GiftSending.RemoveRange(toRemove);
+            IDictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending> inputToGiftSending =
+                Task.Run(() => SubmitGetInputToGiftSending(input)).Result;
 
+            // 清除對應這筆訪問紀錄的所有的 M_CustomerGift
+            DC.M_Customer_Gift.RemoveRange(data.M_Customer_Gift);
+
+            // 建立新的
             data.M_Customer_Gift = input.GiftSendings.Select(i => new M_Customer_Gift
             {
                 CID = input.CID,
                 Ct = i.Ct,
                 Note = i.Note,
-                GiftSending = new GiftSending
-                {
-                    Year = i.Year,
-                    SendDate = i.SendDate.ParseDateTime().Date,
-                    BSCID = i.BSCID,
-                    Title = i.Title,
-                    Note = i.Note
-                }
+                GiftSending = inputToGiftSending[i]
             }).ToList();
         }
 

@@ -119,7 +119,6 @@ namespace NS_Education.Tools.BeingValidated
         }
 
         /// <inheritdoc />
-        /// <remarks>這將檢查所有元素，只要有任一者滿足條件，就跳過後續驗證。</remarks>
         public IBeingValidated<TElement, TEnumerable> ForceSkipIf(Predicate<TElement> predicate)
         {
             _forceSkipCondition = predicate;

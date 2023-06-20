@@ -76,15 +76,16 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                         else if (!_controller.HasError())
                             _controller.AddError(SubmitEditValidateFailed);
                     }
+
+                    if (!_controller.HasError())
+                        transaction.Commit();
                 }
                 catch (Exception e)
                 {
                     _controller.AddError(UpdateFailed(e));
                 }
 
-                if (!_controller.HasError())
-                    transaction.Commit();
-                else
+                if (_controller.HasError())
                     transaction.Rollback();
             }
 

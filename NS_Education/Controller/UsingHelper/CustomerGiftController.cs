@@ -210,6 +210,9 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitAddValidateInput(CustomerGift_Submit_Input_APIItem input)
         {
+            input.SendDate.TryParseDateTime(out DateTime sendDate);
+            sendDate = sendDate.Date;
+
             bool isValid = await input.StartValidate()
                 .Validate(i => i.GSID == 0, () => AddError(WrongFormat("禮品贈與紀錄 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
@@ -222,17 +225,28 @@ namespace NS_Education.Controller.UsingHelper
 
 
             // 驗證每個 CID 都是獨特的
-            bool isCustomersUnique =
-                isValid && input.Customers.Select(i => i.CID).Distinct().Count() == input.Customers.Count;
+            isValid = isValid && input.Customers.Select(i => i.CID).Distinct().Count() == input.Customers.Count;
 
-            bool isCustomersValid = isCustomersUnique && await input.Customers.StartValidateElements()
+            // 驗證每筆客戶輸入資料正確
+            isValid = isValid && await input.Customers.StartValidateElements()
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     i => AddError(NotFound($"客戶 ID（{i.CID}）")))
                 .Validate(i => i.Ct.IsAboveZero(),
                     i => AddError(OutOfRange($"贈送數量（客戶 ID {i.CID}）", 0)))
                 .IsValid();
 
-            return isValid && isCustomersUnique && isCustomersValid;
+            // 驗證沒有其他贈送年份、贈與日期、禮品 ID 相同的資料
+            bool isUnique = isValid && !await DC.GiftSending.AnyAsync(gs => !gs.DeleteFlag
+                                                                            && gs.GSID != input.GSID
+                                                                            && gs.Year == input.Year
+                                                                            && DbFunctions.TruncateTime(gs.SendDate) ==
+                                                                            sendDate
+                                                                            && gs.BSCID == input.BSCID);
+
+            if (isValid && !isUnique)
+                AddError(AlreadyExists("贈送年份、贈與日期、禮品 ID"));
+
+            return isValid && isUnique;
         }
 
         public async Task<GiftSending> SubmitCreateData(CustomerGift_Submit_Input_APIItem input)
@@ -265,29 +279,43 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> SubmitEditValidateInput(CustomerGift_Submit_Input_APIItem input)
         {
+            input.SendDate.TryParseDateTime(out DateTime sendDate);
+            sendDate = sendDate.Date;
+
             bool isValid = await input.StartValidate()
                 .Validate(i => i.GSID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品贈與紀錄 ID")))
-                .ValidateAsync(async i => await DC.GiftSending.ValidateIdExists(i.GSID, nameof(GiftSending.GSID)),
-                    () => AddError(NotFound("禮品贈與紀錄 ID")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與日期")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     () => AddError(NotFound("禮品 ID")))
                 .Validate(i => i.BSC_Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
+                .Validate(i => i.Customers.Any(), () => AddError(EmptyNotAllowed("此紀錄之對應客戶")))
                 .IsValid();
 
-            // 驗證每個 CID 都是獨特的
-            bool isCustomersUnique =
-                isValid && input.Customers.Select(i => i.CID).Distinct().Count() == input.Customers.Count;
 
-            bool isCustomersValid = isCustomersUnique && await input.Customers.StartValidateElements()
+            // 驗證每個 CID 都是獨特的
+            isValid = isValid && input.Customers.Select(i => i.CID).Distinct().Count() == input.Customers.Count;
+
+            // 驗證每筆客戶輸入資料正確
+            isValid = isValid && await input.Customers.StartValidateElements()
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     i => AddError(NotFound($"客戶 ID（{i.CID}）")))
                 .Validate(i => i.Ct.IsAboveZero(),
                     i => AddError(OutOfRange($"贈送數量（客戶 ID {i.CID}）", 0)))
                 .IsValid();
 
-            return isValid && isCustomersUnique && isCustomersValid;
+            // 驗證沒有其他贈送年份、贈與日期、禮品 ID 相同的資料
+            bool isUnique = isValid && !await DC.GiftSending.AnyAsync(gs => !gs.DeleteFlag
+                                                                            && gs.GSID != input.GSID
+                                                                            && gs.Year == input.Year
+                                                                            && DbFunctions.TruncateTime(gs.SendDate) ==
+                                                                            sendDate
+                                                                            && gs.BSCID == input.BSCID);
+
+            if (isValid && !isUnique)
+                AddError(AlreadyExists("贈送年份、贈與日期、禮品 ID"));
+
+            return isValid && isUnique;
         }
 
         public IQueryable<GiftSending> SubmitEditQuery(CustomerGift_Submit_Input_APIItem input)

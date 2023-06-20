@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
@@ -599,7 +600,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Resver_Submit_Input_APIItem.RHID))]
         public async Task<string> Submit(Resver_Submit_Input_APIItem input)
         {
-            return await _submitHelper.Submit(input);
+            // 預約的商業邏輯較長，且需要驗證許多資料，而且可能有異步而造成多筆訂單同時完成，設備超訂等問題。
+            // 所以，這裡指定 Serializable 做處理。
+            return await _submitHelper.Submit(input, IsolationLevel.Serializable);
         }
 
         public bool SubmitIsAdd(Resver_Submit_Input_APIItem input)

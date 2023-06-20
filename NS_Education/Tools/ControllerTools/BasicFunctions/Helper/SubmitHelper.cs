@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Web;
@@ -38,6 +39,16 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private const string SubmitEditValidateFailed = "欲更新資料的輸入格式不符！";
         private const string SubmitEditNotFound = "查無欲更新的資料！";
 
+        private IsolationLevel? _isolationLevel;
+
+        /// <inheritdoc />
+        public async Task<string> Submit(TSubmitRequest input, IsolationLevel isolationLevel)
+        {
+            _isolationLevel = isolationLevel;
+            return await Submit(input);
+        }
+
+        /// <inheritdoc />
         public async Task<string> Submit(TSubmitRequest input)
         {
             // 1. 依據實作內容判定此次 Submit 為新增還是更新。
@@ -45,7 +56,9 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // |- a. 驗證通過時：執行邏輯。
             // +- b. 驗證失敗，且無錯誤訊息時：自動加上預設錯誤訊息。
 
-            using (var transaction = _controller.DC.Database.BeginTransaction())
+            using (var transaction = _isolationLevel != null
+                       ? _controller.DC.Database.BeginTransaction(_isolationLevel.Value)
+                       : _controller.DC.Database.BeginTransaction())
             {
                 if (_controller.SubmitIsAdd(input))
                 {

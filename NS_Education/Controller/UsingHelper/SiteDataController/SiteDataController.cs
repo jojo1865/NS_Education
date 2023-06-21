@@ -479,17 +479,38 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
-            bool isDevicesValid = isValid && await input.Devices.StartValidateElements()
+            // 判定所有 Device 都是有效資料
+            isValid = isValid && await input.Devices.StartValidateElements()
                 .Validate(d => d.BSID == input.BSID, () => AddError(NotEqual("設備的場地 ID", input.BSID)))
                 .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
                     d => AddError(NotFound($"設備 ID（{d.BDID}）")))
                 .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", 0)))
                 .IsValid();
 
-            bool isDevicesUnique = isDevicesValid &&
-                                   input.Devices.Select(d => d.BDID).Distinct().Count() == input.Devices.Count;
+            // 判定沒有重覆的 BDID
+            bool allDeviceIdUnique =
+                isValid && input.Devices.Select(d => d.BDID).Distinct().Count() == input.Devices.Count;
 
-            return isValid && isDevicesValid && isDevicesUnique;
+            if (isValid && !allDeviceIdUnique)
+                AddError(CopyNotAllowed("設備 ID"));
+
+            isValid = isValid && allDeviceIdUnique;
+
+            // 判定新的 MaxSize 不會造成任何預約單人數溢出
+            bool isMaxSizeSufficient = isValid && await DC.Resver_Site
+                .Include(rs => rs.Resver_Head)
+                .Where(rs => !rs.DeleteFlag)
+                .Where(rs => rs.BSID == input.BSID)
+                .Select(rs => rs.Resver_Head)
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .AllAsync(rh => rh.PeopleCt <= input.MaxSize);
+
+            if (isValid && !isMaxSizeSufficient)
+                AddError("新的「最大容納人數」低於既有進行中預約單的人數！");
+
+            isValid = isValid && isMaxSizeSufficient;
+
+            return isValid;
         }
 
         public IQueryable<B_SiteData> SubmitEditQuery(SiteData_Submit_Input_APIItem input)

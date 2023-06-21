@@ -295,6 +295,8 @@ namespace NS_Education.Controller.UsingHelper
                     i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999),
                     i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
+                .Validate(i => i.Title.HasLengthBetween(1, 100),
+                    i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     i => AddError(NotFound("禮品 ID")))
                 .Validate(i => i.Ct > 0,
@@ -341,19 +343,32 @@ namespace NS_Education.Controller.UsingHelper
             IDictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending> inputToGiftSending
                 = new Dictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending>();
 
+            // 同一次輸入中，可能會有相同的 Year 跟 BSCID
+            // 所以，我們需要暫存一下已知的 GiftSending by Year/BSCID
+            // 確保同一次輸入中相同 Year 跟 BSCID，最終都歸屬到同一個 GiftSending 底下
+
+            IDictionary<(int, int, DateTime), GiftSending> giftSendingCache =
+                new Dictionary<(int Year, int BSCID, DateTime SendDate), GiftSending>();
+
             foreach (CustomerVisit_Submit_GiftSendings_Row_APIItem gsi in input.GiftSendings)
             {
                 DateTime sendDate = gsi.SendDate.ParseDateTime().Date;
 
-                GiftSending data = await DC.GiftSending.Where(gs => !gs.DeleteFlag)
-                    .Where(gs => gs.Year == gsi.Year)
-                    .Where(gs => gs.BSCID == gsi.BSCID)
-                    .Where(gs => DbFunctions.TruncateTime(gs.SendDate) == sendDate)
-                    .FirstOrDefaultAsync() ?? new GiftSending();
+                var data = giftSendingCache.ContainsKey((gsi.Year, gsi.BSCID, sendDate))
+                    ? giftSendingCache[(gsi.Year, gsi.BSCID, sendDate)]
+                    : await DC.GiftSending.Where(gs => !gs.DeleteFlag)
+                        .Where(gs => gs.Year == gsi.Year)
+                        .Where(gs => gs.BSCID == gsi.BSCID)
+                        .Where(gs => DbFunctions.TruncateTime(gs.SendDate) == sendDate)
+                        .FirstOrDefaultAsync() ?? new GiftSending
+                    {
+                        Year = gsi.Year,
+                        SendDate = sendDate,
+                        BSCID = gsi.BSCID,
+                        Title = gsi.Title
+                    };
 
-                data.Year = gsi.Year;
-                data.SendDate = sendDate;
-                data.BSCID = gsi.BSCID;
+                giftSendingCache[(gsi.Year, gsi.BSCID, sendDate)] = data;
 
                 inputToGiftSending[gsi] = data;
             }
@@ -393,6 +408,8 @@ namespace NS_Education.Controller.UsingHelper
                     i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999),
                     i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
+                .Validate(i => i.Title.HasLengthBetween(1, 100),
+                    i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     i => AddError(NotFound("禮品 ID")))
                 .Validate(i => i.Ct > 0,

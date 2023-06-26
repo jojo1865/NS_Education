@@ -199,6 +199,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             if (input.Capacity.IsAboveZero())
                 query = query.Where(sd => sd.MaxSize >= input.Capacity);
 
+            if (input.IsCombinedSite.HasValue)
+                query = query.Where(sd =>
+                    sd.M_SiteGroup.Any(msg => msg.ActiveFlag && !msg.DeleteFlag) == input.IsCombinedSite);
+
             if (input.ActiveFlag.IsInBetween(0, 1))
                 query = query.Where(sd => sd.ActiveFlag == (input.ActiveFlag == 1));
 

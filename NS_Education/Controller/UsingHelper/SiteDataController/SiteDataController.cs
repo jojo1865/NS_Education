@@ -389,7 +389,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                         $"有進行中的預約（預約單號：{resverSite.RHID}）"));
                 else
                     AddError(UnsupportedValue("欲刪除的場地",
-                        $"其中一筆場地的父場地（ID {resverSite.BSID} {resverSite.B_SiteData.Code ?? ""}{resverSite.B_SiteData.Title ?? ""}）有進行中的預約（預約單號：{resverSite.RHID}）"));
+                        $"其中一筆場地的上層場地（ID {resverSite.BSID} {resverSite.B_SiteData.Code ?? ""}{resverSite.B_SiteData.Title ?? ""}）有進行中的預約（預約單號：{resverSite.RHID}）"));
             }
 
             return !HasError();

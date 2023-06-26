@@ -350,7 +350,49 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             if (!await DeleteItemValidateParentAndChild(input))
                 return GetResponseJson();
 
+            // 若場地有正在進行的預約，不予刪除
+            if (!await DeleteItemValidateResverSite(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateResverSite(DeleteItem_Input_APIItem input)
+        {
+            HashSet<int> uniqueDeleteId = input.Items
+                .Where(i => i.DeleteFlag == true && i.Id != null)
+                .Select(i => i.Id.Value)
+                .Distinct()
+                .ToHashSet();
+
+            // 須同時驗證這個場地的父場地的預約單
+            var cantDeleteData = await DC.Resver_Head
+                .Include(rh => rh.Resver_Site)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData.M_SiteGroup1))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Site)
+                .Where(rs => !rs.DeleteFlag)
+                .Where(rs => uniqueDeleteId.Contains(rs.BSID) ||
+                             // 找到這張場地預約單的 BS
+                             // BS -> 作為父場地的 M_SiteGroup -> 任何包含在刪除項中的 GroupID
+                             rs.B_SiteData.M_SiteGroup
+                                 .Where(msg => msg.ActiveFlag && !msg.DeleteFlag)
+                                 .Any(msg => uniqueDeleteId.Contains(msg.GroupID)))
+                .ToArrayAsync();
+
+            foreach (Resver_Site resverSite in cantDeleteData)
+            {
+                if (uniqueDeleteId.Contains(resverSite.BSID))
+                    AddError(UnsupportedValue(
+                        $"欲刪除的場地（ID {resverSite.BSID} {resverSite.B_SiteData.Code ?? ""}{resverSite.B_SiteData.Title ?? ""}）",
+                        $"有進行中的預約（預約單號：{resverSite.RHID}）"));
+                else
+                    AddError(UnsupportedValue("欲刪除的場地",
+                        $"其中一筆場地的父場地（ID {resverSite.BSID} {resverSite.B_SiteData.Code ?? ""}{resverSite.B_SiteData.Title ?? ""}）有進行中的預約（預約單號：{resverSite.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         private async Task<bool> DeleteItemValidateParentAndChild(DeleteItem_Input_APIItem input)

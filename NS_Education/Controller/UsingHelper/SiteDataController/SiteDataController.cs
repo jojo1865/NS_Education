@@ -544,8 +544,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .IsValid();
 
             // 判定沒有重覆的 BDID
+            IEnumerable<int> uniqueDeviceId = input.Devices.Select(d => d.BDID).Distinct();
+
             bool allDeviceIdUnique =
-                isValid && input.Devices.Select(d => d.BDID).Distinct().Count() == input.Devices.Count;
+                isValid && uniqueDeviceId.Count() == input.Devices.Count;
 
             if (isValid && !allDeviceIdUnique)
                 AddError(CopyNotAllowed("設備 ID"));
@@ -566,7 +568,89 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             isValid = isValid && isMaxSizeSufficient;
 
+            isValid = isValid && await SubmitValidateDeviceCt(input);
+
             return isValid;
+        }
+
+        private async Task<bool> SubmitValidateDeviceCt(SiteData_Submit_Input_APIItem input)
+        {
+            // 判定設備數量都會足夠
+            // |- a. 計算所有所需的 device Ct
+            // +- b. 對照 input device
+
+            // 父場地可以用子場地的設備
+            // 子場地不能用父場地的設備
+
+            // 所以 ...
+            // |- a. 需要檢查的 RS：此場地的 RS + 父場地的 RS
+            // +- b. 可用數量：輸入 + 子場地
+
+            var thisSite = await DC.B_SiteData
+                .Include(bs => bs.M_Site_Device)
+                .Include(bs => bs.M_SiteGroup)
+                .Include(bs => bs.M_SiteGroup.Select(msg => msg.B_SiteData1))
+                .Include(bs => bs.M_SiteGroup.Select(msg => msg.B_SiteData1.M_Site_Device))
+                .Include(bs => bs.M_SiteGroup1)
+                .Include(bs => bs.M_SiteGroup1.Select(msg => msg.B_SiteData))
+                .FirstAsync(bs => bs.BSID == input.BSID);
+
+            var parentSites = thisSite
+                .M_SiteGroup1
+                .Where(msg => msg.ActiveFlag && !msg.DeleteFlag)
+                .Select(msg => msg.B_SiteData)
+                .Where(parent => parent.ActiveFlag && !parent.DeleteFlag)
+                .ToDictionary(parent => parent.BSID, parent => parent);
+
+            var parentSiteIds = parentSites.Keys.AsEnumerable();
+
+            var deviceIdToNeededCt = await DC.Resver_Head
+                .Include(rh => rh.Resver_Site)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Site)
+                .Where(rs => !rs.DeleteFlag)
+                .Where(rs => rs.BSID == input.BSID || parentSiteIds.Contains(rs.BSID))
+                .SelectMany(rs => rs.Resver_Device)
+                .Where(rd => !rd.DeleteFlag)
+                .GroupBy(rd => rd.BDID)
+                .ToDictionaryAsync(group => @group.Key, group => @group.Max(rd => rd.Ct));
+
+            // 計算子場地的所有設備可用數量
+            // 先找出所有輸入的子場地資料
+            var inputGroupIds = input.GroupList.Select(gl => gl.BSID);
+
+            var inputGroupData = await DC.B_SiteData
+                .Include(sd => sd.M_Site_Device)
+                .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
+                .Where(sd => inputGroupIds.Contains(sd.BSID))
+                .ToArrayAsync();
+
+            var childSiteDevices = thisSite.M_SiteGroup
+                .Where(msg => msg.ActiveFlag && !msg.DeleteFlag)
+                .Select(msg => msg.B_SiteData1)
+                .Where(child => child.ActiveFlag && !child.DeleteFlag)
+                .Concat(inputGroupData)
+                .Distinct()
+                .SelectMany(child => child.M_Site_Device)
+                .ToArray();
+
+            var childDeviceCt = childSiteDevices
+                .GroupBy(msd => msd.BDID)
+                .ToDictionary(g => g.Key, g => g.Sum(msd => msd.Ct));
+
+            var inputDeviceCt = input.Devices.ToDictionary(d => d.BDID, d => d.Ct);
+
+            bool isDeviceCtValid = deviceIdToNeededCt.StartValidateElements()
+                .Validate(
+                    idToNeedCt =>
+                        inputDeviceCt.GetValueOrDefault(idToNeedCt.Key) +
+                        childDeviceCt.GetValueOrDefault(idToNeedCt.Key) >= idToNeedCt.Value,
+                    idToNeedCt => AddError(OutOfRange($"設備（ID {idToNeedCt.Key}）數量",
+                        idToNeedCt.Value - childDeviceCt.GetValueOrDefault(idToNeedCt.Key))))
+                .IsValid();
+
+            return isDeviceCtValid;
         }
 
         public IQueryable<B_SiteData> SubmitEditQuery(SiteData_Submit_Input_APIItem input)

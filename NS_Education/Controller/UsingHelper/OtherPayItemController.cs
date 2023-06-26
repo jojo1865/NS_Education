@@ -141,7 +141,32 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            if (activeFlag == false && !await ChangeActiveValidateReservation(id))
+                return GetResponseJson();
+
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        private async Task<bool> ChangeActiveValidateReservation(int id)
+        {
+            // 停用時，不得有任何進行中預約單
+            Resver_Other[] cantDeleteData = await DC.Resver_Head
+                .Include(rh => rh.Resver_Other)
+                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Other)
+                .Where(ro => !ro.DeleteFlag)
+                .Where(ro => id == ro.DOPIID)
+                .ToArrayAsync();
+
+            foreach (Resver_Other resverOther in cantDeleteData)
+            {
+                AddError(UnsupportedValue(
+                    $"欲停用的其他收費項目（ID {resverOther.ROID} {resverOther.D_OtherPayItem.Code ?? ""}{resverOther.D_OtherPayItem.Title ?? ""}）",
+                    $"已有進行中預約單（單號 {resverOther.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<D_OtherPayItem> ChangeActiveQuery(int id)
@@ -269,7 +294,18 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
+            // 停用時，檢查進行中預約單
+            if (!input.ActiveFlag)
+                isValid = isValid && await ChangeActiveValidateReservation(input.DOPIID);
+
             // 修改 Ct 時，不得使任何進行中預約單的數量不足
+            isValid = isValid && await SubmitEditValidateCt(input);
+
+            return isValid;
+        }
+
+        private async Task<bool> SubmitEditValidateCt(OtherPayItem_Submit_Input_APIItem input)
+        {
             int neededCt = await DC.Resver_Head
                 .Include(rh => rh.Resver_Other)
                 .Where(ResverHeadExpression.IsOngoingExpression)
@@ -282,11 +318,10 @@ namespace NS_Education.Controller.UsingHelper
 
             if (input.Ct < neededCt)
             {
-                isValid = false;
                 AddError(OutOfRange("數量", $"{neededCt}（進行中預約單之所需數）"));
             }
 
-            return isValid;
+            return !HasError();
         }
 
         public IQueryable<D_OtherPayItem> SubmitEditQuery(OtherPayItem_Submit_Input_APIItem input)

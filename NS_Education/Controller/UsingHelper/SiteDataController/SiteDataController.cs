@@ -748,6 +748,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
+            bool isReservationClear = input.ActiveFlag || isValid && await ChangeActiveValidateResverSite(input.BSID);
+
+            isValid = isValid && isReservationClear;
+
             bool isGroupListValid = await SubmitValidateGroupList(input);
 
             isValid = isValid && isGroupListValid;

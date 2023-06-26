@@ -330,7 +330,38 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            // 若場地本身或其父場地有正在進行的預約，不予停用
+            if (activeFlag == false && !await ChangeActiveValidateResverSite(id))
+                return GetResponseJson();
+
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        private async Task<bool> ChangeActiveValidateResverSite(int id)
+        {
+            var ongoingResverSites = await DC.Resver_Head
+                .Include(rh => rh.Resver_Site)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData.M_SiteGroup))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Site)
+                .Where(rs => !rs.DeleteFlag)
+                // 考慮父場地
+                .Where(rs => rs.BSID == id ||
+                             rs.B_SiteData.ActiveFlag && !rs.B_SiteData.DeleteFlag &&
+                             rs.B_SiteData.M_SiteGroup.Any(msg => msg.GroupID == id))
+                .Distinct()
+                .ToArrayAsync();
+
+            foreach (Resver_Site ongoing in ongoingResverSites)
+            {
+                AddError(ongoing.BSID == id
+                    ? UnsupportedValue($"指定的場地 ID {id}", $"有進行中預約單（預約單號：{ongoing.RHID}）")
+                    : UnsupportedValue($"指定的場地 ID {id}",
+                        $"其上層場地（ID {ongoing.BSID} {ongoing.B_SiteData.Code ?? ""}{ongoing.B_SiteData.Title ?? ""}）有進行中預約單（預約單號：{ongoing.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<B_SiteData> ChangeActiveQuery(int id)

@@ -238,7 +238,35 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            if (activeFlag == false && !await ChangeActiveValidateReservation(id))
+                return GetResponseJson();
+
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        private async Task<bool> ChangeActiveValidateReservation(int id)
+        {
+            var cantDisableData = await DC.Resver_Head
+                .Include(rh => rh.Resver_Site)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_Device)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.Resver_Site)))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Site)
+                .Where(rs => !rs.DeleteFlag)
+                .SelectMany(rs => rs.Resver_Device)
+                .Where(rd => !rd.DeleteFlag)
+                .Where(rd => rd.BDID == id)
+                .ToArrayAsync();
+
+            foreach (Resver_Device resverDevice in cantDisableData)
+            {
+                AddError(UnsupportedValue(
+                    $"欲停用的設備（ID {resverDevice.BDID} {resverDevice.B_Device.Code ?? ""}{resverDevice.B_Device.Title ?? ""}）",
+                    $"已有進行中預約單（單號 {resverDevice.Resver_Site.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<B_Device> ChangeActiveQuery(int id)
@@ -338,7 +366,10 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("廳別 ID")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            if (!input.ActiveFlag)
+                isValid = isValid && await ChangeActiveValidateReservation(input.BDID);
+
+            return isValid;
         }
 
         public IQueryable<B_Device> SubmitEditQuery(Device_Submit_Input_APIItem input)

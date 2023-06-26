@@ -219,7 +219,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與日期")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     () => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.BSC_Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
+                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
                 .Validate(i => i.Customers.Any(), () => AddError(EmptyNotAllowed("此紀錄之對應客戶")))
                 .IsValid();
 
@@ -259,7 +259,7 @@ namespace NS_Education.Controller.UsingHelper
                 Year = input.Year,
                 SendDate = sendDate,
                 BSCID = input.BSCID,
-                Title = input.BSC_Title,
+                Title = input.Title,
                 Note = input.Note,
                 M_Customer_Gift = input.Customers.Select(i => new M_Customer_Gift
                 {
@@ -288,7 +288,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與日期")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     () => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.BSC_Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
+                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
                 .Validate(i => i.Customers.Any(), () => AddError(EmptyNotAllowed("此紀錄之對應客戶")))
                 .IsValid();
 
@@ -341,7 +341,7 @@ namespace NS_Education.Controller.UsingHelper
             data.Year = input.Year;
             data.SendDate = sendDate;
             data.BSCID = input.BSCID;
-            data.Title = input.BSC_Title ?? data.Title;
+            data.Title = input.Title ?? data.Title;
             data.Note = input.Note ?? data.Note;
 
             // 更新舊 M_Customer_Gift

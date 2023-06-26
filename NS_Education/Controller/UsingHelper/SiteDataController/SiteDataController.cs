@@ -480,7 +480,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             if (isAGroup && input.GroupList.Any())
             {
-                AddError(UnsupportedValue("場地 ID", "已為組合場地之子場地"));
+                AddError(UnsupportedValue("場地 ID", "已為組合場地之子場地，不得設置子場地"));
                 return false;
             }
 

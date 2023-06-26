@@ -476,7 +476,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             // B. 不允許目前的場地已經是子場地了，還增加子場地
             bool isAGroup = await DC.M_SiteGroup
-                .AnyAsync(msg => msg.ActiveFlag && !msg.DeleteFlag && msg.GroupID == input.BSID);
+                .Include(msg => msg.B_SiteData)
+                .AnyAsync(msg =>
+                    msg.ActiveFlag && !msg.DeleteFlag && msg.GroupID == input.BSID && !msg.B_SiteData.DeleteFlag);
 
             if (isAGroup && input.GroupList.Any())
             {

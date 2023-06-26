@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NS_Education.Models;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.FinalizeResponseFilter;
 
@@ -117,10 +118,13 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// 回傳一串不支援輸入值時可用的預設錯誤字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
+        /// <param name="reason">不支援的原因</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected string UnsupportedValue(string fieldName)
+        protected string UnsupportedValue(string fieldName, string reason = null)
         {
-            return $"{fieldName} 不支援這個輸入值，請重新確認。";
+            return reason.IsNullOrWhiteSpace()
+                ? $"「{fieldName}」不支援這個輸入值，請重新確認。"
+                : $"「{fieldName}」不支援這個輸入值，原因：「{reason}」。";
         }
 
         /// <summary>

@@ -396,6 +396,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
+            bool isGroupListValid = await SubmitValidateGroupList(input);
+
+            isValid = isValid && isGroupListValid;
+
             bool isDevicesValid = isValid && await input.Devices.StartValidateElements()
                 .Validate(d => d.BSID == 0, () => AddError(NotEqual("設備的場地 ID", 0)))
                 .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
@@ -407,6 +411,54 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                                    input.Devices.Select(d => d.BDID).Distinct().Count() == input.Devices.Count;
 
             return isValid && isDevicesValid && isDevicesUnique;
+        }
+
+        private async Task<bool> SubmitValidateGroupList(SiteData_Submit_Input_APIItem input)
+        {
+            // 驗證場地組合列表
+            // |- a. 檢查是否與主場地 ID 相同
+            // |- b. 檢查是否所有 id 都非重複
+            // |- c. 檢查是否所有 id 都有有效資料
+            // +- d. 檢查是否所有子場地都沒有下一層子場地
+
+            // 主場地 ID 檢查
+            if (input.GroupList.Any(gl => gl.BSID == input.BSID))
+            {
+                AddError(UnsupportedValue("子場地 ID", "不可將主場地設為自己的子場地"));
+                return false;
+            }
+
+            // id 非重複
+            HashSet<int> uniqueSiteIds = input.GroupList.Select(gl => gl.BSID).Distinct().ToHashSet();
+
+            if (uniqueSiteIds.Count != input.GroupList.Count)
+            {
+                AddError(CopyNotAllowed("場地組合子場地 ID"));
+                return false;
+            }
+
+            // id 皆有資料
+            Dictionary<int, B_SiteData> idToData = await DC.B_SiteData
+                .Include(sd => sd.M_SiteGroup)
+                .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
+                .Where(sd => uniqueSiteIds.Contains(sd.BSID))
+                .ToDictionaryAsync(sd => sd.BSID, sd => sd);
+
+            bool allInputSiteExists = uniqueSiteIds.StartValidateElements()
+                .Validate(id => idToData.ContainsKey(id),
+                    id => AddError(NotFound($"場地組合子場地（ID {id}）")))
+                .IsValid();
+
+            if (!allInputSiteExists)
+                return false;
+
+            // 都沒有第三層子場地（不是任何人的父場地）
+            bool allInputSiteLeaf = idToData.Values.StartValidateElements()
+                .Validate(sd => !sd.M_SiteGroup.Any(msg => msg.ActiveFlag && !msg.DeleteFlag),
+                    sd => AddError(UnsupportedValue($"子場地（ID {sd.BSID}）", "已為組合場地")))
+                .IsValid();
+
+            return allInputSiteLeaf;
         }
 
         public async Task<B_SiteData> SubmitCreateData(SiteData_Submit_Input_APIItem input)
@@ -478,6 +530,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Site),
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
+
+            bool isGroupListValid = await SubmitValidateGroupList(input);
+
+            isValid = isValid && isGroupListValid;
 
             // 判定所有 Device 都是有效資料
             isValid = isValid && await input.Devices.StartValidateElements()

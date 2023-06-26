@@ -178,7 +178,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Where(ResverHeadExpression.IsOngoingExpression)
                 .SelectMany(rh => rh.Resver_Other)
                 .Where(ro => !ro.DeleteFlag)
-                .Where(ro => uniqueDeleteId.Contains(ro.ROID))
+                .Where(ro => uniqueDeleteId.Contains(ro.DOPIID))
                 .ToArrayAsync();
 
             foreach (Resver_Other resverOther in cantDeleteData)

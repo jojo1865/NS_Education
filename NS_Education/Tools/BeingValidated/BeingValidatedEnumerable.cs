@@ -32,9 +32,17 @@ namespace NS_Education.Tools.BeingValidated
                 if (NeedForceSkipping(element))
                     continue;
 
-                _inner.Validate(_ => validation.Invoke(element),
-                    _ => onFail?.Invoke(element),
-                    (_, e) => onException?.Invoke(element, e));
+                if (onException == null)
+                {
+                    _inner.Validate(_ => validation.Invoke(element),
+                        _ => onFail?.Invoke(element));
+                }
+                else
+                {
+                    _inner.Validate(_ => validation.Invoke(element),
+                        _ => onFail?.Invoke(element),
+                        (_, e) => onException.Invoke(element, e));
+                }
             }
 
             return this;
@@ -54,8 +62,15 @@ namespace NS_Education.Tools.BeingValidated
                 if (NeedForceSkipping(element))
                     continue;
 
-                _inner.Validate(_ => validation.Invoke(element),
-                    (_, e) => onException?.Invoke(element, e));
+                if (onException == null)
+                {
+                    _inner.Validate(_ => validation.Invoke(element));
+                }
+                else
+                {
+                    _inner.Validate(_ => validation.Invoke(element),
+                        (_, e) => onException.Invoke(element, e));
+                }
             }
 
             return this;
@@ -77,9 +92,17 @@ namespace NS_Education.Tools.BeingValidated
                 if (NeedForceSkipping(element))
                     continue;
 
-                await _inner.ValidateAsync(async _ => await validation.Invoke(element),
-                    _ => onFail?.Invoke(element),
-                    (_, e) => onException?.Invoke(element, e));
+                if (onException == null)
+                {
+                    await _inner.ValidateAsync(async _ => await validation.Invoke(element),
+                        _ => onFail?.Invoke(element));
+                }
+                else
+                {
+                    await _inner.ValidateAsync(async _ => await validation.Invoke(element),
+                        _ => onFail?.Invoke(element),
+                        (_, e) => onException.Invoke(element, e));
+                }
             }
 
             return this;
@@ -100,8 +123,15 @@ namespace NS_Education.Tools.BeingValidated
                 if (NeedForceSkipping(element))
                     continue;
 
-                await _inner.ValidateAsync(async _ => await validation.Invoke(element),
-                    (_, e) => onException?.Invoke(element, e));
+                if (onException == null)
+                {
+                    await _inner.ValidateAsync(async _ => await validation.Invoke(element));
+                }
+                else
+                {
+                    await _inner.ValidateAsync(async _ => await validation.Invoke(element),
+                        (_, e) => onException.Invoke(element, e));
+                }
             }
 
             return this;

@@ -452,13 +452,42 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             if (!allInputSiteExists)
                 return false;
 
-            // 都沒有第三層子場地（不是任何人的父場地）
+            // 都不會造成三層以上場地關係
+
+            // 會造成三層以上場地關係的情況有四種
+            // +-----+           +-----+          +-----+
+            // |  A  |    --->   |  B  |   --->   |  C  |
+            // +-----+           +-----+          +-----+
+            // A: 成為父場地之父
+            // B: (1) 帶父增子、 (2) 帶子增父
+            // C: 成為子場地之子
+
+            // 因為 SiteData.Submit 只有「指定子場地」
+            // 所以只需要處理情況 A 和 B(1)
+
+            // A. 不允許輸入的子場地為任何人的父場地
             bool allInputSiteLeaf = idToData.Values.StartValidateElements()
                 .Validate(sd => !sd.M_SiteGroup.Any(msg => msg.ActiveFlag && !msg.DeleteFlag),
                     sd => AddError(UnsupportedValue($"子場地（ID {sd.BSID}）", "已為組合場地")))
                 .IsValid();
 
-            return allInputSiteLeaf;
+            if (!allInputSiteLeaf)
+                return false;
+
+            // B. 不允許目前的場地已經是子場地了，還增加子場地
+            var thisSite = await DC.B_SiteData
+                .Include(sd => sd.M_SiteGroup1)
+                .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
+                .Where(sd => sd.BSID == input.BSID)
+                .FirstOrDefaultAsync();
+
+            if (thisSite != null && input.GroupList.Any() && thisSite.M_SiteGroup1.Any())
+            {
+                AddError(UnsupportedValue("場地 ID", "已為組合場地之子場地"));
+                return false;
+            }
+
+            return true;
         }
 
         public async Task<B_SiteData> SubmitCreateData(SiteData_Submit_Input_APIItem input)

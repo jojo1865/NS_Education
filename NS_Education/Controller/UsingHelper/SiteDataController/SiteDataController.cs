@@ -475,13 +475,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 return false;
 
             // B. 不允許目前的場地已經是子場地了，還增加子場地
-            var thisSite = await DC.B_SiteData
-                .Include(sd => sd.M_SiteGroup1)
-                .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
-                .Where(sd => sd.BSID == input.BSID)
-                .FirstOrDefaultAsync();
+            bool isAGroup = await DC.M_SiteGroup
+                .AnyAsync(msg => msg.ActiveFlag && !msg.DeleteFlag && msg.GroupID == input.BSID);
 
-            if (thisSite != null && input.GroupList.Any() && thisSite.M_SiteGroup1.Any())
+            if (isAGroup && input.GroupList.Any())
             {
                 AddError(UnsupportedValue("場地 ID", "已為組合場地之子場地"));
                 return false;

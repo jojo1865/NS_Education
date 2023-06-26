@@ -157,7 +157,38 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidateReservation(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
+        {
+            // 刪除時，不得有任何進行中預約單
+            HashSet<int> uniqueDeleteId = input.Items
+                .Where(i => i.DeleteFlag == true && i.Id.HasValue)
+                .Select(i => i.Id.Value)
+                .Distinct()
+                .ToHashSet();
+
+            Resver_Other[] cantDeleteData = await DC.Resver_Head
+                .Include(rh => rh.Resver_Other)
+                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Other)
+                .Where(ro => !ro.DeleteFlag)
+                .Where(ro => uniqueDeleteId.Contains(ro.ROID))
+                .ToArrayAsync();
+
+            foreach (Resver_Other resverOther in cantDeleteData)
+            {
+                AddError(UnsupportedValue(
+                    $"欲刪除的其他收費項目（ID {resverOther.ROID} {resverOther.D_OtherPayItem.Code ?? ""}{resverOther.D_OtherPayItem.Title ?? ""}）",
+                    $"已有進行中預約單（單號 {resverOther.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<D_OtherPayItem> DeleteItemsQuery(IEnumerable<int> ids)

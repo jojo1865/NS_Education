@@ -342,7 +342,119 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            // 驗證刪除或復活時，是否會造成三層以上場地關係
+            if (!await DeleteItemValidateParentAndChild(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateParentAndChild(DeleteItem_Input_APIItem input)
+        {
+            // 會造成三層以上場地關係的情況有四種
+            // +-----+           +-----+          +-----+
+            // |  A  |    --->   |  B  |   --->   |  C  |
+            // +-----+           +-----+          +-----+
+            // A: 成為父場地之父
+            // B: (1) 帶父增子、 (2) 帶子增父
+            // C: 成為子場地之子
+
+            // A: 成為父場地之父
+            // |- 刪除: 不會發生
+            // +- 復活: 需確認原有的子場地是否已經當爸爸了
+
+            // B(1): 帶父增子
+            // |- 刪除: 不會發生
+            // +- 復活: 檢查是否同時有父場地和子場地指向自己
+
+            // B(2): 帶子增父
+            // |- 刪除: 不會發生
+            // +- 復活: 檢查是否同時有父場地和子場地指向自己 (B(1))
+
+            // C: 成為子場地之子
+            // |- 刪除: 不會發生
+            // +- 復活: 需確認原有的父場地是否已經是別人的兒子
+
+            // 所以需要檢查的為復活時，並且是以下兩種情況：
+            // |- a. 原有子場地是否已有子場地
+            // |- b. 原有父場地是否已有父場地
+            // +- c. 復活資料是否同時有子場地和父場地的關係資料
+
+            HashSet<int?> uniqueReviveIds = input.Items
+                .Where(i => i.DeleteFlag == false)
+                .Where(i => i.Id.IsAboveZero())
+                .Select(i => i.Id)
+                .Distinct()
+                .ToHashSet();
+
+            HashSet<int?> uniqueDeleteIds = input.Items
+                .Where(i => i.DeleteFlag == true)
+                .Where(i => i.Id.IsAboveZero())
+                .Select(i => i.Id)
+                .Distinct()
+                .ToHashSet();
+
+            // 找出復活對象的資料
+            var dataToRevive = await DC.B_SiteData
+                .Include(sd => sd.M_SiteGroup)
+                .Include(sd => sd.M_SiteGroup.Select(msg => msg.B_SiteData1))
+                .Include(sd => sd.M_SiteGroup.Select(msg => msg.B_SiteData1.M_SiteGroup))
+                .Include(sd =>
+                    sd.M_SiteGroup.Select(msg => msg.B_SiteData1.M_SiteGroup.Select(childMsg => childMsg.B_SiteData1)))
+                .Include(sd => sd.M_SiteGroup1)
+                .Include(sd => sd.M_SiteGroup1.Select(msg => msg.B_SiteData))
+                .Include(sd => sd.M_SiteGroup1.Select(msg => msg.B_SiteData.M_SiteGroup1))
+                .Include(sd =>
+                    sd.M_SiteGroup1.Select(msg =>
+                        msg.B_SiteData.M_SiteGroup1.Select(parentMsg => parentMsg.B_SiteData)))
+                .Where(sd => sd.DeleteFlag)
+                .Where(sd => uniqueReviveIds.Contains(sd.BSID))
+                .ToDictionaryAsync(sd => sd.BSID, sd => sd);
+
+            // 取得原有子場地與父場地，檢查狀態
+
+            foreach (KeyValuePair<int, B_SiteData> kvp in dataToRevive)
+            {
+                // 檢查其本身的子場地與父場地
+                // |- 如果子場地或父場地在 dataToRevive 的行列中，視為活著的資料做判斷...
+                // +- 如果子場地或父場地在 dataToDelete 的行列中，從判斷中排除...
+
+                // 原有子場地是否已有子場地
+                if (kvp.Value.M_SiteGroup
+                    .Where(msg => !uniqueDeleteIds.Contains(msg.GroupID) && msg.ActiveFlag && !msg.DeleteFlag)
+                    .SelectMany(msg => msg.B_SiteData1.M_SiteGroup)
+                    .Where(childMsg => childMsg.ActiveFlag && !childMsg.DeleteFlag)
+                    .Any(childMsg =>
+                        !childMsg.B_SiteData1.DeleteFlag || uniqueReviveIds.Contains(childMsg.B_SiteData1.BSID)))
+                {
+                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", "此場地在刪除前的原有子場地，現已經是組合場地"));
+                }
+
+                // 原有父場地是否已有父場地
+                if (kvp.Value.M_SiteGroup1
+                    .Where(msg => !uniqueDeleteIds.Contains(msg.MasterID) && msg.ActiveFlag && !msg.DeleteFlag)
+                    .SelectMany(msg => msg.B_SiteData.M_SiteGroup1)
+                    .Where(parentMsg => parentMsg.ActiveFlag && !parentMsg.DeleteFlag)
+                    .Any(parentMsg =>
+                        !parentMsg.B_SiteData.DeleteFlag || uniqueReviveIds.Contains(parentMsg.B_SiteData.BSID)))
+                {
+                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", "此場地在刪除前的原有父場地，現已經是其他組合場地的子場地"));
+                }
+
+                // 復活資料本身，復活後是否同時會有活著的子場地和父場地
+                if (kvp.Value.M_SiteGroup
+                        .Where(msg => !uniqueDeleteIds.Contains(msg.GroupID) && msg.ActiveFlag && !msg.DeleteFlag)
+                        .Any(msg => !msg.B_SiteData1.DeleteFlag || uniqueReviveIds.Contains(msg.B_SiteData1.BSID))
+                    &&
+                    kvp.Value.M_SiteGroup1
+                        .Where(msg => !uniqueDeleteIds.Contains(msg.MasterID) && msg.ActiveFlag && !msg.DeleteFlag)
+                        .Any(msg => !msg.B_SiteData.DeleteFlag || uniqueReviveIds.Contains(msg.B_SiteData.BSID)))
+                {
+                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", "此場地復活後會同時有父場地和子場地"));
+                }
+            }
+
+            return !HasError();
         }
 
         public IQueryable<B_SiteData> DeleteItemsQuery(IEnumerable<int> ids)

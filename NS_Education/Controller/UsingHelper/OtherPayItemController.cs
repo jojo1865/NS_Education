@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -237,7 +238,24 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            // 修改 Ct 時，不得使任何進行中預約單的數量不足
+            int neededCt = await DC.Resver_Head
+                .Include(rh => rh.Resver_Other)
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Other)
+                .Where(ro => !ro.DeleteFlag)
+                .Where(ro => ro.DOPIID == input.DOPIID)
+                .OrderByDescending(ro => ro.Ct)
+                .Select(ro => ro.Ct)
+                .FirstOrDefaultAsync();
+
+            if (input.Ct < neededCt)
+            {
+                isValid = false;
+                AddError(OutOfRange("數量", $"{neededCt}（進行中預約單之所需數）"));
+            }
+
+            return isValid;
         }
 
         public IQueryable<D_OtherPayItem> SubmitEditQuery(OtherPayItem_Submit_Input_APIItem input)

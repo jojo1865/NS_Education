@@ -188,7 +188,41 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidateReservation(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
+        {
+            var uniqueDeleteId = input.Items.Where(i => i.DeleteFlag == true && i.Id != null)
+                .Select(i => i.Id.Value)
+                .Distinct()
+                .ToHashSet();
+
+            // 欲刪除的設備不能有任何進行中預約單
+            var cantDeleteData = await DC.Resver_Head
+                .Include(rh => rh.Resver_Site)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_Device)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.Resver_Site)))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Site)
+                .Where(rs => !rs.DeleteFlag)
+                .SelectMany(rs => rs.Resver_Device)
+                .Where(rd => !rd.DeleteFlag)
+                .Where(rd => uniqueDeleteId.Contains(rd.BDID))
+                .ToArrayAsync();
+
+            foreach (Resver_Device resverDevice in cantDeleteData)
+            {
+                AddError(UnsupportedValue(
+                    $"欲刪除的設備（ID {resverDevice.BDID} {resverDevice.B_Device.Code ?? ""}{resverDevice.B_Device.Title ?? ""}）",
+                    $"已有進行中預約單（單號 {resverDevice.Resver_Site.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<B_Device> DeleteItemsQuery(IEnumerable<int> ids)

@@ -791,7 +791,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                         inputDeviceCt.GetValueOrDefault(idToNeedCt.Key) +
                         childDeviceCt.GetValueOrDefault(idToNeedCt.Key) >= idToNeedCt.Value,
                     idToNeedCt => AddError(OutOfRange($"設備（ID {idToNeedCt.Key}）數量",
-                        idToNeedCt.Value - childDeviceCt.GetValueOrDefault(idToNeedCt.Key))))
+                        $"{idToNeedCt.Value - childDeviceCt.GetValueOrDefault(idToNeedCt.Key)}（進行中之預約單的預約數量）")))
                 .IsValid();
 
             return isDeviceCtValid;

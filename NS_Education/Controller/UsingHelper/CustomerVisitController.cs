@@ -212,7 +212,7 @@ namespace NS_Education.Controller.UsingHelper
                         BSCID = mcg.GiftSending.BSCID,
                         BSC_Code = mcg.GiftSending.B_StaticCode?.Code ?? "",
                         BSC_Title = mcg.GiftSending.B_StaticCode?.Title ?? "",
-                        Title = mcg.GiftSending.Title ?? "",
+                        Title = mcg.GiftSending.B_StaticCode?.Title ?? "",
                         Ct = mcg.Ct,
                         Note = mcg.Note ?? ""
                     }).ToList()
@@ -295,8 +295,6 @@ namespace NS_Education.Controller.UsingHelper
                     i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999),
                     i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
-                .Validate(i => i.Title.HasLengthBetween(1, 100),
-                    i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     i => AddError(NotFound("禮品 ID")))
                 .Validate(i => i.Ct > 0,
@@ -364,8 +362,7 @@ namespace NS_Education.Controller.UsingHelper
                     {
                         Year = gsi.Year,
                         SendDate = sendDate,
-                        BSCID = gsi.BSCID,
-                        Title = gsi.Title
+                        BSCID = gsi.BSCID
                     };
 
                 giftSendingCache[(gsi.Year, gsi.BSCID, sendDate)] = data;
@@ -408,8 +405,6 @@ namespace NS_Education.Controller.UsingHelper
                     i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
                 .Validate(i => i.Year.IsInBetween(1911, 9999),
                     i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
-                .Validate(i => i.Title.HasLengthBetween(1, 100),
-                    i => AddError(LengthOutOfRange($"禮品名稱（禮品 ID {i.BSCID}）", 1, 100)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     i => AddError(NotFound("禮品 ID")))
                 .Validate(i => i.Ct > 0,

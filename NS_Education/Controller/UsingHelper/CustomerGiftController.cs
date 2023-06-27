@@ -86,7 +86,7 @@ namespace NS_Education.Controller.UsingHelper
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
-                query = query.Where(mcg => mcg.GiftSending.Title.Contains(input.Keyword));
+                query = query.Where(mcg => mcg.GiftSending.B_StaticCode.Title.Contains(input.Keyword));
 
             if (input.CustomerTitleC.HasContent())
                 query = query.Where(mcg => mcg.Customer.TitleC.Contains(input.CustomerTitleC));
@@ -120,7 +120,7 @@ namespace NS_Education.Controller.UsingHelper
                 BSCID = entity.GiftSending.BSCID,
                 BSC_Code = entity.GiftSending.B_StaticCode?.Code ?? "",
                 BSC_Title = entity.GiftSending.B_StaticCode?.Title ?? "",
-                Title = entity.GiftSending.Title ?? "",
+                Title = entity.GiftSending.B_StaticCode?.Title ?? "",
                 Ct = entity.Ct,
                 Note = entity.Note ?? ""
             });
@@ -159,7 +159,7 @@ namespace NS_Education.Controller.UsingHelper
                 BSC_Title = entity.B_StaticCode?.Title ?? "",
                 BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType,
                     entity.BSCID),
-                Title = entity.Title ?? "",
+                Title = entity.B_StaticCode?.Title ?? "",
                 Note = entity.Note ?? "",
                 Customers = entity.M_Customer_Gift.Select(mcg => new CustomerGift_GetInfoById_Customers_Row_APIItem
                 {
@@ -219,7 +219,6 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與日期")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     () => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
                 .Validate(i => i.Customers.Any(), () => AddError(EmptyNotAllowed("此紀錄之對應客戶")))
                 .IsValid();
 
@@ -259,7 +258,6 @@ namespace NS_Education.Controller.UsingHelper
                 Year = input.Year,
                 SendDate = sendDate,
                 BSCID = input.BSCID,
-                Title = input.Title,
                 Note = input.Note,
                 M_Customer_Gift = input.Customers.Select(i => new M_Customer_Gift
                 {
@@ -288,7 +286,6 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與日期")))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
                     () => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("禮品實際名稱", 1, 100)))
                 .Validate(i => i.Customers.Any(), () => AddError(EmptyNotAllowed("此紀錄之對應客戶")))
                 .IsValid();
 
@@ -341,7 +338,6 @@ namespace NS_Education.Controller.UsingHelper
             data.Year = input.Year;
             data.SendDate = sendDate;
             data.BSCID = input.BSCID;
-            data.Title = input.Title ?? data.Title;
             data.Note = input.Note ?? data.Note;
 
             // 更新舊 M_Customer_Gift

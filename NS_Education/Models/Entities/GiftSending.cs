@@ -24,7 +24,7 @@ namespace NS_Education.Models.Entities
         public int Year { get; set; }
         public System.DateTime SendDate { get; set; }
         public int BSCID { get; set; }
-        public string Title { get; set; }
+        protected string Title { get; set; }
         public string Note { get; set; }
         public bool DeleteFlag { get; set; }
         public System.DateTime CreDate { get; set; }

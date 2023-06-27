@@ -3,11 +3,11 @@ namespace NS_Education.Models.APIItems.Controller.SiteData.GetList
     public class SiteData_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
         public int BSID { get; set; }
-        
+        public bool IsCombinedSiteMaster { get; set; }
         public int BCID { get; set; }
         public string BC_TitleC { get; set; }
         public string BC_TitleE { get; set; }
-        
+
         public string Code { get; set; }
         public string Title { get; set; }
         public int BasicSize { get; set; }

@@ -199,9 +199,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             if (input.Capacity.IsAboveZero())
                 query = query.Where(sd => sd.MaxSize >= input.Capacity);
 
-            if (input.IsCombinedSite.HasValue)
+            if (input.IsCombinedSiteMaster.HasValue)
                 query = query.Where(sd =>
-                    sd.M_SiteGroup.Any(msg => msg.ActiveFlag && !msg.DeleteFlag) == input.IsCombinedSite);
+                    sd.M_SiteGroup.Any(msg => msg.ActiveFlag && !msg.DeleteFlag) == input.IsCombinedSiteMaster);
 
             if (input.ActiveFlag.IsInBetween(0, 1))
                 query = query.Where(sd => sd.ActiveFlag == (input.ActiveFlag == 1));
@@ -218,6 +218,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             SiteData_GetList_Output_Row_APIItem output = new SiteData_GetList_Output_Row_APIItem
             {
                 BSID = entity.BSID,
+                IsCombinedSiteMaster = entity.M_SiteGroup.Any(msg => msg.ActiveFlag && !msg.DeleteFlag),
                 BCID = entity.BCID,
                 BC_TitleC = entity.B_Category?.TitleC ?? "",
                 BC_TitleE = entity.B_Category?.TitleE ?? "",

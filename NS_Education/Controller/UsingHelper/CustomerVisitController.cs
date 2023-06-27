@@ -362,6 +362,10 @@ namespace NS_Education.Controller.UsingHelper
                     {
                         Year = gsi.Year,
                         SendDate = sendDate,
+                        Title = await DC.B_StaticCode
+                            .Where(bsc => bsc.BSCID == gsi.BSCID)
+                            .Select(bsc => bsc.Title)
+                            .FirstOrDefaultAsync() ?? "",
                         BSCID = gsi.BSCID
                     };
 

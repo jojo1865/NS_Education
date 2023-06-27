@@ -256,6 +256,10 @@ namespace NS_Education.Controller.UsingHelper
             GiftSending newGiftSending = new GiftSending
             {
                 Year = input.Year,
+                Title = await DC.B_StaticCode
+                    .Where(bsc => bsc.BSCID == input.BSCID)
+                    .Select(bsc => bsc.Title)
+                    .FirstOrDefaultAsync() ?? "",
                 SendDate = sendDate,
                 BSCID = input.BSCID,
                 Note = input.Note,
@@ -336,6 +340,10 @@ namespace NS_Education.Controller.UsingHelper
             input.SendDate.TryParseDateTime(out DateTime sendDate);
 
             data.Year = input.Year;
+            data.Title = DC.B_StaticCode
+                .Where(bsc => bsc.BSCID == input.BSCID)
+                .Select(bsc => bsc.Title)
+                .FirstOrDefault() ?? "";
             data.SendDate = sendDate;
             data.BSCID = input.BSCID;
             data.Note = input.Note ?? data.Note;

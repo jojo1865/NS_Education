@@ -258,6 +258,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Include(sd => sd.M_SiteGroup)
                 .Include(sd => sd.M_SiteGroup.Select(sg => sg.B_SiteData1))
                 .Include(sd => sd.M_SiteGroup.Select(sg => sg.B_SiteData1).Select(child => child.M_Site_Device))
+                .Include(sd => sd.M_SiteGroup1)
                 .Include(sd => sd.M_Site_Device)
                 .Include(sd => sd.M_Site_Device.Select(msd => msd.B_Device))
                 .Include(sd => sd.M_Site_Device.Select(msd => msd.B_SiteData))
@@ -269,6 +270,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             return new SiteData_GetInfoById_Output_APIItem
             {
                 BSID = entity.BSID,
+                IsCombinedSiteChild = entity.M_SiteGroup1.Any(msg => msg.ActiveFlag && !msg.DeleteFlag),
                 BCID = entity.BCID,
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",

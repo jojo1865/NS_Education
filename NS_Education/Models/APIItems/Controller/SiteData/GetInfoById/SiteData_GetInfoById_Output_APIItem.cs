@@ -5,6 +5,7 @@ namespace NS_Education.Models.APIItems.Controller.SiteData.GetInfoById
     public class SiteData_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int BSID { get; set; }
+        public bool IsCombinedSiteChild { get; set; }
         public int BCID { get; set; }
         public string Code { get; set; }
         public string Title { get; set; }

@@ -11,6 +11,7 @@ using NS_Education.Models.APIItems.Controller.SiteData.GetInfoById;
 using NS_Education.Models.APIItems.Controller.SiteData.GetList;
 using NS_Education.Models.APIItems.Controller.SiteData.Submit;
 using NS_Education.Models.Entities;
+using NS_Education.Models.Errors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -599,7 +600,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             isValid = isValid && isGroupListValid;
 
             bool isDevicesValid = isValid && await input.Devices.StartValidateElements()
-                .Validate(d => d.BSID == 0, () => AddError(NotEqual("設備的場地 ID", 0)))
+                .Validate(d => d.BSID == 0, () => AddError(ExpectedValue("設備的場地 ID", 0)))
                 .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
                     d => AddError(NotFound($"設備 ID（{d.BDID}）")))
                 .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", 0)))
@@ -767,7 +768,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             // 判定所有 Device 都是有效資料
             isValid = isValid && await input.Devices.StartValidateElements()
-                .Validate(d => d.BSID == input.BSID, () => AddError(NotEqual("設備的場地 ID", input.BSID)))
+                .Validate(d => d.BSID == input.BSID, () => AddError(ExpectedValue("設備的場地 ID", input.BSID)))
                 .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
                     d => AddError(NotFound($"設備 ID（{d.BDID}）")))
                 .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", 0)))
@@ -784,19 +785,27 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             isValid = isValid && allDeviceIdUnique;
 
+            if (!isValid)
+                return false;
+
             // 判定新的 MaxSize 不會造成任何預約單人數溢出
-            bool isMaxSizeSufficient = isValid && await DC.Resver_Site
+            int neededSize = await DC.Resver_Site
                 .Include(rs => rs.Resver_Head)
                 .Where(rs => !rs.DeleteFlag)
                 .Where(rs => rs.BSID == input.BSID)
                 .Select(rs => rs.Resver_Head)
                 .Where(ResverHeadExpression.IsOngoingExpression)
-                .AllAsync(rh => rh.PeopleCt <= input.MaxSize);
+                .Select(rh => rh.PeopleCt)
+                .OrderByDescending(ct => ct)
+                .FirstOrDefaultAsync();
 
-            if (isValid && !isMaxSizeSufficient)
-                AddError("新的「最大容納人數」低於既有進行中預約單的人數！");
-
-            isValid = isValid && isMaxSizeSufficient;
+            if (input.MaxSize < neededSize)
+            {
+                isValid = false;
+                AddError(new BusinessError(1,
+                    "新的「最大容納人數」低於既有進行中預約單的人數！",
+                    new KeyValuePair<ErrorField, object>(ErrorField.Min, neededSize)));
+            }
 
             isValid = isValid && await SubmitValidateDeviceCt(input);
 

@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Web;
 using NS_Education.Models.APIItems;
+using NS_Education.Models.Errors.DataValidationErrors;
 using NS_Education.Models.Errors.InputValidationErrors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
@@ -33,13 +34,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         #region Submit
 
-        private static string UpdateFailed(Exception e)
-            => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.GetActualMessage()}！";
-
-        private const string SubmitAddValidateFailed = "欲新增資料的輸入格式不符！";
-        private const string SubmitEditValidateFailed = "欲更新資料的輸入格式不符！";
-        private const string SubmitEditNotFound = "查無欲更新的資料！";
-
         private IsolationLevel? _isolationLevel;
 
         /// <inheritdoc />
@@ -61,27 +55,29 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                        ? _controller.DC.Database.BeginTransaction(_isolationLevel.Value)
                        : _controller.DC.Database.BeginTransaction())
             {
-                if (_controller.SubmitIsAdd(input))
+                try
                 {
-                    if (await _controller.SubmitAddValidateInput(input))
-                        await _SubmitAdd(input);
-                    else if (!_controller.HasError())
-                        _controller.AddError(new WrongFormatError());
-                }
-                else
-                {
-                    if (await _controller.SubmitEditValidateInput(input))
-                        await _SubmitEdit(input);
-                    else if (!_controller.HasError())
-                        _controller.AddError(new WrongFormatError());
-                }
+                    if (_controller.SubmitIsAdd(input))
+                    {
+                        if (await _controller.SubmitAddValidateInput(input))
+                            await _SubmitAdd(input);
+                        else if (!_controller.HasError())
+                            _controller.AddError(new WrongFormatError());
+                    }
+                    else
+                    {
+                        if (await _controller.SubmitEditValidateInput(input))
+                            await _SubmitEdit(input);
+                        else if (!_controller.HasError())
+                            _controller.AddError(new WrongFormatError());
+                    }
 
                     if (!_controller.HasError())
                         transaction.Commit();
                 }
                 catch (Exception e)
                 {
-                    _controller.AddError(UpdateFailed(e));
+                    _controller.AddError(new UpdateDbFailedError(e));
                 }
 
                 if (_controller.HasError())

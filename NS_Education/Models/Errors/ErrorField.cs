@@ -12,6 +12,7 @@ namespace NS_Education.Models.Errors
         ExpectedValue,
         KeyFieldName,
         Exception,
-        ExceptionStack
+        ExceptionStack,
+        Reason
     }
 }

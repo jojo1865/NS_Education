@@ -31,17 +31,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         #region DeleteItem
 
-        private static string UpdateFailed(Exception e)
-            => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
-
-        private const string DeleteItemRepeating = "欲刪除的 ID 存在重複資料，請確認每個 ID 只輸入一次！";
         private const string DeleteItemNotSupported = "此 Controller 的資料型態不支援設定刪除狀態功能！";
-        private const string DeleteItemInputIdIncorrect = "未輸入欲刪除或復活的資料 ID 或是格式不正確！";
-
-        private static string DeleteItemInputDeleteFlagIncorrect(int? id)
-            => id != null ? $"ID {id} 未輸入欲刪除或復活，或是格式不正確！" : "其中一筆輸入資料未輸入欲刪除或復活，或是格式不正確！";
-
-        private const string DeleteItemNotFound = "其中一筆或多筆欲刪除或復活的 ID 查無資料！";
 
         /// <summary>
         /// 刪除單筆資料。
@@ -68,9 +58,9 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             bool isEveryElementValid = input.Items.StartValidateElements()
                 .Validate(i => i.Id != null && i.Id.IsAboveZero(),
-                    () => _controller.AddError(DeleteItemInputIdIncorrect))
+                    () => _controller.AddError(_controller.EmptyNotAllowed("欲刪除的資料 ID")))
                 .Validate(i => i.DeleteFlag != null,
-                    i => _controller.AddError(DeleteItemInputDeleteFlagIncorrect(i.Id)))
+                    i => _controller.AddError(_controller.EmptyNotAllowed($"欲刪除或復活的輸入值（{i.Id}）")))
                 .IsValid();
 
             if (!isCollectionValid || !isEveryElementValid)

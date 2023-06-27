@@ -3,8 +3,8 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
-using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -28,7 +28,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         {
             _controller = controller;
         }
-        
+
         #region DeleteItem
 
         private static string UpdateFailed(Exception e)
@@ -37,8 +37,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private const string DeleteItemRepeating = "欲刪除的 ID 存在重複資料，請確認每個 ID 只輸入一次！";
         private const string DeleteItemNotSupported = "此 Controller 的資料型態不支援設定刪除狀態功能！";
         private const string DeleteItemInputIdIncorrect = "未輸入欲刪除或復活的資料 ID 或是格式不正確！";
+
         private static string DeleteItemInputDeleteFlagIncorrect(int? id)
             => id != null ? $"ID {id} 未輸入欲刪除或復活，或是格式不正確！" : "其中一筆輸入資料未輸入欲刪除或復活，或是格式不正確！";
+
         private const string DeleteItemNotFound = "其中一筆或多筆欲刪除或復活的 ID 查無資料！";
 
         /// <summary>
@@ -61,26 +63,26 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 .Validate(items => items.GroupBy(i => i.Id).Count() == input.Items.Count(),
                     () => _controller.AddError(DeleteItemRepeating))
                 .IsValid();
-            
+
             // 驗證每個元素是否輸入正確
 
             bool isEveryElementValid = input.Items.StartValidateElements()
                 .Validate(i => i.Id != null && i.Id.IsAboveZero(),
                     () => _controller.AddError(DeleteItemInputIdIncorrect))
-                .Validate(i => i.DeleteFlag != null, 
+                .Validate(i => i.DeleteFlag != null,
                     i => _controller.AddError(DeleteItemInputDeleteFlagIncorrect(i.Id)))
                 .IsValid();
 
             if (!isCollectionValid || !isEveryElementValid)
                 return _controller.GetResponseJson();
-            
+
             // 驗證每個元素是否都存在於 Db
             // ReSharper disable once PossibleInvalidOperationException
             // 建立 ID : entity 的字典，方便之後對照輸入資料
             var data = (await _controller.DeleteItemsQuery(input.Items.Select(i => i.Id.Value))
-                .ToArrayAsync())
+                    .ToArrayAsync())
                 .ToDictionary(t => _controller.DC.GetPrimaryKeyFromEntity(t), t => t);
-            
+
             // 前面已經確認過每個元素都是獨特的，所以當這裡的數量不同時，表示有輸入對應不到資料（查無資料）。
             if (data.Keys.Count != input.Items.Count())
             {
@@ -97,8 +99,9 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                     // ReSharper disable PossibleInvalidOperationException
                     FlagHelper.SetDeleteFlag(data[i.Id.Value], i.DeleteFlag.Value);
                 }
-                
-                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(), HttpContext.Current.Request);
+
+                await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(),
+                    HttpContext.Current.Request);
             }
             catch (Exception e)
             {

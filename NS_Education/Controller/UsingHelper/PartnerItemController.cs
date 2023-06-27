@@ -3,12 +3,12 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.PartnerItem.GetInfoById;
 using NS_Education.Models.APIItems.Controller.PartnerItem.GetList;
 using NS_Education.Models.APIItems.Controller.PartnerItem.Submit;
 using NS_Education.Models.Entities;
-using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -42,15 +42,17 @@ namespace NS_Education.Controller.UsingHelper
                     PartnerItem_GetList_Output_Row_APIItem>(this);
 
             _getInfoByIdHelper =
-                new GetInfoByIdHelper<PartnerItemController, B_PartnerItem, PartnerItem_GetInfoById_Output_APIItem>(this);
+                new GetInfoByIdHelper<PartnerItemController, B_PartnerItem, PartnerItem_GetInfoById_Output_APIItem>(
+                    this);
             _deleteItemHelper = new DeleteItemHelper<PartnerItemController, B_PartnerItem>(this);
             _changeActiveHelper = new ChangeActiveHelper<PartnerItemController, B_PartnerItem>(this);
 
-            _submitHelper = new SubmitHelper<PartnerItemController, B_PartnerItem, PartnerItem_Submit_Input_APIItem>(this);
+            _submitHelper =
+                new SubmitHelper<PartnerItemController, B_PartnerItem, PartnerItem_Submit_Input_APIItem>(this);
         }
 
         #endregion
-        
+
         #region GetList
 
         [HttpGet]
@@ -131,9 +133,11 @@ namespace NS_Education.Controller.UsingHelper
                 Note = entity.Note ?? ""
             });
         }
+
         #endregion
 
         #region GetInfoById
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
@@ -151,7 +155,8 @@ namespace NS_Education.Controller.UsingHelper
                 .Where(pi => pi.BPIID == id);
         }
 
-        public async Task<PartnerItem_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(B_PartnerItem entity)
+        public async Task<PartnerItem_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(
+            B_PartnerItem entity)
         {
             return new PartnerItem_GetInfoById_Output_APIItem
             {
@@ -176,9 +181,11 @@ namespace NS_Education.Controller.UsingHelper
                 Note = entity.Note ?? ""
             };
         }
+
         #endregion
 
         #region DeleteItem
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
@@ -190,9 +197,11 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.B_PartnerItem.Where(pi => ids.Contains(pi.BPIID));
         }
+
         #endregion
 
         #region ChangeActive
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
@@ -204,12 +213,14 @@ namespace NS_Education.Controller.UsingHelper
         {
             return DC.B_PartnerItem.Where(pi => pi.BPIID == id);
         }
+
         #endregion
-        
+
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(PartnerItem_Submit_Input_APIItem.BPIID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null,
+            nameof(PartnerItem_Submit_Input_APIItem.BPIID))]
         public async Task<string> Submit(PartnerItem_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);
@@ -221,14 +232,19 @@ namespace NS_Education.Controller.UsingHelper
         }
 
         #region Submit - Add
-        
+
         public async Task<bool> SubmitAddValidateInput(PartnerItem_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BPIID == 0, () => AddError(WrongFormat("房型 ID")))
-                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), () => AddError(NotFound("廠商 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), () => AddError(NotFound("房型類型 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.PartnerItem), () => AddError(NotFound("入帳代號 ID")))
+                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID),
+                    () => AddError(NotFound("廠商 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem),
+                    () => AddError(NotFound("房型類型 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.PartnerItem),
+                    () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
                 .IsValid();
 
@@ -252,18 +268,23 @@ namespace NS_Education.Controller.UsingHelper
                 Note = input.Note
             });
         }
-        
+
         #endregion
 
         #region Submit - Edit
-        
+
         public async Task<bool> SubmitEditValidateInput(PartnerItem_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("房型 ID")))
-                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID), () => AddError(NotFound("廠商 ID")))
-                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem), () => AddError(NotFound("房型類型 ID")))
-                .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.PartnerItem), () => AddError(NotFound("入帳代號 ID")))
+                .ValidateAsync(async i => await DC.B_Partner.ValidatePartnerExists(i.BPID),
+                    () => AddError(NotFound("廠商 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.PartnerItem),
+                    () => AddError(NotFound("房型類型 ID")))
+                .ValidateAsync(
+                    async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.PartnerItem),
+                    () => AddError(NotFound("入帳代號 ID")))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
                 .IsValid();
             return await Task.FromResult(isValid);
@@ -288,9 +309,9 @@ namespace NS_Education.Controller.UsingHelper
             data.SortNo = input.SortNo;
             data.Note = input.Note;
         }
-        
+
         #endregion
-        
+
         #endregion
     }
 }

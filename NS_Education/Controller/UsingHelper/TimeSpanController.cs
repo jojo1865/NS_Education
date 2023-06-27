@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data.Entity;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -155,7 +157,39 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidateReservation(input))
+                return GetResponseJson();
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
+        {
+            // 刪除時，不允許有進行中的預約單
+
+            HashSet<int> uniqueDeleteId = input.Items
+                .Where(i => i.Id != null && i.DeleteFlag == true)
+                .Select(i => i.Id.Value)
+                .Distinct()
+                .ToHashSet();
+
+            KeyValuePair<int, int>[] cantDeleteData = DC.Resver_Head
+                .Include(rh => rh.M_Resver_TimeSpan)
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.M_Resver_TimeSpan)
+                .Where(rts => uniqueDeleteId.Contains(rts.DTSID))
+                .GroupBy(rts => new { rts.RHID, rts.DTSID })
+                .AsEnumerable()
+                .Select(grouping => new KeyValuePair<int, int>(grouping.Key.RHID, grouping.Key.DTSID))
+                .ToArray();
+
+            foreach (KeyValuePair<int, int> kvp in cantDeleteData)
+            {
+                AddError(NotSupportedValue($"欲刪除的 ID（{kvp.Value}）",
+                    nameof(DeleteItem_Input_Row_APIItem.Id),
+                    $"已有進行中預約單（單號 {kvp.Key}）"));
+            }
+
+            return await Task.FromResult(!HasError());
         }
 
         public IQueryable<D_TimeSpan> DeleteItemsQuery(IEnumerable<int> ids)
@@ -166,8 +200,6 @@ namespace NS_Education.Controller.UsingHelper
         #endregion
 
         #region Submit
-
-        private const string SubmitWrongStartTime = "起始時間應小於等於結束時間！";
 
         [HttpPost]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(TimeSpan_Submit_Input_APIItem.DTSID))]

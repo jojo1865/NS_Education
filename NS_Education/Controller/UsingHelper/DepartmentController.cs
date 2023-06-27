@@ -63,7 +63,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Department_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DCID.IsZeroOrAbove(), () => AddError(WrongFormat("所屬公司 ID")))
+                .Validate(i => i.DCID.IsZeroOrAbove(), () => AddError(WrongFormat("所屬公司 ID", nameof(input.DCID))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -191,12 +191,15 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(Department_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DDID == 0, () => AddError(WrongFormat("部門 ID")))
+                .Validate(i => i.DDID == 0, () => AddError(WrongFormat("部門 ID", nameof(input.DDID))))
                 .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)),
-                    () => AddError(EmptyNotAllowed("公司 ID")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
-                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
+                    () => AddError(EmptyNotAllowed("公司 ID", nameof(input.DCID))))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(),
+                    () => AddError(EmptyNotAllowed("名稱", nameof(input.TitleC))))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.TitleC), 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("英文名稱", nameof(input.TitleE), 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -220,12 +223,15 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(Department_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID")))
+                .Validate(i => i.DDID.IsAboveZero(), () => AddError(EmptyNotAllowed("部門 ID", nameof(input.DDID))))
                 .ValidateAsync(async i => await DC.D_Company.ValidateIdExists(i.DCID, nameof(D_Company.DCID)),
-                    () => AddError(EmptyNotAllowed("公司 ID")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
-                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
+                    () => AddError(EmptyNotAllowed("公司 ID", nameof(input.DCID))))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(),
+                    () => AddError(EmptyNotAllowed("名稱", nameof(input.TitleC))))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.TitleC), 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("英文名稱", nameof(input.TitleE), 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

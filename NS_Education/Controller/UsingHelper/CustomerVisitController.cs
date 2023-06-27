@@ -70,13 +70,14 @@ namespace NS_Education.Controller.UsingHelper
             DateTime eDate = default;
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.BUID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之業務員 ID")))
-                .Validate(i => i.BSCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之拜訪方式 ID")))
+                .Validate(i => i.BUID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之業務員 ID", nameof(input.BUID))))
+                .Validate(i => i.BSCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之拜訪方式 ID", nameof(input.BSCID))))
                 .Validate(i => i.SDate.IsNullOrWhiteSpace() || i.SDate.TryParseDateTime(out sDate),
-                    () => AddError(WrongFormat("欲篩選之拜訪期間起始日期")))
+                    () => AddError(WrongFormat("欲篩選之拜訪期間起始日期", nameof(input.SDate))))
                 .Validate(i => i.EDate.IsNullOrWhiteSpace() || i.EDate.TryParseDateTime(out eDate),
-                    () => AddError(WrongFormat("欲篩選之拜訪期間最後日期")))
-                .Validate(i => sDate.Date <= eDate.Date, () => AddError(MinLargerThanMax("拜訪期間起始日期", "拜訪期間最後日期")))
+                    () => AddError(WrongFormat("欲篩選之拜訪期間最後日期", nameof(input.EDate))))
+                .Validate(i => sDate.Date <= eDate.Date,
+                    () => AddError(MinLargerThanMax("拜訪期間起始日期", nameof(input.SDate), "拜訪期間最後日期", nameof(input.EDate))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -270,35 +271,39 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(CustomerVisit_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.CVID == 0, () => AddError(WrongFormat("拜訪紀錄 ID")))
+                .Validate(i => i.CVID == 0, () => AddError(WrongFormat("拜訪紀錄 ID", nameof(input.CVID))))
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
-                    () => AddError(NotFound("客戶 ID")))
+                    () => AddError(NotFound("客戶 ID", nameof(input.CID))))
                 .ForceSkipIf(i => i.BSCID15 == null)
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID15 ?? 0,
                         StaticCodeType.NoDealReason),
-                    () => AddError(NotFound("未成交原因 ID")))
+                    () => AddError(NotFound("未成交原因 ID", nameof(input.BSCID15))))
                 .StopForceSkipping()
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod),
-                    () => AddError(NotFound("客戶拜訪方式 ID")))
+                    () => AddError(NotFound("客戶拜訪方式 ID", nameof(input.BSCID))))
                 .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)),
-                    () => AddError(NotFound("拜訪業務 ID")))
-                .Validate(i => i.TargetTitle.HasContent(), () => AddError(EmptyNotAllowed("拜訪對象")))
-                .Validate(i => i.TargetTitle.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("拜訪對象", 1, 100)))
-                .Validate(i => i.Title.HasLengthBetween(0, 100), () => AddError(LengthOutOfRange("主旨", 0, 100)))
-                .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
+                    () => AddError(NotFound("拜訪業務 ID", nameof(input.BUID))))
+                .Validate(i => i.TargetTitle.HasContent(),
+                    () => AddError(EmptyNotAllowed("拜訪對象", nameof(input.TargetTitle))))
+                .Validate(i => i.TargetTitle.HasLengthBetween(1, 100),
+                    () => AddError(LengthOutOfRange("拜訪對象", nameof(input.TargetTitle), 1, 100)))
+                .Validate(i => i.Title.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("主旨", nameof(input.Title), 0, 100)))
+                .Validate(i => i.VisitDate.TryParseDateTime(out _),
+                    () => AddError(WrongFormat("拜訪日期", nameof(input.VisitDate))))
                 .IsValid();
 
             bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
                 .Validate(i => i.SendDate.TryParseDateTime(out _),
-                    i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
+                    i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）", nameof(i.SendDate))))
                 .Validate(i => i.Year.IsInBetween(1911, 9999),
-                    i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
+                    i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", nameof(i.Year), 1911, 9999)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
-                    i => AddError(NotFound("禮品 ID")))
+                    i => AddError(NotFound("禮品 ID", nameof(i.BSCID))))
                 .Validate(i => i.Ct > 0,
-                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 0)))
+                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", nameof(i.Ct), 0)))
                 .IsValid();
 
             return isValid && isGiftSendingsValid;
@@ -384,35 +389,39 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(CustomerVisit_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.CVID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
+                .Validate(i => i.CVID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID", nameof(input.CVID))))
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
-                    () => AddError(NotFound("客戶 ID")))
+                    () => AddError(NotFound("客戶 ID", nameof(input.CID))))
                 .ForceSkipIf(i => i.BSCID15 == null)
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID15 ?? 0,
                         StaticCodeType.NoDealReason),
-                    () => AddError(NotFound("未成交原因 ID")))
+                    () => AddError(NotFound("未成交原因 ID", nameof(input.BSCID15))))
                 .StopForceSkipping()
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.VisitMethod),
-                    () => AddError(NotFound("客戶拜訪方式 ID")))
+                    () => AddError(NotFound("客戶拜訪方式 ID", nameof(input.BSCID))))
                 .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)),
-                    () => AddError(NotFound("拜訪業務 ID")))
-                .Validate(i => i.TargetTitle.HasContent(), () => AddError(EmptyNotAllowed("拜訪對象")))
-                .Validate(i => i.TargetTitle.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("拜訪對象", 1, 100)))
-                .Validate(i => i.Title.HasLengthBetween(0, 100), () => AddError(LengthOutOfRange("主旨", 0, 100)))
-                .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
+                    () => AddError(NotFound("拜訪業務 ID", nameof(input.BUID))))
+                .Validate(i => i.TargetTitle.HasContent(),
+                    () => AddError(EmptyNotAllowed("拜訪對象", nameof(input.TargetTitle))))
+                .Validate(i => i.TargetTitle.HasLengthBetween(1, 100),
+                    () => AddError(LengthOutOfRange("拜訪對象", nameof(input.TargetTitle), 1, 100)))
+                .Validate(i => i.Title.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("主旨", nameof(input.Title), 0, 100)))
+                .Validate(i => i.VisitDate.TryParseDateTime(out _),
+                    () => AddError(WrongFormat("拜訪日期", nameof(input.VisitDate))))
                 .IsValid();
 
             bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
                 .Validate(i => i.SendDate.TryParseDateTime(out _),
-                    i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
+                    i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）", nameof(i.SendDate))))
                 .Validate(i => i.Year.IsInBetween(1911, 9999),
-                    i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
+                    i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", nameof(i.Year), 1911, 9999)))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
-                    i => AddError(NotFound("禮品 ID")))
+                    i => AddError(NotFound("禮品 ID", nameof(i.BSCID))))
                 .Validate(i => i.Ct > 0,
-                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 1)))
+                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", nameof(i.Ct), 1)))
                 .IsValid();
 
             return isValid && isGiftSendingsValid;

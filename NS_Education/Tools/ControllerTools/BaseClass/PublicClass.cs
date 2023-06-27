@@ -78,7 +78,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
 
         protected internal void AddError(int code, string message,
-            params KeyValuePair<ErrorField, object>[] additionalValues)
+            IDictionary<string, object> additionalValues = null)
         {
             _errors.Add(new BusinessError(code, message, additionalValues));
         }
@@ -105,32 +105,37 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <summary>
         /// 回傳一串查無資料時可用的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="fieldNameChinese">（可選）欄位的中文名稱</param>
         /// <param name="fieldName">（可選）欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected internal DataNotFoundError NotFound(string fieldName = null)
+        protected internal DataNotFoundError NotFound(string fieldNameChinese = null, string fieldName = null)
         {
-            return new DataNotFoundError(fieldName);
+            return new DataNotFoundError(fieldNameChinese, fieldName);
         }
 
         /// <summary>
         /// 回傳一串已存在同樣資料時的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="keyFieldNameChinese">（可選）用於判定重複的欄位的中文名稱</param>
         /// <param name="keyFieldName">（可選）用於判定重覆的欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected DataAlreadyExistsError AlreadyExists(string keyFieldName = null)
+        protected DataAlreadyExistsError AlreadyExists(string keyFieldNameChinese = null, string keyFieldName = null)
         {
-            return new DataAlreadyExistsError(keyFieldName);
+            return new DataAlreadyExistsError(keyFieldNameChinese, keyFieldName);
         }
 
         /// <summary>
         /// 回傳一串發現重複資料時可用的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="fieldNameChinese">欄位的中文名稱</param>
         /// <param name="fieldName">欄位名稱</param>
+        /// <param name="keyFieldNameChinese">（可選）用於判定重覆的子欄位的中文名稱</param>
         /// <param name="keyFieldName">（可選）用於判定重覆的子欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected internal CopyNotAllowedError CopyNotAllowed(string fieldName, string keyFieldName = null)
+        protected internal CopyNotAllowedError CopyNotAllowed(string fieldNameChinese, string fieldName,
+            string keyFieldNameChinese = null, string keyFieldName = null)
         {
-            return new CopyNotAllowedError(fieldName, keyFieldName);
+            return new CopyNotAllowedError(fieldNameChinese, fieldName, keyFieldNameChinese, keyFieldName);
         }
 
         /// <summary>
@@ -139,13 +144,13 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="reason">不支援的原因</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected NotSupportedValueError UnsupportedValue(string fieldName, string reason = null)
+        protected NotSupportedValueError UnsupportedValue(string fieldName, string reason)
         {
             return new NotSupportedValueError(fieldName, reason);
         }
 
         /// <inheritdoc cref="UnsupportedValue"/>>
-        protected NotSupportedValueError NotSupportedValue(string fieldName, string reason = null)
+        protected NotSupportedValueError NotSupportedValue(string fieldName, string reason)
         {
             return UnsupportedValue(fieldName, reason);
         }
@@ -153,89 +158,101 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <summary>
         /// 回傳一串最小值大於最大值時可使用的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="minFieldNameChinese">最小值的欄位的中文名稱</param>
         /// <param name="minFieldName">最小值的欄位名稱</param>
+        /// <param name="maxFieldNameChinese">最大值的欄位的中文名稱</param>
         /// <param name="maxFieldName">最大值的欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected internal MinLargerThanMaxError MinLargerThanMax(string minFieldName, string maxFieldName)
+        protected internal MinLargerThanMaxError MinLargerThanMax(string minFieldNameChinese, string minFieldName,
+            string maxFieldNameChinese, string maxFieldName)
         {
-            return new MinLargerThanMaxError(minFieldName, maxFieldName);
+            return new MinLargerThanMaxError(minFieldNameChinese, minFieldName, maxFieldNameChinese, maxFieldName);
         }
 
         /// <summary>
         /// 回傳一串缺少欄位時可使用的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="fieldNameChinese">欄位的中文名稱</param>
         /// <param name="fieldName">欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected internal EmptyNotAllowedError EmptyNotAllowed(string fieldName)
+        protected internal EmptyNotAllowedError EmptyNotAllowed(string fieldNameChinese, string fieldName)
         {
-            return new EmptyNotAllowedError(fieldName);
+            return new EmptyNotAllowedError(fieldNameChinese, fieldName);
         }
 
         /// <summary>
         /// 回傳一串欄位格式錯誤時可使用的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="fieldNameChinese">欄位的中文名稱</param>
         /// <param name="fieldName">欄位名稱</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected WrongFormatError WrongFormat(string fieldName)
+        protected WrongFormatError WrongFormat(string fieldNameChinese, string fieldName)
         {
-            return new WrongFormatError(fieldName);
+            return new WrongFormatError(fieldNameChinese, fieldName);
         }
 
         /// <summary>
         /// 回傳一串超出範圍時可使用的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="fieldNameChinese">欄位的中文迷稱</param>
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="min">最小值</param>
-        /// <param name="max">最大值</param>
+        /// <param name="max">最大值（可選）</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected ValueOutOfRangeError OutOfRange(string fieldName, object min = null, object max = null)
+        protected ValueOutOfRangeError OutOfRange(string fieldNameChinese, string fieldName, object min,
+            object max = null)
         {
-            return new ValueOutOfRangeError(fieldName, min, max);
+            return new ValueOutOfRangeError(fieldNameChinese, fieldName, min, max);
         }
 
         /// <summary>
         /// 回傳一串不符合預期值時可使用的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="fieldNameChinese">欄位的中文名稱</param>
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="targetValue">預期值</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected ExpectedValueError ExpectedValue(string fieldName, object targetValue)
+        protected ExpectedValueError ExpectedValue(string fieldNameChinese, string fieldName, object targetValue)
         {
-            return new ExpectedValueError(fieldName, targetValue);
+            return new ExpectedValueError(fieldNameChinese, fieldName, targetValue);
         }
 
         /// <summary>
         /// 回傳一串輸入值過大時可使用的預設錯誤訊息駔懺。
         /// </summary>
+        /// <param name="fieldNameChinese">欄位的中文名稱</param>
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="max">最大值</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected ValueTooLargeError TooLarge(string fieldName, object max = null)
+        protected ValueTooLargeError TooLarge(string fieldNameChinese, string fieldName, object max)
         {
-            return new ValueTooLargeError(fieldName, max);
+            return new ValueTooLargeError(fieldNameChinese, fieldName, max);
         }
 
         /// <summary>
         /// 回傳一串長度超出範圍時可使用的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="fieldNameChinese">欄位的中文名稱</param>
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="min">最小值</param>
-        /// <param name="max">最大值</param>
+        /// <param name="max">最大值（可選）</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected LengthOutOfRangeError LengthOutOfRange(string fieldName, int? min = null, int? max = null)
+        protected LengthOutOfRangeError LengthOutOfRange(string fieldNameChinese, string fieldName, int? min,
+            int? max = null)
         {
-            return new LengthOutOfRangeError(fieldName, min, max);
+            return new LengthOutOfRangeError(fieldNameChinese, fieldName, min, max);
         }
 
         /// <summary>
         /// 回傳一串欄位內容過長時可使用的預設錯誤訊息字串。
         /// </summary>
+        /// <param name="fieldNameChinese">欄位的中文名稱</param>
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="length">（可選）長度</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected LengthTooLongError TooLong(string fieldName, int? length = null)
+        protected LengthTooLongError TooLong(string fieldNameChinese, string fieldName, int? length = null)
         {
-            return new LengthTooLongError(fieldName, length);
+            return new LengthTooLongError(fieldNameChinese, fieldName, length);
         }
 
         /// <summary>

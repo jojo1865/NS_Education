@@ -54,8 +54,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         {
             bool isInputValid = input.StartValidate()
                 .SkipIfAlreadyInvalid()
-                .Validate(i => i.Id != null && i.Id.Any(), () => AddError(EmptyNotAllowed("欲查詢之預約單 ID 集合")))
-                .Validate(i => i.Id.Distinct().Count() == i.Id.Count, () => AddError(CopyNotAllowed("欲查詢之預約單 ID 集合")))
+                .Validate(i => i.Id != null && i.Id.Any(),
+                    () => AddError(EmptyNotAllowed("欲查詢之預約單 ID 集合", nameof(input.Id))))
+                .Validate(i => i.Id.Distinct().Count() == i.Id.Count,
+                    () => AddError(CopyNotAllowed("欲查詢之預約單 ID 集合", nameof(input.Id))))
                 .IsValid();
 
             // 檢查所有 RHID 是否都存在
@@ -64,7 +66,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                result & // 一定走過所有資料，以便一次顯示所有找不到的錯誤訊息
                                id.StartValidate()
                                    .Validate(_ => DC.Resver_Head.Any(rh => !rh.DeleteFlag && rh.RHID == id),
-                                       () => AddError(NotFound($"預約單 ID {id}")))
+                                       () => AddError(NotFound($"預約單 ID {id}", nameof(input.Id))))
                                    .IsValid()
                            );
 

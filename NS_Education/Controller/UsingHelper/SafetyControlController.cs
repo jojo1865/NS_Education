@@ -32,19 +32,20 @@ namespace NS_Education.Controller.UsingHelper
             // 1. 驗證輸入
             input.StartValidate()
                 .Validate(i => i.PasswordMinLength.IsAboveZero(),
-                    () => AddError(OutOfRange("密碼的最小長度", 1)))
+                    () => AddError(OutOfRange("密碼的最小長度", nameof(input.PasswordMinLength), 1)))
                 .Validate(i => i.PasswordChangeDailyLimit.IsZeroOrAbove(),
-                    () => AddError(OutOfRange("一天最多可更改幾次密碼", 0)))
+                    () => AddError(OutOfRange("一天最多可更改幾次密碼", nameof(input.PasswordChangeDailyLimit), 0)))
                 .Validate(i => i.PasswordNoReuseCount.IsZeroOrAbove(),
-                    () => AddError(OutOfRange("更新密碼時必須與前面多少次的使用密碼不同", 0)))
+                    () => AddError(OutOfRange("更新密碼時必須與前面多少次的使用密碼不同", nameof(input.PasswordNoReuseCount), 0)))
                 .Validate(i => i.PasswordExpireDays.IsAboveZero(),
-                    () => AddError(OutOfRange("更換密碼後，密碼有效天數", 1)))
+                    () => AddError(OutOfRange("更換密碼後，密碼有效天數", nameof(input.PasswordExpireDays), 1)))
                 .Validate(i => i.LoginFailLimit.IsAboveZero(),
-                    () => AddError(OutOfRange("密碼輸入多少次錯誤時，系統會自動結束", 1)))
+                    () => AddError(OutOfRange("密碼輸入多少次錯誤時，系統會自動結束", nameof(input.LoginFailLimit), 1)))
                 .Validate(i => i.WarnChangePasswordInDays.IsZeroOrAbove(),
-                    () => AddError(OutOfRange("密碼更換到期日警告訊息在幾天前開始顯示", 0)))
+                    () => AddError(OutOfRange("密碼更換到期日警告訊息在幾天前開始顯示", nameof(input.WarnChangePasswordInDays), 0)))
                 .Validate(i => i.IdleSecondsBeforeScreenSaver >= 10,
-                    () => AddError(OutOfRange("帳號登入系統超過多少秒沒動作時，系統將自動進入保護程式", 10)));
+                    () => AddError(OutOfRange("帳號登入系統超過多少秒沒動作時，系統將自動進入保護程式", nameof(input.IdleSecondsBeforeScreenSaver),
+                        10)));
 
             // 2. 查資料
             var staticCodes = await GetStaticCodesAndValidateCount();

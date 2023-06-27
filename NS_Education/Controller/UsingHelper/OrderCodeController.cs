@@ -112,7 +112,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.CodeType >= -1,
-                    () => AddError(EmptyNotAllowed("入帳代號類別")))
+                    () => AddError(EmptyNotAllowed("入帳代號類別", nameof(input.CodeType))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -156,9 +156,6 @@ namespace NS_Education.Controller.UsingHelper
 
         #region GetInfoById
 
-        private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或格式不正確！";
-        private const string GetInfoByIdNotFound = "查無 ID 符合的資料！";
-
         private readonly OrderCode_GetInfoById_Output_APIItem _getInfoByIdDummyOutput =
             new OrderCode_GetInfoById_Output_APIItem
             {
@@ -182,7 +179,7 @@ namespace NS_Education.Controller.UsingHelper
             // 1. 驗證輸入
             if (!id.IsZeroOrAbove())
             {
-                AddError(WrongFormat("欲查詢的 ID"));
+                AddError(WrongFormat("欲查詢的 ID", nameof(id)));
                 return GetResponseJson();
             }
 
@@ -300,21 +297,21 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.BOCID == 0,
-                    () => AddError(WrongFormat("入帳代號 ID")))
+                    () => AddError(WrongFormat("入帳代號 ID", nameof(input.BOCID))))
                 .Validate(i => i.CodeType.IsInBetween(0, 9),
-                    () => AddError(OutOfRange("入帳代號類別", 0, 9)))
+                    () => AddError(OutOfRange("入帳代號類別", nameof(input.CodeType), 0, 9)))
                 .Validate(i => i.Title.HasContent(),
-                    () => AddError(EmptyNotAllowed("入帳代號名稱")))
+                    () => AddError(EmptyNotAllowed("入帳代號名稱", nameof(input.Title))))
                 .Validate(i => i.PrintTitle.HasContent(),
-                    () => AddError(EmptyNotAllowed("帳單列印名稱")))
+                    () => AddError(EmptyNotAllowed("帳單列印名稱", nameof(input.PrintTitle))))
                 .Validate(i => i.Code.HasLengthBetween(0, 10),
-                    () => AddError(OutOfRange("編碼", 0, 10)))
+                    () => AddError(OutOfRange("編碼", nameof(input.Code), 0, 10)))
                 .Validate(i => i.Title.HasLengthBetween(1, 60),
-                    () => AddError(OutOfRange("名稱", 1, 60)))
+                    () => AddError(OutOfRange("名稱", nameof(input.Title), 1, 60)))
                 .Validate(i => i.PrintTitle.HasLengthBetween(1, 100),
-                    () => AddError(OutOfRange("帳單列印名稱", 1, 100)))
+                    () => AddError(OutOfRange("帳單列印名稱", nameof(input.PrintTitle), 1, 100)))
                 .Validate(i => i.PrintNote.HasLengthBetween(0, 100),
-                    () => AddError(OutOfRange("帳單列印說明", 0, 100)))
+                    () => AddError(OutOfRange("帳單列印說明", nameof(input.PrintNote), 0, 100)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -345,21 +342,21 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.BOCID.IsAboveZero(),
-                    () => AddError(WrongFormat("入帳代號 ID")))
+                    () => AddError(WrongFormat("入帳代號 ID", nameof(input.BOCID))))
                 .Validate(i => i.CodeType.IsInBetween(0, 9),
-                    () => AddError(OutOfRange("入帳代號類別", 0, 9)))
+                    () => AddError(OutOfRange("入帳代號類別", nameof(input.CodeType), 0, 9)))
                 .Validate(i => i.Title.HasContent(),
-                    () => AddError(EmptyNotAllowed("入帳代號名稱")))
+                    () => AddError(EmptyNotAllowed("入帳代號名稱", nameof(input.Title))))
                 .Validate(i => i.PrintTitle.HasContent(),
-                    () => AddError(EmptyNotAllowed("帳單列印名稱")))
+                    () => AddError(EmptyNotAllowed("帳單列印名稱", nameof(input.PrintTitle))))
                 .Validate(i => i.Code.HasLengthBetween(0, 10),
-                    () => AddError(OutOfRange("編碼", 0, 10)))
+                    () => AddError(OutOfRange("編碼", nameof(input.Code), 0, 10)))
                 .Validate(i => i.Title.HasLengthBetween(1, 60),
-                    () => AddError(OutOfRange("名稱", 1, 60)))
+                    () => AddError(OutOfRange("名稱", nameof(input.Title), 1, 60)))
                 .Validate(i => i.PrintTitle.HasLengthBetween(1, 100),
-                    () => AddError(OutOfRange("帳單列印名稱", 1, 100)))
+                    () => AddError(OutOfRange("帳單列印名稱", nameof(input.PrintTitle), 1, 100)))
                 .Validate(i => i.PrintNote.HasLengthBetween(0, 100),
-                    () => AddError(OutOfRange("帳單列印說明", 0, 100)))
+                    () => AddError(OutOfRange("帳單列印說明", nameof(input.PrintNote), 0, 100)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

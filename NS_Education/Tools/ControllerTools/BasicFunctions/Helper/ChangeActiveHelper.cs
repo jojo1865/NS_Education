@@ -26,9 +26,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             _controller = controller;
         }
 
-        private static string UpdateFailed(Exception e)
-            => e is null ? "更新 DB 時失敗！" : $"更新 DB 時失敗：{e.Message}；Inner:{e.InnerException?.Message}！";
-
         #region ChangeActive
 
         private const string ChangeActiveNotSupported = "此 Controller 的資料型態不支援啟用/停用功能！";
@@ -51,10 +48,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 1. 驗證輸入。
             if (!id.IsAboveZero())
-                _controller.AddError(_controller.EmptyNotAllowed("ID"));
+                _controller.AddError(_controller.EmptyNotAllowed("ID", nameof(id)));
 
             if (activeFlag is null)
-                _controller.AddError(_controller.EmptyNotAllowed("啟用狀態的新值"));
+                _controller.AddError(_controller.EmptyNotAllowed("啟用狀態的新值", nameof(activeFlag)));
 
             if (_controller.HasError())
                 return _controller.GetResponseJson();

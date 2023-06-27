@@ -28,7 +28,10 @@ namespace NS_Education.Controller.UsingHelper
             catch (Exception e)
             {
                 AddError(1, DbConnectionFail,
-                    new KeyValuePair<ErrorField, object>(ErrorField.Exception, e.GetActualMessage()));
+                    new Dictionary<string, object>
+                    {
+                        { nameof(ErrorField.Exception), e.GetActualMessage() }
+                    });
             }
 
             Health_Ping_Output_APIItem response = new Health_Ping_Output_APIItem

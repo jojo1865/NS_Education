@@ -92,7 +92,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             return await Task.Run(() => input
                 .StartValidate()
                 .Validate(i => i.CodeType >= -1,
-                    () => AddError(EmptyNotAllowed("靜態參數類別")))
+                    () => AddError(EmptyNotAllowed("靜態參數類別", nameof(input.CodeType))))
                 .IsValid()
             );
         }
@@ -158,7 +158,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             // 1. 驗證輸入
             if (id < -1)
             {
-                AddError(WrongFormat("欲查詢的 ID"));
+                AddError(WrongFormat("欲查詢的 ID", nameof(id)));
                 return GetResponseJson();
             }
 
@@ -262,7 +262,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             // 不允許刪除安全控管設定
             if (await DeleteItemInputHasSafetyControl(input))
             {
-                AddError(NotSupportedValue("資料 ID"));
+                AddError(NotSupportedValue("資料 ID", nameof(DeleteItem_Input_Row_APIItem.Id)));
                 return GetResponseJson();
             }
 
@@ -302,7 +302,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                             .Where(sc => sc.Code == toRevive.Code)
                             .Where(sc => sc.BSCID != toRevive.BSCID)
                             .Any(sc => !sc.DeleteFlag),
-                    toRevive => AddError(AlreadyExists($"代碼（{toRevive.Code}）")))
+                    toRevive => AddError(AlreadyExists($"代碼（{toRevive.Code}）", nameof(B_StaticCode.Code))))
                 .IsValid();
 
             return isValid;
@@ -339,11 +339,14 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSCID == 0,
-                    () => AddError(WrongFormat("靜態參數 ID")))
-                .Validate(i => i.CodeType.IsZeroOrAbove(), () => AddError(OutOfRange("參數所屬類別", 0)))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("名稱", 0, 100)))
+                    () => AddError(WrongFormat("靜態參數 ID", nameof(input.BSCID))))
+                .Validate(i => i.CodeType.IsZeroOrAbove(),
+                    () => AddError(OutOfRange("參數所屬類別", nameof(input.CodeType), 0)))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 100),
+                    () => AddError(LengthOutOfRange("名稱", nameof(input.Title), 0, 100)))
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時：
                 // +- a. 必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
@@ -353,24 +356,24 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                                              && !sc.DeleteFlag
                                                              && sc.CodeType == 0
                                                              && sc.Code == i.CodeType.ToString())
-                    , () => AddError(NotFound("參數所屬類別")))
+                    , () => AddError(NotFound("參數所屬類別", nameof(input.CodeType))))
                 .StopForceSkipping()
 
                 // 若 CodeType 為 14（安全控管）時，不允許處理
                 // 使用者應該改用安全控管專用的 Submit API
                 .Validate(i => i.CodeType != (int)StaticCodeType.SafetyControl,
-                    () => AddError(NotSupportedValue("參數所屬類別")))
+                    () => AddError(NotSupportedValue("參數所屬類別", nameof(input.CodeType))))
                 // 若 CodeType 為 0 時：
                 // |- a. 檢查 Code 必須皆為數字
                 // +- b. 同 CodeType 下不允許重複 Code 的資料
                 .ForceSkipIf(i => i.CodeType.IsAboveZero())
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
-                .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼", nameof(input.Code))))
+                .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼", nameof(input.Code))))
                 .ValidateAsync(async i =>
                         !await DC.B_StaticCode.AnyAsync(bc => !bc.DeleteFlag
                                                               && bc.CodeType == 0
                                                               && bc.Code == i.Code)
-                    , () => AddError(AlreadyExists("編碼")))
+                    , () => AddError(AlreadyExists("代碼", nameof(input.Code))))
                 .IsValid();
 
             return isValid;
@@ -400,11 +403,14 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         public async Task<bool> SubmitEditValidateInput(StaticCode_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("靜態參數 ID")))
-                .Validate(i => i.CodeType.IsZeroOrAbove(), () => AddError(OutOfRange("參數所屬類別", 0)))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("名稱", 0, 100)))
+                .Validate(i => i.BSCID.IsAboveZero(), () => AddError(EmptyNotAllowed("靜態參數 ID", nameof(input.BSCID))))
+                .Validate(i => i.CodeType.IsZeroOrAbove(),
+                    () => AddError(OutOfRange("參數所屬類別", nameof(input.CodeType), 0)))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 100),
+                    () => AddError(LengthOutOfRange("名稱", nameof(input.Title), 0, 100)))
                 .SkipIfAlreadyInvalid()
                 // 若 CodeType 不為 0 時：
                 // +- a. 必須已存在 CodeType = 0 而 Code = input.CodeType 的資料
@@ -414,25 +420,25 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                                                              && !sc.DeleteFlag
                                                              && sc.CodeType == 0
                                                              && sc.Code == i.CodeType.ToString())
-                    , () => AddError(NotFound("參數所屬類別")))
+                    , () => AddError(NotFound("參數所屬類別", nameof(input.CodeType))))
                 .StopForceSkipping()
 
                 // 若 CodeType 為 14（安全控管）時，不允許處理
                 // 使用者應該改用安全控管專用的 Submit API
                 .Validate(i => i.CodeType != (int)StaticCodeType.SafetyControl,
-                    () => AddError(NotSupportedValue("參數所屬類別")))
+                    () => AddError(NotSupportedValue("參數所屬類別", nameof(input.CodeType))))
                 // 若 CodeType 為 0 時：
                 // |- a. 檢查 Code 必須皆為數字
                 // +- b. 同 CodeType 下不允許重複 Code 的資料
                 .ForceSkipIf(i => i.CodeType.IsAboveZero())
-                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼")))
-                .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼")))
+                .Validate(i => i.Code.HasContent(), () => AddError(EmptyNotAllowed("代碼", nameof(input.Code))))
+                .Validate(i => i.Code.All(Char.IsDigit), () => AddError(WrongFormat("代碼", nameof(input.Code))))
                 .ValidateAsync(async i =>
                         !await DC.B_StaticCode.AnyAsync(bc => !bc.DeleteFlag
                                                               && bc.CodeType == 0
                                                               && bc.Code == i.Code
                                                               && bc.BSCID == i.BSCID)
-                    , () => AddError(AlreadyExists("編碼")))
+                    , () => AddError(AlreadyExists("代碼", nameof(input.Code))))
                 .IsValid();
 
             return isValid;

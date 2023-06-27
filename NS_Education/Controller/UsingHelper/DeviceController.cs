@@ -62,9 +62,10 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Device_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬分類 ID")))
-                .Validate(i => i.DHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬廳別 ID")))
-                .Validate(i => i.BOCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬入帳代號 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬分類 ID", nameof(input.BCID))))
+                .Validate(i => i.DHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之所屬廳別 ID", nameof(input.DHID))))
+                .Validate(i => i.BOCID.IsZeroOrAbove(),
+                    () => AddError(WrongFormat("欲篩選之所屬入帳代號 ID", nameof(input.BOCID))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -295,24 +296,26 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(Device_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BDID == 0, () => AddError(WrongFormat("設備 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("標題", 1, 60)))
+                .Validate(i => i.BDID == 0, () => AddError(WrongFormat("設備 ID", nameof(input.BDID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("標題", nameof(input.Title), 1, 60)))
                 .Validate(i => i.SupplierTitle.HasLengthBetween(0, 100),
-                    () => AddError(LengthOutOfRange("供應商名稱", 0, 100)))
-                .Validate(i => i.SupplierTitle.HasLengthBetween(0, 100),
-                    () => AddError(LengthOutOfRange("供應商聯絡人", 0, 100)))
+                    () => AddError(LengthOutOfRange("供應商名稱", nameof(input.SupplierTitle), 0, 100)))
+                .Validate(i => i.SupplierName.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("供應商聯絡人", nameof(input.SupplierName), 0, 100)))
                 .Validate(i => i.SupplierPhone.HasLengthBetween(0, 30),
-                    () => AddError(LengthOutOfRange("供應商服務電話", 0, 30)))
+                    () => AddError(LengthOutOfRange("供應商服務電話", nameof(input.SupplierPhone), 0, 30)))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Device),
-                    () => AddError(NotFound("類別 ID")))
+                    () => AddError(NotFound("類別 ID", nameof(input.BCID))))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
-                    () => AddError(NotFound("單位 ID")))
+                    () => AddError(NotFound("單位 ID", nameof(input.BSCID))))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Device),
-                    () => AddError(NotFound("入帳代號 ID")))
+                    () => AddError(NotFound("入帳代號 ID", nameof(input.BOCID))))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
-                    () => AddError(NotFound("廳別 ID")))
+                    () => AddError(NotFound("廳別 ID", nameof(input.DHID))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -346,24 +349,26 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(Device_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BDID.IsAboveZero(), () => AddError(EmptyNotAllowed("設備 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題")))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("標題", 1, 60)))
+                .Validate(i => i.BDID.IsAboveZero(), () => AddError(EmptyNotAllowed("設備 ID", nameof(input.BDID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("標題", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("標題", nameof(input.Title), 1, 60)))
                 .Validate(i => i.SupplierTitle.HasLengthBetween(0, 100),
-                    () => AddError(LengthOutOfRange("供應商名稱", 0, 100)))
-                .Validate(i => i.SupplierTitle.HasLengthBetween(0, 100),
-                    () => AddError(LengthOutOfRange("供應商聯絡人", 0, 100)))
+                    () => AddError(LengthOutOfRange("供應商名稱", nameof(input.SupplierTitle), 0, 100)))
+                .Validate(i => i.SupplierName.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("供應商聯絡人", nameof(input.SupplierName), 0, 100)))
                 .Validate(i => i.SupplierPhone.HasLengthBetween(0, 30),
-                    () => AddError(LengthOutOfRange("供應商服務電話", 0, 30)))
+                    () => AddError(LengthOutOfRange("供應商服務電話", nameof(input.SupplierPhone), 0, 30)))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Device),
-                    () => AddError(NotFound("類別 ID")))
+                    () => AddError(NotFound("類別 ID", nameof(input.BCID))))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
-                    () => AddError(NotFound("單位 ID")))
+                    () => AddError(NotFound("單位 ID", nameof(input.BSCID))))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Device),
-                    () => AddError(NotFound("入帳代號 ID")))
+                    () => AddError(NotFound("入帳代號 ID", nameof(input.BOCID))))
                 .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
-                    () => AddError(NotFound("廳別 ID")))
+                    () => AddError(NotFound("廳別 ID", nameof(input.DHID))))
                 .IsValid();
 
             if (!input.ActiveFlag)

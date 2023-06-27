@@ -176,7 +176,7 @@ namespace NS_Education.Controller.UsingHelper
                          .Select(g => new KeyValuePair<string, int>(g.Key, g.Count()))
                          .Where(g => g.Value > 1))
             {
-                AddError(CopyNotAllowed($"權限名稱（{kvp.Key}）"));
+                AddError(CopyNotAllowed($"權限名稱（{kvp.Key}）", nameof(GroupData.Title)));
             }
 
             if (HasError())
@@ -190,7 +190,7 @@ namespace NS_Education.Controller.UsingHelper
 
             foreach (string aliveSameName in aliveSameNames)
             {
-                AddError(CopyNotAllowed($"權限名稱（{aliveSameName}）"));
+                AddError(CopyNotAllowed($"權限名稱（{aliveSameName}）", nameof(GroupData.Title)));
             }
 
             return !HasError();
@@ -222,14 +222,15 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(GroupData_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.GID == 0, () => AddError(WrongFormat("權限 ID")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("權限名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("權限名稱", 1, 50)))
+                .Validate(i => i.GID == 0, () => AddError(WrongFormat("權限 ID", nameof(input.GID))))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("權限名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 50),
+                    () => AddError(LengthOutOfRange("權限名稱", nameof(input.Title), 1, 50)))
                 .SkipIfAlreadyInvalid()
                 .ValidateAsync(
                     async i => !await DC.GroupData.AnyAsync(gd =>
                         !gd.DeleteFlag && gd.Title == i.Title && gd.GID != i.GID),
-                    () => AddError(CopyNotAllowed("權限名稱")))
+                    () => AddError(CopyNotAllowed("權限名稱", nameof(input.Title))))
                 .IsValid();
 
             return isValid;
@@ -250,13 +251,14 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(GroupData_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("權限名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("權限名稱", 1, 50)))
+                .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID", nameof(input.GID))))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("權限名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 50),
+                    () => AddError(LengthOutOfRange("權限名稱", nameof(input.Title), 1, 50)))
                 .ValidateAsync(
                     async i => !await DC.GroupData.AnyAsync(gd =>
                         !gd.DeleteFlag && gd.Title == i.Title && gd.GID != i.GID),
-                    () => AddError(CopyNotAllowed("權限名稱")))
+                    () => AddError(CopyNotAllowed("權限名稱", nameof(input.Title))))
                 .IsValid();
 
             return isValid;
@@ -277,8 +279,6 @@ namespace NS_Education.Controller.UsingHelper
         #endregion
 
         #region SubmitMenuData
-
-        private const string SameMdIdDetected = "發現重覆的 MDID，請檢查輸入內容！";
 
         /// <summary>
         /// 新增/更新權限對應單一選單的 API 權限。
@@ -372,10 +372,10 @@ namespace NS_Education.Controller.UsingHelper
         private async Task<bool> SubmitMenuDataValidateInput(GroupData_SubmitMenuData_Input_APIItem input)
         {
             bool isInputValid = input.StartValidate()
-                .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID")))
-                .Validate(i => i.GroupItems.Any(), () => AddError(EmptyNotAllowed("選單權限列表")))
+                .Validate(i => i.GID.IsAboveZero(), () => AddError(EmptyNotAllowed("權限 ID", nameof(input.GID))))
+                .Validate(i => i.GroupItems.Any(), () => AddError(EmptyNotAllowed("選單權限列表", nameof(input.GroupItems))))
                 .Validate(i => i.GroupItems.GroupBy(item => item.MDID).Count() == i.GroupItems.Count,
-                    () => AddError(CopyNotAllowed("選單 ID")))
+                    () => AddError(CopyNotAllowed("選單 ID", nameof(input.GroupItems))))
                 .IsValid();
 
             // 檢查是否所有 MDID 都存在
@@ -388,7 +388,7 @@ namespace NS_Education.Controller.UsingHelper
             bool isAllMdIdValid = isInputValid &&
                                   input.GroupItems.StartValidateElements()
                                       .Validate(item => allMenuData.Any(kvp => kvp.Key == item.MDID),
-                                          item => AddError(NotFound($"選單 ID {item.MDID}")))
+                                          item => AddError(NotFound($"選單 ID {item.MDID}", nameof(item.MDID))))
                                       .IsValid();
 
             // 檢查所有 MD 的 flag 沒有與 Always flags 衝突
@@ -396,18 +396,23 @@ namespace NS_Education.Controller.UsingHelper
                                      input.GroupItems.StartValidateElements()
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowShow || item.ShowFlag,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許瀏覽",
+                                                 nameof(item.ShowFlag),
                                                  "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowAdd || item.AddFlag,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許新增",
+                                                 nameof(item.AddFlag),
                                                  "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowEdit || item.EditFlag,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許更新",
+                                                 nameof(item.EditFlag),
                                                  "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowDelete || item.DeleteFlag,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許刪除",
+                                                 nameof(item.DeleteFlag),
                                                  "允許")))
                                          .Validate(item => !allMenuData[item.MDID].AlwaysAllowPring || item.PrintFlag,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許匯出",
+                                                 nameof(item.PrintFlag),
                                                  "允許")))
                                          .IsValid();
 

@@ -1,19 +1,28 @@
+using NS_Education.Tools.Extensions;
+
 namespace NS_Education.Models.Errors.DataValidationErrors
 {
     public sealed class DataNotFoundError : BaseDataValidationError
     {
-        public DataNotFoundError(string fieldName)
+        public DataNotFoundError()
         {
-            AddAdditionalValues(ErrorField.FieldName, fieldName);
         }
+
+        public DataNotFoundError(string fieldNameChinese, string fieldName)
+        {
+            FieldNameChinese = fieldNameChinese;
+            FieldName = fieldName;
+        }
+
+        public string FieldName { get; }
+        public string FieldNameChinese { get; }
 
         public override int ErrorCodeInt => 1;
         public override string ErrorMessage => GetMessage();
 
         private string GetMessage()
         {
-            string fieldName = GetAdditionalValueFormatted(ErrorField.FieldName);
-            return (fieldName ?? "") + "查無資料！";
+            return $"{FieldNameChinese?.UnicodeQuote() ?? ""}查無資料！";
         }
     }
 }

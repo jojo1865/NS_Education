@@ -31,15 +31,12 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         #region GetInfoByID
 
-        private const string GetInfoByIdInputIncorrect = "未輸入欲查詢的 ID 或是值不正確！";
-        private const string GetInfoByIdNotFound = "查無欲查詢的資料！";
-
         public async Task<string> GetInfoById(int id)
         {
             // 1. 驗證輸入資料
             if (!id.IsAboveZero())
             {
-                _controller.AddError(_controller.EmptyNotAllowed("欲查詢的 ID"));
+                _controller.AddError(_controller.EmptyNotAllowed("欲查詢的 ID", nameof(id)));
                 return _controller.GetResponseJson();
             }
 

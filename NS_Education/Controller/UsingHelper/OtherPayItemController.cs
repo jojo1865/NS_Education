@@ -243,16 +243,19 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(OtherPayItem_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DOPIID == 0, () => AddError(WrongFormat("項目 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("代碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("名稱", 1, 60)))
-                .Validate(i => i.PaidType.IsInBetween(0, 1), () => AddError(WrongFormat("計價方式")))
+                .Validate(i => i.DOPIID == 0, () => AddError(WrongFormat("項目 ID", nameof(input.DOPIID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("代碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("名稱", nameof(input.Title), 1, 60)))
+                .Validate(i => i.PaidType.IsInBetween(0, 1),
+                    () => AddError(WrongFormat("計價方式", nameof(input.PaidType))))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
-                    () => AddError(NotFound("單位 ID")))
+                    () => AddError(NotFound("單位 ID", nameof(input.BSCID))))
                 .ValidateAsync(
                     async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem),
-                    () => AddError(NotFound("入帳代號 ID")))
+                    () => AddError(NotFound("入帳代號 ID", nameof(input.BOCID))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -282,16 +285,19 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(OtherPayItem_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DOPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("項目 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("代碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("名稱", 1, 60)))
-                .Validate(i => i.PaidType.IsInBetween(0, 1), () => AddError(WrongFormat("計價方式")))
+                .Validate(i => i.DOPIID.IsAboveZero(), () => AddError(EmptyNotAllowed("項目 ID", nameof(input.DOPIID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("代碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("名稱", nameof(input.Title), 1, 60)))
+                .Validate(i => i.PaidType.IsInBetween(0, 1),
+                    () => AddError(WrongFormat("計價方式", nameof(input.PaidType))))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
-                    () => AddError(NotFound("單位 ID")))
+                    () => AddError(NotFound("單位 ID", nameof(input.BSCID))))
                 .ValidateAsync(
                     async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem),
-                    () => AddError(NotFound("入帳代號 ID")))
+                    () => AddError(NotFound("入帳代號 ID", nameof(input.BOCID))))
                 .IsValid();
 
             // 停用時，檢查進行中預約單
@@ -318,7 +324,7 @@ namespace NS_Education.Controller.UsingHelper
 
             if (input.Ct < neededCt)
             {
-                AddError(OutOfRange("數量", $"{neededCt}（進行中預約單之所需數）"));
+                AddError(OutOfRange("數量", nameof(input.Ct), $"{neededCt}（進行中預約單之所需數）"));
             }
 
             return !HasError();

@@ -188,23 +188,35 @@ namespace NS_Education.Controller.UsingHelper
             decimal priceRate = 0m;
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.DTSID == 0, () => AddError(WrongFormat("時段 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
-                .Validate(i => i.HourS.IsInBetween(0, 23), () => AddError(OutOfRange("起始小時", 0, 23)))
-                .Validate(i => i.HourE.IsInBetween(0, 24), () => AddError(OutOfRange("結束小時", 0, 24)))
-                .Validate(i => i.MinuteS.IsInBetween(0, 59), () => AddError(OutOfRange("起始分鐘", 0, 59)))
-                .Validate(i => i.MinuteE.IsInBetween(0, 59), () => AddError(OutOfRange("結束分鐘", 0, 59)))
+                .Validate(i => i.DTSID == 0, () => AddError(WrongFormat("時段 ID", nameof(input.DTSID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 1, 60)))
+                .Validate(i => i.HourS.IsInBetween(0, 23),
+                    () => AddError(OutOfRange("起始小時", nameof(input.HourS), 0, 23)))
+                .Validate(i => i.HourE.IsInBetween(0, 24),
+                    () => AddError(OutOfRange("結束小時", nameof(input.HourE), 0, 24)))
+                .Validate(i => i.MinuteS.IsInBetween(0, 59),
+                    () => AddError(OutOfRange("起始分鐘", nameof(input.MinuteS), 0, 59)))
+                .Validate(i => i.MinuteE.IsInBetween(0, 59),
+                    () => AddError(OutOfRange("結束分鐘", nameof(input.MinuteE), 0, 59)))
                 .Validate(
                     i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
-                    () => AddError(MinLargerThanMax("起始時間", "結束時間")))
+                    () => AddError(MinLargerThanMax("起始時間", nameof(input.HourS) + ", " + nameof(input.MinuteS), "結束時間",
+                        nameof(input.HourE) + ", " + nameof(input.MinuteE))))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => i.PriceRate.HasContent(), () => AddError(EmptyNotAllowed("價格基數")))
-                .Validate(i => i.PriceRate.HasLengthBetween(1, 6), () => AddError(LengthOutOfRange("價格基數", 1, 6)))
-                .Validate(i => decimal.TryParse(i.PriceRate, out priceRate), () => AddError(WrongFormat("價格基數")))
-                .Validate(i => priceRate.IsInBetween(0m, 1m), () => AddError(OutOfRange("價格基數", 0, 1)))
-                .Validate(i => (priceRate * 100m % 1m) == 0m, () => AddError(TooLong("價格基數的小數後位數", 2)))
+                .Validate(i => i.PriceRate.HasContent(),
+                    () => AddError(EmptyNotAllowed("價格基數", nameof(input.PriceRate))))
+                .Validate(i => i.PriceRate.HasLengthBetween(1, 6),
+                    () => AddError(LengthOutOfRange("價格基數", nameof(input.PriceRate), 1, 6)))
+                .Validate(i => decimal.TryParse(i.PriceRate, out priceRate),
+                    () => AddError(WrongFormat("價格基數", nameof(input.PriceRate))))
+                .Validate(i => priceRate.IsInBetween(0m, 1m),
+                    () => AddError(OutOfRange("價格基數", nameof(input.PriceRate), 0, 1)))
+                .Validate(i => (priceRate * 100m % 1m) == 0m,
+                    () => AddError(TooLong("價格基數的小數後位數", nameof(input.PriceRate), 2)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -233,23 +245,35 @@ namespace NS_Education.Controller.UsingHelper
             decimal priceRate = 0m;
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.DTSID.IsAboveZero(), () => AddError(EmptyNotAllowed("時段 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
-                .Validate(i => i.HourS.IsInBetween(0, 23), () => AddError(OutOfRange("起始小時", 0, 23)))
-                .Validate(i => i.HourE.IsInBetween(0, 24), () => AddError(OutOfRange("結束小時", 0, 24)))
-                .Validate(i => i.MinuteS.IsInBetween(0, 59), () => AddError(OutOfRange("起始分鐘", 0, 59)))
-                .Validate(i => i.MinuteE.IsInBetween(0, 59), () => AddError(OutOfRange("結束分鐘", 0, 59)))
+                .Validate(i => i.DTSID.IsAboveZero(), () => AddError(EmptyNotAllowed("時段 ID", nameof(input.DTSID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 1, 60)))
+                .Validate(i => i.HourS.IsInBetween(0, 23),
+                    () => AddError(OutOfRange("起始小時", nameof(input.HourS), 0, 23)))
+                .Validate(i => i.HourE.IsInBetween(0, 24),
+                    () => AddError(OutOfRange("結束小時", nameof(input.HourE), 0, 24)))
+                .Validate(i => i.MinuteS.IsInBetween(0, 59),
+                    () => AddError(OutOfRange("起始分鐘", nameof(input.MinuteS), 0, 59)))
+                .Validate(i => i.MinuteE.IsInBetween(0, 59),
+                    () => AddError(OutOfRange("結束分鐘", nameof(input.MinuteE), 0, 59)))
                 .Validate(
                     i => input.HourS < input.HourE || input.HourS == input.HourE && input.MinuteS <= input.MinuteE,
-                    () => AddError(MinLargerThanMax("起始時間", "結束時間")))
+                    () => AddError(MinLargerThanMax("起始時間", nameof(input.HourS) + ", " + nameof(input.MinuteS), "結束時間",
+                        nameof(input.HourE) + ", " + nameof(input.MinuteE))))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => i.PriceRate.HasContent(), () => AddError(EmptyNotAllowed("價格基數")))
-                .Validate(i => i.PriceRate.HasLengthBetween(1, 6), () => AddError(LengthOutOfRange("價格基數", 1, 6)))
-                .Validate(i => decimal.TryParse(i.PriceRate, out priceRate), () => AddError(WrongFormat("價格基數")))
-                .Validate(i => priceRate.IsInBetween(0m, 1m), () => AddError(OutOfRange("價格基數", 0, 1)))
-                .Validate(i => (priceRate * 100m % 1m) == 0m, () => AddError(TooLong("價格基數的小數後位數", 2)))
+                .Validate(i => i.PriceRate.HasContent(),
+                    () => AddError(EmptyNotAllowed("價格基數", nameof(input.PriceRate))))
+                .Validate(i => i.PriceRate.HasLengthBetween(1, 6),
+                    () => AddError(LengthOutOfRange("價格基數", nameof(input.PriceRate), 1, 6)))
+                .Validate(i => decimal.TryParse(i.PriceRate, out priceRate),
+                    () => AddError(WrongFormat("價格基數", nameof(input.PriceRate))))
+                .Validate(i => priceRate.IsInBetween(0m, 1m),
+                    () => AddError(OutOfRange("價格基數", nameof(input.PriceRate), 0, 1)))
+                .Validate(i => (priceRate * 100m % 1m) == 0m,
+                    () => AddError(TooLong("價格基數的小數後位數", nameof(input.PriceRate), 2)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

@@ -1,25 +1,27 @@
+using NS_Education.Tools.Extensions;
+
 namespace NS_Education.Models.Errors.InputValidationErrors
 {
     public sealed class NotSupportedValueError : BaseInputValidationError
     {
-        public NotSupportedValueError(string fieldName, string reason = null)
+        public NotSupportedValueError(string fieldNameChinese, string fieldName, string reason = null)
         {
-            AddAdditionalValues(ErrorField.FieldName, fieldName);
-
-            if (reason != null)
-                AddAdditionalValues(ErrorField.Reason, reason);
+            FieldName = fieldName;
+            FieldNameChinese = fieldNameChinese;
+            Reason = reason;
         }
 
+        public string FieldName { get; }
+        public string FieldNameChinese { get; }
+        public string Reason { get; }
         public override int ErrorCodeInt => 2;
         public override string ErrorMessage => GetErrorMessage();
 
         private string GetErrorMessage()
         {
-            if (GetAdditionalValue(ErrorField.Reason) != null)
-                return
-                    $"{GetAdditionalValueFormatted(ErrorField.FieldName)}欄位不支援輸入的值！原因：{GetAdditionalValueFormatted(ErrorField.Reason)}";
-            else
-                return $"{GetAdditionalValueFormatted(ErrorField.FieldName)}欄位不支援輸入的值！";
+            return Reason.HasContent()
+                ? $"{FieldNameChinese.UnicodeQuote()}欄位不支援輸入的值！原因：{Reason.UnicodeQuote()}"
+                : $"{FieldNameChinese.UnicodeQuote()}欄位不支援輸入的值！";
         }
     }
 }

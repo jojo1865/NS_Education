@@ -61,7 +61,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(PayType_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("所屬分類 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("所屬分類 ID", nameof(input.BCID))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -194,15 +194,18 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(PayType_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DPTID == 0, () => AddError(WrongFormat("付款方式 ID")))
+                .Validate(i => i.DPTID == 0, () => AddError(WrongFormat("付款方式 ID", nameof(input.DPTID))))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType),
-                    () => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
+                    () => AddError(NotFound("分類 ID", nameof(input.BCID))))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 1, 60)))
                 .Validate(i => i.AccountingNo.HasLengthBetween(0, 10),
-                    () => AddError(LengthOutOfRange("會計科目代號", 0, 10)))
-                .Validate(i => i.CustomerNo.HasLengthBetween(0, 20), () => AddError(LengthOutOfRange("客戶代號", 0, 20)))
+                    () => AddError(LengthOutOfRange("會計科目代號", nameof(input.AccountingNo), 0, 10)))
+                .Validate(i => i.CustomerNo.HasLengthBetween(0, 20),
+                    () => AddError(LengthOutOfRange("客戶代號", nameof(input.CustomerNo), 0, 20)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -232,15 +235,18 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(PayType_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DPTID.IsAboveZero(), () => AddError(WrongFormat("付款方式 ID")))
+                .Validate(i => i.DPTID.IsAboveZero(), () => AddError(WrongFormat("付款方式 ID", nameof(input.DPTID))))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.PayType),
-                    () => AddError(NotFound("分類 ID")))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 1, 60)))
+                    () => AddError(NotFound("分類 ID", nameof(input.BCID))))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 1, 60)))
                 .Validate(i => i.AccountingNo.HasLengthBetween(0, 10),
-                    () => AddError(LengthOutOfRange("會計科目代號", 0, 10)))
-                .Validate(i => i.CustomerNo.HasLengthBetween(0, 20), () => AddError(LengthOutOfRange("客戶代號", 0, 20)))
+                    () => AddError(LengthOutOfRange("會計科目代號", nameof(input.AccountingNo), 0, 10)))
+                .Validate(i => i.CustomerNo.HasLengthBetween(0, 20),
+                    () => AddError(LengthOutOfRange("客戶代號", nameof(input.CustomerNo), 0, 20)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

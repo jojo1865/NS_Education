@@ -108,7 +108,8 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         public async Task<bool> GetListAllValidateInput(MenuData_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.ParentID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之選單上層 ID")))
+                .Validate(i => i.ParentID.IsZeroOrAbove(),
+                    () => AddError(WrongFormat("欲篩選之選單上層 ID", nameof(input.ParentID))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -201,8 +202,8 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         {
             // 1. 驗證輸入
             bool isValid = this.StartValidate()
-                .Validate(_ => id.IsAboveZero(), () => AddError(EmptyNotAllowed("欲更新的選單 ID")))
-                .Validate(_ => activeFlag != null, () => AddError(EmptyNotAllowed("ActiveFlag")))
+                .Validate(_ => id.IsAboveZero(), () => AddError(EmptyNotAllowed("欲更新的選單 ID", nameof(id))))
+                .Validate(_ => activeFlag != null, () => AddError(EmptyNotAllowed("ActiveFlag", nameof(activeFlag))))
                 .IsValid();
 
             if (!isValid)
@@ -224,7 +225,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                     md.AlwaysAllowShow || md.AlwaysAllowAdd || md.AlwaysAllowEdit || md.AlwaysAllowDelete ||
                     md.AlwaysAllowPring) && activeFlag is false)
             {
-                AddError(NotSupportedValue($"權限 ID（{id}）"));
+                AddError(NotSupportedValue($"權限 ID（{id}）", "此為特殊選單"));
                 return;
             }
 
@@ -282,10 +283,12 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .ToArrayAsync();
 
             bool isEveryElementValid = input.Items.StartValidateElements()
-                .Validate(i => i.Id != null && i.Id.IsAboveZero(), i => AddError(EmptyNotAllowed($"欲刪除的選單 ID（{i.Id}）")))
-                .Validate(i => i.DeleteFlag != null, i => AddError(EmptyNotAllowed($"ID {i.Id} 的 DeleteFlag")))
+                .Validate(i => i.Id != null && i.Id.IsAboveZero(),
+                    i => AddError(EmptyNotAllowed($"欲刪除的選單 ID（{i.Id}）", nameof(i.Id))))
+                .Validate(i => i.DeleteFlag != null,
+                    i => AddError(EmptyNotAllowed($"ID {i.Id} 的 DeleteFlag", nameof(i.DeleteFlag))))
                 .Validate(i => !alwaysShowIds.Contains(i.Id ?? 0) && i.DeleteFlag is true,
-                    i => AddError(NotSupportedValue($"選單 ID（{i.Id}）")))
+                    i => AddError(NotSupportedValue($"選單 ID（{i.Id}）", "此為特殊選單")))
                 .IsValid();
 
             if (!isCollectionValid || !isEveryElementValid)
@@ -299,7 +302,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
                 if (!menuData.Any())
                 {
-                    AddError(NotFound($"選單 ID {item.Id}"));
+                    AddError(NotFound($"選單 ID {item.Id}", nameof(item.Id)));
                 }
 
                 // 3. 設定資料
@@ -342,19 +345,22 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         public async Task<bool> SubmitAddValidateInput(MenuData_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.MDID == 0, () => AddError(WrongFormat("選單 ID")))
-                .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(OutOfRange("上層選單 ID", 0)))
-                .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID, () => AddError(NotSupportedValue("上層選單 ID")))
+                .Validate(i => i.MDID == 0, () => AddError(WrongFormat("選單 ID", nameof(input.MDID))))
+                .Validate(i => i.ParentId.IsZeroOrAbove(),
+                    () => AddError(OutOfRange("上層選單 ID", nameof(input.ParentId), 0)))
+                .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID,
+                    () => AddError(NotSupportedValue("上層選單 ID", nameof(input.ParentId))))
                 .ValidateAsync(
                     async i => i.ParentId == 0 || await DC.MenuData.ValidateIdExists(i.ParentId, nameof(MenuData.MDID)),
-                    () => AddError(NotFound("上層選單 ID")))
-                .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("選單名稱", 1, 50)))
-                .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序")))
+                    () => AddError(NotFound("上層選單 ID", nameof(input.ParentId))))
+                .Validate(i => i.Title.HasLengthBetween(1, 50),
+                    () => AddError(LengthOutOfRange("選單名稱", nameof(input.Title), 1, 50)))
+                .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序", nameof(input.SortNo))))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.StartsWith("/") && !i.Url.EndsWith("/"),
-                    () => AddError(WrongFormat("選單目標網址")))
+                    () => AddError(WrongFormat("選單目標網址", nameof(input.Url))))
                 .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.Length.IsInBetween(0, 300),
-                    () => AddError(TooLong("選單目標網址")))
+                    () => AddError(TooLong("選單目標網址", nameof(input.Url))))
                 .IsValid();
 
             return isValid;
@@ -383,19 +389,22 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         public async Task<bool> SubmitEditValidateInput(MenuData_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.MDID.IsAboveZero(), () => AddError(EmptyNotAllowed("選單 ID")))
-                .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(OutOfRange("上層選單 ID", 0)))
-                .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID, () => AddError(NotSupportedValue("上層選單 ID")))
+                .Validate(i => i.MDID.IsAboveZero(), () => AddError(EmptyNotAllowed("選單 ID", nameof(input.MDID))))
+                .Validate(i => i.ParentId.IsZeroOrAbove(),
+                    () => AddError(OutOfRange("上層選單 ID", nameof(input.ParentId), 0)))
+                .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID,
+                    () => AddError(NotSupportedValue("上層選單 ID", nameof(input.ParentId))))
                 .ValidateAsync(
                     async i => i.ParentId == 0 || await DC.MenuData.ValidateIdExists(i.ParentId, nameof(MenuData.MDID)),
-                    () => AddError(NotFound("上層選單 ID")))
-                .Validate(i => i.Title.HasLengthBetween(1, 50), () => AddError(LengthOutOfRange("選單名稱", 1, 50)))
-                .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序")))
+                    () => AddError(NotFound("上層選單 ID", nameof(input.ParentId))))
+                .Validate(i => i.Title.HasLengthBetween(1, 50),
+                    () => AddError(LengthOutOfRange("選單名稱", nameof(input.Title), 1, 50)))
+                .Validate(i => i.SortNo.IsZeroOrAbove(), () => AddError(WrongFormat("選單排序", nameof(input.SortNo))))
                 .SkipIfAlreadyInvalid()
                 .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.StartsWith("/") && !i.Url.EndsWith("/"),
-                    () => AddError(WrongFormat("選單目標網址")))
+                    () => AddError(WrongFormat("選單目標網址", nameof(input.Url))))
                 .Validate(i => i.Url.IsNullOrWhiteSpace() || i.Url.Length.IsInBetween(0, 300),
-                    () => AddError(TooLong("選單目標網址")))
+                    () => AddError(TooLong("選單目標網址", nameof(input.Url))))
                 .IsValid();
 
             return isValid;
@@ -435,8 +444,8 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         {
             // 1. 驗證輸入
             bool isValid = this.StartValidate()
-                .Validate(_ => id.IsAboveZero(), () => AddError(EmptyNotAllowed("欲更新的選單 ID")))
-                .Validate(_ => sortNo.IsAboveZero(), () => AddError(EmptyNotAllowed("新的排序數字")))
+                .Validate(_ => id.IsAboveZero(), () => AddError(EmptyNotAllowed("欲更新的選單 ID", nameof(id))))
+                .Validate(_ => sortNo.IsAboveZero(), () => AddError(EmptyNotAllowed("新的排序數字", nameof(sortNo))))
                 .IsValid();
 
             if (!isValid)

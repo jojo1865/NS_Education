@@ -66,12 +66,12 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = input.StartValidate(true)
                 .Validate(i => i.SendYear == 0 || i.SendYear.IsInBetween(1911, 9999),
-                    () => AddError(OutOfRange("贈送年分", 1911, 9999)))
+                    () => AddError(OutOfRange("贈送年分", nameof(input.SendYear), 1911, 9999)))
                 .Validate(i =>
                         !i.SDate.TryParseDateTime(out DateTime startDate)
                         || !i.EDate.TryParseDateTime(out DateTime endDate)
                         || endDate >= startDate
-                    , () => AddError(MinLargerThanMax("贈送日期起始日", "贈送日期結束日")))
+                    , () => AddError(MinLargerThanMax("贈送日期起始日", nameof(input.SDate), "贈送日期結束日", nameof(input.EDate))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -214,12 +214,14 @@ namespace NS_Education.Controller.UsingHelper
             sendDate = sendDate.Date;
 
             bool isValid = await input.StartValidate()
-                .Validate(i => i.GSID == 0, () => AddError(WrongFormat("禮品贈與紀錄 ID")))
-                .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
-                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與日期")))
+                .Validate(i => i.GSID == 0, () => AddError(WrongFormat("禮品贈與紀錄 ID", nameof(input.GSID))))
+                .Validate(i => i.Year.IsInBetween(1911, 9999),
+                    () => AddError(WrongFormat("禮品贈送代表年分", nameof(input.Year))))
+                .Validate(i => i.SendDate.TryParseDateTime(out _),
+                    () => AddError(WrongFormat("禮品贈與日期", nameof(input.SendDate))))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
-                    () => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.Customers.Any(), () => AddError(EmptyNotAllowed("此紀錄之對應客戶")))
+                    () => AddError(NotFound("禮品 ID", nameof(input.BSCID))))
+                .Validate(i => i.Customers.Any(), () => AddError(EmptyNotAllowed("此紀錄之對應客戶", nameof(input.Customers))))
                 .IsValid();
 
 
@@ -229,9 +231,9 @@ namespace NS_Education.Controller.UsingHelper
             // 驗證每筆客戶輸入資料正確
             isValid = isValid && await input.Customers.StartValidateElements()
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
-                    i => AddError(NotFound($"客戶 ID（{i.CID}）")))
+                    i => AddError(NotFound($"客戶 ID（{i.CID}）", nameof(i.CID))))
                 .Validate(i => i.Ct.IsAboveZero(),
-                    i => AddError(OutOfRange($"贈送數量（客戶 ID {i.CID}）", 0)))
+                    i => AddError(OutOfRange($"贈送數量（客戶 ID {i.CID}）", nameof(i.Ct), 0)))
                 .IsValid();
 
             // 驗證沒有其他贈送年份、贈與日期、禮品 ID 相同的資料
@@ -243,7 +245,9 @@ namespace NS_Education.Controller.UsingHelper
                                                                             && gs.BSCID == input.BSCID);
 
             if (isValid && !isUnique)
-                AddError(AlreadyExists("贈送年份、贈與日期、禮品 ID"));
+                AddError(AlreadyExists("贈送年份、贈與日期、禮品 ID", nameof(CustomerGift_Submit_Input_APIItem.Year)
+                                                          + ", " + nameof(CustomerGift_Submit_Input_APIItem.SendDate)
+                                                          + ", " + nameof(CustomerGift_Submit_Input_APIItem.BSCID)));
 
             return isValid && isUnique;
         }
@@ -285,12 +289,14 @@ namespace NS_Education.Controller.UsingHelper
             sendDate = sendDate.Date;
 
             bool isValid = await input.StartValidate()
-                .Validate(i => i.GSID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品贈與紀錄 ID")))
-                .Validate(i => i.Year.IsInBetween(1911, 9999), () => AddError(WrongFormat("禮品贈送代表年分")))
-                .Validate(i => i.SendDate.TryParseDateTime(out _), () => AddError(WrongFormat("禮品贈與日期")))
+                .Validate(i => i.GSID.IsAboveZero(), () => AddError(EmptyNotAllowed("禮品贈與紀錄 ID", nameof(input.GSID))))
+                .Validate(i => i.Year.IsInBetween(1911, 9999),
+                    () => AddError(WrongFormat("禮品贈送代表年分", nameof(input.Year))))
+                .Validate(i => i.SendDate.TryParseDateTime(out _),
+                    () => AddError(WrongFormat("禮品贈與日期", nameof(input.SendDate))))
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
-                    () => AddError(NotFound("禮品 ID")))
-                .Validate(i => i.Customers.Any(), () => AddError(EmptyNotAllowed("此紀錄之對應客戶")))
+                    () => AddError(NotFound("禮品 ID", nameof(input.BSCID))))
+                .Validate(i => i.Customers.Any(), () => AddError(EmptyNotAllowed("此紀錄之對應客戶", nameof(input.Customers))))
                 .IsValid();
 
 
@@ -300,9 +306,9 @@ namespace NS_Education.Controller.UsingHelper
             // 驗證每筆客戶輸入資料正確
             isValid = isValid && await input.Customers.StartValidateElements()
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
-                    i => AddError(NotFound($"客戶 ID（{i.CID}）")))
+                    i => AddError(NotFound($"客戶 ID（{i.CID}）", nameof(i.CID))))
                 .Validate(i => i.Ct.IsAboveZero(),
-                    i => AddError(OutOfRange($"贈送數量（客戶 ID {i.CID}）", 0)))
+                    i => AddError(OutOfRange($"贈送數量（客戶 ID {i.CID}）", nameof(i.Ct), 0)))
                 .IsValid();
 
             // 驗證沒有其他贈送年份、贈與日期、禮品 ID 相同的資料
@@ -314,7 +320,9 @@ namespace NS_Education.Controller.UsingHelper
                                                                             && gs.BSCID == input.BSCID);
 
             if (isValid && !isUnique)
-                AddError(AlreadyExists("贈送年份、贈與日期、禮品 ID"));
+                AddError(AlreadyExists("贈送年份、贈與日期、禮品 ID", nameof(CustomerGift_Submit_Input_APIItem.Year)
+                                                          + ", " + nameof(CustomerGift_Submit_Input_APIItem.SendDate)
+                                                          + ", " + nameof(CustomerGift_Submit_Input_APIItem.BSCID)));
 
             return isValid && isUnique;
         }

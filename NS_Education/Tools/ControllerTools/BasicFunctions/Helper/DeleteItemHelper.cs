@@ -51,16 +51,19 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 驗證集合是否皆為獨特 Id
             bool isCollectionValid = input.Items.StartValidate()
                 .Validate(items => items.GroupBy(i => i.Id).Count() == input.Items.Count(),
-                    () => _controller.AddError(_controller.CopyNotAllowed("欲刪除的資料 ID")))
+                    () => _controller.AddError(_controller.CopyNotAllowed("欲刪除的資料 ID",
+                        nameof(DeleteItem_Input_Row_APIItem.Id))))
                 .IsValid();
 
             // 驗證每個元素是否輸入正確
 
             bool isEveryElementValid = input.Items.StartValidateElements()
                 .Validate(i => i.Id != null && i.Id.IsAboveZero(),
-                    () => _controller.AddError(_controller.EmptyNotAllowed("欲刪除的資料 ID")))
+                    () => _controller.AddError(_controller.EmptyNotAllowed("欲刪除的資料 ID",
+                        nameof(DeleteItem_Input_Row_APIItem.Id))))
                 .Validate(i => i.DeleteFlag != null,
-                    i => _controller.AddError(_controller.EmptyNotAllowed($"欲刪除或復活的輸入值（{i.Id}）")))
+                    i => _controller.AddError(_controller.EmptyNotAllowed($"欲刪除或復活的輸入值",
+                        nameof(DeleteItem_Input_Row_APIItem.DeleteFlag))))
                 .IsValid();
 
             if (!isCollectionValid || !isEveryElementValid)

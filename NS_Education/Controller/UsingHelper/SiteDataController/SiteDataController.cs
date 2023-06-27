@@ -152,23 +152,23 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             bool isValid = await input
                 .StartValidate()
                 .Validate(i => i.BCID.IsZeroOrAbove(),
-                    () => AddError(EmptyNotAllowed("分類 ID")))
+                    () => AddError(EmptyNotAllowed("分類 ID", nameof(input.BCID))))
                 .ForceSkipIf(i => i.BCID <= 0)
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
-                    () => AddError(NotFound("分類 ID")))
+                    () => AddError(NotFound("分類 ID", nameof(input.BCID))))
                 .StopForceSkipping()
                 .Validate(i => i.BSCID1.IsZeroOrAbove(),
-                    () => AddError(WrongFormat("樓層別")))
+                    () => AddError(WrongFormat("樓層別", nameof(input.BSCID1))))
                 .ForceSkipIf(i => i.BSCID1 <= 0)
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
-                    () => AddError(NotFound("樓層別 ID")))
+                    () => AddError(NotFound("樓層別 ID", nameof(input.BSCID1))))
                 .StopForceSkipping()
                 .Validate(i => i.Capacity.IsZeroOrAbove(),
-                    () => AddError(WrongFormat("容納人數")))
+                    () => AddError(WrongFormat("容納人數", nameof(input.Capacity))))
                 .ForceSkipIf(i => i.TargetDate.IsNullOrWhiteSpace())
                 .Validate(i => i.TargetDate.TryParseDateTime(out _),
-                    () => AddError(WrongFormat("可租借日期")))
+                    () => AddError(WrongFormat("可租借日期", nameof(input.TargetDate))))
                 .StopForceSkipping()
                 .IsValid();
 
@@ -570,29 +570,37 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public async Task<bool> SubmitAddValidateInput(SiteData_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BSID == 0, () => AddError(WrongFormat("場地 ID")))
+                .Validate(i => i.BSID == 0, () => AddError(WrongFormat("場地 ID", nameof(input.BSID))))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
-                    () => AddError(NotFound("所屬分類 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 0, 60)))
-                .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
-                .Validate(i => i.MaxSize >= i.BasicSize, () => AddError(MinLargerThanMax("一般容納人數", "最大容納人數")))
-                .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
-                .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
-                .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
-                .Validate(i => i.PhoneExt1.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 1", 0, 6)))
-                .Validate(i => i.PhoneExt2.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 2", 0, 6)))
-                .Validate(i => i.PhoneExt3.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 3", 0, 6)))
+                    () => AddError(NotFound("所屬分類 ID", nameof(input.BCID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 0, 60)))
+                .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數", nameof(input.BasicSize))))
+                .Validate(i => i.MaxSize >= i.BasicSize,
+                    () => AddError(MinLargerThanMax("一般容納人數", nameof(input.BasicSize), "最大容納人數",
+                        nameof(input.MaxSize))))
+                .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用", nameof(input.UnitPrice))))
+                .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價", nameof(input.InPrice))))
+                .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價", nameof(input.OutPrice))))
+                .Validate(i => i.PhoneExt1.HasLengthBetween(0, 6),
+                    () => AddError(LengthOutOfRange("分機 1", nameof(input.PhoneExt1), 0, 6)))
+                .Validate(i => i.PhoneExt2.HasLengthBetween(0, 6),
+                    () => AddError(LengthOutOfRange("分機 2", nameof(input.PhoneExt2), 0, 6)))
+                .Validate(i => i.PhoneExt3.HasLengthBetween(0, 6),
+                    () => AddError(LengthOutOfRange("分機 3", nameof(input.PhoneExt3), 0, 6)))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
-                    () => AddError(NotFound("樓別 ID")))
+                    () => AddError(NotFound("樓別 ID", nameof(input.BSCID1))))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID5, StaticCodeType.SiteTable),
-                    () => AddError(NotFound("桌型 ID")))
-                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
+                    () => AddError(NotFound("桌型 ID", nameof(input.BSCID5))))
+                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
+                    () => AddError(NotFound("廳別 ID", nameof(input.DHID))))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Site),
-                    () => AddError(NotFound("入帳代號 ID")))
+                    () => AddError(NotFound("入帳代號 ID", nameof(input.BOCID))))
                 .IsValid();
 
             bool isGroupListValid = await SubmitValidateGroupList(input);
@@ -600,10 +608,12 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             isValid = isValid && isGroupListValid;
 
             bool isDevicesValid = isValid && await input.Devices.StartValidateElements()
-                .Validate(d => d.BSID == 0, () => AddError(ExpectedValue("設備的場地 ID", 0)))
+                .Validate(d => d.BSID == 0,
+                    () => AddError(ExpectedValue("設備的場地 ID", nameof(SiteData_Submit_Input_Devices_Row_APIItem.BSID),
+                        0)))
                 .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
-                    d => AddError(NotFound($"設備 ID（{d.BDID}）")))
-                .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", 0)))
+                    d => AddError(NotFound($"設備 ID（{d.BDID}）", nameof(d.BDID))))
+                .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", nameof(d.Ct), 0)))
                 .IsValid();
 
             bool isDevicesUnique = isDevicesValid &&
@@ -632,7 +642,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             if (uniqueSiteIds.Count != input.GroupList.Count)
             {
-                AddError(CopyNotAllowed("場地組合子場地 ID"));
+                AddError(CopyNotAllowed("場地組合子場地 ID", nameof(SiteData_Submit_Input_GroupList_Row_APIItem.BSID)));
                 return false;
             }
 
@@ -645,7 +655,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             bool allInputSiteExists = uniqueSiteIds.StartValidateElements()
                 .Validate(id => idToData.ContainsKey(id),
-                    id => AddError(NotFound($"場地組合子場地（ID {id}）")))
+                    id => AddError(NotFound($"場地組合子場地（ID {id}）",
+                        nameof(SiteData_Submit_Input_GroupList_Row_APIItem.BSID))))
                 .IsValid();
 
             if (!allInputSiteExists)
@@ -733,29 +744,37 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public async Task<bool> SubmitEditValidateInput(SiteData_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.BSID.IsAboveZero(), () => AddError(EmptyNotAllowed("場地 ID")))
+                .Validate(i => i.BSID.IsAboveZero(), () => AddError(EmptyNotAllowed("場地 ID", nameof(input.BSID))))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
-                    () => AddError(NotFound("所屬分類 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 60), () => AddError(LengthOutOfRange("中文名稱", 0, 60)))
-                .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數")))
-                .Validate(i => i.MaxSize >= i.BasicSize, () => AddError(MinLargerThanMax("一般容納人數", "最大容納人數")))
-                .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用")))
-                .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價")))
-                .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價")))
-                .Validate(i => i.PhoneExt1.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 1", 0, 6)))
-                .Validate(i => i.PhoneExt2.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 2", 0, 6)))
-                .Validate(i => i.PhoneExt3.HasLengthBetween(0, 6), () => AddError(LengthOutOfRange("分機 3", 0, 6)))
+                    () => AddError(NotFound("所屬分類 ID", nameof(input.BCID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
+                .Validate(i => i.Title.HasLengthBetween(1, 60),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 0, 60)))
+                .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數", nameof(input.BasicSize))))
+                .Validate(i => i.MaxSize >= i.BasicSize,
+                    () => AddError(MinLargerThanMax("一般容納人數", nameof(input.BasicSize), "最大容納人數",
+                        nameof(input.MaxSize))))
+                .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用", nameof(input.UnitPrice))))
+                .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價", nameof(input.InPrice))))
+                .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價", nameof(input.OutPrice))))
+                .Validate(i => i.PhoneExt1.HasLengthBetween(0, 6),
+                    () => AddError(LengthOutOfRange("分機 1", nameof(input.PhoneExt1), 0, 6)))
+                .Validate(i => i.PhoneExt2.HasLengthBetween(0, 6),
+                    () => AddError(LengthOutOfRange("分機 2", nameof(input.PhoneExt2), 0, 6)))
+                .Validate(i => i.PhoneExt3.HasLengthBetween(0, 6),
+                    () => AddError(LengthOutOfRange("分機 3", nameof(input.PhoneExt3), 0, 6)))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
-                    () => AddError(NotFound("樓別 ID")))
+                    () => AddError(NotFound("樓別 ID", nameof(input.BSCID1))))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID5, StaticCodeType.SiteTable),
-                    () => AddError(NotFound("桌型 ID")))
-                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID), () => AddError(NotFound("廳別 ID")))
+                    () => AddError(NotFound("桌型 ID", nameof(input.BSCID5))))
+                .ValidateAsync(async i => await DC.D_Hall.ValidateHallExists(i.DHID),
+                    () => AddError(NotFound("廳別 ID", nameof(input.DHID))))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Site),
-                    () => AddError(NotFound("入帳代號 ID")))
+                    () => AddError(NotFound("入帳代號 ID", nameof(input.BOCID))))
                 .IsValid();
 
             bool isReservationClear = input.ActiveFlag || isValid && await ChangeActiveValidateResverSite(input.BSID);
@@ -768,10 +787,12 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             // 判定所有 Device 都是有效資料
             isValid = isValid && await input.Devices.StartValidateElements()
-                .Validate(d => d.BSID == input.BSID, () => AddError(ExpectedValue("設備的場地 ID", input.BSID)))
+                .Validate(d => d.BSID == input.BSID,
+                    () => AddError(ExpectedValue("設備的場地 ID", nameof(input.BSID), input.BSID)))
                 .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
-                    d => AddError(NotFound($"設備 ID（{d.BDID}）")))
-                .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", 0)))
+                    d => AddError(NotFound($"設備 ID（{d.BDID}）", nameof(d.BDID))))
+                .Validate(d => d.Ct.IsAboveZero(),
+                    d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", nameof(d.Ct), 0)))
                 .IsValid();
 
             // 判定沒有重覆的 BDID
@@ -781,7 +802,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 isValid && uniqueDeviceId.Count() == input.Devices.Count;
 
             if (isValid && !allDeviceIdUnique)
-                AddError(CopyNotAllowed("設備 ID"));
+                AddError(CopyNotAllowed("設備 ID", nameof(SiteData_Submit_Input_Devices_Row_APIItem.BDID)));
 
             isValid = isValid && allDeviceIdUnique;
 
@@ -803,8 +824,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             {
                 isValid = false;
                 AddError(new BusinessError(1,
-                    "新的「最大容納人數」低於既有進行中預約單的人數！",
-                    new KeyValuePair<ErrorField, object>(ErrorField.Min, neededSize)));
+                        "新的「最大容納人數」低於既有進行中預約單的人數！",
+                        new Dictionary<string, object> { { nameof(ErrorField.Min), neededSize } }
+                    )
+                );
             }
 
             isValid = isValid && await SubmitValidateDeviceCt(input);
@@ -886,6 +909,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                         inputDeviceCt.GetValueOrDefault(idToNeedCt.Key) +
                         childDeviceCt.GetValueOrDefault(idToNeedCt.Key) >= idToNeedCt.Value,
                     idToNeedCt => AddError(OutOfRange($"設備（ID {idToNeedCt.Key}）數量",
+                        nameof(SiteData_Submit_Input_Devices_Row_APIItem.Ct),
                         $"{idToNeedCt.Value - childDeviceCt.GetValueOrDefault(idToNeedCt.Key)}（進行中之預約單的預約數量）")))
                 .IsValid();
 

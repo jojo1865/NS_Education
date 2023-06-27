@@ -1,14 +1,19 @@
+using NS_Education.Tools.Extensions;
+
 namespace NS_Education.Models.Errors.InputValidationErrors
 {
     public sealed class LengthTooLongError : BaseInputValidationError
     {
-        public LengthTooLongError(string fieldName, int? maxLength)
+        public LengthTooLongError(string fieldName, string fieldNameChinese, int? maxLength)
         {
-            AddAdditionalValues(ErrorField.FieldName, fieldName);
-
-            if (maxLength != null)
-                AddAdditionalValues(ErrorField.MaxLength, maxLength.Value);
+            FieldName = fieldName;
+            FieldNameChinese = fieldNameChinese;
+            MaxLength = maxLength;
         }
+
+        public string FieldName { get; }
+        public string FieldNameChinese { get; }
+        public int? MaxLength { get; }
 
         public override int ErrorCodeInt => 8;
 
@@ -17,10 +22,9 @@ namespace NS_Education.Models.Errors.InputValidationErrors
 
         private string GetMessage()
         {
-            string fieldName = GetAdditionalValueFormatted(ErrorField.FieldName);
-            string maxLength = GetAdditionalValueFormatted(ErrorField.MaxLength);
-
-            return maxLength != null ? $"{fieldName}長度不得超過{maxLength}！" : $"{fieldName}長度過長！";
+            return MaxLength != null
+                ? $"{FieldNameChinese.UnicodeQuote()}長度不得超過 {MaxLength}！"
+                : $"{FieldNameChinese.UnicodeQuote()}長度過長！";
         }
     }
 }

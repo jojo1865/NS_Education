@@ -42,5 +42,27 @@ namespace NS_Education.Tools.Extensions
         {
             return s.Replace("\r", "").Replace("\n", "");
         }
+
+        /// <summary>
+        /// 在字串前後加上全形括號。
+        /// </summary>
+        /// <param name="s">要處理的字串</param>
+        /// <returns>
+        /// 字串有內容時：首尾加上 「 符號與 」 符號的字串。<br/>
+        /// 字串為 null、空或空格時：原字串。
+        /// </returns>
+        public static string UnicodeQuote(this string s)
+        {
+            if (s.IsNullOrWhiteSpace())
+                return s;
+
+            if (!s.StartsWith("「"))
+                s = "「" + s;
+
+            if (!s.EndsWith("」"))
+                s += "」";
+
+            return s;
+        }
     }
 }

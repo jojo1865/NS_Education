@@ -7,14 +7,17 @@ namespace NS_Education.Models.Errors
     {
         public SystemError(Exception exception)
         {
-            AddAdditionalValues(ErrorField.Exception, exception.GetActualMessage());
-            AddAdditionalValues(ErrorField.ExceptionStack, exception.StackTrace);
+            Exception = exception.GetActualMessage();
+            ExceptionStack = exception.StackTrace;
         }
 
         public SystemError(string exceptionMessage)
         {
-            AddAdditionalValues(ErrorField.Exception, exceptionMessage);
+            Exception = exceptionMessage;
         }
+
+        public string Exception { get; }
+        public string ExceptionStack { get; }
 
         public override char ErrorType => 'S';
         public override int ErrorCodeInt => 1;

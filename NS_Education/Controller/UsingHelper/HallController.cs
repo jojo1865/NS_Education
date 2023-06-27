@@ -60,7 +60,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Hall_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.DDID.IsZeroOrAbove(), () => AddError(WrongFormat("所屬部門 ID")))
+                .Validate(i => i.DDID.IsZeroOrAbove(), () => AddError(WrongFormat("所屬部門 ID", nameof(input.DDID))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -207,14 +207,19 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(Hall_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DHID == 0, () => AddError(WrongFormat("廳別 ID")))
+                .Validate(i => i.DHID == 0, () => AddError(WrongFormat("廳別 ID", nameof(input.DHID))))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
-                    () => AddError(NotFound("部門 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
-                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
-                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(NotSupportedValue("開立憑證種類")))
+                    () => AddError(NotFound("部門 ID", nameof(input.DDID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(),
+                    () => AddError(EmptyNotAllowed("名稱", nameof(input.TitleC))))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.TitleC), 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("英文名稱", nameof(input.TitleE), 0, 50)))
+                .Validate(i => i.CheckType.IsInBetween(0, 1),
+                    () => AddError(NotSupportedValue("開立憑證種類", nameof(input.CheckType))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -244,14 +249,19 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(Hall_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID")))
+                .Validate(i => i.DHID.IsAboveZero(), () => AddError(EmptyNotAllowed("廳別 ID", nameof(input.DHID))))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
-                    () => AddError(NotFound("部門 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼", 0, 10)))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
-                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
-                .Validate(i => i.CheckType.IsInBetween(0, 1), () => AddError(NotSupportedValue("開立憑證種類")))
+                    () => AddError(NotFound("部門 ID", nameof(input.DDID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(),
+                    () => AddError(EmptyNotAllowed("名稱", nameof(input.TitleC))))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.TitleC), 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("英文名稱", nameof(input.TitleE), 0, 50)))
+                .Validate(i => i.CheckType.IsInBetween(0, 1),
+                    () => AddError(NotSupportedValue("開立憑證種類", nameof(input.CheckType))))
                 .IsValid();
 
             return await Task.FromResult(isValid);

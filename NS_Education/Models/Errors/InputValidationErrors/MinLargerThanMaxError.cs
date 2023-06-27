@@ -1,16 +1,26 @@
+using NS_Education.Tools.Extensions;
+
 namespace NS_Education.Models.Errors.InputValidationErrors
 {
     public sealed class MinLargerThanMaxError : BaseInputValidationError
     {
-        public MinLargerThanMaxError(string fieldNameA, string fieldNameB)
+        public MinLargerThanMaxError(string fieldNameChineseA, string fieldNameA, string fieldNameChineseB,
+            string fieldNameB)
         {
-            AddAdditionalValues(ErrorField.FieldNameA, fieldNameA);
-            AddAdditionalValues(ErrorField.FieldNameB, fieldNameB);
+            FieldNameA = fieldNameA;
+            FieldNameChineseA = fieldNameChineseA;
+            FieldNameB = fieldNameB;
+            FieldNameChineseB = fieldNameChineseB;
         }
+
+        public string FieldNameA { get; }
+        public string FieldNameChineseA { get; }
+        public string FieldNameB { get; }
+        public string FieldNameChineseB { get; }
 
         public override int ErrorCodeInt => 4;
 
         public override string ErrorMessage =>
-            $"{GetAdditionalValueFormatted(ErrorField.FieldNameA)}必須小於等於{GetAdditionalValueFormatted(ErrorField.FieldNameB)}！";
+            $"{FieldNameChineseA.UnicodeQuote()}必須小於等於{FieldNameChineseB.UnicodeQuote()}！";
     }
 }

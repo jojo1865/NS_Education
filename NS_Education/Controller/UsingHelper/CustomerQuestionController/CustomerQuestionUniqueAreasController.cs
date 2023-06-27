@@ -45,7 +45,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.MaxRow.IsInBetween(1, 1000)
-                    , () => OutOfRange("最大筆數", 1, 1000))
+                    , () => OutOfRange("最大筆數", nameof(input.MaxRow), 1, 1000))
                 .IsValid();
 
             return await Task.FromResult(isValid);

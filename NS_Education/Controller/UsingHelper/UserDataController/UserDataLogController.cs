@@ -149,8 +149,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         public async Task<bool> GetListPagedValidateInput(UserLog_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.NowPage.IsZeroOrAbove(), () => AddError(WrongFormat("查詢分頁")))
-                .Validate(i => i.CutPage.IsZeroOrAbove(), () => AddError(WrongFormat("分頁筆數")))
+                .Validate(i => i.NowPage.IsZeroOrAbove(), () => AddError(WrongFormat("查詢分頁", nameof(input.NowPage))))
+                .Validate(i => i.CutPage.IsZeroOrAbove(), () => AddError(WrongFormat("分頁筆數", nameof(input.CutPage))))
                 .IsValid();
 
             return await Task.FromResult(isValid);

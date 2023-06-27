@@ -58,7 +58,8 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Zip_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.ParentId.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("上層 ID")))
+                .Validate(i => i.ParentId.IsZeroOrAbove(),
+                    () => AddError(EmptyNotAllowed("上層 ID", nameof(input.ParentId))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -182,17 +183,24 @@ namespace NS_Education.Controller.UsingHelper
             string[] groupNames = await SubmitGetGroupNames();
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.DZID == 0, () => AddError(WrongFormat("國籍 / 郵遞區號 ID")))
-                .Validate(i => i.ParentID.IsAboveZero(), () => AddError(EmptyNotAllowed("上層 ID")))
-                .Validate(i => i.ParentID != i.DZID, () => AddError(NotSupportedValue("上層 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼（郵遞區號）", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.GroupName.HasContent(), () => AddError(EmptyNotAllowed("層級名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("中文名稱", 1, 100)))
-                .Validate(i => i.GroupName.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("層級", 1, 100)))
-                .Validate(i => i.Note.HasLengthBetween(0, 1000), () => AddError(LengthOutOfRange("備註", 0, 1000)))
+                .Validate(i => i.DZID == 0, () => AddError(WrongFormat("國籍 / 郵遞區號 ID", nameof(input.DZID))))
+                .Validate(i => i.ParentID.IsAboveZero(),
+                    () => AddError(EmptyNotAllowed("上層 ID", nameof(input.ParentID))))
+                .Validate(i => i.ParentID != i.DZID, () => AddError(NotSupportedValue("上層 ID", nameof(input.ParentID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼（郵遞區號）", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
+                .Validate(i => i.GroupName.HasContent(),
+                    () => AddError(EmptyNotAllowed("層級名稱", nameof(input.GroupName))))
+                .Validate(i => i.Title.HasLengthBetween(1, 100),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 1, 100)))
+                .Validate(i => i.GroupName.HasLengthBetween(1, 100),
+                    () => AddError(LengthOutOfRange("層級名稱", nameof(input.GroupName), 1, 100)))
+                .Validate(i => i.Note.HasLengthBetween(0, 1000),
+                    () => AddError(LengthOutOfRange("備註", nameof(input.Note), 0, 1000)))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => groupNames.Contains(input.GroupName), () => AddError(NotFound("層級")))
+                .Validate(i => groupNames.Contains(input.GroupName),
+                    () => AddError(NotFound("層級名稱", nameof(input.GroupName))))
                 .IsValid();
 
             return isValid;
@@ -219,17 +227,25 @@ namespace NS_Education.Controller.UsingHelper
             string[] groupNames = await SubmitGetGroupNames();
 
             bool isValid = input.StartValidate()
-                .Validate(i => i.DZID.IsAboveZero(), () => AddError(EmptyNotAllowed("國籍 / 郵遞區號 ID")))
-                .Validate(i => i.ParentID.IsAboveZero(), () => AddError(EmptyNotAllowed("上層 ID")))
-                .Validate(i => i.ParentID != i.DZID, () => AddError(NotSupportedValue("上層 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10), () => AddError(LengthOutOfRange("編碼（郵遞區號）", 0, 10)))
-                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱")))
-                .Validate(i => i.GroupName.HasContent(), () => AddError(EmptyNotAllowed("層級名稱")))
-                .Validate(i => i.Title.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("中文名稱", 1, 100)))
-                .Validate(i => i.GroupName.HasLengthBetween(1, 100), () => AddError(LengthOutOfRange("層級", 1, 100)))
-                .Validate(i => i.Note.HasLengthBetween(0, 1000), () => AddError(LengthOutOfRange("備註", 0, 1000)))
+                .Validate(i => i.DZID.IsAboveZero(),
+                    () => AddError(EmptyNotAllowed("國籍 / 郵遞區號 ID", nameof(input.DZID))))
+                .Validate(i => i.ParentID.IsAboveZero(),
+                    () => AddError(EmptyNotAllowed("上層 ID", nameof(input.ParentID))))
+                .Validate(i => i.ParentID != i.DZID, () => AddError(NotSupportedValue("上層 ID", nameof(input.ParentID))))
+                .Validate(i => i.Code.HasLengthBetween(0, 10),
+                    () => AddError(LengthOutOfRange("編碼（郵遞區號）", nameof(input.Code), 0, 10)))
+                .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
+                .Validate(i => i.GroupName.HasContent(),
+                    () => AddError(EmptyNotAllowed("層級名稱", nameof(input.GroupName))))
+                .Validate(i => i.Title.HasLengthBetween(1, 100),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 1, 100)))
+                .Validate(i => i.GroupName.HasLengthBetween(1, 100),
+                    () => AddError(LengthOutOfRange("層級名稱", nameof(input.GroupName), 1, 100)))
+                .Validate(i => i.Note.HasLengthBetween(0, 1000),
+                    () => AddError(LengthOutOfRange("備註", nameof(input.Note), 0, 1000)))
                 .SkipIfAlreadyInvalid()
-                .Validate(i => groupNames.Contains(input.GroupName), () => AddError(NotFound("層級")))
+                .Validate(i => groupNames.Contains(input.GroupName),
+                    () => AddError(NotFound("層級名稱", nameof(input.GroupName))))
                 .IsValid();
 
             return isValid;

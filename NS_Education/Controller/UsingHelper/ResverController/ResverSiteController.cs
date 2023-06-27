@@ -151,15 +151,15 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             return await input.StartValidate()
                 .Validate(i => i.FreeDate.IsNullOrWhiteSpace() || i.FreeDate.TryParseDateTime(out _),
-                    () => AddError(WrongFormat("欲篩選之有空日期")))
+                    () => AddError(WrongFormat("欲篩選之有空日期", nameof(input.FreeDate))))
                 .Validate(i => i.BSCID1.IsZeroOrAbove(),
-                    () => AddError(WrongFormat("欲篩選之樓別 ID")))
+                    () => AddError(WrongFormat("欲篩選之樓別 ID", nameof(input.BSCID1))))
                 .ValidateAsync(
                     async i => i.BSCID1 == 0 ||
                                await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
-                    i => AddError(NotFound($"欲篩選之樓別 ID（{i.BSCID1}）")))
+                    i => AddError(NotFound($"欲篩選之樓別 ID（{i.BSCID1}）", nameof(i.BSCID1))))
                 .Validate(i => i.PeopleCt.IsZeroOrAbove(),
-                    () => AddError(WrongFormat("欲篩選之可容納人數")))
+                    () => AddError(WrongFormat("欲篩選之可容納人數", nameof(input.PeopleCt))))
                 .IsValid();
         }
 

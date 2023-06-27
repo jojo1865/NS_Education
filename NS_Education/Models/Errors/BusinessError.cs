@@ -2,19 +2,16 @@ using System.Collections.Generic;
 
 namespace NS_Education.Models.Errors
 {
-    public class BusinessError : BaseError
+    public sealed class BusinessError : BaseError
     {
-        public BusinessError(int code, string message, params KeyValuePair<ErrorField, object>[] additionalValues)
+        public BusinessError(int code, string message, IDictionary<string, object> additionalValues = null)
         {
+            AdditionalValues = additionalValues;
             ErrorCodeInt = code;
             ErrorMessage = message;
-
-            foreach (KeyValuePair<ErrorField, object> kvp in additionalValues)
-            {
-                if (kvp.Value != null)
-                    AddAdditionalValues(kvp.Key, kvp.Value);
-            }
         }
+
+        public IDictionary<string, object> AdditionalValues { get; }
 
         public override char ErrorType => 'B';
     }

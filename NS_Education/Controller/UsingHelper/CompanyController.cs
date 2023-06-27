@@ -53,7 +53,8 @@ namespace NS_Education.Controller.UsingHelper
 
         #region GetList
 
-        private int departmentDeleteFlag = 0;
+        // 用於套用 DeleteFlag 設定到子項目
+        private int departmentDeleteFlag;
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
@@ -66,7 +67,7 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> GetListPagedValidateInput(Company_GetList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("資料所屬分類 ID")))
+                .Validate(i => i.BCID.IsZeroOrAbove(), () => AddError(EmptyNotAllowed("資料所屬分類 ID", nameof(input.BCID))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -208,12 +209,15 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitAddValidateInput(Company_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DCID == 0, () => AddError(WrongFormat("公司 ID")))
+                .Validate(i => i.DCID == 0, () => AddError(WrongFormat("公司 ID", nameof(input.DCID))))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company),
-                    () => AddError(NotFound("分類 ID")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
-                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
+                    () => AddError(NotFound("分類 ID", nameof(input.BCID))))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(),
+                    () => AddError(EmptyNotAllowed("名稱", nameof(input.TitleC))))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.TitleC), 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("英文名稱", nameof(input.TitleE), 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -236,12 +240,15 @@ namespace NS_Education.Controller.UsingHelper
         public async Task<bool> SubmitEditValidateInput(Company_Submit_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID")))
+                .Validate(i => i.DCID.IsAboveZero(), () => AddError(EmptyNotAllowed("公司 ID", nameof(input.DCID))))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Company),
-                    () => AddError(NotFound("分類 ID")))
-                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(), () => AddError(EmptyNotAllowed("名稱")))
-                .Validate(i => i.TitleC.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("中文名稱", 0, 50)))
-                .Validate(i => i.TitleE.HasLengthBetween(0, 50), () => AddError(LengthOutOfRange("英文名稱", 0, 50)))
+                    () => AddError(NotFound("分類 ID", nameof(input.BCID))))
+                .Validate(i => i.TitleC.HasContent() || i.TitleE.HasContent(),
+                    () => AddError(EmptyNotAllowed("名稱", nameof(input.TitleC))))
+                .Validate(i => i.TitleC.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("中文名稱", nameof(input.TitleC), 0, 50)))
+                .Validate(i => i.TitleE.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("英文名稱", nameof(input.TitleE), 0, 50)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

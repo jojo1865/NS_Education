@@ -51,13 +51,13 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             bool isValid = input.StartValidate()
                 .Validate(i => Enum.IsDefined(typeof(Customer_GetRankings_OrderBy), input.OrderBy),
-                    () => AddError(NotSupportedValue("排序方式")))
+                    () => AddError(NotSupportedValue("排序方式", nameof(input.OrderBy))))
                 .Validate(i => i.DateS.IsNullOrWhiteSpace() || i.DateS.TryParseDateTime(out startDate),
-                    () => AddError(WrongFormat("欲篩選的起始日")))
+                    () => AddError(WrongFormat("欲篩選的起始日", nameof(input.DateS))))
                 .Validate(i => i.DateE.IsNullOrWhiteSpace() || i.DateE.TryParseDateTime(out endDate),
-                    () => AddError(WrongFormat("欲篩選的結束日")))
+                    () => AddError(WrongFormat("欲篩選的結束日", nameof(input.DateE))))
                 .Validate(_ => startDate <= endDate,
-                    () => AddError(MinLargerThanMax("起始日", "結束日")))
+                    () => AddError(MinLargerThanMax("起始日", nameof(input.DateS), "結束日", nameof(input.DateE))))
                 .IsValid();
 
             return await Task.FromResult(isValid);

@@ -53,18 +53,20 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public async Task<bool> GetListPagedValidateInput(SiteData_GetListForCalendar_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
-                .Validate(i => i.TargetYear.IsInBetween(1911, 9999), () => AddError(WrongFormat("目標年分")))
-                .Validate(i => i.TargetMonth.IsInBetween(1, 12), () => AddError(WrongFormat("目標月份")))
-                .Validate(i => i.BSID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之場地 ID")))
-                .Validate(i => i.RHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之預約單 ID")))
+                .Validate(i => i.TargetYear.IsInBetween(1911, 9999),
+                    () => AddError(WrongFormat("目標年分", nameof(input.TargetYear))))
+                .Validate(i => i.TargetMonth.IsInBetween(1, 12),
+                    () => AddError(WrongFormat("目標月份", nameof(input.TargetMonth))))
+                .Validate(i => i.BSID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之場地 ID", nameof(input.BSID))))
+                .Validate(i => i.RHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之預約單 ID", nameof(input.RHID))))
                 .SkipIfAlreadyInvalid()
                 .ForceSkipIf(i => i.BSID <= 0)
                 .ValidateAsync(async i => await DC.B_SiteData.ValidateIdExists(i.BSID, nameof(B_SiteData.BSID)),
-                    () => AddError(NotFound("欲篩選之場地 ID")))
+                    () => AddError(NotFound("欲篩選之場地 ID", nameof(input.BSID))))
                 .StopForceSkipping()
                 .ForceSkipIf(i => i.RHID <= 0)
                 .ValidateAsync(async i => await DC.Resver_Head.ValidateIdExists(i.RHID, nameof(Resver_Head.RHID)),
-                    () => AddError(NotFound("欲篩選之預約單 ID")))
+                    () => AddError(NotFound("欲篩選之預約單 ID", nameof(input.RHID))))
                 .StopForceSkipping()
                 .IsValid();
 

@@ -45,7 +45,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
             if (errors == null || !errors.Any()) return response;
 
             response.SuccessFlag = false;
-            response.Messages = _errors;
+            response.Errors = _errors;
             return response;
         }
 

@@ -11,7 +11,7 @@ namespace NS_Education.Models.APIItems
         public void Infuse(BaseApiResponse message)
         {
             SuccessFlag = message.SuccessFlag;
-            Messages = message.Messages;
+            Messages = message.Errors;
         }
     }
 }

@@ -5,7 +5,7 @@ namespace NS_Education.Models.APIItems
         public void Infuse(BaseApiResponse msg)
         {
             SuccessFlag = msg.SuccessFlag;
-            Messages = msg.Messages;
+            Errors = msg.Errors;
         }
     }
 }

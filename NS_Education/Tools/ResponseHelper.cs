@@ -83,7 +83,7 @@ namespace NS_Education.Tools
                                       : new BaseApiResponse
                                       {
                                           SuccessFlag = false,
-                                          Messages = new[]
+                                          Errors = new[]
                                           {
                                               exception != null
                                                   ? new SystemError(exception)
@@ -124,7 +124,7 @@ namespace NS_Education.Tools
                 ApiResponse = new BaseApiResponse
                 {
                     SuccessFlag = false,
-                    Messages = new[] { error }
+                    Errors = new[] { error }
                 }
             }).ToString();
 

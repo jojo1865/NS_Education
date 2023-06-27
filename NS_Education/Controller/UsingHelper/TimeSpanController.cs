@@ -141,7 +141,29 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            if (activeFlag == false && !await ChangeActiveValidateReservation(id))
+                return GetResponseJson();
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        private async Task<bool> ChangeActiveValidateReservation(int id)
+        {
+            // 停用時，檢查是否有進行中預約單
+            int[] cantDeleteHeadId = await DC.M_Resver_TimeSpan
+                .Include(rts => rts.Resver_Head)
+                .Where(rts => rts.DTSID == id)
+                .Select(rts => rts.Resver_Head)
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .Select(rh => rh.RHID)
+                .Distinct()
+                .ToArrayAsync();
+
+            foreach (int i in cantDeleteHeadId)
+            {
+                AddError(UnsupportedValue("欲停用的 ID", nameof(id), $"已有進行中預約單（單號 {i}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<D_TimeSpan> ChangeActiveQuery(int id)
@@ -307,6 +329,9 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => (priceRate * 100m % 1m) == 0m,
                     () => AddError(TooLong("價格基數的小數後位數", nameof(input.PriceRate), 2)))
                 .IsValid();
+
+            if (input.ActiveFlag == false)
+                isValid = isValid && await ChangeActiveValidateReservation(input.DTSID);
 
             return await Task.FromResult(isValid);
         }

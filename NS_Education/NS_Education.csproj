@@ -645,6 +645,27 @@
         <Compile Include="Models\Entities\UserPasswordLog.cs">
             <DependentUpon>Model1.tt</DependentUpon>
         </Compile>
+        <Compile Include="Models\Errors\AuthorizationErrors\BaseAuthorizationError.cs"/>
+        <Compile Include="Models\Errors\AuthorizationErrors\InsufficientPrivilegeError.cs"/>
+        <Compile Include="Models\Errors\BaseError.cs"/>
+        <Compile Include="Models\Errors\BusinessError.cs"/>
+        <Compile Include="Models\Errors\DataValidationErrors\BaseDataValidationError.cs"/>
+        <Compile Include="Models\Errors\DataValidationErrors\DataAlreadyExistsError.cs"/>
+        <Compile Include="Models\Errors\DataValidationErrors\DataNotFoundError.cs"/>
+        <Compile Include="Models\Errors\DataValidationErrors\UpdateDbFailedError.cs"/>
+        <Compile Include="Models\Errors\ErrorField.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\BaseInputValidationError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\CopyNotAllowedError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\EmptyNotAllowedError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\ExpectedValueError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\LengthOutOfRangeError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\LengthTooLongError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\MinLargerThanMaxError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\NotSupportedValueError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\ValueOutOfRangeError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\ValueTooLargeError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\WrongFormatError.cs"/>
+        <Compile Include="Models\Errors\SystemError.cs"/>
         <Compile Include="Models\FinalizedResponse.cs"/>
         <Compile Include="Models\IReturnMessageInfusable.cs"/>
         <Compile Include="Models\PublicModel.cs"/>

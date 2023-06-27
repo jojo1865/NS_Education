@@ -366,8 +366,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             foreach (Resver_Site ongoing in ongoingResverSites)
             {
                 AddError(ongoing.BSID == id
-                    ? UnsupportedValue($"指定的場地 ID {id}", $"有進行中預約單（預約單號：{ongoing.RHID}）")
-                    : UnsupportedValue($"指定的場地 ID {id}",
+                    ? UnsupportedValue($"指定的場地 ID {id}", nameof(id), $"有進行中預約單（預約單號：{ongoing.RHID}）")
+                    : UnsupportedValue($"指定的場地 ID {id}", nameof(id),
                         $"其上層場地（ID {ongoing.BSID} {ongoing.B_SiteData.Code ?? ""}{ongoing.B_SiteData.Title ?? ""}）有進行中預約單（預約單號：{ongoing.RHID}）"));
             }
 
@@ -427,9 +427,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 if (uniqueDeleteId.Contains(resverSite.BSID))
                     AddError(UnsupportedValue(
                         $"欲刪除的場地（ID {resverSite.BSID} {resverSite.B_SiteData.Code ?? ""}{resverSite.B_SiteData.Title ?? ""}）",
+                        nameof(DeleteItem_Input_Row_APIItem.Id),
                         $"有進行中的預約（預約單號：{resverSite.RHID}）"));
                 else
                     AddError(UnsupportedValue("欲刪除的場地",
+                        nameof(DeleteItem_Input_Row_APIItem.Id),
                         $"其中一筆場地的上層場地（ID {resverSite.BSID} {resverSite.B_SiteData.Code ?? ""}{resverSite.B_SiteData.Title ?? ""}）有進行中的預約（預約單號：{resverSite.RHID}）"));
             }
 
@@ -514,7 +516,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     .Any(childMsg =>
                         !childMsg.B_SiteData1.DeleteFlag || uniqueReviveIds.Contains(childMsg.B_SiteData1.BSID)))
                 {
-                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", "此場地在刪除前的原有子場地，現已經是組合場地"));
+                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", nameof(DeleteItem_Input_Row_APIItem.Id),
+                        "此場地在刪除前的原有子場地，現已經是組合場地"));
                 }
 
                 // 原有父場地是否已有父場地
@@ -525,7 +528,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     .Any(parentMsg =>
                         !parentMsg.B_SiteData.DeleteFlag || uniqueReviveIds.Contains(parentMsg.B_SiteData.BSID)))
                 {
-                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", "此場地在刪除前的原有父場地，現已經是其他組合場地的子場地"));
+                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", nameof(DeleteItem_Input_Row_APIItem.Id),
+                        "此場地在刪除前的原有父場地，現已經是其他組合場地的子場地"));
                 }
 
                 // 復活資料本身，復活後是否同時會有活著的子場地和父場地
@@ -537,7 +541,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                         .Where(msg => !uniqueDeleteIds.Contains(msg.MasterID) && msg.ActiveFlag && !msg.DeleteFlag)
                         .Any(msg => !msg.B_SiteData.DeleteFlag || uniqueReviveIds.Contains(msg.B_SiteData.BSID)))
                 {
-                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", "此場地復活後會同時有父場地和子場地"));
+                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", nameof(DeleteItem_Input_Row_APIItem.Id),
+                        "此場地復活後會同時有父場地和子場地"));
                 }
             }
 
@@ -633,7 +638,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             // 主場地 ID 檢查
             if (input.GroupList.Any(gl => gl.BSID == input.BSID))
             {
-                AddError(UnsupportedValue("子場地 ID", "不可將主場地設為自己的子場地"));
+                AddError(UnsupportedValue("子場地 ID", nameof(input.BSID), "不可將主場地設為自己的子場地"));
                 return false;
             }
 
@@ -678,7 +683,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             // A. 不允許輸入的子場地為任何人的父場地
             bool allInputSiteLeaf = idToData.Values.StartValidateElements()
                 .Validate(sd => !sd.M_SiteGroup.Any(msg => msg.ActiveFlag && !msg.DeleteFlag),
-                    sd => AddError(UnsupportedValue($"子場地（ID {sd.BSID}）", "已為組合場地")))
+                    sd => AddError(UnsupportedValue($"子場地（ID {sd.BSID}）", nameof(sd.BSID), "已為組合場地")))
                 .IsValid();
 
             if (!allInputSiteLeaf)
@@ -692,7 +697,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             if (isAGroup && input.GroupList.Any())
             {
-                AddError(UnsupportedValue("場地 ID", "已為組合場地之子場地，不得設置子場地"));
+                AddError(UnsupportedValue("場地 ID", nameof(input.BSID), "已為組合場地之子場地，不得設置子場地"));
                 return false;
             }
 

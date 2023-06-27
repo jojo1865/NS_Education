@@ -27,8 +27,6 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
     {
         #region Common
 
-        private const string DataNotFound = "查無符合條件的資料！";
-
         #endregion
 
         #region Initialization
@@ -225,7 +223,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                     md.AlwaysAllowShow || md.AlwaysAllowAdd || md.AlwaysAllowEdit || md.AlwaysAllowDelete ||
                     md.AlwaysAllowPring) && activeFlag is false)
             {
-                AddError(NotSupportedValue($"權限 ID（{id}）", "此為特殊選單"));
+                AddError(NotSupportedValue($"權限 ID（{id}）", nameof(id), "此為特殊選單"));
                 return;
             }
 
@@ -288,7 +286,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Validate(i => i.DeleteFlag != null,
                     i => AddError(EmptyNotAllowed($"ID {i.Id} 的 DeleteFlag", nameof(i.DeleteFlag))))
                 .Validate(i => !alwaysShowIds.Contains(i.Id ?? 0) && i.DeleteFlag is true,
-                    i => AddError(NotSupportedValue($"選單 ID（{i.Id}）", "此為特殊選單")))
+                    i => AddError(NotSupportedValue($"選單 ID（{i.Id}）", nameof(i.Id), "此為特殊選單")))
                 .IsValid();
 
             if (!isCollectionValid || !isEveryElementValid)
@@ -349,7 +347,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Validate(i => i.ParentId.IsZeroOrAbove(),
                     () => AddError(OutOfRange("上層選單 ID", nameof(input.ParentId), 0)))
                 .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID,
-                    () => AddError(NotSupportedValue("上層選單 ID", nameof(input.ParentId))))
+                    () => AddError(NotSupportedValue("上層選單 ID", nameof(input.ParentId), "不允許將自己設為上層選單！")))
                 .ValidateAsync(
                     async i => i.ParentId == 0 || await DC.MenuData.ValidateIdExists(i.ParentId, nameof(MenuData.MDID)),
                     () => AddError(NotFound("上層選單 ID", nameof(input.ParentId))))
@@ -393,7 +391,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .Validate(i => i.ParentId.IsZeroOrAbove(),
                     () => AddError(OutOfRange("上層選單 ID", nameof(input.ParentId), 0)))
                 .Validate(i => i.ParentId == 0 || i.ParentId != i.MDID,
-                    () => AddError(NotSupportedValue("上層選單 ID", nameof(input.ParentId))))
+                    () => AddError(NotSupportedValue("上層選單 ID", nameof(input.ParentId), "不允許將自己設為上層選單！")))
                 .ValidateAsync(
                     async i => i.ParentId == 0 || await DC.MenuData.ValidateIdExists(i.ParentId, nameof(MenuData.MDID)),
                     () => AddError(NotFound("上層選單 ID", nameof(input.ParentId))))

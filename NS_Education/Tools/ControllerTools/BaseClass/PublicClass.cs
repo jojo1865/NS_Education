@@ -141,18 +141,19 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// <summary>
         /// 回傳一串不支援輸入值時可用的預設錯誤字串。
         /// </summary>
+        /// <param name="fieldNameChinese">欄位的中文名稱</param>
         /// <param name="fieldName">欄位名稱</param>
         /// <param name="reason">不支援的原因</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected NotSupportedValueError UnsupportedValue(string fieldName, string reason)
+        protected NotSupportedValueError UnsupportedValue(string fieldNameChinese, string fieldName, string reason)
         {
-            return new NotSupportedValueError(fieldName, reason);
+            return new NotSupportedValueError(fieldNameChinese, fieldName, reason);
         }
 
         /// <inheritdoc cref="UnsupportedValue"/>>
-        protected NotSupportedValueError NotSupportedValue(string fieldName, string reason)
+        protected NotSupportedValueError NotSupportedValue(string fieldNameChinese, string fieldName, string reason)
         {
-            return UnsupportedValue(fieldName, reason);
+            return UnsupportedValue(fieldNameChinese, fieldName, reason);
         }
 
         /// <summary>

@@ -457,13 +457,13 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     () => AddError(WrongFormat("國籍與郵遞區號 ID", nameof(Customer_Submit_Input_APIItem.DZID))))
                 .ForceSkipIf(i => i.ContactType1 == -1)
                 .Validate(i => i.ContactType1.IsInBetween(0, 3),
-                    () => AddError(NotSupportedValue("聯絡方式 1 的類型", nameof(input.ContactType1))))
+                    () => AddError(NotSupportedValue("聯絡方式 1 的類型", nameof(input.ContactType1), null)))
                 .Validate(i => i.ContactData1.HasContent(),
                     () => AddError(EmptyNotAllowed("聯絡方式 1 的內容", nameof(Customer_Submit_Input_APIItem.ContactData1))))
                 .StopForceSkipping()
                 .ForceSkipIf(i => i.ContactType2 == -1)
                 .Validate(i => i.ContactType2.IsInBetween(0, 3),
-                    () => AddError(NotSupportedValue("聯絡方式 2 的類型", nameof(input.ContactType2))))
+                    () => AddError(NotSupportedValue("聯絡方式 2 的類型", nameof(input.ContactType2), null)))
                 .Validate(i => i.ContactData2.HasContent(),
                     () => AddError(EmptyNotAllowed("聯絡方式 2 的內容", nameof(Customer_Submit_Input_APIItem.ContactData2))))
                 .StopForceSkipping()
@@ -482,7 +482,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
                 .ForceSkipIf(item => item.ContactType == -1)
                 .Validate(item => item.ContactType.IsInBetween(0, 3),
-                    item => AddError(NotSupportedValue($"業務（ID：{item.BUID}）聯絡方式類型", nameof(item.ContactType))))
+                    item => AddError(NotSupportedValue($"業務（ID：{item.BUID}）聯絡方式類型", nameof(item.ContactType), null)))
                 .Validate(item => item.ContactData.HasContent(),
                     item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容", nameof(item.ContactData))))
                 .Validate(item => item.ContactData.HasLengthBetween(1, 30),
@@ -672,13 +672,13 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID", nameof(input.DZID))))
                 .ForceSkipIf(i => i.ContactType1 == -1)
                 .Validate(i => i.ContactType1.IsInBetween(0, 3),
-                    () => AddError(NotSupportedValue("聯絡方式 1 的類型", nameof(input.ContactType1))))
+                    () => AddError(NotSupportedValue("聯絡方式 1 的類型", nameof(input.ContactType1), null)))
                 .Validate(i => i.ContactData1.HasContent(),
                     () => AddError(EmptyNotAllowed("聯絡方式 1 的內容", nameof(input.ContactData1))))
                 .StopForceSkipping()
                 .ForceSkipIf(i => i.ContactType2 == -1)
                 .Validate(i => i.ContactType2.IsInBetween(0, 3),
-                    () => AddError(NotSupportedValue("聯絡方式 2 的類型", nameof(input.ContactType2))))
+                    () => AddError(NotSupportedValue("聯絡方式 2 的類型", nameof(input.ContactType2), null)))
                 .Validate(i => i.ContactData2.HasContent(),
                     () => AddError(EmptyNotAllowed("聯絡方式 2 的內容", nameof(input.ContactData2))))
                 .StopForceSkipping()
@@ -697,7 +697,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
                 .ForceSkipIf(item => item.ContactType == -1)
                 .Validate(item => item.ContactType.IsInBetween(0, 3),
-                    item => AddError(NotSupportedValue($"業務（ID：{item.BUID}）聯絡方式類型", nameof(item.ContactType))))
+                    item => AddError(NotSupportedValue($"業務（ID：{item.BUID}）聯絡方式類型", nameof(item.ContactType), null)))
                 .Validate(item => item.ContactData.HasContent(),
                     item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容", nameof(item.ContactData))))
                 .Validate(item => item.ContactData.HasLengthBetween(1, 30),

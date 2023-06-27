@@ -186,7 +186,8 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.DZID == 0, () => AddError(WrongFormat("國籍 / 郵遞區號 ID", nameof(input.DZID))))
                 .Validate(i => i.ParentID.IsAboveZero(),
                     () => AddError(EmptyNotAllowed("上層 ID", nameof(input.ParentID))))
-                .Validate(i => i.ParentID != i.DZID, () => AddError(NotSupportedValue("上層 ID", nameof(input.ParentID))))
+                .Validate(i => i.ParentID != i.DZID,
+                    () => AddError(NotSupportedValue("上層 ID", nameof(input.ParentID), "不允許將自己設為上層資料！")))
                 .Validate(i => i.Code.HasLengthBetween(0, 10),
                     () => AddError(LengthOutOfRange("編碼（郵遞區號）", nameof(input.Code), 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
@@ -231,7 +232,8 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(EmptyNotAllowed("國籍 / 郵遞區號 ID", nameof(input.DZID))))
                 .Validate(i => i.ParentID.IsAboveZero(),
                     () => AddError(EmptyNotAllowed("上層 ID", nameof(input.ParentID))))
-                .Validate(i => i.ParentID != i.DZID, () => AddError(NotSupportedValue("上層 ID", nameof(input.ParentID))))
+                .Validate(i => i.ParentID != i.DZID,
+                    () => AddError(NotSupportedValue("上層 ID", nameof(input.ParentID), "不允許將自己設為上層資料！")))
                 .Validate(i => i.Code.HasLengthBetween(0, 10),
                     () => AddError(LengthOutOfRange("編碼（郵遞區號）", nameof(input.Code), 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))

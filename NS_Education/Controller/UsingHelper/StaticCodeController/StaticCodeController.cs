@@ -262,7 +262,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             // 不允許刪除安全控管設定
             if (await DeleteItemInputHasSafetyControl(input))
             {
-                AddError(NotSupportedValue("資料 ID", nameof(DeleteItem_Input_Row_APIItem.Id)));
+                AddError(NotSupportedValue("資料 ID", nameof(DeleteItem_Input_Row_APIItem.Id), "禁止刪除安全控管設定"));
                 return GetResponseJson();
             }
 
@@ -362,7 +362,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 // 若 CodeType 為 14（安全控管）時，不允許處理
                 // 使用者應該改用安全控管專用的 Submit API
                 .Validate(i => i.CodeType != (int)StaticCodeType.SafetyControl,
-                    () => AddError(NotSupportedValue("參數所屬類別", nameof(input.CodeType))))
+                    () => AddError(NotSupportedValue("參數所屬類別", nameof(input.CodeType), "此端點不支援更新安全控管設定")))
                 // 若 CodeType 為 0 時：
                 // |- a. 檢查 Code 必須皆為數字
                 // +- b. 同 CodeType 下不允許重複 Code 的資料
@@ -426,7 +426,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 // 若 CodeType 為 14（安全控管）時，不允許處理
                 // 使用者應該改用安全控管專用的 Submit API
                 .Validate(i => i.CodeType != (int)StaticCodeType.SafetyControl,
-                    () => AddError(NotSupportedValue("參數所屬類別", nameof(input.CodeType))))
+                    () => AddError(NotSupportedValue("參數所屬類別", nameof(input.CodeType), "此端點不支援更新安全控管設定")))
                 // 若 CodeType 為 0 時：
                 // |- a. 檢查 Code 必須皆為數字
                 // +- b. 同 CodeType 下不允許重複 Code 的資料

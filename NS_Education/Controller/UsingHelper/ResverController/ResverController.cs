@@ -587,7 +587,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             bool isValid = this.StartValidate()
                 .Validate(_ => id > 0, () => AddError(EmptyNotAllowed("欲更新的預約 ID", nameof(id))))
                 .Validate(_ => checkInFlag != null, () => AddError(EmptyNotAllowed("報到狀態", nameof(checkInFlag))))
-                .Validate(_ => checkInFlag != false, () => AddError(NotSupportedValue("報到狀態", nameof(checkInFlag))))
+                .Validate(_ => checkInFlag != false,
+                    () => AddError(NotSupportedValue("報到狀態", nameof(checkInFlag), "不支援取消報到！")))
                 .IsValid();
 
             return isValid;

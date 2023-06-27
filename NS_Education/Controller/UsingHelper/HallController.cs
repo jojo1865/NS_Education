@@ -219,7 +219,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.TitleE.HasLengthBetween(0, 50),
                     () => AddError(LengthOutOfRange("英文名稱", nameof(input.TitleE), 0, 50)))
                 .Validate(i => i.CheckType.IsInBetween(0, 1),
-                    () => AddError(NotSupportedValue("開立憑證種類", nameof(input.CheckType))))
+                    () => AddError(NotSupportedValue("開立憑證種類", nameof(input.CheckType), null)))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -261,7 +261,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.TitleE.HasLengthBetween(0, 50),
                     () => AddError(LengthOutOfRange("英文名稱", nameof(input.TitleE), 0, 50)))
                 .Validate(i => i.CheckType.IsInBetween(0, 1),
-                    () => AddError(NotSupportedValue("開立憑證種類", nameof(input.CheckType))))
+                    () => AddError(NotSupportedValue("開立憑證種類", nameof(input.CheckType), null)))
                 .IsValid();
 
             return await Task.FromResult(isValid);

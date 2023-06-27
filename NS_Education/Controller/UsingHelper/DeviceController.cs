@@ -220,6 +220,7 @@ namespace NS_Education.Controller.UsingHelper
             {
                 AddError(UnsupportedValue(
                     $"欲刪除的設備（ID {resverDevice.BDID} {resverDevice.B_Device.Code ?? ""}{resverDevice.B_Device.Title ?? ""}）",
+                    nameof(DeleteItem_Input_Row_APIItem.Id),
                     $"已有進行中預約單（單號 {resverDevice.Resver_Site.RHID}）"));
             }
 
@@ -264,6 +265,7 @@ namespace NS_Education.Controller.UsingHelper
             {
                 AddError(UnsupportedValue(
                     $"欲停用的設備（ID {resverDevice.BDID} {resverDevice.B_Device.Code ?? ""}{resverDevice.B_Device.Title ?? ""}）",
+                    nameof(id),
                     $"已有進行中預約單（單號 {resverDevice.Resver_Site.RHID}）"));
             }
 

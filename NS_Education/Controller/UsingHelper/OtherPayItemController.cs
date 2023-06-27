@@ -163,6 +163,7 @@ namespace NS_Education.Controller.UsingHelper
             {
                 AddError(UnsupportedValue(
                     $"欲停用的其他收費項目（ID {resverOther.ROID} {resverOther.D_OtherPayItem.Code ?? ""}{resverOther.D_OtherPayItem.Title ?? ""}）",
+                    nameof(id),
                     $"已有進行中預約單（單號 {resverOther.RHID}）"));
             }
 
@@ -210,6 +211,7 @@ namespace NS_Education.Controller.UsingHelper
             {
                 AddError(UnsupportedValue(
                     $"欲刪除的其他收費項目（ID {resverOther.ROID} {resverOther.D_OtherPayItem.Code ?? ""}{resverOther.D_OtherPayItem.Title ?? ""}）",
+                    nameof(DeleteItem_Input_Row_APIItem.Id),
                     $"已有進行中預約單（單號 {resverOther.RHID}）"));
             }
 

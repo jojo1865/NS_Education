@@ -4,13 +4,13 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using BeingValidated;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.Customer.GetInfoById;
 using NS_Education.Models.APIItems.Controller.Customer.GetList;
 using NS_Education.Models.APIItems.Controller.Customer.Submit;
 using NS_Education.Models.Entities;
-using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -138,7 +138,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .Include(c => c.B_StaticCode1)
                 .Include(c => c.CustomerVisit)
                 .Include(c => c.CustomerQuestion)
-                .Include(c => c.CustomerGift)
+                .Include(c => c.M_Customer_Gift)
+                .Include(c => c.M_Customer_Gift.Select(mcg => mcg.CustomerVisit))
                 .Include(c => c.M_Customer_BusinessUser)
                 .Include(c => c.M_Customer_BusinessUser.Select(cbu => cbu.BusinessUser))
                 .AsQueryable();
@@ -202,7 +203,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
-                GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
+                GiftCt = entity.M_Customer_Gift.Count(cg => !cg.GiftSending.DeleteFlag),
                 BusinessUsers = GetBusinessUserListFromEntity(entity),
                 Contacts = contacts
                     .Select(c => new Customer_GetList_Contact_APIItem
@@ -229,6 +230,10 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             return DC.Customer
                 .Include(c => c.B_StaticCode)
                 .Include(c => c.B_StaticCode1)
+                .Include(c => c.CustomerVisit)
+                .Include(c => c.CustomerQuestion)
+                .Include(c => c.M_Customer_Gift)
+                .Include(c => c.M_Customer_Gift.Select(mcg => mcg.CustomerVisit))
                 .Where(c => c.CID == id);
         }
 
@@ -277,7 +282,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
                 QuestionCt = entity.CustomerQuestion.Count(cq => !cq.DeleteFlag),
-                GiftCt = entity.CustomerGift.Count(cg => !cg.DeleteFlag),
+                GiftCt = entity.M_Customer_Gift.Count(cg => !cg.GiftSending.DeleteFlag),
                 Items = GetBusinessUserListFromEntity(entity)
             });
         }
@@ -340,7 +345,39 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidateNoSameCodeExistingForRevive(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateNoSameCodeExistingForRevive(DeleteItem_Input_APIItem input)
+        {
+            // 針對復活的資料，檢查是否有任何同樣代號的資料正處於非刪除狀態
+            // 如果有，不允許復活
+
+            IEnumerable<int?> reviveIds = input.Items
+                .Where(i => i.DeleteFlag == false)
+                .Select(i => i.Id)
+                .Distinct();
+
+            Dictionary<string, int> reviveData = await DC.Customer
+                .Where(c => c.DeleteFlag)
+                .Where(c => reviveIds.Contains(c.CID))
+                .ToDictionaryAsync(c => c.Code, c => c.CID);
+
+            HashSet<string> reviveCodes = reviveData.Keys.ToHashSet();
+
+            Customer[] duplicateCodeData = await DC.Customer
+                .Where(c => !c.DeleteFlag && reviveCodes.Contains(c.Code))
+                .ToArrayAsync();
+
+            foreach (Customer dupe in duplicateCodeData)
+            {
+                AddError(AlreadyExists($"客戶代號（{dupe.Code}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<Customer> DeleteItemsQuery(IEnumerable<int> ids)
@@ -382,8 +419,10 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID == 0, () => AddError(WrongFormat("客戶 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10),
-                    () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Code.HasLengthBetween(1, 10),
+                    () => AddError(LengthOutOfRange("客戶代號", 1, 10)))
+                .ValidateAsync(async i => !await DC.Customer.AnyAsync(c => c.Code == i.Code && !c.DeleteFlag),
+                    () => AddError(AlreadyExists("客戶代號")))
                 .Validate(i => i.Compilation.IsNullOrWhiteSpace() || i.Compilation.Length == 8,
                     () => AddError(WrongFormat("統一編號")))
                 .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))
@@ -589,8 +628,11 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             bool isValid = await input.StartValidate()
                 // 驗證輸入
                 .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("客戶 ID")))
-                .Validate(i => i.Code.HasLengthBetween(0, 10),
-                    () => AddError(LengthOutOfRange("編碼", 0, 10)))
+                .Validate(i => i.Code.HasLengthBetween(1, 10),
+                    () => AddError(LengthOutOfRange("客戶代號", 1, 10)))
+                .ValidateAsync(
+                    async i => !await DC.Customer.AnyAsync(c => c.Code == i.Code && !c.DeleteFlag && c.CID != i.CID),
+                    () => AddError(AlreadyExists("客戶代號")))
                 .Validate(i => i.Compilation.IsNullOrWhiteSpace() || i.Compilation.Length == 8,
                     () => AddError(WrongFormat("統一編號")))
                 .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）")))

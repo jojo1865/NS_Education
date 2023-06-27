@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NS_Education.Models;
 using NS_Education.Models.Entities;
+using NS_Education.Tools.Extensions;
 using NS_Education.Models.Errors;
 using NS_Education.Models.Errors.AuthorizationErrors;
 using NS_Education.Models.Errors.DataValidationErrors;
@@ -137,10 +138,11 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         /// 回傳一串不支援輸入值時可用的預設錯誤字串。
         /// </summary>
         /// <param name="fieldName">欄位名稱</param>
+        /// <param name="reason">不支援的原因</param>
         /// <returns>預設錯誤訊息字串</returns>
-        protected NotSupportedValueError NotSupportedValue(string fieldName)
+        protected string UnsupportedValue(string fieldName, string reason = null)
         {
-            return new NotSupportedValueError(fieldName);
+            return new NotSupportedValueError(fieldName, reason);
         }
 
         /// <summary>

@@ -4,13 +4,13 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using BeingValidated;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById;
 using NS_Education.Models.APIItems.Controller.CustomerVisit.GetList;
 using NS_Education.Models.APIItems.Controller.CustomerVisit.Submit;
 using NS_Education.Models.Entities;
-using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -161,6 +161,9 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(cv => cv.B_StaticCode)
                 .Include(cv => cv.B_StaticCode1)
                 .Include(cv => cv.BusinessUser)
+                .Include(cv => cv.M_Customer_Gift)
+                .Include(cv => cv.M_Customer_Gift.Select(mcg => mcg.GiftSending))
+                .Include(cv => cv.M_Customer_Gift.Select(mcg => mcg.GiftSending.B_StaticCode))
                 .Where(cv => cv.CVID == id);
         }
 
@@ -178,7 +181,8 @@ namespace NS_Education.Controller.UsingHelper
                 C_List = await DC.Customer.GetCustomerSelectableWithHasReservation(entity.CID),
                 BSCID = entity.BSCID,
                 BSC_Title = entity.B_StaticCode1?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType, entity.BSCID),
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType,
+                    entity.BSCID),
                 BUID = entity.BUID,
                 BU_Name = entity.BusinessUser?.Name ?? "",
                 BU_List = await GetSelectedBusinessUserList(entity.BUID),
@@ -188,12 +192,30 @@ namespace NS_Education.Controller.UsingHelper
                 Description = entity.Description ?? "",
                 AfterNote = entity.AfterNote ?? "",
                 HasReservation = hasReservation,
-                BSCID15 = hasReservation ? null : entity.BSCID15,
-                BSCID15_Title = (hasReservation ? null : entity.B_StaticCode?.Title) ?? "",
+                BSCID15 = hasReservation
+                    ? null
+                    : entity.BSCID15,
+                BSCID15_Title = (hasReservation
+                                    ? null
+                                    : entity.B_StaticCode?.Title) ??
+                                "",
                 BSCID15_List = hasReservation
                     ? new List<BaseResponseRowForSelectable>()
                     : await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason,
-                        entity.BSCID15 ?? 0)
+                        entity.BSCID15 ?? 0),
+                GiftSendings = entity.M_Customer_Gift.Select(mcg =>
+                    new CustomerVisit_GetInfoById_GiftSendings_Row_APIItem
+                    {
+                        MID = mcg.MID,
+                        SendDate = mcg.GiftSending.SendDate.ToFormattedStringDate(),
+                        Year = mcg.GiftSending.Year,
+                        BSCID = mcg.GiftSending.BSCID,
+                        BSC_Code = mcg.GiftSending.B_StaticCode?.Code ?? "",
+                        BSC_Title = mcg.GiftSending.B_StaticCode?.Title ?? "",
+                        Title = mcg.GiftSending.B_StaticCode?.Title ?? "",
+                        Ct = mcg.Ct,
+                        Note = mcg.Note ?? ""
+                    }).ToList()
             };
         }
 
@@ -268,11 +290,25 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
+                .Validate(i => i.SendDate.TryParseDateTime(out _),
+                    i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
+                .Validate(i => i.Year.IsInBetween(1911, 9999),
+                    i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
+                    i => AddError(NotFound("禮品 ID")))
+                .Validate(i => i.Ct > 0,
+                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 0)))
+                .IsValid();
+
+            return isValid && isGiftSendingsValid;
         }
 
         public async Task<CustomerVisit> SubmitCreateData(CustomerVisit_Submit_Input_APIItem input)
         {
+            IDictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending> inputToGiftSending =
+                await SubmitGetInputToGiftSending(input);
+
             input.VisitDate.TryParseDateTime(out DateTime visitDate);
             return await Task.FromResult(new CustomerVisit
             {
@@ -280,12 +316,65 @@ namespace NS_Education.Controller.UsingHelper
                 BSCID = input.BSCID,
                 BUID = input.BUID,
                 TargetTitle = input.TargetTitle,
-                VisitDate = visitDate,
+                VisitDate = visitDate.Date,
                 Title = input.Title,
                 Description = input.Description,
                 AfterNote = input.AfterNote,
-                BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default
+                BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default,
+                M_Customer_Gift = input.GiftSendings.Select(i => new M_Customer_Gift
+                {
+                    CID = input.CID,
+                    Ct = i.Ct,
+                    Note = i.Note,
+                    GiftSending = inputToGiftSending[i]
+                }).ToList()
             });
+        }
+
+        private async Task<IDictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending>>
+            SubmitGetInputToGiftSending(CustomerVisit_Submit_Input_APIItem input)
+        {
+            // 如果有贈禮：
+            // 找出所有相同贈送日期、贈送年份、禮品 ID 的 GiftSending
+            // 如果找不到對應資料，就新增一筆 GiftSending
+
+            IDictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending> inputToGiftSending
+                = new Dictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending>();
+
+            // 同一次輸入中，可能會有相同的 Year 跟 BSCID
+            // 所以，我們需要暫存一下已知的 GiftSending by Year/BSCID
+            // 確保同一次輸入中相同 Year 跟 BSCID，最終都歸屬到同一個 GiftSending 底下
+
+            IDictionary<(int, int, DateTime), GiftSending> giftSendingCache =
+                new Dictionary<(int Year, int BSCID, DateTime SendDate), GiftSending>();
+
+            foreach (CustomerVisit_Submit_GiftSendings_Row_APIItem gsi in input.GiftSendings)
+            {
+                DateTime sendDate = gsi.SendDate.ParseDateTime().Date;
+
+                var data = giftSendingCache.ContainsKey((gsi.Year, gsi.BSCID, sendDate))
+                    ? giftSendingCache[(gsi.Year, gsi.BSCID, sendDate)]
+                    : await DC.GiftSending.Where(gs => !gs.DeleteFlag)
+                        .Where(gs => gs.Year == gsi.Year)
+                        .Where(gs => gs.BSCID == gsi.BSCID)
+                        .Where(gs => DbFunctions.TruncateTime(gs.SendDate) == sendDate)
+                        .FirstOrDefaultAsync() ?? new GiftSending
+                    {
+                        Year = gsi.Year,
+                        SendDate = sendDate,
+                        Title = await DC.B_StaticCode
+                            .Where(bsc => bsc.BSCID == gsi.BSCID)
+                            .Select(bsc => bsc.Title)
+                            .FirstOrDefaultAsync() ?? "",
+                        BSCID = gsi.BSCID
+                    };
+
+                giftSendingCache[(gsi.Year, gsi.BSCID, sendDate)] = data;
+
+                inputToGiftSending[gsi] = data;
+            }
+
+            return inputToGiftSending;
         }
 
         #endregion
@@ -298,7 +387,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.CVID.IsAboveZero(), () => AddError(EmptyNotAllowed("拜訪紀錄 ID")))
                 .ValidateAsync(async i => await DC.Customer.ValidateIdExists(i.CID, nameof(Customer.CID)),
                     () => AddError(NotFound("客戶 ID")))
-                .ForceSkipIf(i => i.BSCID15 is null)
+                .ForceSkipIf(i => i.BSCID15 == null)
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID15 ?? 0,
                         StaticCodeType.NoDealReason),
@@ -315,12 +404,26 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => i.VisitDate.TryParseDateTime(out _), () => AddError(WrongFormat("拜訪日期")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
+                .Validate(i => i.SendDate.TryParseDateTime(out _),
+                    i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）")))
+                .Validate(i => i.Year.IsInBetween(1911, 9999),
+                    i => AddError(OutOfRange($"贈送年份（禮品 ID {i.BSCID}）", 1911, 9999)))
+                .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Gift),
+                    i => AddError(NotFound("禮品 ID")))
+                .Validate(i => i.Ct > 0,
+                    i => AddError(OutOfRange($"贈與數量（禮品 ID {i.BSCID}）", 1)))
+                .IsValid();
+
+            return isValid && isGiftSendingsValid;
         }
 
         public IQueryable<CustomerVisit> SubmitEditQuery(CustomerVisit_Submit_Input_APIItem input)
         {
-            return DC.CustomerVisit.Where(cv => cv.CVID == input.CVID);
+            return DC.CustomerVisit
+                .Include(cv => cv.M_Customer_Gift)
+                .Include(cv => cv.M_Customer_Gift.Select(mcg => mcg.GiftSending))
+                .Where(cv => cv.CVID == input.CVID);
         }
 
         public void SubmitEditUpdateDataFields(CustomerVisit data, CustomerVisit_Submit_Input_APIItem input)
@@ -331,13 +434,28 @@ namespace NS_Education.Controller.UsingHelper
             data.TargetTitle = input.TargetTitle;
 
             input.VisitDate.TryParseDateTime(out DateTime visitDate);
-            data.VisitDate = visitDate;
+            data.VisitDate = visitDate.Date;
 
             data.Title = input.Title;
             data.Description = input.Description;
             data.AfterNote = input.AfterNote;
 
             data.BSCID15 = input.BSCID15.IsAboveZero() ? input.BSCID15 : default;
+
+            IDictionary<CustomerVisit_Submit_GiftSendings_Row_APIItem, GiftSending> inputToGiftSending =
+                Task.Run(() => SubmitGetInputToGiftSending(input)).Result;
+
+            // 清除對應這筆訪問紀錄的所有的 M_CustomerGift
+            DC.M_Customer_Gift.RemoveRange(data.M_Customer_Gift);
+
+            // 建立新的
+            data.M_Customer_Gift = input.GiftSendings.Select(i => new M_Customer_Gift
+            {
+                CID = input.CID,
+                Ct = i.Ct,
+                Note = i.Note,
+                GiftSending = inputToGiftSending[i]
+            }).ToList();
         }
 
         #endregion

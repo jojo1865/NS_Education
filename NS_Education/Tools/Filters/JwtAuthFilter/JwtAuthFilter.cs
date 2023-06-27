@@ -5,8 +5,8 @@ using System.Net;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
+using BeingValidated;
 using NS_Education.Models.Entities;
-using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.Encryption;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter.AuthorizeType;
@@ -123,8 +123,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                     (_, e) => errorMessage = HasValidTokenFailed(e))
                 .Validate(c => ValidateTokenIsLatest(c, claims, safetyConfiguration),
                     (_, e) => errorMessage = e.Message)
-                .Validate(c => ValidateLastPasswordChange(claims, safetyConfiguration),
-                    e => throw e) // 只有這裡要回傳 901，所以不做 catch
+                .Validate(c => ValidateLastPasswordChange(claims, safetyConfiguration)) // 只有這裡要回傳 901，所以不做 catch
                 .Validate(c => ValidateClaimRole(c, claims),
                     _ => errorMessage = HasNoRoleOrPrivilege)
                 .Validate(c => ValidatePrivileges(c, claims),

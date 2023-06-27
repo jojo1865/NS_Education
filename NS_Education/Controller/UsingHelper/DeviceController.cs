@@ -3,12 +3,12 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.Device.GetInfoById;
 using NS_Education.Models.APIItems.Controller.Device.GetList;
 using NS_Education.Models.APIItems.Controller.Device.Submit;
 using NS_Education.Models.Entities;
-using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -77,6 +77,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(d => d.B_StaticCode)
                 .Include(d => d.B_OrderCode)
                 .Include(d => d.D_Hall)
+                .Include(d => d.M_Site_Device)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -113,7 +114,7 @@ namespace NS_Education.Controller.UsingHelper
                 DH_Title = entity.D_Hall?.TitleC ?? entity.D_Hall?.TitleE ?? "",
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
-                Ct = entity.Ct,
+                Ct = entity.M_Site_Device.Sum(msd => msd.Ct),
                 UnitPrice = entity.UnitPrice,
                 InPrice = entity.InPrice,
                 OutPrice = entity.OutPrice,
@@ -143,6 +144,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(d => d.B_StaticCode)
                 .Include(d => d.B_OrderCode)
                 .Include(d => d.D_Hall)
+                .Include(d => d.M_Site_Device)
                 .Where(d => d.BDID == id);
         }
 
@@ -166,7 +168,7 @@ namespace NS_Education.Controller.UsingHelper
                 DH_List = await DC.D_Hall.GetHallSelectable(entity.DHID),
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
-                Ct = entity.Ct,
+                Ct = entity.M_Site_Device.Sum(msd => msd.Ct),
                 UnitPrice = entity.UnitPrice,
                 InPrice = entity.InPrice,
                 OutPrice = entity.OutPrice,
@@ -186,7 +188,41 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidateReservation(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
+        {
+            var uniqueDeleteId = input.Items.Where(i => i.DeleteFlag == true && i.Id != null)
+                .Select(i => i.Id.Value)
+                .Distinct()
+                .ToHashSet();
+
+            // 欲刪除的設備不能有任何進行中預約單
+            var cantDeleteData = await DC.Resver_Head
+                .Include(rh => rh.Resver_Site)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_Device)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.Resver_Site)))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Site)
+                .Where(rs => !rs.DeleteFlag)
+                .SelectMany(rs => rs.Resver_Device)
+                .Where(rd => !rd.DeleteFlag)
+                .Where(rd => uniqueDeleteId.Contains(rd.BDID))
+                .ToArrayAsync();
+
+            foreach (Resver_Device resverDevice in cantDeleteData)
+            {
+                AddError(UnsupportedValue(
+                    $"欲刪除的設備（ID {resverDevice.BDID} {resverDevice.B_Device.Code ?? ""}{resverDevice.B_Device.Title ?? ""}）",
+                    $"已有進行中預約單（單號 {resverDevice.Resver_Site.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<B_Device> DeleteItemsQuery(IEnumerable<int> ids)
@@ -202,7 +238,35 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            if (activeFlag == false && !await ChangeActiveValidateReservation(id))
+                return GetResponseJson();
+
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        private async Task<bool> ChangeActiveValidateReservation(int id)
+        {
+            var cantDisableData = await DC.Resver_Head
+                .Include(rh => rh.Resver_Site)
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_Device)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.Resver_Site)))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Site)
+                .Where(rs => !rs.DeleteFlag)
+                .SelectMany(rs => rs.Resver_Device)
+                .Where(rd => !rd.DeleteFlag)
+                .Where(rd => rd.BDID == id)
+                .ToArrayAsync();
+
+            foreach (Resver_Device resverDevice in cantDisableData)
+            {
+                AddError(UnsupportedValue(
+                    $"欲停用的設備（ID {resverDevice.BDID} {resverDevice.B_Device.Code ?? ""}{resverDevice.B_Device.Title ?? ""}）",
+                    $"已有進行中預約單（單號 {resverDevice.Resver_Site.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<B_Device> ChangeActiveQuery(int id)
@@ -264,7 +328,6 @@ namespace NS_Education.Controller.UsingHelper
                 DHID = input.DHID,
                 Code = input.Code,
                 Title = input.Title,
-                Ct = input.Ct,
                 UnitPrice = input.UnitPrice,
                 InPrice = input.InPrice,
                 OutPrice = input.OutPrice,
@@ -303,7 +366,10 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("廳別 ID")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            if (!input.ActiveFlag)
+                isValid = isValid && await ChangeActiveValidateReservation(input.BDID);
+
+            return isValid;
         }
 
         public IQueryable<B_Device> SubmitEditQuery(Device_Submit_Input_APIItem input)
@@ -319,7 +385,6 @@ namespace NS_Education.Controller.UsingHelper
             data.DHID = input.DHID;
             data.Code = input.Code ?? data.Code;
             data.Title = input.Title ?? data.Title;
-            data.Ct = input.Ct;
             data.UnitPrice = input.UnitPrice;
             data.InPrice = input.InPrice;
             data.OutPrice = input.OutPrice;

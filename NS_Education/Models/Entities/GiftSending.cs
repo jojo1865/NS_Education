@@ -12,34 +12,27 @@ namespace NS_Education.Models.Entities
     using System;
     using System.Collections.Generic;
     
-    public partial class CustomerVisit
+    public partial class GiftSending
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public CustomerVisit()
+        public GiftSending()
         {
             this.M_Customer_Gift = new HashSet<M_Customer_Gift>();
         }
     
-        public int CVID { get; set; }
-        public int CID { get; set; }
+        public int GSID { get; set; }
+        public int Year { get; set; }
+        public System.DateTime SendDate { get; set; }
         public int BSCID { get; set; }
-        public int BUID { get; set; }
-        public string TargetTitle { get; set; }
-        public System.DateTime VisitDate { get; set; }
         public string Title { get; set; }
-        public string Description { get; set; }
-        public string AfterNote { get; set; }
+        public string Note { get; set; }
         public bool DeleteFlag { get; set; }
         public System.DateTime CreDate { get; set; }
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
-        public Nullable<int> BSCID15 { get; set; }
     
         public virtual B_StaticCode B_StaticCode { get; set; }
-        public virtual B_StaticCode B_StaticCode1 { get; set; }
-        public virtual BusinessUser BusinessUser { get; set; }
-        public virtual Customer Customer { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<M_Customer_Gift> M_Customer_Gift { get; set; }
     }

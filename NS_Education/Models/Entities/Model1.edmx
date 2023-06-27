@@ -34,7 +34,6 @@
           <Property Name="DHID" Type="int" Nullable="false" />
           <Property Name="Code" Type="varchar" MaxLength="10" />
           <Property Name="Title" Type="nvarchar" MaxLength="60" />
-          <Property Name="Ct" Type="int" Nullable="false" />
           <Property Name="UnitPrice" Type="int" Nullable="false" />
           <Property Name="InPrice" Type="int" Nullable="false" />
           <Property Name="OutPrice" Type="int" Nullable="false" />
@@ -198,24 +197,6 @@
           <Property Name="InFlag" Type="bit" Nullable="false" />
           <Property Name="PotentialFlag" Type="bit" Nullable="false" />
           <Property Name="ActiveFlag" Type="bit" Nullable="false" />
-          <Property Name="DeleteFlag" Type="bit" Nullable="false" />
-          <Property Name="CreDate" Type="datetime" Nullable="false" />
-          <Property Name="CreUID" Type="int" Nullable="false" />
-          <Property Name="UpdDate" Type="datetime" Nullable="false" />
-          <Property Name="UpdUID" Type="int" Nullable="false" />
-        </EntityType>
-        <EntityType Name="CustomerGift">
-          <Key>
-            <PropertyRef Name="CGID" />
-          </Key>
-          <Property Name="CGID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="CID" Type="int" Nullable="false" />
-          <Property Name="Year" Type="int" Nullable="false" />
-          <Property Name="SendDate" Type="datetime" Nullable="false" />
-          <Property Name="BSCID" Type="int" Nullable="false" />
-          <Property Name="Title" Type="nvarchar" MaxLength="100" />
-          <Property Name="Ct" Type="int" Nullable="false" />
-          <Property Name="Note" Type="nvarchar(max)" />
           <Property Name="DeleteFlag" Type="bit" Nullable="false" />
           <Property Name="CreDate" Type="datetime" Nullable="false" />
           <Property Name="CreUID" Type="int" Nullable="false" />
@@ -413,6 +394,22 @@
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="GiftSending">
+          <Key>
+            <PropertyRef Name="GSID" />
+          </Key>
+          <Property Name="GSID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Year" Type="int" Nullable="false" />
+          <Property Name="SendDate" Type="datetime" Nullable="false" />
+          <Property Name="BSCID" Type="int" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="100" />
+          <Property Name="Note" Type="nvarchar(max)" />
+          <Property Name="DeleteFlag" Type="bit" Nullable="false" />
+          <Property Name="CreDate" Type="datetime" Nullable="false" />
+          <Property Name="CreUID" Type="int" Nullable="false" />
+          <Property Name="UpdDate" Type="datetime" Nullable="false" />
+          <Property Name="UpdUID" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="GroupData">
           <Key>
             <PropertyRef Name="GID" />
@@ -478,6 +475,21 @@
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="M_Customer_Gift">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CID" Type="int" Nullable="false" />
+          <Property Name="GSID" Type="int" Nullable="false" />
+          <Property Name="CVID" Type="int" />
+          <Property Name="Ct" Type="int" Nullable="false" />
+          <Property Name="Note" Type="nvarchar(max)" />
+          <Property Name="CreDate" Type="datetime" Nullable="false" />
+          <Property Name="CreUID" Type="int" Nullable="false" />
+          <Property Name="UpdDate" Type="datetime" Nullable="false" />
+          <Property Name="UpdUID" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="M_Department_Category">
           <Key>
             <PropertyRef Name="MID" />
@@ -525,6 +537,19 @@
           <Property Name="TargetID" Type="int" Nullable="false" />
           <Property Name="DTSID" Type="int" Nullable="false" />
           <Property Name="SortNo" Type="int" Nullable="false" />
+          <Property Name="CreDate" Type="datetime" Nullable="false" />
+          <Property Name="CreUID" Type="int" Nullable="false" />
+          <Property Name="UpdDate" Type="datetime" Nullable="false" />
+          <Property Name="UpdUID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="M_Site_Device">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BSID" Type="int" Nullable="false" />
+          <Property Name="BDID" Type="int" Nullable="false" />
+          <Property Name="Ct" Type="int" Nullable="false" />
           <Property Name="CreDate" Type="datetime" Nullable="false" />
           <Property Name="CreUID" Type="int" Nullable="false" />
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
@@ -791,12 +816,12 @@
         </EntityType>
         <Association Name="CustomerGift_B_StaticCode_BSCID_fk">
           <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
-          <End Role="CustomerGift" Type="Self.CustomerGift" Multiplicity="*" />
+          <End Role="GiftSending" Type="Self.GiftSending" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_StaticCode">
               <PropertyRef Name="BSCID" />
             </Principal>
-            <Dependent Role="CustomerGift">
+            <Dependent Role="GiftSending">
               <PropertyRef Name="BSCID" />
             </Dependent>
           </ReferentialConstraint>
@@ -1038,18 +1063,6 @@
             </Principal>
             <Dependent Role="Customer">
               <PropertyRef Name="BSCID6" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_CustomerGift_Customer">
-          <End Role="Customer" Type="Self.Customer" Multiplicity="1" />
-          <End Role="CustomerGift" Type="Self.CustomerGift" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Customer">
-              <PropertyRef Name="CID" />
-            </Principal>
-            <Dependent Role="CustomerGift">
-              <PropertyRef Name="CID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1679,6 +1692,76 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="M_Customer_Gift_Customer_CID_fk">
+          <End Role="Customer" Type="Self.Customer" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customer">
+              <PropertyRef Name="CID" />
+            </Principal>
+            <Dependent Role="M_Customer_Gift">
+              <PropertyRef Name="CID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="M_Customer_Gift_CustomerVisit_CVID_fk">
+          <End Role="CustomerVisit" Type="Self.CustomerVisit" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CustomerVisit">
+              <PropertyRef Name="CVID" />
+            </Principal>
+            <Dependent Role="M_Customer_Gift">
+              <PropertyRef Name="CVID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="M_Customer_Gift_GiftSending_GSID_fk">
+          <End Role="GiftSending" Type="Self.GiftSending" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GiftSending">
+              <PropertyRef Name="GSID" />
+            </Principal>
+            <Dependent Role="M_Customer_Gift">
+              <PropertyRef Name="GSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="M_Site_Device_B_Device_BDID_fk">
+          <End Role="B_Device" Type="Self.B_Device" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Site_Device" Type="Self.M_Site_Device" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_Device">
+              <PropertyRef Name="BDID" />
+            </Principal>
+            <Dependent Role="M_Site_Device">
+              <PropertyRef Name="BDID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="M_Site_Device_B_SiteData_BSID_fk">
+          <End Role="B_SiteData" Type="Self.B_SiteData" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Site_Device" Type="Self.M_Site_Device" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_SiteData">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="M_Site_Device">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="M_SiteGroup_B_SiteData_BSID_fk">
           <End Role="B_SiteData" Type="Self.B_SiteData" Multiplicity="1" />
           <End Role="M_SiteGroup" Type="Self.M_SiteGroup" Multiplicity="*" />
@@ -1773,7 +1856,6 @@
           <EntitySet Name="B_StaticCode" EntityType="Self.B_StaticCode" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BusinessUser" EntityType="Self.BusinessUser" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customer" EntityType="Self.Customer" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="CustomerGift" EntityType="Self.CustomerGift" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CustomerQuestion" EntityType="Self.CustomerQuestion" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CustomerVisit" EntityType="Self.CustomerVisit" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="D_Company" EntityType="Self.D_Company" Schema="dbo" store:Type="Tables" />
@@ -1784,15 +1866,18 @@
           <EntitySet Name="D_PayType" EntityType="Self.D_PayType" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="D_TimeSpan" EntityType="Self.D_TimeSpan" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="D_Zip" EntityType="Self.D_Zip" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="GiftSending" EntityType="Self.GiftSending" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Address" EntityType="Self.M_Address" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Contect" EntityType="Self.M_Contect" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Customer_BusinessUser" EntityType="Self.M_Customer_BusinessUser" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Customer_Category" EntityType="Self.M_Customer_Category" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="M_Customer_Gift" EntityType="Self.M_Customer_Gift" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Department_Category" EntityType="Self.M_Department_Category" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Group_Menu" EntityType="Self.M_Group_Menu" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Group_User" EntityType="Self.M_Group_User" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Resver_TimeSpan" EntityType="Self.M_Resver_TimeSpan" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="M_Site_Device" EntityType="Self.M_Site_Device" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_SiteGroup" EntityType="Self.M_SiteGroup" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MenuAPI" EntityType="Self.MenuAPI" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MenuData" EntityType="Self.MenuData" Schema="dbo" store:Type="Tables" />
@@ -1809,7 +1894,7 @@
           <EntitySet Name="UserPasswordLog" EntityType="Self.UserPasswordLog" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="CustomerGift_B_StaticCode_BSCID_fk" Association="Self.CustomerGift_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
-            <End Role="CustomerGift" EntitySet="CustomerGift" />
+            <End Role="GiftSending" EntitySet="GiftSending" />
           </AssociationSet>
           <AssociationSet Name="CustomerVisit_B_StaticCode_BSCID_fk" Association="Self.CustomerVisit_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
@@ -1890,10 +1975,6 @@
           <AssociationSet Name="FK_Customer_B_StaticCode6" Association="Self.FK_Customer_B_StaticCode6">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Customer" EntitySet="Customer" />
-          </AssociationSet>
-          <AssociationSet Name="FK_CustomerGift_Customer" Association="Self.FK_CustomerGift_Customer">
-            <End Role="Customer" EntitySet="Customer" />
-            <End Role="CustomerGift" EntitySet="CustomerGift" />
           </AssociationSet>
           <AssociationSet Name="FK_CustomerQuestion_Customer" Association="Self.FK_CustomerQuestion_Customer">
             <End Role="Customer" EntitySet="Customer" />
@@ -2091,6 +2172,26 @@
             <End Role="Customer" EntitySet="Customer" />
             <End Role="M_Customer_BusinessUser" EntitySet="M_Customer_BusinessUser" />
           </AssociationSet>
+          <AssociationSet Name="M_Customer_Gift_Customer_CID_fk" Association="Self.M_Customer_Gift_Customer_CID_fk">
+            <End Role="Customer" EntitySet="Customer" />
+            <End Role="M_Customer_Gift" EntitySet="M_Customer_Gift" />
+          </AssociationSet>
+          <AssociationSet Name="M_Customer_Gift_CustomerVisit_CVID_fk" Association="Self.M_Customer_Gift_CustomerVisit_CVID_fk">
+            <End Role="CustomerVisit" EntitySet="CustomerVisit" />
+            <End Role="M_Customer_Gift" EntitySet="M_Customer_Gift" />
+          </AssociationSet>
+          <AssociationSet Name="M_Customer_Gift_GiftSending_GSID_fk" Association="Self.M_Customer_Gift_GiftSending_GSID_fk">
+            <End Role="GiftSending" EntitySet="GiftSending" />
+            <End Role="M_Customer_Gift" EntitySet="M_Customer_Gift" />
+          </AssociationSet>
+          <AssociationSet Name="M_Site_Device_B_Device_BDID_fk" Association="Self.M_Site_Device_B_Device_BDID_fk">
+            <End Role="B_Device" EntitySet="B_Device" />
+            <End Role="M_Site_Device" EntitySet="M_Site_Device" />
+          </AssociationSet>
+          <AssociationSet Name="M_Site_Device_B_SiteData_BSID_fk" Association="Self.M_Site_Device_B_SiteData_BSID_fk">
+            <End Role="B_SiteData" EntitySet="B_SiteData" />
+            <End Role="M_Site_Device" EntitySet="M_Site_Device" />
+          </AssociationSet>
           <AssociationSet Name="M_SiteGroup_B_SiteData_BSID_fk" Association="Self.M_SiteGroup_B_SiteData_BSID_fk">
             <End Role="B_SiteData" EntitySet="B_SiteData" />
             <End Role="M_SiteGroup" EntitySet="M_SiteGroup" />
@@ -2162,7 +2263,6 @@
           <Property Name="DHID" Type="Int32" Nullable="false" />
           <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="Title" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
-          <Property Name="Ct" Type="Int32" Nullable="false" />
           <Property Name="UnitPrice" Type="Int32" Nullable="false" />
           <Property Name="InPrice" Type="Int32" Nullable="false" />
           <Property Name="OutPrice" Type="Int32" Nullable="false" />
@@ -2182,6 +2282,7 @@
           <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_B_Device_B_StaticCode" FromRole="B_Device" ToRole="B_StaticCode" />
           <NavigationProperty Name="D_Hall" Relationship="Self.FK_B_Device_D_Hall" FromRole="B_Device" ToRole="D_Hall" />
           <NavigationProperty Name="Resver_Device" Relationship="Self.FK_Resver_Device_B_Device" FromRole="B_Device" ToRole="Resver_Device" />
+          <NavigationProperty Name="M_Site_Device" Relationship="Self.M_Site_Device_B_Device_BDID_fk" FromRole="B_Device" ToRole="M_Site_Device" />
         </EntityType>
         <EntityType Name="B_OrderCode">
           <Key>
@@ -2298,6 +2399,7 @@
           <NavigationProperty Name="B_StaticCode1" Relationship="Self.FK_B_SiteData_B_StaticCode5" FromRole="B_SiteData" ToRole="B_StaticCode" />
           <NavigationProperty Name="D_Hall" Relationship="Self.FK_B_SiteData_D_Hall" FromRole="B_SiteData" ToRole="D_Hall" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_B_SiteData" FromRole="B_SiteData" ToRole="Resver_Site" />
+          <NavigationProperty Name="M_Site_Device" Relationship="Self.M_Site_Device_B_SiteData_BSID_fk" FromRole="B_SiteData" ToRole="M_Site_Device" />
           <NavigationProperty Name="M_SiteGroup" Relationship="Self.M_SiteGroup_B_SiteData_BSID_fk" FromRole="B_SiteData" ToRole="M_SiteGroup" />
           <NavigationProperty Name="M_SiteGroup1" Relationship="Self.M_SiteGroup_B_SiteData_BSID_fk_2" FromRole="B_SiteData" ToRole="M_SiteGroup" />
         </EntityType>
@@ -2322,7 +2424,7 @@
           <NavigationProperty Name="B_PartnerItem" Relationship="Self.FK_B_PartnerItem_B_StaticCode" FromRole="B_StaticCode" ToRole="B_PartnerItem" />
           <NavigationProperty Name="B_SiteData" Relationship="Self.FK_B_SiteData_B_StaticCode1" FromRole="B_StaticCode" ToRole="B_SiteData" />
           <NavigationProperty Name="B_SiteData1" Relationship="Self.FK_B_SiteData_B_StaticCode5" FromRole="B_StaticCode" ToRole="B_SiteData" />
-          <NavigationProperty Name="CustomerGift" Relationship="Self.CustomerGift_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="CustomerGift" />
+          <NavigationProperty Name="GiftSending" Relationship="Self.CustomerGift_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="GiftSending" />
           <NavigationProperty Name="CustomerVisit" Relationship="Self.CustomerVisit_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="CustomerVisit" />
           <NavigationProperty Name="D_OtherPayItem" Relationship="Self.D_OtherPayItem_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="D_OtherPayItem" />
           <NavigationProperty Name="Customer" Relationship="Self.FK_Customer_B_StaticCode4" FromRole="B_StaticCode" ToRole="Customer" />
@@ -2385,32 +2487,12 @@
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_Customer_B_StaticCode4" FromRole="Customer" ToRole="B_StaticCode" />
           <NavigationProperty Name="B_StaticCode1" Relationship="Self.FK_Customer_B_StaticCode6" FromRole="Customer" ToRole="B_StaticCode" />
-          <NavigationProperty Name="CustomerGift" Relationship="Self.FK_CustomerGift_Customer" FromRole="Customer" ToRole="CustomerGift" />
           <NavigationProperty Name="CustomerQuestion" Relationship="Self.FK_CustomerQuestion_Customer" FromRole="Customer" ToRole="CustomerQuestion" />
           <NavigationProperty Name="CustomerVisit" Relationship="Self.FK_CustomerVisit_Customer" FromRole="Customer" ToRole="CustomerVisit" />
           <NavigationProperty Name="M_Customer_Category" Relationship="Self.FK_M_Customer_Category_Customer" FromRole="Customer" ToRole="M_Customer_Category" />
           <NavigationProperty Name="M_Customer_BusinessUser" Relationship="Self.M_Customer_BusinessUser_Customer_CID_fk" FromRole="Customer" ToRole="M_Customer_BusinessUser" />
+          <NavigationProperty Name="M_Customer_Gift" Relationship="Self.M_Customer_Gift_Customer_CID_fk" FromRole="Customer" ToRole="M_Customer_Gift" />
           <NavigationProperty Name="Resver_Head" Relationship="Self.Resver_Head_Customer_CID_fk" FromRole="Customer" ToRole="Resver_Head" />
-        </EntityType>
-        <EntityType Name="CustomerGift">
-          <Key>
-            <PropertyRef Name="CGID" />
-          </Key>
-          <Property Name="CGID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="CID" Type="Int32" Nullable="false" />
-          <Property Name="Year" Type="Int32" Nullable="false" />
-          <Property Name="SendDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="BSCID" Type="Int32" Nullable="false" />
-          <Property Name="Title" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="Ct" Type="Int32" Nullable="false" />
-          <Property Name="Note" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="DeleteFlag" Type="Boolean" Nullable="false" />
-          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="CreUID" Type="Int32" Nullable="false" />
-          <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="UpdUID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="B_StaticCode" Relationship="Self.CustomerGift_B_StaticCode_BSCID_fk" FromRole="CustomerGift" ToRole="B_StaticCode" />
-          <NavigationProperty Name="Customer" Relationship="Self.FK_CustomerGift_Customer" FromRole="CustomerGift" ToRole="Customer" />
         </EntityType>
         <EntityType Name="CustomerQuestion">
           <Key>
@@ -2456,6 +2538,7 @@
           <NavigationProperty Name="B_StaticCode1" Relationship="Self.FK_CustomerVisit_B_StaticCode" FromRole="CustomerVisit" ToRole="B_StaticCode" />
           <NavigationProperty Name="BusinessUser" Relationship="Self.FK_CustomerVisit_BusinessUser" FromRole="CustomerVisit" ToRole="BusinessUser" />
           <NavigationProperty Name="Customer" Relationship="Self.FK_CustomerVisit_Customer" FromRole="CustomerVisit" ToRole="Customer" />
+          <NavigationProperty Name="M_Customer_Gift" Relationship="Self.M_Customer_Gift_CustomerVisit_CVID_fk" FromRole="CustomerVisit" ToRole="M_Customer_Gift" />
         </EntityType>
         <EntityType Name="D_Company">
           <Key>
@@ -2627,6 +2710,24 @@
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="M_Address" Relationship="Self.M_Address_D_Zip_DZID_fk" FromRole="D_Zip" ToRole="M_Address" />
         </EntityType>
+        <EntityType Name="GiftSending">
+          <Key>
+            <PropertyRef Name="GSID" />
+          </Key>
+          <Property Name="GSID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Year" Type="Int32" Nullable="false" />
+          <Property Name="SendDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="BSCID" Type="Int32" Nullable="false" />
+          <Property Name="Title" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Note" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="DeleteFlag" Type="Boolean" Nullable="false" />
+          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreUID" Type="Int32" Nullable="false" />
+          <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="B_StaticCode" Relationship="Self.CustomerGift_B_StaticCode_BSCID_fk" FromRole="GiftSending" ToRole="B_StaticCode" />
+          <NavigationProperty Name="M_Customer_Gift" Relationship="Self.M_Customer_Gift_GiftSending_GSID_fk" FromRole="GiftSending" ToRole="M_Customer_Gift" />
+        </EntityType>
         <EntityType Name="GroupData">
           <Key>
             <PropertyRef Name="GID" />
@@ -2699,6 +2800,24 @@
           <NavigationProperty Name="B_Category" Relationship="Self.FK_M_Customer_Category_B_Category" FromRole="M_Customer_Category" ToRole="B_Category" />
           <NavigationProperty Name="Customer" Relationship="Self.FK_M_Customer_Category_Customer" FromRole="M_Customer_Category" ToRole="Customer" />
         </EntityType>
+        <EntityType Name="M_Customer_Gift">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CID" Type="Int32" Nullable="false" />
+          <Property Name="GSID" Type="Int32" Nullable="false" />
+          <Property Name="CVID" Type="Int32" />
+          <Property Name="Ct" Type="Int32" Nullable="false" />
+          <Property Name="Note" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreUID" Type="Int32" Nullable="false" />
+          <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Customer" Relationship="Self.M_Customer_Gift_Customer_CID_fk" FromRole="M_Customer_Gift" ToRole="Customer" />
+          <NavigationProperty Name="CustomerVisit" Relationship="Self.M_Customer_Gift_CustomerVisit_CVID_fk" FromRole="M_Customer_Gift" ToRole="CustomerVisit" />
+          <NavigationProperty Name="GiftSending" Relationship="Self.M_Customer_Gift_GiftSending_GSID_fk" FromRole="M_Customer_Gift" ToRole="GiftSending" />
+        </EntityType>
         <EntityType Name="M_Department_Category">
           <Key>
             <PropertyRef Name="MID" />
@@ -2759,6 +2878,21 @@
           <NavigationProperty Name="D_TimeSpan" Relationship="Self.FK_M_ResverSiteTimeSpan_D_TimeSpan" FromRole="M_Resver_TimeSpan" ToRole="D_TimeSpan" />
           <NavigationProperty Name="Resver_Head" Relationship="Self.FK_M_Resver_TimeSpan_Resver_Head" FromRole="M_Resver_TimeSpan" ToRole="Resver_Head" />
         </EntityType>
+        <EntityType Name="M_Site_Device">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BSID" Type="Int32" Nullable="false" />
+          <Property Name="BDID" Type="Int32" Nullable="false" />
+          <Property Name="Ct" Type="Int32" Nullable="false" />
+          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreUID" Type="Int32" Nullable="false" />
+          <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="B_Device" Relationship="Self.M_Site_Device_B_Device_BDID_fk" FromRole="M_Site_Device" ToRole="B_Device" />
+          <NavigationProperty Name="B_SiteData" Relationship="Self.M_Site_Device_B_SiteData_BSID_fk" FromRole="M_Site_Device" ToRole="B_SiteData" />
+        </EntityType>
         <EntityType Name="M_SiteGroup">
           <Key>
             <PropertyRef Name="MID" />
@@ -2803,11 +2937,11 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
-          <Property Name="AlwaysAllowShow" Type="Boolean" Nullable="false" DefaultValue="false" />
-          <Property Name="AlwaysAllowAdd" Type="Boolean" Nullable="false" DefaultValue="false" />
-          <Property Name="AlwaysAllowEdit" Type="Boolean" Nullable="false" DefaultValue="false" />
-          <Property Name="AlwaysAllowDelete" Type="Boolean" Nullable="false" DefaultValue="false" />
-          <Property Name="AlwaysAllowPring" Type="Boolean" Nullable="false" DefaultValue="false" />
+          <Property Name="AlwaysAllowShow" Type="Boolean" Nullable="false" />
+          <Property Name="AlwaysAllowAdd" Type="Boolean" Nullable="false" />
+          <Property Name="AlwaysAllowEdit" Type="Boolean" Nullable="false" />
+          <Property Name="AlwaysAllowDelete" Type="Boolean" Nullable="false" />
+          <Property Name="AlwaysAllowPring" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="M_Group_Menu" Relationship="Self.FK_M_Group_Menu_MenuData" FromRole="MenuData" ToRole="M_Group_Menu" />
           <NavigationProperty Name="MenuAPI" Relationship="Self.FK_MenuAPI_MenuData" FromRole="MenuData" ToRole="MenuAPI" />
         </EntityType>
@@ -3213,6 +3347,20 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="M_Site_Device_B_Device_BDID_fk">
+          <End Role="B_Device" Type="Self.B_Device" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Site_Device" Type="Self.M_Site_Device" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_Device">
+              <PropertyRef Name="BDID" />
+            </Principal>
+            <Dependent Role="M_Site_Device">
+              <PropertyRef Name="BDID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="D_OtherPayItem_B_OrderCode_BOCID_fk">
           <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="D_OtherPayItem" Type="Self.D_OtherPayItem" Multiplicity="*" />
@@ -3421,6 +3569,20 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="M_Site_Device_B_SiteData_BSID_fk">
+          <End Role="B_SiteData" Type="Self.B_SiteData" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Site_Device" Type="Self.M_Site_Device" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="B_SiteData">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="M_Site_Device">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="M_SiteGroup_B_SiteData_BSID_fk">
           <End Role="B_SiteData" Type="Self.B_SiteData" Multiplicity="1" />
           <End Role="M_SiteGroup" Type="Self.M_SiteGroup" Multiplicity="*" />
@@ -3447,12 +3609,12 @@
         </Association>
         <Association Name="CustomerGift_B_StaticCode_BSCID_fk">
           <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
-          <End Role="CustomerGift" Type="Self.CustomerGift" Multiplicity="*" />
+          <End Role="GiftSending" Type="Self.GiftSending" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_StaticCode">
               <PropertyRef Name="BSCID" />
             </Principal>
-            <Dependent Role="CustomerGift">
+            <Dependent Role="GiftSending">
               <PropertyRef Name="BSCID" />
             </Dependent>
           </ReferentialConstraint>
@@ -3651,18 +3813,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_CustomerGift_Customer">
-          <End Role="Customer" Type="Self.Customer" Multiplicity="1" />
-          <End Role="CustomerGift" Type="Self.CustomerGift" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Customer">
-              <PropertyRef Name="CID" />
-            </Principal>
-            <Dependent Role="CustomerGift">
-              <PropertyRef Name="CID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_CustomerQuestion_Customer">
           <End Role="Customer" Type="Self.Customer" Multiplicity="1" />
           <End Role="CustomerQuestion" Type="Self.CustomerQuestion" Multiplicity="*" />
@@ -3713,6 +3863,20 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="M_Customer_Gift_Customer_CID_fk">
+          <End Role="Customer" Type="Self.Customer" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customer">
+              <PropertyRef Name="CID" />
+            </Principal>
+            <Dependent Role="M_Customer_Gift">
+              <PropertyRef Name="CID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="Resver_Head_Customer_CID_fk">
           <End Role="Customer" Type="Self.Customer" Multiplicity="1" />
           <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="*" />
@@ -3722,6 +3886,20 @@
             </Principal>
             <Dependent Role="Resver_Head">
               <PropertyRef Name="CID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="M_Customer_Gift_CustomerVisit_CVID_fk">
+          <End Role="CustomerVisit" Type="Self.CustomerVisit" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CustomerVisit">
+              <PropertyRef Name="CVID" />
+            </Principal>
+            <Dependent Role="M_Customer_Gift">
+              <PropertyRef Name="CVID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -3836,6 +4014,20 @@
             </Principal>
             <Dependent Role="M_Address">
               <PropertyRef Name="DZID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="M_Customer_Gift_GiftSending_GSID_fk">
+          <End Role="GiftSending" Type="Self.GiftSending" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GiftSending">
+              <PropertyRef Name="GSID" />
+            </Principal>
+            <Dependent Role="M_Customer_Gift">
+              <PropertyRef Name="GSID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -4049,7 +4241,6 @@
           <EntitySet Name="B_StaticCode" EntityType="Self.B_StaticCode" />
           <EntitySet Name="BusinessUser" EntityType="Self.BusinessUser" />
           <EntitySet Name="Customer" EntityType="Self.Customer" />
-          <EntitySet Name="CustomerGift" EntityType="Self.CustomerGift" />
           <EntitySet Name="CustomerQuestion" EntityType="Self.CustomerQuestion" />
           <EntitySet Name="CustomerVisit" EntityType="Self.CustomerVisit" />
           <EntitySet Name="D_Company" EntityType="Self.D_Company" />
@@ -4060,15 +4251,18 @@
           <EntitySet Name="D_PayType" EntityType="Self.D_PayType" />
           <EntitySet Name="D_TimeSpan" EntityType="Self.D_TimeSpan" />
           <EntitySet Name="D_Zip" EntityType="Self.D_Zip" />
+          <EntitySet Name="GiftSending" EntityType="Self.GiftSending" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" />
           <EntitySet Name="M_Address" EntityType="Self.M_Address" />
           <EntitySet Name="M_Contect" EntityType="Self.M_Contect" />
           <EntitySet Name="M_Customer_BusinessUser" EntityType="Self.M_Customer_BusinessUser" />
           <EntitySet Name="M_Customer_Category" EntityType="Self.M_Customer_Category" />
+          <EntitySet Name="M_Customer_Gift" EntityType="Self.M_Customer_Gift" />
           <EntitySet Name="M_Department_Category" EntityType="Self.M_Department_Category" />
           <EntitySet Name="M_Group_Menu" EntityType="Self.M_Group_Menu" />
           <EntitySet Name="M_Group_User" EntityType="Self.M_Group_User" />
           <EntitySet Name="M_Resver_TimeSpan" EntityType="Self.M_Resver_TimeSpan" />
+          <EntitySet Name="M_Site_Device" EntityType="Self.M_Site_Device" />
           <EntitySet Name="M_SiteGroup" EntityType="Self.M_SiteGroup" />
           <EntitySet Name="MenuAPI" EntityType="Self.MenuAPI" />
           <EntitySet Name="MenuData" EntityType="Self.MenuData" />
@@ -4130,6 +4324,10 @@
           <AssociationSet Name="FK_Resver_Device_B_Device" Association="Self.FK_Resver_Device_B_Device">
             <End Role="B_Device" EntitySet="B_Device" />
             <End Role="Resver_Device" EntitySet="Resver_Device" />
+          </AssociationSet>
+          <AssociationSet Name="M_Site_Device_B_Device_BDID_fk" Association="Self.M_Site_Device_B_Device_BDID_fk">
+            <End Role="B_Device" EntitySet="B_Device" />
+            <End Role="M_Site_Device" EntitySet="M_Site_Device" />
           </AssociationSet>
           <AssociationSet Name="D_OtherPayItem_B_OrderCode_BOCID_fk" Association="Self.D_OtherPayItem_B_OrderCode_BOCID_fk">
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
@@ -4199,6 +4397,10 @@
             <End Role="B_SiteData" EntitySet="B_SiteData" />
             <End Role="Resver_Site" EntitySet="Resver_Site" />
           </AssociationSet>
+          <AssociationSet Name="M_Site_Device_B_SiteData_BSID_fk" Association="Self.M_Site_Device_B_SiteData_BSID_fk">
+            <End Role="B_SiteData" EntitySet="B_SiteData" />
+            <End Role="M_Site_Device" EntitySet="M_Site_Device" />
+          </AssociationSet>
           <AssociationSet Name="M_SiteGroup_B_SiteData_BSID_fk" Association="Self.M_SiteGroup_B_SiteData_BSID_fk">
             <End Role="B_SiteData" EntitySet="B_SiteData" />
             <End Role="M_SiteGroup" EntitySet="M_SiteGroup" />
@@ -4209,7 +4411,7 @@
           </AssociationSet>
           <AssociationSet Name="CustomerGift_B_StaticCode_BSCID_fk" Association="Self.CustomerGift_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
-            <End Role="CustomerGift" EntitySet="CustomerGift" />
+            <End Role="GiftSending" EntitySet="GiftSending" />
           </AssociationSet>
           <AssociationSet Name="CustomerVisit_B_StaticCode_BSCID_fk" Association="Self.CustomerVisit_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
@@ -4275,10 +4477,6 @@
             <End Role="BusinessUser" EntitySet="BusinessUser" />
             <End Role="Resver_Head" EntitySet="Resver_Head" />
           </AssociationSet>
-          <AssociationSet Name="FK_CustomerGift_Customer" Association="Self.FK_CustomerGift_Customer">
-            <End Role="Customer" EntitySet="Customer" />
-            <End Role="CustomerGift" EntitySet="CustomerGift" />
-          </AssociationSet>
           <AssociationSet Name="FK_CustomerQuestion_Customer" Association="Self.FK_CustomerQuestion_Customer">
             <End Role="Customer" EntitySet="Customer" />
             <End Role="CustomerQuestion" EntitySet="CustomerQuestion" />
@@ -4295,9 +4493,17 @@
             <End Role="Customer" EntitySet="Customer" />
             <End Role="M_Customer_BusinessUser" EntitySet="M_Customer_BusinessUser" />
           </AssociationSet>
+          <AssociationSet Name="M_Customer_Gift_Customer_CID_fk" Association="Self.M_Customer_Gift_Customer_CID_fk">
+            <End Role="Customer" EntitySet="Customer" />
+            <End Role="M_Customer_Gift" EntitySet="M_Customer_Gift" />
+          </AssociationSet>
           <AssociationSet Name="Resver_Head_Customer_CID_fk" Association="Self.Resver_Head_Customer_CID_fk">
             <End Role="Customer" EntitySet="Customer" />
             <End Role="Resver_Head" EntitySet="Resver_Head" />
+          </AssociationSet>
+          <AssociationSet Name="M_Customer_Gift_CustomerVisit_CVID_fk" Association="Self.M_Customer_Gift_CustomerVisit_CVID_fk">
+            <End Role="CustomerVisit" EntitySet="CustomerVisit" />
+            <End Role="M_Customer_Gift" EntitySet="M_Customer_Gift" />
           </AssociationSet>
           <AssociationSet Name="FK_D_Department_D_Company" Association="Self.FK_D_Department_D_Company">
             <End Role="D_Company" EntitySet="D_Company" />
@@ -4334,6 +4540,10 @@
           <AssociationSet Name="M_Address_D_Zip_DZID_fk" Association="Self.M_Address_D_Zip_DZID_fk">
             <End Role="D_Zip" EntitySet="D_Zip" />
             <End Role="M_Address" EntitySet="M_Address" />
+          </AssociationSet>
+          <AssociationSet Name="M_Customer_Gift_GiftSending_GSID_fk" Association="Self.M_Customer_Gift_GiftSending_GSID_fk">
+            <End Role="GiftSending" EntitySet="GiftSending" />
+            <End Role="M_Customer_Gift" EntitySet="M_Customer_Gift" />
           </AssociationSet>
           <AssociationSet Name="FK_M_Group_Menu_GroupData" Association="Self.FK_M_Group_Menu_GroupData">
             <End Role="GroupData" EntitySet="GroupData" />
@@ -4431,7 +4641,6 @@
                 <ScalarProperty Name="DHID" ColumnName="DHID" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
-                <ScalarProperty Name="Ct" ColumnName="Ct" />
                 <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
                 <ScalarProperty Name="InPrice" ColumnName="InPrice" />
                 <ScalarProperty Name="OutPrice" ColumnName="OutPrice" />
@@ -4602,25 +4811,6 @@
                 <ScalarProperty Name="InFlag" ColumnName="InFlag" />
                 <ScalarProperty Name="PotentialFlag" ColumnName="PotentialFlag" />
                 <ScalarProperty Name="ActiveFlag" ColumnName="ActiveFlag" />
-                <ScalarProperty Name="DeleteFlag" ColumnName="DeleteFlag" />
-                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
-                <ScalarProperty Name="CreUID" ColumnName="CreUID" />
-                <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
-                <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="CustomerGift">
-            <EntityTypeMapping TypeName="db_NS_EducationModel.CustomerGift">
-              <MappingFragment StoreEntitySet="CustomerGift">
-                <ScalarProperty Name="CGID" ColumnName="CGID" />
-                <ScalarProperty Name="CID" ColumnName="CID" />
-                <ScalarProperty Name="Year" ColumnName="Year" />
-                <ScalarProperty Name="SendDate" ColumnName="SendDate" />
-                <ScalarProperty Name="BSCID" ColumnName="BSCID" />
-                <ScalarProperty Name="Title" ColumnName="Title" />
-                <ScalarProperty Name="Ct" ColumnName="Ct" />
-                <ScalarProperty Name="Note" ColumnName="Note" />
                 <ScalarProperty Name="DeleteFlag" ColumnName="DeleteFlag" />
                 <ScalarProperty Name="CreDate" ColumnName="CreDate" />
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
@@ -4830,6 +5020,23 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="GiftSending">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.GiftSending">
+              <MappingFragment StoreEntitySet="GiftSending">
+                <ScalarProperty Name="GSID" ColumnName="GSID" />
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="SendDate" ColumnName="SendDate" />
+                <ScalarProperty Name="BSCID" ColumnName="BSCID" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Note" ColumnName="Note" />
+                <ScalarProperty Name="DeleteFlag" ColumnName="DeleteFlag" />
+                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
+                <ScalarProperty Name="CreUID" ColumnName="CreUID" />
+                <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
+                <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="GroupData">
             <EntityTypeMapping TypeName="db_NS_EducationModel.GroupData">
               <MappingFragment StoreEntitySet="GroupData">
@@ -4900,6 +5107,22 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="M_Customer_Gift">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Customer_Gift">
+              <MappingFragment StoreEntitySet="M_Customer_Gift">
+                <ScalarProperty Name="MID" ColumnName="MID" />
+                <ScalarProperty Name="CID" ColumnName="CID" />
+                <ScalarProperty Name="GSID" ColumnName="GSID" />
+                <ScalarProperty Name="CVID" ColumnName="CVID" />
+                <ScalarProperty Name="Ct" ColumnName="Ct" />
+                <ScalarProperty Name="Note" ColumnName="Note" />
+                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
+                <ScalarProperty Name="CreUID" ColumnName="CreUID" />
+                <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
+                <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="M_Department_Category">
             <EntityTypeMapping TypeName="db_NS_EducationModel.M_Department_Category">
               <MappingFragment StoreEntitySet="M_Department_Category">
@@ -4949,6 +5172,20 @@
                 <ScalarProperty Name="TargetID" ColumnName="TargetID" />
                 <ScalarProperty Name="DTSID" ColumnName="DTSID" />
                 <ScalarProperty Name="SortNo" ColumnName="SortNo" />
+                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
+                <ScalarProperty Name="CreUID" ColumnName="CreUID" />
+                <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
+                <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="M_Site_Device">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Site_Device">
+              <MappingFragment StoreEntitySet="M_Site_Device">
+                <ScalarProperty Name="MID" ColumnName="MID" />
+                <ScalarProperty Name="BSID" ColumnName="BSID" />
+                <ScalarProperty Name="BDID" ColumnName="BDID" />
+                <ScalarProperty Name="Ct" ColumnName="Ct" />
                 <ScalarProperty Name="CreDate" ColumnName="CreDate" />
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />

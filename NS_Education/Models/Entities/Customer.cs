@@ -17,11 +17,11 @@ namespace NS_Education.Models.Entities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Customer()
         {
-            this.CustomerGift = new HashSet<CustomerGift>();
             this.CustomerQuestion = new HashSet<CustomerQuestion>();
             this.CustomerVisit = new HashSet<CustomerVisit>();
             this.M_Customer_Category = new HashSet<M_Customer_Category>();
             this.M_Customer_BusinessUser = new HashSet<M_Customer_BusinessUser>();
+            this.M_Customer_Gift = new HashSet<M_Customer_Gift>();
             this.Resver_Head = new HashSet<Resver_Head>();
         }
     
@@ -51,8 +51,6 @@ namespace NS_Education.Models.Entities
         public virtual B_StaticCode B_StaticCode { get; set; }
         public virtual B_StaticCode B_StaticCode1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CustomerGift> CustomerGift { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CustomerQuestion> CustomerQuestion { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CustomerVisit> CustomerVisit { get; set; }
@@ -60,6 +58,8 @@ namespace NS_Education.Models.Entities
         public virtual ICollection<M_Customer_Category> M_Customer_Category { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<M_Customer_BusinessUser> M_Customer_BusinessUser { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<M_Customer_Gift> M_Customer_Gift { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Head> Resver_Head { get; set; }
     }

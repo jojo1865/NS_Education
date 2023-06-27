@@ -37,5 +37,8 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById
 
         public ICollection<BaseResponseRowForSelectable> BSCID15_List { get; set; } =
             new List<BaseResponseRowForSelectable>();
+
+        public ICollection<CustomerVisit_GetInfoById_GiftSendings_Row_APIItem> GiftSendings { get; set; } =
+            new List<CustomerVisit_GetInfoById_GiftSendings_Row_APIItem>();
     }
 }

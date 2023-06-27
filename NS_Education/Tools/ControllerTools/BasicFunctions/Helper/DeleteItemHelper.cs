@@ -3,8 +3,8 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
-using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -68,9 +68,9 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             bool isEveryElementValid = input.Items.StartValidateElements()
                 .Validate(i => i.Id != null && i.Id.IsAboveZero(),
-                    () => _controller.AddError(_controller.EmptyNotAllowed("欲刪除的資料 ID")))
+                    () => _controller.AddError(DeleteItemInputIdIncorrect))
                 .Validate(i => i.DeleteFlag != null,
-                    i => _controller.AddError(_controller.EmptyNotAllowed($"欲刪除或復活的輸入值（{i.Id}）")))
+                    i => _controller.AddError(DeleteItemInputDeleteFlagIncorrect(i.Id)))
                 .IsValid();
 
             if (!isCollectionValid || !isEveryElementValid)

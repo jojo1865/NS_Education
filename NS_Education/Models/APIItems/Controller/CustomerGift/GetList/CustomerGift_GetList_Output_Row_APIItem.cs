@@ -2,9 +2,11 @@ namespace NS_Education.Models.APIItems.Controller.CustomerGift.GetList
 {
     public class CustomerGift_GetList_Output_Row_APIItem : BaseGetResponseRowWithCreUpd
     {
-        public int CGID { get; set; }
+        public int GSID { get; set; }
+        public int MID { get; set; }
 
         public int CID { get; set; }
+        public string C_Code { get; set; }
         public string C_TitleC { get; set; }
         public string C_TitleE { get; set; }
 

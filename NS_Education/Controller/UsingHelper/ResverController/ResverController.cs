@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
@@ -7,12 +8,12 @@ using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById;
 using NS_Education.Models.APIItems.Controller.Resver.GetHeadList;
 using NS_Education.Models.APIItems.Controller.Resver.Submit;
 using NS_Education.Models.Entities;
-using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -599,7 +600,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(Resver_Submit_Input_APIItem.RHID))]
         public async Task<string> Submit(Resver_Submit_Input_APIItem input)
         {
-            return await _submitHelper.Submit(input);
+            // 預約的商業邏輯較長，且需要驗證許多資料，而且可能有異步而造成多筆訂單同時完成，設備超訂等問題。
+            // 所以，這裡指定 Serializable 做處理。
+            return await _submitHelper.Submit(input, IsolationLevel.Serializable);
         }
 
         public bool SubmitIsAdd(Resver_Submit_Input_APIItem input)
@@ -1035,11 +1038,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 先一次查完所有 BDID
             IEnumerable<Resver_Submit_DeviceItem_Input_APIItem> allDeviceItems =
                 input.SiteItems.SelectMany(si => si.DeviceItems).ToArray();
-            var inputDeviceIds = allDeviceItems.Select(di => di.BDID);
+            IEnumerable<int> inputDeviceIds = allDeviceItems
+                .Select(di => di.BDID)
+                .AsEnumerable();
 
             Dictionary<int, B_Device> devices = await DC.B_Device
                 .Include(bd => bd.Resver_Device)
                 .Include(bd => bd.Resver_Device.Select(rd => rd.Resver_Site))
+                .Include(bd => bd.M_Site_Device)
                 .Where(bd =>
                     bd.ActiveFlag && !bd.DeleteFlag &&
                     inputDeviceIds.Any(id => id == bd.BDID))
@@ -1072,25 +1078,62 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     // 每個時段
                     foreach (D_TimeSpan timeSpan in wantedTimeSpans)
                     {
-                        // 計算此設備預約單以外的預約單中，預約了同一設備的總數量
-                        int reservedCount = DC.Resver_Device
-                            // 選出所有不是這張設備預約單的設備預約單，並且是同一天、未刪除
+                        // 計算此設備預約單以外的預約單中，在同一場地預約了同一設備的總數量
+                        Resver_Device[] otherResverDevices = await DC.Resver_Device
+                            .Include(rs => rs.Resver_Site)
+                            .Include(rs => rs.Resver_Site.B_SiteData)
+                            .Include(rs => rs.Resver_Site.B_SiteData.M_SiteGroup1)
+                            // 選出所有不是這張設備預約單的設備預約單，同場地或者其子場地，並且是同一天、未刪除
                             .Where(rd => !rd.DeleteFlag)
                             .Where(rd => DbFunctions.TruncateTime(rd.TargetDate) == targetDate.Date)
                             .Where(rd => rd.RDID != deviceItem.RDID)
+                            .Where(rd => rd.Resver_Site.BSID == siteItem.BSID
+                                         || rd.Resver_Site.B_SiteData.M_SiteGroup1.Any(child =>
+                                             child.MasterID == siteItem.BSID))
+                            .Where(rd => rd.Resver_Site.B_SiteData.ActiveFlag && !rd.Resver_Site.B_SiteData.DeleteFlag)
                             // 存到記憶體，因為接下來又要查 DB 了
-                            .ToArray()
-                            // 選出它們的 RTS
-                            .Where(rd => DC.M_Resver_TimeSpan
-                                .Include(rts => rts.D_TimeSpan)
-                                .Where(rts => rts.TargetTable == resverDeviceTableName)
-                                .Where(rts => rts.TargetID == rd.RDID)
-                                .AsEnumerable()
-                                .Any(rts => rts.D_TimeSpan.IsCrossingWith(timeSpan))
-                            )
-                            .Sum(rd => rd.Ct);
+                            .ToArrayAsync();
 
-                        int totalCt = devices[deviceItem.BDID].Ct;
+                        IEnumerable<int> otherResverDeviceIds = otherResverDevices
+                            .Select(ord => ord.RDID)
+                            .AsEnumerable();
+
+                        // 選出它們的 RTS，當發現重疊時段時，計入 reservedCount
+                        IEnumerable<int> crossingResverDeviceIds = DC.M_Resver_TimeSpan
+                            .Include(rts => rts.D_TimeSpan)
+                            .Where(rts => rts.TargetTable == resverDeviceTableName)
+                            .Where(rts => otherResverDeviceIds.Contains(rts.TargetID))
+                            .AsEnumerable()
+                            .Where(rts => rts.D_TimeSpan.IsCrossingWith(timeSpan))
+                            .Select(rts => rts.TargetID);
+
+                        int reservedCount = DC.Resver_Device
+                            .Where(rd => crossingResverDeviceIds.Contains(rd.RDID))
+                            .Sum(rd => (int?)rd.Ct) ?? 0;
+
+                        // 總可用數量，取用
+                        // 1. 該設備在此場地的數量
+                        // 2. 該設備在此場地之子場地的數量
+                        // 之總和
+
+                        int totalCt = devices[deviceItem.BDID].M_Site_Device
+                            .Where(msd => msd.BSID == siteItem.BSID)
+                            .Sum(msd => (int?)msd.Ct) ?? 0;
+
+                        // 所有子場地此設備的庫存
+                        int implicitCt = await DC.M_SiteGroup
+                            .Include(msg => msg.B_SiteData1)
+                            .Include(msg => msg.B_SiteData1.M_Site_Device)
+                            .Where(msg => msg.MasterID == siteItem.BSID)
+                            .Where(msg => msg.ActiveFlag && !msg.DeleteFlag)
+                            .Select(msg => msg.B_SiteData1)
+                            .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
+                            .SelectMany(sd => sd.M_Site_Device)
+                            .Where(msd => msd.BDID == deviceItem.BDID)
+                            .SumAsync(msd => (int?)msd.Ct) ?? 0;
+
+                        totalCt += implicitCt;
+
                         if (totalCt - reservedCount >= deviceItem.Ct) continue;
 
                         AddError(21,
@@ -1319,45 +1362,37 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             bool isAdd = SubmitIsAdd(input);
             IList<object> entitiesToAdd = new List<object>();
 
-            using (var transaction = DC.Database.BeginTransaction())
+            // 取得主資料
+            Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
+
+            // 已結帳時，只允許處理預約回饋紀錄的值
+            if (isAdd || head.B_StaticCode1.Code != ReserveHeadState.FullyPaid)
             {
-                // 取得主資料
-                Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
-
-                // 已結帳時，只允許處理預約回饋紀錄的值
-                if (isAdd || head.B_StaticCode1.Code != ReserveHeadState.FullyPaid)
+                SubmitPopulateHeadValues(input, head);
+                // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
+                if (head.RHID == 0)
                 {
-                    SubmitPopulateHeadValues(input, head);
-                    // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
-                    if (head.RHID == 0)
-                    {
-                        await DC.AddAsync(head);
-                        await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
-                    }
-
-                    // 清理所有跟這張預約單有關的 ResverTimeSpan
-                    DC.M_Resver_TimeSpan.RemoveRange(head.M_Resver_TimeSpan);
-
-                    // 開始寫入值
-                    SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
-                    await SubmitPopulateHeadSiteItems(input, head, entitiesToAdd);
-                    SubmitPopulateHeadOtherItems(input, head, entitiesToAdd);
-                    SubmitPopulateHeadBillItems(input, head, entitiesToAdd);
+                    await DC.AddAsync(head);
+                    await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
                 }
 
-                SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
+                // 清理所有跟這張預約單有關的 ResverTimeSpan
+                DC.M_Resver_TimeSpan.RemoveRange(head.M_Resver_TimeSpan);
 
-                // 寫入 Db
-                await DC.AddRangeAsync(entitiesToAdd);
-                // 這裡就手動 SaveChanges，以便作 transaction 管理
-                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
-
-                // 如果沒有錯誤，才作 commit
-                if (!HasError())
-                    transaction.Commit();
-
-                return head;
+                // 開始寫入值
+                SubmitPopulateHeadContactItems(input, head, entitiesToAdd, isAdd);
+                await SubmitPopulateHeadSiteItems(input, head, entitiesToAdd);
+                SubmitPopulateHeadOtherItems(input, head, entitiesToAdd);
+                SubmitPopulateHeadBillItems(input, head, entitiesToAdd);
             }
+
+            SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
+
+            // 寫入 Db
+            await DC.AddRangeAsync(entitiesToAdd);
+            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+
+            return head;
         }
 
         private void AddErrorNotThisHead(int itemId, string itemName, int dataHeadId)

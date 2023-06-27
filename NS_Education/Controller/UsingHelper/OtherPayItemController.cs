@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.OtherPayItem.GetInfoById;
 using NS_Education.Models.APIItems.Controller.OtherPayItem.GetList;
 using NS_Education.Models.APIItems.Controller.OtherPayItem.Submit;
 using NS_Education.Models.Entities;
-using NS_Education.Tools.BeingValidated;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -140,7 +141,32 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            if (activeFlag == false && !await ChangeActiveValidateReservation(id))
+                return GetResponseJson();
+
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        private async Task<bool> ChangeActiveValidateReservation(int id)
+        {
+            // 停用時，不得有任何進行中預約單
+            Resver_Other[] cantDeleteData = await DC.Resver_Head
+                .Include(rh => rh.Resver_Other)
+                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Other)
+                .Where(ro => !ro.DeleteFlag)
+                .Where(ro => id == ro.DOPIID)
+                .ToArrayAsync();
+
+            foreach (Resver_Other resverOther in cantDeleteData)
+            {
+                AddError(UnsupportedValue(
+                    $"欲停用的其他收費項目（ID {resverOther.ROID} {resverOther.D_OtherPayItem.Code ?? ""}{resverOther.D_OtherPayItem.Title ?? ""}）",
+                    $"已有進行中預約單（單號 {resverOther.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<D_OtherPayItem> ChangeActiveQuery(int id)
@@ -156,7 +182,38 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidateReservation(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
+        {
+            // 刪除時，不得有任何進行中預約單
+            HashSet<int> uniqueDeleteId = input.Items
+                .Where(i => i.DeleteFlag == true && i.Id.HasValue)
+                .Select(i => i.Id.Value)
+                .Distinct()
+                .ToHashSet();
+
+            Resver_Other[] cantDeleteData = await DC.Resver_Head
+                .Include(rh => rh.Resver_Other)
+                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem))
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Other)
+                .Where(ro => !ro.DeleteFlag)
+                .Where(ro => uniqueDeleteId.Contains(ro.DOPIID))
+                .ToArrayAsync();
+
+            foreach (Resver_Other resverOther in cantDeleteData)
+            {
+                AddError(UnsupportedValue(
+                    $"欲刪除的其他收費項目（ID {resverOther.ROID} {resverOther.D_OtherPayItem.Code ?? ""}{resverOther.D_OtherPayItem.Title ?? ""}）",
+                    $"已有進行中預約單（單號 {resverOther.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<D_OtherPayItem> DeleteItemsQuery(IEnumerable<int> ids)
@@ -237,7 +294,34 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("入帳代號 ID")))
                 .IsValid();
 
-            return await Task.FromResult(isValid);
+            // 停用時，檢查進行中預約單
+            if (!input.ActiveFlag)
+                isValid = isValid && await ChangeActiveValidateReservation(input.DOPIID);
+
+            // 修改 Ct 時，不得使任何進行中預約單的數量不足
+            isValid = isValid && await SubmitEditValidateCt(input);
+
+            return isValid;
+        }
+
+        private async Task<bool> SubmitEditValidateCt(OtherPayItem_Submit_Input_APIItem input)
+        {
+            int neededCt = await DC.Resver_Head
+                .Include(rh => rh.Resver_Other)
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .SelectMany(rh => rh.Resver_Other)
+                .Where(ro => !ro.DeleteFlag)
+                .Where(ro => ro.DOPIID == input.DOPIID)
+                .OrderByDescending(ro => ro.Ct)
+                .Select(ro => ro.Ct)
+                .FirstOrDefaultAsync();
+
+            if (input.Ct < neededCt)
+            {
+                AddError(OutOfRange("數量", $"{neededCt}（進行中預約單之所需數）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<D_OtherPayItem> SubmitEditQuery(OtherPayItem_Submit_Input_APIItem input)

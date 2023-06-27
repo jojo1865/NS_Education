@@ -17,11 +17,6 @@ namespace NS_Education.Models.Entities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public MenuData()
         {
-            this.AlwaysAllowShow = false;
-            this.AlwaysAllowAdd = false;
-            this.AlwaysAllowEdit = false;
-            this.AlwaysAllowDelete = false;
-            this.AlwaysAllowPring = false;
             this.M_Group_Menu = new HashSet<M_Group_Menu>();
             this.MenuAPI = new HashSet<MenuAPI>();
         }

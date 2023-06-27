@@ -22,7 +22,7 @@ namespace NS_Education.Models.Entities
             this.B_PartnerItem = new HashSet<B_PartnerItem>();
             this.B_SiteData = new HashSet<B_SiteData>();
             this.B_SiteData1 = new HashSet<B_SiteData>();
-            this.CustomerGift = new HashSet<CustomerGift>();
+            this.GiftSending = new HashSet<GiftSending>();
             this.CustomerVisit = new HashSet<CustomerVisit>();
             this.D_OtherPayItem = new HashSet<D_OtherPayItem>();
             this.Customer = new HashSet<Customer>();
@@ -61,7 +61,7 @@ namespace NS_Education.Models.Entities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<B_SiteData> B_SiteData1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CustomerGift> CustomerGift { get; set; }
+        public virtual ICollection<GiftSending> GiftSending { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CustomerVisit> CustomerVisit { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

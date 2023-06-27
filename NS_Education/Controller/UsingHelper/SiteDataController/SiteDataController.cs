@@ -182,6 +182,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Include(sd => sd.M_SiteGroup)
                 .Include(sd =>
                     sd.M_SiteGroup.Select(asMaster => asMaster.B_SiteData1).Select(child => child.Resver_Site))
+                .Include(sd => sd.M_SiteGroup.Select(msg => msg.B_SiteData1))
                 .Include(sd => sd.M_SiteGroup1)
                 .Include(sd =>
                     sd.M_SiteGroup1.Select(asChild => asChild.B_SiteData).Select(master => master.Resver_Site))
@@ -201,7 +202,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             if (input.IsCombinedSiteMaster.HasValue)
                 query = query.Where(sd =>
-                    sd.M_SiteGroup.Any(msg => msg.ActiveFlag && !msg.DeleteFlag) == input.IsCombinedSiteMaster);
+                    sd.M_SiteGroup.Any(msg =>
+                        msg.ActiveFlag && !msg.DeleteFlag && msg.B_SiteData1.ActiveFlag &&
+                        !msg.B_SiteData1.DeleteFlag) == input.IsCombinedSiteMaster);
 
             if (input.ActiveFlag.IsInBetween(0, 1))
                 query = query.Where(sd => sd.ActiveFlag == (input.ActiveFlag == 1));
@@ -218,7 +221,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             SiteData_GetList_Output_Row_APIItem output = new SiteData_GetList_Output_Row_APIItem
             {
                 BSID = entity.BSID,
-                IsCombinedSiteMaster = entity.M_SiteGroup.Any(msg => msg.ActiveFlag && !msg.DeleteFlag),
+                IsCombinedSiteMaster = entity.M_SiteGroup.Any(msg =>
+                    msg.ActiveFlag && !msg.DeleteFlag && msg.B_SiteData1.ActiveFlag && !msg.B_SiteData1.DeleteFlag),
                 BCID = entity.BCID,
                 BC_TitleC = entity.B_Category?.TitleC ?? "",
                 BC_TitleE = entity.B_Category?.TitleE ?? "",
@@ -259,6 +263,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Include(sd => sd.M_SiteGroup.Select(sg => sg.B_SiteData1))
                 .Include(sd => sd.M_SiteGroup.Select(sg => sg.B_SiteData1).Select(child => child.M_Site_Device))
                 .Include(sd => sd.M_SiteGroup1)
+                .Include(sd => sd.M_SiteGroup1.Select(msg => msg.B_SiteData))
                 .Include(sd => sd.M_Site_Device)
                 .Include(sd => sd.M_Site_Device.Select(msd => msd.B_Device))
                 .Include(sd => sd.M_Site_Device.Select(msd => msd.B_SiteData))
@@ -270,7 +275,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             return new SiteData_GetInfoById_Output_APIItem
             {
                 BSID = entity.BSID,
-                IsCombinedSiteChild = entity.M_SiteGroup1.Any(msg => msg.ActiveFlag && !msg.DeleteFlag),
+                IsCombinedSiteChild = entity.M_SiteGroup1.Any(msg =>
+                    msg.ActiveFlag && !msg.DeleteFlag && msg.B_SiteData.ActiveFlag && !msg.B_SiteData.DeleteFlag),
                 BCID = entity.BCID,
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",

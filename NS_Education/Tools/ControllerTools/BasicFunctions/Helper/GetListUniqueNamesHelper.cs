@@ -69,7 +69,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 .Distinct()
                 .Take(input.MaxRow);
 
-            return await filteredQuery.ToArrayAsync();
+            return await filteredQuery.AsNoTracking().ToArrayAsync();
         }
 
         private bool ValidateInput(CommonRequestForUniqueNames input)

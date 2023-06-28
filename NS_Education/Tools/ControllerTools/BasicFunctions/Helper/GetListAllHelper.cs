@@ -96,7 +96,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 回傳實際資料
 
-            return await query.ToListAsync();
+            return await query.AsNoTracking().ToListAsync();
         }
 
         #endregion

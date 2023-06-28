@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using NS_Education.Models.APIItems;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface
 {
@@ -8,7 +7,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface
     /// </summary>
     /// <typeparam name="TGetListRequest">傳入物件類型</typeparam>
     public interface IGetListAllHelper<in TGetListRequest>
-    where TGetListRequest : BaseRequestForList
     {
         /// <summary>
         /// 取得符合條件的無分頁整批資料列表。

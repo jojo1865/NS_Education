@@ -295,6 +295,7 @@
         <Compile Include="Models\APIItems\BaseRequestForList.cs"/>
         <Compile Include="Models\APIItems\BaseRequestForPagedList.cs"/>
         <Compile Include="Models\APIItems\BaseRequestForSubmit.cs"/>
+        <Compile Include="Models\APIItems\CommonRequestForUniqueNames.cs"/>
         <Compile Include="Models\APIItems\BaseResponseForList.cs"/>
         <Compile Include="Models\APIItems\BaseResponseForPagedList.cs"/>
         <Compile Include="Models\APIItems\BaseResponseRowForSelectable.cs"/>
@@ -679,6 +680,7 @@
         <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListAllHelper.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListLocalHelper.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListPagedHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListUniqueNamesHelper.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetTypeListHelper.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IChangeActiveHelper.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IDeleteItemHelper.cs"/>
@@ -695,6 +697,7 @@
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListAll.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListLocal.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListPaged.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListUniqueNames.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetTypeList.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs"/>
         <Compile Include="Tools\Encryption\JwtHelper.cs"/>

@@ -17,7 +17,6 @@ using NS_Education.Models.APIItems.Controller.UserData.UserData.Login;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.Submit;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.UpdatePW;
 using NS_Education.Models.Entities;
-using NS_Education.Models.Errors.DataValidationErrors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -226,33 +225,16 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         private async Task<bool> LoginUpdateDb(UserData queried, string jwt)
         {
-            bool isProcessSuccessful;
-
             // 1. 更新 JWT 欄位
             // 2. 更新 LoginDate
             // 3. 儲存至 DB
-            using (var transaction = DC.Database.BeginTransaction())
-            {
-                try
-                {
-                    isProcessSuccessful = await this.StartValidate()
-                        .SkipIfAlreadyInvalid()
-                        .ValidateAsync(_ => UpdateJWT(queried, jwt), (_, e) => AddError(UpdateDbFailed(e)))
-                        .Validate(_ => UpdateUserLoginDate(queried))
-                        .ValidateAsync(_ => DC.SaveChangesStandardProcedureAsync(queried.UID, Request),
-                            (_, e) => AddError(UpdateDbFailed(e)))
-                        .IsValid();
-
-                    if (isProcessSuccessful)
-                        transaction.Commit();
-                }
-                catch (Exception e)
-                {
-                    AddError(new UpdateDbFailedError(e));
-                    isProcessSuccessful = false;
-                    transaction.Rollback();
-                }
-            }
+            bool isProcessSuccessful = await this.StartValidate()
+                .SkipIfAlreadyInvalid()
+                .ValidateAsync(_ => UpdateJWT(queried, jwt), (_, e) => AddError(UpdateDbFailed(e)))
+                .Validate(_ => UpdateUserLoginDate(queried))
+                .ValidateAsync(_ => DC.SaveChangesStandardProcedureAsync(queried.UID, Request),
+                    (_, e) => AddError(UpdateDbFailed(e)))
+                .IsValid();
 
             return isProcessSuccessful;
         }

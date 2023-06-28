@@ -164,8 +164,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID1, StaticCodeType.Floor),
                     () => AddError(NotFound("樓層別 ID", nameof(input.BSCID1))))
                 .StopForceSkipping()
-                .Validate(i => i.Capacity.IsZeroOrAbove(),
-                    () => AddError(WrongFormat("容納人數", nameof(input.Capacity))))
+                .Validate(i => i.BasicCapacity.IsZeroOrAbove(),
+                    () => AddError(WrongFormat("一般容納人數", nameof(input.BasicCapacity))))
+                .Validate(i => i.MaxCapacity.IsZeroOrAbove(),
+                    () => AddError(WrongFormat("最大容納人數", nameof(input.MaxCapacity))))
                 .ForceSkipIf(i => i.TargetDate.IsNullOrWhiteSpace())
                 .Validate(i => i.TargetDate.TryParseDateTime(out _),
                     () => AddError(WrongFormat("可租借日期", nameof(input.TargetDate))))
@@ -198,8 +200,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             if (input.BSCID1.IsAboveZero())
                 query = query.Where(sd => sd.BSCID1 == input.BSCID1);
 
-            if (input.Capacity.IsAboveZero())
-                query = query.Where(sd => sd.MaxSize >= input.Capacity);
+            if (input.BasicCapacity.IsAboveZero())
+                query = query.Where(sd => sd.BasicSize >= input.BasicCapacity);
+
+            if (input.MaxCapacity.IsAboveZero())
+                query = query.Where(sd => sd.MaxSize >= input.MaxCapacity);
 
             if (input.IsCombinedSiteMaster.HasValue)
                 query = query.Where(sd =>

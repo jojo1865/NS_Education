@@ -17,6 +17,7 @@ using NS_Education.Models.APIItems.Controller.UserData.UserData.Login;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.Submit;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.UpdatePW;
 using NS_Education.Models.Entities;
+using NS_Education.Models.Errors.DataValidationErrors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -192,28 +193,72 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         public async Task<string> Login(UserData_Login_Input_APIItem input)
         {
             // 驗證
-            var queried = !input.LoginAccount.IsNullOrWhiteSpace()
-                ? await DC.UserData
-                    .Include(u => u.M_Group_User)
-                    .FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount)
-                : null;
+            UserData queried = await LoginGetUserData(input);
 
-            // 1. 先查詢是否確實有這個帳號
-            // 2. 確認帳號的啟用 Flag 與刪除 Flag 
-            // 3. 有帳號，才驗證登入密碼
-            bool isValidated = queried.StartValidate(true)
-                .Validate(q => q != null, () => AddError(NotFound("使用者帳號", nameof(input.LoginAccount))))
-                .Validate(q => q.ActiveFlag && !q.DeleteFlag,
-                    () => AddError(NotFound("使用者帳號", nameof(input.LoginAccount))))
-                .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
-                    () => AddError(1, LoginPasswordIncorrect))
-                .IsValid();
+            bool isValidated = LoginValidateCredential(input, queried);
 
             if (!isValidated)
                 return GetResponseJson();
 
             // 登入都成功後，回傳部分使用者資訊，以及使用者的權限資訊。
             // 先建立 claims
+            string jwt = LoginCreateJwt(queried);
+
+            var output = new UserData_Login_Output_APIItem
+            {
+                UID = queried.UID,
+                Username = queried.UserName,
+                JwtToken = jwt
+            };
+
+            bool isUpdateSuccessful = await LoginUpdateDb(queried, jwt);
+
+            return isUpdateSuccessful ? GetResponseJson(output) : GetResponseJson();
+        }
+
+        private static string LoginCreateJwt(UserData queried)
+        {
+            List<Claim> claims = LoginCreateClaims(queried);
+
+            string jwt = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims);
+            return jwt;
+        }
+
+        private async Task<bool> LoginUpdateDb(UserData queried, string jwt)
+        {
+            bool isProcessSuccessful;
+
+            // 1. 更新 JWT 欄位
+            // 2. 更新 LoginDate
+            // 3. 儲存至 DB
+            using (var transaction = DC.Database.BeginTransaction())
+            {
+                try
+                {
+                    isProcessSuccessful = await this.StartValidate()
+                        .SkipIfAlreadyInvalid()
+                        .ValidateAsync(_ => UpdateJWT(queried, jwt), (_, e) => AddError(UpdateDbFailed(e)))
+                        .Validate(_ => UpdateUserLoginDate(queried))
+                        .ValidateAsync(_ => DC.SaveChangesStandardProcedureAsync(queried.UID, Request),
+                            (_, e) => AddError(UpdateDbFailed(e)))
+                        .IsValid();
+
+                    if (isProcessSuccessful)
+                        transaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    AddError(new UpdateDbFailedError(e));
+                    isProcessSuccessful = false;
+                    transaction.Rollback();
+                }
+            }
+
+            return isProcessSuccessful;
+        }
+
+        private static List<Claim> LoginCreateClaims(UserData queried)
+        {
             var claims = new List<Claim>
             {
                 // queried 已經在上面驗證為非 null。目前專案使用 C# 版本不支援 !，所以以此代替。 
@@ -226,25 +271,32 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             if (queried.M_Group_User.Any(groupUser => groupUser.GID == JwtConstants.AdminGid))
                 claims.Add(new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.Admin.GetRoleValue()));
 
-            string jwt = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims);
+            return claims;
+        }
 
-            var output = new UserData_Login_Output_APIItem
-            {
-                UID = queried.UID,
-                Username = queried.UserName,
-                JwtToken = jwt
-            };
+        private bool LoginValidateCredential(UserData_Login_Input_APIItem input, UserData queried)
+        {
+            // 1. 先查詢是否確實有這個帳號
+            // 2. 確認帳號的啟用 Flag 與刪除 Flag 
+            // 3. 有帳號，才驗證登入密碼
+            bool isValidated = queried.StartValidate(true)
+                .Validate(q => q != null, () => AddError(NotFound("使用者帳號", nameof(input.LoginAccount))))
+                .Validate(q => q.ActiveFlag && !q.DeleteFlag,
+                    () => AddError(NotFound("使用者帳號", nameof(input.LoginAccount))))
+                .Validate(q => ValidatePassword(input.LoginPassword, q.LoginPassword),
+                    () => AddError(1, LoginPasswordIncorrect))
+                .IsValid();
+            return isValidated;
+        }
 
-            // 1. 更新 JWT 欄位
-            // 2. 更新 LoginDate
-            // 3. 儲存至 DB
-            await this.StartValidate()
-                .ValidateAsync(_ => UpdateJWT(queried, jwt), (_, e) => AddError(UpdateDbFailed(e)))
-                .Validate(_ => UpdateUserLoginDate(queried))
-                .ValidateAsync(_ => DC.SaveChangesStandardProcedureAsync(queried.UID, Request),
-                    (_, e) => AddError(UpdateDbFailed(e)));
-
-            return GetResponseJson(output);
+        private async Task<UserData> LoginGetUserData(UserData_Login_Input_APIItem input)
+        {
+            var queried = input.LoginAccount.HasContent()
+                ? await DC.UserData
+                    .Include(u => u.M_Group_User)
+                    .FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount)
+                : null;
+            return queried;
         }
 
         /// <summary>

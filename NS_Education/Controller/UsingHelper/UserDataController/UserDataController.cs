@@ -354,11 +354,15 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         public Task<bool> SubmitAddValidateInput(UserData_Submit_Input_APIItem input)
         {
+            // UserData.Submit 不支援新增，但因為利用 Helper 介面，必須有實作方法。
+            // 這個方法永遠不該被呼叫。
             throw new NotSupportedException();
         }
 
         public Task<UserData> SubmitCreateData(UserData_Submit_Input_APIItem input)
         {
+            // UserData.Submit 不支援新增，但因為利用 Helper 介面，必須有實作方法。
+            // 這個方法永遠不該被呼叫。
             throw new NotSupportedException();
         }
 

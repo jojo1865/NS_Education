@@ -283,6 +283,7 @@
         <Compile Include="Controller\UsingHelper\SafetyControlController.cs"/>
         <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs"/>
         <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs"/>
+        <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataUniqueNamesController.cs"/>
         <Compile Include="Controller\UsingHelper\StaticCodeController\StaticCodeController.cs"/>
         <Compile Include="Controller\UsingHelper\StaticCodeController\StaticCodeTypeListController.cs"/>
         <Compile Include="Controller\UsingHelper\TimeSpanController.cs"/>

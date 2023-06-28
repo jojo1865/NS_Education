@@ -11,7 +11,6 @@ using NS_Education.Models.APIItems.Controller.SiteData.GetInfoById;
 using NS_Education.Models.APIItems.Controller.SiteData.GetList;
 using NS_Education.Models.APIItems.Controller.SiteData.Submit;
 using NS_Education.Models.Entities;
-using NS_Education.Models.Errors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -590,7 +589,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.Title.HasLengthBetween(1, 60),
                     () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 0, 60)))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數", nameof(input.BasicSize))))
-                .Validate(i => i.MaxSize >= i.BasicSize,
+                .Validate(i => i.MaxSize > 0 && i.MaxSize >= i.BasicSize,
                     () => AddError(MinLargerThanMax("一般容納人數", nameof(input.BasicSize), "最大容納人數",
                         nameof(input.MaxSize))))
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用", nameof(input.UnitPrice))))
@@ -718,7 +717,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 Code = input.Code,
                 Title = input.Title,
                 BasicSize = input.BasicSize,
-                MaxSize = input.MaxSize,
+                MaxSize = input.MaxSize <= 0 ? input.BasicSize : input.MaxSize,
                 UnitPrice = input.UnitPrice,
                 InPrice = input.InPrice,
                 OutPrice = input.OutPrice,
@@ -764,7 +763,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.Title.HasLengthBetween(1, 60),
                     () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 0, 60)))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數", nameof(input.BasicSize))))
-                .Validate(i => i.MaxSize >= i.BasicSize,
+                .Validate(i => i.MaxSize > 0 && i.MaxSize >= i.BasicSize,
                     () => AddError(MinLargerThanMax("一般容納人數", nameof(input.BasicSize), "最大容納人數",
                         nameof(input.MaxSize))))
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用", nameof(input.UnitPrice))))
@@ -831,13 +830,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .OrderByDescending(ct => ct)
                 .FirstOrDefaultAsync();
 
-            if (input.MaxSize < neededSize)
+            if (input.BasicSize < neededSize && input.MaxSize < neededSize)
             {
                 isValid = false;
-                AddError(new BusinessError(1,
-                        "新的「最大容納人數」低於既有進行中預約單的人數！",
-                        new Dictionary<string, object> { { nameof(ErrorField.Min), neededSize } }
-                    )
+                AddError(OutOfRange("容納人數", nameof(input.BasicSize) + ", " + nameof(input.MaxSize), neededSize)
                 );
             }
 
@@ -969,7 +965,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.Code = input.Code;
             data.Title = input.Title;
             data.BasicSize = input.BasicSize;
-            data.MaxSize = input.MaxSize;
+            data.MaxSize = input.MaxSize <= 0 ? input.BasicSize : input.MaxSize;
             data.UnitPrice = input.UnitPrice;
             data.InPrice = input.InPrice;
             data.OutPrice = input.OutPrice;

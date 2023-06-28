@@ -108,6 +108,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     rs.Resver_Head.CustomerTitle.Contains(input.CustomerTitleC) ||
                     rs.Resver_Head.Customer.TitleC.Contains(input.CustomerTitleC));
 
+            if (input.SiteTitle.HasContent())
+                query = query.Where(rs => rs.B_SiteData.Title.Contains(input.SiteTitle));
+
             return query.OrderBy(rs => rs.TargetDate)
                 .ThenBy(rs => rs.SortNo)
                 .ThenBy(rs => rs.RHID)

@@ -60,6 +60,54 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddFlag)]
         public async Task<string> SignUp(UserData_Submit_Input_APIItem input)
         {
+            bool isValid = await SignUpValidateInput(input);
+
+            if (!isValid)
+                return GetResponseJson();
+
+            UserData newUser = SignUpCreateUserData(input);
+            await SignUpSaveToDb(newUser);
+
+            return GetResponseJson();
+        }
+
+        private async Task SignUpSaveToDb(UserData newUser)
+        {
+            try
+            {
+                await DC.UserData.AddAsync(newUser);
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+            }
+            catch (Exception e)
+            {
+                AddError(UpdateDbFailed(e));
+            }
+        }
+
+        private static UserData SignUpCreateUserData(UserData_Submit_Input_APIItem input)
+        {
+            var newUser = new UserData
+            {
+                UserName = input.Username,
+                LoginAccount = input.LoginAccount,
+                LoginPassword = EncryptPassword(input.LoginPassword),
+                Note = input.Note,
+                LoginDate = DateTime.Now,
+                DDID = input.DDID,
+                M_Group_User = new List<M_Group_User>
+                {
+                    new M_Group_User
+                    {
+                        GID = input.GID
+                    }
+                },
+                ActiveFlag = true
+            };
+            return newUser;
+        }
+
+        private async Task<bool> SignUpValidateInput(UserData_Submit_Input_APIItem input)
+        {
             int passwordMinLength = GetPasswordMinLength();
 
             bool isValid = await input.StartValidate()
@@ -85,40 +133,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     () => AddError(LengthOutOfRange("使用者密碼", nameof(input.LoginPassword), passwordMinLength, 100)))
                 .Validate(i => i.LoginPassword.IsEncryptablePassword(), () => AddError(1, PasswordAlphanumericOnly))
                 .IsValid();
-
-            if (!isValid)
-                return GetResponseJson();
-
-            // create UserData object, validate the columns along
-            var newUser = new UserData
-            {
-                UserName = input.Username,
-                LoginAccount = input.LoginAccount,
-                LoginPassword = EncryptPassword(input.LoginPassword),
-                Note = input.Note,
-                LoginDate = DateTime.Now,
-                DDID = input.DDID,
-                M_Group_User = new List<M_Group_User>
-                {
-                    new M_Group_User
-                    {
-                        GID = input.GID
-                    }
-                },
-                ActiveFlag = true
-            };
-
-            try
-            {
-                await DC.UserData.AddAsync(newUser);
-                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
-            }
-            catch (Exception e)
-            {
-                AddError(UpdateDbFailed(e));
-            }
-
-            return GetResponseJson();
+            return isValid;
         }
 
         #endregion

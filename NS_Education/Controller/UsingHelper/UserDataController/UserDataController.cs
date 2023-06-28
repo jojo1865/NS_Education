@@ -1050,38 +1050,46 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
         public async Task<string> Logout()
         {
-            // 1. 查出 UserData
-            int uid = GetUid();
-            UserData user =
-                await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == uid && !ud.DeleteFlag && ud.ActiveFlag);
+            UserData user = await LogoutGetUserData();
 
-            // 2. 驗證若查無資料，回傳錯誤訊息
             if (user == null)
             {
-                AddError(NotFound($"目前登入的使用者（ID {uid}）", nameof(UserData.UID)));
+                AddError(NotFound($"目前登入的使用者（ID {GetUid()}）", nameof(UserData.UID)));
                 return GetResponseJson();
             }
 
-            // 3. 清空其 JWT 並存檔
+            await LogoutUpdateUserDataAndSaveToDb(user);
+
+            return GetResponseJson();
+        }
+
+        private async Task LogoutUpdateUserDataAndSaveToDb(UserData user)
+        {
             try
             {
                 user.JWT = String.Empty;
-                await LogoutWriteUserLogoutLog(uid);
-                await DC.SaveChangesStandardProcedureAsync(uid, Request);
+                await LogoutWriteUserLogoutLog();
+                await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }
             catch (Exception e)
             {
                 AddError(UpdateDbFailed(e));
             }
-
-            return GetResponseJson();
         }
 
-        private async Task LogoutWriteUserLogoutLog(int uid)
+        private async Task<UserData> LogoutGetUserData()
+        {
+            int uid = GetUid();
+            UserData user =
+                await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == uid && !ud.DeleteFlag && ud.ActiveFlag);
+            return user;
+        }
+
+        private async Task LogoutWriteUserLogoutLog()
         {
             UserPasswordLog logoutLog = new UserPasswordLog
             {
-                UID = uid,
+                UID = GetUid(),
                 Type = (int)UserPasswordLogType.Logout
             };
             await DC.AddAsync(logoutLog);

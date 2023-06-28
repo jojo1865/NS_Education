@@ -8,7 +8,7 @@ namespace NS_Education.Models.APIItems
         public bool SuccessFlag { get; private set; }
         public IEnumerable<BaseError> Messages { get; private set; } = new List<BaseError>();
 
-        public void Infuse(BaseApiResponse message)
+        public void Infuse(CommonApiResponse message)
         {
             SuccessFlag = message.SuccessFlag;
             Messages = message.Errors;

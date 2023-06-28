@@ -46,8 +46,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             // 3. 轉換成輸出結果
             int index = input.ReverseOrder ? queryResult.Count - 1 : 0;
-            BaseResponseForPagedList<Resver_GetResverSiteList_Output_Row_APIItem> response =
-                new BaseResponseForPagedList<Resver_GetResverSiteList_Output_Row_APIItem>
+            CommonResponseForPagedList<Resver_GetResverSiteList_Output_Row_APIItem> response =
+                new CommonResponseForPagedList<Resver_GetResverSiteList_Output_Row_APIItem>
                 {
                     Items = queryResult.Keys.Select(bs => new Resver_GetResverSiteList_Output_Row_APIItem
                     {

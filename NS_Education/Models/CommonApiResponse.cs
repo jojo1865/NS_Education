@@ -5,7 +5,7 @@ using NS_Education.Models.Errors;
 
 namespace NS_Education.Models
 {
-    public class BaseApiResponse
+    public class CommonApiResponse
     {
         public IEnumerable<BaseError> Errors = Array.Empty<BaseError>();
         public bool SuccessFlag = true;

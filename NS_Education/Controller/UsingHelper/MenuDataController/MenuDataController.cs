@@ -77,8 +77,8 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             var lookup = dictionary.ToLookup(md => md.Value.ParentID, md => md.Value);
 
             // 建立 最後的 response
-            BaseResponseForList<MenuData_GetList_Output_Row_APIItem> response =
-                new BaseResponseForList<MenuData_GetList_Output_Row_APIItem>();
+            CommonResponseForList<MenuData_GetList_Output_Row_APIItem> response =
+                new CommonResponseForList<MenuData_GetList_Output_Row_APIItem>();
 
             // 3. 重新排序
             // 如果 parent 在 dictionary 中找不到，表示這是一個 parent，所以由 parent 開始長

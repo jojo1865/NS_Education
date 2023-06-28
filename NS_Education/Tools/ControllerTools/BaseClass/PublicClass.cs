@@ -39,9 +39,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
 
         protected internal NsDbContext DC { get; }
 
-        public BaseApiResponse GetMsgClass(IEnumerable<BaseError> errors)
+        public CommonApiResponse GetMsgClass(IEnumerable<BaseError> errors)
         {
-            BaseApiResponse response = new BaseApiResponse();
+            CommonApiResponse response = new CommonApiResponse();
             if (errors == null || !errors.Any()) return response;
 
             response.SuccessFlag = false;

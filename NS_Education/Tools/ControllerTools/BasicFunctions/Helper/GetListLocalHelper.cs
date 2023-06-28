@@ -19,22 +19,23 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         {
             _controller = controller;
         }
-        
+
         #region GetListLocal
 
         public async Task<string> GetListLocal()
         {
             // 寫一筆 UserLog
-            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(), HttpContext.Current.Request);
-            
-            BaseResponseForList<TGetListRow> response = new BaseResponseForList<TGetListRow>
+            await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(),
+                HttpContext.Current.Request);
+
+            CommonResponseForList<TGetListRow> response = new CommonResponseForList<TGetListRow>
             {
                 Items = await _controller.GetListLocalResults()
             };
-            
+
             return _controller.GetResponseJson(response);
         }
-        
+
         #endregion
     }
 }

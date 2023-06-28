@@ -81,9 +81,9 @@ namespace NS_Education.Controller.UsingHelper
         /// 提供給其他需要用到通訊方式下拉可選選單的功能用。
         /// </summary>
         /// <returns>通訊方式的可選選單</returns>
-        public static ICollection<BaseResponseRowForSelectable> GetContactTypeSelectable(int selectId)
+        public static ICollection<CommonResponseRowForSelectable> GetContactTypeSelectable(int selectId)
         {
-            return ContactTypes.Select(ct => new BaseResponseRowForSelectable
+            return ContactTypes.Select(ct => new CommonResponseRowForSelectable
             {
                 ID = ct.ID,
                 Title = ct.Title ?? "",

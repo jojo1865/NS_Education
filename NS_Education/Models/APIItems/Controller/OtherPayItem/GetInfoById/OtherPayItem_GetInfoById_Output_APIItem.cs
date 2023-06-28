@@ -14,8 +14,8 @@ namespace NS_Education.Models.APIItems.Controller.OtherPayItem.GetInfoById
         public int PaidType { get; set; }
         public int BSCID { get; set; }
 
-        public IEnumerable<BaseResponseRowForSelectable> BSC_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public IEnumerable<CommonResponseRowForSelectable> BSC_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public int BOCID { get; set; }
     }

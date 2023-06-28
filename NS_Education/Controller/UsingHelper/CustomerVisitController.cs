@@ -201,7 +201,7 @@ namespace NS_Education.Controller.UsingHelper
                                     : entity.B_StaticCode?.Title) ??
                                 "",
                 BSCID15_List = hasReservation
-                    ? new List<BaseResponseRowForSelectable>()
+                    ? new List<CommonResponseRowForSelectable>()
                     : await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason,
                         entity.BSCID15 ?? 0),
                 GiftSendings = entity.M_Customer_Gift.Select(mcg =>
@@ -220,11 +220,11 @@ namespace NS_Education.Controller.UsingHelper
             };
         }
 
-        private async Task<List<BaseResponseRowForSelectable>> GetSelectedBusinessUserList(int businessUserId)
+        private async Task<List<CommonResponseRowForSelectable>> GetSelectedBusinessUserList(int businessUserId)
         {
             return await DC.BusinessUser
                 .Where(bu => bu.ActiveFlag && !bu.DeleteFlag)
-                .Select(bu => new BaseResponseRowForSelectable
+                .Select(bu => new CommonResponseRowForSelectable
                 {
                     ID = bu.BUID,
                     Title = bu.Name ?? "",

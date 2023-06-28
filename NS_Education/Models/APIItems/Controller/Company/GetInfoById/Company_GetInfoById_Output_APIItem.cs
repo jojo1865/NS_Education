@@ -9,9 +9,9 @@ namespace NS_Education.Models.APIItems.Controller.Company.GetInfoById
         public string BC_TitleC { get; set; }
         public string BC_TitleE { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BC_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
-        
+        public ICollection<CommonResponseRowForSelectable> BC_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
+
         public string Code { get; set; }
         public string TitleC { get; set; }
         public string TitleE { get; set; }

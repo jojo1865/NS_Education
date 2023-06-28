@@ -16,7 +16,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
     /// 處理 Category 的 GetTypeList 功能。
     /// </summary>
     public class CategoryTypeListController : PublicClass,
-        IGetListLocal<BaseResponseRowIdTitle>
+        IGetListLocal<CommonResponseRowIdTitle>
     {
         #region Initialization
 
@@ -24,12 +24,13 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
 
         public CategoryTypeListController()
         {
-            _getListLocalHelper = new GetListLocalHelper<CategoryTypeListController, BaseResponseRowIdTitle>(this);
+            _getListLocalHelper = new GetListLocalHelper<CategoryTypeListController, CommonResponseRowIdTitle>(this);
         }
 
         #endregion
-        
+
         #region GetTypeList
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList()
@@ -37,19 +38,20 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
             return await _getListLocalHelper.GetListLocal();
         }
 
-        public async Task<ICollection<BaseResponseRowIdTitle>> GetListLocalResults()
+        public async Task<ICollection<CommonResponseRowIdTitle>> GetListLocalResults()
         {
             return await Task.FromResult(GetCategoryTypeList(CategoryTypes));
         }
 
-        public static IList<BaseResponseRowIdTitle> GetCategoryTypeList(string[] sCategoryTypes)
+        public static IList<CommonResponseRowIdTitle> GetCategoryTypeList(string[] sCategoryTypes)
         {
-            return sCategoryTypes.Select((s, i) => new BaseResponseRowIdTitle
+            return sCategoryTypes.Select((s, i) => new CommonResponseRowIdTitle
             {
                 ID = i,
                 Title = s
             }).ToList();
         }
+
         #endregion
     }
 }

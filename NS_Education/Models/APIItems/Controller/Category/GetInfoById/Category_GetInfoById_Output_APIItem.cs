@@ -8,8 +8,9 @@ namespace NS_Education.Models.APIItems.Controller.Category.GetInfoById
         public int iCategoryType { get; set; }
         public string sCategoryType { get; set; }
 
-        public ICollection<BaseResponseRowIdTitle> CategoryTypeList { get; set; } =
-            new List<BaseResponseRowIdTitle>();
+        public ICollection<CommonResponseRowIdTitle> CategoryTypeList { get; set; } =
+            new List<CommonResponseRowIdTitle>();
+
         public int ParentID { get; set; }
         public string Code { get; set; }
         public string TitleC { get; set; }

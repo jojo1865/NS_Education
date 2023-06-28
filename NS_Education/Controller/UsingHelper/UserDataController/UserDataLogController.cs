@@ -136,8 +136,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             var result = (await GetListPagedResult(input)).ToArray();
 
             // 3. 回傳
-            BaseResponseForPagedList<UserLog_GetList_Output_Row_APIItem> response =
-                new BaseResponseForPagedList<UserLog_GetList_Output_Row_APIItem>();
+            CommonResponseForPagedList<UserLog_GetList_Output_Row_APIItem> response =
+                new CommonResponseForPagedList<UserLog_GetList_Output_Row_APIItem>();
 
             response.SetByInput(input);
             response.AllItemCt = result.Length;

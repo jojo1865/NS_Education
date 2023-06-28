@@ -91,7 +91,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             if (input.ContactData.HasContent())
                 joinedQuery = joinedQuery.Where(j => j.Contacts.Any(c => c.ContectData.Contains(input.ContactData)));
 
-            var response = new BaseResponseForPagedList<Customer_GetList_Output_Row_APIItem>();
+            var response = new CommonResponseForPagedList<Customer_GetList_Output_Row_APIItem>();
             response.SetByInput(input);
             response.AllItemCt = await joinedQuery.CountAsync();
 

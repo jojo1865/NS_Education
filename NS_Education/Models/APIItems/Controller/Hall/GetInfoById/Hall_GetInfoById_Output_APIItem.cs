@@ -9,9 +9,9 @@ namespace NS_Education.Models.APIItems.Controller.Hall.GetInfoById
         public string DD_TitleC { get; set; }
         public string DD_TitleE { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> DD_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
-        
+        public ICollection<CommonResponseRowForSelectable> DD_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
+
         public string Code { get; set; }
         public string TitleC { get; set; }
         public string TitleE { get; set; }

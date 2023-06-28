@@ -297,12 +297,12 @@
         <Compile Include="Models\APIItems\BaseRequestForPagedList.cs"/>
         <Compile Include="Models\APIItems\BaseRequestForSubmit.cs"/>
         <Compile Include="Models\APIItems\CommonRequestForUniqueNames.cs"/>
-        <Compile Include="Models\APIItems\BaseResponseForList.cs"/>
-        <Compile Include="Models\APIItems\BaseResponseForPagedList.cs"/>
-        <Compile Include="Models\APIItems\BaseResponseRowForSelectable.cs"/>
+        <Compile Include="Models\APIItems\CommonResponseForList.cs"/>
+        <Compile Include="Models\APIItems\CommonResponseForPagedList.cs"/>
+        <Compile Include="Models\APIItems\CommonResponseRowForSelectable.cs"/>
         <Compile Include="Models\APIItems\BaseGetResponseRowWithCreDateOnly.cs"/>
         <Compile Include="Models\APIItems\BaseGetResponseRowWithCreUpd.cs"/>
-        <Compile Include="Models\APIItems\BaseResponseRowIdTitle.cs"/>
+        <Compile Include="Models\APIItems\CommonResponseRowIdTitle.cs"/>
         <Compile Include="Models\APIItems\BaseGetResponseRowInfusableWithCreUpd.cs"/>
         <Compile Include="Models\APIItems\BaseInfusable.cs"/>
         <Compile Include="Models\APIItems\Common\DeleteItem\DeleteItem_Input_APIItem.cs"/>
@@ -496,7 +496,7 @@
         <Compile Include="Models\APIItems\Controller\Zip\GetList\Zip_GetList_Output_Row_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Zip\Submit\Zip_Submit_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\IGetResponseRow.cs"/>
-        <Compile Include="Models\BaseApiResponse.cs"/>
+        <Compile Include="Models\CommonApiResponse.cs"/>
         <Compile Include="Models\Entities\BusinessUser.cs">
             <DependentUpon>Model1.tt</DependentUpon>
         </Compile>

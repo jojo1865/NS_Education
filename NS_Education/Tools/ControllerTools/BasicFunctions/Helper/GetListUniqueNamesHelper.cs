@@ -41,7 +41,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 HttpContext.Current.Request);
 
             // 4. 回傳資料
-            BaseResponseForList<string> response = new BaseResponseForList<string>
+            CommonResponseForList<string> response = new CommonResponseForList<string>
             {
                 Items = names
             };

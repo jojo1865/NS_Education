@@ -19,17 +19,17 @@ namespace NS_Education.Tools.Extensions
         /// <param name="dbSet">StaticCode 的 DbSet</param>
         /// <param name="codeType">欲顯示的 CodeType</param>
         /// <param name="bscIdToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<ICollection<BaseResponseRowForSelectable>> GetStaticCodeSelectable(
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<ICollection<CommonResponseRowForSelectable>> GetStaticCodeSelectable(
             this DbSet<B_StaticCode> dbSet
             , int? codeType, int bscIdToSelect)
         {
             if (codeType == null)
-                return new List<BaseResponseRowForSelectable>();
+                return new List<CommonResponseRowForSelectable>();
 
             return await dbSet
                 .Where(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.CodeType == codeType)
-                .Select(sc => new BaseResponseRowForSelectable
+                .Select(sc => new CommonResponseRowForSelectable
                 {
                     ID = sc.BSCID,
                     Title = sc.Title ?? "",
@@ -43,13 +43,14 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">Hall 的 DbSet</param>
         /// <param name="dhIdToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<ICollection<BaseResponseRowForSelectable>> GetHallSelectable(this DbSet<D_Hall> dbSet,
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<ICollection<CommonResponseRowForSelectable>> GetHallSelectable(
+            this DbSet<D_Hall> dbSet,
             int dhIdToSelect)
         {
             return await dbSet
                 .Where(dh => dh.ActiveFlag && !dh.DeleteFlag)
-                .Select(dh => new BaseResponseRowForSelectable
+                .Select(dh => new CommonResponseRowForSelectable
                 {
                     ID = dh.DHID,
                     Title = dh.TitleC ?? "",
@@ -63,14 +64,14 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">Department 的 DbSet</param>
         /// <param name="ddIdToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<ICollection<BaseResponseRowForSelectable>> GetDepartmentSelectable(
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<ICollection<CommonResponseRowForSelectable>> GetDepartmentSelectable(
             this DbSet<D_Department> dbSet,
             int ddIdToSelect)
         {
             return await dbSet
                 .Where(dd => dd.ActiveFlag && !dd.DeleteFlag)
-                .Select(dd => new BaseResponseRowForSelectable
+                .Select(dd => new CommonResponseRowForSelectable
                 {
                     ID = dd.DDID,
                     Title = dd.TitleC ?? "",
@@ -85,17 +86,17 @@ namespace NS_Education.Tools.Extensions
         /// <param name="dbSet">OrderCode 的 DbSet</param>
         /// <param name="codeType">欲顯示的 CodeType</param>
         /// <param name="bocIdToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<ICollection<BaseResponseRowForSelectable>> GetOrderCodeSelectable(
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<ICollection<CommonResponseRowForSelectable>> GetOrderCodeSelectable(
             this DbSet<B_OrderCode> dbSet
             , int? codeType, int bocIdToSelect)
         {
             if (codeType == null)
-                return new List<BaseResponseRowForSelectable>();
+                return new List<CommonResponseRowForSelectable>();
 
             return await dbSet
                 .Where(oc => oc.ActiveFlag && !oc.DeleteFlag && oc.CodeType == codeType)
-                .Select(oc => new BaseResponseRowForSelectable
+                .Select(oc => new CommonResponseRowForSelectable
                 {
                     ID = oc.BOCID,
                     Title = oc.Title ?? "",
@@ -110,17 +111,17 @@ namespace NS_Education.Tools.Extensions
         /// <param name="dbSet">Category 的 DbSet</param>
         /// <param name="categoryType">欲顯示的 CategoryType</param>
         /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<ICollection<BaseResponseRowForSelectable>> GetCategorySelectable(
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<ICollection<CommonResponseRowForSelectable>> GetCategorySelectable(
             this DbSet<B_Category> dbSet
             , int? categoryType, int idToSelect)
         {
             if (categoryType == null)
-                return new List<BaseResponseRowForSelectable>();
+                return new List<CommonResponseRowForSelectable>();
 
             return await dbSet
                 .Where(c => c.CategoryType == categoryType && c.ActiveFlag && !c.DeleteFlag)
-                .Select(c => new BaseResponseRowForSelectable
+                .Select(c => new CommonResponseRowForSelectable
                 {
                     ID = c.BCID,
                     Title = c.TitleC ?? c.TitleE ?? "",
@@ -133,13 +134,13 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">Customer 的 DbSet</param>
         /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<List<BaseResponseRowForSelectable>> GetCustomerSelectable(this DbSet<Customer> dbSet
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<CommonResponseRowForSelectable>> GetCustomerSelectable(this DbSet<Customer> dbSet
             , int idToSelect)
         {
             return await dbSet
                 .Where(c => c.ActiveFlag && !c.DeleteFlag)
-                .Select(c => new BaseResponseRowForSelectable
+                .Select(c => new CommonResponseRowForSelectable
                 {
                     ID = c.CID,
                     Title = c.TitleC ?? c.TitleE ?? "",
@@ -176,14 +177,14 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">BusinessUser 的 DbSet</param>
         /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<List<BaseResponseRowForSelectable>> GetBusinessUserSelectable(
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<CommonResponseRowForSelectable>> GetBusinessUserSelectable(
             this DbSet<BusinessUser> dbSet
             , int idToSelect)
         {
             return await dbSet
                 .Where(bu => bu.ActiveFlag && !bu.DeleteFlag)
-                .Select(bu => new BaseResponseRowForSelectable
+                .Select(bu => new CommonResponseRowForSelectable
                 {
                     ID = bu.BUID,
                     Title = bu.Name ?? bu.Code ?? "",
@@ -197,14 +198,14 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">FoodCategory 的 DbSet</param>
         /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<List<BaseResponseRowForSelectable>> GetFoodCategorySelectable(
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<CommonResponseRowForSelectable>> GetFoodCategorySelectable(
             this DbSet<D_FoodCategory> dbSet
             , int idToSelect)
         {
             return await dbSet
                 .Where(fc => fc.ActiveFlag && !fc.DeleteFlag)
-                .Select(fc => new BaseResponseRowForSelectable
+                .Select(fc => new CommonResponseRowForSelectable
                 {
                     ID = fc.DFCID,
                     Title = fc.Title ?? fc.Code ?? "",
@@ -218,13 +219,13 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">FoodCategory 的 DbSet</param>
         /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<List<BaseResponseRowForSelectable>> GetPartnerSelectable(this DbSet<B_Partner> dbSet
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<CommonResponseRowForSelectable>> GetPartnerSelectable(this DbSet<B_Partner> dbSet
             , int idToSelect)
         {
             return await dbSet
                 .Where(p => p.ActiveFlag && !p.DeleteFlag)
-                .Select(p => new BaseResponseRowForSelectable
+                .Select(p => new CommonResponseRowForSelectable
                 {
                     ID = p.BPID,
                     Title = p.Title ?? p.Code ?? "",
@@ -238,14 +239,14 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">Device 的 DbSet</param>
         /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<List<BaseResponseRowForSelectable>> GetOtherPayItemSelectable(
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<CommonResponseRowForSelectable>> GetOtherPayItemSelectable(
             this DbSet<B_Device> dbSet
             , int idToSelect)
         {
             return await dbSet
                 .Where(d => d.ActiveFlag && !d.DeleteFlag)
-                .Select(d => new BaseResponseRowForSelectable
+                .Select(d => new CommonResponseRowForSelectable
                 {
                     ID = d.BDID,
                     Title = d.Title ?? d.Code ?? "",
@@ -259,14 +260,14 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">OtherPayItem 的 DbSet</param>
         /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<List<BaseResponseRowForSelectable>> GetOtherPayItemSelectable(
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<CommonResponseRowForSelectable>> GetOtherPayItemSelectable(
             this DbSet<D_OtherPayItem> dbSet
             , int idToSelect)
         {
             return await dbSet
                 .Where(opi => opi.ActiveFlag && !opi.DeleteFlag)
-                .Select(opi => new BaseResponseRowForSelectable
+                .Select(opi => new CommonResponseRowForSelectable
                 {
                     ID = opi.DOPIID,
                     Title = opi.Title ?? opi.Code ?? "",
@@ -280,14 +281,14 @@ namespace NS_Education.Tools.Extensions
         /// </summary>
         /// <param name="dbSet">PayType 的 DbSet</param>
         /// <param name="idToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="BaseResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<List<BaseResponseRowForSelectable>> GetOtherPayItemSelectable(
+        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
+        public static async Task<List<CommonResponseRowForSelectable>> GetOtherPayItemSelectable(
             this DbSet<D_PayType> dbSet
             , int idToSelect)
         {
             return await dbSet
                 .Where(pt => pt.ActiveFlag && !pt.DeleteFlag)
-                .Select(pt => new BaseResponseRowForSelectable
+                .Select(pt => new CommonResponseRowForSelectable
                 {
                     ID = pt.DPTID,
                     Title = pt.Title ?? "",

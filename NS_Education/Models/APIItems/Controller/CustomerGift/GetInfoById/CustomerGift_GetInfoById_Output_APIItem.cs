@@ -16,8 +16,8 @@ namespace NS_Education.Models.APIItems.Controller.CustomerGift.GetInfoById
         public string BSC_Code { get; set; }
         public string BSC_Title { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BSC_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> BSC_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public string Title { get; set; }
         public string Note { get; set; }

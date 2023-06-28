@@ -60,8 +60,8 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // +- c. 第三層為各子 MenuData 的 MenuAPI
 
             // Response 物件
-            BaseResponseForList<MenuData_GetListByUid_Output_Node_APIItem> response =
-                new BaseResponseForList<MenuData_GetListByUid_Output_Node_APIItem>();
+            CommonResponseForList<MenuData_GetListByUid_Output_Node_APIItem> response =
+                new CommonResponseForList<MenuData_GetListByUid_Output_Node_APIItem>();
 
             // 遞迴產生 nodes 時的暫存區
             Dictionary<int, MenuData_GetListByUid_Output_Node_APIItem> createdNodes =

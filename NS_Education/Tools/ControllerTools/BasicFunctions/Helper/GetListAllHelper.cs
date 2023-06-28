@@ -75,7 +75,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 rows.Add(row);
             }
 
-            BaseResponseForList<TGetListRow> response = new BaseResponseForList<TGetListRow>
+            CommonResponseForList<TGetListRow> response = new CommonResponseForList<TGetListRow>
             {
                 Items = rows
             };

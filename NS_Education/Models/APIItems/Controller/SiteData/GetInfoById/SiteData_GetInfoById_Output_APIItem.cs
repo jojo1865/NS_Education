@@ -21,18 +21,18 @@ namespace NS_Education.Models.APIItems.Controller.SiteData.GetInfoById
         public string Note { get; set; }
         public int BSCID1 { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> FloorList { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> FloorList { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public int BSCID5 { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> TableList { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> TableList { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public int DHID { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> HallList { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> HallList { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public int BOCID { get; set; }
 

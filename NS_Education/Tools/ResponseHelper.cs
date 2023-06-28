@@ -80,7 +80,7 @@ namespace NS_Education.Tools
                     ApiResponse = modify.SelectToken("Content.ApiResponse")?.Value<object>()
                                   ?? (modify["Content"] != null
                                       ? (object)JToken.Parse(modify["Content"]?.Value<string>() ?? "")
-                                      : new BaseApiResponse
+                                      : new CommonApiResponse
                                       {
                                           SuccessFlag = false,
                                           Errors = new[]
@@ -121,7 +121,7 @@ namespace NS_Education.Tools
             {
                 Status = (int)statusCode,
                 StatusMessage = error.ErrorMessage,
-                ApiResponse = new BaseApiResponse
+                ApiResponse = new CommonApiResponse
                 {
                     SuccessFlag = false,
                     Errors = new[] { error }

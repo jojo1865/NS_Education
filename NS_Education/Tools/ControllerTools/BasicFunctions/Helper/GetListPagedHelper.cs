@@ -49,7 +49,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson();
 
             // 2. 執行查詢
-            var response = new BaseResponseForPagedList<TGetListRow>();
+            var response = new CommonResponseForPagedList<TGetListRow>();
             response.SetByInput(input);
 
             (int startIndex, IList<TEntity> results) queryResult = await _GetListQueryResult(input, response);
@@ -84,7 +84,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         }
 
         private async Task<(int, IList<TEntity>)> _GetListQueryResult(TGetListRequest input
-            , BaseResponseForPagedList<TGetListRow> response)
+            , CommonResponseForPagedList<TGetListRow> response)
         {
             IQueryable<TEntity> query = _controller.GetListPagedOrderedQuery(input);
 

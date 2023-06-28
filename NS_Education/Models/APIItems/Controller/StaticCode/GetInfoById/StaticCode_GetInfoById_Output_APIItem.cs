@@ -7,7 +7,7 @@ namespace NS_Education.Models.APIItems.Controller.StaticCode.GetInfoById
         public int BSCID { get; set; }
         public int iCodeType { get; set; }
         public string sCodeType { get; set; }
-        public List<BaseResponseRowIdTitle> CodeTypeList { get; set; } = new List<BaseResponseRowIdTitle>();
+        public List<CommonResponseRowIdTitle> CodeTypeList { get; set; } = new List<CommonResponseRowIdTitle>();
         public string Code { get; set; }
         public string Title { get; set; }
         public int SortNo { get; set; }

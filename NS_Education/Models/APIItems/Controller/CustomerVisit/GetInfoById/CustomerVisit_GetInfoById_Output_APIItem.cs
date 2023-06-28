@@ -15,14 +15,14 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById
         public int BSCID { get; set; }
         public string BSC_Title { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BSC_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> BSC_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public int BUID { get; set; }
         public string BU_Name { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BU_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> BU_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public string TargetTitle { get; set; }
         public string Title { get; set; }
@@ -35,8 +35,8 @@ namespace NS_Education.Models.APIItems.Controller.CustomerVisit.GetInfoById
         public int? BSCID15 { get; set; }
         public string BSCID15_Title { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BSCID15_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> BSCID15_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public ICollection<CustomerVisit_GetInfoById_GiftSendings_Row_APIItem> GiftSendings { get; set; } =
             new List<CustomerVisit_GetInfoById_GiftSendings_Row_APIItem>();

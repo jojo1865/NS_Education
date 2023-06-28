@@ -9,20 +9,20 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public int DOPIID { get; set; }
         public string DOPI_Title { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> DOPI_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> DOPI_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public int BSCID { get; set; }
         public string BSC_Title { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BSC_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> BSC_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public int BOCID { get; set; }
         public string BOC_Code { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BOC_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> BOC_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }

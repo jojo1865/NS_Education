@@ -5,7 +5,7 @@ namespace NS_Education.Models.APIItems
     /// <summary>
     /// 包含 List 的通用訊息回傳格式。其中包含的僅單一分頁資料。
     /// </summary>
-    public class BaseResponseForPagedList<T> : BaseResponseForList<T>
+    public class CommonResponseForPagedList<T> : CommonResponseForList<T>
     {
         /// <summary>
         /// 目前所在頁數。全部顯示時，此值為 0。

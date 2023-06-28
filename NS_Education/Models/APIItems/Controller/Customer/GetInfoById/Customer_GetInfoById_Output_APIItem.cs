@@ -10,14 +10,14 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetInfoById
         public int BSCID6 { get; set; }
         public string BSC6_Title { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BSC6_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> BSC6_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public int BSCID4 { get; set; }
         public string BSC4_Title { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BSC4_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> BSC4_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public string Code { get; set; }
         public string Compilation { get; set; }

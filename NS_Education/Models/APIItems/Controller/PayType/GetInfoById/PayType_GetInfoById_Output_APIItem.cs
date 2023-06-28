@@ -9,14 +9,14 @@ namespace NS_Education.Models.APIItems.Controller.PayType.GetInfoById
         public string BC_TitleC { get; set; }
         public string BC_TitleE { get; set; }
 
-        public ICollection<BaseResponseRowForSelectable> BC_List { get; set; } =
-            new List<BaseResponseRowForSelectable>();
+        public ICollection<CommonResponseRowForSelectable> BC_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
 
         public string Code { get; set; }
         public string Title { get; set; }
         public string AccountingNo { get; set; }
         public string CustomerNo { get; set; }
-        
+
         public bool InvoiceFlag { get; set; }
         public bool DepositFlag { get; set; }
         public bool RestaurantFlag { get; set; }

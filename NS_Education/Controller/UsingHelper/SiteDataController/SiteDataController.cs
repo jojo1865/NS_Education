@@ -67,8 +67,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             (int skip, int take) = input.CalculateSkipAndTake(filteredResult.Length);
 
-            BaseResponseForPagedList<SiteData_GetList_Output_Row_APIItem> responseForPagedList =
-                new BaseResponseForPagedList<SiteData_GetList_Output_Row_APIItem>
+            CommonResponseForPagedList<SiteData_GetList_Output_Row_APIItem> responseForPagedList =
+                new CommonResponseForPagedList<SiteData_GetList_Output_Row_APIItem>
                 {
                     Items = filteredResult
                         .Skip(skip)

@@ -9,8 +9,18 @@ namespace NS_Education.Models.APIItems.Common.DeleteItem
 
         public HashSet<int> GetUniqueDeleteId()
         {
+            return GetUniqueId(true);
+        }
+
+        public HashSet<int> GetUniqueReviveId()
+        {
+            return GetUniqueId(true);
+        }
+
+        private HashSet<int> GetUniqueId(bool deleteFlag)
+        {
             return Items
-                .Where(i => i.Id != null && i.DeleteFlag == true)
+                .Where(i => i.Id != null && i.DeleteFlag == deleteFlag)
                 .Select(i => i.Id.Value)
                 .Distinct()
                 .ToHashSet();

@@ -405,11 +405,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         private async Task<bool> DeleteItemValidateResverSite(DeleteItem_Input_APIItem input)
         {
-            HashSet<int> uniqueDeleteId = input.Items
-                .Where(i => i.DeleteFlag == true && i.Id != null)
-                .Select(i => i.Id.Value)
-                .Distinct()
-                .ToHashSet();
+            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
 
             // 須同時驗證這個場地的父場地的預約單
             var cantDeleteData = await DC.Resver_Head
@@ -469,24 +465,14 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             // |- 刪除: 不會發生
             // +- 復活: 需確認原有的父場地是否已經是別人的兒子
 
-            // 所以需要檢查的為復活時，並且是以下兩種情況：
+            // 所以需要檢查的為復活時，並且是以下其中一種情況：
             // |- a. 原有子場地是否已有子場地
             // |- b. 原有父場地是否已有父場地
             // +- c. 復活資料是否同時有子場地和父場地的關係資料
 
-            HashSet<int?> uniqueReviveIds = input.Items
-                .Where(i => i.DeleteFlag == false)
-                .Where(i => i.Id.IsAboveZero())
-                .Select(i => i.Id)
-                .Distinct()
-                .ToHashSet();
+            HashSet<int> uniqueReviveIds = input.GetUniqueReviveId();
 
-            HashSet<int?> uniqueDeleteIds = input.Items
-                .Where(i => i.DeleteFlag == true)
-                .Where(i => i.Id.IsAboveZero())
-                .Select(i => i.Id)
-                .Distinct()
-                .ToHashSet();
+            HashSet<int> uniqueDeleteIds = input.GetUniqueDeleteId();
 
             // 找出復活對象的資料
             var dataToRevive = await DC.B_SiteData

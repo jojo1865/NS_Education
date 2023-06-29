@@ -378,11 +378,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
         private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
         {
-            HashSet<int> uniqueDeleteId = input.Items
-                .Where(i => i.Id != null && i.DeleteFlag == true)
-                .Select(i => i.Id.Value)
-                .Distinct()
-                .ToHashSet();
+            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
 
             Resver_Head[] cantDeleteData = await DC.Resver_Head
                 .Where(ResverHeadExpression.IsOngoingExpression)

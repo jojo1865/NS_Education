@@ -192,11 +192,7 @@ namespace NS_Education.Controller.UsingHelper
         private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
         {
             // 刪除時，不得有任何進行中預約單
-            HashSet<int> uniqueDeleteId = input.Items
-                .Where(i => i.DeleteFlag == true && i.Id.HasValue)
-                .Select(i => i.Id.Value)
-                .Distinct()
-                .ToHashSet();
+            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
 
             Resver_Other[] cantDeleteData = await DC.Resver_Head
                 .Include(rh => rh.Resver_Other)

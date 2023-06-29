@@ -188,11 +188,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             // 刪除時，不允許有進行中的預約單
 
-            HashSet<int> uniqueDeleteId = input.Items
-                .Where(i => i.Id != null && i.DeleteFlag == true)
-                .Select(i => i.Id.Value)
-                .Distinct()
-                .ToHashSet();
+            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
 
             KeyValuePair<int, int>[] cantDeleteData = DC.Resver_Head
                 .Include(rh => rh.M_Resver_TimeSpan)

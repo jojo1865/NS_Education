@@ -161,7 +161,28 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            if (!await DeleteItemValidationReservation(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidationReservation(DeleteItem_Input_APIItem input)
+        {
+            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
+
+            Resver_Head[] cantDeleteData = await DC.Resver_Head
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .Where(rh => uniqueDeleteId.Contains(rh.MK_BUID) || uniqueDeleteId.Contains(rh.OP_BUID))
+                .ToArrayAsync();
+
+            foreach (Resver_Head resverHead in cantDeleteData)
+            {
+                AddError(NotSupportedValue("欲刪除的 ID", nameof(DeleteItem_Input_Row_APIItem.Id),
+                    $"已有進行中的預約單（單號 {resverHead.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<BusinessUser> DeleteItemsQuery(IEnumerable<int> ids)
@@ -177,7 +198,26 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            if (activeFlag == false && !await ChangeActiveValidateReservation(id))
+                return GetResponseJson();
+
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        private async Task<bool> ChangeActiveValidateReservation(int id)
+        {
+            int[] cantDeleteData = await DC.Resver_Head
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .Where(rh => rh.MK_BUID == id || rh.OP_BUID == id)
+                .Select(rh => rh.RHID)
+                .ToArrayAsync();
+
+            foreach (int headId in cantDeleteData)
+            {
+                AddError(NotSupportedValue("欲停用的 ID", nameof(id), $"已有進行中的預約單（單號 {headId}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<BusinessUser> ChangeActiveQuery(int id)
@@ -256,6 +296,9 @@ namespace NS_Education.Controller.UsingHelper
                 .Validate(i => !i.Items.Any() || i.Items.GroupBy(item => item.CID).Count() == input.Items.Count,
                     () => AddError(CopyNotAllowed("負責客戶列表", "客戶 ID")))
                 .IsValid();
+
+            if (input.ActiveFlag == false && !await ChangeActiveValidateReservation(input.BUID))
+                return false;
 
             // 驗證所有 CID 都實際存在於資料庫。
             bool isValid = isInputValid &&

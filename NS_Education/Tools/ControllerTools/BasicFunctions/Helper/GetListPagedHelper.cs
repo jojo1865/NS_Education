@@ -97,7 +97,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 1. 先取得總筆數
 
-            int totalRows = await query.AsNoTracking().CountAsync();
+            int totalRows = await query.CountAsync();
             response.AllItemCt = totalRows;
 
             // 2. 再回傳實際資料
@@ -111,7 +111,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             var resultList = await query
                 .Skip(skip)
                 .Take(take)
-                .AsNoTracking()
                 .ToListAsync();
 
             return (skip, resultList);

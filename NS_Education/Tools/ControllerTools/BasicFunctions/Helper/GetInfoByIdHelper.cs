@@ -63,8 +63,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private async Task<TEntity> _GetInfoByIdQueryResult(int id)
         {
             // 取得實作者的查詢，並檢查刪除狀態
-            return await FlagHelper.FilterDeletedIfHasFlag(_controller.GetInfoByIdQuery(id)).AsNoTracking()
-                .FirstOrDefaultAsync();
+            return await FlagHelper.FilterDeletedIfHasFlag(_controller.GetInfoByIdQuery(id)).FirstOrDefaultAsync();
         }
 
         #endregion

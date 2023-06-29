@@ -730,10 +730,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 PhoneExt2 = input.PhoneExt2,
                 PhoneExt3 = input.PhoneExt3,
                 Note = input.Note,
-                M_SiteGroup = input.GroupList.Select(item => new M_SiteGroup
+                M_SiteGroup = input.GroupList.Select((item, index) => new M_SiteGroup
                 {
                     GroupID = item.BSID,
-                    SortNo = item.SortNo,
+                    SortNo = index,
                     ActiveFlag = true
                 }).ToArray()
             };
@@ -933,6 +933,14 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public void SubmitEditUpdateDataFields(B_SiteData data, SiteData_Submit_Input_APIItem input)
         {
+            // 先為每筆 input.GroupList 資料設 Index 值
+            // 方便後面寫入 SortNo
+
+            for (int i = 0; i < input.GroupList.Count; i++)
+            {
+                input.GroupList[i].Index = i;
+            }
+
             // 1. 將所有 SiteGroup 的舊資料刪除
 
             // 先找出已存在關係資料的 BSID
@@ -987,7 +995,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
                 SiteData_Submit_Input_GroupList_Row_APIItem item = inputBySiteIds[siteGroup.GroupID];
 
-                siteGroup.SortNo = item.SortNo;
+                siteGroup.SortNo = item.Index + 1;
                 siteGroup.ActiveFlag = true;
                 siteGroup.DeleteFlag = false;
             }
@@ -1008,7 +1016,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     .Select(item => new M_SiteGroup
                     {
                         GroupID = item.BSID,
-                        SortNo = item.SortNo,
+                        SortNo = item.Index + 1,
                         ActiveFlag = true
                     }))
                 .ToArray();

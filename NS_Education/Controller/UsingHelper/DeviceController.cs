@@ -146,6 +146,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(d => d.B_OrderCode)
                 .Include(d => d.D_Hall)
                 .Include(d => d.M_Site_Device)
+                .Include(d => d.M_Site_Device.Select(msd => msd.B_SiteData))
                 .Where(d => d.BDID == id);
         }
 
@@ -157,13 +158,16 @@ namespace NS_Education.Controller.UsingHelper
                 BCID = entity.BCID,
                 BC_TitleC = entity.B_Category?.TitleC ?? "",
                 BC_TitleE = entity.B_Category?.TitleE ?? "",
-                BC_List = await DC.B_Category.GetCategorySelectable(entity.B_Category?.CategoryType, entity.BCID),
+                BC_List = await DC.B_Category.GetCategorySelectable(entity.B_Category?.CategoryType,
+                    entity.BCID),
                 BSCID = entity.BSCID,
                 BSC_Title = entity.B_StaticCode?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID),
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType,
+                    entity.BSCID),
                 BOCID = entity.BOCID,
                 BOC_Title = entity.B_OrderCode?.Title ?? "",
-                BOC_List = await DC.B_OrderCode.GetOrderCodeSelectable(entity.B_OrderCode?.CodeType, entity.BOCID),
+                BOC_List = await DC.B_OrderCode.GetOrderCodeSelectable(entity.B_OrderCode?.CodeType,
+                    entity.BOCID),
                 DHID = entity.DHID,
                 DH_Title = entity.D_Hall?.TitleC ?? entity.D_Hall?.TitleE ?? "",
                 DH_List = await DC.D_Hall.GetHallSelectable(entity.DHID),
@@ -177,7 +181,15 @@ namespace NS_Education.Controller.UsingHelper
                 SupplierName = entity.SupplierName ?? "",
                 SupplierPhone = entity.SupplierPhone ?? "",
                 Repair = entity.Repair ?? "",
-                Note = entity.Note ?? ""
+                Note = entity.Note ?? "",
+                Sites = entity.M_Site_Device
+                    .Select(msd => new Device_GetInfoById_Site_APIItem
+                    {
+                        BSID = msd.BSID,
+                        BS_Code = msd.B_SiteData.Code ?? "",
+                        BS_Title = msd.B_SiteData.Title ?? "",
+                        Ct = msd.Ct
+                    }).ToList()
             };
         }
 

@@ -42,5 +42,8 @@ namespace NS_Education.Models.APIItems.Controller.Device.GetInfoById
         public string SupplierPhone { get; set; }
         public string Repair { get; set; }
         public string Note { get; set; }
+
+        public ICollection<Device_GetInfoById_Site_APIItem> Sites { get; set; } =
+            new List<Device_GetInfoById_Site_APIItem>();
     }
 }

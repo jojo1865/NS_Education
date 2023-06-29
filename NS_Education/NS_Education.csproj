@@ -251,7 +251,9 @@
         <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs"/>
         <Compile Include="Controller\ErrorController.cs"/>
         <Compile Include="Controller\HomeController.cs"/>
-        <Compile Include="Controller\UsingHelper\BusinessUserController.cs"/>
+        <Compile Include="Controller\UsingHelper\BusinessUserController\BusinessUserController.cs"/>
+        <Compile Include="Controller\UsingHelper\BusinessUserController\BusinessUserDeleteItemValidateMarketer.cs"/>
+        <Compile Include="Controller\UsingHelper\BusinessUserController\BusinessUserDeleteItemValidateOperator.cs"/>
         <Compile Include="Controller\UsingHelper\CategoryController\CategoryController.cs"/>
         <Compile Include="Controller\UsingHelper\CategoryController\CategoryTypeListController.cs"/>
         <Compile Include="Controller\UsingHelper\CompanyController.cs"/>
@@ -695,6 +697,7 @@
         <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\SubmitHelper.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IChangeActive.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItem.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItemValidateReservation.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetInfoByID.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListAll.cs"/>
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListLocal.cs"/>

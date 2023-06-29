@@ -25,7 +25,8 @@ namespace NS_Education.Controller.UsingHelper
         IGetInfoById<D_OtherPayItem, OtherPayItem_GetInfoById_Output_APIItem>,
         IDeleteItem<D_OtherPayItem>,
         ISubmit<D_OtherPayItem, OtherPayItem_Submit_Input_APIItem>,
-        IChangeActive<D_OtherPayItem>
+        IChangeActive<D_OtherPayItem>,
+        IDeleteItemValidateReservation<Resver_Other>
     {
         #region Initialization
 
@@ -183,35 +184,32 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            if (!await DeleteItemValidateReservation(input))
+            if (!await _deleteItemHelper.DeleteItemValidateReservation(input, this))
                 return GetResponseJson();
 
             return await _deleteItemHelper.DeleteItem(input);
         }
 
-        private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
+        /// <inheritdoc />
+        public IQueryable<Resver_Other> SupplyQueryWithInputIdCondition(IQueryable<Resver_Head> basicQuery,
+            HashSet<int> uniqueDeleteId)
         {
-            // 刪除時，不得有任何進行中預約單
-            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
-
-            Resver_Other[] cantDeleteData = await DC.Resver_Head
+            return basicQuery
                 .Include(rh => rh.Resver_Other)
-                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem))
-                .Where(ResverHeadExpression.IsOngoingExpression)
                 .SelectMany(rh => rh.Resver_Other)
-                .Where(ro => !ro.DeleteFlag)
-                .Where(ro => uniqueDeleteId.Contains(ro.DOPIID))
-                .ToArrayAsync();
+                .Where(ro => uniqueDeleteId.Contains(ro.DOPIID));
+        }
 
-            foreach (Resver_Other resverOther in cantDeleteData)
-            {
-                AddError(UnsupportedValue(
-                    $"欲刪除的其他收費項目（ID {resverOther.ROID} {resverOther.D_OtherPayItem.Code ?? ""}{resverOther.D_OtherPayItem.Title ?? ""}）",
-                    nameof(DeleteItem_Input_Row_APIItem.Id),
-                    $"已有進行中預約單（單號 {resverOther.RHID}）"));
-            }
+        /// <inheritdoc />
+        public object GetInputId(Resver_Other cantDelete)
+        {
+            return cantDelete.DOPIID;
+        }
 
-            return !HasError();
+        /// <inheritdoc />
+        public int GetHeadId(Resver_Other cantDelete)
+        {
+            return cantDelete.RHID;
         }
 
         public IQueryable<D_OtherPayItem> DeleteItemsQuery(IEnumerable<int> ids)

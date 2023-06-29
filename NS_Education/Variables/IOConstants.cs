@@ -8,5 +8,6 @@ namespace NS_Education.Variables
         public const string DateTimeFormat = "yyyy/MM/dd HH:mm";
         public const string DateFormat = "yyyy/MM/dd";
         public const string DefaultRole = "內定角色";
+        public const int DeleteItemHeadIdMaxCount = 5;
     }
 }

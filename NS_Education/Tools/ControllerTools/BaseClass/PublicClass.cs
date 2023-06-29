@@ -151,7 +151,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         }
 
         /// <inheritdoc cref="UnsupportedValue"/>>
-        protected NotSupportedValueError NotSupportedValue(string fieldNameChinese, string fieldName, string reason)
+        public NotSupportedValueError NotSupportedValue(string fieldNameChinese, string fieldName, string reason)
         {
             return UnsupportedValue(fieldNameChinese, fieldName, reason);
         }

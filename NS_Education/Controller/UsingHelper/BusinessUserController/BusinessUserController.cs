@@ -18,7 +18,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
 
-namespace NS_Education.Controller.UsingHelper
+namespace NS_Education.Controller.UsingHelper.BusinessUserController
 {
     public class BusinessUserController : PublicClass,
         IGetListPaged<BusinessUser, BusinessUser_GetList_Input_APIItem, BusinessUser_GetList_Output_Row_APIItem>,
@@ -34,6 +34,12 @@ namespace NS_Education.Controller.UsingHelper
         private readonly IDeleteItemHelper _deleteItemHelper;
         private readonly IChangeActiveHelper _changeActiveHelper;
         private readonly ISubmitHelper<BusinessUser_Submit_Input_APIItem> _submitHelper;
+
+        private static readonly BusinessUserDeleteItemValidateMarketer DeleteItemValidateMkBu =
+            new BusinessUserDeleteItemValidateMarketer();
+
+        private static readonly BusinessUserDeleteItemValidateOperator DeleteItemValidateOpBu =
+            new BusinessUserDeleteItemValidateOperator();
 
         public BusinessUserController()
         {
@@ -161,28 +167,13 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            if (!await DeleteItemValidationReservation(input))
+            if (!await _deleteItemHelper.DeleteItemValidateReservation(input, DeleteItemValidateMkBu))
+                return GetResponseJson();
+
+            if (!await _deleteItemHelper.DeleteItemValidateReservation(input, DeleteItemValidateOpBu))
                 return GetResponseJson();
 
             return await _deleteItemHelper.DeleteItem(input);
-        }
-
-        private async Task<bool> DeleteItemValidationReservation(DeleteItem_Input_APIItem input)
-        {
-            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
-
-            Resver_Head[] cantDeleteData = await DC.Resver_Head
-                .Where(ResverHeadExpression.IsOngoingExpression)
-                .Where(rh => uniqueDeleteId.Contains(rh.MK_BUID) || uniqueDeleteId.Contains(rh.OP_BUID))
-                .ToArrayAsync();
-
-            foreach (Resver_Head resverHead in cantDeleteData)
-            {
-                AddError(NotSupportedValue("欲刪除的 ID", nameof(DeleteItem_Input_Row_APIItem.Id),
-                    $"已有進行中的預約單（單號 {resverHead.RHID}）"));
-            }
-
-            return !HasError();
         }
 
         public IQueryable<BusinessUser> DeleteItemsQuery(IEnumerable<int> ids)

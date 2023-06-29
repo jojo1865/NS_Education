@@ -194,7 +194,7 @@ namespace NS_Education.Controller.UsingHelper
                 .Where(rts => uniqueDeleteId.Contains(rts.DTSID))
                 // 只回傳獨特的 RHID 和 DTSID
                 .GroupBy(rts => new { rts.RHID, rts.DTSID })
-                .Select(grouping => grouping.First());
+                .Select(grouping => grouping.FirstOrDefault());
         }
 
         public object GetInputId(M_Resver_TimeSpan cantDelete)

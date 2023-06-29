@@ -122,14 +122,31 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 .AsNoTracking()
                 .ToArrayAsync();
 
-            foreach (TReservationEntity cantDelete in cantDeleteData.OrderBy(validation.GetInputId))
+            // 整合成單個錯誤訊息
+            IDictionary<object, string> errors = cantDeleteData
+                .GroupBy(validation.GetInputId)
+                .OrderBy(grouping => grouping.Key)
+                .ToDictionary(grouping => grouping.Key, grouping =>
+                    DeleteItemValidateReservationCombineHeadId(validation, grouping));
+
+            foreach (KeyValuePair<object, string> kvp in errors)
             {
-                _controller.AddError(_controller.NotSupportedValue($"欲刪除的資料 ID（{validation.GetInputId(cantDelete)}）",
+                _controller.AddError(_controller.NotSupportedValue($"欲刪除的資料 ID（{kvp.Key}）",
                     nameof(DeleteItem_Input_Row_APIItem.Id),
-                    $"已存在進行中的預約單（單號 {validation.GetHeadId(cantDelete)}）"));
+                    $"已存在進行中的預約單（單號 {kvp.Value}）"));
             }
 
             return !cantDeleteData.Any();
+        }
+
+        private static string DeleteItemValidateReservationCombineHeadId<TReservationEntity>(
+            IDeleteItemValidateReservation<TReservationEntity> validation,
+            IGrouping<object, TReservationEntity> grouping) where TReservationEntity : class
+        {
+            // 把預約單 ID 組成最大不超過一定數量的一串字串，並視必要加上 ... 符號
+            return String.Join(", ",
+                       grouping.Select(validation.GetHeadId).Take(IoConstants.DeleteItemHeadIdMaxCount))
+                   + (grouping.Count() > IoConstants.DeleteItemHeadIdMaxCount ? "..." : "");
         }
 
         #endregion

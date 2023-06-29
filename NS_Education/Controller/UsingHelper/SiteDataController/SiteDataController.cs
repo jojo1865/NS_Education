@@ -178,7 +178,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public IOrderedQueryable<B_SiteData> GetListPagedOrderedQuery(SiteData_GetList_Input_APIItem input)
         {
-            var query = DC.B_SiteData
+            IQueryable<B_SiteData> query = DC.B_SiteData
                 .Include(sd => sd.B_Category)
                 .Include(sd => sd.Resver_Site)
                 .Include(sd => sd.M_SiteGroup)
@@ -354,7 +354,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         private async Task<bool> ChangeActiveValidateResverSite(int id)
         {
-            var ongoingResverSites = await DC.Resver_Head
+            Resver_Site[] ongoingResverSites = await DC.Resver_Head
                 .Include(rh => rh.Resver_Site)
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData.M_SiteGroup))
@@ -408,7 +408,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
 
             // 須同時驗證這個場地的父場地的預約單
-            var cantDeleteData = await DC.Resver_Head
+            Resver_Site[] cantDeleteData = await DC.Resver_Head
                 .Include(rh => rh.Resver_Site)
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData.M_SiteGroup1))
@@ -448,23 +448,23 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             // A: 成為父場地之父
             // B: (1) 帶父增子、 (2) 帶子增父
             // C: 成為子場地之子
-
+            // 
             // A: 成為父場地之父
             // |- 刪除: 不會發生
             // +- 復活: 需確認原有的子場地是否已經當爸爸了
-
+            //
             // B(1): 帶父增子
             // |- 刪除: 不會發生
             // +- 復活: 檢查是否同時有父場地和子場地指向自己
-
+            //
             // B(2): 帶子增父
             // |- 刪除: 不會發生
             // +- 復活: 檢查是否同時有父場地和子場地指向自己 (B(1))
-
+            //
             // C: 成為子場地之子
             // |- 刪除: 不會發生
             // +- 復活: 需確認原有的父場地是否已經是別人的兒子
-
+            //
             // 所以需要檢查的為復活時，並且是以下其中一種情況：
             // |- a. 原有子場地是否已有子場地
             // |- b. 原有父場地是否已有父場地
@@ -475,7 +475,78 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             HashSet<int> uniqueDeleteIds = input.GetUniqueDeleteId();
 
             // 找出復活對象的資料
-            var dataToRevive = await DC.B_SiteData
+            Dictionary<int, B_SiteData> dataToRevive = await DeleteItemGetReviveData(uniqueReviveIds);
+
+            // 取得原有子場地與父場地，檢查狀態
+
+            foreach (KeyValuePair<int, B_SiteData> kvp in dataToRevive)
+            {
+                // 檢查其本身的子場地與父場地
+                // |- 如果子場地或父場地在 dataToRevive 的行列中，視為活著的資料做判斷...
+                // +- 如果子場地或父場地在 dataToDelete 的行列中，從判斷中排除...
+
+                // 原有子場地是否已有子場地
+                DeleteItemCheckIfChildIsParentNow(kvp, uniqueDeleteIds, uniqueReviveIds);
+
+                // 原有父場地是否已有父場地
+                DeleteItemCheckIfParentIsChildNow(kvp, uniqueDeleteIds, uniqueReviveIds);
+
+                // 復活資料本身，復活後是否同時會有活著的子場地和父場地
+                DeleteItemCheckIfHasBothParentAndChild(kvp, uniqueDeleteIds, uniqueReviveIds);
+            }
+
+            return !HasError();
+        }
+
+        private void DeleteItemCheckIfHasBothParentAndChild(KeyValuePair<int, B_SiteData> kvp,
+            HashSet<int> uniqueDeleteIds, HashSet<int> uniqueReviveIds)
+        {
+            if (kvp.Value.M_SiteGroup
+                    .Where(msg => !uniqueDeleteIds.Contains(msg.GroupID) && msg.ActiveFlag && !msg.DeleteFlag)
+                    .Any(msg => !msg.B_SiteData1.DeleteFlag || uniqueReviveIds.Contains(msg.B_SiteData1.BSID))
+                &&
+                kvp.Value.M_SiteGroup1
+                    .Where(msg => !uniqueDeleteIds.Contains(msg.MasterID) && msg.ActiveFlag && !msg.DeleteFlag)
+                    .Any(msg => !msg.B_SiteData.DeleteFlag || uniqueReviveIds.Contains(msg.B_SiteData.BSID)))
+            {
+                AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", nameof(DeleteItem_Input_Row_APIItem.Id),
+                    "此場地復活後會同時有父場地和子場地"));
+            }
+        }
+
+        private void DeleteItemCheckIfParentIsChildNow(KeyValuePair<int, B_SiteData> kvp, HashSet<int> uniqueDeleteIds,
+            HashSet<int> uniqueReviveIds)
+        {
+            if (kvp.Value.M_SiteGroup1
+                .Where(msg => !uniqueDeleteIds.Contains(msg.MasterID) && msg.ActiveFlag && !msg.DeleteFlag)
+                .SelectMany(msg => msg.B_SiteData.M_SiteGroup1)
+                .Where(parentMsg => parentMsg.ActiveFlag && !parentMsg.DeleteFlag)
+                .Any(parentMsg =>
+                    !parentMsg.B_SiteData.DeleteFlag || uniqueReviveIds.Contains(parentMsg.B_SiteData.BSID)))
+            {
+                AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", nameof(DeleteItem_Input_Row_APIItem.Id),
+                    "此場地在刪除前的原有父場地，現已經是其他組合場地的子場地"));
+            }
+        }
+
+        private void DeleteItemCheckIfChildIsParentNow(KeyValuePair<int, B_SiteData> kvp, HashSet<int> uniqueDeleteIds,
+            HashSet<int> uniqueReviveIds)
+        {
+            if (kvp.Value.M_SiteGroup
+                .Where(msg => !uniqueDeleteIds.Contains(msg.GroupID) && msg.ActiveFlag && !msg.DeleteFlag)
+                .SelectMany(msg => msg.B_SiteData1.M_SiteGroup)
+                .Where(childMsg => childMsg.ActiveFlag && !childMsg.DeleteFlag)
+                .Any(childMsg =>
+                    !childMsg.B_SiteData1.DeleteFlag || uniqueReviveIds.Contains(childMsg.B_SiteData1.BSID)))
+            {
+                AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", nameof(DeleteItem_Input_Row_APIItem.Id),
+                    "此場地在刪除前的原有子場地，現已經是組合場地"));
+            }
+        }
+
+        private async Task<Dictionary<int, B_SiteData>> DeleteItemGetReviveData(HashSet<int> uniqueReviveIds)
+        {
+            return await DC.B_SiteData
                 .Include(sd => sd.M_SiteGroup)
                 .Include(sd => sd.M_SiteGroup.Select(msg => msg.B_SiteData1))
                 .Include(sd => sd.M_SiteGroup.Select(msg => msg.B_SiteData1.M_SiteGroup))
@@ -490,54 +561,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Where(sd => sd.DeleteFlag)
                 .Where(sd => uniqueReviveIds.Contains(sd.BSID))
                 .ToDictionaryAsync(sd => sd.BSID, sd => sd);
-
-            // 取得原有子場地與父場地，檢查狀態
-
-            foreach (KeyValuePair<int, B_SiteData> kvp in dataToRevive)
-            {
-                // 檢查其本身的子場地與父場地
-                // |- 如果子場地或父場地在 dataToRevive 的行列中，視為活著的資料做判斷...
-                // +- 如果子場地或父場地在 dataToDelete 的行列中，從判斷中排除...
-
-                // 原有子場地是否已有子場地
-                if (kvp.Value.M_SiteGroup
-                    .Where(msg => !uniqueDeleteIds.Contains(msg.GroupID) && msg.ActiveFlag && !msg.DeleteFlag)
-                    .SelectMany(msg => msg.B_SiteData1.M_SiteGroup)
-                    .Where(childMsg => childMsg.ActiveFlag && !childMsg.DeleteFlag)
-                    .Any(childMsg =>
-                        !childMsg.B_SiteData1.DeleteFlag || uniqueReviveIds.Contains(childMsg.B_SiteData1.BSID)))
-                {
-                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", nameof(DeleteItem_Input_Row_APIItem.Id),
-                        "此場地在刪除前的原有子場地，現已經是組合場地"));
-                }
-
-                // 原有父場地是否已有父場地
-                if (kvp.Value.M_SiteGroup1
-                    .Where(msg => !uniqueDeleteIds.Contains(msg.MasterID) && msg.ActiveFlag && !msg.DeleteFlag)
-                    .SelectMany(msg => msg.B_SiteData.M_SiteGroup1)
-                    .Where(parentMsg => parentMsg.ActiveFlag && !parentMsg.DeleteFlag)
-                    .Any(parentMsg =>
-                        !parentMsg.B_SiteData.DeleteFlag || uniqueReviveIds.Contains(parentMsg.B_SiteData.BSID)))
-                {
-                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", nameof(DeleteItem_Input_Row_APIItem.Id),
-                        "此場地在刪除前的原有父場地，現已經是其他組合場地的子場地"));
-                }
-
-                // 復活資料本身，復活後是否同時會有活著的子場地和父場地
-                if (kvp.Value.M_SiteGroup
-                        .Where(msg => !uniqueDeleteIds.Contains(msg.GroupID) && msg.ActiveFlag && !msg.DeleteFlag)
-                        .Any(msg => !msg.B_SiteData1.DeleteFlag || uniqueReviveIds.Contains(msg.B_SiteData1.BSID))
-                    &&
-                    kvp.Value.M_SiteGroup1
-                        .Where(msg => !uniqueDeleteIds.Contains(msg.MasterID) && msg.ActiveFlag && !msg.DeleteFlag)
-                        .Any(msg => !msg.B_SiteData.DeleteFlag || uniqueReviveIds.Contains(msg.B_SiteData.BSID)))
-                {
-                    AddError(UnsupportedValue($"欲復活的場地 ID（{kvp.Key}）", nameof(DeleteItem_Input_Row_APIItem.Id),
-                        "此場地復活後會同時有父場地和子場地"));
-                }
-            }
-
-            return !HasError();
         }
 
         public IQueryable<B_SiteData> DeleteItemsQuery(IEnumerable<int> ids)
@@ -603,7 +626,17 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             isValid = isValid && isGroupListValid;
 
-            bool isDevicesValid = isValid && await input.Devices.StartValidateElements()
+            bool isDevicesValid = isValid && await SubmitValidateDevices(input);
+
+            bool isDevicesUnique = isDevicesValid &&
+                                   input.Devices.Select(d => d.BDID).Distinct().Count() == input.Devices.Count;
+
+            return isValid && isDevicesValid && isDevicesUnique;
+        }
+
+        private async Task<bool> SubmitValidateDevices(SiteData_Submit_Input_APIItem input)
+        {
+            return await input.Devices.StartValidateElements()
                 .Validate(d => d.BSID == 0,
                     () => AddError(ExpectedValue("設備的場地 ID", nameof(SiteData_Submit_Input_Devices_Row_APIItem.BSID),
                         0)))
@@ -611,11 +644,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     d => AddError(NotFound($"設備 ID（{d.BDID}）", nameof(d.BDID))))
                 .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", nameof(d.Ct), 0)))
                 .IsValid();
-
-            bool isDevicesUnique = isDevicesValid &&
-                                   input.Devices.Select(d => d.BDID).Distinct().Count() == input.Devices.Count;
-
-            return isValid && isDevicesValid && isDevicesUnique;
         }
 
         private async Task<bool> SubmitValidateGroupList(SiteData_Submit_Input_APIItem input)
@@ -782,14 +810,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             isValid = isValid && isGroupListValid;
 
             // 判定所有 Device 都是有效資料
-            isValid = isValid && await input.Devices.StartValidateElements()
-                .Validate(d => d.BSID == input.BSID,
-                    () => AddError(ExpectedValue("設備的場地 ID", nameof(input.BSID), input.BSID)))
-                .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
-                    d => AddError(NotFound($"設備 ID（{d.BDID}）", nameof(d.BDID))))
-                .Validate(d => d.Ct.IsAboveZero(),
-                    d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", nameof(d.Ct), 0)))
-                .IsValid();
+            isValid = isValid && await SubmitValidateDevices(input);
 
             // 判定沒有重覆的 BDID
             IEnumerable<int> uniqueDeviceId = input.Devices.Select(d => d.BDID).Distinct();
@@ -806,6 +827,15 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 return false;
 
             // 判定新的 MaxSize 不會造成任何預約單人數溢出
+            isValid = await SubmitEditValidatePeopleCtEnough(input);
+
+            isValid = isValid && await SubmitValidateDeviceCt(input);
+
+            return isValid;
+        }
+
+        private async Task<bool> SubmitEditValidatePeopleCtEnough(SiteData_Submit_Input_APIItem input)
+        {
             int neededSize = await DC.Resver_Site
                 .Include(rs => rs.Resver_Head)
                 .Where(rs => !rs.DeleteFlag)
@@ -816,16 +846,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .OrderByDescending(ct => ct)
                 .FirstOrDefaultAsync();
 
-            if (input.BasicSize < neededSize && input.MaxSize < neededSize)
-            {
-                isValid = false;
-                AddError(OutOfRange("容納人數", nameof(input.BasicSize) + ", " + nameof(input.MaxSize), neededSize)
-                );
-            }
+            if (input.BasicSize >= neededSize || input.MaxSize >= neededSize) return true;
 
-            isValid = isValid && await SubmitValidateDeviceCt(input);
+            AddError(OutOfRange("容納人數", nameof(input.BasicSize) + ", " + nameof(input.MaxSize), neededSize));
 
-            return isValid;
+            return false;
         }
 
         private async Task<bool> SubmitValidateDeviceCt(SiteData_Submit_Input_APIItem input)
@@ -841,7 +866,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             // |- a. 需要檢查的 RS：此場地的 RS + 父場地的 RS
             // +- b. 可用數量：輸入 + 子場地
 
-            var thisSite = await DC.B_SiteData
+            B_SiteData thisSite = await DC.B_SiteData
                 .Include(bs => bs.M_Site_Device)
                 .Include(bs => bs.M_SiteGroup)
                 .Include(bs => bs.M_SiteGroup.Select(msg => msg.B_SiteData1))
@@ -850,16 +875,16 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Include(bs => bs.M_SiteGroup1.Select(msg => msg.B_SiteData))
                 .FirstAsync(bs => bs.BSID == input.BSID);
 
-            var parentSites = thisSite
+            Dictionary<int, B_SiteData> parentSites = thisSite
                 .M_SiteGroup1
                 .Where(msg => msg.ActiveFlag && !msg.DeleteFlag)
                 .Select(msg => msg.B_SiteData)
                 .Where(parent => parent.ActiveFlag && !parent.DeleteFlag)
                 .ToDictionary(parent => parent.BSID, parent => parent);
 
-            var parentSiteIds = parentSites.Keys.AsEnumerable();
+            IEnumerable<int> parentSiteIds = parentSites.Keys.AsEnumerable();
 
-            var deviceIdToNeededCt = await DC.Resver_Head
+            Dictionary<int, int> deviceIdToNeededCt = await DC.Resver_Head
                 .Include(rh => rh.Resver_Site)
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
                 .Where(ResverHeadExpression.IsOngoingExpression)
@@ -873,15 +898,15 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             // 計算子場地的所有設備可用數量
             // 先找出所有輸入的子場地資料
-            var inputGroupIds = input.GroupList.Select(gl => gl.BSID);
+            IEnumerable<int> inputGroupIds = input.GroupList.Select(gl => gl.BSID);
 
-            var inputGroupData = await DC.B_SiteData
+            B_SiteData[] inputGroupData = await DC.B_SiteData
                 .Include(sd => sd.M_Site_Device)
                 .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
                 .Where(sd => inputGroupIds.Contains(sd.BSID))
                 .ToArrayAsync();
 
-            var childSiteDevices = thisSite.M_SiteGroup
+            M_Site_Device[] childSiteDevices = thisSite.M_SiteGroup
                 .Where(msg => msg.ActiveFlag && !msg.DeleteFlag)
                 .Select(msg => msg.B_SiteData1)
                 .Where(child => child.ActiveFlag && !child.DeleteFlag)
@@ -890,11 +915,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .SelectMany(child => child.M_Site_Device)
                 .ToArray();
 
-            var childDeviceCt = childSiteDevices
+            Dictionary<int, int> childDeviceCt = childSiteDevices
                 .GroupBy(msd => msd.BDID)
                 .ToDictionary(g => g.Key, g => g.Sum(msd => msd.Ct));
 
-            var inputDeviceCt = input.Devices.ToDictionary(d => d.BDID, d => d.Ct);
+            Dictionary<int, int> inputDeviceCt = input.Devices.ToDictionary(d => d.BDID, d => d.Ct);
 
             bool isDeviceCtValid = deviceIdToNeededCt.StartValidateElements()
                 .Validate(
@@ -930,26 +955,30 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             // 1. 將所有 SiteGroup 的舊資料刪除
 
             // 先找出已存在關係資料的 BSID
-            var inputBySiteIds = input.GroupList.ToDictionary(item => item.BSID, item => item);
-            var alreadyExistingInputs = data.M_SiteGroup
+            Dictionary<int, SiteData_Submit_Input_GroupList_Row_APIItem> inputBySiteIds =
+                input.GroupList.ToDictionary(item => item.BSID, item => item);
+            M_SiteGroup[] alreadyExistingInputs = data.M_SiteGroup
                 .Where(sg => inputBySiteIds.ContainsKey(sg.GroupID))
                 .ToArray();
 
             // 刪除所有 alreadyExistingInputs 以外的資料 - 這些舊資料沒有出現在新輸入中，表示要刪除
             DC.M_SiteGroup.RemoveRange(data.M_SiteGroup.Except(alreadyExistingInputs));
 
-            var alreadyExistingInputsIds = alreadyExistingInputs.Select(aei => aei.GroupID);
-            var newSiteGroupInputs = input.GroupList.Where(item => !alreadyExistingInputsIds.Contains(item.BSID));
+            IEnumerable<int> alreadyExistingInputsIds = alreadyExistingInputs.Select(aei => aei.GroupID);
+            IEnumerable<SiteData_Submit_Input_GroupList_Row_APIItem> newSiteGroupInputs =
+                input.GroupList.Where(item => !alreadyExistingInputsIds.Contains(item.BSID));
 
             // 2. 將所有 SiteDevice 的舊資料刪除
             // 先找出已存在同樣 BDID 的資料
-            var inputByDeviceIds = input.Devices.ToDictionary(item => item.BDID, item => item);
-            var alreadyExistingDevices = data.M_Site_Device
+            Dictionary<int, SiteData_Submit_Input_Devices_Row_APIItem> inputByDeviceIds =
+                input.Devices.ToDictionary(item => item.BDID, item => item);
+            M_Site_Device[] alreadyExistingDevices = data.M_Site_Device
                 .Where(msd => inputByDeviceIds.ContainsKey(msd.BDID))
                 .ToArray();
 
-            var alreadyExistingDeviceIds = alreadyExistingDevices.Select(aed => aed.BDID);
-            var newDeviceInputs = input.Devices.Where(item => !alreadyExistingDeviceIds.Contains(item.BDID));
+            IEnumerable<int> alreadyExistingDeviceIds = alreadyExistingDevices.Select(aed => aed.BDID);
+            IEnumerable<SiteData_Submit_Input_Devices_Row_APIItem> newDeviceInputs =
+                input.Devices.Where(item => !alreadyExistingDeviceIds.Contains(item.BDID));
 
             // 山除所有 alreadyExistingDevices 以外的資料
             DC.M_Site_Device.RemoveRange(data.M_Site_Device.Except(alreadyExistingDevices));

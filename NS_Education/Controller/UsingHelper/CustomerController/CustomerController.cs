@@ -331,7 +331,27 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            if (activeFlag == false && !await ChangeActiveValidateReservation(id))
+                return GetResponseJson();
+
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
+        }
+
+        private async Task<bool> ChangeActiveValidateReservation(int id)
+        {
+            int[] cantDeleteData = await DC.Resver_Head
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .Where(rh => rh.CID == id)
+                .Select(rh => rh.RHID)
+                .Distinct()
+                .ToArrayAsync();
+
+            foreach (int headId in cantDeleteData)
+            {
+                AddError(NotSupportedValue("欲停用的 ID", nameof(id), $"已有進行中的預約單（單號 {headId}）"));
+            }
+
+            return !HasError();
         }
 
         public IQueryable<Customer> ChangeActiveQuery(int id)
@@ -350,7 +370,32 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             if (!await DeleteItemValidateNoSameCodeExistingForRevive(input))
                 return GetResponseJson();
 
+            if (!await DeleteItemValidateReservation(input))
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
+        }
+
+        private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
+        {
+            HashSet<int> uniqueDeleteId = input.Items
+                .Where(i => i.Id != null && i.DeleteFlag == true)
+                .Select(i => i.Id.Value)
+                .Distinct()
+                .ToHashSet();
+
+            Resver_Head[] cantDeleteData = await DC.Resver_Head
+                .Where(ResverHeadExpression.IsOngoingExpression)
+                .Where(rh => uniqueDeleteId.Contains(rh.CID))
+                .ToArrayAsync();
+
+            foreach (Resver_Head head in cantDeleteData)
+            {
+                AddError(NotSupportedValue($"欲刪除的 ID（{head.CID}）", nameof(DeleteItem_Input_Row_APIItem.Id),
+                    $"已有進行中的預約單（單號 {head.RHID}）"));
+            }
+
+            return !HasError();
         }
 
         private async Task<bool> DeleteItemValidateNoSameCodeExistingForRevive(DeleteItem_Input_APIItem input)
@@ -692,6 +737,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items),
                     () => AddError(NotFound("業務 ID", nameof(Customer_Submit_BUID_APIItem.BUID))))
                 .IsValid();
+
+            if (input.ActiveFlag == false && !await ChangeActiveValidateReservation(input.CID))
+                return false;
 
             // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
             bool isBusinessUserContactValid = input.Items.StartValidateElements()

@@ -26,7 +26,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         IGetInfoById<Customer, Customer_GetInfoById_Output_APIItem>,
         IChangeActive<Customer>,
         IDeleteItem<Customer>,
-        ISubmit<Customer, Customer_Submit_Input_APIItem>
+        ISubmit<Customer, Customer_Submit_Input_APIItem>,
+        IDeleteItemValidateReservation<Resver_Head>
     {
         #region 通用
 
@@ -370,28 +371,30 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             if (!await DeleteItemValidateNoSameCodeExistingForRevive(input))
                 return GetResponseJson();
 
-            if (!await DeleteItemValidateReservation(input))
+            if (!await _deleteItemHelper.DeleteItemValidateReservation<Resver_Head>(input, this))
                 return GetResponseJson();
 
             return await _deleteItemHelper.DeleteItem(input);
         }
 
-        private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
+        /// <inheritdoc />
+        public IQueryable<Resver_Head> SupplyQueryWithInputIdCondition(IQueryable<Resver_Head> basicQuery,
+            HashSet<int> uniqueDeleteId)
         {
-            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
+            return basicQuery
+                .Where(rh => uniqueDeleteId.Contains(rh.CID));
+        }
 
-            Resver_Head[] cantDeleteData = await DC.Resver_Head
-                .Where(ResverHeadExpression.IsOngoingExpression)
-                .Where(rh => uniqueDeleteId.Contains(rh.CID))
-                .ToArrayAsync();
+        /// <inheritdoc />
+        public object GetInputId(Resver_Head cantDelete)
+        {
+            return cantDelete.CID;
+        }
 
-            foreach (Resver_Head head in cantDeleteData)
-            {
-                AddError(NotSupportedValue($"欲刪除的 ID（{head.CID}）", nameof(DeleteItem_Input_Row_APIItem.Id),
-                    $"已有進行中的預約單（單號 {head.RHID}）"));
-            }
-
-            return !HasError();
+        /// <inheritdoc />
+        public int GetHeadId(Resver_Head cantDelete)
+        {
+            return cantDelete.RHID;
         }
 
         private async Task<bool> DeleteItemValidateNoSameCodeExistingForRevive(DeleteItem_Input_APIItem input)

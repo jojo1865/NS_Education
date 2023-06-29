@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using NS_Education.Models.APIItems.Common.DeleteItem;
+using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface
 {
@@ -15,5 +16,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface
         /// 其他異常時：拋錯。
         /// </returns>
         Task<string> DeleteItem(DeleteItem_Input_APIItem input);
+
+        Task<bool> DeleteItemValidateReservation<TReservationEntity>(DeleteItem_Input_APIItem input,
+            IDeleteItemValidateReservation<TReservationEntity> validation) where TReservationEntity : class;
     }
 }

@@ -26,7 +26,8 @@ namespace NS_Education.Controller.UsingHelper
         IGetInfoById<D_TimeSpan, TimeSpan_GetInfoById_Output_APIItem>,
         IDeleteItem<D_TimeSpan>,
         ISubmit<D_TimeSpan, TimeSpan_Submit_Input_APIItem>,
-        IChangeActive<D_TimeSpan>
+        IChangeActive<D_TimeSpan>,
+        IDeleteItemValidateReservation<M_Resver_TimeSpan>
     {
         #region Initialization
 
@@ -179,35 +180,31 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            if (!await DeleteItemValidateReservation(input))
+            if (!await _deleteItemHelper.DeleteItemValidateReservation(input, this))
                 return GetResponseJson();
             return await _deleteItemHelper.DeleteItem(input);
         }
 
-        private async Task<bool> DeleteItemValidateReservation(DeleteItem_Input_APIItem input)
+        public IQueryable<M_Resver_TimeSpan> SupplyQueryWithInputIdCondition(IQueryable<Resver_Head> basicQuery,
+            HashSet<int> uniqueDeleteId)
         {
-            // 刪除時，不允許有進行中的預約單
-
-            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
-
-            KeyValuePair<int, int>[] cantDeleteData = DC.Resver_Head
-                .Include(rh => rh.M_Resver_TimeSpan)
+            return basicQuery
                 .Where(ResverHeadExpression.IsOngoingExpression)
                 .SelectMany(rh => rh.M_Resver_TimeSpan)
                 .Where(rts => uniqueDeleteId.Contains(rts.DTSID))
+                // 只回傳獨特的 RHID 和 DTSID
                 .GroupBy(rts => new { rts.RHID, rts.DTSID })
-                .AsEnumerable()
-                .Select(grouping => new KeyValuePair<int, int>(grouping.Key.RHID, grouping.Key.DTSID))
-                .ToArray();
+                .Select(grouping => grouping.First());
+        }
 
-            foreach (KeyValuePair<int, int> kvp in cantDeleteData)
-            {
-                AddError(NotSupportedValue($"欲刪除的 ID（{kvp.Value}）",
-                    nameof(DeleteItem_Input_Row_APIItem.Id),
-                    $"已有進行中預約單（單號 {kvp.Key}）"));
-            }
+        public object GetInputId(M_Resver_TimeSpan cantDelete)
+        {
+            return cantDelete.DTSID;
+        }
 
-            return await Task.FromResult(!HasError());
+        public int GetHeadId(M_Resver_TimeSpan cantDelete)
+        {
+            return cantDelete.RHID;
         }
 
         public IQueryable<D_TimeSpan> DeleteItemsQuery(IEnumerable<int> ids)

@@ -1,15 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
+using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
+using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
@@ -103,6 +106,30 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 3. 回傳通用回傳訊息格式。
             return _controller.GetResponseJson();
+        }
+
+        public async Task<bool> DeleteItemValidateReservation<TReservationEntity>(DeleteItem_Input_APIItem input,
+            IDeleteItemValidateReservation<TReservationEntity> validation)
+            where TReservationEntity : class
+        {
+            HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
+
+            IQueryable<Resver_Head> basicQuery = _controller.DC.Resver_Head
+                .Where(ResverHeadExpression.IsOngoingExpression);
+
+            TReservationEntity[] cantDeleteData = await validation
+                .SupplyQueryWithInputIdCondition(basicQuery, uniqueDeleteId)
+                .AsNoTracking()
+                .ToArrayAsync();
+
+            foreach (TReservationEntity cantDelete in cantDeleteData)
+            {
+                _controller.AddError(_controller.NotSupportedValue($"欲刪除的資料 ID（{validation.GetInputId(cantDelete)}）",
+                    nameof(DeleteItem_Input_Row_APIItem.Id),
+                    $"已存在進行中的預約單（單號 {validation.GetHeadId(cantDelete)}）"));
+            }
+
+            return !cantDeleteData.Any();
         }
 
         #endregion

@@ -397,6 +397,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 return GetResponseJson();
 
             // 若場地有正在進行的預約，不予刪除
+            
             if (!await DeleteItemValidateResverSite(input))
                 return GetResponseJson();
 
@@ -405,11 +406,13 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         private async Task<bool> DeleteItemValidateResverSite(DeleteItem_Input_APIItem input)
         {
+            // 特例：需考慮上層場地，所以不使用 DeleteItemHelper 的驗證方法
+            
             HashSet<int> uniqueDeleteId = input.GetUniqueDeleteId();
 
             // 須同時驗證這個場地的父場地的預約單
             Resver_Site[] cantDeleteData = await DC.Resver_Head
-                .Include(rh => rh.Resver_Site)
+                .Include(rh => rh.`Resver_Site)
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData.M_SiteGroup1))
                 .Where(ResverHeadExpression.IsOngoingExpression)

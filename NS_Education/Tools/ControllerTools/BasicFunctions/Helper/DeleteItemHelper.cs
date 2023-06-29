@@ -122,7 +122,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 .AsNoTracking()
                 .ToArrayAsync();
 
-            foreach (TReservationEntity cantDelete in cantDeleteData)
+            foreach (TReservationEntity cantDelete in cantDeleteData.OrderBy(validation.GetInputId))
             {
                 _controller.AddError(_controller.NotSupportedValue($"欲刪除的資料 ID（{validation.GetInputId(cantDelete)}）",
                     nameof(DeleteItem_Input_Row_APIItem.Id),

@@ -19,7 +19,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
     /// <summary>
     /// 處理預約時搜尋場地的 API。
     /// </summary>
-    public partial class ResverSiteController : PublicClass
+    public class ResverSiteController : PublicClass
     {
         #region GetList
 

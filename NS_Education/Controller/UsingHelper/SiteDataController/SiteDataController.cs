@@ -640,9 +640,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         private async Task<bool> SubmitValidateDevices(SiteData_Submit_Input_APIItem input)
         {
             return await input.Devices.StartValidateElements()
-                .Validate(d => d.BSID == 0,
+                .Validate(d => d.BSID == input.BSID,
                     () => AddError(ExpectedValue("設備的場地 ID", nameof(SiteData_Submit_Input_Devices_Row_APIItem.BSID),
-                        0)))
+                        input.BSID)))
                 .ValidateAsync(async d => await DC.B_Device.ValidateIdExists(d.BDID, nameof(B_Device.BDID)),
                     d => AddError(NotFound($"設備 ID（{d.BDID}）", nameof(d.BDID))))
                 .Validate(d => d.Ct.IsAboveZero(), d => AddError(OutOfRange($"設備（ID {d.BDID}）數量", nameof(d.Ct), 0)))

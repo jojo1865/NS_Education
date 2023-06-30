@@ -394,6 +394,18 @@
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="ErrorLog">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="JWT" Type="varchar(max)" />
+          <Property Name="RequestUrl" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Payload" Type="nvarchar(max)" />
+          <Property Name="ExceptionMessage" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="ExceptionTrace" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="CreDate" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="GiftSending">
           <Key>
             <PropertyRef Name="GSID" />
@@ -1315,9 +1327,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Bill_Header_B_Category">
-          <End Role="B_Category" Type="Self.B_Category" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="B_Category" Type="Self.B_Category" Multiplicity="1" />
           <End Role="Resver_Bill" Type="Self.Resver_Bill" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_Category">
@@ -1329,9 +1339,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Bill_Header_D_PayType">
-          <End Role="D_PayType" Type="Self.D_PayType" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="D_PayType" Type="Self.D_PayType" Multiplicity="1" />
           <End Role="Resver_Bill" Type="Self.Resver_Bill" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="D_PayType">
@@ -1357,9 +1365,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Device_B_Device">
-          <End Role="B_Device" Type="Self.B_Device" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="B_Device" Type="Self.B_Device" Multiplicity="1" />
           <End Role="Resver_Device" Type="Self.Resver_Device" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_Device">
@@ -1371,9 +1377,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Device_B_OrderCode">
-          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="Resver_Device" Type="Self.Resver_Device" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_OrderCode">
@@ -1437,9 +1441,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Other_B_OrderCode">
-          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_OrderCode">
@@ -1451,9 +1453,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Other_D_OtherPayItem">
-          <End Role="D_OtherPayItem" Type="Self.D_OtherPayItem" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="D_OtherPayItem" Type="Self.D_OtherPayItem" Multiplicity="1" />
           <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="D_OtherPayItem">
@@ -1693,9 +1693,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="M_Customer_Gift_Customer_CID_fk">
-          <End Role="Customer" Type="Self.Customer" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Customer" Type="Self.Customer" Multiplicity="1" />
           <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Customer">
@@ -1707,9 +1705,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="M_Customer_Gift_CustomerVisit_CVID_fk">
-          <End Role="CustomerVisit" Type="Self.CustomerVisit" Multiplicity="0..1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="CustomerVisit" Type="Self.CustomerVisit" Multiplicity="0..1" />
           <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="CustomerVisit">
@@ -1866,6 +1862,7 @@
           <EntitySet Name="D_PayType" EntityType="Self.D_PayType" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="D_TimeSpan" EntityType="Self.D_TimeSpan" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="D_Zip" EntityType="Self.D_Zip" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ErrorLog" EntityType="Self.ErrorLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="GiftSending" EntityType="Self.GiftSending" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Address" EntityType="Self.M_Address" Schema="dbo" store:Type="Tables" />
@@ -2710,6 +2707,18 @@
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="M_Address" Relationship="Self.M_Address_D_Zip_DZID_fk" FromRole="D_Zip" ToRole="M_Address" />
         </EntityType>
+        <EntityType Name="ErrorLog">
+          <Key>
+            <PropertyRef Name="MID" />
+          </Key>
+          <Property Name="MID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="JWT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="RequestUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Payload" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ExceptionMessage" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ExceptionTrace" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
         <EntityType Name="GiftSending">
           <Key>
             <PropertyRef Name="GSID" />
@@ -3284,9 +3293,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Bill_Header_B_Category">
-          <End Role="B_Category" Type="Self.B_Category" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="B_Category" Type="Self.B_Category" Multiplicity="1" />
           <End Role="Resver_Bill" Type="Self.Resver_Bill" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_Category">
@@ -3334,9 +3341,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Device_B_Device">
-          <End Role="B_Device" Type="Self.B_Device" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="B_Device" Type="Self.B_Device" Multiplicity="1" />
           <End Role="Resver_Device" Type="Self.Resver_Device" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_Device">
@@ -3410,9 +3415,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Device_B_OrderCode">
-          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="Resver_Device" Type="Self.Resver_Device" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_OrderCode">
@@ -3424,9 +3427,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Other_B_OrderCode">
-          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="B_OrderCode">
@@ -3864,9 +3865,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="M_Customer_Gift_Customer_CID_fk">
-          <End Role="Customer" Type="Self.Customer" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Customer" Type="Self.Customer" Multiplicity="1" />
           <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Customer">
@@ -3890,9 +3889,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="M_Customer_Gift_CustomerVisit_CVID_fk">
-          <End Role="CustomerVisit" Type="Self.CustomerVisit" Multiplicity="0..1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="CustomerVisit" Type="Self.CustomerVisit" Multiplicity="0..1" />
           <End Role="M_Customer_Gift" Type="Self.M_Customer_Gift" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="CustomerVisit">
@@ -3964,9 +3961,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Other_D_OtherPayItem">
-          <End Role="D_OtherPayItem" Type="Self.D_OtherPayItem" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="D_OtherPayItem" Type="Self.D_OtherPayItem" Multiplicity="1" />
           <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="D_OtherPayItem">
@@ -3978,9 +3973,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Bill_Header_D_PayType">
-          <End Role="D_PayType" Type="Self.D_PayType" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="D_PayType" Type="Self.D_PayType" Multiplicity="1" />
           <End Role="Resver_Bill" Type="Self.Resver_Bill" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="D_PayType">
@@ -4251,6 +4244,7 @@
           <EntitySet Name="D_PayType" EntityType="Self.D_PayType" />
           <EntitySet Name="D_TimeSpan" EntityType="Self.D_TimeSpan" />
           <EntitySet Name="D_Zip" EntityType="Self.D_Zip" />
+          <EntitySet Name="ErrorLog" EntityType="Self.ErrorLog" />
           <EntitySet Name="GiftSending" EntityType="Self.GiftSending" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" />
           <EntitySet Name="M_Address" EntityType="Self.M_Address" />
@@ -5017,6 +5011,19 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ErrorLog">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.ErrorLog">
+              <MappingFragment StoreEntitySet="ErrorLog">
+                <ScalarProperty Name="MID" ColumnName="MID" />
+                <ScalarProperty Name="JWT" ColumnName="JWT" />
+                <ScalarProperty Name="RequestUrl" ColumnName="RequestUrl" />
+                <ScalarProperty Name="Payload" ColumnName="Payload" />
+                <ScalarProperty Name="ExceptionMessage" ColumnName="ExceptionMessage" />
+                <ScalarProperty Name="ExceptionTrace" ColumnName="ExceptionTrace" />
+                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

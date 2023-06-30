@@ -55,6 +55,7 @@ namespace NS_Education
             {
                 // 如果是 OPTIONS，即刻回傳
                 Response.Flush();
+                Response.End();
             }
         }
     }

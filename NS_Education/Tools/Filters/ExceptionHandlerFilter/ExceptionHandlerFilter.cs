@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Web.Mvc;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.Extensions;
@@ -9,8 +10,23 @@ namespace NS_Education.Tools.Filters.ExceptionHandlerFilter
     {
         public void OnException(ExceptionContext filterContext)
         {
+            filterContext.Result = ResponseHelper.CreateWrappedResponse(filterContext, filterContext.Result);
+
+            Console.WriteLine(filterContext.Exception.Message);
+            Console.WriteLine(filterContext.Exception.StackTrace);
+
+            WriteToDbIfInternalError(filterContext);
+
+            filterContext.ExceptionHandled = true;
+        }
+
+        private static void WriteToDbIfInternalError(ExceptionContext filterContext)
+        {
             try
             {
+                if (filterContext.HttpContext.Response.StatusCode != (int)HttpStatusCode.InternalServerError)
+                    return;
+
                 WriteToDb(filterContext);
             }
             catch
@@ -18,13 +34,6 @@ namespace NS_Education.Tools.Filters.ExceptionHandlerFilter
                 // ignored
                 // Because there can be exception about connection with DB.
             }
-
-            filterContext.Result = ResponseHelper.CreateWrappedResponse(filterContext, filterContext.Result);
-
-            Console.WriteLine(filterContext.Exception.Message);
-            Console.WriteLine(filterContext.Exception.StackTrace);
-
-            filterContext.ExceptionHandled = true;
         }
 
         private static void WriteToDb(ExceptionContext filterContext)

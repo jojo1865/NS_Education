@@ -9,6 +9,12 @@ namespace NS_Education.Tools.Extensions
     /// </summary>
     public static class ExceptionExtensionMethods
     {
+        private static IEnumerable<string> IgnoredNamespacePrefixes = new[]
+        {
+            "System.",
+            "Microsoft."
+        };
+
         /// <summary>
         /// 從 Exception 中取得最裡面一層的錯誤訊息。
         /// </summary>
@@ -33,12 +39,11 @@ namespace NS_Education.Tools.Extensions
         public static string GetMeaningfulStackTrace(this Exception e)
         {
             string stackTrace = e.StackTrace;
-            // 以專案起始點的 namespace 為基準
-            string nameSpace = typeof(WebApiApplication).Namespace ?? "";
 
             string[] traces = stackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
-            return String.Join(Environment.NewLine, traces.Where(t => t.Contains(nameSpace)));
+            return String.Join(Environment.NewLine, traces
+                .Where(t => !IgnoredNamespacePrefixes.Any(t.StartsWith)));
         }
     }
 }

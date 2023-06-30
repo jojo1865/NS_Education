@@ -11,6 +11,6 @@ namespace NS_Education.Models
         public bool SuccessFlag = true;
 
         public IEnumerable<string> Messages =>
-            Errors.Select(error => $"{error.ErrorType}-{error.ErrorCode} {error.ErrorMessage}");
+            Errors.Select(error => $"{error.ErrorType}-{error.ErrorCodePadded} {error.ErrorMessage}");
     }
 }

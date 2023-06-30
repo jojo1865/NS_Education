@@ -305,7 +305,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 DHID = entity.DHID,
                 HallList = await DC.D_Hall.GetHallSelectable(entity.DHID),
                 BOCID = entity.BOCID,
-                Items = entity.M_SiteGroup
+                GroupList = entity.M_SiteGroup
                     .Where(siteGroup => siteGroup.ActiveFlag && !siteGroup.DeleteFlag)
                     .Select(siteGroup => new SiteData_GetInfoById_Output_GroupList_Row_APIItem
                     {

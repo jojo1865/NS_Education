@@ -36,7 +36,7 @@ namespace NS_Education.Models.APIItems.Controller.SiteData.GetInfoById
 
         public int BOCID { get; set; }
 
-        public ICollection<SiteData_GetInfoById_Output_GroupList_Row_APIItem> Items { get; set; } =
+        public ICollection<SiteData_GetInfoById_Output_GroupList_Row_APIItem> GroupList { get; set; } =
             new List<SiteData_GetInfoById_Output_GroupList_Row_APIItem>();
 
         public ICollection<SiteData_GetInfoById_Output_Device_Row_APIItem> Devices { get; set; } =

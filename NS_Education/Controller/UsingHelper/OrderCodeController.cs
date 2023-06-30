@@ -76,6 +76,8 @@ namespace NS_Education.Controller.UsingHelper
 
         #region GetTypeList
 
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetTypeList()
         {
             return await _getTypeListHelper.GetTypeList();

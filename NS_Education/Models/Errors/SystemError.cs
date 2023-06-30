@@ -8,7 +8,7 @@ namespace NS_Education.Models.Errors
         public SystemError(Exception exception)
         {
             Exception = exception.GetActualMessage();
-            ExceptionStack = exception.StackTrace;
+            ExceptionStack = exception.GetMeaningfulStackTrace();
         }
 
         public SystemError(string exceptionMessage)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NS_Education.Tools.Extensions
 {
@@ -27,6 +28,17 @@ namespace NS_Education.Tools.Extensions
             }
 
             return current.Message;
+        }
+
+        public static string GetMeaningfulStackTrace(this Exception e)
+        {
+            string stackTrace = e.StackTrace;
+            // 以專案起始點的 namespace 為基準
+            string nameSpace = typeof(WebApiApplication).Namespace ?? "";
+
+            string[] traces = stackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            return String.Join(Environment.NewLine, traces.Where(t => t.Contains(nameSpace)));
         }
     }
 }

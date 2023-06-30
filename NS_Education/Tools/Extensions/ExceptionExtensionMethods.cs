@@ -9,11 +9,11 @@ namespace NS_Education.Tools.Extensions
     /// </summary>
     public static class ExceptionExtensionMethods
     {
-        private static IEnumerable<string> IgnoredNamespacePrefixes = new[]
+        private static readonly IEnumerable<string> IgnoredNamespacePrefixes = new[]
         {
             "System.",
             "Microsoft."
-        };
+        }.Select(p => " " + p); // 前置空白，只抓開頭
 
         /// <summary>
         /// 從 Exception 中取得最裡面一層的錯誤訊息。
@@ -43,7 +43,7 @@ namespace NS_Education.Tools.Extensions
             string[] traces = stackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
             return String.Join(Environment.NewLine, traces
-                .Where(t => !IgnoredNamespacePrefixes.Any(t.StartsWith)));
+                .Where(t => !IgnoredNamespacePrefixes.Any(t.Contains)));
         }
     }
 }

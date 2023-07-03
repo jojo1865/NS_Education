@@ -85,10 +85,7 @@ namespace NS_Education.Tools
                                           SuccessFlag = false,
                                           Errors = new[]
                                           {
-                                              exception != null
-                                                  ? new SystemError(exception)
-                                                  : new SystemError(
-                                                      filterContext.HttpContext.Response.StatusDescription)
+                                              GetError(filterContext, exception)
                                           }
                                       }
                                   )
@@ -103,6 +100,15 @@ namespace NS_Education.Tools
             filterContext.HttpContext.Response.StatusDescription = "OK";
 
             return newActionResult;
+        }
+
+        private static BaseError GetError(ControllerContext filterContext, Exception exception)
+        {
+            if (filterContext.HttpContext.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+                return new AuthError(exception);
+            return exception != null
+                ? new SystemError(exception)
+                : new SystemError(filterContext.HttpContext.Response.StatusDescription);
         }
 
         /// <summary>

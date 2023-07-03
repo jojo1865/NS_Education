@@ -675,6 +675,7 @@
         <Compile Include="Models\Errors\InputValidationErrors\ValueOutOfRangeError.cs"/>
         <Compile Include="Models\Errors\InputValidationErrors\ValueTooLargeError.cs"/>
         <Compile Include="Models\Errors\InputValidationErrors\WrongFormatError.cs"/>
+        <Compile Include="Models\Errors\AuthError.cs"/>
         <Compile Include="Models\Errors\SystemError.cs"/>
         <Compile Include="Models\FinalizedResponse.cs"/>
         <Compile Include="Models\IReturnMessageInfusable.cs"/>

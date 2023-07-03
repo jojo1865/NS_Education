@@ -47,7 +47,7 @@ namespace NS_Education
                 }
 
                 Response.Flush();
-                CompleteRequest();
+                Response.Close(); // 避免 IIS Server 繼續寫入 Response
                 return;
             }
 
@@ -55,7 +55,7 @@ namespace NS_Education
             {
                 // 如果是 OPTIONS，即刻回傳
                 Response.Flush();
-                CompleteRequest();
+                Response.End();
             }
         }
     }

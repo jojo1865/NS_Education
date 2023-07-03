@@ -40,6 +40,9 @@ namespace NS_Education.Tools.Extensions
         {
             string stackTrace = e.StackTrace;
 
+            if (stackTrace.IsNullOrWhiteSpace())
+                return null;
+
             string[] traces = stackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
             return String.Join(Environment.NewLine, traces

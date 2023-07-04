@@ -53,20 +53,26 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Where(dts => dts.ActiveFlag && !dts.DeleteFlag)
                 .ToDictionaryAsync(dts => dts.DTSID, dts => dts);
 
-            // 將查詢出來的資料先轉換成 RSID -> RS 的字典，方便之後快速建立 DTS -> RS 的對照表
-            Dictionary<int, Resver_Site> resverSites = results
+            // 建立 RSID -> RS 的字典，方便在建立 DTSID -> RS 對照表時快速對照
+            Dictionary<int, Resver_Site> rsIdToRs = results
                 .ToDictionary(rs => rs.RSID, rs => rs);
 
             // 查詢 dtsToRts 的先備參數
             IEnumerable<int> resultIds = results.Select(rs => rs.RSID);
             string tableName = DC.GetTableName<Resver_Site>();
 
-            // 查詢 RTS，並且透過 rts.DTSID 建立 DTS -> RS 的對照表
-            ILookup<int, Resver_Site> dtsToRs = DC.M_Resver_TimeSpan
+            // 查詢所有有關的 RTS
+            M_Resver_TimeSpan[] relatedRts = await DC.M_Resver_TimeSpan
+                .Include(rts => rts.D_TimeSpan)
                 .Where(rts => rts.TargetTable == tableName)
                 .Where(rts => resultIds.Contains(rts.TargetID))
-                .AsEnumerable()
-                .ToLookup(rts => rts.DTSID, rts => resverSites[rts.TargetID]);
+                .ToArrayAsync();
+
+            // 建立每個 DTSID 與哪些 RS 有關的對照辭典
+            IDictionary<int, IEnumerable<Resver_Site>> dtsIdToRs = timeSpans.Values
+                .ToDictionary(dts => dts.DTSID, dts => relatedRts
+                    .Where(rts => rts.D_TimeSpan.IsCrossingWith(dts))
+                    .Select(rts => rsIdToRs[rts.TargetID]));
 
             CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem>
                 response = GetListInitializeResponse();
@@ -80,7 +86,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             {
                 SiteData_GetListForCalendar_Output_Row_APIItem row = GetListMakeNewRow(d);
                 List<SiteData_GetListForCalendar_TimeSpan_APIItem> timeSpanItems =
-                    GetListMakeRowTimeSpanItems(d, results, timeSpans, dtsToRs);
+                    GetListMakeRowTimeSpanItems(d, results, timeSpans, dtsIdToRs);
 
                 row.TimeSpans = timeSpanItems;
                 response.Items.Add(row);
@@ -98,14 +104,15 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         }
 
         private List<SiteData_GetListForCalendar_TimeSpan_APIItem> GetListMakeRowTimeSpanItems(DateTime d,
-            Resver_Site[] results, Dictionary<int, D_TimeSpan> timeSpans, ILookup<int, Resver_Site> dtsToRs)
+            Resver_Site[] results, Dictionary<int, D_TimeSpan> timeSpans,
+            IDictionary<int, IEnumerable<Resver_Site>> dtsToRs)
         {
             List<SiteData_GetListForCalendar_TimeSpan_APIItem> timeSpanItems = timeSpans.Select(kvp => kvp.Value)
                 .Select((dts, tsIndex) => new SiteData_GetListForCalendar_TimeSpan_APIItem
                 {
                     Title = dts.Title ?? "",
                     SortNo = tsIndex,
-                    ReservedSites = !dtsToRs.Contains(dts.DTSID)
+                    ReservedSites = !dtsToRs.ContainsKey(dts.DTSID)
                         ? new List<SiteData_GetListForCalendar_ReservedSite_APIItem>()
                         : dtsToRs[dts.DTSID]
                             .Where(rs => rs.TargetDate.Date == d.Date)
@@ -137,12 +144,16 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             DateTime endDate = default;
 
             bool isValid = await input.StartValidate()
+                .SkipIfAlreadyInvalid()
                 .Validate(i => i.StartDate.TryParseDateTime(out startDate),
                     () => AddError(WrongFormat("起始日期", nameof(input.StartDate))))
                 .Validate(i => i.EndDate.TryParseDateTime(out endDate),
                     () => AddError(WrongFormat("結束日期", nameof(input.EndDate))))
                 .Validate(i => endDate >= startDate,
                     () => AddError(MinLargerThanMax("起始日期", nameof(input.StartDate), "結束日期", nameof(input.EndDate))))
+                .Validate(i => ((endDate.Date - startDate.Date).Days + 1).IsInBetween(1, 21),
+                    () => AddError(OutOfRange("查詢的日期區間天數", nameof(input.StartDate) + ", " + nameof(input.EndDate), 1,
+                        21)))
                 .Validate(i => i.BSID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之場地 ID", nameof(input.BSID))))
                 .Validate(i => i.RHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之預約單 ID", nameof(input.RHID))))
                 .SkipIfAlreadyInvalid()

@@ -250,7 +250,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             };
 
             // 特殊規格：如果擁有特殊 GID 的權限，則認識為管理員
-            if (queried.M_Group_User.Any(groupUser => groupUser.GID == JwtConstants.AdminGid))
+            if (queried.M_Group_User.Any(groupUser => groupUser.GroupData.IsAdministrator))
                 claims.Add(new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.Admin.GetRoleValue()));
 
             return claims;
@@ -276,6 +276,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             var queried = input.LoginAccount.HasContent()
                 ? await DC.UserData
                     .Include(u => u.M_Group_User)
+                    .Include(u => u.M_Group_User.Select(mgu => mgu.GroupData))
                     .FirstOrDefaultAsync(u => u.LoginAccount == input.LoginAccount)
                 : null;
             return queried;

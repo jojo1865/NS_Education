@@ -12,7 +12,9 @@ namespace NS_Education.Tools.Extensions
         /// <returns>表示開始時間與結束時間的「HH:mm ~ HH:mm」格式的字串</returns>
         public static string GetTimeRangeFormattedString(this D_TimeSpan dts)
         {
-            return dts == null ? null : $"{(dts.HourS, dts.MinuteS).ToFormattedHourAndMinute()} ~ {(dts.HourE, dts.MinuteE).ToFormattedHourAndMinute()}";
+            return dts == null
+                ? null
+                : $"{(dts.HourS, dts.MinuteS).ToFormattedHourAndMinute()} ~ {(dts.HourE, dts.MinuteE).ToFormattedHourAndMinute()}";
         }
 
         /// <summary>
@@ -33,11 +35,20 @@ namespace NS_Education.Tools.Extensions
                 .IsCrossingWith(((thatDts.HourS, thatDts.MinuteS), (thatDts.HourE, thatDts.MinuteE)));
         }
 
+        /// <summary>
+        /// 驗證兩個 D_TimeSpan 的時間範圍間是否為包含關係。精準至分鐘，僅起始分或結束分重疊時不算。
+        /// </summary>
+        /// <param name="bigDts">外圈的時間範圍</param>
+        /// <param name="smallDts">內圈的時間範圍</param>
+        /// <returns>
+        /// true：內圈完全包含於外圈中（包含首尾重疊）
+        /// false：內圈不完全包含於外圍中（無重疊、首尾超出...等）
+        /// </returns>
         public static bool IsIncluding(this D_TimeSpan bigDts, D_TimeSpan smallDts)
         {
             if (bigDts == null || smallDts == null)
                 return false;
-            
+
             return ((bigDts.HourS, bigDts.MinuteS), (bigDts.HourE, bigDts.MinuteE))
                 .IsIncluding(((smallDts.HourS, smallDts.MinuteS), (smallDts.HourE, smallDts.MinuteE)));
         }

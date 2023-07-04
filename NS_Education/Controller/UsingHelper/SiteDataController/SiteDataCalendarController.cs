@@ -1,14 +1,14 @@
+using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BeingValidated;
+using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.SiteData.GetListForCalendar;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
-using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
-using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
-using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -21,24 +21,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
     /// 但因為目前開的 Route 為 SiteData，因此還是歸類在 SiteDataController，<br/>
     /// 但處理的是預約單的 Entity。
     /// </summary>
-    public class SiteDataCalendarController : PublicClass,
-        IGetListPaged<Resver_Site, SiteData_GetListForCalendar_Input_APIItem,
-            SiteData_GetListForCalendar_Output_Row_APIItem>
+    public class SiteDataCalendarController : PublicClass
     {
-        #region Initializaton
-
-        private readonly IGetListPagedHelper<SiteData_GetListForCalendar_Input_APIItem> _getListPagedHelper;
-
-        public SiteDataCalendarController()
-        {
-            _getListPagedHelper =
-                new GetListPagedHelper<SiteDataCalendarController, Resver_Site,
-                    SiteData_GetListForCalendar_Input_APIItem,
-                    SiteData_GetListForCalendar_Output_Row_APIItem>(this);
-        }
-
-        #endregion
-
         #region GetList - For calendar
 
         // Route 為 /SiteData/GetCalendarList
@@ -47,16 +31,118 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetList(SiteData_GetListForCalendar_Input_APIItem input)
         {
-            return await _getListPagedHelper.GetPagedList(input);
+            // 特例：最終輸出資料不以單筆資料為單位，而是重新 group 過，因此不使用 Helper
+
+            if (!await GetListPagedValidateInput(input))
+                return GetResponseJson();
+
+            Resver_Site[] results = await GetListPagedOrderedQuery(input).ToArrayAsync();
+
+            CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem> response =
+                await GetListResponse(input, results);
+
+            return GetResponseJson(response);
+        }
+
+        private async Task<CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem>> GetListResponse(
+            SiteData_GetListForCalendar_Input_APIItem input,
+            Resver_Site[] results)
+        {
+            // 查出所有有效的時段資料
+            Dictionary<int, D_TimeSpan> timeSpans = await DC.D_TimeSpan
+                .Where(dts => dts.ActiveFlag && !dts.DeleteFlag)
+                .ToDictionaryAsync(dts => dts.DTSID, dts => dts);
+
+            // 將查詢出來的資料先轉換成 RSID -> RS 的字典，方便之後快速建立 DTS -> RS 的對照表
+            Dictionary<int, Resver_Site> resverSites = results
+                .ToDictionary(rs => rs.RSID, rs => rs);
+
+            // 查詢 dtsToRts 的先備參數
+            IEnumerable<int> resultIds = results.Select(rs => rs.RSID);
+            string tableName = DC.GetTableName<Resver_Site>();
+
+            // 查詢 RTS，並且透過 rts.DTSID 建立 DTS -> RS 的對照表
+            ILookup<int, Resver_Site> dtsToRs = DC.M_Resver_TimeSpan
+                .Where(rts => rts.TargetTable == tableName)
+                .Where(rts => resultIds.Contains(rts.TargetID))
+                .AsEnumerable()
+                .ToLookup(rts => rts.DTSID, rts => resverSites[rts.TargetID]);
+
+            CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem>
+                response = GetListInitializeResponse();
+
+            // 因為回傳結果是 startDate ~ endDate 每天一個 row，所以不能從不一定每天都有的 resverSites.TargetDate 來建立
+
+            DateTime startDate = input.StartDate.ParseDateTime().Date;
+            DateTime endDate = input.EndDate.ParseDateTime().Date;
+
+            for (DateTime d = startDate; d <= endDate; d = d.AddDays(1))
+            {
+                SiteData_GetListForCalendar_Output_Row_APIItem row = GetListMakeNewRow(d);
+                List<SiteData_GetListForCalendar_TimeSpan_APIItem> timeSpanItems =
+                    GetListMakeRowTimeSpanItems(d, results, timeSpans, dtsToRs);
+
+                row.TimeSpans = timeSpanItems;
+                response.Items.Add(row);
+            }
+
+            return response;
+        }
+
+        private static CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem> GetListInitializeResponse()
+        {
+            CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem> response =
+                new CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem>();
+            response.Items = new List<SiteData_GetListForCalendar_Output_Row_APIItem>();
+            return response;
+        }
+
+        private List<SiteData_GetListForCalendar_TimeSpan_APIItem> GetListMakeRowTimeSpanItems(DateTime d,
+            Resver_Site[] results, Dictionary<int, D_TimeSpan> timeSpans, ILookup<int, Resver_Site> dtsToRs)
+        {
+            List<SiteData_GetListForCalendar_TimeSpan_APIItem> timeSpanItems = timeSpans.Select(kvp => kvp.Value)
+                .Select((dts, tsIndex) => new SiteData_GetListForCalendar_TimeSpan_APIItem
+                {
+                    Title = dts.Title ?? "",
+                    SortNo = tsIndex,
+                    ReservedSites = !dtsToRs.Contains(dts.DTSID)
+                        ? new List<SiteData_GetListForCalendar_ReservedSite_APIItem>()
+                        : dtsToRs[dts.DTSID]
+                            .Where(rs => rs.TargetDate.Date == d.Date)
+                            .Select((rs, rsIndex) => new SiteData_GetListForCalendar_ReservedSite_APIItem
+                            {
+                                BS_Code = rs.B_SiteData?.Code ?? "",
+                                BS_Title = rs.B_SiteData?.Title ?? "",
+                                RH_Code = rs.Resver_Head?.Code ?? "",
+                                RH_Title = rs.Resver_Head?.Title ?? "",
+                                SortNo = rsIndex
+                            }).OrderBy(i => i.SortNo).ToList()
+                }).OrderBy(i => i.SortNo).ToList();
+            return timeSpanItems;
+        }
+
+        private static SiteData_GetListForCalendar_Output_Row_APIItem GetListMakeNewRow(DateTime d)
+        {
+            SiteData_GetListForCalendar_Output_Row_APIItem row = new SiteData_GetListForCalendar_Output_Row_APIItem
+            {
+                Date = d.ToFormattedStringDate(),
+                Weekday = (int)d.DayOfWeek == 0 ? 7 : (int)d.DayOfWeek,
+            };
+            return row;
         }
 
         public async Task<bool> GetListPagedValidateInput(SiteData_GetListForCalendar_Input_APIItem input)
         {
+            DateTime startDate = default;
+            DateTime endDate = default;
+
             bool isValid = await input.StartValidate()
-                .Validate(i => i.TargetYear.IsInBetween(1911, 9999),
-                    () => AddError(WrongFormat("目標年分", nameof(input.TargetYear))))
-                .Validate(i => i.TargetMonth.IsInBetween(1, 12),
-                    () => AddError(WrongFormat("目標月份", nameof(input.TargetMonth))))
+                .Validate(i => i.StartDate.TryParseDateTime(out startDate),
+                    () => AddError(WrongFormat("起始日期", nameof(input.StartDate))))
+                .Validate(i => i.EndDate.TryParseDateTime(out endDate),
+                    () => AddError(WrongFormat("結束日期", nameof(input.EndDate))))
+                .Validate(i => endDate >= startDate,
+                    () => AddError(MinLargerThanMax("起始日期", nameof(input.StartDate), "結束日期", nameof(input.EndDate))))
                 .Validate(i => i.BSID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之場地 ID", nameof(input.BSID))))
                 .Validate(i => i.RHID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之預約單 ID", nameof(input.RHID))))
                 .SkipIfAlreadyInvalid()
@@ -87,9 +173,13 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Include(rs => rs.B_SiteData.M_SiteGroup1.Select(sg => sg.B_SiteData))
                 .AsQueryable();
 
-            // 年份和月份
+            DateTime startDate = input.StartDate.ParseDateTime().Date;
+            DateTime endDate = input.EndDate.ParseDateTime().Date;
+
+            // 日期範圍
             query = query.Where(
-                rs => rs.TargetDate.Year == input.TargetYear && rs.TargetDate.Month == input.TargetMonth);
+                rs => DbFunctions.TruncateTime(rs.TargetDate) >= startDate &&
+                      DbFunctions.TruncateTime(rs.TargetDate) <= endDate);
 
             // 預約單號
             if (input.RHID.IsAboveZero())
@@ -111,42 +201,11 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             if (input.SiteTitle.HasContent())
                 query = query.Where(rs => rs.B_SiteData.Title.Contains(input.SiteTitle));
 
-            return query.OrderBy(rs => rs.TargetDate)
-                .ThenBy(rs => rs.SortNo)
-                .ThenBy(rs => rs.RHID)
-                .ThenBy(rs => rs.RSID);
-        }
+            query = query.Where(rs => !rs.DeleteFlag);
 
-        public async Task<SiteData_GetListForCalendar_Output_Row_APIItem> GetListPagedEntityToRow(Resver_Site entity)
-        {
-            string targetTableName = DC.GetTableName<Resver_Site>();
+            query = query.Where(rs => !rs.Resver_Head.DeleteFlag);
 
-            return await Task.FromResult(new SiteData_GetListForCalendar_Output_Row_APIItem
-                {
-                    BSID = entity.BSID,
-                    Code = entity.B_SiteData.Code ?? "",
-                    Title = entity.B_SiteData.Title ?? "",
-                    RHID = entity.RHID,
-                    RSID = entity.RSID,
-                    RSSortNo = entity.SortNo,
-                    RHCode = entity.Resver_Head?.Code ?? "",
-                    RHTitle = entity.Resver_Head?.Title ?? "",
-                    CID = entity.Resver_Head?.CID ?? 0,
-                    CustomerTitle = entity.Resver_Head?.CustomerTitle ?? "",
-                    TargetDate = entity.TargetDate.ToFormattedStringDate(),
-                    Items = entity.Resver_Head?.M_Resver_TimeSpan
-                        .Where(rts => rts.TargetTable == targetTableName)
-                        .Where(rts => rts.TargetID == entity.RSID)
-                        .Select(rts =>
-                            new SiteData_GetListForCalendar_TimeSpan_APIItem
-                            {
-                                DTSID = rts.DTSID,
-                                Title = rts.D_TimeSpan.Title ?? "",
-                                SortNo = rts.SortNo
-                            }).OrderBy(item => item.SortNo)
-                        .ThenBy(item => item.DTSID)
-                }
-            );
+            return query.OrderBy(rs => rs.TargetDate);
         }
 
         #endregion

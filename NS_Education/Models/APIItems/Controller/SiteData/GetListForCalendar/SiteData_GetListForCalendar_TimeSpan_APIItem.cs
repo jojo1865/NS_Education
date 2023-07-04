@@ -15,6 +15,7 @@ namespace NS_Education.Models.APIItems.Controller.SiteData.GetListForCalendar
     {
         public string BS_Code { get; set; }
         public string BS_Title { get; set; }
+        public int RHID { get; set; }
         public string RH_Code { get; set; }
         public string RH_Title { get; set; }
         public int SortNo { get; set; }

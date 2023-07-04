@@ -120,6 +120,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                             {
                                 BS_Code = rs.B_SiteData?.Code ?? "",
                                 BS_Title = rs.B_SiteData?.Title ?? "",
+                                RHID = rs.RHID,
                                 RH_Code = rs.Resver_Head?.Code ?? "",
                                 RH_Title = rs.Resver_Head?.Title ?? "",
                                 SortNo = rsIndex

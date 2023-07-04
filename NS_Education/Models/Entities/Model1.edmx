@@ -434,6 +434,7 @@
           <Property Name="CreUID" Type="int" Nullable="false" />
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
+          <Property Name="IsAdministrator" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="M_Address">
           <Key>
@@ -2749,6 +2750,7 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <Property Name="IsAdministrator" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="M_Group_Menu" Relationship="Self.FK_M_Group_Menu_GroupData" FromRole="GroupData" ToRole="M_Group_Menu" />
           <NavigationProperty Name="M_Group_User" Relationship="Self.FK_M_Group_User_GroupData" FromRole="GroupData" ToRole="M_Group_User" />
         </EntityType>
@@ -5055,6 +5057,7 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+                <ScalarProperty Name="IsAdministrator" ColumnName="IsAdministrator" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -49,9 +49,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             Resver_Site[] results)
         {
             // 查出所有有效的時段資料
-            Dictionary<int, D_TimeSpan> timeSpans = await DC.D_TimeSpan
+            var timeSpans = await DC.D_TimeSpan
                 .Where(dts => dts.ActiveFlag && !dts.DeleteFlag)
-                .ToDictionaryAsync(dts => dts.DTSID, dts => dts);
+                .ToArrayAsync();
 
             // 建立 RSID -> RS 的字典，方便在建立 DTSID -> RS 對照表時快速對照
             Dictionary<int, Resver_Site> rsIdToRs = results
@@ -69,7 +69,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .ToArrayAsync();
 
             // 建立每個 DTSID 與哪些 RS 有關的對照辭典
-            IDictionary<int, IEnumerable<Resver_Site>> dtsIdToRs = timeSpans.Values
+            IDictionary<int, IEnumerable<Resver_Site>> dtsIdToRs = timeSpans
                 .ToDictionary(dts => dts.DTSID, dts => relatedRts
                     .Where(rts => rts.D_TimeSpan.IsCrossingWith(dts))
                     .Select(rts => rsIdToRs[rts.TargetID]));
@@ -104,10 +104,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         }
 
         private List<SiteData_GetListForCalendar_TimeSpan_APIItem> GetListMakeRowTimeSpanItems(DateTime d,
-            Resver_Site[] results, Dictionary<int, D_TimeSpan> timeSpans,
+            Resver_Site[] results, D_TimeSpan[] timeSpans,
             IDictionary<int, IEnumerable<Resver_Site>> dtsToRs)
         {
-            List<SiteData_GetListForCalendar_TimeSpan_APIItem> timeSpanItems = timeSpans.Select(kvp => kvp.Value)
+            List<SiteData_GetListForCalendar_TimeSpan_APIItem> timeSpanItems = timeSpans
                 .Select((dts, tsIndex) => new SiteData_GetListForCalendar_TimeSpan_APIItem
                 {
                     Title = dts.Title ?? "",

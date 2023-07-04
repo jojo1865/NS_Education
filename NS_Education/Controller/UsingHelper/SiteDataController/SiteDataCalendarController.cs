@@ -86,7 +86,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             {
                 SiteData_GetListForCalendar_Output_Row_APIItem row = GetListMakeNewRow(d);
                 List<SiteData_GetListForCalendar_TimeSpan_APIItem> timeSpanItems =
-                    GetListMakeRowTimeSpanItems(d, results, timeSpans, dtsIdToRs);
+                    GetListMakeRowTimeSpanItems(d, timeSpans, dtsIdToRs);
 
                 row.TimeSpans = timeSpanItems;
                 response.Items.Add(row);
@@ -104,7 +104,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         }
 
         private List<SiteData_GetListForCalendar_TimeSpan_APIItem> GetListMakeRowTimeSpanItems(DateTime d,
-            Resver_Site[] results, D_TimeSpan[] timeSpans,
+            D_TimeSpan[] timeSpans,
             IDictionary<int, IEnumerable<Resver_Site>> dtsToRs)
         {
             List<SiteData_GetListForCalendar_TimeSpan_APIItem> timeSpanItems = timeSpans

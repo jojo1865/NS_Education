@@ -97,10 +97,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         private static CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem> GetListInitializeResponse()
         {
-            CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem> response =
-                new CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem>();
-            response.Items = new List<SiteData_GetListForCalendar_Output_Row_APIItem>();
-            return response;
+            return new CommonResponseForList<SiteData_GetListForCalendar_Output_Row_APIItem>
+            {
+                Items = new List<SiteData_GetListForCalendar_Output_Row_APIItem>()
+            };
         }
 
         private List<SiteData_GetListForCalendar_TimeSpan_APIItem> GetListMakeRowTimeSpanItems(DateTime d,

@@ -1,4 +1,6 @@
 using System;
+using System.Net;
+using System.Web;
 using System.Web.Mvc;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.Extensions;
@@ -29,6 +31,11 @@ namespace NS_Education.Tools.Filters.ExceptionHandlerFilter
 
         private static void WriteToDb(ExceptionContext filterContext)
         {
+            // 為 401 時，不寫 log
+            if (filterContext.Exception is HttpException httpException &&
+                httpException.GetHttpCode() == (int)HttpStatusCode.Unauthorized)
+                return;
+
             using (NsDbContext context = new NsDbContext())
             {
                 // here we don't use project-customized SaveChanges method,

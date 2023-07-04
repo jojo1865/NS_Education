@@ -4,6 +4,7 @@ using System.Web;
 using System.Web.Mvc;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.Extensions;
+using NS_Education.Variables;
 
 namespace NS_Education.Tools.Filters.ExceptionHandlerFilter
 {
@@ -31,10 +32,11 @@ namespace NS_Education.Tools.Filters.ExceptionHandlerFilter
 
         private static void WriteToDb(ExceptionContext filterContext)
         {
-            // 為 401 時，不寫 log
-            if (filterContext.Exception is HttpException httpException &&
-                httpException.GetHttpCode() == (int)HttpStatusCode.Unauthorized)
-                return;
+            // 為 401 或 901 時，不寫 log
+            if (filterContext.Exception is HttpException httpException)
+                if (httpException.GetHttpCode() == (int)HttpStatusCode.Unauthorized ||
+                    httpException.GetHttpCode() == (int)CustomHttpCode.PasswordExpired)
+                    return;
 
             using (NsDbContext context = new NsDbContext())
             {

@@ -97,14 +97,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             TEntity t = await _controller.SubmitCreateData(input);
             FlagHelper.SetActiveFlag(t, input.ActiveFlag);
 
-            // 2. 如果 ID 不是 0，表示此前已有手動儲存至 DB，折返。
-            // 否則，儲存至DB。
-            if (_controller.DC.GetPrimaryKeyFromEntity(t) != 0)
-                return;
-
             try
             {
-                await Task.Run(() => _controller.DC.Set<TEntity>().Add(t));
+                // 2. 如果 ID 不是 0，表示此前已有手動儲存至 DB，不手動 Add。
+                if (_controller.DC.GetPrimaryKeyFromEntity(t) == 0)
+                    await Task.Run(() => _controller.DC.Set<TEntity>().Add(t));
                 await _controller.DC.SaveChangesStandardProcedureAsync(_controller.GetUid(),
                     HttpContext.Current.Request);
             }

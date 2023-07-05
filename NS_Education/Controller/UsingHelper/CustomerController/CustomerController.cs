@@ -524,14 +524,10 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
-                .ForceSkipIf(item => item.ContactType == -1)
-                .Validate(item => item.ContactType.IsInBetween(0, 3),
-                    item => AddError(NotSupportedValue($"業務（ID：{item.BUID}）聯絡方式類型", nameof(item.ContactType), null)))
-                .Validate(item => item.ContactData.HasContent(),
-                    item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容", nameof(item.ContactData))))
-                .Validate(item => item.ContactData.HasLengthBetween(1, 30),
-                    item => AddError(LengthOutOfRange($"業務（ID：{item.BUID}）聯絡方式內容", nameof(item.ContactData), 1, 30)))
-                .StopForceSkipping()
+                .Validate(i => i.Phone.HasLengthBetween(0, 50),
+                    i => AddError(LengthOutOfRange($"業務（ID {i.BUID}）的聯絡電話", nameof(i.Phone), 0, 50)))
+                .Validate(i => i.Phone.All(Char.IsDigit),
+                    i => AddError(WrongFormat($"業務（ID {i.BUID}）的聯絡電話", nameof(i.Phone))))
                 .IsValid();
             return await Task.FromResult(isValid && isBusinessUserContactValid);
         }
@@ -585,7 +581,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 if (thisInput is null)
                     continue;
 
-                await EditContactAndAddIfNew(cbu, thisInput.ContactType, thisInput.ContactData, 1);
+                await EditContactAndAddIfNew(cbu, (int)ContactType.Phone, thisInput.Phone, 1);
             }
 
             // 寫一筆 M_Address
@@ -604,11 +600,15 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             await EditContactAndAddIfNew(DC.GetTableName<Customer>(), customer.CID, contactType, contactData, sortNo);
         }
 
-        private async Task EditContactAndAddIfNew(M_Customer_BusinessUser customerBusinessUser, int contactType,
+        private async Task EditContactAndAddIfNew(M_Customer_BusinessUser customerBusinessUser, int? contactType,
             string contactData, int sortNo)
         {
+            // 當沒有正確的資訊時，不做任何事
+            if (contactType is null || !contactType.Value.IsInBetween(0, 3) || contactData.IsNullOrWhiteSpace())
+                return;
+
             await EditContactAndAddIfNew(DC.GetTableName<M_Customer_BusinessUser>(), customerBusinessUser.MID,
-                contactType, contactData, sortNo);
+                contactType.Value, contactData, sortNo);
         }
 
         private async Task EditContactAndAddIfNew(string tableName, int targetId, int contactType, string contactData,
@@ -740,16 +740,12 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             if (input.ActiveFlag == false && !await ChangeActiveValidateReservation(input.CID))
                 return false;
 
-            // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
+            // 驗證業務如果有輸入聯絡方式種類時，輸入欄位格式正確
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
-                .ForceSkipIf(item => item.ContactType == -1)
-                .Validate(item => item.ContactType.IsInBetween(0, 3),
-                    item => AddError(NotSupportedValue($"業務（ID：{item.BUID}）聯絡方式類型", nameof(item.ContactType), null)))
-                .Validate(item => item.ContactData.HasContent(),
-                    item => AddError(EmptyNotAllowed($"業務（ID：{item.BUID}）聯絡方式內容", nameof(item.ContactData))))
-                .Validate(item => item.ContactData.HasLengthBetween(1, 30),
-                    item => AddError(LengthOutOfRange($"業務（ID：{item.BUID}）聯絡方式內容", nameof(item.ContactData), 1, 30)))
-                .StopForceSkipping()
+                .Validate(i => i.Phone.HasLengthBetween(0, 50),
+                    i => AddError(LengthOutOfRange($"業務（ID {i.BUID}）的聯絡電話", nameof(i.Phone), 0, 50)))
+                .Validate(i => i.Phone.All(Char.IsDigit),
+                    i => AddError(WrongFormat($"業務（ID {i.BUID}）的聯絡電話", nameof(i.Phone))))
                 .IsValid();
 
 
@@ -835,7 +831,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 if (thisInput is null)
                     continue;
 
-                Task.Run(() => EditContactAndAddIfNew(cbu, thisInput.ContactType, thisInput.ContactData, 1))
+                Task.Run(() => EditContactAndAddIfNew(cbu, (int)ContactType.Phone, thisInput.Phone, 1))
                     .GetAwaiter().GetResult();
             }
 

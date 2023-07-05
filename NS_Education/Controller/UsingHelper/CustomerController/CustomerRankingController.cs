@@ -79,10 +79,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             query = query.Where(c => c.Resver_Head
                 .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
-                .Any(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate));
-            query = query.Where(c => c.Resver_Head
-                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
-                .Any(rh => DbFunctions.TruncateTime(rh.EDate) <= _endDate));
+                .Any(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate &&
+                           DbFunctions.TruncateTime(rh.EDate) <= _endDate));
 
             Customer_GetRankings_OrderBy orderBy =
                 (Customer_GetRankings_OrderBy)Enum.Parse(typeof(Customer_GetRankings_OrderBy),

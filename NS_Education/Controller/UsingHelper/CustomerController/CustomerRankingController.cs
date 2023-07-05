@@ -24,6 +24,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         #region Initialization
 
         private readonly IGetListPagedHelper<Customer_GetRankings_Input_APIItem> helper;
+        private DateTime _startDate = SqlDateTime.MinValue.Value;
+        private DateTime _endDate = SqlDateTime.MaxValue.Value;
 
         public CustomerRankingController()
         {
@@ -70,24 +72,17 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .Include(c => c.Resver_Head.Select(rh => rh.B_StaticCode))
                 .Include(c => c.B_StaticCode1);
 
-            DateTime startDate = SqlDateTime.MinValue.Value;
-            DateTime endDate = SqlDateTime.MaxValue.Value;
+            // _startDate 和 _endDate 在將資料轉換為 response 時也會用到，
+            // 所以作為控制器的參數儲存
 
-            if (input.DateS.TryParseDateTime(out DateTime newStartDate))
-                startDate = newStartDate;
-
-            if (input.DateE.TryParseDateTime(out DateTime newEndDate))
-                endDate = newEndDate;
-
-            startDate = startDate.Date;
-            endDate = endDate.Date;
+            GetListRememberInputDates(input);
 
             query = query.Where(c => c.Resver_Head
-                .Where(rh => !rh.DeleteFlag)
-                .Any(rh => DbFunctions.TruncateTime(rh.SDate) >= startDate));
+                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                .Any(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate));
             query = query.Where(c => c.Resver_Head
-                .Where(rh => !rh.DeleteFlag)
-                .Any(rh => DbFunctions.TruncateTime(rh.EDate) <= endDate));
+                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                .Any(rh => DbFunctions.TruncateTime(rh.EDate) <= _endDate));
 
             Customer_GetRankings_OrderBy orderBy =
                 (Customer_GetRankings_OrderBy)Enum.Parse(typeof(Customer_GetRankings_OrderBy),
@@ -99,15 +94,15 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 case Customer_GetRankings_OrderBy.ResverCt:
                     orderedQuery = query.OrderByDescending(c =>
                         c.Resver_Head
-                            .Where(rh => DbFunctions.TruncateTime(rh.SDate) >= startDate)
-                            .Where(rh => DbFunctions.TruncateTime(rh.EDate) <= endDate)
+                            .Where(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate)
+                            .Where(rh => DbFunctions.TruncateTime(rh.EDate) <= _endDate)
                             .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft));
                     break;
                 case Customer_GetRankings_OrderBy.QuotedPrice:
                     orderedQuery = query.OrderByDescending(c => c.Resver_Head
                         .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
-                        .Where(rh => DbFunctions.TruncateTime(rh.SDate) >= startDate)
-                        .Where(rh => DbFunctions.TruncateTime(rh.EDate) <= endDate)
+                        .Where(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate)
+                        .Where(rh => DbFunctions.TruncateTime(rh.EDate) <= _endDate)
                         .Sum(rh => rh.QuotedPrice));
                     break;
                 default:
@@ -115,6 +110,18 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             }
 
             return orderedQuery;
+        }
+
+        private void GetListRememberInputDates(Customer_GetRankings_Input_APIItem input)
+        {
+            if (input.DateS.TryParseDateTime(out DateTime newStartDate))
+                _startDate = newStartDate;
+
+            if (input.DateE.TryParseDateTime(out DateTime newEndDate))
+                _endDate = newEndDate;
+
+            _startDate = _startDate.Date;
+            _endDate = _endDate.Date;
         }
 
         public async Task<Customer_GetRankings_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity)
@@ -128,16 +135,27 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             return await Task.FromResult(new Customer_GetRankings_Output_Row_APIItem
             {
+                RentCt = entity.Resver_Head
+                    .Where(rh => rh.SDate.Date >= _startDate)
+                    .Where(rh => rh.EDate.Date <= _endDate)
+                    .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
+                QuotedTotal = entity.Resver_Head
+                    .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                    .Where(rh => rh.SDate.Date >= _startDate)
+                    .Where(rh => rh.EDate.Date <= _endDate)
+                    .Sum(rh => (decimal)rh.QuotedPrice)
+                    .ToString("N0"),
                 Code = entity.Code ?? "",
                 Title = entity.TitleC ?? entity.TitleE ?? "",
                 Industry = entity.B_StaticCode1?.Title ?? "",
                 ContactName = entity.ContectName,
                 Contacts = contacts.Select(contact => new Customer_GetRankings_Output_Contact_APIItem
-                    {
-                        ContactType = ContactTypeController.GetContactTypeTitle(contact.ContectType) ?? "",
-                        ContactData = contact.ContectData ?? ""
-                    }
-                ).ToList()
+                        {
+                            ContactType = ContactTypeController.GetContactTypeTitle(contact.ContectType) ?? "",
+                            ContactData = contact.ContectData ?? ""
+                        }
+                    )
+                    .ToList()
             });
         }
 

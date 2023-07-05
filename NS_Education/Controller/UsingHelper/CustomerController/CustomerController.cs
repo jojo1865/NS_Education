@@ -371,7 +371,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             if (!await DeleteItemValidateNoSameCodeExistingForRevive(input))
                 return GetResponseJson();
 
-            if (!await _deleteItemHelper.DeleteItemValidateReservation<Resver_Head>(input, this))
+            if (!await _deleteItemHelper.DeleteItemValidateReservation(input, this))
                 return GetResponseJson();
 
             return await _deleteItemHelper.DeleteItem(input);
@@ -526,7 +526,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
                 .Validate(i => i.Phone.HasLengthBetween(0, 50),
                     i => AddError(LengthOutOfRange($"業務（ID {i.BUID}）的聯絡電話", nameof(i.Phone), 0, 50)))
-                .Validate(i => i.Phone.All(Char.IsDigit),
+                .Validate(i => i.Phone == null || i.Phone.All(Char.IsDigit),
                     i => AddError(WrongFormat($"業務（ID {i.BUID}）的聯絡電話", nameof(i.Phone))))
                 .IsValid();
             return await Task.FromResult(isValid && isBusinessUserContactValid);
@@ -586,11 +586,12 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             // 寫一筆 M_Address
 
-            var address = new M_Address();
-            SetAddressValues(input, newData, address);
-
-            await DC.AddAsync(address);
-            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+            if (input.Address.HasContent())
+            {
+                var address = new M_Address();
+                SetAddressValues(input, newData, address);
+                await DC.AddAsync(address);
+            }
 
             return newData;
         }
@@ -836,11 +837,14 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             }
 
             // 更新 M_Address
-            M_Address address = Task.Run(() => GetAddresses(data.CID)).Result.FirstOrDefault() ?? new M_Address();
-            SetAddressValues(input, data, address);
+            if (input.Address.HasContent())
+            {
+                M_Address address = Task.Run(() => GetAddresses(data.CID)).Result.FirstOrDefault() ?? new M_Address();
+                SetAddressValues(input, data, address);
 
-            if (!address.MID.IsAboveZero())
-                DC.M_Address.Add(address);
+                if (!address.MID.IsAboveZero())
+                    DC.M_Address.Add(address);
+            }
         }
 
         #endregion

@@ -1,4 +1,6 @@
 using System;
+using System.Data.Entity.Validation;
+using System.Linq;
 using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Models.Errors.DataValidationErrors
@@ -7,7 +9,15 @@ namespace NS_Education.Models.Errors.DataValidationErrors
     {
         public UpdateDbFailedError(Exception exception)
         {
-            Exception = exception.GetActualMessage();
+            if (exception is DbEntityValidationException efException)
+            {
+                Exception = String.Join(",\n",
+                    efException.EntityValidationErrors.SelectMany(r => r.ValidationErrors).Select(e => e.ErrorMessage));
+            }
+            else
+            {
+                Exception = exception.GetActualMessage();
+            }
         }
 
         public string Exception { get; }

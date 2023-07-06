@@ -120,8 +120,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                         break;
                     case "Industry":
                         ordering = sort.IsAscending
-                            ? ordering.ThenBy(c => c.B_StaticCode1?.Title ?? "")
-                            : ordering.ThenByDescending(c => c.B_StaticCode1?.Title ?? "");
+                            ? ordering.ThenBy(c => c.B_StaticCode1?.SortNo ?? 0)
+                            : ordering.ThenByDescending(c => c.B_StaticCode1?.SortNo ?? 0);
                         break;
                     case "Contact":
                         ordering = sort.IsAscending

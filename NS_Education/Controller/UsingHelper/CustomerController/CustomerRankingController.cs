@@ -1,16 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BeingValidated;
+using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.Customer.GetRankings;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
-using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
-using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
-using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -18,23 +17,12 @@ using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper.CustomerController
 {
-    public class CustomerRankingController : PublicClass,
-        IGetListPaged<Customer, Customer_GetRankings_Input_APIItem, Customer_GetRankings_Output_Row_APIItem>
+    public class CustomerRankingController : PublicClass
     {
         #region Initialization
 
-        private readonly IGetListPagedHelper<Customer_GetRankings_Input_APIItem> helper;
         private DateTime _startDate = SqlDateTime.MinValue.Value;
         private DateTime _endDate = SqlDateTime.MaxValue.Value;
-
-        public CustomerRankingController()
-        {
-            helper =
-                new GetListPagedHelper<CustomerRankingController,
-                    Customer,
-                    Customer_GetRankings_Input_APIItem,
-                    Customer_GetRankings_Output_Row_APIItem>(this);
-        }
 
         #endregion
 
@@ -44,7 +32,108 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(Customer_GetRankings_Input_APIItem input)
         {
-            return await helper.GetPagedList(input);
+            // 特例：無法使用 helper
+            // 排行榜需要支援不同欄位做排序
+            // 但是最後要依照金額計算排名
+            // 這裡採用全部查回記憶體，再做排名與 paging 的策略
+
+            if (!await GetListPagedValidateInput(input))
+                return GetResponseJson();
+
+            // 取得查詢結果，這裡的排序 = 排名
+            Dictionary<Customer, int> customerToRank = GetListPagedOrderedQuery(input)
+                .AsEnumerable()
+                .Select((c, index) => new { Customer = c, Index = index })
+                .ToDictionary(ci => ci.Customer, ci => ci.Index);
+
+            // 依據輸入的 Sorting 做排序
+            IEnumerable<Customer> customers = GetListOrderByInput(customerToRank, input.Sorting).ToArray();
+
+            var response = new CommonResponseForPagedList<Customer_GetRankings_Output_Row_APIItem>();
+            response.SetByInput(input);
+
+            (int skip, int take) = input.CalculateSkipAndTake(customers.Count());
+
+            customers = customers
+                .Skip(skip)
+                .Take(take);
+
+            int itemIndex = 0;
+            foreach (Customer customer in customers)
+            {
+                response.Items.Add(await GetListPagedEntityToRow(customer, itemIndex++, customerToRank[customer]));
+            }
+
+            return GetResponseJson(response);
+        }
+
+        private IEnumerable<Customer> GetListOrderByInput(IDictionary<Customer, int> customers,
+            IEnumerable<PagedListSorting> sorts)
+        {
+            IEnumerable<Customer> enumerable = customers.Keys.AsEnumerable();
+            // IEnumerable 沒辦法直接轉成 IOrderedEnumerable...
+            IOrderedEnumerable<Customer> ordering = enumerable.OrderBy(c => "Dummy");
+
+            foreach (PagedListSorting sort in sorts)
+            {
+                // TODO: this makes me want to kms. 
+                switch (sort.PropertyName)
+                {
+                    case "Rank":
+                        ordering = sort.IsAscending
+                            ? ordering.ThenBy(c => customers[c])
+                            : ordering.ThenByDescending(c => customers[c]);
+                        break;
+                    case "RentCt":
+                        ordering = sort.IsAscending
+                            ? ordering.ThenBy(c => c.Resver_Head
+                                .Where(rh => rh.SDate.Date >= _startDate)
+                                .Where(rh => rh.EDate.Date <= _endDate)
+                                .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft))
+                            : ordering.ThenByDescending(c => c.Resver_Head
+                                .Where(rh => rh.SDate.Date >= _startDate)
+                                .Where(rh => rh.EDate.Date <= _endDate)
+                                .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft));
+                        break;
+                    case "QuotedTotal":
+                        ordering = sort.IsAscending
+                            ? ordering.ThenBy(c => c.Resver_Head
+                                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                                .Where(rh => rh.SDate.Date >= _startDate)
+                                .Where(rh => rh.EDate.Date <= _endDate)
+                                .Sum(rh => rh.QuotedPrice))
+                            : ordering.ThenByDescending(c => c.Resver_Head
+                                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                                .Where(rh => rh.SDate.Date >= _startDate)
+                                .Where(rh => rh.EDate.Date <= _endDate)
+                                .Sum(rh => rh.QuotedPrice));
+                        break;
+                    case "CustomerCode":
+                        ordering = sort.IsAscending
+                            ? ordering.ThenBy(c => c.Code ?? "")
+                            : ordering.ThenByDescending(c => c.Code ?? "");
+                        break;
+                    case "CustomerName":
+                        ordering = sort.IsAscending
+                            ? ordering.ThenBy(c => c.TitleC ?? c.TitleE ?? "")
+                            : ordering.ThenByDescending(c => c.TitleC ?? c.TitleE ?? "");
+                        break;
+                    case "Industry":
+                        ordering = sort.IsAscending
+                            ? ordering.ThenBy(c => c.B_StaticCode1?.Title ?? "")
+                            : ordering.ThenByDescending(c => c.B_StaticCode1?.Title ?? "");
+                        break;
+                    case "Contact":
+                        ordering = sort.IsAscending
+                            ? ordering.ThenBy(c => c.ContectName ?? "")
+                            : ordering.ThenByDescending(c => c.ContectName ?? "");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return ordering;
         }
 
         public async Task<bool> GetListPagedValidateInput(Customer_GetRankings_Input_APIItem input)
@@ -52,8 +141,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             DateTime startDate = default, endDate = default;
 
             bool isValid = input.StartValidate()
-                .Validate(i => Enum.IsDefined(typeof(Customer_GetRankings_OrderBy), input.OrderBy),
-                    () => AddError(NotSupportedValue("排序方式", nameof(input.OrderBy), null)))
+                .Validate(i => Enum.IsDefined(typeof(Customer_GetRankings_RankBy), input.RankBy),
+                    () => AddError(NotSupportedValue("排序方式", nameof(input.RankBy), null)))
                 .Validate(i => i.DateS.IsNullOrWhiteSpace() || i.DateS.TryParseDateTime(out startDate),
                     () => AddError(WrongFormat("欲篩選的起始日", nameof(input.DateS))))
                 .Validate(i => i.DateE.IsNullOrWhiteSpace() || i.DateE.TryParseDateTime(out endDate),
@@ -67,7 +156,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
         public IOrderedQueryable<Customer> GetListPagedOrderedQuery(Customer_GetRankings_Input_APIItem input)
         {
-            IQueryable<Customer> query = DC.Customer.AsQueryable()
+            IQueryable<Customer> query = DC.Customer
+                .AsNoTracking()
+                .AsQueryable()
                 .Include(c => c.Resver_Head)
                 .Include(c => c.Resver_Head.Select(rh => rh.B_StaticCode))
                 .Include(c => c.B_StaticCode1);
@@ -82,21 +173,21 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .Any(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate &&
                            DbFunctions.TruncateTime(rh.EDate) <= _endDate));
 
-            Customer_GetRankings_OrderBy orderBy =
-                (Customer_GetRankings_OrderBy)Enum.Parse(typeof(Customer_GetRankings_OrderBy),
-                    input.OrderBy.ToString());
+            Customer_GetRankings_RankBy rankBy =
+                (Customer_GetRankings_RankBy)Enum.Parse(typeof(Customer_GetRankings_RankBy),
+                    input.RankBy.ToString());
 
             IOrderedQueryable<Customer> orderedQuery;
-            switch (orderBy)
+            switch (rankBy)
             {
-                case Customer_GetRankings_OrderBy.ResverCt:
+                case Customer_GetRankings_RankBy.ResverCt:
                     orderedQuery = query.OrderByDescending(c =>
                         c.Resver_Head
                             .Where(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate)
                             .Where(rh => DbFunctions.TruncateTime(rh.EDate) <= _endDate)
                             .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft));
                     break;
-                case Customer_GetRankings_OrderBy.QuotedPrice:
+                case Customer_GetRankings_RankBy.QuotedPrice:
                     orderedQuery = query.OrderByDescending(c => c.Resver_Head
                         .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
                         .Where(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate)
@@ -122,7 +213,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             _endDate = _endDate.Date;
         }
 
-        public async Task<Customer_GetRankings_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity)
+        public async Task<Customer_GetRankings_Output_Row_APIItem> GetListPagedEntityToRow(Customer entity, int index,
+            int rank)
         {
             string targetTableName = DC.GetTableName<Customer>();
             M_Contect[] contacts = await DC.M_Contect
@@ -133,6 +225,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             return await Task.FromResult(new Customer_GetRankings_Output_Row_APIItem
             {
+                Index = index,
+                Rank = rank,
                 RentCt = entity.Resver_Head
                     .Where(rh => rh.SDate.Date >= _startDate)
                     .Where(rh => rh.EDate.Date <= _endDate)

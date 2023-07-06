@@ -7,6 +7,7 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetRankings
     public class Customer_GetRankings_Output_Row_APIItem : IGetResponseRow
     {
         public int Index { get; set; }
+        public int Rank { get; set; }
         public int RentCt { get; set; }
         public string QuotedTotal { get; set; }
         public string Code { get; set; }

@@ -719,6 +719,7 @@
         <Compile Include="Tools\Extensions\DecimalExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\DictionaryExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\ExceptionExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\IEnumerableExtensions.cs"/>
         <Compile Include="Tools\Extensions\IntExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\IQueryableExtensions.cs"/>
         <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs"/>

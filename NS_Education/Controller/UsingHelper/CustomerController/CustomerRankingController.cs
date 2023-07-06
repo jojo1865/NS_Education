@@ -70,63 +70,43 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         private IEnumerable<Customer> GetListOrderByInput(IDictionary<Customer, int> customers,
             IEnumerable<PagedListSorting> sorts)
         {
-            IEnumerable<Customer> enumerable = customers.Keys.AsEnumerable();
-            // IEnumerable 沒辦法直接轉成 IOrderedEnumerable...
-            IOrderedEnumerable<Customer> ordering = enumerable.OrderBy(c => "Dummy");
+            IOrderedEnumerable<Customer> ordering = customers.Keys.AsOrderedEnumerable(true);
 
             foreach (PagedListSorting sort in sorts)
             {
-                // TODO: this makes me want to kms. 
                 switch (sort.PropertyName)
                 {
                     case "Rank":
-                        ordering = sort.IsAscending
-                            ? ordering.ThenBy(c => customers[c])
-                            : ordering.ThenByDescending(c => customers[c]);
+                        ordering = ordering.Order(c => customers[c], sort.IsAscending);
                         break;
                     case "RentCt":
-                        ordering = sort.IsAscending
-                            ? ordering.ThenBy(c => c.Resver_Head
+                        ordering = ordering.Order(
+                            c => c.Resver_Head
                                 .Where(rh => rh.SDate.Date >= _startDate)
                                 .Where(rh => rh.EDate.Date <= _endDate)
-                                .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft))
-                            : ordering.ThenByDescending(c => c.Resver_Head
-                                .Where(rh => rh.SDate.Date >= _startDate)
-                                .Where(rh => rh.EDate.Date <= _endDate)
-                                .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft));
+                                .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                            , sort.IsAscending);
                         break;
                     case "QuotedTotal":
-                        ordering = sort.IsAscending
-                            ? ordering.ThenBy(c => c.Resver_Head
+                        ordering = ordering.Order(
+                            c => c.Resver_Head
                                 .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
                                 .Where(rh => rh.SDate.Date >= _startDate)
                                 .Where(rh => rh.EDate.Date <= _endDate)
-                                .Sum(rh => rh.QuotedPrice))
-                            : ordering.ThenByDescending(c => c.Resver_Head
-                                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
-                                .Where(rh => rh.SDate.Date >= _startDate)
-                                .Where(rh => rh.EDate.Date <= _endDate)
-                                .Sum(rh => rh.QuotedPrice));
+                                .Sum(rh => rh.QuotedPrice)
+                            , sort.IsAscending);
                         break;
                     case "CustomerCode":
-                        ordering = sort.IsAscending
-                            ? ordering.ThenBy(c => c.Code ?? "")
-                            : ordering.ThenByDescending(c => c.Code ?? "");
+                        ordering = ordering.Order(c => c.Code ?? "", sort.IsAscending);
                         break;
                     case "CustomerName":
-                        ordering = sort.IsAscending
-                            ? ordering.ThenBy(c => c.TitleC ?? c.TitleE ?? "")
-                            : ordering.ThenByDescending(c => c.TitleC ?? c.TitleE ?? "");
+                        ordering = ordering.Order(c => c.TitleC ?? c.TitleE ?? "", sort.IsAscending);
                         break;
                     case "Industry":
-                        ordering = sort.IsAscending
-                            ? ordering.ThenBy(c => c.B_StaticCode1?.SortNo ?? 0)
-                            : ordering.ThenByDescending(c => c.B_StaticCode1?.SortNo ?? 0);
+                        ordering = ordering.Order(c => c.B_StaticCode1?.SortNo ?? 0, sort.IsAscending);
                         break;
                     case "Contact":
-                        ordering = sort.IsAscending
-                            ? ordering.ThenBy(c => c.ContectName ?? "")
-                            : ordering.ThenByDescending(c => c.ContectName ?? "");
+                        ordering = ordering.Order(c => c.ContectName ?? "", sort.IsAscending);
                         break;
                 }
             }

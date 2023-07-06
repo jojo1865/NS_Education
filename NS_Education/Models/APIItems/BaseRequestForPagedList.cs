@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NS_Education.Variables;
 
 namespace NS_Education.Models.APIItems
@@ -29,6 +30,8 @@ namespace NS_Education.Models.APIItems
         /// 取得是否啟用分頁處理。
         /// </summary>
         public bool IsPagingEnabled => NowPage > 0;
+
+        public IEnumerable<PagedListSorting> Sorting { get; set; } = new List<PagedListSorting>();
 
         /// <summary>
         /// 依據目前的 NowPage 和 CutPage，回傳 0-based 的查詢 index。

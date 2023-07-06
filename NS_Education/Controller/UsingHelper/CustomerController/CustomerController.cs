@@ -449,14 +449,6 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             return input.CID == 0;
         }
 
-        private async Task<bool> SubmitCheckAllBuIdExists(IEnumerable<Customer_Submit_BUID_APIItem> items)
-        {
-            HashSet<int> buIdSet = items.Select(item => item.BUID).ToHashSet();
-            return await DC.BusinessUser
-                .Where(bu => bu.ActiveFlag && !bu.DeleteFlag && buIdSet.Contains(bu.BUID))
-                .CountAsync() == buIdSet.Count;
-        }
-
         #region Submit - Add
 
         public async Task<bool> SubmitAddValidateInput(Customer_Submit_Input_APIItem input)
@@ -515,12 +507,18 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .ValidateAsync(async i => await DC.D_Zip.ValidateIdExists(i.DZID, nameof(D_Zip.DZID)),
                     () => AddError(NotFound("國籍與郵遞區號 ID", nameof(input.DZID))))
                 .StopForceSkipping()
-
-                // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
-                .SkipIfAlreadyInvalid()
-                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items),
-                    () => AddError(NotFound("業務 ID", nameof(Customer_Submit_BUID_APIItem.BUID))))
                 .IsValid();
+
+            isValid = isValid &&
+                      // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
+                      await input.Items.StartValidateElements()
+                          .SkipIfAlreadyInvalid()
+                          .Validate(i => i.BUID.IsAboveZero(),
+                              () => AddError(EmptyNotAllowed("業務負責人", nameof(Customer_Submit_BUID_APIItem.BUID))))
+                          .ValidateAsync(
+                              async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)),
+                              () => AddError(NotFound("業務負責人", nameof(Customer_Submit_BUID_APIItem.BUID))))
+                          .IsValid();
 
             // 驗證業務如果有輸入聯絡方式時，輸入欄位格式正確
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
@@ -731,12 +729,18 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .ValidateAsync(async i => await DC.D_Zip.ValidateIdExists(i.DZID, nameof(D_Zip.DZID)),
                     () => AddError(NotFound("國籍與郵遞區號 ID", nameof(input.DZID))))
                 .StopForceSkipping()
-
-                // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
-                .SkipIfAlreadyInvalid()
-                .ValidateAsync(async i => await SubmitCheckAllBuIdExists(i.Items),
-                    () => AddError(NotFound("業務 ID", nameof(Customer_Submit_BUID_APIItem.BUID))))
                 .IsValid();
+
+            isValid = isValid &&
+                      // 當前面輸入都正確時，繼續驗證所有 BUID 都是實際存在的 BU 資料
+                      await input.Items.StartValidateElements()
+                          .SkipIfAlreadyInvalid()
+                          .Validate(i => i.BUID.IsAboveZero(),
+                              () => AddError(EmptyNotAllowed("業務負責人", nameof(Customer_Submit_BUID_APIItem.BUID))))
+                          .ValidateAsync(
+                              async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)),
+                              () => AddError(NotFound("業務負責人", nameof(Customer_Submit_BUID_APIItem.BUID))))
+                          .IsValid();
 
             if (input.ActiveFlag == false && !await ChangeActiveValidateReservation(input.CID))
                 return false;

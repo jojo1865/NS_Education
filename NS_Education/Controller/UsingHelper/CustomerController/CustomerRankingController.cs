@@ -70,6 +70,11 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         private IEnumerable<Customer> GetListOrderByInput(IDictionary<Customer, int> customers,
             IEnumerable<PagedListSorting> sorts)
         {
+            sorts = sorts?.ToArray();
+
+            if (sorts == null || !sorts.Any())
+                return customers.Keys;
+
             IOrderedEnumerable<Customer> ordering = customers.Keys.AsOrderedEnumerable(true);
 
             foreach (PagedListSorting sort in sorts)

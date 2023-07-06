@@ -128,8 +128,6 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                             ? ordering.ThenBy(c => c.ContectName ?? "")
                             : ordering.ThenByDescending(c => c.ContectName ?? "");
                         break;
-                    default:
-                        break;
                 }
             }
 

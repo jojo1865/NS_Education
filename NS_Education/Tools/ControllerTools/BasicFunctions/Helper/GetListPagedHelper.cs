@@ -52,7 +52,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             var response = new CommonResponseForPagedList<TGetListRow>();
             response.SetByInput(input);
 
-            (int startIndex, IList<TEntity> results) queryResult = await _GetListQueryResult(input, response);
+            IList<TEntity> results = await _GetListQueryResult(input, response);
 
             // 3. 有錯誤時提早返回
             if (_controller.HasError())
@@ -65,10 +65,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 5. 按指定格式回傳結果
             // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。（如：取得 Username）
             List<TGetListRow> rows = new List<TGetListRow>();
-            foreach (var entity in queryResult.results)
+            int startIndex = input.CalculateSkipAndTake(response.AllItemCt).skip;
+            foreach (var entity in results)
             {
                 var row = Task.Run(() => _controller.GetListPagedEntityToRow(entity)).Result;
-                row.SetIndex(queryResult.startIndex++);
+                row.SetIndex(startIndex++);
                 await row.SetInfoFromEntity(entity, _controller);
 
                 // 在這裡才實作 ReverseOrder，比較好計算 index 的值
@@ -83,7 +84,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             return _controller.GetResponseJson(response);
         }
 
-        private async Task<(int, IList<TEntity>)> _GetListQueryResult(TGetListRequest input
+        private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest input
             , CommonResponseForPagedList<TGetListRow> response)
         {
             IQueryable<TEntity> query = _controller.GetListPagedOrderedQuery(input);
@@ -104,7 +105,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 當查詢頁數超出總頁數時，直接回傳空清單
             if (totalRows == 0 || input.NowPage > response.AllPageCt)
-                return (0, new List<TEntity>());
+                return new List<TEntity>();
 
             (int skip, int take) = input.CalculateSkipAndTake(totalRows);
 
@@ -113,7 +114,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 .Take(take)
                 .ToListAsync();
 
-            return (skip, resultList);
+            return resultList;
         }
 
         #endregion

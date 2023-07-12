@@ -10,7 +10,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     /// GetUniqueNames 功能 API 端點的介面。提供無分頁的回傳。
     /// </summary>
     /// <typeparam name="TEntity">資料類型</typeparam>
-    public interface IGetListUniqueField<TEntity>
+    public interface IGetListUniqueField<TEntity, TResult>
         where TEntity : class
     {
         /// <summary>
@@ -28,12 +28,20 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// 為查詢進行排序。
         /// </summary>
         /// <returns>排序過的查詢。</returns>
-        IOrderedQueryable<TEntity> GetListUniqueNamesOrderQuery(IQueryable<TEntity> query);
+        IOrderedQueryable<TEntity> GetListUniqueFieldsOrderQuery(IQueryable<TEntity> query);
 
         /// <summary>
-        /// 從物件中取得名稱欄位的表示式。
+        /// 根據關鍵字，對查詢進行篩選。
+        /// </summary>
+        /// <param name="query">查詢</param>
+        /// <param name="keyword">關鍵字</param>
+        /// <returns>篩選過的查詢</returns>
+        IQueryable<TResult> GetListUniqueFieldsApplyKeywordFilter(IQueryable<TResult> query, string keyword);
+
+        /// <summary>
+        /// 將物件變形成查詢結果的表示式。
         /// </summary>
         /// <returns>表示式</returns>
-        Expression<Func<TEntity, string>> GetListUniqueNamesQueryExpression();
+        Expression<Func<TEntity, TResult>> GetListUniqueFieldsQueryExpression();
     }
 }

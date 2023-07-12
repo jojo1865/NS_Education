@@ -11,7 +11,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 
 namespace NS_Education.Controller.UsingHelper.SiteDataController
 {
-    public class SiteDataUniqueNamesController : PublicClass, IGetListUniqueField<B_SiteData>
+    public class SiteDataUniqueNamesController : PublicClass, IGetListUniqueField<B_SiteData, string>
     {
         #region Initialization
 
@@ -19,7 +19,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
         public SiteDataUniqueNamesController()
         {
-            _getListUniqueFieldHelper = new GetListUniqueFieldHelper<SiteDataUniqueNamesController, B_SiteData>(this);
+            _getListUniqueFieldHelper =
+                new GetListUniqueFieldHelper<SiteDataUniqueNamesController, B_SiteData, string>(this);
         }
 
         #endregion
@@ -34,13 +35,18 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         }
 
         /// <inheritdoc />
-        public IOrderedQueryable<B_SiteData> GetListUniqueNamesOrderQuery(IQueryable<B_SiteData> query)
+        public IOrderedQueryable<B_SiteData> GetListUniqueFieldsOrderQuery(IQueryable<B_SiteData> query)
         {
             return query.OrderBy(sd => sd.BSID);
         }
 
+        public IQueryable<string> GetListUniqueFieldsApplyKeywordFilter(IQueryable<string> query, string keyword)
+        {
+            return query.Where(q => q.Contains(keyword));
+        }
+
         /// <inheritdoc />
-        public Expression<Func<B_SiteData, string>> GetListUniqueNamesQueryExpression()
+        public Expression<Func<B_SiteData, string>> GetListUniqueFieldsQueryExpression()
         {
             return sd => sd.Title;
         }

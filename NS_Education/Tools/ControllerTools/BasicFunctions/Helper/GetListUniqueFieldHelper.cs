@@ -15,9 +15,11 @@ using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
-    public class GetListUniqueFieldHelper<TController, TEntity> : IGetListAllHelper<CommonRequestForUniqueField>
-        where TController : PublicClass, IGetListUniqueField<TEntity>
+    public class
+        GetListUniqueFieldHelper<TController, TEntity, TResult> : IGetListAllHelper<CommonRequestForUniqueField>
+        where TController : PublicClass, IGetListUniqueField<TEntity, TResult>
         where TEntity : class
+        where TResult : class
     {
         public GetListUniqueFieldHelper(TController controller)
         {
@@ -34,14 +36,14 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return Controller.GetResponseJson();
 
             // 2. 查詢資料
-            ICollection<string> fields = await QueryUniqueFields(input);
+            ICollection<TResult> fields = await QueryUniqueFields(input);
 
             // 3. 寫一筆 UserLog
             await Controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, Controller.GetUid(),
                 HttpContext.Current.Request);
 
             // 4. 回傳資料
-            CommonResponseForList<string> response = new CommonResponseForList<string>
+            CommonResponseForList<TResult> response = new CommonResponseForList<TResult>
             {
                 Items = fields
             };
@@ -49,21 +51,21 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             return Controller.GetResponseJson(response);
         }
 
-        private async Task<ICollection<string>> QueryUniqueFields(CommonRequestForUniqueField input)
+        private async Task<ICollection<TResult>> QueryUniqueFields(CommonRequestForUniqueField input)
         {
             IQueryable<TEntity> query = Controller.DC.Set<TEntity>().AsQueryable();
-            IOrderedQueryable<TEntity> orderedQuery = Controller.GetListUniqueNamesOrderQuery(query);
+            IOrderedQueryable<TEntity> orderedQuery = Controller.GetListUniqueFieldsOrderQuery(query);
 
             // Filter by DeleteFlag
             IQueryable<TEntity> applyDeleteFlagQuery =
                 FlagHelper.FilterByInputDeleteFlag(orderedQuery, input.DeleteFlag == 1);
 
-            IQueryable<string> filteredQuery =
+            IQueryable<TResult> filteredQuery =
                 applyDeleteFlagQuery
-                    .Select(Controller.GetListUniqueNamesQueryExpression());
+                    .Select(Controller.GetListUniqueFieldsQueryExpression());
 
             if (input.Keyword.HasContent())
-                filteredQuery = filteredQuery.Where(s => s.Contains(input.Keyword));
+                filteredQuery = Controller.GetListUniqueFieldsApplyKeywordFilter(filteredQuery, input.Keyword);
 
             filteredQuery = filteredQuery
                 .Distinct()

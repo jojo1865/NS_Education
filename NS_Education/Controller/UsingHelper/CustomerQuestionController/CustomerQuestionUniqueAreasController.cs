@@ -14,7 +14,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
 {
-    public class CustomerQuestionUniqueAreasController : PublicClass, IGetListUniqueField<CustomerQuestion>
+    public class CustomerQuestionUniqueAreasController : PublicClass, IGetListUniqueField<CustomerQuestion, string>
     {
         #region Initialization
 
@@ -23,7 +23,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
         public CustomerQuestionUniqueAreasController()
         {
             _getListUniqueFieldHelper =
-                new GetListUniqueFieldHelper<CustomerQuestionUniqueAreasController, CustomerQuestion>(this);
+                new GetListUniqueFieldHelper<CustomerQuestionUniqueAreasController, CustomerQuestion, string>(this);
         }
 
         #endregion
@@ -39,13 +39,19 @@ namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
         }
 
         /// <inheritdoc />
-        public IOrderedQueryable<CustomerQuestion> GetListUniqueNamesOrderQuery(IQueryable<CustomerQuestion> query)
+        public IOrderedQueryable<CustomerQuestion> GetListUniqueFieldsOrderQuery(IQueryable<CustomerQuestion> query)
         {
             return query.OrderBy(q => q.CQID);
         }
 
         /// <inheritdoc />
-        public Expression<Func<CustomerQuestion, string>> GetListUniqueNamesQueryExpression()
+        public IQueryable<string> GetListUniqueFieldsApplyKeywordFilter(IQueryable<string> query, string keyword)
+        {
+            return query.Where(s => s.Contains(keyword));
+        }
+
+        /// <inheritdoc />
+        public Expression<Func<CustomerQuestion, string>> GetListUniqueFieldsQueryExpression()
         {
             return question => question.AskArea;
         }

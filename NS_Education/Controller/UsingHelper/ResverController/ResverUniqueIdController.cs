@@ -15,7 +15,7 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controller.UsingHelper.ResverController
 {
-    public class ResverUniqueIdController : PublicClass, IGetListUniqueField<Resver_Head>
+    public class ResverUniqueIdController : PublicClass, IGetListUniqueField<Resver_Head, string>
     {
         #region Initialization
 
@@ -23,7 +23,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         public ResverUniqueIdController()
         {
-            _helper = new GetListUniqueFieldHelper<ResverUniqueIdController, Resver_Head>(this);
+            _helper = new GetListUniqueFieldHelper<ResverUniqueIdController, Resver_Head, string>(this);
         }
 
         #endregion
@@ -40,13 +40,18 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         }
 
         /// <inheritdoc />
-        public IOrderedQueryable<Resver_Head> GetListUniqueNamesOrderQuery(IQueryable<Resver_Head> query)
+        public IOrderedQueryable<Resver_Head> GetListUniqueFieldsOrderQuery(IQueryable<Resver_Head> query)
         {
             return query.OrderBy(rh => rh.RHID);
         }
 
+        public IQueryable<string> GetListUniqueFieldsApplyKeywordFilter(IQueryable<string> query, string keyword)
+        {
+            return query.Where(s => s.Contains(keyword));
+        }
+
         /// <inheritdoc />
-        public Expression<Func<Resver_Head, string>> GetListUniqueNamesQueryExpression()
+        public Expression<Func<Resver_Head, string>> GetListUniqueFieldsQueryExpression()
         {
             int minLength = DC.Resver_Head.Select(rh => rh.RHID.ToString().Length).OrderByDescending(l => l)
                 .FirstOrDefault();

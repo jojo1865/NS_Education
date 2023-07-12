@@ -284,6 +284,7 @@
         <Compile Include="Controller\UsingHelper\ResverController\ResverSiteController.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverSubmitPopulate.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverSubmitValidate.cs"/>
+        <Compile Include="Controller\UsingHelper\ResverController\ResverUniqueIdController.cs"/>
         <Compile Include="Controller\UsingHelper\SafetyControlController.cs"/>
         <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs"/>
         <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs"/>

@@ -1,4 +1,5 @@
 using System;
+using System.Data.Entity.SqlServer;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -47,7 +48,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         /// <inheritdoc />
         public Expression<Func<Resver_Head, string>> GetListUniqueNamesQueryExpression()
         {
-            return rh => rh.RHID.ToString();
+            int minLength = DC.Resver_Head.Select(rh => rh.RHID.ToString().Length).OrderByDescending(l => l)
+                .FirstOrDefault();
+            minLength = Math.Max(minLength, 3); // 3 comes from UI/UX design example.
+            return rh => SqlFunctions.Replicate("0", minLength - rh.RHID.ToString().Length) + rh.RHID + "（" +
+                         (rh.Title ?? "") + "）";
         }
 
         #endregion

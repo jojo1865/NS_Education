@@ -34,7 +34,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return Controller.GetResponseJson();
 
             // 2. 查詢資料
-            ICollection<string> names = await QueryUniqueNames(input);
+            ICollection<string> fields = await QueryUniqueFields(input);
 
             // 3. 寫一筆 UserLog
             await Controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, Controller.GetUid(),
@@ -43,13 +43,13 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 4. 回傳資料
             CommonResponseForList<string> response = new CommonResponseForList<string>
             {
-                Items = names
+                Items = fields
             };
 
             return Controller.GetResponseJson(response);
         }
 
-        private async Task<ICollection<string>> QueryUniqueNames(CommonRequestForUniqueField input)
+        private async Task<ICollection<string>> QueryUniqueFields(CommonRequestForUniqueField input)
         {
             IQueryable<TEntity> query = Controller.DC.Set<TEntity>().AsQueryable();
             IOrderedQueryable<TEntity> orderedQuery = Controller.GetListUniqueNamesOrderQuery(query);

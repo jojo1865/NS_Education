@@ -15,11 +15,11 @@ using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
-    public class GetListUniqueNamesHelper<TController, TEntity> : IGetListAllHelper<CommonRequestForUniqueNames>
-        where TController : PublicClass, IGetListUniqueNames<TEntity>
+    public class GetListUniqueFieldHelper<TController, TEntity> : IGetListAllHelper<CommonRequestForUniqueField>
+        where TController : PublicClass, IGetListUniqueField<TEntity>
         where TEntity : class
     {
-        public GetListUniqueNamesHelper(TController controller)
+        public GetListUniqueFieldHelper(TController controller)
         {
             Controller = controller;
         }
@@ -27,7 +27,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         private TController Controller { get; }
 
         /// <inheritdoc />
-        public async Task<string> GetAllList(CommonRequestForUniqueNames input)
+        public async Task<string> GetAllList(CommonRequestForUniqueField input)
         {
             // 1. 驗證輸入
             if (!ValidateInput(input))
@@ -49,7 +49,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             return Controller.GetResponseJson(response);
         }
 
-        private async Task<ICollection<string>> QueryUniqueNames(CommonRequestForUniqueNames input)
+        private async Task<ICollection<string>> QueryUniqueNames(CommonRequestForUniqueField input)
         {
             IQueryable<TEntity> query = Controller.DC.Set<TEntity>().AsQueryable();
             IOrderedQueryable<TEntity> orderedQuery = Controller.GetListUniqueNamesOrderQuery(query);
@@ -72,7 +72,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             return await filteredQuery.AsNoTracking().ToArrayAsync();
         }
 
-        private bool ValidateInput(CommonRequestForUniqueNames input)
+        private bool ValidateInput(CommonRequestForUniqueField input)
         {
             return input.StartValidate()
                 .Validate(i => i.DeleteFlag.IsInBetween(0, 1),

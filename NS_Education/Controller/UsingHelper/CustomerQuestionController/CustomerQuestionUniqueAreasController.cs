@@ -14,16 +14,16 @@ using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
 {
-    public class CustomerQuestionUniqueAreasController : PublicClass, IGetListUniqueNames<CustomerQuestion>
+    public class CustomerQuestionUniqueAreasController : PublicClass, IGetListUniqueField<CustomerQuestion>
     {
         #region Initialization
 
-        private readonly IGetListAllHelper<CommonRequestForUniqueNames> _getListUniqueNamesHelper;
+        private readonly IGetListAllHelper<CommonRequestForUniqueField> _getListUniqueFieldHelper;
 
         public CustomerQuestionUniqueAreasController()
         {
-            _getListUniqueNamesHelper =
-                new GetListUniqueNamesHelper<CustomerQuestionUniqueAreasController, CustomerQuestion>(this);
+            _getListUniqueFieldHelper =
+                new GetListUniqueFieldHelper<CustomerQuestionUniqueAreasController, CustomerQuestion>(this);
         }
 
         #endregion
@@ -33,9 +33,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerQuestionController
         /// <inheritdoc />
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
-        public async Task<string> GetList(CommonRequestForUniqueNames input)
+        public async Task<string> GetList(CommonRequestForUniqueField input)
         {
-            return await _getListUniqueNamesHelper.GetAllList(input);
+            return await _getListUniqueFieldHelper.GetAllList(input);
         }
 
         /// <inheritdoc />

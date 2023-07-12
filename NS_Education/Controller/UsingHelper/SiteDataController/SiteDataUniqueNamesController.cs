@@ -11,15 +11,15 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 
 namespace NS_Education.Controller.UsingHelper.SiteDataController
 {
-    public class SiteDataUniqueNamesController : PublicClass, IGetListUniqueNames<B_SiteData>
+    public class SiteDataUniqueNamesController : PublicClass, IGetListUniqueField<B_SiteData>
     {
         #region Initialization
 
-        private readonly IGetListAllHelper<CommonRequestForUniqueNames> _getListUniqueNamesHelper;
+        private readonly IGetListAllHelper<CommonRequestForUniqueField> _getListUniqueFieldHelper;
 
         public SiteDataUniqueNamesController()
         {
-            _getListUniqueNamesHelper = new GetListUniqueNamesHelper<SiteDataUniqueNamesController, B_SiteData>(this);
+            _getListUniqueFieldHelper = new GetListUniqueFieldHelper<SiteDataUniqueNamesController, B_SiteData>(this);
         }
 
         #endregion
@@ -27,10 +27,10 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         #region GetList
 
         /// <inheritdoc />
-        public async Task<string> GetList(CommonRequestForUniqueNames input)
+        public async Task<string> GetList(CommonRequestForUniqueField input)
         {
             // 確切的 Route 請參考 RouteConfig
-            return await _getListUniqueNamesHelper.GetAllList(input);
+            return await _getListUniqueFieldHelper.GetAllList(input);
         }
 
         /// <inheritdoc />

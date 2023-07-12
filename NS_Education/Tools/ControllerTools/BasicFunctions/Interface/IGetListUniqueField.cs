@@ -10,7 +10,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
     /// GetUniqueNames 功能 API 端點的介面。提供無分頁的回傳。
     /// </summary>
     /// <typeparam name="TEntity">資料類型</typeparam>
-    public interface IGetListUniqueNames<TEntity>
+    public interface IGetListUniqueField<TEntity>
         where TEntity : class
     {
         /// <summary>
@@ -22,7 +22,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// 驗證失敗時：不包含列表的通用訊息回傳格式。<br/>
         /// 意外錯誤時：拋錯。
         /// </returns>
-        Task<string> GetList(CommonRequestForUniqueNames input);
+        Task<string> GetList(CommonRequestForUniqueField input);
 
         /// <summary>
         /// 為查詢進行排序。

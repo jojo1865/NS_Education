@@ -156,7 +156,6 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 query = query.Where(c =>
                     c.TitleC.Contains(input.Keyword)
                     || c.TitleE.Contains(input.Keyword)
-                    || c.Compilation.Contains(input.Keyword)
                     || c.Code.Contains(input.Keyword));
 
             if (input.ContactName.HasContent())

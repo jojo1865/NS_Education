@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using NS_Education.Models.APIItems;
+using NS_Education.Models.APIItems.Controller.SiteData.GetUniqueNames;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
@@ -11,7 +12,8 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 
 namespace NS_Education.Controller.UsingHelper.SiteDataController
 {
-    public class SiteDataUniqueNamesController : PublicClass, IGetListUniqueField<B_SiteData, string>
+    public class SiteDataUniqueNamesController : PublicClass,
+        IGetListUniqueField<B_SiteData, SiteData_GetUniqueNames_Output_Row_APIItem>
     {
         #region Initialization
 
@@ -20,7 +22,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public SiteDataUniqueNamesController()
         {
             _getListUniqueFieldHelper =
-                new GetListUniqueFieldHelper<SiteDataUniqueNamesController, B_SiteData, string>(this);
+                new GetListUniqueFieldHelper<SiteDataUniqueNamesController, B_SiteData,
+                    SiteData_GetUniqueNames_Output_Row_APIItem>(this);
         }
 
         #endregion
@@ -40,15 +43,21 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             return query.OrderBy(sd => sd.BSID);
         }
 
-        public IQueryable<string> GetListUniqueFieldsApplyKeywordFilter(IQueryable<string> query, string keyword)
+        public IQueryable<SiteData_GetUniqueNames_Output_Row_APIItem> GetListUniqueFieldsApplyKeywordFilter(
+            IQueryable<SiteData_GetUniqueNames_Output_Row_APIItem> query, string keyword)
         {
-            return query.Where(q => q.Contains(keyword));
+            return query.Where(q => q.Title.Contains(keyword));
         }
 
         /// <inheritdoc />
-        public Expression<Func<B_SiteData, string>> GetListUniqueFieldsQueryExpression()
+        public Expression<Func<B_SiteData, SiteData_GetUniqueNames_Output_Row_APIItem>>
+            GetListUniqueFieldsQueryExpression()
         {
-            return sd => sd.Title;
+            return sd => new SiteData_GetUniqueNames_Output_Row_APIItem
+            {
+                BSID = sd.BSID,
+                Title = sd.Title ?? ""
+            };
         }
 
         #endregion

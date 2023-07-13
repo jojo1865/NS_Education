@@ -463,6 +463,7 @@
         <Compile Include="Models\APIItems\Controller\SiteData\GetListForCalendar\SiteData_GetListForCalendar_TimeSpan_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\SiteData\GetList\SiteData_GetList_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\SiteData\GetList\SiteData_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetUniqueNames\SiteData_GetUniqueNames_Output_Row_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_Devices_Row_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_GroupList_Row_APIItem.cs"/>

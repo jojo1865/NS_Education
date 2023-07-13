@@ -47,7 +47,6 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<ErrorLog> ErrorLog { get; set; }
         public virtual DbSet<GiftSending> GiftSending { get; set; }
         public virtual DbSet<GroupData> GroupData { get; set; }
-        public virtual DbSet<Lookup> Lookup { get; set; }
         public virtual DbSet<M_Address> M_Address { get; set; }
         public virtual DbSet<M_Contect> M_Contect { get; set; }
         public virtual DbSet<M_Customer_BusinessUser> M_Customer_BusinessUser { get; set; }
@@ -72,5 +71,6 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<UserData> UserData { get; set; }
         public virtual DbSet<UserLog> UserLog { get; set; }
         public virtual DbSet<UserPasswordLog> UserPasswordLog { get; set; }
+        public virtual DbSet<Lookup> Lookup { get; set; }
     }
 }

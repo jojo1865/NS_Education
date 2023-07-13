@@ -30,5 +30,6 @@ namespace NS_Education.Models.Entities
         public string Field4PropertyName { get; set; }
         public string Field5Title { get; set; }
         public string Field5PropertyName { get; set; }
+        public string IdPropertyName { get; set; }
     }
 }

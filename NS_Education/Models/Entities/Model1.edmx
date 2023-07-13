@@ -436,9 +436,27 @@
           <Property Name="UpdUID" Type="int" Nullable="false" />
           <Property Name="IsAdministrator" Type="bit" Nullable="false" />
         </EntityType>
+        <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'db_NS_Education.dbo.Lookup' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
         <EntityType Name="Lookup">
           <Key>
             <PropertyRef Name="Title" />
+            <PropertyRef Name="Category" />
+            <PropertyRef Name="GetListEndpoint" />
+            <PropertyRef Name="SubmitEndpoint" />
+            <PropertyRef Name="DeleteEndpoint" />
+            <PropertyRef Name="GetEndpoint" />
+            <PropertyRef Name="Field1Title" />
+            <PropertyRef Name="Field1PropertyName" />
+            <PropertyRef Name="Field2Title" />
+            <PropertyRef Name="Field2PropertyName" />
+            <PropertyRef Name="Field3Title" />
+            <PropertyRef Name="Field3PropertyName" />
+            <PropertyRef Name="Field4Title" />
+            <PropertyRef Name="Field4PropertyName" />
+            <PropertyRef Name="Field5Title" />
+            <PropertyRef Name="Field5PropertyName" />
+            <PropertyRef Name="IdPropertyName" />
           </Key>
           <Property Name="Title" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="Category" Type="nvarchar" MaxLength="20" Nullable="false" />
@@ -456,6 +474,7 @@
           <Property Name="Field4PropertyName" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="Field5Title" Type="nvarchar" MaxLength="10" Nullable="false" />
           <Property Name="Field5PropertyName" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="IdPropertyName" Type="varchar" MaxLength="100" Nullable="false" />
         </EntityType>
         <EntityType Name="M_Address">
           <Key>
@@ -1887,7 +1906,6 @@
           <EntitySet Name="ErrorLog" EntityType="Self.ErrorLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="GiftSending" EntityType="Self.GiftSending" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Lookup" EntityType="Self.Lookup" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Address" EntityType="Self.M_Address" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Contect" EntityType="Self.M_Contect" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Customer_BusinessUser" EntityType="Self.M_Customer_BusinessUser" Schema="dbo" store:Type="Tables" />
@@ -1912,6 +1930,27 @@
           <EntitySet Name="UserData" EntityType="Self.UserData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserLog" EntityType="Self.UserLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserPasswordLog" EntityType="Self.UserPasswordLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Lookup" EntityType="Self.Lookup" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [Lookup].[Title] AS [Title], 
+    [Lookup].[Category] AS [Category], 
+    [Lookup].[GetListEndpoint] AS [GetListEndpoint], 
+    [Lookup].[SubmitEndpoint] AS [SubmitEndpoint], 
+    [Lookup].[DeleteEndpoint] AS [DeleteEndpoint], 
+    [Lookup].[GetEndpoint] AS [GetEndpoint], 
+    [Lookup].[Field1Title] AS [Field1Title], 
+    [Lookup].[Field1PropertyName] AS [Field1PropertyName], 
+    [Lookup].[Field2Title] AS [Field2Title], 
+    [Lookup].[Field2PropertyName] AS [Field2PropertyName], 
+    [Lookup].[Field3Title] AS [Field3Title], 
+    [Lookup].[Field3PropertyName] AS [Field3PropertyName], 
+    [Lookup].[Field4Title] AS [Field4Title], 
+    [Lookup].[Field4PropertyName] AS [Field4PropertyName], 
+    [Lookup].[Field5Title] AS [Field5Title], 
+    [Lookup].[Field5PropertyName] AS [Field5PropertyName], 
+    [Lookup].[IdPropertyName] AS [IdPropertyName]
+    FROM [dbo].[Lookup] AS [Lookup]</DefiningQuery>
+          </EntitySet>
           <AssociationSet Name="CustomerGift_B_StaticCode_BSCID_fk" Association="Self.CustomerGift_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="GiftSending" EntitySet="GiftSending" />
@@ -2776,27 +2815,6 @@
           <NavigationProperty Name="M_Group_Menu" Relationship="Self.FK_M_Group_Menu_GroupData" FromRole="GroupData" ToRole="M_Group_Menu" />
           <NavigationProperty Name="M_Group_User" Relationship="Self.FK_M_Group_User_GroupData" FromRole="GroupData" ToRole="M_Group_User" />
         </EntityType>
-        <EntityType Name="Lookup">
-          <Key>
-            <PropertyRef Name="Title" />
-          </Key>
-          <Property Name="Title" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Category" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="GetListEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="SubmitEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="DeleteEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="GetEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Field1Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Field1PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Field2Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Field2PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Field3Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Field3PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Field4Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Field4PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Field5Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Field5PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-        </EntityType>
         <EntityType Name="M_Address">
           <Key>
             <PropertyRef Name="MID" />
@@ -3252,6 +3270,44 @@
           <Property Name="NewPassword" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="UserData" Relationship="Self.FK_UserPasswordLog_UserData" FromRole="UserPasswordLog" ToRole="UserData" />
+        </EntityType>
+        <EntityType Name="Lookup">
+          <Key>
+            <PropertyRef Name="Title" />
+            <PropertyRef Name="Category" />
+            <PropertyRef Name="GetListEndpoint" />
+            <PropertyRef Name="SubmitEndpoint" />
+            <PropertyRef Name="DeleteEndpoint" />
+            <PropertyRef Name="GetEndpoint" />
+            <PropertyRef Name="Field1Title" />
+            <PropertyRef Name="Field1PropertyName" />
+            <PropertyRef Name="Field2Title" />
+            <PropertyRef Name="Field2PropertyName" />
+            <PropertyRef Name="Field3Title" />
+            <PropertyRef Name="Field3PropertyName" />
+            <PropertyRef Name="Field4Title" />
+            <PropertyRef Name="Field4PropertyName" />
+            <PropertyRef Name="Field5Title" />
+            <PropertyRef Name="Field5PropertyName" />
+            <PropertyRef Name="IdPropertyName" />
+          </Key>
+          <Property Name="Title" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Category" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="GetListEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="SubmitEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="DeleteEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="GetEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field1Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field1PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field2Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field2PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field3Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field3PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field4Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field4PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field5Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field5PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdPropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
         </EntityType>
         <Association Name="FK_B_Device_B_Category">
           <End Role="B_Category" Type="Self.B_Category" Multiplicity="1" />
@@ -4292,7 +4348,6 @@
           <EntitySet Name="ErrorLog" EntityType="Self.ErrorLog" />
           <EntitySet Name="GiftSending" EntityType="Self.GiftSending" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" />
-          <EntitySet Name="Lookup" EntityType="Self.Lookup" />
           <EntitySet Name="M_Address" EntityType="Self.M_Address" />
           <EntitySet Name="M_Contect" EntityType="Self.M_Contect" />
           <EntitySet Name="M_Customer_BusinessUser" EntityType="Self.M_Customer_BusinessUser" />
@@ -4317,6 +4372,7 @@
           <EntitySet Name="UserData" EntityType="Self.UserData" />
           <EntitySet Name="UserLog" EntityType="Self.UserLog" />
           <EntitySet Name="UserPasswordLog" EntityType="Self.UserPasswordLog" />
+          <EntitySet Name="Lookup" EntityType="Self.Lookup" />
           <AssociationSet Name="FK_B_Device_B_Category" Association="Self.FK_B_Device_B_Category">
             <End Role="B_Category" EntitySet="B_Category" />
             <End Role="B_Device" EntitySet="B_Device" />
@@ -5105,28 +5161,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Lookup">
-            <EntityTypeMapping TypeName="db_NS_EducationModel.Lookup">
-              <MappingFragment StoreEntitySet="Lookup">
-                <ScalarProperty Name="Title" ColumnName="Title" />
-                <ScalarProperty Name="Category" ColumnName="Category" />
-                <ScalarProperty Name="GetListEndpoint" ColumnName="GetListEndpoint" />
-                <ScalarProperty Name="SubmitEndpoint" ColumnName="SubmitEndpoint" />
-                <ScalarProperty Name="DeleteEndpoint" ColumnName="DeleteEndpoint" />
-                <ScalarProperty Name="GetEndpoint" ColumnName="GetEndpoint" />
-                <ScalarProperty Name="Field1Title" ColumnName="Field1Title" />
-                <ScalarProperty Name="Field1PropertyName" ColumnName="Field1PropertyName" />
-                <ScalarProperty Name="Field2Title" ColumnName="Field2Title" />
-                <ScalarProperty Name="Field2PropertyName" ColumnName="Field2PropertyName" />
-                <ScalarProperty Name="Field3Title" ColumnName="Field3Title" />
-                <ScalarProperty Name="Field3PropertyName" ColumnName="Field3PropertyName" />
-                <ScalarProperty Name="Field4Title" ColumnName="Field4Title" />
-                <ScalarProperty Name="Field4PropertyName" ColumnName="Field4PropertyName" />
-                <ScalarProperty Name="Field5Title" ColumnName="Field5Title" />
-                <ScalarProperty Name="Field5PropertyName" ColumnName="Field5PropertyName" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="M_Address">
             <EntityTypeMapping TypeName="db_NS_EducationModel.M_Address">
               <MappingFragment StoreEntitySet="M_Address">
@@ -5539,6 +5573,29 @@
                 <ScalarProperty Name="OldPassword" ColumnName="OldPassword" />
                 <ScalarProperty Name="NewPassword" ColumnName="NewPassword" />
                 <ScalarProperty Name="CreDate" ColumnName="CreDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Lookup">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Lookup">
+              <MappingFragment StoreEntitySet="Lookup">
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
+                <ScalarProperty Name="GetListEndpoint" ColumnName="GetListEndpoint" />
+                <ScalarProperty Name="SubmitEndpoint" ColumnName="SubmitEndpoint" />
+                <ScalarProperty Name="DeleteEndpoint" ColumnName="DeleteEndpoint" />
+                <ScalarProperty Name="GetEndpoint" ColumnName="GetEndpoint" />
+                <ScalarProperty Name="Field1Title" ColumnName="Field1Title" />
+                <ScalarProperty Name="Field1PropertyName" ColumnName="Field1PropertyName" />
+                <ScalarProperty Name="Field2Title" ColumnName="Field2Title" />
+                <ScalarProperty Name="Field2PropertyName" ColumnName="Field2PropertyName" />
+                <ScalarProperty Name="Field3Title" ColumnName="Field3Title" />
+                <ScalarProperty Name="Field3PropertyName" ColumnName="Field3PropertyName" />
+                <ScalarProperty Name="Field4Title" ColumnName="Field4Title" />
+                <ScalarProperty Name="Field4PropertyName" ColumnName="Field4PropertyName" />
+                <ScalarProperty Name="Field5Title" ColumnName="Field5Title" />
+                <ScalarProperty Name="Field5PropertyName" ColumnName="Field5PropertyName" />
+                <ScalarProperty Name="IdPropertyName" ColumnName="IdPropertyName" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

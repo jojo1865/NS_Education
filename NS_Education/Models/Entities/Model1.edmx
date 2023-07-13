@@ -436,6 +436,27 @@
           <Property Name="UpdUID" Type="int" Nullable="false" />
           <Property Name="IsAdministrator" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="Lookup">
+          <Key>
+            <PropertyRef Name="Title" />
+          </Key>
+          <Property Name="Title" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Category" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="GetListEndpoint" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="SubmitEndpoint" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="DeleteEndpoint" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="GetEndpoint" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Field1Title" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="Field1PropertyName" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Field2Title" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="Field2PropertyName" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Field3Title" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="Field3PropertyName" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Field4Title" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="Field4PropertyName" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Field5Title" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="Field5PropertyName" Type="varchar" MaxLength="100" Nullable="false" />
+        </EntityType>
         <EntityType Name="M_Address">
           <Key>
             <PropertyRef Name="MID" />
@@ -1866,6 +1887,7 @@
           <EntitySet Name="ErrorLog" EntityType="Self.ErrorLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="GiftSending" EntityType="Self.GiftSending" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Lookup" EntityType="Self.Lookup" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Address" EntityType="Self.M_Address" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Contect" EntityType="Self.M_Contect" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="M_Customer_BusinessUser" EntityType="Self.M_Customer_BusinessUser" Schema="dbo" store:Type="Tables" />
@@ -2753,6 +2775,27 @@
           <Property Name="IsAdministrator" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="M_Group_Menu" Relationship="Self.FK_M_Group_Menu_GroupData" FromRole="GroupData" ToRole="M_Group_Menu" />
           <NavigationProperty Name="M_Group_User" Relationship="Self.FK_M_Group_User_GroupData" FromRole="GroupData" ToRole="M_Group_User" />
+        </EntityType>
+        <EntityType Name="Lookup">
+          <Key>
+            <PropertyRef Name="Title" />
+          </Key>
+          <Property Name="Title" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Category" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="GetListEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="SubmitEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="DeleteEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="GetEndpoint" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field1Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field1PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field2Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field2PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field3Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field3PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field4Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field4PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Field5Title" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Field5PropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
         </EntityType>
         <EntityType Name="M_Address">
           <Key>
@@ -4249,6 +4292,7 @@
           <EntitySet Name="ErrorLog" EntityType="Self.ErrorLog" />
           <EntitySet Name="GiftSending" EntityType="Self.GiftSending" />
           <EntitySet Name="GroupData" EntityType="Self.GroupData" />
+          <EntitySet Name="Lookup" EntityType="Self.Lookup" />
           <EntitySet Name="M_Address" EntityType="Self.M_Address" />
           <EntitySet Name="M_Contect" EntityType="Self.M_Contect" />
           <EntitySet Name="M_Customer_BusinessUser" EntityType="Self.M_Customer_BusinessUser" />
@@ -5058,6 +5102,28 @@
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
                 <ScalarProperty Name="IsAdministrator" ColumnName="IsAdministrator" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Lookup">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Lookup">
+              <MappingFragment StoreEntitySet="Lookup">
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
+                <ScalarProperty Name="GetListEndpoint" ColumnName="GetListEndpoint" />
+                <ScalarProperty Name="SubmitEndpoint" ColumnName="SubmitEndpoint" />
+                <ScalarProperty Name="DeleteEndpoint" ColumnName="DeleteEndpoint" />
+                <ScalarProperty Name="GetEndpoint" ColumnName="GetEndpoint" />
+                <ScalarProperty Name="Field1Title" ColumnName="Field1Title" />
+                <ScalarProperty Name="Field1PropertyName" ColumnName="Field1PropertyName" />
+                <ScalarProperty Name="Field2Title" ColumnName="Field2Title" />
+                <ScalarProperty Name="Field2PropertyName" ColumnName="Field2PropertyName" />
+                <ScalarProperty Name="Field3Title" ColumnName="Field3Title" />
+                <ScalarProperty Name="Field3PropertyName" ColumnName="Field3PropertyName" />
+                <ScalarProperty Name="Field4Title" ColumnName="Field4Title" />
+                <ScalarProperty Name="Field4PropertyName" ColumnName="Field4PropertyName" />
+                <ScalarProperty Name="Field5Title" ColumnName="Field5Title" />
+                <ScalarProperty Name="Field5PropertyName" ColumnName="Field5PropertyName" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

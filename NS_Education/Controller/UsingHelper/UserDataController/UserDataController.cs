@@ -10,6 +10,7 @@ using System.Web.Mvc;
 using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.AdminAuthorize;
+using NS_Education.Models.APIItems.Controller.UserData.UserData.AdminChangeUserPassword;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitDepartment;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitGroup;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetInfoById;
@@ -70,6 +71,35 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             if (!isValid)
                 AddError(new WrongPasswordError());
+
+            return GetResponseJson();
+        }
+
+        #endregion
+
+        #region AdminChangeUserPassword
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        public async Task<string> AdminChangeUserPassword(UserData_AdminChangeUserPassword_Input_APIItem input)
+        {
+            bool isValid = await input.StartValidate()
+                .ValidateAsync(async i => await DC.UserData.ValidateIdExists(input.UID, nameof(UserData.UID)),
+                    i => AddError(NotFound("使用者", nameof(i.UID))))
+                .Validate(i => i.Password.HasContent(),
+                    () => AddError(EmptyNotAllowed("新的密碼", nameof(input.Password))))
+                .Validate(i => i.Password.IsEncryptablePassword(),
+                    () => AddError(WrongFormat("新的密碼", nameof(input.Password))))
+                .IsValid();
+
+            if (!isValid)
+                return GetResponseJson();
+
+            UserData userData = await DC.UserData.FirstAsync(ud => ud.UID == input.UID);
+
+            userData.LoginPassword = EncryptPassword(input.Password);
+
+            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
             return GetResponseJson();
         }

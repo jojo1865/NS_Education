@@ -94,7 +94,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             return await Task.Run(() => new CommonResponseRowIdTitle
             {
-                ID = int.Parse(entity.Code),
+                ID = entity.Code,
                 Title = entity.Title
             });
         }

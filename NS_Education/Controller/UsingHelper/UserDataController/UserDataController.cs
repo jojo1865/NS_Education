@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
+using NS_Education.Models.APIItems.Controller.UserData.UserData.AdminAuthorize;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitDepartment;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitGroup;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetInfoById;
@@ -17,6 +18,7 @@ using NS_Education.Models.APIItems.Controller.UserData.UserData.Login;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.Submit;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.UpdatePW;
 using NS_Education.Models.Entities;
+using NS_Education.Models.Errors.AuthorizationErrors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
@@ -46,6 +48,31 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         #region 錯誤訊息 - 登入
 
         private const string LoginPasswordIncorrect = "使用者密碼錯誤！";
+
+        #endregion
+
+        #region AdminAuthorize
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.None)]
+        public async Task<string> AdminAuthorize(UserData_AdminAuthorize_Input_APIItem input)
+        {
+            int uid = GetUid();
+            UserData data = await DC.UserData.FirstOrDefaultAsync(ud => ud.UID == uid);
+
+            if (data is null)
+            {
+                AddError(NotFound("使用者 ID", "UID"));
+                return GetResponseJson();
+            }
+
+            bool isValid = ValidatePassword(input.Password, data.LoginPassword);
+
+            if (!isValid)
+                AddError(new WrongPasswordError());
+
+            return GetResponseJson();
+        }
 
         #endregion
 

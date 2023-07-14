@@ -195,7 +195,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 .AsEnumerable() // 在這裡就轉換成 Enumerable，避免 LINQ 以為是 Query 中要做的處理，導致多重 DataConnection 問題
                 .Select(sc => new CommonResponseRowIdTitle
                 {
-                    ID = int.Parse(sc.Code),
+                    ID = sc.Code,
                     Title = sc.Title
                 })
                 .ToList();

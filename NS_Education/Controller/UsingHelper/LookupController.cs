@@ -41,6 +41,7 @@ namespace NS_Education.Controller.UsingHelper
                         {
                             Title = lu.Title ?? "",
                             IdPropertyName = lu.IdPropertyName ?? "",
+                            EditPageRoute = lu.EditPageRoute ?? "",
                             GetListEndpoint = lu.GetListEndpoint ?? "",
                             SubmitEndpoint = lu.SubmitEndpoint ?? "",
                             DeleteEndpoint = lu.DeleteEndpoint ?? "",

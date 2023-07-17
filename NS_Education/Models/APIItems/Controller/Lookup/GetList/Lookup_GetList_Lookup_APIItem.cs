@@ -4,6 +4,7 @@ namespace NS_Education.Models.APIItems.Controller.Lookup.GetList
     {
         public string Title { get; set; }
         public string IdPropertyName { get; set; }
+        public string EditPageRoute { get; set; }
         public string GetListEndpoint { get; set; }
         public string SubmitEndpoint { get; set; }
         public string DeleteEndpoint { get; set; }

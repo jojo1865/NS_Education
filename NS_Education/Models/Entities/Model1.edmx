@@ -54,7 +54,7 @@
             <PropertyRef Name="BOCID" />
           </Key>
           <Property Name="BOCID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="CodeType" Type="int" Nullable="false" />
+          <Property Name="CodeType" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Code" Type="varchar" MaxLength="10" />
           <Property Name="Title" Type="nvarchar" MaxLength="60" />
           <Property Name="PrintTitle" Type="nvarchar" MaxLength="100" />
@@ -2351,7 +2351,7 @@
             <PropertyRef Name="BOCID" />
           </Key>
           <Property Name="BOCID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="CodeType" Type="Int32" Nullable="false" />
+          <Property Name="CodeType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="Title" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
           <Property Name="PrintTitle" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />

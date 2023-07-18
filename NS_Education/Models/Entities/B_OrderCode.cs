@@ -29,7 +29,7 @@ namespace NS_Education.Models.Entities
         }
     
         public int BOCID { get; set; }
-        public int CodeType { get; set; }
+        public string CodeType { get; set; }
         public string Code { get; set; }
         public string Title { get; set; }
         public string PrintTitle { get; set; }

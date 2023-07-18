@@ -89,7 +89,7 @@ namespace NS_Education.Tools.Extensions
         /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
         public static async Task<ICollection<CommonResponseRowForSelectable>> GetOrderCodeSelectable(
             this DbSet<B_OrderCode> dbSet
-            , int? codeType, int bocIdToSelect)
+            , string codeType, int bocIdToSelect)
         {
             if (codeType == null)
                 return new List<CommonResponseRowForSelectable>();
@@ -349,7 +349,7 @@ namespace NS_Education.Tools.Extensions
             return orderCodeId.IsAboveZero()
                    && await dbSet.AnyAsync(boc => boc.ActiveFlag && !boc.DeleteFlag
                                                                  && boc.BOCID == orderCodeId
-                                                                 && boc.CodeType == (int)orderCodeType);
+                                                                 && boc.CodeType == ((int)orderCodeType).ToString());
         }
 
         /// <summary>

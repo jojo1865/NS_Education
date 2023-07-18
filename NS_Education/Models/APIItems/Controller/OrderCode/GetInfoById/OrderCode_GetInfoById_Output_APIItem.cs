@@ -6,7 +6,7 @@ namespace NS_Education.Models.APIItems.Controller.OrderCode.GetInfoById
     public class OrderCode_GetInfoById_Output_APIItem : BaseGetResponseRowInfusableWithCreUpd
     {
         public int BOCID { get; set; }
-        public int iCodeType { get; set; }
+        public string iCodeType { get; set; }
         public string sCodeType { get; set; }
 
         public List<OrderCode_GetTypeList_Output_APIItem> CodeTypeList { get; set; } =

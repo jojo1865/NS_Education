@@ -51,7 +51,7 @@ namespace NS_Education.Controller.UsingHelper
         {
             OrderCodeTypes = DC.B_OrderCode
                 .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
-                .Where(sc => sc.CodeType == 0)
+                .Where(sc => sc.CodeType == "0")
                 .OrderBy(sc => sc.Code.Length)
                 .ThenBy(sc => sc.Code)
                 .ThenBy(sc => sc.SortNo)
@@ -87,7 +87,7 @@ namespace NS_Education.Controller.UsingHelper
         public IOrderedQueryable<B_OrderCode> GetTypeListQuery()
         {
             return DC.B_OrderCode
-                .Where(oc => oc.ActiveFlag && oc.CodeType == 0)
+                .Where(oc => oc.ActiveFlag && oc.CodeType == "0")
                 .OrderBy(oc => oc.SortNo);
         }
 
@@ -96,7 +96,7 @@ namespace NS_Education.Controller.UsingHelper
             return await Task.FromResult(new OrderCode_GetTypeList_Output_APIItem
             {
                 BOCID = entity.BOCID,
-                iCodeType = Convert.ToInt32(entity.Code),
+                iCodeType = entity.Code,
                 sCodeType = entity.Title ?? ""
             });
         }
@@ -114,12 +114,7 @@ namespace NS_Education.Controller.UsingHelper
 
         public async Task<bool> GetListPagedValidateInput(OrderCode_GetList_Input_APIItem input)
         {
-            bool isValid = input.StartValidate()
-                .Validate(i => i.CodeType >= -1,
-                    () => AddError(EmptyNotAllowed("入帳代號類別", nameof(input.CodeType))))
-                .IsValid();
-
-            return await Task.FromResult(isValid);
+            return await Task.FromResult(true);
         }
 
         public IOrderedQueryable<B_OrderCode> GetListPagedOrderedQuery(OrderCode_GetList_Input_APIItem input)
@@ -129,7 +124,7 @@ namespace NS_Education.Controller.UsingHelper
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(oc => oc.Title.Contains(input.Keyword) || oc.Code.Contains(input.Keyword));
 
-            if (input.CodeType >= 0)
+            if (input.CodeType.HasContent())
                 query = query.Where(oc => oc.CodeType == input.CodeType);
 
             return query.OrderBy(oc => oc.CodeType)
@@ -164,7 +159,7 @@ namespace NS_Education.Controller.UsingHelper
             new OrderCode_GetInfoById_Output_APIItem
             {
                 BOCID = 0,
-                iCodeType = 0,
+                iCodeType = null,
                 sCodeType = null,
                 CodeTypeList = null, // 在轉換方法中才設值，所以這個物件不能是 static。
                 Code = null,
@@ -302,8 +297,6 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = input.StartValidate()
                 .Validate(i => i.BOCID == 0,
                     () => AddError(WrongFormat("入帳代號 ID", nameof(input.BOCID))))
-                .Validate(i => i.CodeType.IsInBetween(0, 9),
-                    () => AddError(OutOfRange("入帳代號類別", nameof(input.CodeType), 0, 9)))
                 .Validate(i => i.Title.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號名稱", nameof(input.Title))))
                 .Validate(i => i.PrintTitle.HasContent(),
@@ -347,8 +340,6 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = input.StartValidate()
                 .Validate(i => i.BOCID.IsAboveZero(),
                     () => AddError(WrongFormat("入帳代號 ID", nameof(input.BOCID))))
-                .Validate(i => i.CodeType.IsInBetween(0, 9),
-                    () => AddError(OutOfRange("入帳代號類別", nameof(input.CodeType), 0, 9)))
                 .Validate(i => i.Title.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號名稱", nameof(input.Title))))
                 .Validate(i => i.PrintTitle.HasContent(),

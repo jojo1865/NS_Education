@@ -96,11 +96,10 @@ namespace NS_Education.Controller.UsingHelper
             return await Task.FromResult(new OrderCode_GetTypeList_Output_APIItem
             {
                 BOCID = entity.BOCID,
-                iCodeType = entity.CodeType,
+                iCodeType = Convert.ToInt32(entity.Code),
                 sCodeType = OrderCodeTypes.ContainsKey(entity.CodeType.ToString())
                     ? OrderCodeTypes[entity.CodeType.ToString()].Title
                     : "",
-                Code = entity.Code ?? "",
                 Title = entity.Title ?? ""
             });
         }

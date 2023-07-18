@@ -97,8 +97,8 @@ namespace NS_Education.Controller.UsingHelper
             {
                 BOCID = entity.BOCID,
                 iCodeType = Convert.ToInt32(entity.Code),
-                sCodeType = OrderCodeTypes.ContainsKey(entity.CodeType.ToString())
-                    ? OrderCodeTypes[entity.CodeType.ToString()].Title
+                sCodeType = OrderCodeTypes.ContainsKey(entity.Code)
+                    ? OrderCodeTypes[entity.Code].Title
                     : "",
                 Title = entity.Title ?? ""
             });

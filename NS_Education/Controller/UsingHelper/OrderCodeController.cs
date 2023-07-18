@@ -121,6 +121,9 @@ namespace NS_Education.Controller.UsingHelper
         {
             var query = DC.B_OrderCode.AsQueryable();
 
+            // 不顯示 CodeType = 0（入帳代碼類別）的資料
+            query = query.Where(oc => oc.CodeType != "0");
+
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(oc => oc.Title.Contains(input.Keyword) || oc.Code.Contains(input.Keyword));
 

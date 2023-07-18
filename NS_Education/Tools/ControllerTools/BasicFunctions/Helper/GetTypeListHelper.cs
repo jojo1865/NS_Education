@@ -13,8 +13,8 @@ using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 {
-    public class GetTypeListHelper<TController, TEntity> : IGetTypeListHelper
-        where TController : PublicClass, IGetTypeList<TEntity>
+    public class GetTypeListHelper<TController, TEntity, TResponseRow> : IGetTypeListHelper
+        where TController : PublicClass, IGetTypeList<TEntity, TResponseRow>
         where TEntity : class
     {
         private readonly TController _controller;
@@ -34,8 +34,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 return _controller.GetResponseJson();
 
             // 2. 轉換為 BaseResponseForList
-            CommonResponseForList<CommonResponseRowIdTitle> response =
-                new CommonResponseForList<CommonResponseRowIdTitle>
+            CommonResponseForList<TResponseRow> response =
+                new CommonResponseForList<TResponseRow>
                 {
                     // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。
                     Items = queryResult

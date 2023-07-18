@@ -5,10 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BeingValidated;
-using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.OrderCode.GetInfoById;
 using NS_Education.Models.APIItems.Controller.OrderCode.GetList;
+using NS_Education.Models.APIItems.Controller.OrderCode.GetTypeList;
 using NS_Education.Models.APIItems.Controller.OrderCode.Submit;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -26,7 +26,7 @@ namespace NS_Education.Controller.UsingHelper
     /// 入帳代號 B_OrderCode 的 Controller。
     /// </summary>
     public class OrderCodeController : PublicClass,
-        IGetTypeList<B_OrderCode>,
+        IGetTypeList<B_OrderCode, OrderCode_GetTypeList_Output_APIItem>,
         IGetListPaged<B_OrderCode, OrderCode_GetList_Input_APIItem, OrderCode_GetList_Output_Row_APIItem>,
         IChangeActive<B_OrderCode>,
         IDeleteItem<B_OrderCode>,
@@ -64,7 +64,8 @@ namespace NS_Education.Controller.UsingHelper
             _deleteItemHelper = new DeleteItemHelper<OrderCodeController, B_OrderCode>(this);
             _changeActiveHelper = new ChangeActiveHelper<OrderCodeController, B_OrderCode>(this);
 
-            _getTypeListHelper = new GetTypeListHelper<OrderCodeController, B_OrderCode>(this);
+            _getTypeListHelper =
+                new GetTypeListHelper<OrderCodeController, B_OrderCode, OrderCode_GetTypeList_Output_APIItem>(this);
 
             _getListHelper = new GetListPagedHelper<OrderCodeController
                 , B_OrderCode
@@ -90,12 +91,17 @@ namespace NS_Education.Controller.UsingHelper
                 .OrderBy(oc => oc.SortNo);
         }
 
-        public async Task<CommonResponseRowIdTitle> GetTypeListEntityToRow(B_OrderCode entity)
+        public async Task<OrderCode_GetTypeList_Output_APIItem> GetTypeListEntityToRow(B_OrderCode entity)
         {
-            return await Task.Run(() => new CommonResponseRowIdTitle
+            return await Task.FromResult(new OrderCode_GetTypeList_Output_APIItem
             {
-                ID = entity.Code,
-                Title = entity.Title
+                BOCID = entity.BOCID,
+                iCodeType = entity.CodeType,
+                sCodeType = OrderCodeTypes.ContainsKey(entity.CodeType.ToString())
+                    ? OrderCodeTypes[entity.CodeType.ToString()].Title
+                    : "",
+                Code = entity.Code ?? "",
+                Title = entity.Title ?? ""
             });
         }
 

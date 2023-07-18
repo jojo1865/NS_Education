@@ -1,11 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using NS_Education.Models.APIItems;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
 {
-    public interface IGetTypeList<TEntity>
+    public interface IGetTypeList<TEntity, TResponseRow>
         where TEntity : class
     {
         /// <summary>
@@ -32,6 +31,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Interface
         /// <param name="entity">資料</param>
         /// <returns>回傳中 List 的子物件類別</returns>
         [NonAction]
-        Task<CommonResponseRowIdTitle> GetTypeListEntityToRow(TEntity entity);
+        Task<TResponseRow> GetTypeListEntityToRow(TEntity entity);
     }
 }

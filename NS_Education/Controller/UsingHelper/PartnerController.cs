@@ -265,8 +265,12 @@ namespace NS_Education.Controller.UsingHelper
                 Email = input.Email,
                 CleanFlag = input.CleanFlag,
                 CleanPrice = input.CleanPrice,
-                CleanSDate = input.CleanSDate.ParseDateTime().Date,
-                CleanEDate = input.CleanEDate.ParseDateTime().Date
+                CleanSDate = input.CleanSDate.ParseDateTime()
+                    .Date,
+                CleanEDate = input.CleanEDate.ParseDateTime()
+                    .Date,
+                ActiveFlag = input.ActiveFlag,
+                Note = input.Note
             });
         }
 
@@ -330,6 +334,8 @@ namespace NS_Education.Controller.UsingHelper
             data.CleanPrice = input.CleanPrice;
             data.CleanSDate = input.CleanSDate.ParseDateTime().Date;
             data.CleanEDate = input.CleanEDate.ParseDateTime().Date;
+            data.ActiveFlag = input.ActiveFlag;
+            data.Note = input.Note ?? data.Note;
         }
 
         #endregion

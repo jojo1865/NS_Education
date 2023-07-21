@@ -51,7 +51,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         public IQueryable<SiteData_GetUniqueNames_Output_Row_APIItem> GetListUniqueFieldsApplyKeywordFilter(
             IQueryable<SiteData_GetUniqueNames_Output_Row_APIItem> query, string keyword)
         {
-            return query.Where(q => q.Title.Contains(keyword));
+            return query.Where(q => q.Title.Contains(keyword) || q.Code.Contains(keyword));
         }
 
         /// <inheritdoc />
@@ -61,7 +61,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             return sd => new SiteData_GetUniqueNames_Output_Row_APIItem
             {
                 BSID = sd.BSID,
-                Title = sd.Title ?? ""
+                Title = sd.Title ?? "",
+                Code = sd.Code ?? ""
             };
         }
 

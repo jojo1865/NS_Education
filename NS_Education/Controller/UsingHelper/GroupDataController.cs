@@ -121,12 +121,6 @@ namespace NS_Education.Controller.UsingHelper
                     {
                         MDID = result.MenuData.MDID,
                         Title = result.MenuData.Title ?? "",
-                        ActiveFlag = result.ThisGroupMenu != null
-                                     && (result.MenuData.AlwaysAllowShow
-                                         || result.MenuData.AlwaysAllowAdd
-                                         || result.MenuData.AlwaysAllowEdit
-                                         || result.MenuData.AlwaysAllowDelete
-                                         || result.MenuData.AlwaysAllowPring),
                         AddFlag = result.MenuData.AlwaysAllowAdd || (result.ThisGroupMenu?.AddFlag ?? false),
                         ShowFlag = result.MenuData.AlwaysAllowShow || (result.ThisGroupMenu?.ShowFlag ?? false),
                         EditFlag = result.MenuData.AlwaysAllowEdit || (result.ThisGroupMenu?.EditFlag ?? false),
@@ -333,12 +327,14 @@ namespace NS_Education.Controller.UsingHelper
                 MenuData menuData = await DC.MenuData
                     .FirstOrDefaultAsync(md => md.MDID == item.MDID && md.ActiveFlag && !md.DeleteFlag);
 
+                bool needsData = item.AddFlag || item.DeleteFlag || item.EditFlag || item.PrintFlag || item.ShowFlag;
+
                 if (menuIdToGroupMenuDict.TryGetValue(item.MDID, out M_Group_Menu mgm))
                 {
                     // 有原資料，則輸入的 ActiveFlag 為
                     // |- a.  true 時：修改資料。
                     // +- b. false 時：刪除資料。
-                    if (!item.ActiveFlag)
+                    if (!needsData)
                     {
                         DC.M_Group_Menu.Remove(mgm);
                         continue;
@@ -350,7 +346,7 @@ namespace NS_Education.Controller.UsingHelper
                     mgm.DeleteFlag = (menuData?.AlwaysAllowDelete ?? false) || item.DeleteFlag;
                     mgm.PringFlag = (menuData?.AlwaysAllowPring ?? false) || item.PrintFlag;
                 }
-                else if (item.ActiveFlag)
+                else if (needsData)
                 {
                     // 沒有原資料，若 ActiveFlag 為 true，新增一筆 M_Group_Menu
                     M_Group_Menu newEntity = new M_Group_Menu

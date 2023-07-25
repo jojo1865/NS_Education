@@ -815,6 +815,9 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             if (input.DDID.IsAboveZero())
                 query = query.Where(u => u.DDID == input.DDID);
 
+            if (input.GID.IsAboveZero())
+                query = query.Where(u => u.M_Group_User.Any(mgu => mgu.GID == input.GID));
+
             return query.OrderBy(u => u.UID);
         }
 

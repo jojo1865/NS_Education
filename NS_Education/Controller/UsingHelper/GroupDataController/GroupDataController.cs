@@ -112,6 +112,7 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
                     .Include(md => md.M_Group_Menu)
                     .Where(md => md.ActiveFlag && !md.DeleteFlag)
                     .AsEnumerable()
+                    .Where(md => md.URL.HasContent())
                     .Select(md => new
                     {
                         MenuData = md,

@@ -21,7 +21,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             IList<object> entitiesToAdd = new List<object>();
 
             // 取得主資料
-            Resver_Head head = data ?? SubmitFindOrCreateNew<Resver_Head>(input.RHID);
+            bool needsNewHead = data is null;
+            B_StaticCode originalHeadState = data?.B_StaticCode1;
+            Resver_Head head = needsNewHead ? SubmitFindOrCreateNew<Resver_Head>(input.RHID) : data;
 
             // 已結帳時，只允許處理預約回饋紀錄的值
             if (isAdd || head.B_StaticCode1.Code != ReserveHeadState.FullyPaid)
@@ -46,11 +48,32 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
 
+            if (needsNewHead)
+                WriteResverHeadLog(head.RHID, ResverHistoryType.DraftCreated);
+
+            if (originalHeadState != head.B_StaticCode1)
+                WriteResverHeadLog(head.RHID, head.B_StaticCode1);
+
             // 寫入 Db
             await DC.AddRangeAsync(entitiesToAdd);
             await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
             return head;
+        }
+
+        private void WriteResverHeadLog(int headRhid, B_StaticCode headBscid12)
+        {
+            string bscidString = headBscid12.Code ?? "";
+
+            switch (bscidString)
+            {
+                case ReserveHeadState.Terminated:
+                    WriteResverHeadLog(headRhid, ResverHistoryType.Terminated);
+                    break;
+                case ReserveHeadState.FullyPaid:
+                    WriteResverHeadLog(headRhid, ResverHistoryType.FullyPaid);
+                    break;
+            }
         }
 
         private void SubmitPopulateHeadGiveBackItems(Resver_Submit_Input_APIItem input, Resver_Head head,

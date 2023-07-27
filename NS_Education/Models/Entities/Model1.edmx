@@ -744,6 +744,16 @@
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="Resver_Head_Log">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="RHID" Type="int" Nullable="false" />
+          <Property Name="Type" Type="int" Nullable="false" />
+          <Property Name="CreUID" Type="int" Nullable="false" />
+          <Property Name="CreDate" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="Resver_Other">
           <Key>
             <PropertyRef Name="ROID" />
@@ -1873,6 +1883,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_Head_Log_Resver_Head_RHID_fk">
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
+          <End Role="Resver_Head_Log" Type="Self.Resver_Head_Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resver_Head">
+              <PropertyRef Name="RHID" />
+            </Principal>
+            <Dependent Role="Resver_Head_Log">
+              <PropertyRef Name="RHID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="Resver_Head_Log_UserData_UID_fk">
+          <End Role="UserData" Type="Self.UserData" Multiplicity="1" />
+          <End Role="Resver_Head_Log" Type="Self.Resver_Head_Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserData">
+              <PropertyRef Name="UID" />
+            </Principal>
+            <Dependent Role="Resver_Head_Log">
+              <PropertyRef Name="CreUID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="Resver_Other_B_StaticCode_BSCID_fk">
           <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
           <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
@@ -1925,6 +1959,7 @@
           <EntitySet Name="Resver_Device" EntityType="Self.Resver_Device" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_GiveBack" EntityType="Self.Resver_GiveBack" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Head" EntityType="Self.Resver_Head" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Resver_Head_Log" EntityType="Self.Resver_Head_Log" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Other" EntityType="Self.Resver_Other" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Site" EntityType="Self.Resver_Site" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Throw" EntityType="Self.Resver_Throw" Schema="dbo" store:Type="Tables" />
@@ -2277,6 +2312,14 @@
           <AssociationSet Name="Resver_Head_Customer_CID_fk" Association="Self.Resver_Head_Customer_CID_fk">
             <End Role="Customer" EntitySet="Customer" />
             <End Role="Resver_Head" EntitySet="Resver_Head" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Head_Log_Resver_Head_RHID_fk" Association="Self.Resver_Head_Log_Resver_Head_RHID_fk">
+            <End Role="Resver_Head" EntitySet="Resver_Head" />
+            <End Role="Resver_Head_Log" EntitySet="Resver_Head_Log" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Head_Log_UserData_UID_fk" Association="Self.Resver_Head_Log_UserData_UID_fk">
+            <End Role="UserData" EntitySet="UserData" />
+            <End Role="Resver_Head_Log" EntitySet="Resver_Head_Log" />
           </AssociationSet>
           <AssociationSet Name="Resver_Other_B_StaticCode_BSCID_fk" Association="Self.Resver_Other_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
@@ -3124,6 +3167,19 @@
           <NavigationProperty Name="Resver_GiveBack" Relationship="Self.FK_Resver_GiveBack_Resver_Head" FromRole="Resver_Head" ToRole="Resver_GiveBack" />
           <NavigationProperty Name="Resver_Other" Relationship="Self.FK_Resver_Other_Resver_Head" FromRole="Resver_Head" ToRole="Resver_Other" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_Resver_Head" FromRole="Resver_Head" ToRole="Resver_Site" />
+          <NavigationProperty Name="Resver_Head_Log" Relationship="Self.Resver_Head_Log_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Head_Log" />
+        </EntityType>
+        <EntityType Name="Resver_Head_Log">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="RHID" Type="Int32" Nullable="false" />
+          <Property Name="Type" Type="Int32" Nullable="false" />
+          <Property Name="CreUID" Type="Int32" Nullable="false" />
+          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Resver_Head" Relationship="Self.Resver_Head_Log_Resver_Head_RHID_fk" FromRole="Resver_Head_Log" ToRole="Resver_Head" />
+          <NavigationProperty Name="UserData" Relationship="Self.Resver_Head_Log_UserData_UID_fk" FromRole="Resver_Head_Log" ToRole="UserData" />
         </EntityType>
         <EntityType Name="Resver_Other">
           <Key>
@@ -3246,6 +3302,7 @@
           <Property Name="JWT" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="D_Department" Relationship="Self.FK_UserData_D_Department" FromRole="UserData" ToRole="D_Department" />
           <NavigationProperty Name="M_Group_User" Relationship="Self.FK_M_Group_User_UserData" FromRole="UserData" ToRole="M_Group_User" />
+          <NavigationProperty Name="Resver_Head_Log" Relationship="Self.Resver_Head_Log_UserData_UID_fk" FromRole="UserData" ToRole="Resver_Head_Log" />
           <NavigationProperty Name="UserLog" Relationship="Self.FK_UserLog_UserData" FromRole="UserData" ToRole="UserLog" />
           <NavigationProperty Name="UserPasswordLog" Relationship="Self.FK_UserPasswordLog_UserData" FromRole="UserData" ToRole="UserPasswordLog" />
         </EntityType>
@@ -4278,6 +4335,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_Head_Log_Resver_Head_RHID_fk">
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
+          <End Role="Resver_Head_Log" Type="Self.Resver_Head_Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resver_Head">
+              <PropertyRef Name="RHID" />
+            </Principal>
+            <Dependent Role="Resver_Head_Log">
+              <PropertyRef Name="RHID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="Resver_Head_Log_UserData_UID_fk">
+          <End Role="UserData" Type="Self.UserData" Multiplicity="1" />
+          <End Role="Resver_Head_Log" Type="Self.Resver_Head_Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserData">
+              <PropertyRef Name="UID" />
+            </Principal>
+            <Dependent Role="Resver_Head_Log">
+              <PropertyRef Name="CreUID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Resver_Throw_Resver_Site">
           <End Role="Resver_Site" Type="Self.Resver_Site" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -4370,6 +4451,7 @@
           <EntitySet Name="Resver_Device" EntityType="Self.Resver_Device" />
           <EntitySet Name="Resver_GiveBack" EntityType="Self.Resver_GiveBack" />
           <EntitySet Name="Resver_Head" EntityType="Self.Resver_Head" />
+          <EntitySet Name="Resver_Head_Log" EntityType="Self.Resver_Head_Log" />
           <EntitySet Name="Resver_Other" EntityType="Self.Resver_Other" />
           <EntitySet Name="Resver_Site" EntityType="Self.Resver_Site" />
           <EntitySet Name="Resver_Throw" EntityType="Self.Resver_Throw" />
@@ -4689,6 +4771,14 @@
           <AssociationSet Name="FK_Resver_Site_Resver_Head" Association="Self.FK_Resver_Site_Resver_Head">
             <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_Site" EntitySet="Resver_Site" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Head_Log_Resver_Head_RHID_fk" Association="Self.Resver_Head_Log_Resver_Head_RHID_fk">
+            <End Role="Resver_Head" EntitySet="Resver_Head" />
+            <End Role="Resver_Head_Log" EntitySet="Resver_Head_Log" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Head_Log_UserData_UID_fk" Association="Self.Resver_Head_Log_UserData_UID_fk">
+            <End Role="UserData" EntitySet="UserData" />
+            <End Role="Resver_Head_Log" EntitySet="Resver_Head_Log" />
           </AssociationSet>
           <AssociationSet Name="FK_Resver_Throw_Resver_Site" Association="Self.FK_Resver_Throw_Resver_Site">
             <End Role="Resver_Site" EntitySet="Resver_Site" />
@@ -5446,6 +5536,17 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Resver_Head_Log">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Head_Log">
+              <MappingFragment StoreEntitySet="Resver_Head_Log">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="RHID" ColumnName="RHID" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="CreUID" ColumnName="CreUID" />
+                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

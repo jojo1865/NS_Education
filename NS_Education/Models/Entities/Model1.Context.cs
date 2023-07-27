@@ -64,6 +64,7 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<Resver_Device> Resver_Device { get; set; }
         public virtual DbSet<Resver_GiveBack> Resver_GiveBack { get; set; }
         public virtual DbSet<Resver_Head> Resver_Head { get; set; }
+        public virtual DbSet<Resver_Head_Log> Resver_Head_Log { get; set; }
         public virtual DbSet<Resver_Other> Resver_Other { get; set; }
         public virtual DbSet<Resver_Site> Resver_Site { get; set; }
         public virtual DbSet<Resver_Throw> Resver_Throw { get; set; }

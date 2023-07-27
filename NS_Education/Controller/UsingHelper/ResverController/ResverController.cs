@@ -28,6 +28,23 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         IDeleteItem<Resver_Head>,
         ISubmit<Resver_Head, Resver_Submit_Input_APIItem>
     {
+        #region WriteResverHeadLog
+
+        private void WriteResverHeadLog(int headId, ResverHistoryType type)
+        {
+            Resver_Head_Log newEntity = new Resver_Head_Log
+            {
+                RHID = headId,
+                Type = (int)type,
+                CreUID = GetUid(),
+                CreDate = DateTime.Now
+            };
+
+            DC.Resver_Head_Log.Add(newEntity);
+        }
+
+        #endregion
+
         #region Initialization
 
         private readonly IGetListPagedHelper<Resver_GetHeadList_Input_APIItem> _getListPagedHelper;
@@ -479,6 +496,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             }
 
             // 3. 修改 DB
+            WriteResverHeadLog(entity.RHID, ResverHistoryType.Checked);
             entity.CheckFlag = checkFlag ?? throw new ArgumentNullException(nameof(checkFlag));
             await ChangeCheckUpdateDb();
 
@@ -548,6 +566,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             }
 
             // 3. 修改 DB
+            WriteResverHeadLog(entity.RHID, ResverHistoryType.CheckedIn);
             entity.CheckInFlag = checkInFlag ?? throw new ArgumentNullException(nameof(checkInFlag));
             await ChangeCheckInUpdateDb();
 

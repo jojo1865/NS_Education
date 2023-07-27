@@ -22,6 +22,7 @@ namespace NS_Education.Models.Entities
             this.Resver_GiveBack = new HashSet<Resver_GiveBack>();
             this.Resver_Other = new HashSet<Resver_Other>();
             this.Resver_Site = new HashSet<Resver_Site>();
+            this.Resver_Head_Log = new HashSet<Resver_Head_Log>();
         }
     
         public int RHID { get; set; }
@@ -65,5 +66,7 @@ namespace NS_Education.Models.Entities
         public virtual ICollection<Resver_Other> Resver_Other { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Site> Resver_Site { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Resver_Head_Log> Resver_Head_Log { get; set; }
     }
 }

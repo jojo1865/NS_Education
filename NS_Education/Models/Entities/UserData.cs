@@ -18,6 +18,7 @@ namespace NS_Education.Models.Entities
         public UserData()
         {
             this.M_Group_User = new HashSet<M_Group_User>();
+            this.Resver_Head_Log = new HashSet<Resver_Head_Log>();
             this.UserLog = new HashSet<UserLog>();
             this.UserPasswordLog = new HashSet<UserPasswordLog>();
         }
@@ -40,6 +41,8 @@ namespace NS_Education.Models.Entities
         public virtual D_Department D_Department { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<M_Group_User> M_Group_User { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Resver_Head_Log> Resver_Head_Log { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserLog> UserLog { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

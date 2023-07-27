@@ -97,7 +97,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             UserData userData = await DC.UserData.FirstAsync(ud => ud.UID == input.UID);
 
-            userData.LoginPassword = EncryptPassword(input.Password);
+            await UpdatePasswordForUserData(userData, input.Password);
 
             await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 

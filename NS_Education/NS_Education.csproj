@@ -283,6 +283,7 @@
         <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs1Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs2Controller.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverController.cs"/>
+        <Compile Include="Controller\UsingHelper\ResverController\ResverHistoryController.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverSiteController.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverSubmitPopulate.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverSubmitValidate.cs"/>
@@ -446,6 +447,8 @@
         <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_TimeSpanItem_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetHeadList\Resver_GetHeadList_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetHeadList\Resver_GetHeadList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetHistory\Resver_GetHistory_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetHistory\Resver_GetHistory_Output_Row_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetResverSiteList\Resver_GetResverSiteList_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetResverSiteList\Resver_GetResverSiteList_Output_Row_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetResverSiteList\Resver_GetResverSiteList_TimeSpan_Output_APIItem.cs"/>
@@ -743,6 +746,7 @@
         <Compile Include="Tools\Extensions\IntExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\IQueryableExtensions.cs"/>
         <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\ResverHistoryTypeExtension.cs"/>
         <Compile Include="Tools\Extensions\SpecificTableExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\StringExtensionMethods.cs"/>

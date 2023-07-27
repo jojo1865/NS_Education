@@ -10,11 +10,19 @@ namespace NS_Education
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
+                name: "ResverGetHistory",
+                url: "Resver/GetHistory",
+                defaults: new
+                    { controller = "ResverHistory", action = "GetList" }
+            );
+
+            routes.MapRoute(
                 name: "GroupDataGetUniqueNames",
                 url: "GroupData/GetUniqueNames",
                 defaults: new
                     { controller = "GroupDataUniqueNames", action = "GetList" }
             );
+
             routes.MapRoute(
                 name: "ResverGetUniqueIds",
                 url: "Resver/GetUniqueIds",

@@ -108,7 +108,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 CustomerCode = entity.CustomerTitle ?? "",
                 PeopleCt = entity.PeopleCt,
                 BSCID12 = entity.BSCID12,
-                BSCID12_Title = entity.B_StaticCode.Title ?? ""
+                BSCID12_Title = entity.B_StaticCode1.Title ?? ""
             });
         }
 
@@ -178,13 +178,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             {
                 RHID = entity.RHID,
                 BSCID12 = entity.BSCID12,
-                BSC12_Title = entity.B_StaticCode.Title ?? "",
+                BSC12_Title = entity.B_StaticCode1.Title ?? "",
                 BSC12_List =
-                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID12),
+                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType, entity.BSCID12),
                 BSCID11 = entity.BSCID11,
-                BSC11_Title = entity.B_StaticCode1?.Title ?? "",
+                BSC11_Title = entity.B_StaticCode?.Title ?? "",
                 BSC11_List =
-                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType, entity.BSCID11),
+                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID11),
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 SDate = entity.SDate.ToFormattedStringDate(),

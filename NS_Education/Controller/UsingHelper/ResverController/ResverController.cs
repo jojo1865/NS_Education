@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 using BeingValidated;
 using NS_Education.Models.APIItems.Common.DeleteItem;
@@ -28,6 +29,15 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         IDeleteItem<Resver_Head>,
         ISubmit<Resver_Head, Resver_Submit_Input_APIItem>
     {
+        #region WriteResverHeadLog
+
+        private void WriteResverHeadLog(int? id, ResverHistoryType @checked, HttpRequestBase request)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
         #region Initialization
 
         private readonly IGetListPagedHelper<Resver_GetHeadList_Input_APIItem> _getListPagedHelper;
@@ -479,6 +489,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             }
 
             // 3. 修改 DB
+            WriteResverHeadLog(id, ResverHistoryType.Checked, Request);
             entity.CheckFlag = checkFlag ?? throw new ArgumentNullException(nameof(checkFlag));
             await ChangeCheckUpdateDb();
 
@@ -548,6 +559,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             }
 
             // 3. 修改 DB
+            WriteResverHeadLog(id, ResverHistoryType.CheckedIn, Request);
             entity.CheckInFlag = checkInFlag ?? throw new ArgumentNullException(nameof(checkInFlag));
             await ChangeCheckInUpdateDb();
 

@@ -10,6 +10,8 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Common;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters;
+using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Variables;
 
 namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
@@ -94,7 +96,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 query = FlagHelper.FilterByInputActiveFlag(query, input.ActiveFlag == 1);
 
             // Filter by DeleteFlag
-            query = FlagHelper.FilterByInputDeleteFlag(query, input.DeleteFlag == 1);
+            if (input.DeleteFlag != -1 || !FilterStaticTools.HasRoleInRequest(_controller.Request, AuthorizeBy.Admin))
+                query = FlagHelper.FilterByInputDeleteFlag(query, input.DeleteFlag == 1);
 
             // 1. 先取得總筆數
 

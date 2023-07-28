@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Models.APIItems.Controller.Resver.GetHeadList
 {
@@ -16,10 +17,13 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetHeadList
 
         public int BSCID12 { get; set; }
         public string BSCID12_Title { get; set; }
+
+        public bool DeleteFlag { get; set; }
         public int Index { get; private set; }
 
         public Task SetInfoFromEntity<T>(T entity, PublicClass controller) where T : class
         {
+            DeleteFlag = entity.GetIfHasProperty<T, bool>(nameof(DeleteFlag));
             return Task.CompletedTask;
             // 不做任何事。這個回傳沒有任何普遍性欄位。
         }

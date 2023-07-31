@@ -258,26 +258,28 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             // 登入都成功後，回傳部分使用者資訊，以及使用者的權限資訊。
             // 先建立 claims
-            string jwt = LoginCreateJwt(queried);
+            (string jwt, bool isAdmin) result = LoginCreateJwt(queried);
 
             var output = new UserData_Login_Output_APIItem
             {
                 UID = queried.UID,
                 Username = queried.UserName,
-                JwtToken = jwt
+                JwtToken = result.jwt,
+                IsAdministrator = result.isAdmin
             };
 
-            bool isUpdateSuccessful = await LoginUpdateDb(queried, jwt);
+            bool isUpdateSuccessful = await LoginUpdateDb(queried, result.jwt);
 
             return isUpdateSuccessful ? GetResponseJson(output) : GetResponseJson();
         }
 
-        private static string LoginCreateJwt(UserData queried)
+        private static (string, bool) LoginCreateJwt(UserData queried)
         {
-            List<Claim> claims = LoginCreateClaims(queried);
+            (List<Claim> claims, bool isAdmin) claimAndIsAdmin = LoginCreateClaims(queried);
 
-            string jwt = JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claims);
-            return jwt;
+            string jwt =
+                JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claimAndIsAdmin.claims);
+            return (jwt, claimAndIsAdmin.isAdmin);
         }
 
         private async Task<bool> LoginUpdateDb(UserData queried, string jwt)
@@ -296,7 +298,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             return isProcessSuccessful;
         }
 
-        private static List<Claim> LoginCreateClaims(UserData queried)
+        private static (List<Claim>, bool) LoginCreateClaims(UserData queried)
         {
             var claims = new List<Claim>
             {
@@ -306,11 +308,15 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.User.GetRoleValue())
             };
 
+            bool isAdmin = false;
             // 特殊規格：如果擁有特殊 GID 的權限，則認識為管理員
             if (queried.M_Group_User.Any(groupUser => groupUser.GroupData.IsAdministrator))
+            {
                 claims.Add(new Claim(ClaimTypes.Role, AuthorizeTypeSingletonFactory.Admin.GetRoleValue()));
+                isAdmin = true;
+            }
 
-            return claims;
+            return (claims, isAdmin);
         }
 
         private bool LoginValidateCredential(UserData_Login_Input_APIItem input, UserData queried)

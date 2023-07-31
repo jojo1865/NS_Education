@@ -51,6 +51,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // |- a. 驗證通過時：執行邏輯。
             // +- b. 驗證失敗，且無錯誤訊息時：自動加上預設錯誤訊息。
 
+            int? id = null;
+
             using (var transaction = _isolationLevel != null
                        ? _controller.DC.Database.BeginTransaction(_isolationLevel.Value)
                        : _controller.DC.Database.BeginTransaction())
@@ -60,14 +62,14 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                     if (_controller.SubmitIsAdd(input))
                     {
                         if (await _controller.SubmitAddValidateInput(input))
-                            await _SubmitAdd(input);
+                            id = await _SubmitAdd(input);
                         else if (!_controller.HasError())
                             _controller.AddError(new WrongFormatError());
                     }
                     else
                     {
                         if (await _controller.SubmitEditValidateInput(input))
-                            await _SubmitEdit(input);
+                            id = await _SubmitEdit(input);
                         else if (!_controller.HasError())
                             _controller.AddError(new WrongFormatError());
                     }
@@ -86,12 +88,15 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 3. 回傳通用回傳訊息格式。
 
-            return _controller.GetResponseJson();
+            return _controller.GetResponseJson(new SubmitHelperIdResponse
+            {
+                ID = id
+            });
         }
 
         #region Submit - Add
 
-        private async Task _SubmitAdd(TSubmitRequest input)
+        private async Task<int?> _SubmitAdd(TSubmitRequest input)
         {
             // 1. 建立資料
             TEntity t = await _controller.SubmitCreateData(input);
@@ -108,14 +113,17 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             catch (Exception e)
             {
                 _controller.AddError(_controller.UpdateDbFailed(e));
+                return null;
             }
+
+            return _controller.DC.GetPrimaryKeyFromEntity(t);
         }
 
         #endregion
 
         #region Submit - Edit
 
-        private async Task _SubmitEdit(TSubmitRequest input)
+        private async Task<int?> _SubmitEdit(TSubmitRequest input)
         {
             // 1. 查詢資料並確認刪除狀態
             TEntity data = await FlagHelper
@@ -125,7 +133,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             if (data == null)
             {
                 _controller.AddError(_controller.NotFound());
-                return;
+                return null;
             }
 
             // 2. 覆寫資料
@@ -141,7 +149,10 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             catch (Exception e)
             {
                 _controller.AddError(_controller.UpdateDbFailed(e));
+                return null;
             }
+
+            return _controller.DC.GetPrimaryKeyFromEntity(data);
         }
 
         #endregion

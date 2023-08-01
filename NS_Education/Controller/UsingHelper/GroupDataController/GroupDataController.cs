@@ -19,6 +19,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper.GroupDataController
 {
@@ -110,28 +111,39 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
                 Title = entity.Title ?? "",
                 GroupItems = DC.MenuData
                     .Include(md => md.M_Group_Menu)
+                    .Include(md => md.MenuAPI)
                     .Where(md => md.ActiveFlag && !md.DeleteFlag)
                     .AsEnumerable()
                     .Where(md => md.URL.HasContent())
                     .Select(md => new
                     {
                         MenuData = md,
-                        ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID)
+                        ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID),
+                        HasAdd = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Add),
+                        HasShow = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Show),
+                        HasEdit = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Edit),
+                        HasDelete = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Delete),
+                        HasPrint = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Print)
                     })
                     .Select(result => new GroupData_MenuItem_APIItem
                     {
                         MDID = result.MenuData.MDID,
                         Title = result.MenuData.Title ?? "",
-                        AddFlag = result.MenuData.AlwaysAllowAdd || (result.ThisGroupMenu?.AddFlag ?? false),
-                        ShowFlag = result.MenuData.AlwaysAllowShow || (result.ThisGroupMenu?.ShowFlag ?? false),
-                        EditFlag = result.MenuData.AlwaysAllowEdit || (result.ThisGroupMenu?.EditFlag ?? false),
-                        DeleteFlag = result.MenuData.AlwaysAllowDelete || (result.ThisGroupMenu?.DeleteFlag ?? false),
-                        PrintFlag = result.MenuData.AlwaysAllowPring || (result.ThisGroupMenu?.PringFlag ?? false),
-                        AddFlagReadOnly = result.MenuData.AlwaysAllowAdd,
-                        ShowFlagReadOnly = result.MenuData.AlwaysAllowShow,
-                        EditFlagReadOnly = result.MenuData.AlwaysAllowEdit,
-                        DeleteFlagReadOnly = result.MenuData.AlwaysAllowDelete,
-                        PrintFlagReadOnly = result.MenuData.AlwaysAllowPring
+                        AddFlag = result.HasAdd && result.MenuData.AlwaysAllowAdd ||
+                                  (result.ThisGroupMenu?.AddFlag ?? false),
+                        ShowFlag = result.HasShow && result.MenuData.AlwaysAllowShow ||
+                                   (result.ThisGroupMenu?.ShowFlag ?? false),
+                        EditFlag = result.HasEdit && result.MenuData.AlwaysAllowEdit ||
+                                   (result.ThisGroupMenu?.EditFlag ?? false),
+                        DeleteFlag = result.HasDelete && result.MenuData.AlwaysAllowDelete ||
+                                     (result.ThisGroupMenu?.DeleteFlag ?? false),
+                        PrintFlag = result.HasPrint && result.MenuData.AlwaysAllowPring ||
+                                    (result.ThisGroupMenu?.PringFlag ?? false),
+                        AddFlagReadOnly = result.MenuData.AlwaysAllowAdd || !result.HasAdd,
+                        ShowFlagReadOnly = result.MenuData.AlwaysAllowShow || !result.HasShow,
+                        EditFlagReadOnly = result.MenuData.AlwaysAllowEdit || !result.HasEdit,
+                        DeleteFlagReadOnly = result.MenuData.AlwaysAllowDelete || !result.HasDelete,
+                        PrintFlagReadOnly = result.MenuData.AlwaysAllowPring || !result.HasPrint
                     })
                     .ToList()
             });

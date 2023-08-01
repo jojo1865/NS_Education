@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
+using NS_Education.Variables;
 
 namespace NS_Education.Models.APIItems.Controller.Resver.GetHeadList
 {
@@ -17,6 +18,8 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetHeadList
 
         public int BSCID12 { get; set; }
         public string BSCID12_Title { get; set; }
+
+        public ReserveHeadGetListState State { get; set; }
 
         public bool DeleteFlag { get; set; }
         public int Index { get; private set; }

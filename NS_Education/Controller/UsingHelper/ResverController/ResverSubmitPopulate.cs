@@ -390,7 +390,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         private static void SubmitPopulateHeadValues(Resver_Submit_Input_APIItem input, Resver_Head head)
         {
-            head.BSCID12 = input.BSCID12;
+            int billSum = input.BillItems
+                .Where(bi => bi.PayFlag)
+                .Sum(bi => bi.Price);
+
+            head.BSCID12 = billSum >= input.QuotedPrice ? Convert.ToInt32(ReserveHeadState.FullyPaid)
+                : billSum > 0 ? Convert.ToInt32(ReserveHeadState.DepositPaid)
+                : Convert.ToInt32(ReserveHeadState.Draft);
             head.BSCID11 = input.BSCID11;
             head.Title = input.Title;
             head.SDate = input.SDate.ParseDateTime().Date;

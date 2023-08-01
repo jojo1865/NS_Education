@@ -50,8 +50,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .ValidateAsync(
                     async i => isAdd || await DC.Resver_Head.ValidateIdExists(i.RHID, nameof(Resver_Head.RHID)),
                     () => AddError(NotFound("預約單 ID", nameof(input.RHID))))
-                .ValidateAsync(async i => await SubmitValidateStaticCode(i.BSCID12, StaticCodeType.ResverStatus),
-                    () => AddError(NotFound("預約狀態 ID", nameof(input.BSCID12))))
                 .ValidateAsync(async i => await SubmitValidateStaticCode(i.BSCID11, StaticCodeType.ResverSource),
                     () => AddError(NotFound("預約來源 ID", nameof(input.BSCID11))))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("預約單名稱", nameof(input.Title))))
@@ -83,26 +81,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     () => AddError(NotFound("MK 業務", nameof(input.MK_BUID))))
                 .ValidateAsync(async i => await SubmitValidateOPBusinessUser(i.OP_BUID),
                     () => AddError(NotFound("OP 業務", nameof(input.OP_BUID))))
-                .IsValid();
-
-            // 驗證預約單狀態調整
-            B_StaticCode resverStatusCode = await DC.B_StaticCode
-                .FirstOrDefaultAsync(bsc => bsc.BSCID == input.BSCID12);
-
-            // (1) 預約草稿：CheckFlag 為 true 時報錯
-            // (2) 已付訂金：Resver_Bill 已付未刪除的資料數量為 0 時報錯
-            // (3) 已結帳：Resver_Bill 已付總額不等於 QuotedPrice 時報錯。
-
-            isHeadValid = isHeadValid && input.StartValidate()
-                .Validate(i => resverStatusCode?.Code != ReserveHeadState.Draft || !dataCheckFlag,
-                    () => AddError(11, "預約已確認，無法設置為預約草稿狀態！"))
-                .Validate(
-                    i => resverStatusCode?.Code != ReserveHeadState.DepositPaid ||
-                         input.BillItems.Any(bi => bi.PayFlag),
-                    () => AddError(12, "無已繳費紀錄，無法設置為已付訂金狀態！"))
-                .Validate(i => resverStatusCode?.Code != ReserveHeadState.FullyPaid
-                               || input.BillItems.Where(bi => bi.PayFlag).Sum(bi => bi.Price) == input.QuotedPrice,
-                    () => AddError(13, "繳費紀錄中已繳總額不等於預約單總價，無法設置為已結帳狀態！"))
                 .IsValid();
 
             // short-circuit

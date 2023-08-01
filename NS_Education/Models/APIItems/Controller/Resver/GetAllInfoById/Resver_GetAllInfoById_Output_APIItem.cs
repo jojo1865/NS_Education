@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NS_Education.Models.APIItems.Controller.ContactType.GetList;
+using NS_Education.Variables;
 
 namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
 {
@@ -20,6 +21,7 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public ICollection<Resver_GetAllInfoById_Output_SiteItem_APIItem> SiteItems =
             new List<Resver_GetAllInfoById_Output_SiteItem_APIItem>();
 
+        public ReserveHeadGetListState State { get; set; }
         public int RHID { get; set; }
 
         public int BSCID12 { get; set; }

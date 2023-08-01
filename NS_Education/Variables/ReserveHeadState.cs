@@ -7,4 +7,13 @@ namespace NS_Education.Variables
         public const string FullyPaid = "3";
         public const string Terminated = "4";
     }
+
+    public enum ReserveHeadGetListState
+    {
+        Draft = 1,
+        Checked,
+        FullyPaid,
+        Terminated,
+        Deleted
+    }
 }

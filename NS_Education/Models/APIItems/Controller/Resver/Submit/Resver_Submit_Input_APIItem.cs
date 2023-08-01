@@ -5,7 +5,6 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
     public class Resver_Submit_Input_APIItem : BaseRequestForSubmit
     {
         public int RHID { get; set; }
-        public int BSCID12 { get; set; }
         public int BSCID11 { get; set; }
         public string Title { get; set; }
         public string SDate { get; set; }

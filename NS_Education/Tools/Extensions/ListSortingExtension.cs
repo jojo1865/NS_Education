@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using BeingValidated;
 using NS_Education.Models.APIItems;
 
@@ -13,7 +14,8 @@ namespace NS_Education.Tools.Extensions
 
             bool isValid = sorts.StartValidateElements()
                 .Validate(
-                    sort => sort.PropertyName.HasContent() && typeof(TEntity).GetProperty(sort.PropertyName) != null,
+                    sort => sort.PropertyName.HasContent() &&
+                            typeof(TEntity).GetProperty(sort.PropertyName, BindingFlags.IgnoreCase) != null,
                     sort => errors.Add($"套用排序時，查無此欄位：{sort.PropertyName}"))
                 .IsValid();
 

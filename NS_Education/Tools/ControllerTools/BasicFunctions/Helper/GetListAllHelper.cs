@@ -50,6 +50,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 2. 執行查詢
             var queryResult = await _GetListQueryResult(input);
 
+            var sorting = input.Sorting?.ToArray();
+
+            if (sorting != null && sorting.Any())
+                queryResult = queryResult.SortWithInput(sorting).ToList();
+
             // 3. 有錯誤時提早返回
             if (_controller.HasError())
                 return _controller.GetResponseJson();

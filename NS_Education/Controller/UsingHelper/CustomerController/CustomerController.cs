@@ -98,7 +98,10 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             (int skip, int take) = input.CalculateSkipAndTake(response.AllItemCt);
 
-            var queryResult = await joinedQuery.Skip(skip).Take(take).ToListAsync();
+            var queryResult = (await joinedQuery
+                    .ToArrayAsync())
+                .SortWithInput(input.Sorting)
+                .Skip(skip).Take(take);
 
             var list = new List<Customer_GetList_Output_Row_APIItem>();
 

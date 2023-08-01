@@ -68,7 +68,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         }
 
         private IEnumerable<Customer> GetListOrderByInput(IDictionary<Customer, int> customers,
-            IEnumerable<PagedListSorting> sorts)
+            IEnumerable<ListSorting> sorts)
         {
             sorts = sorts?.ToArray();
 
@@ -77,7 +77,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             IOrderedEnumerable<Customer> ordering = customers.Keys.AsOrderedEnumerable(true);
 
-            foreach (PagedListSorting sort in sorts)
+            foreach (ListSorting sort in sorts)
             {
                 switch (sort.PropertyName)
                 {

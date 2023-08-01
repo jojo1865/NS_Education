@@ -70,6 +70,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 new CommonResponseForPagedList<SiteData_GetList_Output_Row_APIItem>
                 {
                     Items = filteredResult
+                        .SortWithInput(input.Sorting)
                         .Skip(skip)
                         .Take(take)
                         .Select(sd => Task.Run(() => GetListPagedEntityToRow(sd, skip++)).Result)

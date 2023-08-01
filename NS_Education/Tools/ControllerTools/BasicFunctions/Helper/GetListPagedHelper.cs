@@ -56,6 +56,11 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             IList<TEntity> results = await _GetListQueryResult(input, response);
 
+            var sorting = input.Sorting?.ToArray();
+
+            if (sorting != null && sorting.Any())
+                results = results.SortWithInput(sorting).ToList();
+
             // 3. 有錯誤時提早返回
             if (_controller.HasError())
                 return _controller.GetResponseJson();

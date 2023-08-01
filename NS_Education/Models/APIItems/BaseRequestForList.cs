@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace NS_Education.Models.APIItems
 {
     public abstract class BaseRequestForList
@@ -17,5 +19,7 @@ namespace NS_Education.Models.APIItems
         /// 1：僅篩選已刪除<br/>
         /// </summary>
         public int DeleteFlag { get; set; } = 0;
+
+        public IEnumerable<ListSorting> Sorting { get; set; } = new List<ListSorting>();
     }
 }

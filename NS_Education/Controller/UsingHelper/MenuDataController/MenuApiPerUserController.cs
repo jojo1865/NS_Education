@@ -144,64 +144,67 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                                       || thisNodeOrNull.AlwaysAllowDelete
                                       || thisNodeOrNull.AlwaysAllowPring);
 
+            var usableApis = thisNodeOrNull?.MenuAPI
+                .Where(api =>
+                    // 如果是特殊的選單（如預約管理），必定有瀏覽新增修改
+                    (isASpecialMenu
+                     && (api.APIType != (int)MenuApiType.Show || thisNodeOrNull.AlwaysAllowShow)
+                     && (api.APIType != (int)MenuApiType.Add || thisNodeOrNull.AlwaysAllowAdd)
+                     && (api.APIType != (int)MenuApiType.Edit || thisNodeOrNull.AlwaysAllowEdit)
+                     && (api.APIType != (int)MenuApiType.Delete || thisNodeOrNull.AlwaysAllowDelete)
+                     && (api.APIType != (int)MenuApiType.Print || thisNodeOrNull.AlwaysAllowPring))
+                    ||
+                    // 判斷管理員權限
+                    (UserHasRootAccess && (api.APIType != (int)MenuApiType.Add || rootAdd)
+                                       && (api.APIType != (int)MenuApiType.Delete || rootDelete)
+                                       && (api.APIType != (int)MenuApiType.Edit || rootEdit)
+                                       && (api.APIType != (int)MenuApiType.Print || rootPrint)
+                                       && (api.APIType != (int)MenuApiType.Show || rootShow))
+                    ||
+                    // 如果沒有管理員權限,再用 MenuData 回溯到 M_Group_Menu 確認權限
+                    (
+                        api.MenuData.ActiveFlag
+                        && !api.MenuData.DeleteFlag
+                        && api.MenuData.M_Group_Menu.Any(mgm =>
+                            mgm.GroupData.ActiveFlag
+                            && !mgm.GroupData.DeleteFlag
+                            && mgm.GroupData.M_Group_User.Any(mgu => mgu.UID == uid)
+                            && (api.APIType != (int)MenuApiType.Add || mgm.AddFlag)
+                            && (api.APIType != (int)MenuApiType.Delete || mgm.DeleteFlag)
+                            && (api.APIType != (int)MenuApiType.Edit || mgm.EditFlag)
+                            && (api.APIType != (int)MenuApiType.Print || mgm.PringFlag)
+                            && (api.APIType != (int)MenuApiType.Show || mgm.ShowFlag)
+                        )
+                    )
+                ).ToArray();
+
             // 建立新的 Node
             MenuData_GetListByUid_Output_Node_APIItem newNode = new MenuData_GetListByUid_Output_Node_APIItem
             {
                 MDID = thisNodeId,
                 Title = thisNodeOrNull?.Title ?? "",
+                IsShownOnLeft = thisNodeOrNull?.IsVisibleOnLeft ?? false,
                 URL = thisNodeOrNull?.URL.HasContent() ?? false
                     ? thisNodeOrNull.URL
                     : children?
                           .OrderBy(child => child.SortNo)
                           .Select(child => child.URL)
-                          .FirstOrDefault()
-                      ?? "",
+                          .FirstOrDefault() ??
+                      "",
                 SortNo = thisNodeOrNull?.SortNo ?? 0,
                 // 這裡在做遞迴
                 Items = children?.Select(child =>
-                            CreateNode(child.MDID, menuDataDict, parentToChildrenLookUp, createdNodes)).ToList() ??
+                                CreateNode(child.MDID,
+                                    menuDataDict,
+                                    parentToChildrenLookUp,
+                                    createdNodes))
+                            .ToList() ??
                         new List<MenuData_GetListByUid_Output_Node_APIItem>(),
-                Apis = thisNodeOrNull?.MenuAPI
-                           .Where(api =>
-                               // 如果是特殊的選單（如預約管理），必定有瀏覽新增修改
-                               (isASpecialMenu
-                                && (api.APIType != (int)MenuApiType.Show || thisNodeOrNull.AlwaysAllowShow)
-                                && (api.APIType != (int)MenuApiType.Add || thisNodeOrNull.AlwaysAllowAdd)
-                                && (api.APIType != (int)MenuApiType.Edit || thisNodeOrNull.AlwaysAllowEdit)
-                                && (api.APIType != (int)MenuApiType.Delete || thisNodeOrNull.AlwaysAllowDelete)
-                                && (api.APIType != (int)MenuApiType.Print || thisNodeOrNull.AlwaysAllowPring))
-                               ||
-                               // 判斷管理員權限
-                               (UserHasRootAccess && (api.APIType != (int)MenuApiType.Add || rootAdd)
-                                                  && (api.APIType != (int)MenuApiType.Delete || rootDelete)
-                                                  && (api.APIType != (int)MenuApiType.Edit || rootEdit)
-                                                  && (api.APIType != (int)MenuApiType.Print || rootPrint)
-                                                  && (api.APIType != (int)MenuApiType.Show || rootShow))
-                               ||
-                               // 如果沒有管理員權限,再用 MenuData 回溯到 M_Group_Menu 確認權限
-                               (
-                                   api.MenuData.ActiveFlag
-                                   && !api.MenuData.DeleteFlag
-                                   && api.MenuData.M_Group_Menu.Any(mgm =>
-                                       mgm.GroupData.ActiveFlag
-                                       && !mgm.GroupData.DeleteFlag
-                                       && mgm.GroupData.M_Group_User.Any(mgu => mgu.UID == uid)
-                                       && (api.APIType != (int)MenuApiType.Add || mgm.AddFlag)
-                                       && (api.APIType != (int)MenuApiType.Delete || mgm.DeleteFlag)
-                                       && (api.APIType != (int)MenuApiType.Edit || mgm.EditFlag)
-                                       && (api.APIType != (int)MenuApiType.Print || mgm.PringFlag)
-                                       && (api.APIType != (int)MenuApiType.Show || mgm.ShowFlag)
-                                   )
-                               )
-                           )
-                           .Select(menuApi => new MenuData_GetListByUid_Output_MenuApi_APIItem
-                           {
-                               ApiUrl = menuApi.APIURL ?? "",
-                               ApiType = menuApi.APIType < ApiTypes.Length
-                                   ? ApiTypes[menuApi.APIType]
-                                   : ""
-                           }).ToList()
-                       ?? new List<MenuData_GetListByUid_Output_MenuApi_APIItem>()
+                HasShow = usableApis?.Any(a => a.APIType == (int)MenuApiType.Show) ?? false,
+                HasAdd = usableApis?.Any(a => a.APIType == (int)MenuApiType.Add) ?? false,
+                HasEdit = usableApis?.Any(a => a.APIType == (int)MenuApiType.Edit) ?? false,
+                HasDelete = usableApis?.Any(a => a.APIType == (int)MenuApiType.Delete) ?? false,
+                HasPrint = usableApis?.Any(a => a.APIType == (int)MenuApiType.Print) ?? false,
             };
 
             // 綁定父層關係

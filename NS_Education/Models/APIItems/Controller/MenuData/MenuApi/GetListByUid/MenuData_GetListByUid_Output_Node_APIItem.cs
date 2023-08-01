@@ -13,14 +13,17 @@ namespace NS_Education.Models.APIItems.Controller.MenuData.MenuApi.GetListByUid
         public string Title { get; set; }
         public string URL { get; set; }
         public int SortNo { get; set; }
-
+        public bool IsShownOnLeft { get; set; }
         [JsonIgnore] public int Index { get; private set; }
 
         public IList<MenuData_GetListByUid_Output_Node_APIItem> Items { get; set; } =
             new List<MenuData_GetListByUid_Output_Node_APIItem>();
 
-        public IList<MenuData_GetListByUid_Output_MenuApi_APIItem> Apis { get; set; } =
-            new List<MenuData_GetListByUid_Output_MenuApi_APIItem>();
+        public bool HasShow { get; set; }
+        public bool HasAdd { get; set; }
+        public bool HasEdit { get; set; }
+        public bool HasDelete { get; set; }
+        public bool HasPrint { get; set; }
 
         public Task SetInfoFromEntity<T>(T entity, PublicClass controller) where T : class
         {

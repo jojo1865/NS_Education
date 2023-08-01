@@ -37,6 +37,7 @@ namespace NS_Education.Models.Entities
         public bool AlwaysAllowEdit { get; set; }
         public bool AlwaysAllowDelete { get; set; }
         public bool AlwaysAllowPring { get; set; }
+        public bool IsVisibleOnLeft { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<M_Group_Menu> M_Group_Menu { get; set; }

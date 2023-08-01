@@ -129,16 +129,17 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
                     {
                         MDID = result.MenuData.MDID,
                         Title = result.MenuData.Title ?? "",
-                        AddFlag = result.HasAdd && result.MenuData.AlwaysAllowAdd ||
-                                  (result.ThisGroupMenu?.AddFlag ?? false),
-                        ShowFlag = result.HasShow && result.MenuData.AlwaysAllowShow ||
-                                   (result.ThisGroupMenu?.ShowFlag ?? false),
-                        EditFlag = result.HasEdit && result.MenuData.AlwaysAllowEdit ||
-                                   (result.ThisGroupMenu?.EditFlag ?? false),
-                        DeleteFlag = result.HasDelete && result.MenuData.AlwaysAllowDelete ||
-                                     (result.ThisGroupMenu?.DeleteFlag ?? false),
-                        PrintFlag = result.HasPrint && result.MenuData.AlwaysAllowPring ||
-                                    (result.ThisGroupMenu?.PringFlag ?? false),
+                        AddFlag = result.HasAdd
+                                  && (result.MenuData.AlwaysAllowAdd || (result.ThisGroupMenu?.AddFlag ?? false)),
+                        ShowFlag = result.HasShow
+                                   && (result.MenuData.AlwaysAllowShow || (result.ThisGroupMenu?.ShowFlag ?? false)),
+                        EditFlag = result.HasEdit
+                                   && (result.MenuData.AlwaysAllowEdit || (result.ThisGroupMenu?.EditFlag ?? false)),
+                        DeleteFlag = result.HasDelete
+                                     && (result.MenuData.AlwaysAllowDelete ||
+                                         (result.ThisGroupMenu?.DeleteFlag ?? false)),
+                        PrintFlag = result.HasPrint
+                                    && (result.MenuData.AlwaysAllowPring || (result.ThisGroupMenu?.PringFlag ?? false)),
                         AddFlagReadOnly = result.MenuData.AlwaysAllowAdd || !result.HasAdd,
                         ShowFlagReadOnly = result.MenuData.AlwaysAllowShow || !result.HasShow,
                         EditFlagReadOnly = result.MenuData.AlwaysAllowEdit || !result.HasEdit,

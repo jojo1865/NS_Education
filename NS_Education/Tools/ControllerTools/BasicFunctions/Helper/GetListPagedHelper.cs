@@ -28,7 +28,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         where TController : PublicClass, IGetListPaged<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForPagedList
-        where TGetListRow : IGetResponseRow
+        where TGetListRow : class, IGetResponseRow
     {
         private readonly TController _controller;
 
@@ -56,11 +56,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             IList<TEntity> results = await _GetListQueryResult(input, response);
 
-            var sorting = input.Sorting?.ToArray();
-
-            if (sorting != null && sorting.Any())
-                results = results.SortWithInput(sorting).ToList();
-
             // 3. 有錯誤時提早返回
             if (_controller.HasError())
                 return _controller.GetResponseJson();
@@ -72,7 +67,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 5. 按指定格式回傳結果
             // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。（如：取得 Username）
             List<TGetListRow> rows = new List<TGetListRow>();
-            int startIndex = input.CalculateSkipAndTake(response.AllItemCt).skip;
+            int startIndex = 0;
             foreach (var entity in results)
             {
                 var row = Task.Run(() => _controller.GetListPagedEntityToRow(entity)).Result;
@@ -86,7 +81,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                     rows.Add(row);
             }
 
-            response.Items = rows;
+            (int skip, int take) = input.CalculateSkipAndTake(rows.Count);
+            response.Items = rows.AsEnumerable().SortWithInput(input.Sorting).Skip(skip).Take(take).ToList();
 
             return _controller.GetResponseJson(response);
         }
@@ -115,11 +111,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             if (totalRows == 0 || input.NowPage > response.AllPageCt)
                 return new List<TEntity>();
 
-            (int skip, int take) = input.CalculateSkipAndTake(totalRows);
-
             var resultList = await query
-                .Skip(skip)
-                .Take(take)
                 .ToListAsync();
 
             return resultList;

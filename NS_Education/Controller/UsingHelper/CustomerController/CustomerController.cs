@@ -96,12 +96,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             response.SetByInput(input);
             response.AllItemCt = await joinedQuery.CountAsync();
 
-            (int skip, int take) = input.CalculateSkipAndTake(response.AllItemCt);
-
-            var queryResult = (await joinedQuery
-                    .ToArrayAsync())
-                .SortWithInput(input.Sorting)
-                .Skip(skip).Take(take);
+            var queryResult = await joinedQuery
+                .ToArrayAsync();
 
             var list = new List<Customer_GetList_Output_Row_APIItem>();
 
@@ -119,7 +115,14 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     list.Add(row);
             }
 
-            response.Items = list;
+            (int skip, int take) = input.CalculateSkipAndTake(response.AllItemCt);
+
+            response.Items = list
+                .AsEnumerable()
+                .SortWithInput(input.Sorting)
+                .Skip(skip)
+                .Take(take)
+                .ToList();
 
             return GetResponseJson(response);
         }

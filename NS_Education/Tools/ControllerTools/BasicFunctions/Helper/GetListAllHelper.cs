@@ -26,6 +26,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         where TController : PublicClass, IGetListAll<TEntity, TGetListRequest, TGetListRow>
         where TEntity : class
         where TGetListRequest : BaseRequestForList
+        where TGetListRow : class
     {
         private readonly TController _controller;
 
@@ -50,11 +51,6 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
             // 2. 執行查詢
             var queryResult = await _GetListQueryResult(input);
 
-            var sorting = input.Sorting?.ToArray();
-
-            if (sorting != null && sorting.Any())
-                queryResult = queryResult.SortWithInput(sorting).ToList();
-
             // 3. 有錯誤時提早返回
             if (_controller.HasError())
                 return _controller.GetResponseJson();
@@ -65,7 +61,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             // 5. 按指定格式回傳結果
             // 如果實作者有再用 DB 查值，會造成多重 Connection 異常，所以這邊不能使用 Task.WhenAll。（如：取得 Username）
-            List<TGetListRow> rows = new List<TGetListRow>();
+            ICollection<TGetListRow> rows = new List<TGetListRow>();
             int index = 0;
             foreach (var entity in queryResult)
             {
@@ -79,6 +75,8 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
                 rows.Add(row);
             }
+
+            rows = rows.SortWithInput(input.Sorting).ToList();
 
             CommonResponseForList<TGetListRow> response = new CommonResponseForList<TGetListRow>
             {

@@ -9,6 +9,7 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetResverSiteList
         public ICollection<Resver_GetResverSiteList_TimeSpan_Output_APIItem> Items =
             new List<Resver_GetResverSiteList_TimeSpan_Output_APIItem>();
 
+        public string Date { get; set; }
         public int BSID { get; set; }
         public string Code { get; set; }
         public string Title { get; set; }

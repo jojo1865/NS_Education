@@ -51,6 +51,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 {
                     Items = queryResult.Keys.Select(bs => new Resver_GetResverSiteList_Output_Row_APIItem
                     {
+                        Date = input.FreeDate,
                         Index = input.ReverseOrder ? index-- : index++,
                         BSID = bs.BSID,
                         Code = bs.Code ?? "",

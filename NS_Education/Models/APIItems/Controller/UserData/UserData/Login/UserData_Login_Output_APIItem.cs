@@ -9,6 +9,8 @@ namespace NS_Education.Models.APIItems.Controller.UserData.UserData.Login
         public string JwtToken { get; set; }
         public int MaxAgeMinutes => JwtConstants.ExpireMinutes;
 
+        public int DaysUntilPasswordExpires { get; set; }
+
         public bool IsAdministrator { get; set; }
     }
 }

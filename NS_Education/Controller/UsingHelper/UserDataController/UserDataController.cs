@@ -260,17 +260,42 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             // 先建立 claims
             (string jwt, bool isAdmin) result = LoginCreateJwt(queried);
 
+            DateTime userLastPasswordChangeDate = await GetUserLastPasswordChangeDate(queried);
+            int currentMaxPasswordDays = await GetPasswordExpireDays();
+
             var output = new UserData_Login_Output_APIItem
             {
                 UID = queried.UID,
                 Username = queried.UserName,
                 JwtToken = result.jwt,
-                IsAdministrator = result.isAdmin
+                IsAdministrator = result.isAdmin,
+                DaysUntilPasswordExpires =
+                    (userLastPasswordChangeDate.AddDays(currentMaxPasswordDays).Date - DateTime.Now.Date).Days
             };
 
             bool isUpdateSuccessful = await LoginUpdateDb(queried, result.jwt);
 
             return isUpdateSuccessful ? GetResponseJson(output) : GetResponseJson();
+        }
+
+        private async Task<DateTime> GetUserLastPasswordChangeDate(UserData userData)
+        {
+            UserPasswordLog lastChange = DC.UserPasswordLog
+                .Where(upl => upl.UID == userData.UID)
+                .Where(upl => upl.Type == (int)UserPasswordLogType.ChangePassword)
+                .OrderByDescending(upl => upl.CreDate)
+                .FirstOrDefault();
+
+            return lastChange?.CreDate ?? userData.CreDate;
+        }
+
+        private async Task<int> GetPasswordExpireDays()
+        {
+            return await DC.B_StaticCode
+                .Where(bsc => bsc.CodeType == (int)StaticCodeType.SafetyControl)
+                .Where(bsc => bsc.Code == ((int)StaticCodeSafetyControlCode.PasswordExpireDays).ToString())
+                .Select(bsc => bsc.SortNo)
+                .FirstOrDefaultAsync();
         }
 
         private static (string, bool) LoginCreateJwt(UserData queried)

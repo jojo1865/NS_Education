@@ -115,31 +115,45 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
                     .Where(md => md.ActiveFlag && !md.DeleteFlag)
                     .AsEnumerable()
                     .Where(md => md.URL.HasContent())
-                    .Select(md => new
+                    .Select(md =>
                     {
-                        MenuData = md,
-                        ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID),
-                        HasAdd = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Add),
-                        HasShow = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Show),
-                        HasEdit = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Edit),
-                        HasDelete = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Delete),
-                        HasPrint = md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Print)
+                        // 為全域時，視為 Add/Show/Edit... 全都有
+                        bool isRootMenu = md.MenuAPI.Any(api => api.APIURL == PrivilegeConstants.RootAccessUrl);
+                        return new
+                        {
+                            MenuData = md,
+                            ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID),
+                            HasAdd = isRootMenu
+                                     || md.AlwaysAllowAdd
+                                     || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Add),
+                            HasShow = isRootMenu
+                                      || md.AlwaysAllowShow
+                                      || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Show),
+                            HasEdit = isRootMenu
+                                      || md.AlwaysAllowEdit
+                                      || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Edit),
+                            HasDelete = isRootMenu
+                                        || md.AlwaysAllowDelete
+                                        || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Delete),
+                            HasPrint = isRootMenu
+                                       || md.AlwaysAllowPring
+                                       || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Print)
+                        };
                     })
                     .Select(result => new GroupData_MenuItem_APIItem
                     {
                         MDID = result.MenuData.MDID,
                         Title = result.MenuData.Title ?? "",
                         AddFlag = result.HasAdd
-                                  && (result.MenuData.AlwaysAllowAdd || (result.ThisGroupMenu?.AddFlag ?? false)),
+                                  && (result.ThisGroupMenu?.AddFlag ?? false),
                         ShowFlag = result.HasShow
-                                   && (result.MenuData.AlwaysAllowShow || (result.ThisGroupMenu?.ShowFlag ?? false)),
+                                   && (result.ThisGroupMenu?.ShowFlag ?? false),
                         EditFlag = result.HasEdit
-                                   && (result.MenuData.AlwaysAllowEdit || (result.ThisGroupMenu?.EditFlag ?? false)),
+                                   && (result.ThisGroupMenu?.EditFlag ?? false),
                         DeleteFlag = result.HasDelete
-                                     && (result.MenuData.AlwaysAllowDelete ||
-                                         (result.ThisGroupMenu?.DeleteFlag ?? false)),
+                                     && (result.ThisGroupMenu?.DeleteFlag ?? false),
                         PrintFlag = result.HasPrint
-                                    && (result.MenuData.AlwaysAllowPring || (result.ThisGroupMenu?.PringFlag ?? false)),
+                                    && (result.ThisGroupMenu?.PringFlag ?? false),
                         AddFlagReadOnly = result.MenuData.AlwaysAllowAdd || !result.HasAdd,
                         ShowFlagReadOnly = result.MenuData.AlwaysAllowShow || !result.HasShow,
                         EditFlagReadOnly = result.MenuData.AlwaysAllowEdit || !result.HasEdit,

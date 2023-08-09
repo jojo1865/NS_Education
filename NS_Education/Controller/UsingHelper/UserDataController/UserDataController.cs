@@ -280,11 +280,11 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         private async Task<DateTime> GetUserLastPasswordChangeDate(UserData userData)
         {
-            UserPasswordLog lastChange = DC.UserPasswordLog
+            UserPasswordLog lastChange = await DC.UserPasswordLog
                 .Where(upl => upl.UID == userData.UID)
                 .Where(upl => upl.Type == (int)UserPasswordLogType.ChangePassword)
                 .OrderByDescending(upl => upl.CreDate)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             return lastChange?.CreDate ?? userData.CreDate;
         }

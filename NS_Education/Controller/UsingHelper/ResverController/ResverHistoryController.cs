@@ -68,15 +68,15 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             return query.OrderByDescending(rhl => rhl.CreDate);
         }
 
-        public async Task<Resver_GetHistory_Output_Row_APIItem> GetListAllEntityToRow(Resver_Head_Log entity)
+        public Task<Resver_GetHistory_Output_Row_APIItem> GetListAllEntityToRow(Resver_Head_Log entity)
         {
-            return new Resver_GetHistory_Output_Row_APIItem
+            return Task.FromResult(new Resver_GetHistory_Output_Row_APIItem
             {
                 TypeName = ((ResverHistoryType?)entity.Type).GetChineseName(),
                 CreDate = entity.CreDate.ToFormattedStringDateTime(),
                 CreUser =
                     $"{entity.CreUID} {entity.UserData?.UserName ?? entity.UserData?.LoginAccount ?? String.Empty}"
-            };
+            });
         }
 
         #endregion

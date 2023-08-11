@@ -165,8 +165,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 // site -> throw
                 .Include(rh => rh.Resver_Site)
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.B_StaticCode)))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.B_OrderCode)))
+                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.D_Throw)))
+                .Include(rh =>
+                    rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.D_Throw).Select(dt => dt.B_StaticCode)))
+                .Include(rh =>
+                    rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.D_Throw).Select(dt => dt.B_OrderCode)))
                 // site -> throw -> throw_food
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food)))
                 .Include(rh => rh.Resver_Site.Select(rs =>
@@ -369,15 +372,19 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 {
                     RTID = rt.RTID,
                     TargetDate = rt.TargetDate.ToFormattedStringDate(),
-                    BSCID = rt.BSCID,
-                    BSC_Title = rt.B_StaticCode?.Title ?? "",
+                    BSCID = rt.D_Throw.BSCID,
+                    BSC_Title = rt.D_Throw.B_StaticCode?.Title ?? "",
                     BSC_List = Task.Run(() =>
-                            DC.B_StaticCode.GetStaticCodeSelectable(rt.B_StaticCode?.CodeType, rt.BSCID))
+                            DC.B_StaticCode.GetStaticCodeSelectable(rt.D_Throw.B_StaticCode?.CodeType,
+                                rt.D_Throw.BSCID))
                         .Result,
-                    Title = rt.Title ?? "",
-                    BOCID = rt.BOCID,
-                    BOC_Title = rt.B_OrderCode?.Title ?? "",
-                    BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rt.B_OrderCode?.CodeType, rt.BOCID))
+                    DTID = rt.DTID,
+                    DT_List = Task.Run(() => DC.D_Throw.GetThrowSelectable(rt.D_Throw.BSCID, rt.DTID)).Result,
+                    Title = rt.D_Throw.Title ?? "",
+                    BOCID = rt.D_Throw.BOCID,
+                    BOC_Title = rt.D_Throw.B_OrderCode?.Title ?? "",
+                    BOC_List = Task.Run(() =>
+                            DC.B_OrderCode.GetOrderCodeSelectable(rt.D_Throw.B_OrderCode?.CodeType, rt.D_Throw.BOCID))
                         .Result,
                     PrintTitle = rt.PrintTitle ?? "",
                     PrintNote = rt.PrintNote ?? "",
@@ -387,7 +394,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     SortNo = rt.SortNo,
                     Note = rt.Note,
                     TimeSpanItems = GetTimeSpanFromHead<Resver_Throw>(rs.Resver_Head, rt.RTID),
-                    FoodItems = rt.B_StaticCode?.Title != DbConstants.ThrowDineTitle
+                    FoodItems = rt.D_Throw.B_StaticCode?.Title != DbConstants.ThrowDineTitle
                         ? new List<Resver_GetAllInfoById_Output_FoodItem_APIItem>()
                         : GetALlInfoByIdPopulateFoodItems(rt)
                 })

@@ -827,9 +827,6 @@
           <Property Name="RTID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="RSID" Type="int" Nullable="false" />
           <Property Name="TargetDate" Type="datetime" Nullable="false" />
-          <Property Name="BSCID" Type="int" Nullable="false" />
-          <Property Name="BOCID" Type="int" Nullable="false" />
-          <Property Name="Title" Type="nvarchar" MaxLength="100" />
           <Property Name="PrintTitle" Type="nvarchar" MaxLength="100" />
           <Property Name="PrintNote" Type="nvarchar" MaxLength="100" />
           <Property Name="UnitPrice" Type="int" Nullable="false" />
@@ -842,6 +839,7 @@
           <Property Name="CreUID" Type="int" Nullable="false" />
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
+          <Property Name="DTID" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Resver_Throw_Food">
           <Key>
@@ -1624,30 +1622,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Resver_Throw_B_OrderCode">
-          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
-          <End Role="Resver_Throw" Type="Self.Resver_Throw" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="B_OrderCode">
-              <PropertyRef Name="BOCID" />
-            </Principal>
-            <Dependent Role="Resver_Throw">
-              <PropertyRef Name="BOCID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Resver_Throw_B_StaticCode">
-          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
-          <End Role="Resver_Throw" Type="Self.Resver_Throw" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="B_StaticCode">
-              <PropertyRef Name="BSCID" />
-            </Principal>
-            <Dependent Role="Resver_Throw">
-              <PropertyRef Name="BSCID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Resver_Throw_D_B_Partner">
           <End Role="B_Partner" Type="Self.B_Partner" Multiplicity="1" />
           <End Role="Resver_Throw_Food" Type="Self.Resver_Throw_Food" Multiplicity="*" />
@@ -1962,6 +1936,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_Throw_D_Throw_DTID_fk">
+          <End Role="D_Throw" Type="Self.D_Throw" Multiplicity="1" />
+          <End Role="Resver_Throw" Type="Self.Resver_Throw" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="D_Throw">
+              <PropertyRef Name="DTID" />
+            </Principal>
+            <Dependent Role="Resver_Throw">
+              <PropertyRef Name="DTID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="db_NS_EducationModelStoreContainer">
           <EntitySet Name="B_Category" EntityType="Self.B_Category" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="B_Device" EntityType="Self.B_Device" Schema="dbo" store:Type="Tables" />
@@ -2269,14 +2255,6 @@
             <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_Site" EntitySet="Resver_Site" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resver_Throw_B_OrderCode" Association="Self.FK_Resver_Throw_B_OrderCode">
-            <End Role="B_OrderCode" EntitySet="B_OrderCode" />
-            <End Role="Resver_Throw" EntitySet="Resver_Throw" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Resver_Throw_B_StaticCode" Association="Self.FK_Resver_Throw_B_StaticCode">
-            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
-            <End Role="Resver_Throw" EntitySet="Resver_Throw" />
-          </AssociationSet>
           <AssociationSet Name="FK_Resver_Throw_D_B_Partner" Association="Self.FK_Resver_Throw_D_B_Partner">
             <End Role="B_Partner" EntitySet="B_Partner" />
             <End Role="Resver_Throw_Food" EntitySet="Resver_Throw_Food" />
@@ -2377,6 +2355,10 @@
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Resver_Other" EntitySet="Resver_Other" />
           </AssociationSet>
+          <AssociationSet Name="Resver_Throw_D_Throw_DTID_fk" Association="Self.Resver_Throw_D_Throw_DTID_fk">
+            <End Role="D_Throw" EntitySet="D_Throw" />
+            <End Role="Resver_Throw" EntitySet="Resver_Throw" />
+          </AssociationSet>
         </EntityContainer>
       </Schema>
     </edmx:StorageModels>
@@ -2467,7 +2449,6 @@
           <NavigationProperty Name="Resver_Device" Relationship="Self.FK_Resver_Device_B_OrderCode" FromRole="B_OrderCode" ToRole="Resver_Device" />
           <NavigationProperty Name="Resver_Other" Relationship="Self.FK_Resver_Other_B_OrderCode" FromRole="B_OrderCode" ToRole="Resver_Other" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_B_OrderCode" FromRole="B_OrderCode" ToRole="Resver_Site" />
-          <NavigationProperty Name="Resver_Throw" Relationship="Self.FK_Resver_Throw_B_OrderCode" FromRole="B_OrderCode" ToRole="Resver_Throw" />
         </EntityType>
         <EntityType Name="B_Partner">
           <Key>
@@ -2592,7 +2573,6 @@
           <NavigationProperty Name="Resver_Head" Relationship="Self.FK_Resver_Head_B_StaticCode11" FromRole="B_StaticCode" ToRole="Resver_Head" />
           <NavigationProperty Name="Resver_Head1" Relationship="Self.FK_Resver_Head_B_StaticCode12" FromRole="B_StaticCode" ToRole="Resver_Head" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Site" />
-          <NavigationProperty Name="Resver_Throw" Relationship="Self.FK_Resver_Throw_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Throw" />
           <NavigationProperty Name="Resver_Throw_Food" Relationship="Self.FK_Resver_Throw_D_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Throw_Food" />
           <NavigationProperty Name="Resver_GiveBack" Relationship="Self.Resver_GiveBack_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="Resver_GiveBack" />
           <NavigationProperty Name="Resver_Other" Relationship="Self.Resver_Other_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="Resver_Other" />
@@ -2850,6 +2830,7 @@
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="B_OrderCode" Relationship="Self.D_Throw_B_OrderCode_BOCID_fk" FromRole="D_Throw" ToRole="B_OrderCode" />
           <NavigationProperty Name="B_StaticCode" Relationship="Self.D_Throw_B_StaticCode_BSCID_fk" FromRole="D_Throw" ToRole="B_StaticCode" />
+          <NavigationProperty Name="Resver_Throw" Relationship="Self.Resver_Throw_D_Throw_DTID_fk" FromRole="D_Throw" ToRole="Resver_Throw" />
         </EntityType>
         <EntityType Name="D_TimeSpan">
           <Key>
@@ -3320,9 +3301,6 @@
           <Property Name="RTID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="RSID" Type="Int32" Nullable="false" />
           <Property Name="TargetDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="BSCID" Type="Int32" Nullable="false" />
-          <Property Name="BOCID" Type="Int32" Nullable="false" />
-          <Property Name="Title" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="PrintTitle" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="PrintNote" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="UnitPrice" Type="Int32" Nullable="false" />
@@ -3335,8 +3313,8 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="B_OrderCode" Relationship="Self.FK_Resver_Throw_B_OrderCode" FromRole="Resver_Throw" ToRole="B_OrderCode" />
-          <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_Resver_Throw_B_StaticCode" FromRole="Resver_Throw" ToRole="B_StaticCode" />
+          <Property Name="DTID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="D_Throw" Relationship="Self.Resver_Throw_D_Throw_DTID_fk" FromRole="Resver_Throw" ToRole="D_Throw" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Throw_Resver_Site" FromRole="Resver_Throw" ToRole="Resver_Site" />
           <NavigationProperty Name="Resver_Throw_Food" Relationship="Self.FK_Resver_Throw_D_Resver_Throw" FromRole="Resver_Throw" ToRole="Resver_Throw_Food" />
         </EntityType>
@@ -3700,18 +3678,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Resver_Throw_B_OrderCode">
-          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
-          <End Role="Resver_Throw" Type="Self.Resver_Throw" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="B_OrderCode">
-              <PropertyRef Name="BOCID" />
-            </Principal>
-            <Dependent Role="Resver_Throw">
-              <PropertyRef Name="BOCID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_B_Partner_B_StaticCode">
           <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
           <End Role="B_Partner" Type="Self.B_Partner" Multiplicity="*" />
@@ -3978,18 +3944,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Resver_Throw_B_StaticCode">
-          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
-          <End Role="Resver_Throw" Type="Self.Resver_Throw" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="B_StaticCode">
-              <PropertyRef Name="BSCID" />
-            </Principal>
-            <Dependent Role="Resver_Throw">
-              <PropertyRef Name="BSCID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Resver_Throw_D_B_StaticCode">
           <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
           <End Role="Resver_Throw_Food" Type="Self.Resver_Throw_Food" Multiplicity="*" />
@@ -4243,6 +4197,18 @@
             </Principal>
             <Dependent Role="Resver_Bill">
               <PropertyRef Name="DPTID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="Resver_Throw_D_Throw_DTID_fk">
+          <End Role="D_Throw" Type="Self.D_Throw" Multiplicity="1" />
+          <End Role="Resver_Throw" Type="Self.Resver_Throw" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="D_Throw">
+              <PropertyRef Name="DTID" />
+            </Principal>
+            <Dependent Role="Resver_Throw">
+              <PropertyRef Name="DTID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -4644,10 +4610,6 @@
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
             <End Role="Resver_Site" EntitySet="Resver_Site" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resver_Throw_B_OrderCode" Association="Self.FK_Resver_Throw_B_OrderCode">
-            <End Role="B_OrderCode" EntitySet="B_OrderCode" />
-            <End Role="Resver_Throw" EntitySet="Resver_Throw" />
-          </AssociationSet>
           <AssociationSet Name="FK_B_Partner_B_StaticCode" Association="Self.FK_B_Partner_B_StaticCode">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="B_Partner" EntitySet="B_Partner" />
@@ -4736,10 +4698,6 @@
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Resver_Site" EntitySet="Resver_Site" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resver_Throw_B_StaticCode" Association="Self.FK_Resver_Throw_B_StaticCode">
-            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
-            <End Role="Resver_Throw" EntitySet="Resver_Throw" />
-          </AssociationSet>
           <AssociationSet Name="FK_Resver_Throw_D_B_StaticCode" Association="Self.FK_Resver_Throw_D_B_StaticCode">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Resver_Throw_Food" EntitySet="Resver_Throw_Food" />
@@ -4823,6 +4781,10 @@
           <AssociationSet Name="FK_Resver_Bill_Header_D_PayType" Association="Self.FK_Resver_Bill_Header_D_PayType">
             <End Role="D_PayType" EntitySet="D_PayType" />
             <End Role="Resver_Bill" EntitySet="Resver_Bill" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Throw_D_Throw_DTID_fk" Association="Self.Resver_Throw_D_Throw_DTID_fk">
+            <End Role="D_Throw" EntitySet="D_Throw" />
+            <End Role="Resver_Throw" EntitySet="Resver_Throw" />
           </AssociationSet>
           <AssociationSet Name="FK_M_ResverSiteTimeSpan_D_TimeSpan" Association="Self.FK_M_ResverSiteTimeSpan_D_TimeSpan">
             <End Role="D_TimeSpan" EntitySet="D_TimeSpan" />
@@ -5733,9 +5695,6 @@
                 <ScalarProperty Name="RTID" ColumnName="RTID" />
                 <ScalarProperty Name="RSID" ColumnName="RSID" />
                 <ScalarProperty Name="TargetDate" ColumnName="TargetDate" />
-                <ScalarProperty Name="BSCID" ColumnName="BSCID" />
-                <ScalarProperty Name="BOCID" ColumnName="BOCID" />
-                <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="PrintTitle" ColumnName="PrintTitle" />
                 <ScalarProperty Name="PrintNote" ColumnName="PrintNote" />
                 <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
@@ -5748,6 +5707,7 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+                <ScalarProperty Name="DTID" ColumnName="DTID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

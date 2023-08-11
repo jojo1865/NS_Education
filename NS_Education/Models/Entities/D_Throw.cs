@@ -14,6 +14,12 @@ namespace NS_Education.Models.Entities
     
     public partial class D_Throw
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public D_Throw()
+        {
+            this.Resver_Throw = new HashSet<Resver_Throw>();
+        }
+    
         public int DTID { get; set; }
         public int BOCID { get; set; }
         public int BSCID { get; set; }
@@ -30,5 +36,7 @@ namespace NS_Education.Models.Entities
     
         public virtual B_OrderCode B_OrderCode { get; set; }
         public virtual B_StaticCode B_StaticCode { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Resver_Throw> Resver_Throw { get; set; }
     }
 }

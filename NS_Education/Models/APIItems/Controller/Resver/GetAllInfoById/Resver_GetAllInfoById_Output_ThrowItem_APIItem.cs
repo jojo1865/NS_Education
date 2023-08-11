@@ -13,6 +13,11 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public int RTID { get; set; }
         public string TargetDate { get; set; }
 
+        public int DTID { get; set; }
+
+        public ICollection<CommonResponseRowForSelectable> DT_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
+
         public int BSCID { get; set; }
         public string BSC_Title { get; set; }
 

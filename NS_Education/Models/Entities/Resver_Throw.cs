@@ -23,6 +23,9 @@ namespace NS_Education.Models.Entities
         public int RTID { get; set; }
         public int RSID { get; set; }
         public System.DateTime TargetDate { get; set; }
+        public int BSCID { get; set; }
+        public int BOCID { get; set; }
+        public string Title { get; set; }
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }
         public int UnitPrice { get; set; }
@@ -35,9 +38,9 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
-        public int DTID { get; set; }
     
-        public virtual D_Throw D_Throw { get; set; }
+        public virtual B_OrderCode B_OrderCode { get; set; }
+        public virtual B_StaticCode B_StaticCode { get; set; }
         public virtual Resver_Site Resver_Site { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Throw_Food> Resver_Throw_Food { get; set; }

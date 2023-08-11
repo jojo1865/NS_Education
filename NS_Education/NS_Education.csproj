@@ -1,1010 +1,1002 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')"/>
-  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')"/>
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>
-    </ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{5FAD52F3-D081-4DC4-83F0-B4CD270298C9}</ProjectGuid>
-    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NS_Education</RootNamespace>
-    <AssemblyName>NS_Education</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>true</UseIISExpress>
-    <Use64BitIISExpress/>
-    <IISExpressSSLPort>44336</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication/>
-    <IISExpressWindowsAuthentication/>
-    <IISExpressUseClassicPipelineMode/>
-    <UseGlobalApplicationHostFile/>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="BeingValidated, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\BeingValidated.0.0.4\lib\netstandard2.0\BeingValidated.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="EntityFramework.DynamicLinq, Version=1.3.2.0, Culture=neutral, PublicKeyToken=6586a8658ac2670d">
-      <HintPath>..\packages\EntityFramework.DynamicLinq.1.3.2\lib\net46\EntityFramework.DynamicLinq.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.1.1\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Bcl.HashCode, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>..\packages\Microsoft.Bcl.HashCode.1.1.1\lib\net461\Microsoft.Bcl.HashCode.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.CSharp"/>
-    <Reference Include="Microsoft.Data.SqlClient, Version=1.13.20136.2, Culture=neutral, PublicKeyToken=23ec7fc2d6eaa4a5">
-      <HintPath>..\packages\Microsoft.Data.SqlClient.1.1.3\lib\net46\Microsoft.Data.SqlClient.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.DependencyInjection, Version=3.1.32.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
-      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.3.1.32\lib\net461\Microsoft.Extensions.DependencyInjection.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=3.1.32.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
-      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.3.1.32\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=3.1.32.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
-      <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.3.1.32\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Identity.Client, Version=3.0.8.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae">
-      <HintPath>..\packages\Microsoft.Identity.Client.3.0.8\lib\net45\Microsoft.Identity.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\packages\Microsoft.IdentityModel.JsonWebTokens.5.5.0\lib\net461\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Logging, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\packages\Microsoft.IdentityModel.Logging.5.5.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Protocols, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\packages\Microsoft.IdentityModel.Protocols.5.5.0\lib\net461\Microsoft.IdentityModel.Protocols.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\packages\Microsoft.IdentityModel.Protocols.OpenIdConnect.5.5.0\lib\net461\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\packages\Microsoft.IdentityModel.Tokens.5.5.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="mscorlib"/>
-    <Reference Include="System"/>
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\packages\System.ComponentModel.Annotations.4.7.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Data"/>
-    <Reference Include="System.Data.Common, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\packages\System.Data.Common.4.3.0\lib\net451\System.Data.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Data.Linq"/>
-    <Reference Include="System.Drawing"/>
-    <Reference Include="System.IdentityModel"/>
-    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.5.5.0\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Linq.Dynamic.Core, Version=1.3.2.0, Culture=neutral, PublicKeyToken=0f07ec44de6ac832">
-      <HintPath>..\packages\System.Linq.Dynamic.Core.1.3.2\lib\net46\System.Linq.Dynamic.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Security"/>
-    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>Bin\System.Threading.Tasks.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Entity"/>
-    <Reference Include="System.Web.ApplicationServices"/>
-    <Reference Include="System.ComponentModel.DataAnnotations"/>
-    <Reference Include="System.Core"/>
-    <Reference Include="System.Data.DataSetExtensions"/>
-    <Reference Include="System.Windows.Forms"/>
-    <Reference Include="System.Xml.Linq"/>
-    <Reference Include="System.Web"/>
-    <Reference Include="System.Web.Abstractions"/>
-    <Reference Include="System.Web.Routing"/>
-    <Reference Include="System.Xml"/>
-    <Reference Include="System.Configuration"/>
-    <Reference Include="System.Runtime.Serialization"/>
-    <Reference Include="Microsoft.Web.Infrastructure, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.Web.Infrastructure.2.0.1\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http">
-    </Reference>
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.9\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http.WebRequest">
-    </Reference>
-    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.Helpers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.9\lib\net45\System.Web.Http.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http.WebHost, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.9\lib\net45\System.Web.Http.WebHost.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.9\lib\net45\System.Web.Mvc.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Optimization">
-      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.9\lib\net45\System.Web.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="WebGrease">
-      <Private>True</Private>
-      <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
-    </Reference>
-    <Reference Include="Antlr3.Runtime">
-      <Private>True</Private>
-      <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
-      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="App_Start\BundleConfig.cs"/>
-    <Compile Include="App_Start\FilterConfig.cs"/>
-    <Compile Include="App_Start\RouteConfig.cs"/>
-    <Compile Include="App_Start\WebApiConfig.cs"/>
-    <Compile Include="Areas\HelpPage\ApiDescriptionExtensions.cs"/>
-    <Compile Include="Areas\HelpPage\App_Start\HelpPageConfig.cs"/>
-    <Compile Include="Areas\HelpPage\Controllers\HelpController.cs"/>
-    <Compile Include="Areas\HelpPage\HelpPageAreaRegistration.cs"/>
-    <Compile Include="Areas\HelpPage\HelpPageConfigurationExtensions.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\CollectionModelDescription.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\ComplexTypeModelDescription.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\DictionaryModelDescription.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\EnumTypeModelDescription.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\EnumValueDescription.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\IModelDocumentationProvider.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\KeyValuePairModelDescription.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\ModelDescription.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameAttribute.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameHelper.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterAnnotation.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterDescription.cs"/>
-    <Compile Include="Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.cs"/>
-    <Compile Include="Areas\HelpPage\Models\HelpPageApiModel.cs"/>
-    <Compile Include="Areas\HelpPage\SampleGeneration\HelpPageSampleGenerator.cs"/>
-    <Compile Include="Areas\HelpPage\SampleGeneration\HelpPageSampleKey.cs"/>
-    <Compile Include="Areas\HelpPage\SampleGeneration\ImageSample.cs"/>
-    <Compile Include="Areas\HelpPage\SampleGeneration\InvalidSample.cs"/>
-    <Compile Include="Areas\HelpPage\SampleGeneration\ObjectGenerator.cs"/>
-    <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs"/>
-    <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs"/>
-    <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs"/>
-    <Compile Include="Controller\ErrorController.cs"/>
-    <Compile Include="Controller\HomeController.cs"/>
-    <Compile Include="Controller\UsingHelper\BusinessUserController\BusinessUserController.cs"/>
-    <Compile Include="Controller\UsingHelper\BusinessUserController\BusinessUserDeleteItemValidateMarketer.cs"/>
-    <Compile Include="Controller\UsingHelper\BusinessUserController\BusinessUserDeleteItemValidateOperator.cs"/>
-    <Compile Include="Controller\UsingHelper\CategoryController\CategoryController.cs"/>
-    <Compile Include="Controller\UsingHelper\CategoryController\CategoryTypeListController.cs"/>
-    <Compile Include="Controller\UsingHelper\CompanyController.cs"/>
-    <Compile Include="Controller\UsingHelper\ContactTypeController.cs"/>
-    <Compile Include="Controller\UsingHelper\CustomerController\CustomerController.cs"/>
-    <Compile Include="Controller\UsingHelper\CustomerController\CustomerRankingController.cs"/>
-    <Compile Include="Controller\UsingHelper\CustomerGiftController.cs"/>
-    <Compile Include="Controller\UsingHelper\CustomerQuestionController\CustomerQuestionController.cs"/>
-    <Compile Include="Controller\UsingHelper\CustomerQuestionController\CustomerQuestionUniqueAreasController.cs"/>
-    <Compile Include="Controller\UsingHelper\CustomerVisitController.cs"/>
-    <Compile Include="Controller\UsingHelper\DepartmentController.cs"/>
-    <Compile Include="Controller\UsingHelper\DeviceController.cs"/>
-    <Compile Include="Controller\UsingHelper\FoodCategoryController.cs"/>
-    <Compile Include="Controller\UsingHelper\GroupDataController\GroupDataController.cs"/>
-    <Compile Include="Controller\UsingHelper\GroupDataController\GroupDataUniqueNamesController.cs"/>
-    <Compile Include="Controller\UsingHelper\HallController.cs"/>
-    <Compile Include="Controller\UsingHelper\HealthController.cs"/>
-    <Compile Include="Controller\UsingHelper\LookupController.cs"/>
-    <Compile Include="Controller\UsingHelper\MenuDataController\MenuApiController.cs"/>
-    <Compile Include="Controller\UsingHelper\MenuDataController\MenuApiPerUserController.cs"/>
-    <Compile Include="Controller\UsingHelper\MenuDataController\MenuDataController.cs"/>
-    <Compile Include="Controller\UsingHelper\OrderCodeController.cs"/>
-    <Compile Include="Controller\UsingHelper\OtherPayItemController.cs"/>
-    <Compile Include="Controller\UsingHelper\PartnerController.cs"/>
-    <Compile Include="Controller\UsingHelper\PartnerItemController.cs"/>
-    <Compile Include="Controller\UsingHelper\PayTypeController.cs"/>
-    <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs1Controller.cs"/>
-    <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs2Controller.cs"/>
-    <Compile Include="Controller\UsingHelper\ResverController\ResverController.cs"/>
-    <Compile Include="Controller\UsingHelper\ResverController\ResverHistoryController.cs"/>
-    <Compile Include="Controller\UsingHelper\ResverController\ResverSiteController.cs"/>
-    <Compile Include="Controller\UsingHelper\ResverController\ResverSubmitPopulate.cs"/>
-    <Compile Include="Controller\UsingHelper\ResverController\ResverSubmitValidate.cs"/>
-    <Compile Include="Controller\UsingHelper\ResverController\ResverUniqueIdController.cs"/>
-    <Compile Include="Controller\UsingHelper\SafetyControlController.cs"/>
-    <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs"/>
-    <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs"/>
-    <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataUniqueNamesController.cs"/>
-    <Compile Include="Controller\UsingHelper\StaticCodeController\StaticCodeController.cs"/>
-    <Compile Include="Controller\UsingHelper\StaticCodeController\StaticCodeTypeListController.cs"/>
-    <Compile Include="Controller\UsingHelper\ThrowController.cs"/>
-    <Compile Include="Controller\UsingHelper\TimeSpanController.cs"/>
-    <Compile Include="Controller\UsingHelper\UserDataController\UserDataController.cs"/>
-    <Compile Include="Controller\UsingHelper\UserDataController\UserDataLogController.cs"/>
-    <Compile Include="Controller\UsingHelper\ZipController.cs"/>
-    <Compile Include="Global.asax.cs">
-      <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
-    <Compile Include="Models\APIItems\BaseRequestForList.cs"/>
-    <Compile Include="Models\APIItems\BaseRequestForPagedList.cs"/>
-    <Compile Include="Models\APIItems\BaseRequestForSubmit.cs"/>
-    <Compile Include="Models\APIItems\CommonRequestForUniqueField.cs"/>
-    <Compile Include="Models\APIItems\CommonResponseForList.cs"/>
-    <Compile Include="Models\APIItems\CommonResponseForPagedList.cs"/>
-    <Compile Include="Models\APIItems\CommonResponseRowForSelectable.cs"/>
-    <Compile Include="Models\APIItems\BaseGetResponseRowWithCreDateOnly.cs"/>
-    <Compile Include="Models\APIItems\BaseGetResponseRowWithCreUpd.cs"/>
-    <Compile Include="Models\APIItems\CommonResponseRowIdTitle.cs"/>
-    <Compile Include="Models\APIItems\BaseGetResponseRowInfusableWithCreUpd.cs"/>
-    <Compile Include="Models\APIItems\BaseInfusable.cs"/>
-    <Compile Include="Models\APIItems\Common\DeleteItem\DeleteItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Common\DeleteItem\DeleteItem_Input_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\BusinessUser\GetInfoById\BusinessUser_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\BusinessUser\GetList\BusinessUser_GetList_Customer_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\BusinessUser\GetList\BusinessUser_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\BusinessUser\GetList\BusinessUser_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\BusinessUser\Submit\BusinessUser_Submit_CID_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\BusinessUser\Submit\BusinessUser_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Category\B_Category_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Category\GetInfoById\Category_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Category\GetList\Category_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Category\GetList\Category_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Category\Submit\Category_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Company\D_Company_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Company\GetInfoById\Company_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Company\GetList\Company_GetList_DepartmentItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Company\GetList\Company_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Company\GetList\Company_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Company\Submit\Company_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\ContactType\GetList\ContactType_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerGift\GetInfoById\CustomerGift_GetInfoById_Customers_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerGift\GetInfoById\CustomerGift_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerGift\GetList\CustomerGift_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerGift\GetList\CustomerGift_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerGift\Submit\CustomerGift_Submit_Customers_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerGift\Submit\CustomerGift_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetInfoById\CustomerQuestion_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetList\CustomerQuestion_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetList\CustomerQuestion_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetUniqueAreas\CustomerQuestion_GetUniqueAreas_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerQuestion\Submit\CustomerQuestion_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerVisit\GetInfoById\CustomerVisit_CustomerSelectable.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerVisit\GetInfoById\CustomerVisit_GetInfoById_GiftSendings_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerVisit\GetInfoById\CustomerVisit_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerVisit\GetList\CustomerVisit_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerVisit\GetList\CustomerVisit_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerVisit\Submit\CustomerVisit_Submit_GiftSendings_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\CustomerVisit\Submit\CustomerVisit_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\GetInfoById\Customer_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_BusinessUser_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_Contact_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_RankBy.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_Output_Contact_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\Submit\Customer_Submit_BUID_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Customer\Submit\Customer_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Department\D_Department_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Department\GetInfoById\Department_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Department\GetList\Department_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Department\GetList\Department_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Department\Submit\Department_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Device\GetInfoById\Device_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Device\GetInfoById\Device_GetInfoById_Site_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Device\GetList\Device_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Device\GetList\Device_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Device\Submit\Device_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\FoodCategory\D_FoodCategory_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\FoodCategory\GetInfoById\FoodCategory_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\FoodCategory\GetList\FoodCategory_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\FoodCategory\GetList\FoodCategory_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\FoodCategory\Submit\FoodCategory_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\GroupData\GetInfoById\GroupData_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\GroupData\GetList\GroupData_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\GroupData\GetList\GroupData_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\GroupData\GetUniqueNames\GroupData_GetUniqueNames_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\GroupData\GroupData_MenuItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\GroupData\SubmitMenuData\GroupData_SubmitMenuData_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\GroupData\Submit\GroupData_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Hall\D_Hall_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Hall\GetInfoById\Hall_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Hall\GetList\Hall_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Hall\GetList\Hall_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Hall\Submit\Hall_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Health\Ping\Health_Ping_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Lookup\GetList\Lookup_GetList_Category_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Lookup\GetList\Lookup_GetList_Lookup_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Lookup\GetList\Lookup_GetList_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_ChildMenu_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_MenuApi_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_Node_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetList\MenuApi_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetList\MenuApi_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\Submit\MenuApi_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuData\GetInfoById\MenuData_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuData\GetList\MenuData_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuData\GetList\MenuData_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\MenuData\MenuData\Submit\MenuData_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OrderCode\GetInfoById\OrderCode_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OrderCode\GetList\OrderCode_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OrderCode\GetList\OrderCode_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OrderCode\GetTypeList\OrderCode_GetTypeList_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OrderCode\Submit\OrderCode_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OtherPayItem\D_OtherPayItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OtherPayItem\GetInfoById\OtherPayItem_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OtherPayItem\GetList\OtherPayItem_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OtherPayItem\GetList\OtherPayItem_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\OtherPayItem\Submit\OtherPayItem_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PartnerItem\GetInfoById\PartnerItem_GetInfoById_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PartnerItem\GetList\PartnerItem_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PartnerItem\GetList\PartnerItem_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PartnerItem\Submit\PartnerItem_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Partner\GetInfoById\Partner_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Partner\GetList\Partner_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Partner\GetList\Partner_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Partner\Submit\Partner_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PayType\D_PayType_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PayType\GetInfoById\PayType_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PayType\GetList\PayType_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PayType\GetList\PayType_GetList_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PayType\Submit\PayType_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_DeviceItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_SiteItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_TimeSpanItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_PayItemDetail_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_PayItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_BillItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_ContactItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_DeviceItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_FoodItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_GiveBackItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_OtherItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_SiteItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_ThrowItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_TimeSpanItem_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetHeadList\Resver_GetHeadList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetHeadList\Resver_GetHeadList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetHistory\Resver_GetHistory_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetHistory\Resver_GetHistory_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetResverSiteList\Resver_GetResverSiteList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetResverSiteList\Resver_GetResverSiteList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetResverSiteList\Resver_GetResverSiteList_TimeSpan_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\GetUniqueIds\Resver_GetUniqueIds_Output_Row_APItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_BillItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_ContactItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_DeviceItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_FoodItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_GiveBackItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_OtherItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_SiteItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_ThrowItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_TimeSpanItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SafetyControl\GetList\SafetyControl_GetList_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SafetyControl\Submit\SafetyControl_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\GetInfoById\SiteData_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\GetInfoById\SiteData_GetInfoById_Output_Device_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\GetInfoById\SiteData_GetInfoById_Output_GroupList_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\GetListForCalendar\SiteData_GetListForCalendar_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\GetListForCalendar\SiteData_GetListForCalendar_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\GetListForCalendar\SiteData_GetListForCalendar_TimeSpan_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\GetList\SiteData_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\GetList\SiteData_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\GetUniqueNames\SiteData_GetUniqueNames_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_Devices_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_GroupList_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetInfoById\StaticCode_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetList\StaticCode_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetList\StaticCode_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetTypeList\StaticCode_GetTypeList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\StaticCode\GetTypeList\StaticCode_GetTypeList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\StaticCode\Submit\StaticCode_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Throw\GetInfoById\Throw_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Throw\GetList\Throw_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Throw\GetList\Throw_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Throw\Submit\Throw_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\TimeSpan\D_TimeSpan_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\TimeSpan\GetInfoById\TimeSpan_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\TimeSpan\GetList\TimeSpan_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\TimeSpan\GetList\TimeSpan_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\TimeSpan\Submit\TimeSpan_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\AdminAuthorize\UserData_AdminAuthorize_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\AdminChangeUserPassword\UserData_AdminChangeUserPassword_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\BatchSubmitDepartment\UserData_BatchSubmitDepartment_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\BatchSubmitDepartment\UserData_BatchSubmitDepartment_Input_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\BatchSubmitGroup\UserData_BatchSubmitGroup_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\BatchSubmitGroup\UserData_BatchSubmitGroup_Input_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\ChangeActive\UserData_ChangeActive_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\DeleteItem\UserData_DeleteItem_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\GetInfoById\UserData_GetInfoById_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\GetInfoById\UserData_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\GetList\UserData_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\GetList\UserData_GetList_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\GetList\UserData_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\Login\UserData_Login_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\Login\UserData_Login_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\Submit\UserData_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserData\UpdatePW\UserData_UpdatePW_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserLog\GetList\UserLog_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserLog\GetList\UserLog_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserLog\GetLogKeepDays\UserLog_GetLogKeepDays_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserLog\GetTypeList\UserLog_GetTypeList_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\UserData\UserLog\SubmitLogKeepDays\UserLog_SubmitLogKeepDays_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Zip\D_Zip_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Zip\GetInfoById\Zip_GetInfoById_Output_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Zip\GetList\Zip_GetList_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Zip\GetList\Zip_GetList_Output_Row_APIItem.cs"/>
-    <Compile Include="Models\APIItems\Controller\Zip\Submit\Zip_Submit_Input_APIItem.cs"/>
-    <Compile Include="Models\APIItems\IGetResponseRow.cs"/>
-    <Compile Include="Models\APIItems\ListSorting.cs"/>
-    <Compile Include="Models\APIItems\SubmitHelperIdResponse.cs"/>
-    <Compile Include="Models\CommonApiResponse.cs"/>
-    <Compile Include="Models\Entities\BusinessUser.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_Category.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_Device.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_OrderCode.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_Partner.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_PartnerItem.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_SiteData.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\B_StaticCode.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Customer.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\CustomerQuestion.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\CustomerVisit.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\D_Company.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\D_Department.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\D_FoodCategory.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\D_Hall.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\D_OtherPayItem.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\D_PayType.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\D_Throw.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\D_TimeSpan.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\D_Zip.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\ErrorLog.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\GiftSending.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\GroupData.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Lookup.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\MenuAPI.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\MenuData.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Model1.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Model1.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Model1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Model1.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Model1.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Address.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Contect.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Customer_BusinessUser.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Customer_Category.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Customer_Gift.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Department_Category.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Group_Menu.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Group_User.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Resver_TimeSpan.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_SiteGroup.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\M_Site_Device.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\ResverHeadLogGuidGenerator.cs"/>
-    <Compile Include="Models\Entities\Resver_Bill.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Device.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_GiveBack.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Head.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Head_Log.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Other.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Site.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Throw.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\Resver_Throw_Food.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\UserData.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\UserLog.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Entities\UserPasswordLog.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Errors\AuthorizationErrors\BaseAuthorizationError.cs"/>
-    <Compile Include="Models\Errors\AuthorizationErrors\InsufficientPrivilegeError.cs"/>
-    <Compile Include="Models\Errors\AuthorizationErrors\WrongPasswordError.cs"/>
-    <Compile Include="Models\Errors\BaseError.cs"/>
-    <Compile Include="Models\Errors\BusinessError.cs"/>
-    <Compile Include="Models\Errors\DataValidationErrors\BaseDataValidationError.cs"/>
-    <Compile Include="Models\Errors\DataValidationErrors\DataAlreadyExistsError.cs"/>
-    <Compile Include="Models\Errors\DataValidationErrors\DataNotFoundError.cs"/>
-    <Compile Include="Models\Errors\DataValidationErrors\UpdateDbFailedError.cs"/>
-    <Compile Include="Models\Errors\ErrorField.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\BaseInputValidationError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\CopyNotAllowedError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\EmptyNotAllowedError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\ExpectedValueError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\LengthOutOfRangeError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\LengthTooLongError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\MinLargerThanMaxError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\NotSupportedValueError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\ValueOutOfRangeError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\ValueTooLargeError.cs"/>
-    <Compile Include="Models\Errors\InputValidationErrors\WrongFormatError.cs"/>
-    <Compile Include="Models\Errors\AuthError.cs"/>
-    <Compile Include="Models\Errors\SystemError.cs"/>
-    <Compile Include="Models\FinalizedResponse.cs"/>
-    <Compile Include="Models\IReturnMessageInfusable.cs"/>
-    <Compile Include="Models\PublicModel.cs"/>
-    <Compile Include="Models\Utilities\PrintReport\GetResverListByIDs2\PrintReport_GetResverListByIds2_PayItem.cs"/>
-    <Compile Include="Properties\AssemblyInfo.cs"/>
-    <Compile Include="Tools\ControllerTools\BaseClass\PublicClass.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\ChangeActiveHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Common\FlagHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\DeleteItemHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetInfoByIdHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListAllHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListLocalHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListPagedHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListUniqueFieldHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetTypeListHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IChangeActiveHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IDeleteItemHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetInfoByIdHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListAllHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListLocalHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListPagedHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetTypeListHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\ISubmitHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\SubmitHelper.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IChangeActive.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItem.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItemValidateReservation.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetInfoByID.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListAll.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListLocal.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListPaged.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListUniqueField.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetTypeList.cs"/>
-    <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs"/>
-    <Compile Include="Tools\Encryption\JwtHelper.cs"/>
-    <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs"/>
-    <Compile Include="Tools\Extensions\CustomerExtension.cs"/>
-    <Compile Include="Tools\Extensions\DbContextExtensions.cs"/>
-    <Compile Include="Tools\Extensions\DecimalExtensionMethods.cs"/>
-    <Compile Include="Tools\Extensions\DictionaryExtensionMethods.cs"/>
-    <Compile Include="Tools\Extensions\ExceptionExtensionMethods.cs"/>
-    <Compile Include="Tools\Extensions\IEnumerableExtensions.cs"/>
-    <Compile Include="Tools\Extensions\IntExtensionMethods.cs"/>
-    <Compile Include="Tools\Extensions\IQueryableExtensions.cs"/>
-    <Compile Include="Tools\Extensions\ListSortingExtension.cs"/>
-    <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs"/>
-    <Compile Include="Tools\Extensions\ResverHistoryTypeExtension.cs"/>
-    <Compile Include="Tools\Extensions\SpecificTableExtensionMethods.cs"/>
-    <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs"/>
-    <Compile Include="Tools\Extensions\StringExtensionMethods.cs"/>
-    <Compile Include="Tools\Extensions\TypeExtensionMethods.cs"/>
-    <Compile Include="Tools\Filters\ExceptionHandlerFilter\ExceptionHandlerFilter.cs"/>
-    <Compile Include="Tools\Filters\FilterStaticTools.cs"/>
-    <Compile Include="Tools\Filters\FinalizeResponseFilter\FinalizeResponseFilter.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeBy.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeTypeSingletonFactory.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AdminRole.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AnyRole.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\IAuthorizeType.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\RoleConstants.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\UserRole.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\JwtAuthFilter.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequiredPrivileges.cs"/>
-    <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequirePrivilege.cs"/>
-    <Compile Include="Tools\RequestHelper.cs"/>
-    <Compile Include="Tools\ResponseHelper.cs"/>
-    <Compile Include="Variables\CategoryType.cs"/>
-    <Compile Include="Variables\ContactType.cs"/>
-    <Compile Include="Variables\CustomHttpCode.cs"/>
-    <Compile Include="Variables\DbConstants.cs"/>
-    <Compile Include="Variables\IOConstants.cs"/>
-    <Compile Include="Variables\JwtConstants.cs"/>
-    <Compile Include="Variables\MenuApiType.cs"/>
-    <Compile Include="Variables\OrderCodeType.cs"/>
-    <Compile Include="Variables\PrivilegeConstants.cs"/>
-    <Compile Include="Variables\ReserveHeadState.cs"/>
-    <Compile Include="Variables\ResverHeadExpression.cs"/>
-    <Compile Include="Variables\ResverHistoryType.cs"/>
-    <Compile Include="Variables\StaticCodeSafetyControlCode.cs"/>
-    <Compile Include="Variables\StaticCodeType.cs"/>
-    <Compile Include="Variables\TableCommentDictionary.cs"/>
-    <Compile Include="Variables\UserLogControlType.cs"/>
-    <Compile Include="Variables\UserPasswordLogType.cs"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\HelpPage\HelpPage.css"/>
-    <Content Include="Content\bootstrap-grid.css"/>
-    <Content Include="Content\bootstrap-grid.min.css"/>
-    <Content Include="Content\bootstrap-grid.rtl.css"/>
-    <Content Include="Content\bootstrap-grid.rtl.min.css"/>
-    <Content Include="Content\bootstrap-reboot.css"/>
-    <Content Include="Content\bootstrap-reboot.min.css"/>
-    <Content Include="Content\bootstrap-reboot.rtl.css"/>
-    <Content Include="Content\bootstrap-reboot.rtl.min.css"/>
-    <Content Include="Content\bootstrap-utilities.css"/>
-    <Content Include="Content\bootstrap-utilities.min.css"/>
-    <Content Include="Content\bootstrap-utilities.rtl.css"/>
-    <Content Include="Content\bootstrap-utilities.rtl.min.css"/>
-    <Content Include="Content\bootstrap.css"/>
-    <Content Include="Content\bootstrap.min.css"/>
-    <Content Include="Content\bootstrap.rtl.css"/>
-    <Content Include="Content\bootstrap.rtl.min.css"/>
-    <Content Include="favicon.ico"/>
-    <Content Include="Global.asax"/>
-    <Content Include="index.html"/>
-    <Content Include="Models\Entities\Model1.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>Model1.edmx</DependentUpon>
-      <LastGenOutput>Model1.Context.cs</LastGenOutput>
-    </Content>
-    <Content Include="Models\Entities\Model1.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>Model1.edmx</DependentUpon>
-      <LastGenOutput>Model1.cs</LastGenOutput>
-    </Content>
-    <Content Include="Scripts\bootstrap.bundle.js"/>
-    <Content Include="Scripts\bootstrap.bundle.min.js"/>
-    <Content Include="Scripts\bootstrap.esm.js"/>
-    <Content Include="Scripts\bootstrap.esm.min.js"/>
-    <Content Include="Scripts\bootstrap.js"/>
-    <Content Include="Scripts\bootstrap.min.js"/>
-    <Content Include="Areas\HelpPage\Views\Web.config"/>
-    <Content Include="Areas\HelpPage\Views\Shared\_Layout.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\ResourceModel.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\Index.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\TextSample.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\SimpleTypeModelDescription.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\Samples.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\Parameters.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ModelDescriptionLink.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\KeyValuePairModelDescription.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\InvalidSample.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ImageSample.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\HelpPageApiModel.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\EnumTypeModelDescription.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\DictionaryModelDescription.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ComplexTypeModelDescription.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml"/>
-    <Content Include="Areas\HelpPage\Views\Help\Api.cshtml"/>
-    <EntityDeploy Include="Models\Entities\Model1.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>Model1.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <Content Include="Models\Entities\Model1.edmx.diagram">
-      <DependentUpon>Model1.edmx</DependentUpon>
-    </Content>
-    <None Include="Scripts\jquery-3.4.1.intellisense.js"/>
-    <Content Include="Scripts\jquery-3.4.1.js"/>
-    <Content Include="Scripts\jquery-3.4.1.min.js"/>
-    <Content Include="Scripts\jquery-3.4.1.slim.js"/>
-    <Content Include="Scripts\jquery-3.4.1.slim.min.js"/>
-    <Content Include="Scripts\modernizr-2.8.3.js"/>
-    <Content Include="TestAPI.html"/>
-    <Content Include="Tools\ControllerTools\BasicFunctions\Helper\README.md"/>
-    <Content Include="Web.config"/>
-    <Content Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
-    <Content Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
-    <Content Include="Areas\HelpPage\Views\_ViewStart.cshtml"/>
-    <Content Include="Content\Site.css"/>
-    <Content Include="Views\Web.config"/>
-    <Content Include="Views\_ViewStart.cshtml"/>
-    <Content Include="Views\Home\Index.cshtml"/>
-    <Content Include="Views\Master\Master_Basic.cshtml"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\"/>
-    <Folder Include="Views\Category\"/>
-    <Folder Include="Views\GetInfo\"/>
-    <Folder Include="Views\Hall\"/>
-    <Folder Include="Views\Include\"/>
-    <Folder Include="Views\User\"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Scripts\bootstrap.min.js.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Scripts\bootstrap.js.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Scripts\bootstrap.esm.min.js.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Scripts\bootstrap.esm.js.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Scripts\bootstrap.bundle.min.js.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Scripts\bootstrap.bundle.js.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap.rtl.min.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap.rtl.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap.min.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-utilities.rtl.min.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-utilities.rtl.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-utilities.min.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-utilities.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-reboot.rtl.min.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-reboot.rtl.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-reboot.min.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-reboot.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-grid.rtl.min.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-grid.rtl.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-grid.min.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bootstrap-grid.css.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config"/>
-    <Content Include="Scripts\jquery-3.4.1.slim.min.map"/>
-    <Content Include="Scripts\jquery-3.4.1.min.map"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}"/>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}"/>
-  </ItemGroup>
-  <PropertyGroup>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
-    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-  </PropertyGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets"/>
-  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''"/>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false"/>
-  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
-    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)"/>
-  </Target>
-  <ProjectExtensions>
-    <VisualStudio>
-      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
-        <WebProjectProperties>
-          <UseIIS>True</UseIIS>
-          <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>2147</DevelopmentServerPort>
-          <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44336/</IISUrl>
-          <NTLMAuthentication>False</NTLMAuthentication>
-          <UseCustomServer>False</UseCustomServer>
-          <CustomServerUrl>
-          </CustomServerUrl>
-          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
-        </WebProjectProperties>
-      </FlavorProperties>
-    </VisualStudio>
-  </ProjectExtensions>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')"/>
+    <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')"/>
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
     <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProductVersion>
+        </ProductVersion>
+        <SchemaVersion>2.0</SchemaVersion>
+        <ProjectGuid>{5FAD52F3-D081-4DC4-83F0-B4CD270298C9}</ProjectGuid>
+        <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>NS_Education</RootNamespace>
+        <AssemblyName>NS_Education</AssemblyName>
+        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+        <MvcBuildViews>false</MvcBuildViews>
+        <UseIISExpress>true</UseIISExpress>
+        <Use64BitIISExpress/>
+        <IISExpressSSLPort>44336</IISExpressSSLPort>
+        <IISExpressAnonymousAuthentication/>
+        <IISExpressWindowsAuthentication/>
+        <IISExpressUseClassicPipelineMode/>
+        <UseGlobalApplicationHostFile/>
+        <NuGetPackageImportStamp>
+        </NuGetPackageImportStamp>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))"/>
-    <Error Condition="!Exists('..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets'))"/>
-    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))"/>
-    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))"/>
-  </Target>
-  <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets')"/>
-  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')"/>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-                           Other similar extension points exist, see Microsoft.Common.targets.
-                      <Target Name="BeforeBuild">
-                      </Target>
-                      <Target Name="AfterBuild">
-                      </Target> -->
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="BeingValidated, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\packages\BeingValidated.0.0.4\lib\netstandard2.0\BeingValidated.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+            <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+        </Reference>
+        <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+            <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+        </Reference>
+        <Reference Include="EntityFramework.DynamicLinq, Version=1.3.2.0, Culture=neutral, PublicKeyToken=6586a8658ac2670d">
+            <HintPath>..\packages\EntityFramework.DynamicLinq.1.3.2\lib\net46\EntityFramework.DynamicLinq.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+            <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+        </Reference>
+        <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.1.1\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.Bcl.HashCode, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\Microsoft.Bcl.HashCode.1.1.1\lib\net461\Microsoft.Bcl.HashCode.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.CSharp"/>
+        <Reference Include="Microsoft.Data.SqlClient, Version=1.13.20136.2, Culture=neutral, PublicKeyToken=23ec7fc2d6eaa4a5">
+            <HintPath>..\packages\Microsoft.Data.SqlClient.1.1.3\lib\net46\Microsoft.Data.SqlClient.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.Extensions.DependencyInjection, Version=3.1.32.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+            <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.3.1.32\lib\net461\Microsoft.Extensions.DependencyInjection.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=3.1.32.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+            <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.3.1.32\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=3.1.32.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+            <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.3.1.32\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.Identity.Client, Version=3.0.8.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae">
+            <HintPath>..\packages\Microsoft.Identity.Client.3.0.8\lib\net45\Microsoft.Identity.Client.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+            <HintPath>..\packages\Microsoft.IdentityModel.JsonWebTokens.5.5.0\lib\net461\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.IdentityModel.Logging, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+            <HintPath>..\packages\Microsoft.IdentityModel.Logging.5.5.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.IdentityModel.Protocols, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+            <HintPath>..\packages\Microsoft.IdentityModel.Protocols.5.5.0\lib\net461\Microsoft.IdentityModel.Protocols.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+            <HintPath>..\packages\Microsoft.IdentityModel.Protocols.OpenIdConnect.5.5.0\lib\net461\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+            <HintPath>..\packages\Microsoft.IdentityModel.Tokens.5.5.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="mscorlib"/>
+        <Reference Include="System"/>
+        <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.ComponentModel.Annotations.4.7.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Data"/>
+        <Reference Include="System.Data.Common, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Data.Common.4.3.0\lib\net451\System.Data.Common.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Data.Linq"/>
+        <Reference Include="System.Drawing"/>
+        <Reference Include="System.IdentityModel"/>
+        <Reference Include="System.IdentityModel.Tokens.Jwt, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+            <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.5.5.0\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Linq.Dynamic.Core, Version=1.3.2.0, Culture=neutral, PublicKeyToken=0f07ec44de6ac832">
+            <HintPath>..\packages\System.Linq.Dynamic.Core.1.3.2\lib\net46\System.Linq.Dynamic.Core.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Security"/>
+        <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>Bin\System.Threading.Tasks.Extensions.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Web.Entity"/>
+        <Reference Include="System.Web.ApplicationServices"/>
+        <Reference Include="System.ComponentModel.DataAnnotations"/>
+        <Reference Include="System.Core"/>
+        <Reference Include="System.Data.DataSetExtensions"/>
+        <Reference Include="System.Windows.Forms"/>
+        <Reference Include="System.Xml.Linq"/>
+        <Reference Include="System.Web"/>
+        <Reference Include="System.Web.Abstractions"/>
+        <Reference Include="System.Web.Routing"/>
+        <Reference Include="System.Xml"/>
+        <Reference Include="System.Configuration"/>
+        <Reference Include="System.Runtime.Serialization"/>
+        <Reference Include="Microsoft.Web.Infrastructure, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <Private>True</Private>
+            <HintPath>..\packages\Microsoft.Web.Infrastructure.2.0.1\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Net.Http">
+        </Reference>
+        <Reference Include="System.Net.Http.Formatting, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.9\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Net.Http.WebRequest">
+        </Reference>
+        <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <Private>True</Private>
+            <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.Helpers.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Web.Http, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.9\lib\net45\System.Web.Http.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Web.Http.WebHost, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.9\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Web.Mvc, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <Private>True</Private>
+            <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.9\lib\net45\System.Web.Mvc.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Web.Optimization">
+            <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <Private>True</Private>
+            <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.9\lib\net45\System.Web.Razor.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <Private>True</Private>
+            <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <Private>True</Private>
+            <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+            <Private>True</Private>
+            <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+        </Reference>
+        <Reference Include="WebGrease">
+            <Private>True</Private>
+            <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
+        </Reference>
+        <Reference Include="Antlr3.Runtime">
+            <Private>True</Private>
+            <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
+            <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="App_Start\BundleConfig.cs"/>
+        <Compile Include="App_Start\FilterConfig.cs"/>
+        <Compile Include="App_Start\RouteConfig.cs"/>
+        <Compile Include="App_Start\WebApiConfig.cs"/>
+        <Compile Include="Areas\HelpPage\ApiDescriptionExtensions.cs"/>
+        <Compile Include="Areas\HelpPage\App_Start\HelpPageConfig.cs"/>
+        <Compile Include="Areas\HelpPage\Controllers\HelpController.cs"/>
+        <Compile Include="Areas\HelpPage\HelpPageAreaRegistration.cs"/>
+        <Compile Include="Areas\HelpPage\HelpPageConfigurationExtensions.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\CollectionModelDescription.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\ComplexTypeModelDescription.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\DictionaryModelDescription.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\EnumTypeModelDescription.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\EnumValueDescription.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\IModelDocumentationProvider.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\KeyValuePairModelDescription.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\ModelDescription.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\ModelDescriptionGenerator.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameAttribute.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\ModelNameHelper.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterAnnotation.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\ParameterDescription.cs"/>
+        <Compile Include="Areas\HelpPage\ModelDescriptions\SimpleTypeModelDescription.cs"/>
+        <Compile Include="Areas\HelpPage\Models\HelpPageApiModel.cs"/>
+        <Compile Include="Areas\HelpPage\SampleGeneration\HelpPageSampleGenerator.cs"/>
+        <Compile Include="Areas\HelpPage\SampleGeneration\HelpPageSampleKey.cs"/>
+        <Compile Include="Areas\HelpPage\SampleGeneration\ImageSample.cs"/>
+        <Compile Include="Areas\HelpPage\SampleGeneration\InvalidSample.cs"/>
+        <Compile Include="Areas\HelpPage\SampleGeneration\ObjectGenerator.cs"/>
+        <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs"/>
+        <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs"/>
+        <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs"/>
+        <Compile Include="Controller\ErrorController.cs"/>
+        <Compile Include="Controller\HomeController.cs"/>
+        <Compile Include="Controller\UsingHelper\BusinessUserController\BusinessUserController.cs"/>
+        <Compile Include="Controller\UsingHelper\BusinessUserController\BusinessUserDeleteItemValidateMarketer.cs"/>
+        <Compile Include="Controller\UsingHelper\BusinessUserController\BusinessUserDeleteItemValidateOperator.cs"/>
+        <Compile Include="Controller\UsingHelper\CategoryController\CategoryController.cs"/>
+        <Compile Include="Controller\UsingHelper\CategoryController\CategoryTypeListController.cs"/>
+        <Compile Include="Controller\UsingHelper\CompanyController.cs"/>
+        <Compile Include="Controller\UsingHelper\ContactTypeController.cs"/>
+        <Compile Include="Controller\UsingHelper\CustomerController\CustomerController.cs"/>
+        <Compile Include="Controller\UsingHelper\CustomerController\CustomerRankingController.cs"/>
+        <Compile Include="Controller\UsingHelper\CustomerGiftController.cs"/>
+        <Compile Include="Controller\UsingHelper\CustomerQuestionController\CustomerQuestionController.cs"/>
+        <Compile Include="Controller\UsingHelper\CustomerQuestionController\CustomerQuestionUniqueAreasController.cs"/>
+        <Compile Include="Controller\UsingHelper\CustomerVisitController.cs"/>
+        <Compile Include="Controller\UsingHelper\DepartmentController.cs"/>
+        <Compile Include="Controller\UsingHelper\DeviceController.cs"/>
+        <Compile Include="Controller\UsingHelper\FoodCategoryController.cs"/>
+        <Compile Include="Controller\UsingHelper\GroupDataController\GroupDataController.cs"/>
+        <Compile Include="Controller\UsingHelper\GroupDataController\GroupDataUniqueNamesController.cs"/>
+        <Compile Include="Controller\UsingHelper\HallController.cs"/>
+        <Compile Include="Controller\UsingHelper\HealthController.cs"/>
+        <Compile Include="Controller\UsingHelper\LookupController.cs"/>
+        <Compile Include="Controller\UsingHelper\MenuDataController\MenuApiController.cs"/>
+        <Compile Include="Controller\UsingHelper\MenuDataController\MenuApiPerUserController.cs"/>
+        <Compile Include="Controller\UsingHelper\MenuDataController\MenuDataController.cs"/>
+        <Compile Include="Controller\UsingHelper\OrderCodeController.cs"/>
+        <Compile Include="Controller\UsingHelper\OtherPayItemController.cs"/>
+        <Compile Include="Controller\UsingHelper\PartnerController.cs"/>
+        <Compile Include="Controller\UsingHelper\PartnerItemController.cs"/>
+        <Compile Include="Controller\UsingHelper\PayTypeController.cs"/>
+        <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs1Controller.cs"/>
+        <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs2Controller.cs"/>
+        <Compile Include="Controller\UsingHelper\ResverController\ResverController.cs"/>
+        <Compile Include="Controller\UsingHelper\ResverController\ResverHistoryController.cs"/>
+        <Compile Include="Controller\UsingHelper\ResverController\ResverSiteController.cs"/>
+        <Compile Include="Controller\UsingHelper\ResverController\ResverSubmitPopulate.cs"/>
+        <Compile Include="Controller\UsingHelper\ResverController\ResverSubmitValidate.cs"/>
+        <Compile Include="Controller\UsingHelper\ResverController\ResverUniqueIdController.cs"/>
+        <Compile Include="Controller\UsingHelper\SafetyControlController.cs"/>
+        <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataController.cs"/>
+        <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataCalendarController.cs"/>
+        <Compile Include="Controller\UsingHelper\SiteDataController\SiteDataUniqueNamesController.cs"/>
+        <Compile Include="Controller\UsingHelper\StaticCodeController\StaticCodeController.cs"/>
+        <Compile Include="Controller\UsingHelper\StaticCodeController\StaticCodeTypeListController.cs"/>
+        <Compile Include="Controller\UsingHelper\TimeSpanController.cs"/>
+        <Compile Include="Controller\UsingHelper\UserDataController\UserDataController.cs"/>
+        <Compile Include="Controller\UsingHelper\UserDataController\UserDataLogController.cs"/>
+        <Compile Include="Controller\UsingHelper\ZipController.cs"/>
+        <Compile Include="Global.asax.cs">
+            <DependentUpon>Global.asax</DependentUpon>
+        </Compile>
+        <Compile Include="Models\APIItems\BaseRequestForList.cs"/>
+        <Compile Include="Models\APIItems\BaseRequestForPagedList.cs"/>
+        <Compile Include="Models\APIItems\BaseRequestForSubmit.cs"/>
+        <Compile Include="Models\APIItems\CommonRequestForUniqueField.cs"/>
+        <Compile Include="Models\APIItems\CommonResponseForList.cs"/>
+        <Compile Include="Models\APIItems\CommonResponseForPagedList.cs"/>
+        <Compile Include="Models\APIItems\CommonResponseRowForSelectable.cs"/>
+        <Compile Include="Models\APIItems\BaseGetResponseRowWithCreDateOnly.cs"/>
+        <Compile Include="Models\APIItems\BaseGetResponseRowWithCreUpd.cs"/>
+        <Compile Include="Models\APIItems\CommonResponseRowIdTitle.cs"/>
+        <Compile Include="Models\APIItems\BaseGetResponseRowInfusableWithCreUpd.cs"/>
+        <Compile Include="Models\APIItems\BaseInfusable.cs"/>
+        <Compile Include="Models\APIItems\Common\DeleteItem\DeleteItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Common\DeleteItem\DeleteItem_Input_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\BusinessUser\GetInfoById\BusinessUser_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\BusinessUser\GetList\BusinessUser_GetList_Customer_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\BusinessUser\GetList\BusinessUser_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\BusinessUser\GetList\BusinessUser_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\BusinessUser\Submit\BusinessUser_Submit_CID_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\BusinessUser\Submit\BusinessUser_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Category\B_Category_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Category\GetInfoById\Category_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Category\GetList\Category_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Category\GetList\Category_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Category\Submit\Category_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Company\D_Company_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Company\GetInfoById\Company_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Company\GetList\Company_GetList_DepartmentItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Company\GetList\Company_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Company\GetList\Company_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Company\Submit\Company_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\ContactType\GetList\ContactType_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerGift\GetInfoById\CustomerGift_GetInfoById_Customers_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerGift\GetInfoById\CustomerGift_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerGift\GetList\CustomerGift_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerGift\GetList\CustomerGift_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerGift\Submit\CustomerGift_Submit_Customers_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerGift\Submit\CustomerGift_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetInfoById\CustomerQuestion_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetList\CustomerQuestion_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetList\CustomerQuestion_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerQuestion\GetUniqueAreas\CustomerQuestion_GetUniqueAreas_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerQuestion\Submit\CustomerQuestion_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerVisit\GetInfoById\CustomerVisit_CustomerSelectable.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerVisit\GetInfoById\CustomerVisit_GetInfoById_GiftSendings_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerVisit\GetInfoById\CustomerVisit_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerVisit\GetList\CustomerVisit_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerVisit\GetList\CustomerVisit_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerVisit\Submit\CustomerVisit_Submit_GiftSendings_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\CustomerVisit\Submit\CustomerVisit_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetInfoById\Customer_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_BusinessUser_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_Contact_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_RankBy.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_Output_Contact_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetRankings\Customer_GetRankings_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\Submit\Customer_Submit_BUID_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\Submit\Customer_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Department\D_Department_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Department\GetInfoById\Department_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Department\GetList\Department_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Department\GetList\Department_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Department\Submit\Department_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Device\GetInfoById\Device_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Device\GetInfoById\Device_GetInfoById_Site_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Device\GetList\Device_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Device\GetList\Device_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Device\Submit\Device_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\FoodCategory\D_FoodCategory_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\FoodCategory\GetInfoById\FoodCategory_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\FoodCategory\GetList\FoodCategory_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\FoodCategory\GetList\FoodCategory_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\FoodCategory\Submit\FoodCategory_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\GroupData\GetInfoById\GroupData_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\GroupData\GetList\GroupData_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\GroupData\GetList\GroupData_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\GroupData\GetUniqueNames\GroupData_GetUniqueNames_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\GroupData\GroupData_MenuItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\GroupData\SubmitMenuData\GroupData_SubmitMenuData_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\GroupData\Submit\GroupData_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Hall\D_Hall_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Hall\GetInfoById\Hall_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Hall\GetList\Hall_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Hall\GetList\Hall_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Hall\Submit\Hall_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Health\Ping\Health_Ping_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Lookup\GetList\Lookup_GetList_Category_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Lookup\GetList\Lookup_GetList_Lookup_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Lookup\GetList\Lookup_GetList_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_ChildMenu_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_MenuApi_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetListByUid\MenuData_GetListByUid_Output_Node_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetList\MenuApi_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\GetList\MenuApi_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuApi\Submit\MenuApi_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuData\GetInfoById\MenuData_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuData\GetList\MenuData_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuData\GetList\MenuData_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MenuData\MenuData\Submit\MenuData_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OrderCode\GetInfoById\OrderCode_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OrderCode\GetList\OrderCode_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OrderCode\GetList\OrderCode_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OrderCode\GetTypeList\OrderCode_GetTypeList_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OrderCode\Submit\OrderCode_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OtherPayItem\D_OtherPayItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OtherPayItem\GetInfoById\OtherPayItem_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OtherPayItem\GetList\OtherPayItem_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OtherPayItem\GetList\OtherPayItem_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\OtherPayItem\Submit\OtherPayItem_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PartnerItem\GetInfoById\PartnerItem_GetInfoById_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PartnerItem\GetList\PartnerItem_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PartnerItem\GetList\PartnerItem_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PartnerItem\Submit\PartnerItem_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Partner\GetInfoById\Partner_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Partner\GetList\Partner_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Partner\GetList\Partner_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Partner\Submit\Partner_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PayType\D_PayType_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PayType\GetInfoById\PayType_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PayType\GetList\PayType_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PayType\GetList\PayType_GetList_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PayType\Submit\PayType_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_DeviceItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_SiteItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds1\PrintReport_GetResverListByIds1_TimeSpanItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_PayItemDetail_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\GetResverListByIds2\PrintReport_GetResverListByIds2_PayItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_BillItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_ContactItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_DeviceItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_FoodItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_GiveBackItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_OtherItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_SiteItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_ThrowItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_TimeSpanItem_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetHeadList\Resver_GetHeadList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetHeadList\Resver_GetHeadList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetHistory\Resver_GetHistory_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetHistory\Resver_GetHistory_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetResverSiteList\Resver_GetResverSiteList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetResverSiteList\Resver_GetResverSiteList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetResverSiteList\Resver_GetResverSiteList_TimeSpan_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\GetUniqueIds\Resver_GetUniqueIds_Output_Row_APItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_BillItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_ContactItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_DeviceItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_FoodItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_GiveBackItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_OtherItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_SiteItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_ThrowItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Resver\Submit\Resver_Submit_TimeSpanItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SafetyControl\GetList\SafetyControl_GetList_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SafetyControl\Submit\SafetyControl_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetInfoById\SiteData_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetInfoById\SiteData_GetInfoById_Output_Device_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetInfoById\SiteData_GetInfoById_Output_GroupList_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetListForCalendar\SiteData_GetListForCalendar_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetListForCalendar\SiteData_GetListForCalendar_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetListForCalendar\SiteData_GetListForCalendar_TimeSpan_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetList\SiteData_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetList\SiteData_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\GetUniqueNames\SiteData_GetUniqueNames_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_Devices_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\SiteData\Submit\SiteData_Submit_Input_GroupList_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\StaticCode\GetInfoById\StaticCode_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\StaticCode\GetList\StaticCode_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\StaticCode\GetList\StaticCode_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\StaticCode\GetTypeList\StaticCode_GetTypeList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\StaticCode\GetTypeList\StaticCode_GetTypeList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\StaticCode\Submit\StaticCode_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\TimeSpan\D_TimeSpan_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\TimeSpan\GetInfoById\TimeSpan_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\TimeSpan\GetList\TimeSpan_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\TimeSpan\GetList\TimeSpan_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\TimeSpan\Submit\TimeSpan_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\AdminAuthorize\UserData_AdminAuthorize_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\AdminChangeUserPassword\UserData_AdminChangeUserPassword_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\BatchSubmitDepartment\UserData_BatchSubmitDepartment_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\BatchSubmitDepartment\UserData_BatchSubmitDepartment_Input_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\BatchSubmitGroup\UserData_BatchSubmitGroup_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\BatchSubmitGroup\UserData_BatchSubmitGroup_Input_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\ChangeActive\UserData_ChangeActive_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\DeleteItem\UserData_DeleteItem_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\GetInfoById\UserData_GetInfoById_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\GetInfoById\UserData_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\GetList\UserData_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\GetList\UserData_GetList_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\GetList\UserData_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\Login\UserData_Login_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\Login\UserData_Login_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\Submit\UserData_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserData\UpdatePW\UserData_UpdatePW_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserLog\GetList\UserLog_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserLog\GetList\UserLog_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserLog\GetLogKeepDays\UserLog_GetLogKeepDays_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserLog\GetTypeList\UserLog_GetTypeList_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\UserData\UserLog\SubmitLogKeepDays\UserLog_SubmitLogKeepDays_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Zip\D_Zip_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Zip\GetInfoById\Zip_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Zip\GetList\Zip_GetList_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Zip\GetList\Zip_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Zip\Submit\Zip_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\IGetResponseRow.cs"/>
+        <Compile Include="Models\APIItems\ListSorting.cs"/>
+        <Compile Include="Models\APIItems\SubmitHelperIdResponse.cs"/>
+        <Compile Include="Models\CommonApiResponse.cs"/>
+        <Compile Include="Models\Entities\BusinessUser.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\B_Category.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\B_Device.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\B_OrderCode.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\B_Partner.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\B_PartnerItem.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\B_SiteData.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\B_StaticCode.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Customer.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\CustomerQuestion.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\CustomerVisit.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\D_Company.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\D_Department.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\D_FoodCategory.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\D_Hall.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\D_OtherPayItem.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\D_PayType.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\D_TimeSpan.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\D_Zip.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\ErrorLog.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\GiftSending.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\GroupData.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Lookup.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\MenuAPI.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\MenuData.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Model1.Context.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>Model1.Context.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Model1.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Model1.Designer.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>Model1.edmx</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Address.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Contect.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Customer_BusinessUser.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Customer_Category.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Customer_Gift.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Department_Category.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Group_Menu.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Group_User.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Resver_TimeSpan.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_SiteGroup.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\M_Site_Device.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\ResverHeadLogGuidGenerator.cs"/>
+        <Compile Include="Models\Entities\Resver_Bill.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Resver_Device.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Resver_GiveBack.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Resver_Head.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Resver_Head_Log.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Resver_Other.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Resver_Site.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Resver_Throw.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\Resver_Throw_Food.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\UserData.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\UserLog.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Entities\UserPasswordLog.cs">
+            <DependentUpon>Model1.tt</DependentUpon>
+        </Compile>
+        <Compile Include="Models\Errors\AuthorizationErrors\BaseAuthorizationError.cs"/>
+        <Compile Include="Models\Errors\AuthorizationErrors\InsufficientPrivilegeError.cs"/>
+        <Compile Include="Models\Errors\AuthorizationErrors\WrongPasswordError.cs"/>
+        <Compile Include="Models\Errors\BaseError.cs"/>
+        <Compile Include="Models\Errors\BusinessError.cs"/>
+        <Compile Include="Models\Errors\DataValidationErrors\BaseDataValidationError.cs"/>
+        <Compile Include="Models\Errors\DataValidationErrors\DataAlreadyExistsError.cs"/>
+        <Compile Include="Models\Errors\DataValidationErrors\DataNotFoundError.cs"/>
+        <Compile Include="Models\Errors\DataValidationErrors\UpdateDbFailedError.cs"/>
+        <Compile Include="Models\Errors\ErrorField.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\BaseInputValidationError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\CopyNotAllowedError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\EmptyNotAllowedError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\ExpectedValueError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\LengthOutOfRangeError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\LengthTooLongError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\MinLargerThanMaxError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\NotSupportedValueError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\ValueOutOfRangeError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\ValueTooLargeError.cs"/>
+        <Compile Include="Models\Errors\InputValidationErrors\WrongFormatError.cs"/>
+        <Compile Include="Models\Errors\AuthError.cs"/>
+        <Compile Include="Models\Errors\SystemError.cs"/>
+        <Compile Include="Models\FinalizedResponse.cs"/>
+        <Compile Include="Models\IReturnMessageInfusable.cs"/>
+        <Compile Include="Models\PublicModel.cs"/>
+        <Compile Include="Models\Utilities\PrintReport\GetResverListByIDs2\PrintReport_GetResverListByIds2_PayItem.cs"/>
+        <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="Tools\ControllerTools\BaseClass\PublicClass.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\ChangeActiveHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Common\FlagHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\DeleteItemHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetInfoByIdHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListAllHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListLocalHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListPagedHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetListUniqueFieldHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\GetTypeListHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IChangeActiveHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IDeleteItemHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetInfoByIdHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListAllHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListLocalHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetListPagedHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\IGetTypeListHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\Interface\ISubmitHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Helper\SubmitHelper.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IChangeActive.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItem.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IDeleteItemValidateReservation.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetInfoByID.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListAll.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListLocal.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListPaged.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetListUniqueField.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\IGetTypeList.cs"/>
+        <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs"/>
+        <Compile Include="Tools\Encryption\JwtHelper.cs"/>
+        <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\CustomerExtension.cs"/>
+        <Compile Include="Tools\Extensions\DbContextExtensions.cs"/>
+        <Compile Include="Tools\Extensions\DecimalExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\DictionaryExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\ExceptionExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\IEnumerableExtensions.cs"/>
+        <Compile Include="Tools\Extensions\IntExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\IQueryableExtensions.cs"/>
+        <Compile Include="Tools\Extensions\ListSortingExtension.cs"/>
+        <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\ResverHistoryTypeExtension.cs"/>
+        <Compile Include="Tools\Extensions\SpecificTableExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\StringExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\TypeExtensionMethods.cs"/>
+        <Compile Include="Tools\Filters\ExceptionHandlerFilter\ExceptionHandlerFilter.cs"/>
+        <Compile Include="Tools\Filters\FilterStaticTools.cs"/>
+        <Compile Include="Tools\Filters\FinalizeResponseFilter\FinalizeResponseFilter.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeBy.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeTypeSingletonFactory.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AdminRole.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\AnyRole.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\IAuthorizeType.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\RoleConstants.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\AuthorizeType\UserRole.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\JwtAuthFilter.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequiredPrivileges.cs"/>
+        <Compile Include="Tools\Filters\JwtAuthFilter\PrivilegeType\RequirePrivilege.cs"/>
+        <Compile Include="Tools\RequestHelper.cs"/>
+        <Compile Include="Tools\ResponseHelper.cs"/>
+        <Compile Include="Variables\CategoryType.cs"/>
+        <Compile Include="Variables\ContactType.cs"/>
+        <Compile Include="Variables\CustomHttpCode.cs"/>
+        <Compile Include="Variables\DbConstants.cs"/>
+        <Compile Include="Variables\IOConstants.cs"/>
+        <Compile Include="Variables\JwtConstants.cs"/>
+        <Compile Include="Variables\MenuApiType.cs"/>
+        <Compile Include="Variables\OrderCodeType.cs"/>
+        <Compile Include="Variables\PrivilegeConstants.cs"/>
+        <Compile Include="Variables\ReserveHeadState.cs"/>
+        <Compile Include="Variables\ResverHeadExpression.cs"/>
+        <Compile Include="Variables\ResverHistoryType.cs"/>
+        <Compile Include="Variables\StaticCodeSafetyControlCode.cs"/>
+        <Compile Include="Variables\StaticCodeType.cs"/>
+        <Compile Include="Variables\TableCommentDictionary.cs"/>
+        <Compile Include="Variables\UserLogControlType.cs"/>
+        <Compile Include="Variables\UserPasswordLogType.cs"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Areas\HelpPage\HelpPage.css"/>
+        <Content Include="Content\bootstrap-grid.css"/>
+        <Content Include="Content\bootstrap-grid.min.css"/>
+        <Content Include="Content\bootstrap-grid.rtl.css"/>
+        <Content Include="Content\bootstrap-grid.rtl.min.css"/>
+        <Content Include="Content\bootstrap-reboot.css"/>
+        <Content Include="Content\bootstrap-reboot.min.css"/>
+        <Content Include="Content\bootstrap-reboot.rtl.css"/>
+        <Content Include="Content\bootstrap-reboot.rtl.min.css"/>
+        <Content Include="Content\bootstrap-utilities.css"/>
+        <Content Include="Content\bootstrap-utilities.min.css"/>
+        <Content Include="Content\bootstrap-utilities.rtl.css"/>
+        <Content Include="Content\bootstrap-utilities.rtl.min.css"/>
+        <Content Include="Content\bootstrap.css"/>
+        <Content Include="Content\bootstrap.min.css"/>
+        <Content Include="Content\bootstrap.rtl.css"/>
+        <Content Include="Content\bootstrap.rtl.min.css"/>
+        <Content Include="favicon.ico"/>
+        <Content Include="Global.asax"/>
+        <Content Include="index.html"/>
+        <Content Include="Models\Entities\Model1.Context.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <DependentUpon>Model1.edmx</DependentUpon>
+            <LastGenOutput>Model1.Context.cs</LastGenOutput>
+        </Content>
+        <Content Include="Models\Entities\Model1.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <DependentUpon>Model1.edmx</DependentUpon>
+            <LastGenOutput>Model1.cs</LastGenOutput>
+        </Content>
+        <Content Include="Scripts\bootstrap.bundle.js"/>
+        <Content Include="Scripts\bootstrap.bundle.min.js"/>
+        <Content Include="Scripts\bootstrap.esm.js"/>
+        <Content Include="Scripts\bootstrap.esm.min.js"/>
+        <Content Include="Scripts\bootstrap.js"/>
+        <Content Include="Scripts\bootstrap.min.js"/>
+        <Content Include="Areas\HelpPage\Views\Web.config"/>
+        <Content Include="Areas\HelpPage\Views\Shared\_Layout.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\ResourceModel.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\Index.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\TextSample.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\SimpleTypeModelDescription.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\Samples.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\Parameters.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ModelDescriptionLink.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\KeyValuePairModelDescription.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\InvalidSample.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ImageSample.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\HelpPageApiModel.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\EnumTypeModelDescription.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\DictionaryModelDescription.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ComplexTypeModelDescription.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml"/>
+        <Content Include="Areas\HelpPage\Views\Help\Api.cshtml"/>
+        <EntityDeploy Include="Models\Entities\Model1.edmx">
+            <Generator>EntityModelCodeGenerator</Generator>
+            <LastGenOutput>Model1.Designer.cs</LastGenOutput>
+        </EntityDeploy>
+        <Content Include="Models\Entities\Model1.edmx.diagram">
+            <DependentUpon>Model1.edmx</DependentUpon>
+        </Content>
+        <None Include="Scripts\jquery-3.4.1.intellisense.js"/>
+        <Content Include="Scripts\jquery-3.4.1.js"/>
+        <Content Include="Scripts\jquery-3.4.1.min.js"/>
+        <Content Include="Scripts\jquery-3.4.1.slim.js"/>
+        <Content Include="Scripts\jquery-3.4.1.slim.min.js"/>
+        <Content Include="Scripts\modernizr-2.8.3.js"/>
+        <Content Include="TestAPI.html"/>
+        <Content Include="Tools\ControllerTools\BasicFunctions\Helper\README.md"/>
+        <Content Include="Web.config"/>
+        <Content Include="Web.Debug.config">
+            <DependentUpon>Web.config</DependentUpon>
+        </Content>
+        <Content Include="Web.Release.config">
+            <DependentUpon>Web.config</DependentUpon>
+        </Content>
+        <Content Include="Areas\HelpPage\Views\_ViewStart.cshtml"/>
+        <Content Include="Content\Site.css"/>
+        <Content Include="Views\Web.config"/>
+        <Content Include="Views\_ViewStart.cshtml"/>
+        <Content Include="Views\Home\Index.cshtml"/>
+        <Content Include="Views\Master\Master_Basic.cshtml"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="App_Data\"/>
+        <Folder Include="Views\Category\"/>
+        <Folder Include="Views\GetInfo\"/>
+        <Folder Include="Views\Hall\"/>
+        <Folder Include="Views\Include\"/>
+        <Folder Include="Views\User\"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Scripts\bootstrap.min.js.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Scripts\bootstrap.js.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Scripts\bootstrap.esm.min.js.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Scripts\bootstrap.esm.js.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Scripts\bootstrap.bundle.min.js.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Scripts\bootstrap.bundle.js.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap.rtl.min.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap.rtl.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap.min.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-utilities.rtl.min.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-utilities.rtl.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-utilities.min.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-utilities.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-reboot.rtl.min.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-reboot.rtl.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-reboot.min.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-reboot.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-grid.rtl.min.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-grid.rtl.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-grid.min.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Content\bootstrap-grid.css.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="packages.config"/>
+        <Content Include="Scripts\jquery-3.4.1.slim.min.map"/>
+        <Content Include="Scripts\jquery-3.4.1.min.map"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}"/>
+        <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}"/>
+    </ItemGroup>
+    <PropertyGroup>
+        <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+        <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    </PropertyGroup>
+    <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets"/>
+    <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''"/>
+    <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false"/>
+    <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+        <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)"/>
+    </Target>
+    <ProjectExtensions>
+        <VisualStudio>
+            <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+                <WebProjectProperties>
+                    <UseIIS>True</UseIIS>
+                    <AutoAssignPort>True</AutoAssignPort>
+                    <DevelopmentServerPort>2147</DevelopmentServerPort>
+                    <DevelopmentServerVPath>/</DevelopmentServerVPath>
+                    <IISUrl>https://localhost:44336/</IISUrl>
+                    <NTLMAuthentication>False</NTLMAuthentication>
+                    <UseCustomServer>False</UseCustomServer>
+                    <CustomServerUrl>
+                    </CustomServerUrl>
+                    <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+                </WebProjectProperties>
+            </FlavorProperties>
+        </VisualStudio>
+    </ProjectExtensions>
+    <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+        <PropertyGroup>
+            <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+        </PropertyGroup>
+        <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))"/>
+        <Error Condition="!Exists('..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets'))"/>
+        <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))"/>
+        <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))"/>
+    </Target>
+    <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets')"/>
+    <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')"/>
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+                         Other similar extension points exist, see Microsoft.Common.targets.
+                    <Target Name="BeforeBuild">
+                    </Target>
+                    <Target Name="AfterBuild">
+                    </Target> -->
 </Project>

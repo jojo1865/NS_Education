@@ -254,7 +254,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             Resver_Head head, Resver_Site site, IList<object> entitiesToAdd)
         {
             DC.Resver_Throw.RemoveRange(site.Resver_Throw.Where(rt => item.ThrowItems.All(ti => ti.RTID != rt.RTID)));
-            foreach (Resver_Submit_ThrowItem_Input_APIItem throwItem in item.ThrowItems)
+            foreach (var throwItem in item.ThrowItems)
             {
                 Resver_Throw throwData = SubmitFindOrCreateNew<Resver_Throw>(throwItem.RTID);
                 if (throwData.Resver_Site != null && throwData.Resver_Site.RHID != 0 &&
@@ -266,7 +266,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                 throwData.TargetDate = throwItem.TargetDate.ParseDateTime().Date;
                 throwData.RSID = site.RSID;
-                throwData.DTID = throwItem.DTID;
+                throwData.BSCID = throwItem.BSCID;
+                throwData.Title = throwItem.Title;
+                throwData.BOCID = throwItem.BOCID;
                 throwData.PrintTitle = throwItem.PrintTitle;
                 throwData.PrintNote = throwItem.PrintNote;
                 throwData.UnitPrice = throwItem.UnitPrice;

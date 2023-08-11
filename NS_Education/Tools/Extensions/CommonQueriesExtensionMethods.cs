@@ -81,28 +81,6 @@ namespace NS_Education.Tools.Extensions
         }
 
         /// <summary>
-        /// 取得 D_Throw 的下拉選單。
-        /// </summary>
-        /// <param name="dbSet">D_Throw 的 DbSet</param>
-        /// <param name="bscId">欲顯示的 BSCID</param>
-        /// <param name="dtIdToSelect">選擇一筆資料的 ID，此筆資料 SelectFlag 設為 true</param>
-        /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
-        public static async Task<ICollection<CommonResponseRowForSelectable>> GetThrowSelectable(
-            this DbSet<D_Throw> dbSet
-            , int bscId, int dtIdToSelect)
-        {
-            return await dbSet
-                .Where(dt => dt.ActiveFlag && !dt.DeleteFlag && dt.BSCID == bscId)
-                .Select(dt => new CommonResponseRowForSelectable
-                {
-                    ID = dt.DTID,
-                    Title = dt.Title ?? "",
-                    SelectFlag = dt.DTID == dtIdToSelect
-                })
-                .ToListAsync();
-        }
-
-        /// <summary>
         /// 取得 OrderCode 的下拉選單。
         /// </summary>
         /// <param name="dbSet">OrderCode 的 DbSet</param>

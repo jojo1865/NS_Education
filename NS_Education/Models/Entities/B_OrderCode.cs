@@ -19,13 +19,13 @@ namespace NS_Education.Models.Entities
         {
             this.B_Device = new HashSet<B_Device>();
             this.D_OtherPayItem = new HashSet<D_OtherPayItem>();
-            this.D_Throw = new HashSet<D_Throw>();
             this.B_PartnerItem = new HashSet<B_PartnerItem>();
             this.B_SiteData = new HashSet<B_SiteData>();
             this.D_FoodCategory = new HashSet<D_FoodCategory>();
             this.Resver_Device = new HashSet<Resver_Device>();
             this.Resver_Other = new HashSet<Resver_Other>();
             this.Resver_Site = new HashSet<Resver_Site>();
+            this.Resver_Throw = new HashSet<Resver_Throw>();
         }
     
         public int BOCID { get; set; }
@@ -47,8 +47,6 @@ namespace NS_Education.Models.Entities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<D_OtherPayItem> D_OtherPayItem { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<D_Throw> D_Throw { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<B_PartnerItem> B_PartnerItem { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<B_SiteData> B_SiteData { get; set; }
@@ -60,5 +58,7 @@ namespace NS_Education.Models.Entities
         public virtual ICollection<Resver_Other> Resver_Other { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Site> Resver_Site { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Resver_Throw> Resver_Throw { get; set; }
     }
 }

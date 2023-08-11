@@ -6,7 +6,9 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
     {
         public int RTID { get; set; }
         public string TargetDate { get; set; }
-        public int DTID { get; set; }
+        public int BSCID { get; set; }
+        public string Title { get; set; }
+        public int BOCID { get; set; }
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }
         public int UnitPrice { get; set; }

@@ -154,29 +154,51 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             // 主預約單 -> 場地列表 -> 行程列表
             bool isSiteItemThrowItemValid = isSiteItemsValid &&
-                                            input.SiteItems.SelectMany(si => si.ThrowItems)
-                                                .StartValidateElements()
-                                                .Validate(ti => isAdd ? ti.RTID == 0 : ti.RTID.IsZeroOrAbove(),
-                                                    item => AddError(WrongFormat($"行程預約單 ID（{item.RTID}）",
-                                                        nameof(item.RTID))))
-                                                .Validate(
-                                                    ti => ti.RTID == 0 || Task.Run(() =>
-                                                        DC.Resver_Throw.ValidateIdExists(ti.RTID,
-                                                            nameof(Resver_Throw.RTID))).Result,
-                                                    item => AddError(NotFound($"行程預約單 ID（{item.RTID}）",
-                                                        nameof(item.RTID))))
-                                                .Validate(ti => ti.PrintTitle.HasLengthBetween(0, 100),
-                                                    item => AddError(LengthOutOfRange("行程的帳單列印名稱",
-                                                        nameof(item.PrintTitle), 0, 100)))
-                                                .Validate(ti => ti.PrintNote.HasLengthBetween(0, 100),
-                                                    item => AddError(LengthOutOfRange("行程的帳單列印說明",
-                                                        nameof(item.PrintNote), 0, 100)))
-                                                .IsValid();
-
-            // 檢查所有行程的日期都等於場地的日期
-            isSiteItemThrowItemValid = isSiteItemThrowItemValid &&
-                                       SubmitValidateThrowItemDates(input);
-
+                                            input.SiteItems
+                                                .All(si => si.ThrowItems.All(item =>
+                                                    item.StartValidate()
+                                                        .Validate(ti => isAdd ? ti.RTID == 0 : ti.RTID.IsZeroOrAbove(),
+                                                            () => AddError(WrongFormat($"行程預約單 ID（{item.RTID}）",
+                                                                nameof(item.RTID))))
+                                                        .Validate(
+                                                            ti => ti.RTID == 0 || Task.Run(() =>
+                                                                DC.Resver_Throw.ValidateIdExists(ti.RTID,
+                                                                    nameof(Resver_Throw.RTID))).Result,
+                                                            () => AddError(NotFound($"行程預約單 ID（{item.RTID}）",
+                                                                nameof(item.RTID))))
+                                                        // 檢查所有行程的日期都等於場地的日期
+                                                        .Validate(ti =>
+                                                                ti.TargetDate.TryParseDateTime(
+                                                                    out DateTime throwTargetDate)
+                                                                && si.TargetDate.TryParseDateTime(
+                                                                    out DateTime siteTargetDate)
+                                                                && throwTargetDate.Date == siteTargetDate.Date,
+                                                            () => AddError(OutOfRange($"預約行程的預計使用日期（{item.TargetDate}）",
+                                                                nameof(item.TargetDate),
+                                                                si.TargetDate, si.TargetDate)))
+                                                        .Validate(
+                                                            ti => Task.Run(() =>
+                                                                SubmitValidateStaticCode(ti.BSCID,
+                                                                    StaticCodeType.ResverThrow)).Result,
+                                                            () => AddError(WrongFormat($"預約類型（{item.BSCID}）",
+                                                                nameof(item.BSCID))))
+                                                        .Validate(
+                                                            ti => Task.Run(() =>
+                                                                    SubmitValidateOrderCode(ti.BOCID,
+                                                                        OrderCodeType.Throw))
+                                                                .Result,
+                                                            () => AddError(NotFound($"預約行程的入帳代號 ID（{item.BOCID}）",
+                                                                nameof(item.BOCID))))
+                                                        .Validate(ti => ti.Title.HasLengthBetween(0, 100),
+                                                            () => AddError(LengthOutOfRange("行程名稱", nameof(item.Title),
+                                                                0, 100)))
+                                                        .Validate(ti => ti.PrintTitle.HasLengthBetween(0, 100),
+                                                            () => AddError(LengthOutOfRange("行程的帳單列印名稱",
+                                                                nameof(item.PrintTitle), 0, 100)))
+                                                        .Validate(ti => ti.PrintNote.HasLengthBetween(0, 100),
+                                                            () => AddError(LengthOutOfRange("行程的帳單列印說明",
+                                                                nameof(item.PrintNote), 0, 100)))
+                                                        .IsValid()));
 
             // 主預約單 -> 場地列表 -> 行程列表 -> 時段列表
             bool isSiteItemThrowItemTimeSpanItemValid = isSiteItemThrowItemValid &&
@@ -376,29 +398,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                      && SubmitValidateAllPrices(input);
 
             return await Task.FromResult(isEveryPriceValid);
-        }
-
-        private bool SubmitValidateThrowItemDates(Resver_Submit_Input_APIItem input)
-        {
-            bool isValid = true;
-
-            foreach (Resver_Submit_SiteItem_Input_APIItem si in input.SiteItems)
-            {
-                DateTime siteDate = si.TargetDate.ParseDateTime().Date;
-
-                foreach (Resver_Submit_ThrowItem_Input_APIItem ti in si.ThrowItems)
-                {
-                    DateTime throwDate = ti.TargetDate.ParseDateTime().Date;
-
-                    if (siteDate == throwDate)
-                        continue;
-
-                    isValid = false;
-                    AddError(ExpectedValue($"預約行程的預計使用日期（{ti.TargetDate}）", nameof(ti.TargetDate), si.TargetDate));
-                }
-            }
-
-            return isValid;
         }
 
         private bool SubmitValidateAllPrices(Resver_Submit_Input_APIItem input)

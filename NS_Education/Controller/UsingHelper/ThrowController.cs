@@ -61,10 +61,21 @@ namespace NS_Education.Controller.UsingHelper
             return await _getListPagedHelper.GetPagedList(input);
         }
 
-        public Task<bool> GetListPagedValidateInput(Throw_GetList_Input_APIItem input)
+        public async Task<bool> GetListPagedValidateInput(Throw_GetList_Input_APIItem input)
         {
-            // 沒有需要驗證的輸入。
-            return Task.FromResult(true);
+            bool isValid = await input.StartValidate()
+                .ValidateAsync(
+                    async i => i.BOCID is null ||
+                               await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID.Value, OrderCodeType.Throw),
+                    i => AddError(NotFound("入帳代號", nameof(i.BOCID))))
+                .ValidateAsync(
+                    async i => i.BSCID is null ||
+                               await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID.Value,
+                                   StaticCodeType.ResverThrow),
+                    i => AddError(NotFound("類別", nameof(i.BSCID))))
+                .IsValid();
+
+            return isValid;
         }
 
         public IOrderedQueryable<D_Throw> GetListPagedOrderedQuery(Throw_GetList_Input_APIItem input)
@@ -183,18 +194,18 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DTID == 0,
-                    i => ExpectedValue("行程 ID", nameof(i.DTID), 0))
+                    i => AddError(ExpectedValue("行程 ID", nameof(i.DTID), 0)))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Throw),
-                    i => NotFound("入帳代號", nameof(i.BOCID)))
+                    i => AddError(NotFound("入帳代號", nameof(i.BOCID))))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.ResverThrow),
-                    i => NotFound("類別", nameof(i.BSCID)))
+                    i => AddError(NotFound("類別", nameof(i.BSCID))))
                 .Validate(i => i.Title.HasLengthBetween(1, 60),
-                    i => LengthOutOfRange("行程名稱", nameof(i.Title), 1, 60))
+                    i => AddError(LengthOutOfRange("行程名稱", nameof(i.Title), 1, 60)))
                 .Validate(i => i.UnitPrice.IsZeroOrAbove(),
-                    i => OutOfRange("單位成本", nameof(i.UnitPrice), 0))
+                    i => AddError(OutOfRange("單位成本", nameof(i.UnitPrice), 0)))
                 .Validate(i => i.FixedPrice.IsZeroOrAbove(),
-                    i => OutOfRange("定價", nameof(i.FixedPrice), 0))
+                    i => AddError(OutOfRange("定價", nameof(i.FixedPrice), 0)))
                 .IsValid();
 
             return isValid;
@@ -222,18 +233,18 @@ namespace NS_Education.Controller.UsingHelper
         {
             bool isValid = await input.StartValidate()
                 .Validate(i => i.DTID.IsAboveZero(),
-                    i => OutOfRange("行程 ID", nameof(i.DTID), 0))
+                    i => AddError(OutOfRange("行程 ID", nameof(i.DTID), 0)))
                 .ValidateAsync(async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.Throw),
-                    i => NotFound("入帳代號", nameof(i.BOCID)))
+                    i => AddError(NotFound("入帳代號", nameof(i.BOCID))))
                 .ValidateAsync(
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.ResverThrow),
-                    i => NotFound("類別", nameof(i.BSCID)))
+                    i => AddError(NotFound("類別", nameof(i.BSCID))))
                 .Validate(i => i.Title.HasLengthBetween(1, 60),
-                    i => LengthOutOfRange("行程名稱", nameof(i.Title), 1, 60))
+                    i => AddError(LengthOutOfRange("行程名稱", nameof(i.Title), 1, 60)))
                 .Validate(i => i.UnitPrice.IsZeroOrAbove(),
-                    i => OutOfRange("單位成本", nameof(i.UnitPrice), 0))
+                    i => AddError(OutOfRange("單位成本", nameof(i.UnitPrice), 0)))
                 .Validate(i => i.FixedPrice.IsZeroOrAbove(),
-                    i => OutOfRange("定價", nameof(i.FixedPrice), 0))
+                    i => AddError(OutOfRange("定價", nameof(i.FixedPrice), 0)))
                 .IsValid();
 
             return isValid;

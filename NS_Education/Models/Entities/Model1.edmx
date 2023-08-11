@@ -360,9 +360,9 @@
         </EntityType>
         <EntityType Name="D_Throw">
           <Key>
-            <PropertyRef Name="DSID" />
+            <PropertyRef Name="DTID" />
           </Key>
-          <Property Name="DSID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DTID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="BOCID" Type="int" Nullable="false" />
           <Property Name="BSCID" Type="int" Nullable="false" />
           <Property Name="Title" Type="nvarchar" MaxLength="60" Nullable="false" />
@@ -2833,9 +2833,9 @@
         </EntityType>
         <EntityType Name="D_Throw">
           <Key>
-            <PropertyRef Name="DSID" />
+            <PropertyRef Name="DTID" />
           </Key>
-          <Property Name="DSID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DTID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="BOCID" Type="Int32" Nullable="false" />
           <Property Name="BSCID" Type="Int32" Nullable="false" />
           <Property Name="Title" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
@@ -5284,7 +5284,7 @@
           <EntitySetMapping Name="D_Throw">
             <EntityTypeMapping TypeName="db_NS_EducationModel.D_Throw">
               <MappingFragment StoreEntitySet="D_Throw">
-                <ScalarProperty Name="DSID" ColumnName="DSID" />
+                <ScalarProperty Name="DTID" ColumnName="DTID" />
                 <ScalarProperty Name="BOCID" ColumnName="BOCID" />
                 <ScalarProperty Name="BSCID" ColumnName="BSCID" />
                 <ScalarProperty Name="Title" ColumnName="Title" />

@@ -14,7 +14,7 @@ namespace NS_Education.Models.Entities
     
     public partial class D_Throw
     {
-        public int DSID { get; set; }
+        public int DTID { get; set; }
         public int BOCID { get; set; }
         public int BSCID { get; set; }
         public string Title { get; set; }

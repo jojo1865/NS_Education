@@ -61,7 +61,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         BOC_Title = bs.B_OrderCode?.Title ?? "",
                         BOC_PrintTitle = bs.B_OrderCode?.PrintTitle ?? "",
                         BOC_PrintNote = bs.B_OrderCode?.PrintNote ?? "",
-                        Items = queryResult[bs]
+                        Items = queryResult[bs],
+                        UnitPrice = bs.UnitPrice
                     }).ToList()
                 };
 

@@ -18,6 +18,7 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetResverSiteList
         public string BOC_Title { get; set; }
         public string BOC_PrintTitle { get; set; }
         public string BOC_PrintNote { get; set; }
+        public int UnitPrice { get; set; }
 
         public int Index { get; set; }
 

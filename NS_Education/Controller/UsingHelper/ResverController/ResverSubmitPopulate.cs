@@ -394,7 +394,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Where(bi => bi.PayFlag)
                 .Sum(bi => bi.Price);
 
-            head.BSCID12 = billSum >= input.QuotedPrice ? Convert.ToInt32(ReserveHeadState.FullyPaid)
+            head.BSCID12 = input.FinishDeal ? Convert.ToInt32(ReserveHeadState.FullyPaid)
                 : billSum > 0 ? Convert.ToInt32(ReserveHeadState.DepositPaid)
                 : Convert.ToInt32(ReserveHeadState.Draft);
             head.BSCID11 = input.BSCID11;

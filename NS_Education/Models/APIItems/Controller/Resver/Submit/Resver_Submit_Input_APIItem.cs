@@ -4,6 +4,7 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
 {
     public class Resver_Submit_Input_APIItem : BaseRequestForSubmit
     {
+        public bool FinishDeal { get; set; }
         public int RHID { get; set; }
         public int BSCID11 { get; set; }
         public string Title { get; set; }

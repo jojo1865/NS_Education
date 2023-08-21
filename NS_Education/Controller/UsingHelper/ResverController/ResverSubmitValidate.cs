@@ -21,7 +21,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private async Task<bool> SubmitValidateInput(Resver_Submit_Input_APIItem input)
         {
             bool isAdd = SubmitIsAdd(input);
-            bool dataCheckFlag = false;
 
             // 修改時，有一些值需要參照已有資料
             if (!isAdd)
@@ -30,8 +29,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 Resver_Head head = await DC.Resver_Head
                     .Include(rh => rh.B_StaticCode1)
                     .FirstOrDefaultAsync(rh => rh.RHID == input.RHID);
-
-                dataCheckFlag = head?.CheckFlag ?? false;
 
                 if (head != null && head.B_StaticCode1.Code == ReserveHeadState.Terminated)
                 {
@@ -44,7 +41,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             DateTime headEndDate = default;
 
             // 主預約單
+            int billSum = input.BillItems
+                .Where(bi => bi.PayFlag)
+                .Sum(bi => bi.Price);
+
             bool isHeadValid = await input.StartValidate()
+                .Validate(i => !i.FinishDeal || billSum >= input.QuotedPrice,
+                    () => AddError(ExpectedValue("繳費紀錄已付總額", nameof(input.BillItems), input.QuotedPrice)))
                 .Validate(i => isAdd ? i.RHID == 0 : i.RHID.IsZeroOrAbove(),
                     () => AddError(WrongFormat("預約單 ID", nameof(input.RHID))))
                 .ValidateAsync(

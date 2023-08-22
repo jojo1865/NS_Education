@@ -365,8 +365,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private List<Resver_GetAllInfoById_Output_ThrowItem_APIItem> GetAllInfoByIdPopulateThrowItems(Resver_Site rs)
         {
             return rs.Resver_Throw
-                .Select(rt => new Resver_GetAllInfoById_Output_ThrowItem_APIItem
+                .Select((rt, index) => new Resver_GetAllInfoById_Output_ThrowItem_APIItem
                 {
+                    OnlyID = index,
                     RTID = rt.RTID,
                     TargetDate = rt.TargetDate.ToFormattedStringDate(),
                     BSCID = rt.BSCID,
@@ -389,17 +390,19 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     TimeSpanItems = GetTimeSpanFromHead<Resver_Throw>(rs.Resver_Head, rt.RTID),
                     FoodItems = rt.B_StaticCode?.Title != DbConstants.ThrowDineTitle
                         ? new List<Resver_GetAllInfoById_Output_FoodItem_APIItem>()
-                        : GetALlInfoByIdPopulateFoodItems(rt)
+                        : GetALlInfoByIdPopulateFoodItems(rt, index)
                 })
                 .OrderBy(rt => rt.SortNo)
                 .ToList();
         }
 
-        private List<Resver_GetAllInfoById_Output_FoodItem_APIItem> GetALlInfoByIdPopulateFoodItems(Resver_Throw rt)
+        private List<Resver_GetAllInfoById_Output_FoodItem_APIItem> GetALlInfoByIdPopulateFoodItems(Resver_Throw rt,
+            int parentId)
         {
             return rt.Resver_Throw_Food
                 .Select(rtf => new Resver_GetAllInfoById_Output_FoodItem_APIItem
                 {
+                    ParentID = parentId,
                     RTFID = rtf.RTFID,
                     DFCID = rtf.DFCID,
                     DFC_Title = rtf.D_FoodCategory?.Title,

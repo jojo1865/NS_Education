@@ -4,6 +4,11 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
 {
     public class Resver_GetAllInfoById_Output_FoodItem_APIItem
     {
+        /// <summary>
+        /// 所屬行程的獨特 ID，提供給前端加總時用。
+        /// </summary>
+        public int ParentID { get; set; }
+
         public int RTFID { get; set; }
 
         public int DFCID { get; set; }

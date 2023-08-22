@@ -10,6 +10,11 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public ICollection<Resver_GetAllInfoById_Output_TimeSpanItem_APIItem> TimeSpanItems =
             new List<Resver_GetAllInfoById_Output_TimeSpanItem_APIItem>();
 
+        /// <summary>
+        /// 此行程的獨特 ID，提供給前端加總時用。
+        /// </summary>
+        public int OnlyID { get; set; }
+
         public int RTID { get; set; }
         public string TargetDate { get; set; }
 

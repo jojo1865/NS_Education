@@ -418,22 +418,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 // 其他項目
                 input.OtherItems.Sum(oi => oi.FixedPrice);
 
-            // 子項目所有總報價
-            int subItemsQuotedPriceTotal =
-                // 場地
-                input.SiteItems.Sum(si => si.QuotedPrice) +
-                // 行程
-                input.SiteItems.SelectMany(si => si.ThrowItems).Sum(ti => ti.QuotedPrice) +
-                // 設備
-                input.SiteItems.SelectMany(si => si.DeviceItems).Sum(di => di.QuotedPrice) +
-                // 其他項目
-                input.OtherItems.Sum(oi => oi.QuotedPrice);
-
             bool isValid = input.StartValidate()
                 .Validate(i => i.FixedPrice == subItemsFixedPriceTotal,
                     i => AddError(ExpectedValue("預約單總定價", nameof(i.FixedPrice), subItemsFixedPriceTotal)))
-                .Validate(i => i.QuotedPrice == subItemsQuotedPriceTotal,
-                    i => AddError(ExpectedValue("預約單總報價", nameof(i.QuotedPrice), subItemsQuotedPriceTotal)))
                 .IsValid();
 
             return isValid;

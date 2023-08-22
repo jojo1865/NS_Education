@@ -387,7 +387,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .IsValid();
 
             // 輸入都正確後，才計算各項目價格
-            bool isEveryPriceValid = isContactItemValid
+            bool isEverythingValid = isContactItemValid
                                      && isSiteItemsValid
                                      && isSiteItemTimeSpanItemValid
                                      && isSiteItemThrowItemValid
@@ -397,33 +397,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                      && isSiteItemDeviceItemTimeSpanItemValid
                                      && isOtherItemValid
                                      && isBillItemValid
-                                     && isGiveBackItemValid
-                                     && SubmitValidateAllPrices(input);
+                                     && isGiveBackItemValid;
 
-            return await Task.FromResult(isEveryPriceValid);
-        }
-
-        private bool SubmitValidateAllPrices(Resver_Submit_Input_APIItem input)
-        {
-            // 子項目的價格都能夠修改，所以只簡單計算總定價、總報價是否符合輸入的總和
-
-            // 子項目所有總定價
-            int subItemsFixedPriceTotal =
-                // 場地
-                input.SiteItems.Sum(si => si.FixedPrice) +
-                // 行程
-                input.SiteItems.SelectMany(si => si.ThrowItems).Sum(ti => ti.FixedPrice) +
-                // 設備
-                input.SiteItems.SelectMany(si => si.DeviceItems).Sum(di => di.FixedPrice) +
-                // 其他項目
-                input.OtherItems.Sum(oi => oi.FixedPrice);
-
-            bool isValid = input.StartValidate()
-                .Validate(i => i.FixedPrice == subItemsFixedPriceTotal,
-                    i => AddError(ExpectedValue("預約單總定價", nameof(i.FixedPrice), subItemsFixedPriceTotal)))
-                .IsValid();
-
-            return isValid;
+            return await Task.FromResult(isEverythingValid);
         }
 
         private async Task<bool> SubmitValidateSiteItemDeviceItemsAllTimeSpanEnough(Resver_Submit_Input_APIItem input)

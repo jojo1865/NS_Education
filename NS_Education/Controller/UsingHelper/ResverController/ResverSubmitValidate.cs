@@ -210,7 +210,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                                 SubmitValidateTimeSpanItems(
                                                                     si.ThrowItems.SelectMany(ti => ti.TimeSpanItems),
                                                                     SubmitValidateGetTimeSpans(
-                                                                        si.TimeSpanItems.Select(tsi => tsi.DTSID))
+                                                                        si.TimeSpanItems)
                                                                 )
                                                             )
                                                             .IsValid();
@@ -296,7 +296,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                                  SubmitValidateTimeSpanItems(
                                                                      si.DeviceItems.SelectMany(di => di.TimeSpanItems),
                                                                      SubmitValidateGetTimeSpans(
-                                                                         si.TimeSpanItems.Select(tsi => tsi.DTSID))
+                                                                         si.TimeSpanItems)
                                                                  )
                                                              )
                                                              .IsValid();
@@ -475,7 +475,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     }
 
                     // 查出所有對應 deviceItem.DTSID 的 DTS
-                    var allInputDtsIds = deviceItem.TimeSpanItems.Select(tsi => tsi.DTSID);
+                    var allInputDtsIds = deviceItem.TimeSpanItems;
                     D_TimeSpan[] wantedTimeSpans = await DC.D_TimeSpan
                         .Where(dts => dts.ActiveFlag)
                         .Where(dts => !dts.DeleteFlag)
@@ -570,7 +570,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 // 2. RTS 的 DTSID = 當天已被占用的 DTSID，從輸入中抓出此類 DTSID
                 isValid &= allResverTimeSpans
                     .StartValidateElements()
-                    .Validate(rts => si.TimeSpanItems.All(tsi => tsi.DTSID != rts.DTSID),
+                    .Validate(rts => si.TimeSpanItems.All(tsi => tsi != rts.DTSID),
                         rts => AddError(22,
                             $"{siteData?.Title ?? $"場地 ID {si.BSID}"} 欲預約的時段（{rts.D_TimeSpan.GetTimeRangeFormattedString()}）當天已被預約了！")
                     )
@@ -579,7 +579,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                 // 3. 所有 TimeSpanItem 的 DTS 時段不可與 allResverTimeSpans 任一者的 DTS 時段重疊
                 // 先查出所有輸入 DTSID 的 DTS 資料
-                var inputDtsIds = si.TimeSpanItems.Select(tsi => tsi.DTSID);
+                var inputDtsIds = si.TimeSpanItems;
                 List<D_TimeSpan> allInputDts = await DC.D_TimeSpan
                     .Where(dts =>
                         dts.ActiveFlag
@@ -695,12 +695,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         /// true：時段皆正確。<br/>
         /// false：有時段格式錯誤，或是不存在於上層項目預約的時段中。
         /// </returns>
-        private bool SubmitValidateTimeSpanItems(IEnumerable<Resver_Submit_TimeSpanItem_Input_APIItem> items,
+        private bool SubmitValidateTimeSpanItems(IEnumerable<int> items,
             IEnumerable<D_TimeSpan> parentTimeSpan)
         {
-            Resver_Submit_TimeSpanItem_Input_APIItem[] itemsArray = items.ToArray();
-
-            int[] inputDtsIds = itemsArray.Select(i => i.DTSID).ToArray();
+            int[] inputDtsIds = items.ToArray();
 
             // 查出輸入的 TimeSpanItem 的所有對應的 DTS
             Dictionary<int, D_TimeSpan> dtsData = SubmitValidateGetTimeSpansDictionary(inputDtsIds);
@@ -708,7 +706,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 驗證所有 DTSID 都存在
             bool isInputValid = inputDtsIds.StartValidateElements()
                 .Validate(id => dtsData.ContainsKey(id),
-                    id => AddError(NotFound($"預約時段 ID {id}", nameof(Resver_Submit_TimeSpanItem_Input_APIItem.DTSID))))
+                    id => AddError(NotFound($"預約時段 ID {id}", "TimeSpanItems")))
                 .IsValid();
 
             if (!isInputValid)

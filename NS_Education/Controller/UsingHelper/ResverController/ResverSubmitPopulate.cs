@@ -241,7 +241,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         RHID = head.RHID,
                         TargetTable = deviceTableName,
                         TargetID = device.RDID,
-                        DTSID = timeSpanItem.DTSID,
+                        DTSID = timeSpanItem,
                         SortNo = ++sortNo
                     };
 
@@ -330,7 +330,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     RHID = head.RHID,
                     TargetTable = throwTableName,
                     TargetID = throwData.RTID,
-                    DTSID = timeSpanItem.DTSID,
+                    DTSID = timeSpanItem,
                     SortNo = ++sortNo
                 };
                 head.M_Resver_TimeSpan.Add(resverTimeSpan);
@@ -350,7 +350,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     RHID = head.RHID,
                     TargetTable = siteTableName,
                     TargetID = site.RSID,
-                    DTSID = timeSpanItem.DTSID,
+                    DTSID = timeSpanItem,
                     SortNo = ++sortNo
                 };
 

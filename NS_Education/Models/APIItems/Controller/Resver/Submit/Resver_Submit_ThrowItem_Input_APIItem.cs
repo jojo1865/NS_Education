@@ -17,8 +17,8 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
         public int SortNo { get; set; }
         public string Note { get; set; }
 
-        public ICollection<Resver_Submit_TimeSpanItem_Input_APIItem> TimeSpanItems { get; set; } =
-            new List<Resver_Submit_TimeSpanItem_Input_APIItem>();
+        public ICollection<int> TimeSpanItems { get; set; } =
+            new List<int>();
 
         public ICollection<Resver_Submit_FoodItem_Input_APIItem> FoodItems { get; set; } =
             new List<Resver_Submit_FoodItem_Input_APIItem>();

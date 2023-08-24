@@ -119,10 +119,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     })
                     .ToArray();
 
-                // 如果所有時段都沒空，不加入回傳結果
-                if (!rows.Any(r => r.AllowResverFlag))
-                    continue;
-
                 result[siteData] = rows;
             }
 

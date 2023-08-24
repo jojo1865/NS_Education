@@ -12,6 +12,7 @@ namespace NS_Education.Variables
     {
         Draft = 1,
         Checked,
+        CheckedIn,
         FullyPaid,
         Terminated,
         Deleted

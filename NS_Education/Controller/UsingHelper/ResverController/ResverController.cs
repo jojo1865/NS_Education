@@ -128,6 +128,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 BSCID12_Title = entity.B_StaticCode1.Title ?? "",
                 State = entity.DeleteFlag ? ReserveHeadGetListState.Deleted :
                     entity.B_StaticCode1.Code == ReserveHeadState.Terminated ? ReserveHeadGetListState.Terminated :
+                    entity.CheckInFlag ? ReserveHeadGetListState.CheckedIn :
                     entity.CheckFlag ? ReserveHeadGetListState.Checked :
                     entity.B_StaticCode1.Code == ReserveHeadState.FullyPaid ? ReserveHeadGetListState.FullyPaid :
                     ReserveHeadGetListState.Draft

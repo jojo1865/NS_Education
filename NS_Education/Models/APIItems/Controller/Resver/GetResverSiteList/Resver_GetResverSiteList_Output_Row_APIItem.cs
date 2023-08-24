@@ -11,6 +11,7 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetResverSiteList
 
         public string Date { get; set; }
         public int BSID { get; set; }
+        public bool SelectFlag { get; set; }
         public string Code { get; set; }
         public string Title { get; set; }
         public int BOCID { get; set; }

@@ -54,6 +54,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         Date = input.FreeDate,
                         Index = input.ReverseOrder ? index-- : index++,
                         BSID = bs.BSID,
+                        SelectFlag = input.SelectedId.HasValue && input.SelectedId == bs.BSID,
                         Code = bs.Code ?? "",
                         Title = bs.Title ?? "",
                         BOCID = bs.BOCID,

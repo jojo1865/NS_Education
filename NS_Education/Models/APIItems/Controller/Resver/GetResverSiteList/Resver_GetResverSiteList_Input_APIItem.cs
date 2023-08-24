@@ -5,5 +5,6 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetResverSiteList
         public string FreeDate { get; set; }
         public int BSCID1 { get; set; }
         public int PeopleCt { get; set; }
+        public int? SelectedId { get; set; }
     }
 }

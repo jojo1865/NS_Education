@@ -126,13 +126,18 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 PeopleCt = entity.PeopleCt,
                 BSCID12 = entity.BSCID12,
                 BSCID12_Title = entity.B_StaticCode1.Title ?? "",
-                State = entity.DeleteFlag ? ReserveHeadGetListState.Deleted :
-                    entity.B_StaticCode1.Code == ReserveHeadState.Terminated ? ReserveHeadGetListState.Terminated :
-                    entity.CheckInFlag ? ReserveHeadGetListState.CheckedIn :
-                    entity.CheckFlag ? ReserveHeadGetListState.Checked :
-                    entity.B_StaticCode1.Code == ReserveHeadState.FullyPaid ? ReserveHeadGetListState.FullyPaid :
-                    ReserveHeadGetListState.Draft
+                State = GetState(entity)
             });
+        }
+
+        private static ReserveHeadGetListState GetState(Resver_Head entity)
+        {
+            return entity.DeleteFlag ? ReserveHeadGetListState.Deleted :
+                entity.B_StaticCode1.Code == ReserveHeadState.Terminated ? ReserveHeadGetListState.Terminated :
+                entity.CheckInFlag ? ReserveHeadGetListState.CheckedIn :
+                entity.CheckFlag ? ReserveHeadGetListState.Checked :
+                entity.B_StaticCode1.Code == ReserveHeadState.FullyPaid ? ReserveHeadGetListState.FullyPaid :
+                ReserveHeadGetListState.Draft;
         }
 
         #endregion
@@ -199,11 +204,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             var result = new Resver_GetAllInfoById_Output_APIItem
             {
-                State = entity.DeleteFlag ? ReserveHeadGetListState.Deleted :
-                    entity.B_StaticCode1.Code == ReserveHeadState.Terminated ? ReserveHeadGetListState.Terminated :
-                    entity.CheckFlag ? ReserveHeadGetListState.Checked :
-                    entity.B_StaticCode1.Code == ReserveHeadState.FullyPaid ? ReserveHeadGetListState.FullyPaid :
-                    ReserveHeadGetListState.Draft,
+                State = GetState(entity),
                 RHID = entity.RHID,
                 BSCID12 = entity.BSCID12,
                 BSC12_Title = entity.B_StaticCode1.Title ?? "",

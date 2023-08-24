@@ -351,7 +351,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         () => AddError(NotFound($"繳費紀錄的付款方式 ID（{item.DPTID}）", nameof(item.DPTID))))
                     .Validate(
                         bi => bi.PayDate.IsNullOrWhiteSpace() ||
-                              bi.PayDate.TryParseDateTime(out _, DateTimeParseType.DateTime),
+                              bi.PayDate.TryParseDateTime(out _),
                         () => AddError(WrongFormat($"付款時間（{item.PayDate}）", nameof(item.PayDate))))
                     .IsValid());
 

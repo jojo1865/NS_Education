@@ -1,4 +1,4 @@
-namespace NS_Education.Models.APIItems.Controller.PrintReport.Report14
+namespace NS_Education.Models.APIItems.Controller.PrintReport.Report15
 {
     /// <summary>
     /// 場地實際銷售統計表的單筆輸出物件。

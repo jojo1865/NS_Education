@@ -1,7 +1,6 @@
-using NS_Education.Models.APIItems.Controller.PrintReport.Report14;
 using NS_Education.Tools.Extensions;
 
-namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
+namespace NS_Education.Models.APIItems.Controller.PrintReport.Report15
 {
     /// <summary>
     /// 場地實際銷售統計表的輸出物件。

@@ -1,4 +1,4 @@
-namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
+namespace NS_Education.Models.APIItems.Controller.PrintReport.Report14
 {
     /// <summary>
     /// 場地實際使用統計表的輸入物件。

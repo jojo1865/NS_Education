@@ -43,21 +43,24 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.SetByInput(input);
 
                 response.Items = results.Select(cv => new Report10_Output_Row_APIItem
-                {
-                    CustomerCode = cv.Customer.Code,
-                    CustomerName = cv.Customer.TitleC,
-                    TargetTitle = cv.TargetTitle,
-                    VisitMethod = cv.B_StaticCode1.Title,
-                    VisitDate = cv.VisitDate.ToString("yyyy/MM/dd"),
-                    Agent = cv.BusinessUser.Name,
-                    Title = cv.Title,
-                    Description = cv.Description,
-                    AfterNote = cv.AfterNote,
-                    NoDealReason = cv.B_StaticCode.Title
-                }).ToList();
+                    {
+                        CustomerCode = cv.Customer.Code,
+                        CustomerName = cv.Customer.TitleC,
+                        TargetTitle = cv.TargetTitle,
+                        VisitMethod = cv.B_StaticCode1.Title,
+                        VisitDate = cv.VisitDate.ToString("yyyy/MM/dd"),
+                        Agent = cv.BusinessUser.Name,
+                        Title = cv.Title,
+                        Description = cv.Description,
+                        AfterNote = cv.AfterNote,
+                        NoDealReason = cv.B_StaticCode.Title
+                    })
+                    .Skip(input.GetStartIndex())
+                    .Take(input.GetTakeRowCount())
+                    .ToList();
                 response.UID = GetUid();
                 response.Username = await GetUserNameByID(response.UID);
-
+                response.AllItemCt = results.Count();
                 return response;
             }
         }

@@ -72,12 +72,14 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         TotalPrice = (int)(e.Key.QuotedPrice * e.Count() *
                                            e.Max(grouping => grouping.rts.D_TimeSpan.PriceRatePercentage * 0.01m))
                     })
-                    .Skip(input.GetStartIndex())
-                    .Take(input.GetTakeRowCount())
                     .ToList();
 
                 response.UID = GetUid();
                 response.Username = await GetUserNameByID(response.UID);
+
+                response.AllItemCt = response.Items.Count;
+
+                response.Items = response.Items.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToList();
 
                 return response;
             }

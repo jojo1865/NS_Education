@@ -67,12 +67,13 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         AverageQuotedPrice = e.Sum(grouping => grouping.rs.QuotedPrice) / e.Count(),
                         FixedPrice = e.Max(grouping => grouping.rs.B_SiteData.UnitPrice)
                     })
-                    .Skip(input.GetStartIndex())
-                    .Take(input.GetTakeRowCount())
                     .ToList();
 
                 response.UID = GetUid();
                 response.Username = await GetUserNameByID(response.UID);
+                response.AllItemCt = response.Items.Count;
+
+                response.Items = response.Items.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToList();
 
                 return response;
             }

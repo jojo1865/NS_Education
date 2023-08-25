@@ -75,12 +75,14 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         UnitPrice = e.Max(grouping => grouping.rs.B_SiteData.UnitPrice),
                         QuotedPrice = e.Max(grouping => grouping.rs.QuotedPrice)
                     })
-                    .Skip(input.GetStartIndex())
-                    .Take(input.GetTakeRowCount())
                     .ToList();
 
                 response.UID = GetUid();
                 response.Username = await GetUserNameByID(response.UID);
+
+                response.AllItemCt = response.Items.Count;
+
+                response.Items = response.Items.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToList();
 
                 return response;
             }

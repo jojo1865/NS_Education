@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using NS_Education.Models.APIItems;
-using NS_Education.Models.APIItems.Controller.PrintReport.Report13;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report14;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -68,12 +67,14 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         UseCount = e.Count(),
                         UseRate = (Decimal.Divide(e.Count(), total)).ToString("P")
                     })
-                    .Skip(input.GetStartIndex())
-                    .Take(input.GetTakeRowCount())
                     .ToList();
 
                 response.UID = GetUid();
                 response.Username = await GetUserNameByID(response.UID);
+
+                response.AllItemCt = response.Items.Count;
+
+                response.Items = response.Items.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToList();
 
                 return response;
             }

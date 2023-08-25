@@ -4,9 +4,9 @@ using NS_Education.Tools.Extensions;
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
 {
     /// <summary>
-    /// 場地預估銷售月報表的輸出物件。
+    /// 場地實際銷售統計表的輸出物件。
     /// </summary>
-    public class Report14_Output_APIItem : CommonResponseForPagedList<Report14_Output_Row_APIItem>
+    public class Report15_Output_APIItem : CommonResponseForPagedList<Report15_Output_Row_APIItem>
     {
         /// <summary>
         /// 製表者 ID
@@ -23,10 +23,10 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
-            if (input is Report14_Input_APIItem r14)
+            if (input is Report15_Input_APIItem r15)
             {
-                StartDate = r14.StartDate?.ParseDateTime().ToString("yyyy/MM/dd");
-                EndDate = r14.EndDate?.ParseDateTime().ToString("yyyy/MM/dd");
+                StartDate = r15.StartDate?.ParseDateTime().ToString("yyyy/MM/dd");
+                EndDate = r15.EndDate?.ParseDateTime().ToString("yyyy/MM/dd");
             }
 
             base.SetByInput(input);

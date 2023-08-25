@@ -288,6 +288,7 @@
         <Compile Include="Controller\UsingHelper\PrintReportController\Report14Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report15Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report16Controller.cs"/>
+        <Compile Include="Controller\UsingHelper\PrintReportController\Report6Controller.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverController.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverHistoryController.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverSiteController.cs"/>
@@ -462,6 +463,9 @@
         <Compile Include="Models\APIItems\Controller\PrintReport\Report16\Report16_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report16\Report16_Output_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report16\Report16_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\Report6\Report6_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\Report6\Report6_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\Report6\Report6_Output_Row_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_BillItem_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_ContactItem_APIItem.cs"/>

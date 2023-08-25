@@ -42,6 +42,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(dts => dts.ActiveFlag && !dts.DeleteFlag)
                     .ToArrayAsync();
                 Report11_Output_APIItem response = new Report11_Output_APIItem();
+                response.SetByInput(input);
 
                 response.Items = result.GroupBy(sd => sd.BCID)
                     .Select(grouping => new Report11_Output_Row_APIItem

@@ -1,4 +1,3 @@
-using NS_Education.Models.APIItems.Controller.PrintReport.Report11;
 using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report10
@@ -22,9 +21,9 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report10
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
-            if (input is Report11_Input_APIItem r11)
+            if (input is Report10_Input_APIItem r10)
             {
-                TargetDate = r11.TargetDate?.ParseDateTime().ToString("yyyy/MM/dd");
+                TargetDate = r10.TargetDate?.ParseDateTime().ToString("yyyy/MM/dd");
             }
 
             base.SetByInput(input);

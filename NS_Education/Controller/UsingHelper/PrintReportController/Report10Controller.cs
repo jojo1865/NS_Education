@@ -40,6 +40,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 var results = await query.ToArrayAsync();
 
                 Report10_Output_APIItem response = new Report10_Output_APIItem();
+                response.SetByInput(input);
 
                 response.Items = results.Select(cv => new Report10_Output_Row_APIItem
                 {

@@ -282,8 +282,7 @@
         <Compile Include="Controller\UsingHelper\PayTypeController.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs1Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\GetResverListByIDs2Controller.cs"/>
-        <Compile Include="Controller\UsingHelper\PrintReportController\PrintReportController.cs"/>
-        <Compile Include="Controller\UsingHelper\PrintReportController\Report13.cs"/>
+        <Compile Include="Controller\UsingHelper\PrintReportController\Report13Controller.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverController.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverHistoryController.cs"/>
         <Compile Include="Controller\UsingHelper\ResverController\ResverSiteController.cs"/>

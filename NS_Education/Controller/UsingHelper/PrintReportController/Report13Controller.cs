@@ -1,18 +1,23 @@
+using System;
 using System.Data.Entity;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report13;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters.JwtAuthFilter;
+using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
     /// <summary>
     /// 場地預估銷售月報表的處理。
     /// </summary>
-    public class Report13 : IPrintReport<Report13_Input_APIItem, Report13_Output_Row_APIItem>
+    public class Report13Controller : PublicClass, IPrintReport<Report13_Input_APIItem, Report13_Output_Row_APIItem>
     {
         /// <inheritdoc />
         public async Task<CommonResponseForPagedList<Report13_Output_Row_APIItem>> GetResultAsync(
@@ -24,13 +29,22 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 string tableName = dbContext.GetTableName<Resver_Site>();
 
+                DateTime startTime = input.HasInputTargetMonth
+                    ? new DateTime(input.Year ?? 1, input.Month ?? 1, 1)
+                    : SqlDateTime.MinValue.Value;
+
+                DateTime endTime = input.HasInputTargetMonth
+                    ? startTime.AddMonths(1).AddDays(-1)
+                    : SqlDateTime.MaxValue.Value;
+
                 var query = dbContext.Resver_Site
                     .AsNoTracking()
                     .Include(rs => rs.B_SiteData)
+                    .Where(rs => startTime <= rs.TargetDate && rs.TargetDate <= endTime)
                     .GroupJoin(dbContext.M_Resver_TimeSpan
                             .Include(rts => rts.D_TimeSpan)
                             .Where(rts => rts.TargetTable == tableName),
-                        rs => rs.BSID,
+                        rs => rs.RSID,
                         rts => rts.TargetID,
                         (rs, rts) => new { rs, rts }
                     )
@@ -45,15 +59,18 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.SetByInput(input);
 
                 response.Items = results
+                    .Where(e => e.rts != null)
+                    .GroupBy(e => new { e.rs.BSID, e.rs.QuotedPrice, e.rts.DTSID })
                     .Select(e => new Report13_Output_Row_APIItem
                     {
-                        SiteCode = e.rs.B_SiteData?.Code ?? "",
-                        SiteName = e.rs.B_SiteData?.Title ?? "",
-                        SiteTimeSpanUnitPrice = e.rs.QuotedPrice,
-                        SiteUnitPrice = e.rs.B_SiteData?.UnitPrice ?? 0,
-                        TimeSpan = e.rts.D_TimeSpan?.Title ?? "",
-                        Quantity = ,
-                        TotalPrice = 0
+                        SiteCode = e.Max(grouping => grouping.rs.B_SiteData.Code),
+                        SiteName = e.Max(grouping => grouping.rs.B_SiteData.Title),
+                        SiteTimeSpanUnitPrice = e.Key.QuotedPrice,
+                        SiteUnitPrice = e.Max(grouping => grouping.rs.B_SiteData.UnitPrice),
+                        TimeSpan = e.Max(grouping => grouping.rts.D_TimeSpan.Title),
+                        Quantity = e.Count(),
+                        TotalPrice = (int)(e.Key.QuotedPrice * e.Count() *
+                                           e.Max(grouping => grouping.rts.D_TimeSpan.PriceRatePercentage * 0.01m))
                     })
                     .Skip(input.GetStartIndex())
                     .Take(input.GetTakeRowCount())
@@ -61,6 +78,13 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 return response;
             }
+        }
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<string> Get(Report13_Input_APIItem input)
+        {
+            return GetResponseJson(await GetResultAsync(input));
         }
     }
 }

@@ -245,7 +245,7 @@ namespace NS_Education.Tools.Extensions
         /// <param name="context">DbContext</param>
         /// <param name="entityType">物件的類型</param>
         /// <returns>Table 名。</returns>
-        private static string GetTableName(this DbContext context, Type entityType)
+        public static string GetTableName(this DbContext context, Type entityType)
         {
             // 先從庫存拿
             if (EntityTypeTableNames.ContainsKey(entityType))

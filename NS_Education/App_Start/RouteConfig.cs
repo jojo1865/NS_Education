@@ -17,6 +17,13 @@ namespace NS_Education
             );
 
             routes.MapRoute(
+                name: "PrintReport5",
+                url: "PrintReport/5",
+                defaults: new
+                    { controller = "Report5", action = "Get" }
+            );
+
+            routes.MapRoute(
                 name: "PrintReport6",
                 url: "PrintReport/6",
                 defaults: new

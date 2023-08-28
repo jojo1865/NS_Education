@@ -11,6 +11,7 @@ namespace NS_Education.Models.APIItems.Controller.SiteData.GetInfoById
         public string Title { get; set; }
         public int BasicSize { get; set; }
         public int MaxSize { get; set; }
+        public int AreaSize { get; set; }
         public int UnitPrice { get; set; }
         public int InPrice { get; set; }
         public int OutPrice { get; set; }

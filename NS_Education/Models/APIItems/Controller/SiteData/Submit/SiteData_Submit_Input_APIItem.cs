@@ -11,6 +11,7 @@ namespace NS_Education.Models.APIItems.Controller.SiteData.Submit
         public int BasicSize { get; set; }
         public int MaxSize { get; set; } = 0;
         public int UnitPrice { get; set; }
+        public int AreaSize { get; set; }
         public int InPrice { get; set; }
         public int OutPrice { get; set; }
         public bool CubicleFlag { get; set; }

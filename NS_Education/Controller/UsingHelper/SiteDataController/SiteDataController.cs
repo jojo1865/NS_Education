@@ -236,6 +236,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 Title = entity.Title ?? "",
                 BasicSize = entity.BasicSize,
                 MaxSize = entity.MaxSize,
+                AreaSize = entity.AreaSize,
                 UnitPrice = entity.UnitPrice,
                 InPrice = entity.InPrice,
                 OutPrice = entity.OutPrice,
@@ -290,6 +291,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 BasicSize = entity.BasicSize,
                 MaxSize = entity.MaxSize,
                 UnitPrice = entity.UnitPrice,
+                AreaSize = entity.AreaSize,
                 InPrice = entity.InPrice,
                 OutPrice = entity.OutPrice,
                 CubicleFlag = entity.CubicleFlag,
@@ -605,6 +607,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.MaxSize > 0 && i.MaxSize >= i.BasicSize,
                     () => AddError(MinLargerThanMax("一般容納人數", nameof(input.BasicSize), "最大容納人數",
                         nameof(input.MaxSize))))
+                .Validate(i => i.AreaSize.IsAboveZero(),
+                    () => AddError(OutOfRange("面積坪數", nameof(input.AreaSize), 1)))
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用", nameof(input.UnitPrice))))
                 .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價", nameof(input.InPrice))))
                 .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價", nameof(input.OutPrice))))
@@ -736,6 +740,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 Title = input.Title,
                 BasicSize = input.BasicSize,
                 MaxSize = input.MaxSize <= 0 ? input.BasicSize : input.MaxSize,
+                AreaSize = input.AreaSize,
                 UnitPrice = input.UnitPrice,
                 InPrice = input.InPrice,
                 OutPrice = input.OutPrice,
@@ -784,6 +789,8 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.MaxSize > 0 && i.MaxSize >= i.BasicSize,
                     () => AddError(MinLargerThanMax("一般容納人數", nameof(input.BasicSize), "最大容納人數",
                         nameof(input.MaxSize))))
+                .Validate(i => i.AreaSize.IsAboveZero(),
+                    () => AddError(OutOfRange("面積坪數", nameof(input.AreaSize), 1)))
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用", nameof(input.UnitPrice))))
                 .Validate(i => i.InPrice >= 0, () => AddError(WrongFormat("內部單位定價", nameof(input.InPrice))))
                 .Validate(i => i.OutPrice >= 0, () => AddError(WrongFormat("外部單位定價", nameof(input.OutPrice))))
@@ -993,6 +1000,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.Title = input.Title;
             data.BasicSize = input.BasicSize;
             data.MaxSize = input.MaxSize <= 0 ? input.BasicSize : input.MaxSize;
+            data.AreaSize = input.AreaSize;
             data.UnitPrice = input.UnitPrice;
             data.InPrice = input.InPrice;
             data.OutPrice = input.OutPrice;

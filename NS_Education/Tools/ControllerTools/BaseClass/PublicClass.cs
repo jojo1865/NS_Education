@@ -56,6 +56,9 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
 
         public string GetResponseJson<T>(T infusable) where T : IReturnMessageInfusable
         {
+            if (infusable == null)
+                return GetResponseJson();
+
             infusable.Infuse(GetMsgClass(_errors));
             return ChangeJson(infusable);
         }

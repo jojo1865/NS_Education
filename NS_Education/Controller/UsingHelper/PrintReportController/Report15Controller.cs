@@ -35,6 +35,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 var query = dbContext.Resver_Site
                     .AsNoTracking()
                     .Include(rs => rs.B_SiteData)
+                    .Include(rs => rs.Resver_Head)
+                    .Where(rs => !rs.DeleteFlag)
+                    .Where(rs => !rs.Resver_Head.DeleteFlag)
                     .Where(rs => startTime <= rs.TargetDate && rs.TargetDate <= endTime)
                     .GroupJoin(dbContext.M_Resver_TimeSpan
                             .Include(rts => rts.D_TimeSpan)

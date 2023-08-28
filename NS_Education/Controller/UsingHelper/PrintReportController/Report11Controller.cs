@@ -55,6 +55,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             {
                                 Name = dts.Title,
                                 Customer = s.Resver_Site
+                                    .Where(rs => !rs.Resver_Head.DeleteFlag)
                                     .Where(rs => !rs.DeleteFlag)
                                     .Where(rs => rs.TargetDate.Date == targetDate)
                                     .Where(rs => dbContext.M_Resver_TimeSpan

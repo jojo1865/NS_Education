@@ -60,6 +60,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Include(rh => rh.Resver_Other)
                 .Include(rh => rh.M_Resver_TimeSpan)
                 .Include(rh => rh.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
+                .Where(rh => !rh.DeleteFlag)
                 .FirstOrDefaultAsync(rh => rh.RHID == input.RHID);
         }
 

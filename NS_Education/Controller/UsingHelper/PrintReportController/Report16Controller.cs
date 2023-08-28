@@ -37,6 +37,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Include(rs => rs.B_SiteData)
                     .Include(rs => rs.Resver_Head)
                     .Include(rs => rs.Resver_Head.Customer)
+                    .Where(rs => !rs.DeleteFlag)
+                    .Where(rs => !rs.Resver_Head.DeleteFlag)
                     .Where(rs => startTime <= rs.TargetDate && rs.TargetDate <= endTime)
                     .GroupJoin(dbContext.M_Resver_TimeSpan
                             .Include(rts => rts.D_TimeSpan)

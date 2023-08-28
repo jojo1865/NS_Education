@@ -39,7 +39,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                  || (input.External && rh.Customer.InFlag == false))
                     .AsQueryable();
 
-                var results = await query.ToArrayAsync();
+                var results = await query
+                    .OrderBy(rh => rh.SDate)
+                    .ThenByDescending(rh => rh.EDate)
+                    .ToArrayAsync();
 
                 Report6_Output_APIItem response = new Report6_Output_APIItem();
                 response.SetByInput(input);

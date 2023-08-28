@@ -43,7 +43,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                  || (input.External && rh.Customer.InFlag == false))
                     .AsQueryable();
 
-                Resver_Head[] result = await query.ToArrayAsync();
+                Resver_Head[] result = await query
+                    .OrderBy(rh => rh.RHID)
+                    .ToArrayAsync();
                 Report9_Output_APIItem response = new Report9_Output_APIItem();
                 response.SetByInput(input);
 

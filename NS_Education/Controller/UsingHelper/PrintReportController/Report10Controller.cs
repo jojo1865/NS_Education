@@ -37,7 +37,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(cv => cv.BSCID15 != null)
                     .AsQueryable();
 
-                var results = await query.ToArrayAsync();
+                var results = await query
+                    .OrderBy(cv => cv.CVID)
+                    .ToArrayAsync();
 
                 Report10_Output_APIItem response = new Report10_Output_APIItem();
                 response.SetByInput(input);

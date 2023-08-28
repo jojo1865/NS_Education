@@ -36,7 +36,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Include(sd => sd.Resver_Site.Select(rs => rs.Resver_Head))
                     .Where(sd => sd.ActiveFlag && !sd.DeleteFlag);
 
-                var result = await query.ToArrayAsync();
+                var result = await query
+                    .OrderBy(sd => sd.BSID)
+                    .ToArrayAsync();
 
                 var timeSpans = await dbContext.D_TimeSpan
                     .Where(dts => dts.ActiveFlag && !dts.DeleteFlag)

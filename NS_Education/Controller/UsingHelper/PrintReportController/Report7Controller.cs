@@ -40,7 +40,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(rh => rh.SDate <= targetDate && targetDate <= rh.EDate)
                     .AsQueryable();
 
-                var results = await query.ToArrayAsync();
+                var results = await query
+                    .OrderBy(rh => rh.SDate)
+                    .ThenByDescending(rh => rh.EDate)
+                    .ToArrayAsync();
 
                 Report7_Output_APIItem response = new Report7_Output_APIItem();
                 response.SetByInput(input);

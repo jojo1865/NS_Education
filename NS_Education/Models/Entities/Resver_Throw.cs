@@ -23,9 +23,6 @@ namespace NS_Education.Models.Entities
         public int RTID { get; set; }
         public int RSID { get; set; }
         public System.DateTime TargetDate { get; set; }
-        public int BSCID { get; set; }
-        public int BOCID { get; set; }
-        public string Title { get; set; }
         public string PrintTitle { get; set; }
         public string PrintNote { get; set; }
         public int UnitPrice { get; set; }
@@ -38,6 +35,9 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public int BSCID { get; set; }
+        public int BOCID { get; set; }
+        public string Title { get; set; }
     
         public virtual B_OrderCode B_OrderCode { get; set; }
         public virtual B_StaticCode B_StaticCode { get; set; }

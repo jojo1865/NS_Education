@@ -42,6 +42,7 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<D_Hall> D_Hall { get; set; }
         public virtual DbSet<D_OtherPayItem> D_OtherPayItem { get; set; }
         public virtual DbSet<D_PayType> D_PayType { get; set; }
+        public virtual DbSet<D_Throw> D_Throw { get; set; }
         public virtual DbSet<D_TimeSpan> D_TimeSpan { get; set; }
         public virtual DbSet<D_Zip> D_Zip { get; set; }
         public virtual DbSet<ErrorLog> ErrorLog { get; set; }

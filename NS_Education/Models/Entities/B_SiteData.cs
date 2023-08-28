@@ -47,6 +47,7 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public int AreaSize { get; set; }
     
         public virtual B_Category B_Category { get; set; }
         public virtual B_OrderCode B_OrderCode { get; set; }

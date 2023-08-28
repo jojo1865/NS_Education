@@ -25,16 +25,17 @@ namespace NS_Education.Models.Entities
             this.GiftSending = new HashSet<GiftSending>();
             this.CustomerVisit = new HashSet<CustomerVisit>();
             this.D_OtherPayItem = new HashSet<D_OtherPayItem>();
+            this.D_Throw = new HashSet<D_Throw>();
             this.Customer = new HashSet<Customer>();
             this.Customer1 = new HashSet<Customer>();
             this.CustomerVisit1 = new HashSet<CustomerVisit>();
             this.Resver_Head = new HashSet<Resver_Head>();
             this.Resver_Head1 = new HashSet<Resver_Head>();
             this.Resver_Site = new HashSet<Resver_Site>();
-            this.Resver_Throw = new HashSet<Resver_Throw>();
             this.Resver_Throw_Food = new HashSet<Resver_Throw_Food>();
             this.Resver_GiveBack = new HashSet<Resver_GiveBack>();
             this.Resver_Other = new HashSet<Resver_Other>();
+            this.Resver_Throw = new HashSet<Resver_Throw>();
         }
     
         public int BSCID { get; set; }
@@ -67,6 +68,8 @@ namespace NS_Education.Models.Entities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<D_OtherPayItem> D_OtherPayItem { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<D_Throw> D_Throw { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Customer> Customer { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Customer> Customer1 { get; set; }
@@ -79,12 +82,12 @@ namespace NS_Education.Models.Entities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Site> Resver_Site { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Resver_Throw> Resver_Throw { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Throw_Food> Resver_Throw_Food { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_GiveBack> Resver_GiveBack { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Other> Resver_Other { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Resver_Throw> Resver_Throw { get; set; }
     }
 }

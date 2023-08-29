@@ -27,24 +27,33 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             {
                 Report3_Output_APIItem response = new Report3_Output_APIItem();
                 response.SetByInput(input);
+                response.UID = GetUid();
+                response.Username = await GetUserNameByID(response.UID);
 
-                Resver_Head head = await GetHead(input, dbContext);
+                IEnumerable<Resver_Head> heads = await GetHead(input, dbContext);
+                heads = heads.ToArray();
 
-                if (head is null)
+                if (!heads.Any())
                 {
                     AddError(NotFound("預約單", nameof(input.RHID)));
                     return null;
                 }
 
-                await AssignBasicFields(response, head);
-                AssignIncomes(head, response);
-                AssignDetails(head, response);
+                foreach (Resver_Head head in heads)
+                {
+                    Report3_Output_Row_APIItem row = new Report3_Output_Row_APIItem();
+                    response.Items.Add(row);
+
+                    AssignBasicFields(row, head);
+                    AssignIncomes(head, row);
+                    AssignDetails(head, row);
+                }
 
                 return response;
             }
         }
 
-        private static async Task<Resver_Head> GetHead(Report3_Input_APIItem input, NsDbContext dbContext)
+        private static async Task<IEnumerable<Resver_Head>> GetHead(Report3_Input_APIItem input, NsDbContext dbContext)
         {
             return await dbContext.Resver_Head.AsQueryable()
                 .Include(rh => rh.Resver_Site)
@@ -61,21 +70,21 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Include(rh => rh.M_Resver_TimeSpan)
                 .Include(rh => rh.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
                 .Where(rh => !rh.DeleteFlag)
-                .FirstOrDefaultAsync(rh => rh.RHID == input.RHID);
+                .Where(rh => input.RHID.Contains(rh.RHID))
+                .ToArrayAsync();
         }
 
-        private async Task AssignBasicFields(Report3_Output_APIItem response, Resver_Head head)
+        private void AssignBasicFields(Report3_Output_Row_APIItem response, Resver_Head head)
         {
+            response.RHID = head.RHID;
             response.StartDate = head.SDate.ToFormattedStringDate();
             response.EndDate = head.EDate.ToFormattedStringDate();
             response.PeopleCt = head.PeopleCt;
             response.HostName = head.CustomerTitle;
             response.EventName = head.Title;
-            response.UID = GetUid();
-            response.Username = await GetUserNameByID(response.UID);
         }
 
-        private static void AssignDetails(Resver_Head head, Report3_Output_APIItem response)
+        private static void AssignDetails(Resver_Head head, Report3_Output_Row_APIItem response)
         {
             var siteDetails = head.Resver_Site
                 .Where(rs => !rs.DeleteFlag)
@@ -161,7 +170,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             }
         }
 
-        private static void AssignIncomes(Resver_Head head, Report3_Output_APIItem response)
+        private static void AssignIncomes(Resver_Head head, Report3_Output_Row_APIItem response)
         {
             var siteIncomes = head.Resver_Site
                 .Where(rs => !rs.DeleteFlag)

@@ -8,8 +8,8 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
     public class Report9_Input_APIItem : BaseRequestForPagedList
     {
         public IEnumerable<int> CID { get; set; }
-        public bool Internal { get; set; } = false;
-        public bool External { get; set; } = false;
+        public bool Internal { get; set; } = true;
+        public bool External { get; set; } = true;
         public string StartDate { get; set; }
         public string EndDate { get; set; }
     }

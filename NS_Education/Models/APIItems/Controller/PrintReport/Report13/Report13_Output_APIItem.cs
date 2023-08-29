@@ -15,15 +15,16 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
         /// </summary>
         public string Username { get; set; }
 
-        /// <summary>
-        /// 查詢月份，格式 yyyy/MM，要求若未傳入此欄位則為 null。
-        /// </summary>
-        public string TargetMonth { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report13_Input_APIItem r13)
-                TargetMonth = r13.TargetMonth;
+            {
+                StartDate = r13.StartDate;
+                EndDate = r13.EndDate;
+            }
 
             base.SetByInput(input);
         }

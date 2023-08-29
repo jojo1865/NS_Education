@@ -22,6 +22,8 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
         public string EndDate { get; set; }
         public string[] Opponents { get; set; }
 
+        public IEnumerable<int> RHID { get; set; }
+
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report6_Input_APIItem r6)
@@ -37,6 +39,8 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
                     opponents.Add("EXTERNAL");
 
                 Opponents = opponents.ToArray();
+
+                RHID = r6.RHID;
             }
 
             base.SetByInput(input);

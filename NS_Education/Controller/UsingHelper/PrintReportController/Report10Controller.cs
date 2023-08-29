@@ -37,6 +37,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(cv => cv.BSCID15 != null)
                     .AsQueryable();
 
+                if (input.CVID != null)
+                    query = query.Where(cv => input.CVID.Contains(cv.CVID));
+
                 var results = await query
                     .OrderBy(cv => cv.CVID)
                     .ToArrayAsync();

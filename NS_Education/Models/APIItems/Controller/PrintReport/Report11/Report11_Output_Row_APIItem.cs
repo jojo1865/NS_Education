@@ -8,9 +8,9 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report11
     /// </summary>
     public class Report11_Output_Row_APIItem
     {
-        public string Name { get; set; }
+        public string Date { get; set; }
 
-        public IEnumerable<Report11_Output_Row_Site_APIItem> Sites { get; set; } =
-            Array.Empty<Report11_Output_Row_Site_APIItem>();
+        public IEnumerable<Report11_Output_Row_SiteType_APIItem> SiteTypes { get; set; } =
+            Array.Empty<Report11_Output_Row_SiteType_APIItem>();
     }
 }

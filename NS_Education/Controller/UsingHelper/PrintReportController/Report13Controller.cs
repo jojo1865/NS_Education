@@ -29,13 +29,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 string tableName = dbContext.GetTableName<Resver_Site>();
 
-                DateTime startTime = input.HasInputTargetMonth
-                    ? new DateTime(input.Year ?? 1, input.Month ?? 1, 1)
-                    : SqlDateTime.MinValue.Value;
-
-                DateTime endTime = input.HasInputTargetMonth
-                    ? startTime.AddMonths(1).AddDays(-1)
-                    : SqlDateTime.MaxValue.Value;
+                DateTime startTime = input.StartDate?.ParseDateTime().Date ?? SqlDateTime.MinValue.Value;
+                DateTime endTime = input.EndDate?.ParseDateTime().Date ?? SqlDateTime.MaxValue.Value;
 
                 var query = dbContext.Resver_Site
                     .AsNoTracking()

@@ -1,5 +1,3 @@
-using NS_Education.Tools.Extensions;
-
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report11
 {
     /// <summary>
@@ -17,13 +15,15 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report11
         /// </summary>
         public string Username { get; set; }
 
-        public string TargetDate { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report11_Input_APIItem r11)
             {
-                TargetDate = r11.TargetDate?.ParseDateTime().ToString("yyyy/MM/dd");
+                StartDate = r11.StartDate;
+                EndDate = r11.EndDate;
             }
 
             base.SetByInput(input);

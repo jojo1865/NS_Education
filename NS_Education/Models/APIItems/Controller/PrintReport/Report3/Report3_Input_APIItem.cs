@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report3
 {
     /// <summary>
@@ -5,6 +7,6 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report3
     /// </summary>
     public class Report3_Input_APIItem : BaseRequestForPagedList
     {
-        public int[] RHID { get; set; }
+        public IEnumerable<int> RHID { get; set; }
     }
 }

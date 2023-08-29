@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report3
 {
     /// <summary>
@@ -14,5 +16,17 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report3
         /// 製表者名稱
         /// </summary>
         public string Username { get; set; }
+
+        public IEnumerable<int> RHID { get; set; }
+
+        public override void SetByInput(BaseRequestForPagedList input)
+        {
+            if (input is Report3_Input_APIItem r3)
+            {
+                RHID = r3.RHID;
+            }
+
+            base.SetByInput(input);
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report11
     /// </summary>
     public class Report11_Input_APIItem : BaseRequestForPagedList
     {
-        public string TargetDate { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
     }
 }

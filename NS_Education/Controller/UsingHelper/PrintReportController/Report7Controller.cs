@@ -40,6 +40,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(rh => rh.SDate <= targetDate && targetDate <= rh.EDate)
                     .AsQueryable();
 
+                if (input.RHID != null)
+                    query = query.Where(rh => input.RHID.Contains(rh.RHID));
+
                 var results = await query
                     .OrderBy(rh => rh.SDate)
                     .ThenByDescending(rh => rh.EDate)

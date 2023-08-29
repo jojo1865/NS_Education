@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report5
@@ -20,6 +21,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report5
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string Partner { get; set; }
+        public IEnumerable<int> RHID { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
@@ -28,6 +30,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report5
                 StartDate = r5.StartDate?.ParseDateTime().ToString("yyyy/MM/dd");
                 EndDate = r5.EndDate?.ParseDateTime().ToString("yyyy/MM/dd");
                 Partner = r5.Partner;
+                RHID = r5.RHID;
             }
 
             base.SetByInput(input);

@@ -41,6 +41,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(rtf => startDate <= rtf.Resver_Throw.TargetDate && rtf.Resver_Throw.TargetDate <= endDate)
                     .AsQueryable();
 
+                if (input.RHID != null)
+                    query = query.Where(rtf => input.RHID.Contains(rtf.Resver_Throw.Resver_Site.RHID));
+
                 if (input.Partner.HasContent())
                     query = query
                         .Where(rtf => rtf.B_Partner.Title.Contains(input.Partner)

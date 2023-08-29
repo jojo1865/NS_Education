@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
 {
     /// <summary>
@@ -5,6 +7,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
     /// </summary>
     public class Report9_Input_APIItem : BaseRequestForPagedList
     {
+        public IEnumerable<int> CID { get; set; }
         public bool Internal { get; set; } = false;
         public bool External { get; set; } = false;
         public string StartDate { get; set; }

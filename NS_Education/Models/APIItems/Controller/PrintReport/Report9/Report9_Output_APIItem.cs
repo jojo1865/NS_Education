@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
@@ -21,6 +22,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
         public string EndDate { get; set; }
         public bool Internal { get; set; }
         public bool External { get; set; }
+        public IEnumerable<int> CID { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
@@ -30,6 +32,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
                 EndDate = r9.EndDate?.ParseDateTime().ToString("yyyy/MM/dd");
                 External = r9.External;
                 Internal = r9.Internal;
+                CID = r9.CID;
             }
 
             base.SetByInput(input);

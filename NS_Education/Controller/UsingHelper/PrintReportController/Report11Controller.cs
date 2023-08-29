@@ -1,5 +1,6 @@
 using System;
 using System.Data.Entity;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -27,47 +28,68 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 // 基於 Resver_Site，查詢範圍內的場地預約資料
 
                 string tableName = dbContext.GetTableName<Resver_Site>();
-                DateTime targetDate = input.TargetDate?.ParseDateTime() ?? DateTime.Today;
-                targetDate = targetDate.Date;
+                DateTime startTime = input.StartDate?.ParseDateTime().Date ?? SqlDateTime.MinValue.Value;
+                DateTime endTime = input.EndDate?.ParseDateTime().Date ?? SqlDateTime.MaxValue.Value;
 
-                var query = dbContext.B_SiteData
+                var query = dbContext.Resver_Site
+                    .AsNoTracking()
+                    .Include(rs => rs.B_SiteData)
+                    .Include(rs => rs.Resver_Head)
+                    .Where(rs => !rs.DeleteFlag)
+                    .Where(rs => !rs.Resver_Head.DeleteFlag)
+                    .Where(rs => startTime <= rs.TargetDate && rs.TargetDate <= endTime)
+                    .GroupJoin(dbContext.M_Resver_TimeSpan
+                            .Include(rts => rts.D_TimeSpan)
+                            .Where(rts => rts.TargetTable == tableName),
+                        rs => rs.RSID,
+                        rts => rts.TargetID,
+                        (rs, rts) => new { rs, rts }
+                    )
+                    .SelectMany(e => e.rts.DefaultIfEmpty(), (e, rts) => new { e.rs, rts })
+                    .AsQueryable();
+
+                var results = await query
+                    .OrderBy(e => e.rs.RSID)
+                    .ToArrayAsync();
+
+                var siteData = await dbContext.B_SiteData
                     .Include(sd => sd.B_Category)
-                    .Include(sd => sd.Resver_Site)
-                    .Include(sd => sd.Resver_Site.Select(rs => rs.Resver_Head))
-                    .Where(sd => sd.ActiveFlag && !sd.DeleteFlag);
-
-                var result = await query
+                    .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
                     .OrderBy(sd => sd.BSID)
                     .ToArrayAsync();
 
                 var timeSpans = await dbContext.D_TimeSpan
                     .Where(dts => dts.ActiveFlag && !dts.DeleteFlag)
                     .ToArrayAsync();
+
                 Report11_Output_APIItem response = new Report11_Output_APIItem();
                 response.SetByInput(input);
 
-                response.Items = result.GroupBy(sd => sd.BCID)
-                    .Select(grouping => new Report11_Output_Row_APIItem
+                response.Items = startTime.Range(endTime)
+                    .Select(dt => new Report11_Output_Row_APIItem
                     {
-                        Name = grouping.Max(g => g.B_Category.TitleC),
-                        Sites = grouping.Select(s => new Report11_Output_Row_Site_APIItem
-                        {
-                            Name = s.Title,
-                            TimeSpans = timeSpans.Select(dts => new Report11_Output_Row_TimeSpan_APIItem
+                        Date = dt.ToFormattedStringDate(),
+                        SiteTypes = siteData
+                            .GroupBy(sd => sd.BCID)
+                            .Select(grouping => new Report11_Output_Row_SiteType_APIItem
                             {
-                                Name = dts.Title,
-                                Customer = s.Resver_Site
-                                    .Where(rs => !rs.Resver_Head.DeleteFlag)
-                                    .Where(rs => !rs.DeleteFlag)
-                                    .Where(rs => rs.TargetDate.Date == targetDate)
-                                    .Where(rs => dbContext.M_Resver_TimeSpan
-                                        .Where(rts => rts.TargetTable == tableName)
-                                        .Any(rts => rts.TargetID == rs.RSID)
-                                    ).Max(rs => rs.Resver_Head.CustomerTitle)
+                                Name = grouping.Max(g => g.B_Category.TitleC),
+                                Sites = grouping.Select(sd => new Report11_Output_Row_Site_APIItem
+                                {
+                                    Name = sd.Title,
+                                    TimeSpans = timeSpans.Select(ts => new Report11_Output_Row_TimeSpan_APIItem
+                                    {
+                                        Name = ts.Title,
+                                        Customer = results
+                                            .Where(e => e.rs.TargetDate == dt.Date)
+                                            .Where(e => e.rts.DTSID == ts.DTSID)
+                                            .Select(e => e.rs.Resver_Head.Title)
+                                            .FirstOrDefault()
+                                    }).ToArray()
+                                }).ToArray()
                             }).ToArray()
-                        }).ToArray()
                     })
-                    .ToList();
+                    .ToArray();
 
                 response.UID = GetUid();
                 response.Username = await GetUserNameByID(response.UID);

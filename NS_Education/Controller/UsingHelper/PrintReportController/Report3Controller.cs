@@ -55,7 +55,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
         private static async Task<IEnumerable<Resver_Head>> GetHead(Report3_Input_APIItem input, NsDbContext dbContext)
         {
-            return await dbContext.Resver_Head.AsQueryable()
+            var query = dbContext.Resver_Head.AsQueryable()
                 .Include(rh => rh.Resver_Site)
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData).Select(bs => bs.B_StaticCode1))
@@ -69,9 +69,12 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Include(rh => rh.Resver_Other)
                 .Include(rh => rh.M_Resver_TimeSpan)
                 .Include(rh => rh.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
-                .Where(rh => !rh.DeleteFlag)
-                .Where(rh => input.RHID.Contains(rh.RHID))
-                .ToArrayAsync();
+                .Where(rh => !rh.DeleteFlag);
+
+            if (input.RHID != null)
+                query = query.Where(rh => input.RHID.Contains(rh.RHID));
+
+            return await query.ToArrayAsync();
         }
 
         private void AssignBasicFields(Report3_Output_Row_APIItem response, Resver_Head head)

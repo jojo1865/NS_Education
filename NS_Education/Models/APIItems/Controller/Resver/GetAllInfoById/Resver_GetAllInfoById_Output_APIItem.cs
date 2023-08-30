@@ -24,12 +24,6 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public ReserveHeadGetListState State { get; set; }
         public int RHID { get; set; }
 
-        public int BSCID12 { get; set; }
-        public string BSC12_Title { get; set; }
-
-        public ICollection<CommonResponseRowForSelectable> BSC12_List { get; set; } =
-            new List<CommonResponseRowForSelectable>();
-
         public int BSCID11 { get; set; }
         public string BSC11_Title { get; set; }
 

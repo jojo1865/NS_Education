@@ -206,10 +206,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             {
                 State = GetState(entity),
                 RHID = entity.RHID,
-                BSCID12 = entity.BSCID12,
-                BSC12_Title = entity.B_StaticCode1.Title ?? "",
-                BSC12_List =
-                    await DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.ResverStatus, entity.BSCID12),
                 BSCID11 = entity.BSCID11,
                 BSC11_Title = entity.B_StaticCode?.Title ?? "",
                 BSC11_List =

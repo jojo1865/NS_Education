@@ -157,7 +157,7 @@ namespace NS_Education.Controller.UsingHelper
                 BSCID = entity.BSCID,
                 BSC_Code = entity.B_StaticCode?.Code ?? "",
                 BSC_Title = entity.B_StaticCode?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType,
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.Gift,
                     entity.BSCID),
                 Title = entity.B_StaticCode?.Title ?? "",
                 Note = entity.Note ?? "",

@@ -182,7 +182,7 @@ namespace NS_Education.Controller.UsingHelper
                 C_List = await DC.Customer.GetCustomerSelectableWithHasReservation(entity.CID),
                 BSCID = entity.BSCID,
                 BSC_Title = entity.B_StaticCode1?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType,
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.VisitMethod,
                     entity.BSCID),
                 BUID = entity.BUID,
                 BU_Name = entity.BusinessUser?.Name ?? "",
@@ -202,7 +202,7 @@ namespace NS_Education.Controller.UsingHelper
                                 "",
                 BSCID15_List = hasReservation
                     ? new List<CommonResponseRowForSelectable>()
-                    : await DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.NoDealReason,
+                    : await DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.NoDealReason,
                         entity.BSCID15 ?? 0),
                 GiftSendings = entity.M_Customer_Gift.Select(mcg =>
                     new CustomerVisit_GetInfoById_GiftSendings_Row_APIItem

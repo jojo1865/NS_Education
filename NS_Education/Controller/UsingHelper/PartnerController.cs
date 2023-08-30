@@ -145,7 +145,7 @@ namespace NS_Education.Controller.UsingHelper
                 BCID = entity.BCID,
                 BC_TitleC = entity.B_Category?.TitleC ?? "",
                 BC_TitleE = entity.B_Category?.TitleE ?? "",
-                BC_List = await DC.B_Category.GetCategorySelectable(entity.B_Category?.CategoryType, entity.BCID),
+                BC_List = await DC.B_Category.GetCategorySelectable(CategoryType.Partner, entity.BCID),
 
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
@@ -153,7 +153,7 @@ namespace NS_Education.Controller.UsingHelper
 
                 BSCID = entity.BSCID,
                 BSC_Title = entity.B_StaticCode?.Title ?? "",
-                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID),
+                BSC_List = await DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.Region, entity.BSCID),
 
                 Email = entity.Email,
                 Note = entity.Note,

@@ -148,7 +148,7 @@ namespace NS_Education.Controller.UsingHelper
                 BCID = entity.BCID,
                 BC_TitleC = entity.B_Category?.TitleC ?? "",
                 BC_TitleE = entity.B_Category?.TitleE ?? "",
-                BC_List = await DC.B_Category.GetCategorySelectable(entity.B_Category?.CategoryType, entity.BCID),
+                BC_List = await DC.B_Category.GetCategorySelectable(CategoryType.Company, entity.BCID),
                 Code = entity.Code ?? "",
                 TitleC = entity.TitleC ?? "",
                 TitleE = entity.TitleE ?? "",

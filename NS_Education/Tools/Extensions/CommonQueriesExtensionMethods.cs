@@ -22,13 +22,12 @@ namespace NS_Education.Tools.Extensions
         /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
         public static async Task<ICollection<CommonResponseRowForSelectable>> GetStaticCodeSelectable(
             this DbSet<B_StaticCode> dbSet
-            , int? codeType, int bscIdToSelect)
+            , StaticCodeType codeType, int bscIdToSelect)
         {
-            if (codeType == null)
-                return new List<CommonResponseRowForSelectable>();
+            int codeTypeInt = (int)codeType;
 
             return await dbSet
-                .Where(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.CodeType == codeType)
+                .Where(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.CodeType == codeTypeInt)
                 .Select(sc => new CommonResponseRowForSelectable
                 {
                     ID = sc.BSCID,
@@ -89,13 +88,12 @@ namespace NS_Education.Tools.Extensions
         /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
         public static async Task<ICollection<CommonResponseRowForSelectable>> GetOrderCodeSelectable(
             this DbSet<B_OrderCode> dbSet
-            , string codeType, int bocIdToSelect)
+            , OrderCodeType codeType, int bocIdToSelect)
         {
-            if (codeType == null)
-                return new List<CommonResponseRowForSelectable>();
+            string codeTypeString = ((int)codeType).ToString();
 
             return await dbSet
-                .Where(oc => oc.ActiveFlag && !oc.DeleteFlag && oc.CodeType == codeType)
+                .Where(oc => oc.ActiveFlag && !oc.DeleteFlag && oc.CodeType == codeTypeString)
                 .Select(oc => new CommonResponseRowForSelectable
                 {
                     ID = oc.BOCID,
@@ -114,13 +112,12 @@ namespace NS_Education.Tools.Extensions
         /// <returns><see cref="CommonResponseRowForSelectable"/> 的 List</returns>
         public static async Task<ICollection<CommonResponseRowForSelectable>> GetCategorySelectable(
             this DbSet<B_Category> dbSet
-            , int? categoryType, int idToSelect)
+            , CategoryType categoryType, int idToSelect)
         {
-            if (categoryType == null)
-                return new List<CommonResponseRowForSelectable>();
+            int categoryTypeInt = (int)categoryType;
 
             return await dbSet
-                .Where(c => c.CategoryType == categoryType && c.ActiveFlag && !c.DeleteFlag)
+                .Where(c => c.CategoryType == categoryTypeInt && c.ActiveFlag && !c.DeleteFlag)
                 .Select(c => new CommonResponseRowForSelectable
                 {
                     ID = c.BCID,

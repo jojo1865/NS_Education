@@ -209,11 +209,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 BSCID12 = entity.BSCID12,
                 BSC12_Title = entity.B_StaticCode1.Title ?? "",
                 BSC12_List =
-                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode1?.CodeType, entity.BSCID12),
+                    await DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.ResverStatus, entity.BSCID12),
                 BSCID11 = entity.BSCID11,
                 BSC11_Title = entity.B_StaticCode?.Title ?? "",
                 BSC11_List =
-                    await DC.B_StaticCode.GetStaticCodeSelectable(entity.B_StaticCode?.CodeType, entity.BSCID11),
+                    await DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.ResverSource, entity.BSCID11),
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 SDate = entity.SDate.ToFormattedStringDate(),
@@ -265,7 +265,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 RBID = rb.RBID,
                 BCID = rb.BCID,
                 BC_Title = rb.B_Category?.TitleC ?? rb.B_Category?.TitleE ?? "",
-                BC_List = Task.Run(() => DC.B_Category.GetCategorySelectable(rb.B_Category?.CategoryType, rb.BCID))
+                BC_List = Task.Run(() => DC.B_Category.GetCategorySelectable(CategoryType.PayType, rb.BCID))
                     .Result,
                 DPTID = rb.DPTID,
                 DPT_Title = rb.D_PayType?.Title ?? "",
@@ -289,11 +289,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 DOPI_List = Task.Run(() => DC.D_OtherPayItem.GetOtherPayItemSelectable(ro.DOPIID)).Result,
                 BSCID = ro.BSCID,
                 BSC_Title = ro.B_StaticCode?.Title ?? "",
-                BSC_List = Task.Run(() => DC.B_StaticCode.GetStaticCodeSelectable((int)StaticCodeType.Unit, ro.BSCID))
+                BSC_List = Task.Run(() => DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.Unit, ro.BSCID))
                     .Result,
                 BOCID = ro.BOCID,
                 BOC_Code = ro.B_OrderCode?.Code ?? "",
-                BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(ro.B_OrderCode?.CodeType, ro.BOCID))
+                BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(OrderCodeType.OtherPayItem, ro.BOCID))
                     .Result,
                 PrintTitle = ro.PrintTitle ?? "",
                 PrintNote = ro.PrintNote ?? "",
@@ -317,7 +317,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     BS_Title = rs.B_SiteData?.Title ?? "",
                     BOCID = rs.BOCID,
                     BOC_Code = rs.B_OrderCode?.Code ?? "",
-                    BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rs.B_OrderCode?.CodeType, rs.BOCID))
+                    BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(OrderCodeType.Site, rs.BOCID))
                         .Result,
                     PrintTitle = rs.PrintTitle ?? "",
                     PrintNote = rs.PrintNote ?? "",
@@ -329,7 +329,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     BSCID = rs.BSCID,
                     BSC_Title = rs.B_StaticCode?.Title ?? "",
                     BSC_List = Task.Run(() =>
-                            DC.B_StaticCode.GetStaticCodeSelectable(rs.B_StaticCode?.CodeType, rs.BSCID))
+                            DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.SiteTable, rs.BSCID))
                         .Result,
                     TimeSpanItems = GetTimeSpanFromHead<Resver_Site>(rs.Resver_Head, rs.RSID),
                     ThrowItems = GetAllInfoByIdPopulateThrowItems(rs),
@@ -351,7 +351,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 Ct = rd.Ct,
                 BOCID = rd.BOCID,
                 BOC_Code = rd.B_OrderCode?.Code ?? "",
-                BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rd.B_OrderCode?.CodeType, rd.BOCID))
+                BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(OrderCodeType.Device, rd.BOCID))
                     .Result,
                 PrintTitle = rd.PrintTitle ?? "",
                 PrintNote = rd.PrintNote ?? "",
@@ -375,12 +375,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     BSCID = rt.BSCID,
                     BSC_Title = rt.B_StaticCode?.Title ?? "",
                     BSC_List = Task.Run(() =>
-                            DC.B_StaticCode.GetStaticCodeSelectable(rt.B_StaticCode?.CodeType, rt.BSCID))
+                            DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.Unit, rt.BSCID))
                         .Result,
                     Title = rt.Title ?? "",
                     BOCID = rt.BOCID,
                     BOC_Title = rt.B_OrderCode?.Title ?? "",
-                    BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(rt.B_OrderCode?.CodeType, rt.BOCID))
+                    BOC_List = Task.Run(() =>
+                            DC.B_OrderCode.GetOrderCodeSelectable(OrderCodeType.OtherPayItem, rt.BOCID))
                         .Result,
                     PrintTitle = rt.PrintTitle ?? "",
                     PrintNote = rt.PrintNote ?? "",
@@ -412,7 +413,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     BSCID = rtf.BSCID,
                     BSC_Title = rtf.B_StaticCode?.Title,
                     BSC_List = Task.Run(() =>
-                            DC.B_StaticCode.GetStaticCodeSelectable(rtf.B_StaticCode?.CodeType, rtf.BSCID))
+                            DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.Cuisine, rtf.BSCID))
                         .Result,
                     BPID = rtf.BPID,
                     BP_Title = rtf.B_Partner?.Title,

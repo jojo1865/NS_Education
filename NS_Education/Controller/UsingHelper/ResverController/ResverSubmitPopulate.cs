@@ -388,7 +388,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             }
         }
 
-        private static void SubmitPopulateHeadValues(Resver_Submit_Input_APIItem input, Resver_Head head)
+        private void SubmitPopulateHeadValues(Resver_Submit_Input_APIItem input, Resver_Head head)
         {
             int billSum = input.BillItems
                 .Where(bi => bi.PayFlag)
@@ -412,6 +412,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             head.Note = input.Note;
             head.FixedPrice = input.FixedPrice;
             head.QuotedPrice = input.QuotedPrice;
+
+            if (input.FinishDeal)
+                WriteResverHeadLog(head.RHID, ResverHistoryType.FullyPaid, input.FinishDealDate.ParseDateTime());
         }
 
         private T SubmitFindOrCreateNew<T>(int id, ICollection<object> entitiesToAdd = null)

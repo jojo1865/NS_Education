@@ -46,8 +46,12 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Sum(bi => bi.Price);
 
             bool isHeadValid = await input.StartValidate()
-                .Validate(i => !i.FinishDeal || billSum >= input.QuotedPrice,
+                .ForceSkipIf(i => !i.FinishDeal)
+                .Validate(i => billSum >= input.QuotedPrice,
                     () => AddError(ExpectedValue("繳費紀錄已付總額", nameof(input.BillItems), input.QuotedPrice)))
+                .Validate(i => i.FinishDealDate.TryParseDateTime(out _),
+                    () => AddError(WrongFormat("結帳日期", nameof(input.FinishDealDate))))
+                .StopForceSkipping()
                 .Validate(i => isAdd ? i.RHID == 0 : i.RHID.IsZeroOrAbove(),
                     () => AddError(WrongFormat("預約單 ID", nameof(input.RHID))))
                 .ValidateAsync(

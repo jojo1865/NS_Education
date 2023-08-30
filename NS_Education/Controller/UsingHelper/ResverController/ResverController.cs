@@ -30,14 +30,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
     {
         #region WriteResverHeadLog
 
-        private void WriteResverHeadLog(int headId, ResverHistoryType type)
+        private void WriteResverHeadLog(int headId, ResverHistoryType type, DateTime? creDate = null)
         {
             Resver_Head_Log newEntity = new Resver_Head_Log
             {
                 RHID = headId,
                 Type = (int)type,
                 CreUID = GetUid(),
-                CreDate = DateTime.Now
+                CreDate = creDate ?? DateTime.Now
             };
 
             DC.Resver_Head_Log.Add(newEntity);

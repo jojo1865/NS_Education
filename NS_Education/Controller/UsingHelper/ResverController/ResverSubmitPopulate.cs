@@ -394,9 +394,20 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Where(bi => bi.PayFlag)
                 .Sum(bi => bi.Price);
 
-            head.BSCID12 = input.FinishDeal ? Convert.ToInt32(ReserveHeadState.FullyPaid)
-                : billSum > 0 ? Convert.ToInt32(ReserveHeadState.DepositPaid)
-                : Convert.ToInt32(ReserveHeadState.Draft);
+            ReserveHeadGetListState state = head.DeleteFlag ? ReserveHeadGetListState.Deleted
+                : input.FinishDeal ? ReserveHeadGetListState.FullyPaid
+                : head.CheckInFlag ? ReserveHeadGetListState.CheckedIn
+                : head.CheckFlag ? ReserveHeadGetListState.Checked
+                : ReserveHeadGetListState.Draft;
+
+            int codeType = (int)StaticCodeType.ResverStatus;
+            string stateString = ((int)state).ToString();
+            head.BSCID12 = DC.B_StaticCode
+                .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
+                .Where(sc => sc.CodeType == codeType)
+                .Where(sc => sc.Code == stateString)
+                .Select(sc => sc.BSCID)
+                .First();
             head.BSCID11 = input.BSCID11;
             head.Title = input.Title;
             head.SDate = input.SDate.ParseDateTime().Date;

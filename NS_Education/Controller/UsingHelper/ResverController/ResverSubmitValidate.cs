@@ -329,7 +329,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .Validate(oi => SubmitValidateOtherPayItem(oi.DOPIID),
                         item => AddError(NotFound($"其他收費項目 ID（{item.DOPIID}）", nameof(item.DOPIID))))
                     .ValidateAsync(
-                        async oi => await SubmitValidateOrderCode(oi.BOCID, OrderCodeType.OtherPayItem),
+                        async oi => await SubmitValidateOrderCode(oi.BOCID, OrderCodeType.OtherPayItem) ||
+                                    await SubmitValidateOrderCode(oi.BOCID, OrderCodeType.General),
                         item => AddError(NotFound($"其他收費項目的入帳代號 ID（{item.BOCID}）", nameof(item.BOCID))))
                     .ValidateAsync(
                         async oi => await DC.B_StaticCode.ValidateStaticCodeExists(oi.BSCID, StaticCodeType.Unit),

@@ -294,7 +294,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 BOCID = ro.BOCID,
                 BOC_Code = ro.B_OrderCode?.Code ?? "",
                 BOC_List = Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(OrderCodeType.OtherPayItem, ro.BOCID))
-                    .Result,
+                    .Result
+                    .Concat(Task.Run(() => DC.B_OrderCode.GetOrderCodeSelectable(OrderCodeType.General, ro.BOCID))
+                        .Result)
+                    .ToList(),
                 PrintTitle = ro.PrintTitle ?? "",
                 PrintNote = ro.PrintNote ?? "",
                 UnitPrice = ro.UnitPrice,
@@ -381,7 +384,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     BOCID = rt.BOCID,
                     BOC_Title = rt.B_OrderCode?.Title ?? "",
                     BOC_List = Task.Run(() =>
-                            DC.B_OrderCode.GetOrderCodeSelectable(OrderCodeType.OtherPayItem, rt.BOCID))
+                            DC.B_OrderCode.GetOrderCodeSelectable(OrderCodeType.Throw, rt.BOCID))
                         .Result,
                     PrintTitle = rt.PrintTitle ?? "",
                     PrintNote = rt.PrintNote ?? "",

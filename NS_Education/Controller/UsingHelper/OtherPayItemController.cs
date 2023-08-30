@@ -250,7 +250,8 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
                     () => AddError(NotFound("單位 ID", nameof(input.BSCID))))
                 .ValidateAsync(
-                    async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem),
+                    async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem) ||
+                               await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.General),
                     () => AddError(NotFound("入帳代號 ID", nameof(input.BOCID))))
                 .IsValid();
 
@@ -292,7 +293,8 @@ namespace NS_Education.Controller.UsingHelper
                 .ValidateAsync(async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID, StaticCodeType.Unit),
                     () => AddError(NotFound("單位 ID", nameof(input.BSCID))))
                 .ValidateAsync(
-                    async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem),
+                    async i => await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.OtherPayItem) ||
+                               await DC.B_OrderCode.ValidateOrderCodeExists(i.BOCID, OrderCodeType.General),
                     () => AddError(NotFound("入帳代號 ID", nameof(input.BOCID))))
                 .IsValid();
 

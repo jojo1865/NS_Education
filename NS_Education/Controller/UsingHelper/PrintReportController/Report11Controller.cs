@@ -151,7 +151,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 foreach (KeyValuePair<DateTime, string> kvp in item.DateToCustomer)
                 {
-                    row.CreateCell(row.LastCellNum).SetCellValue(kvp.Value ?? "");
+                    row.CreateCell(row.LastCellNum).SetCellValue(kvp.Value ?? " ");
                 }
             }
 
@@ -186,7 +186,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             for (var i = 0; i < header.Cells.Count; i++)
             {
-                sheet.SetColumnWidth(i, header.GetCell(i)?.ToString().Length * 10 ?? 10);
+                sheet.SetColumnWidth(i, header.GetCell(i)?.StringCellValue.Length * 10 * 256 ?? 10);
             }
 
             XmlDocument xmlDocument = MakeXmlDocument(book);
@@ -203,7 +203,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 excelToHtmlConverter.Document.InnerXml.Insert(
                     excelToHtmlConverter.Document.InnerXml.IndexOf("<head>", 0,
                         StringComparison.InvariantCultureIgnoreCase) + 6,
-                    @"<style>table, td, th{border:1px solid green;}th{background-color:green;color:white;}</style>"
+                    @"<style>table, td, th{width:1%; white-space: nowrap; border:1px solid green;}th{background-color:green;color:white;}</style>"
                 );
 
             return excelToHtmlConverter.Document;

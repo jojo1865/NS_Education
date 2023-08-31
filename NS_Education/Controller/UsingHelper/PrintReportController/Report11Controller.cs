@@ -5,6 +5,11 @@ using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Xml;
+using NPOI.SS.Converter;
+using NPOI.SS.UserModel;
+using NPOI.SS.Util;
+using NPOI.XSSF.UserModel;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report11;
 using NS_Education.Models.Entities;
@@ -19,10 +24,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
     /// 場地庫存狀況表的處理。
     /// </summary>
     public class Report11Controller : PublicClass,
-        IPrintReport<Report11_Input_APIItem, IDictionary<string, string>>
+        IPrintReport<Report11_Input_APIItem, Report11_Output_Row_APIItem>
     {
         /// <inheritdoc />
-        public async Task<CommonResponseForPagedList<IDictionary<string, string>>> GetResultAsync(
+        public async Task<CommonResponseForPagedList<Report11_Output_Row_APIItem>> GetResultAsync(
             Report11_Input_APIItem input)
         {
             using (NsDbContext dbContext = new NsDbContext())
@@ -77,16 +82,16 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 {
                     foreach (D_TimeSpan dts in timeSpans)
                     {
-                        IDictionary<string, string> newRow = new Dictionary<string, string>();
+                        Report11_Output_Row_APIItem newRow = new Report11_Output_Row_APIItem();
                         response.Items.Add(newRow);
 
-                        newRow.Add("Type", sd.B_Category.TitleC);
-                        newRow.Add("SiteName", sd.Title);
-                        newRow.Add("Time", dts.Title);
+                        newRow.Type = sd.B_Category.TitleC;
+                        newRow.SiteName = sd.Title;
+                        newRow.Time = dts.Title;
 
                         foreach (DateTime dt in startTime.Range(endTime))
                         {
-                            newRow.Add(dt.ToFormattedStringDate(),
+                            newRow.DateToCustomer.Add(dt.Date,
                                 results
                                     .Where(g => g.rs.TargetDate.Date == dt.Date)
                                     .Select(g => g.rs.Resver_Head.CustomerTitle)
@@ -109,7 +114,99 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<string> Get(Report11_Input_APIItem input)
         {
-            return GetResponseJson(await GetResultAsync(input));
+            CommonResponseForPagedList<Report11_Output_Row_APIItem> response = await GetResultAsync(input);
+
+            response.Items = response.Items
+                    .OrderBy(i => i.Type)
+                    .ThenBy(i => i.SiteName)
+                    .ThenBy(i => i.Type)
+                    .ToList()
+                ;
+            IWorkbook book = new XSSFWorkbook();
+            ISheet sheet = book.CreateSheet();
+
+            // 1. 建立 Header
+
+            IRow header = sheet.CreateRow(0);
+            header.CreateCell(0).SetCellValue("場地類別");
+            header.CreateCell(1).SetCellValue("場地名稱");
+            header.CreateCell(2).SetCellValue("時段");
+
+            var headerItem = response.Items.First();
+            for (var i = 0; i < headerItem.DateToCustomer.Keys.Count; i++)
+            {
+                header.CreateCell(2 + i)
+                    .SetCellValue(headerItem.DateToCustomer.Keys.ElementAt(i).ToFormattedStringDate());
+            }
+
+            // 2. 寫入資料
+
+            foreach (Report11_Output_Row_APIItem item in response.Items)
+            {
+                IRow row = sheet.CreateRow(sheet.LastRowNum + 1);
+
+                row.CreateCell(0).SetCellValue(item.Type);
+                row.CreateCell(1).SetCellValue(item.SiteName);
+                row.CreateCell(2).SetCellValue(item.Time);
+
+                foreach (KeyValuePair<DateTime, string> kvp in item.DateToCustomer)
+                {
+                    row.CreateCell(row.LastCellNum).SetCellValue(kvp.Value ?? "");
+                }
+            }
+
+            // 3. 前兩欄從上到下，相同內容的 cells 做 merge
+
+            for (int c = 0; c <= 1; c++)
+            {
+                int thisRangeStart = 0;
+                string lastCellContent = sheet.GetRow(0).GetCell(c).StringCellValue;
+
+                // 小於等於，這樣才能保證最後一項也有 merge
+                for (int r = 0; r <= sheet.PhysicalNumberOfRows; r++)
+                {
+                    IRow row = sheet.GetRow(r);
+                    string thisCellContent = row?.GetCell(c)?.StringCellValue ?? "";
+
+                    if (thisCellContent != lastCellContent)
+                    {
+                        CellRangeAddress range = new CellRangeAddress(thisRangeStart, r - 1, c, c);
+
+                        if (range.NumberOfCells >= 2)
+                            sheet.AddMergedRegion(range);
+
+                        thisRangeStart = r;
+                    }
+
+                    lastCellContent = thisCellContent;
+                }
+            }
+
+            // 完成, 調整所有欄位寬度
+
+            for (var i = 0; i < header.Cells.Count; i++)
+            {
+                sheet.SetColumnWidth(i, header.GetCell(i)?.ToString().Length * 10 ?? 10);
+            }
+
+            XmlDocument xmlDocument = MakeXmlDocument(book);
+
+            return xmlDocument.OuterXml;
+        }
+
+        private static XmlDocument MakeXmlDocument(IWorkbook book)
+        {
+            ExcelToHtmlConverter excelToHtmlConverter = new ExcelToHtmlConverter();
+            excelToHtmlConverter.ProcessWorkbook(book);
+
+            excelToHtmlConverter.Document.InnerXml =
+                excelToHtmlConverter.Document.InnerXml.Insert(
+                    excelToHtmlConverter.Document.InnerXml.IndexOf("<head>", 0,
+                        StringComparison.InvariantCultureIgnoreCase) + 6,
+                    @"<style>table, td, th{border:1px solid green;}th{background-color:green;color:white;}</style>"
+                );
+
+            return excelToHtmlConverter.Document;
         }
     }
 }

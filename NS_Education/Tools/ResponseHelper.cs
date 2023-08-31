@@ -65,41 +65,48 @@ namespace NS_Education.Tools
             JObject modify = JObject.FromObject(originalActionResult);
 
             // 轉換成 ActionResult
-            ContentResult newActionResult = new ContentResult
+            try
             {
-                Content = JObject.FromObject(new FinalizedResponse
+                ContentResult newActionResult = new ContentResult
                 {
-                    Status = modify.SelectToken("Content.Status")?.Value<int>() ??
-                             filterContext.HttpContext.Response.StatusCode,
-                    StatusMessage = modify.SelectToken("Content.StatusMessage")?.Value<string>() ??
-                                    filterContext.HttpContext.Response.StatusDescription,
-                    // ApiResponse 視可以取得的值決定：
-                    // |- a. 如果已經有 ApiResponse：用 ApiResponse。
-                    // |- b. 否則：視為還沒經過 Wrap，把原有的整個 Response Content 轉換成 ApiResponse。
-                    // +- c. 如果 Content 是 null：建立預設內容。
-                    ApiResponse = modify.SelectToken("Content.ApiResponse")?.Value<object>()
-                                  ?? (modify["Content"] != null
-                                      ? (object)JToken.Parse(modify["Content"]?.Value<string>() ?? "")
-                                      : new CommonApiResponse
-                                      {
-                                          SuccessFlag = false,
-                                          Errors = new[]
+                    Content = JObject.FromObject(new FinalizedResponse
+                    {
+                        Status = modify.SelectToken("Content.Status")?.Value<int>() ??
+                                 filterContext.HttpContext.Response.StatusCode,
+                        StatusMessage = modify.SelectToken("Content.StatusMessage")?.Value<string>() ??
+                                        filterContext.HttpContext.Response.StatusDescription,
+                        // ApiResponse 視可以取得的值決定：
+                        // |- a. 如果已經有 ApiResponse：用 ApiResponse。
+                        // |- b. 否則：視為還沒經過 Wrap，把原有的整個 Response Content 轉換成 ApiResponse。
+                        // +- c. 如果 Content 是 null：建立預設內容。
+                        ApiResponse = modify.SelectToken("Content.ApiResponse")?.Value<object>()
+                                      ?? (modify["Content"] != null
+                                          ? (object)JToken.Parse(modify["Content"]?.Value<string>() ?? "")
+                                          : new CommonApiResponse
                                           {
-                                              GetError(filterContext, exception)
+                                              SuccessFlag = false,
+                                              Errors = new[]
+                                              {
+                                                  GetError(filterContext, exception)
+                                              }
                                           }
-                                      }
-                                  )
-                }).ToString(),
-                ContentEncoding = Encoding.UTF8,
-                ContentType = "application/json; charset=utf-8",
-                // 修改 Content 結構，修改為制式結構
-            };
+                                      )
+                    }).ToString(),
+                    ContentEncoding = Encoding.UTF8,
+                    ContentType = "application/json; charset=utf-8",
+                    // 修改 Content 結構，修改為制式結構
+                };
 
-            // 正常化成 200
-            filterContext.HttpContext.Response.StatusCode = 200;
-            filterContext.HttpContext.Response.StatusDescription = "OK";
+                // 正常化成 200
+                filterContext.HttpContext.Response.StatusCode = 200;
+                filterContext.HttpContext.Response.StatusDescription = "OK";
 
-            return newActionResult;
+                return newActionResult;
+            }
+            catch
+            {
+                return originalActionResult;
+            }
         }
 
         private static BaseError GetError(ControllerContext filterContext, Exception exception)

@@ -8,6 +8,9 @@ namespace NS_Education.Tools.Extensions
     {
         public static IEnumerable<DateTime> Range(this DateTime start, DateTime end)
         {
+            start = start.Date;
+            end = end.Date;
+
             if (end < start)
                 (start, end) = (end, start);
 

@@ -17,10 +17,11 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
     /// <summary>
     /// 場地庫存狀況表的處理。
     /// </summary>
-    public class Report11Controller : PublicClass, IPrintReport<Report11_Input_APIItem, Report11_Output_Row_APIItem>
+    public class Report11Controller : PublicClass,
+        IPrintReport<Report11_Input_APIItem, Report11_Output_Row_SiteType_APIItem>
     {
         /// <inheritdoc />
-        public async Task<CommonResponseForPagedList<Report11_Output_Row_APIItem>> GetResultAsync(
+        public async Task<CommonResponseForPagedList<Report11_Output_Row_SiteType_APIItem>> GetResultAsync(
             Report11_Input_APIItem input)
         {
             using (NsDbContext dbContext = new NsDbContext())
@@ -65,30 +66,31 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 Report11_Output_APIItem response = new Report11_Output_APIItem();
                 response.SetByInput(input);
 
-                response.Items = startTime.Range(endTime)
-                    .Select(dt => new Report11_Output_Row_APIItem
+                response.Items = siteData
+                    .GroupBy(sd => sd.BCID)
+                    .Select(grouping => new Report11_Output_Row_SiteType_APIItem
                     {
-                        Date = dt.ToFormattedStringDate(),
-                        SiteTypes = siteData
-                            .GroupBy(sd => sd.BCID)
-                            .Select(grouping => new Report11_Output_Row_SiteType_APIItem
+                        Name = grouping.Max(g => g.B_Category.TitleC),
+                        Sites = grouping.Select(sd => new Report11_Output_Row_Site_APIItem
+                        {
+                            Name = sd.Title,
+                            TimeSpans = timeSpans.Select(ts => new Report11_Output_Row_TimeSpan_APIItem
                             {
-                                Name = grouping.Max(g => g.B_Category.TitleC),
-                                Sites = grouping.Select(sd => new Report11_Output_Row_Site_APIItem
-                                {
-                                    Name = sd.Title,
-                                    TimeSpans = timeSpans.Select(ts => new Report11_Output_Row_TimeSpan_APIItem
+                                Name = ts.Title,
+                                Dates = startTime.Range(endTime)
+                                    .Select(dt => new Report11_Output_Row_Date_APIItem
                                     {
-                                        Name = ts.Title,
+                                        Date = dt.ToFormattedStringDate(),
                                         Customer = results
                                             .Where(e => e.rs.TargetDate == dt.Date)
                                             .Where(e => e.rts.DTSID == ts.DTSID)
                                             .Select(e => e.rs.Resver_Head.Title)
                                             .FirstOrDefault()
-                                    }).ToArray()
-                                }).ToArray()
+                                    })
+                                    .ToDictionary(d => d.Date, d => d.Customer)
                             }).ToArray()
-                    })
+                        }).ToArray()
+                    }).ToArray()
                     .ToArray();
 
                 response.UID = GetUid();

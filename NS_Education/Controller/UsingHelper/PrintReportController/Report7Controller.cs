@@ -1,5 +1,6 @@
 using System;
 using System.Data.Entity;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -25,7 +26,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         {
             using (NsDbContext dbContext = new NsDbContext())
             {
-                DateTime targetDate = input.TargetDate?.ParseDateTime() ?? DateTime.Today;
+                DateTime startTime = input.StartDate?.ParseDateTime().Date ?? SqlDateTime.MinValue.Value;
+                DateTime endTime = input.EndDate?.ParseDateTime().Date.AddDays(1) ?? SqlDateTime.MaxValue.Value;
 
                 var query = dbContext.Resver_Head
                     .Include(rh => rh.Customer)
@@ -37,7 +39,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Include(rh => rh.Resver_Other)
                     .Include(rh => rh.Resver_Other.Select(ro => ro.B_OrderCode))
                     .Where(rh => !rh.DeleteFlag)
-                    .Where(rh => rh.SDate <= targetDate && targetDate <= rh.EDate)
+                    .Where(rh => startTime <= rh.SDate && rh.EDate < endTime)
                     .AsQueryable();
 
                 if (input.RHID != null)

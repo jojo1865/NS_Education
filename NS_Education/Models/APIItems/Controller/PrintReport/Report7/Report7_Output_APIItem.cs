@@ -17,15 +17,16 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report7
         /// </summary>
         public string Username { get; set; }
 
-        public string TargetDate { get; set; }
-
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public IEnumerable<int> RHID { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report7_Input_APIItem r7)
             {
-                TargetDate = r7.TargetDate;
+                StartDate = r7.StartDate;
+                EndDate = r7.EndDate;
                 RHID = r7.RHID;
             }
 

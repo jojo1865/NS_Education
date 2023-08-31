@@ -8,6 +8,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report7
     public class Report7_Input_APIItem : BaseRequestForPagedList
     {
         public IEnumerable<int> RHID { get; set; }
-        public string TargetDate { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
     }
 }

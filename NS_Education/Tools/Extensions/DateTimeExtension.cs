@@ -14,7 +14,7 @@ namespace NS_Education.Tools.Extensions
             if (end < start)
                 (start, end) = (end, start);
 
-            return Enumerable.Range(0, (end - start).Days)
+            return Enumerable.Range(0, (end - start).Days + 1)
                 .Select(i => start.AddDays(i))
                 .ToArray();
         }

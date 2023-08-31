@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.SqlTypes;
 using System.Linq;
@@ -18,10 +19,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
     /// 場地庫存狀況表的處理。
     /// </summary>
     public class Report11Controller : PublicClass,
-        IPrintReport<Report11_Input_APIItem, Report11_Output_Row_SiteType_APIItem>
+        IPrintReport<Report11_Input_APIItem, IDictionary<string, string>>
     {
         /// <inheritdoc />
-        public async Task<CommonResponseForPagedList<Report11_Output_Row_SiteType_APIItem>> GetResultAsync(
+        public async Task<CommonResponseForPagedList<IDictionary<string, string>>> GetResultAsync(
             Report11_Input_APIItem input)
         {
             using (NsDbContext dbContext = new NsDbContext())
@@ -66,32 +67,33 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 Report11_Output_APIItem response = new Report11_Output_APIItem();
                 response.SetByInput(input);
 
-                response.Items = siteData
-                    .GroupBy(sd => sd.BCID)
-                    .Select(grouping => new Report11_Output_Row_SiteType_APIItem
+                // 欄位：
+                // Type
+                // SiteName
+                // Time
+                // yyyy-MM-dd
+                // yyyy-MM-dd
+                foreach (B_SiteData sd in siteData)
+                {
+                    foreach (D_TimeSpan dts in timeSpans)
                     {
-                        Name = grouping.Max(g => g.B_Category.TitleC),
-                        Sites = grouping.Select(sd => new Report11_Output_Row_Site_APIItem
+                        IDictionary<string, string> newRow = new Dictionary<string, string>();
+                        response.Items.Add(newRow);
+
+                        newRow.Add("Type", sd.B_Category.TitleC);
+                        newRow.Add("SiteName", sd.Title);
+                        newRow.Add("Time", dts.Title);
+
+                        foreach (DateTime dt in startTime.Range(endTime))
                         {
-                            Name = sd.Title,
-                            TimeSpans = timeSpans.Select(ts => new Report11_Output_Row_TimeSpan_APIItem
-                            {
-                                Name = ts.Title,
-                                Dates = startTime.Range(endTime)
-                                    .Select(dt => new Report11_Output_Row_Date_APIItem
-                                    {
-                                        Date = dt.ToFormattedStringDate(),
-                                        Customer = results
-                                            .Where(e => e.rs.TargetDate == dt.Date)
-                                            .Where(e => e.rts.DTSID == ts.DTSID)
-                                            .Select(e => e.rs.Resver_Head.Title)
-                                            .FirstOrDefault()
-                                    })
-                                    .ToDictionary(d => d.Date, d => d.Customer)
-                            }).ToArray()
-                        }).ToArray()
-                    }).ToArray()
-                    .ToArray();
+                            newRow.Add(dt.ToFormattedStringDate(),
+                                results
+                                    .Where(g => g.rs.TargetDate.Date == dt.Date)
+                                    .Select(g => g.rs.Resver_Head.CustomerTitle)
+                                    .FirstOrDefault());
+                        }
+                    }
+                }
 
                 response.UID = GetUid();
                 response.Username = await GetUserNameByID(response.UID);

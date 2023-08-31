@@ -1,9 +1,11 @@
+using System.Collections.Generic;
+
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report11
 {
     /// <summary>
     /// 場地庫存狀況表的輸出物件。
     /// </summary>
-    public class Report11_Output_APIItem : CommonResponseForPagedList<Report11_Output_Row_SiteType_APIItem>
+    public class Report11_Output_APIItem : CommonResponseForPagedList<IDictionary<string, string>>
     {
         /// <summary>
         /// 製表者 ID

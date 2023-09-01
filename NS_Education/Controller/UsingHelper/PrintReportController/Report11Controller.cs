@@ -88,8 +88,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         {
                             newRow.Add(dt.ToFormattedStringDate(),
                                 results
-                                    .Where(g => g.rs.TargetDate.Date == dt.Date)
+                                    .Where(g => g.rs.BSID == sd.BSID)
                                     .Where(g => g.rts.DTSID == dts.DTSID)
+                                    .Where(g => g.rs.TargetDate.Date == dt.Date)
                                     .Select(g => g.rs.Resver_Head.CustomerTitle)
                                     .FirstOrDefault());
                         }

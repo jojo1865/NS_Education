@@ -30,12 +30,12 @@ namespace NS_Education.Controller.UsingHelper.ResverController
     {
         #region WriteResverHeadLog
 
-        private void WriteResverHeadLog(int headId, ResverHistoryType type, DateTime? creDate = null)
+        private void WriteResverHeadLog(int headId, int state, DateTime? creDate = null)
         {
             Resver_Head_Log newEntity = new Resver_Head_Log
             {
                 RHID = headId,
-                Type = (int)type,
+                Type = state,
                 CreUID = GetUid(),
                 CreDate = creDate ?? DateTime.Now
             };
@@ -81,8 +81,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             bool isValid = input.StartValidate()
                 .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID", nameof(input.CID))))
-                .Validate(i => i.BSCID12.IsZeroOrAbove(),
-                    () => AddError(WrongFormat("欲篩選之預約狀態 ID", nameof(input.BSCID12))))
+                .Validate(i => i.State.IsZeroOrAbove(),
+                    () => AddError(WrongFormat("欲篩選之預約狀態 ID", nameof(input.State))))
                 .IsValid();
 
             return await Task.FromResult(isValid);
@@ -91,7 +91,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         public IOrderedQueryable<Resver_Head> GetListPagedOrderedQuery(Resver_GetHeadList_Input_APIItem input)
         {
             var query = DC.Resver_Head
-                .Include(rh => rh.B_StaticCode1)
+                .Include(rh => rh.Resver_Bill)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -104,8 +104,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             if (input.CID.IsAboveZero())
                 query = query.Where(rh => rh.CID == input.CID);
 
-            if (input.BSCID12.IsAboveZero())
-                query = query.Where(rh => rh.BSCID12 == input.BSCID12);
+            if (input.State.IsAboveZero())
+                query = query.Where(rh => rh.State == input.State);
 
             return query.OrderByDescending(rh => rh.SDate)
                 .ThenByDescending(rh => rh.EDate)
@@ -124,8 +124,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 CustomerTitle = entity.CustomerTitle ?? "",
                 CustomerCode = entity.CustomerTitle ?? "",
                 PeopleCt = entity.PeopleCt,
-                BSCID12 = entity.BSCID12,
-                BSCID12_Title = entity.B_StaticCode1.Title ?? "",
                 State = GetState(entity)
             });
         }
@@ -133,10 +131,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         private static ReserveHeadGetListState GetState(Resver_Head entity)
         {
             return entity.DeleteFlag ? ReserveHeadGetListState.Deleted :
-                entity.B_StaticCode1.Code == ReserveHeadState.Terminated ? ReserveHeadGetListState.Terminated :
                 entity.CheckInFlag ? ReserveHeadGetListState.CheckedIn :
                 entity.CheckFlag ? ReserveHeadGetListState.Checked :
-                entity.B_StaticCode1.Code == ReserveHeadState.FullyPaid ? ReserveHeadGetListState.FullyPaid :
+                entity.Resver_Bill
+                    .Where(b => !b.DeleteFlag)
+                    .Where(b => b.PayFlag)
+                    .Sum(b => (int?)b.Price)
+                >= entity.QuotedPrice ? ReserveHeadGetListState.FullyPaid :
                 ReserveHeadGetListState.Draft;
         }
 
@@ -156,7 +157,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             return DC.Resver_Head
                 .Include(rh => rh.B_StaticCode)
-                .Include(rh => rh.B_StaticCode1)
                 .Include(rh => rh.BusinessUser)
                 .Include(rh => rh.BusinessUser1)
                 // site
@@ -503,20 +503,26 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 return GetResponseJson();
             }
 
-            if (entity.B_StaticCode1.Code == ReserveHeadState.Terminated &&
-                entity.B_StaticCode1.Code == ReserveHeadState.FullyPaid)
+            ReserveHeadGetListState? state = (ReserveHeadGetListState?)entity.State;
+            if (state == ReserveHeadGetListState.Terminated ||
+                state == ReserveHeadGetListState.FullyPaid)
             {
                 AddError(1, "已結帳或已中止的預約單無法修改確認狀態！");
                 return GetResponseJson();
             }
 
             // 3. 修改 DB
-            WriteResverHeadLog(entity.RHID, ResverHistoryType.Checked);
+            WriteResverHeadLog(entity.RHID, ReserveHeadGetListState.Checked);
             entity.CheckFlag = checkFlag ?? throw new ArgumentNullException(nameof(checkFlag));
             await ChangeCheckUpdateDb();
 
             // 4. 回傳
             return GetResponseJson();
+        }
+
+        private void WriteResverHeadLog(int entityRhid, ReserveHeadGetListState state)
+        {
+            WriteResverHeadLog(entityRhid, (int)state);
         }
 
         private async Task ChangeCheckUpdateDb()
@@ -537,7 +543,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 throw new ArgumentNullException(nameof(id));
 
             return await DC.Resver_Head
-                .Include(rh => rh.B_StaticCode1)
                 // 已結帳或已中止時，不允許修改確認狀態。
                 .Where(rh => !rh.DeleteFlag && rh.RHID == id)
                 .FirstOrDefaultAsync();
@@ -574,14 +579,14 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 return GetResponseJson();
             }
 
-            if (entity.B_StaticCode1.Code == ReserveHeadState.Terminated)
+            if (entity.State == (int)ReserveHeadGetListState.Terminated)
             {
                 AddError(1, "已中止的預約單無法修改報到狀態！");
                 return GetResponseJson();
             }
 
             // 3. 修改 DB
-            WriteResverHeadLog(entity.RHID, ResverHistoryType.CheckedIn);
+            WriteResverHeadLog(entity.RHID, ReserveHeadGetListState.CheckedIn);
             entity.CheckInFlag = checkInFlag ?? throw new ArgumentNullException(nameof(checkInFlag));
             await ChangeCheckInUpdateDb();
 
@@ -607,7 +612,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 throw new ArgumentNullException(nameof(id));
 
             return await DC.Resver_Head
-                .Include(rh => rh.B_StaticCode1)
                 // 已中止時，不允許修改報到狀態。
                 .Where(rh => !rh.DeleteFlag && rh.RHID == id)
                 .FirstOrDefaultAsync();

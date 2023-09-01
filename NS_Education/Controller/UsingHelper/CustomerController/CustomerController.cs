@@ -180,7 +180,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             // ResverType 為 1 時，只找有預約過的客戶
             if (input.ResverType.IsInBetween(0, 1))
                 query = query.Where(c =>
-                    c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft) ==
+                    c.Resver_Head.Any(rh => !rh.DeleteFlag && rh.State != (int)ReserveHeadGetListState.Draft) ==
                     (input.ResverType == 1));
 
             return query.OrderBy(c => c.CID);

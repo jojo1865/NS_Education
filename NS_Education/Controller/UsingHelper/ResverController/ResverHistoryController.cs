@@ -72,11 +72,34 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             return Task.FromResult(new Resver_GetHistory_Output_Row_APIItem
             {
-                TypeName = ((ResverHistoryType?)entity.Type).GetChineseName(),
+                TypeName = GetTypeName(entity.Type),
                 CreDate = entity.CreDate.ToFormattedStringDateTime(),
                 CreUser =
                     $"{entity.CreUID} {entity.UserData?.UserName ?? entity.UserData?.LoginAccount ?? String.Empty}"
             });
+        }
+
+        private string GetTypeName(int entityType)
+        {
+            ReserveHeadGetListState? state = (ReserveHeadGetListState?)entityType;
+
+            switch (state)
+            {
+                case ReserveHeadGetListState.Draft:
+                    return "建立草稿";
+                case ReserveHeadGetListState.Checked:
+                    return "確認預約";
+                case ReserveHeadGetListState.CheckedIn:
+                    return "報到作業";
+                case ReserveHeadGetListState.FullyPaid:
+                    return "結帳作業";
+                case ReserveHeadGetListState.Terminated:
+                    return "預約中止";
+                case ReserveHeadGetListState.Deleted:
+                    return "刪除";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         #endregion

@@ -22,11 +22,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             // 取得主資料
             bool needsNewHead = data is null;
-            B_StaticCode originalHeadState = data?.B_StaticCode1;
             Resver_Head head = needsNewHead ? SubmitFindOrCreateNew<Resver_Head>(input.RHID) : data;
+            int originalHeadState = head.State;
 
             // 已結帳時，只允許處理預約回饋紀錄的值
-            if (isAdd || head.B_StaticCode1.Code != ReserveHeadState.FullyPaid)
+            if (isAdd || head.State != (int)ReserveHeadGetListState.FullyPaid)
             {
                 SubmitPopulateHeadValues(input, head);
                 // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
@@ -49,31 +49,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
 
             if (needsNewHead)
-                WriteResverHeadLog(head.RHID, ResverHistoryType.DraftCreated);
+                WriteResverHeadLog(head.RHID, ReserveHeadGetListState.Draft);
 
-            if (originalHeadState != head.B_StaticCode1)
-                WriteResverHeadLog(head.RHID, head.B_StaticCode1);
+            if (originalHeadState != head.State)
+                WriteResverHeadLog(head.RHID, head.State);
 
             // 寫入 Db
             await DC.AddRangeAsync(entitiesToAdd);
             await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
             return head;
-        }
-
-        private void WriteResverHeadLog(int headRhid, B_StaticCode headBscid12)
-        {
-            string bscidString = headBscid12.Code ?? "";
-
-            switch (bscidString)
-            {
-                case ReserveHeadState.Terminated:
-                    WriteResverHeadLog(headRhid, ResverHistoryType.Terminated);
-                    break;
-                case ReserveHeadState.FullyPaid:
-                    WriteResverHeadLog(headRhid, ResverHistoryType.FullyPaid);
-                    break;
-            }
         }
 
         private void SubmitPopulateHeadGiveBackItems(Resver_Submit_Input_APIItem input, Resver_Head head,
@@ -400,14 +385,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 : head.CheckFlag ? ReserveHeadGetListState.Checked
                 : ReserveHeadGetListState.Draft;
 
-            int codeType = (int)StaticCodeType.ResverStatus;
-            string stateString = ((int)state).ToString();
-            head.BSCID12 = DC.B_StaticCode
-                .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
-                .Where(sc => sc.CodeType == codeType)
-                .Where(sc => sc.Code == stateString)
-                .Select(sc => sc.BSCID)
-                .First();
+            head.State = (int)state;
             head.BSCID11 = input.BSCID11;
             head.Title = input.Title;
             head.SDate = input.SDate.ParseDateTime().Date;
@@ -425,7 +403,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             head.QuotedPrice = input.QuotedPrice;
 
             if (input.FinishDeal)
-                WriteResverHeadLog(head.RHID, ResverHistoryType.FullyPaid, input.FinishDealDate.ParseDateTime());
+                WriteResverHeadLog(head.RHID, (int)ReserveHeadGetListState.FullyPaid,
+                    input.FinishDealDate.ParseDateTime());
         }
 
         private T SubmitFindOrCreateNew<T>(int id, ICollection<object> entitiesToAdd = null)

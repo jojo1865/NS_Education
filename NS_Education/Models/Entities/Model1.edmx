@@ -742,7 +742,6 @@
           <Property Name="Code" Type="varchar" MaxLength="10" />
           <Property Name="SDate" Type="datetime" Nullable="false" />
           <Property Name="EDate" Type="datetime" Nullable="false" />
-          <Property Name="BSCID12" Type="int" Nullable="false" />
           <Property Name="BSCID11" Type="int" Nullable="false" />
           <Property Name="Title" Type="nvarchar" MaxLength="100" />
           <Property Name="CID" Type="int" Nullable="false" />
@@ -763,6 +762,7 @@
           <Property Name="CreUID" Type="int" Nullable="false" />
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
+          <Property Name="State" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Resver_Head_Log">
           <Key>
@@ -1525,18 +1525,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Resver_Head_B_StaticCode12">
-          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="B_StaticCode">
-              <PropertyRef Name="BSCID" />
-            </Principal>
-            <Dependent Role="Resver_Head">
-              <PropertyRef Name="BSCID12" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Resver_Other_B_OrderCode">
           <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
@@ -2238,10 +2226,6 @@
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Resver_Head" EntitySet="Resver_Head" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resver_Head_B_StaticCode12" Association="Self.FK_Resver_Head_B_StaticCode12">
-            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
-            <End Role="Resver_Head" EntitySet="Resver_Head" />
-          </AssociationSet>
           <AssociationSet Name="FK_Resver_Other_B_OrderCode" Association="Self.FK_Resver_Other_B_OrderCode">
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
             <End Role="Resver_Other" EntitySet="Resver_Other" />
@@ -2592,7 +2576,6 @@
           <NavigationProperty Name="Customer1" Relationship="Self.FK_Customer_B_StaticCode6" FromRole="B_StaticCode" ToRole="Customer" />
           <NavigationProperty Name="CustomerVisit1" Relationship="Self.FK_CustomerVisit_B_StaticCode" FromRole="B_StaticCode" ToRole="CustomerVisit" />
           <NavigationProperty Name="Resver_Head" Relationship="Self.FK_Resver_Head_B_StaticCode11" FromRole="B_StaticCode" ToRole="Resver_Head" />
-          <NavigationProperty Name="Resver_Head1" Relationship="Self.FK_Resver_Head_B_StaticCode12" FromRole="B_StaticCode" ToRole="Resver_Head" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Site" />
           <NavigationProperty Name="Resver_Throw_Food" Relationship="Self.FK_Resver_Throw_D_B_StaticCode" FromRole="B_StaticCode" ToRole="Resver_Throw_Food" />
           <NavigationProperty Name="Resver_GiveBack" Relationship="Self.Resver_GiveBack_B_StaticCode_BSCID_fk" FromRole="B_StaticCode" ToRole="Resver_GiveBack" />
@@ -3213,7 +3196,6 @@
           <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="SDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="EDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="BSCID12" Type="Int32" Nullable="false" />
           <Property Name="BSCID11" Type="Int32" Nullable="false" />
           <Property Name="Title" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="CID" Type="Int32" Nullable="false" />
@@ -3234,8 +3216,8 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <Property Name="State" Type="Int32" Nullable="false" />
           <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_Resver_Head_B_StaticCode11" FromRole="Resver_Head" ToRole="B_StaticCode" />
-          <NavigationProperty Name="B_StaticCode1" Relationship="Self.FK_Resver_Head_B_StaticCode12" FromRole="Resver_Head" ToRole="B_StaticCode" />
           <NavigationProperty Name="BusinessUser" Relationship="Self.Resver_Head_BusinessUser_BUID_fk" FromRole="Resver_Head" ToRole="BusinessUser" />
           <NavigationProperty Name="BusinessUser1" Relationship="Self.Resver_Head_BusinessUser_BUID_fk_2" FromRole="Resver_Head" ToRole="BusinessUser" />
           <NavigationProperty Name="Customer" Relationship="Self.Resver_Head_Customer_CID_fk" FromRole="Resver_Head" ToRole="Customer" />
@@ -3953,18 +3935,6 @@
             </Principal>
             <Dependent Role="Resver_Head">
               <PropertyRef Name="BSCID11" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Resver_Head_B_StaticCode12">
-          <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="B_StaticCode">
-              <PropertyRef Name="BSCID" />
-            </Principal>
-            <Dependent Role="Resver_Head">
-              <PropertyRef Name="BSCID12" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -4727,10 +4697,6 @@
             <End Role="CustomerVisit" EntitySet="CustomerVisit" />
           </AssociationSet>
           <AssociationSet Name="FK_Resver_Head_B_StaticCode11" Association="Self.FK_Resver_Head_B_StaticCode11">
-            <End Role="B_StaticCode" EntitySet="B_StaticCode" />
-            <End Role="Resver_Head" EntitySet="Resver_Head" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Resver_Head_B_StaticCode12" Association="Self.FK_Resver_Head_B_StaticCode12">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Resver_Head" EntitySet="Resver_Head" />
           </AssociationSet>
@@ -5646,7 +5612,6 @@
                 <ScalarProperty Name="Code" ColumnName="Code" />
                 <ScalarProperty Name="SDate" ColumnName="SDate" />
                 <ScalarProperty Name="EDate" ColumnName="EDate" />
-                <ScalarProperty Name="BSCID12" ColumnName="BSCID12" />
                 <ScalarProperty Name="BSCID11" ColumnName="BSCID11" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="CID" ColumnName="CID" />
@@ -5667,6 +5632,7 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+                <ScalarProperty Name="State" ColumnName="State" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

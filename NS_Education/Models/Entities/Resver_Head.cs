@@ -29,7 +29,6 @@ namespace NS_Education.Models.Entities
         public string Code { get; set; }
         public System.DateTime SDate { get; set; }
         public System.DateTime EDate { get; set; }
-        public int BSCID12 { get; set; }
         public int BSCID11 { get; set; }
         public string Title { get; set; }
         public int CID { get; set; }
@@ -50,9 +49,9 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public int State { get; set; }
     
         public virtual B_StaticCode B_StaticCode { get; set; }
-        public virtual B_StaticCode B_StaticCode1 { get; set; }
         public virtual BusinessUser BusinessUser { get; set; }
         public virtual BusinessUser BusinessUser1 { get; set; }
         public virtual Customer Customer { get; set; }

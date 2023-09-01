@@ -16,9 +16,6 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetHeadList
         public string CustomerCode { get; set; }
         public int PeopleCt { get; set; }
 
-        public int BSCID12 { get; set; }
-        public string BSCID12_Title { get; set; }
-
         public ReserveHeadGetListState State { get; set; }
 
         public bool DeleteFlag { get; set; }

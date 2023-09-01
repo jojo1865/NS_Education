@@ -802,7 +802,6 @@
         <Compile Include="Tools\Extensions\ListSortingExtension.cs"/>
         <Compile Include="Tools\Extensions\LookupExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs"/>
-        <Compile Include="Tools\Extensions\ResverHistoryTypeExtension.cs"/>
         <Compile Include="Tools\Extensions\SpecificTableExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\StringExtensionMethods.cs"/>
@@ -831,9 +830,8 @@
         <Compile Include="Variables\MenuApiType.cs"/>
         <Compile Include="Variables\OrderCodeType.cs"/>
         <Compile Include="Variables\PrivilegeConstants.cs"/>
-        <Compile Include="Variables\ReserveHeadState.cs"/>
+        <Compile Include="Variables\ReserveHeadGetListState.cs"/>
         <Compile Include="Variables\ResverHeadExpression.cs"/>
-        <Compile Include="Variables\ResverHistoryType.cs"/>
         <Compile Include="Variables\StaticCodeSafetyControlCode.cs"/>
         <Compile Include="Variables\StaticCodeType.cs"/>
         <Compile Include="Variables\TableCommentDictionary.cs"/>

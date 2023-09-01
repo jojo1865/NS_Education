@@ -27,10 +27,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             {
                 // 先確認預約單狀態，如果是已中止，直接報錯
                 Resver_Head head = await DC.Resver_Head
-                    .Include(rh => rh.B_StaticCode1)
                     .FirstOrDefaultAsync(rh => rh.RHID == input.RHID);
 
-                if (head != null && head.B_StaticCode1.Code == ReserveHeadState.Terminated)
+                if (head != null && head.State == (int)ReserveHeadGetListState.Terminated)
                 {
                     AddError(1, "預約單已中止，無法更新！");
                     return false;

@@ -89,13 +89,13 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                             c => c.Resver_Head
                                 .Where(rh => rh.SDate.Date >= _startDate)
                                 .Where(rh => rh.EDate.Date <= _endDate)
-                                .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                                .Count(rh => !rh.DeleteFlag && rh.State != (int)ReserveHeadGetListState.Draft)
                             , sort.IsAscending);
                         break;
                     case "QuotedTotal":
                         ordering = ordering.Order(
                             c => c.Resver_Head
-                                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                                .Where(rh => !rh.DeleteFlag && rh.State != (int)ReserveHeadGetListState.Draft)
                                 .Where(rh => rh.SDate.Date >= _startDate)
                                 .Where(rh => rh.EDate.Date <= _endDate)
                                 .Sum(rh => rh.QuotedPrice)
@@ -152,7 +152,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             GetListRememberInputDates(input);
 
             query = query.Where(c => c.Resver_Head
-                .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                .Where(rh => !rh.DeleteFlag && rh.State != (int)ReserveHeadGetListState.Draft)
                 .Any(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate &&
                            DbFunctions.TruncateTime(rh.EDate) <= _endDate));
 
@@ -168,11 +168,11 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                         c.Resver_Head
                             .Where(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate)
                             .Where(rh => DbFunctions.TruncateTime(rh.EDate) <= _endDate)
-                            .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft));
+                            .Count(rh => !rh.DeleteFlag && rh.State != (int)ReserveHeadGetListState.Draft));
                     break;
                 case Customer_GetRankings_RankBy.QuotedPrice:
                     orderedQuery = query.OrderByDescending(c => c.Resver_Head
-                        .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                        .Where(rh => !rh.DeleteFlag && rh.State != (int)ReserveHeadGetListState.Draft)
                         .Where(rh => DbFunctions.TruncateTime(rh.SDate) >= _startDate)
                         .Where(rh => DbFunctions.TruncateTime(rh.EDate) <= _endDate)
                         .Sum(rh => rh.QuotedPrice));
@@ -213,9 +213,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 RentCt = entity.Resver_Head
                     .Where(rh => rh.SDate.Date >= _startDate)
                     .Where(rh => rh.EDate.Date <= _endDate)
-                    .Count(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft),
+                    .Count(rh => !rh.DeleteFlag && rh.State != (int)ReserveHeadGetListState.Draft),
                 QuotedTotal = entity.Resver_Head
-                    .Where(rh => !rh.DeleteFlag && rh.B_StaticCode.Code != ReserveHeadState.Draft)
+                    .Where(rh => !rh.DeleteFlag && rh.State != (int)ReserveHeadGetListState.Draft)
                     .Where(rh => rh.SDate.Date >= _startDate)
                     .Where(rh => rh.EDate.Date <= _endDate)
                     .Sum(rh => (decimal)rh.QuotedPrice)

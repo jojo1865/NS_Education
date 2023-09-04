@@ -201,6 +201,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         public async Task<Resver_GetAllInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(Resver_Head entity)
         {
+            (M_Contect contact1, M_Contect contact2) = await GetInfoByIdGetContacts(entity);
+
             var result = new Resver_GetAllInfoById_Output_APIItem
             {
                 State = GetState(entity),
@@ -208,7 +210,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 BSCID11 = entity.BSCID11,
                 BSC11_Title = entity.B_StaticCode?.Title ?? "",
                 BSC11_List =
-                    await DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.ResverSource, entity.BSCID11),
+                    await DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.ResverSource,
+                        entity.BSCID11),
                 Code = entity.Code ?? "",
                 Title = entity.Title ?? "",
                 SDate = entity.SDate.ToFormattedStringDate(),
@@ -227,10 +230,13 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 OP_BU_Name = entity.BusinessUser1?.Name ?? "",
                 OP_BU_List = await DC.BusinessUser.GetBusinessUserSelectable(entity.OP_BUID),
                 OP_Phone = entity.OP_Phone ?? "",
+                ContactType1 = contact1?.ContectType,
+                ContactData1 = contact1?.ContectData,
+                ContactType2 = contact2?.ContectType,
+                ContactData2 = contact2?.ContectData,
                 Note = entity.Note,
                 FixedPrice = entity.FixedPrice,
                 QuotedPrice = entity.QuotedPrice,
-                ContactItems = GetAllInfoByIdPopulateContactItems(entity),
                 SiteItems = GetAllInfoByIdPopulateSiteItems(entity),
                 OtherItems = GetAllInfoByIdPopulateOtherItems(entity),
                 BillItems = GetAllInfoByIdPopulateBillItems(entity),
@@ -238,6 +244,19 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             };
 
             return await Task.FromResult(result);
+        }
+
+        private async Task<(M_Contect contact1, M_Contect contact2)> GetInfoByIdGetContacts(Resver_Head entity)
+        {
+            string tableName = DC.GetTableName<Resver_Head>();
+
+            M_Contect[] contacts = await DC.M_Contect
+                .Where(c => c.TargetTable == tableName)
+                .Where(c => c.TargetID == entity.RHID)
+                .Take(2)
+                .ToArrayAsync();
+
+            return (contacts.FirstOrDefault(c => c.SortNo == 1), contacts.FirstOrDefault(c => c.SortNo == 2));
         }
 
         private static List<Resver_GetAllInfoById_Output_GiveBackItem_APIItem> GetAllInfoByIdPopulateGiveBackItems(
@@ -419,26 +438,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     Ct = rtf.Ct,
                     UnitPrice = rtf.UnitPrice,
                     Price = rtf.Price
-                })
-                .ToList();
-        }
-
-        private List<Resver_GetAllInfoById_Output_ContactItem_APIItem> GetAllInfoByIdPopulateContactItems(
-            Resver_Head entity)
-        {
-            string tableName = DC.GetTableName<Resver_Head>();
-            return DC.M_Contect.Where(c =>
-                    c.TargetTable == tableName
-                    && c.TargetID == entity.RHID)
-                .OrderBy(c => c.SortNo)
-                // 回記憶體
-                .AsEnumerable()
-                .Select(c => new Resver_GetAllInfoById_Output_ContactItem_APIItem
-                {
-                    MID = c.MID,
-                    ContactType = c.ContectType,
-                    ContactTypeList = ContactTypeController.GetContactTypeSelectable(c.ContectType),
-                    ContactData = c.ContectData ?? ""
                 })
                 .ToList();
         }

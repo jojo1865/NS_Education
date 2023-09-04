@@ -486,7 +486,6 @@
         <Compile Include="Models\APIItems\Controller\PrintReport\Report9\Report9_Output_Row_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_BillItem_APIItem.cs"/>
-        <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_ContactItem_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_DeviceItem_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_FoodItem_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Resver\GetAllInfoById\Resver_GetAllInfoById_Output_GiveBackItem_APIItem.cs"/>

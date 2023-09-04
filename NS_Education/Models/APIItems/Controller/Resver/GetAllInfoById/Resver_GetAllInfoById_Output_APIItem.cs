@@ -9,9 +9,6 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public ICollection<Resver_GetAllInfoById_Output_BillItem_APIItem> BillItems =
             new List<Resver_GetAllInfoById_Output_BillItem_APIItem>();
 
-        public ICollection<Resver_GetAllInfoById_Output_ContactItem_APIItem> ContactItems =
-            new List<Resver_GetAllInfoById_Output_ContactItem_APIItem>();
-
         public ICollection<Resver_GetAllInfoById_Output_GiveBackItem_APIItem> GiveBackItems =
             new List<Resver_GetAllInfoById_Output_GiveBackItem_APIItem>();
 
@@ -61,6 +58,11 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
             new List<CommonResponseRowForSelectable>();
 
         public string OP_Phone { get; set; }
+
+        public int? ContactType1 { get; set; }
+        public string ContactData1 { get; set; }
+        public int? ContactType2 { get; set; }
+        public string ContactData2 { get; set; }
 
         public string Note { get; set; }
         public int FixedPrice { get; set; }

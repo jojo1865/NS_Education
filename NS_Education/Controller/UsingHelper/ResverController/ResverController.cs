@@ -237,6 +237,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 Note = entity.Note,
                 FixedPrice = entity.FixedPrice,
                 QuotedPrice = entity.QuotedPrice,
+                MKT = entity.MKT ?? "",
+                Owner = entity.Owner ?? "",
+                ParkingNote = entity.ParkingNote ?? "",
                 SiteItems = GetAllInfoByIdPopulateSiteItems(entity),
                 OtherItems = GetAllInfoByIdPopulateOtherItems(entity),
                 BillItems = GetAllInfoByIdPopulateBillItems(entity),
@@ -348,6 +351,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     BSC_List = Task.Run(() =>
                             DC.B_StaticCode.GetStaticCodeSelectable(StaticCodeType.SiteTable, rs.BSCID))
                         .Result,
+                    ArriveTimeStart = rs.ArriveTimeStart.ToFormattedStringTime(),
+                    ArriveTimeEnd = rs.ArriveTimeEnd.ToFormattedStringTime(),
+                    ArriveDescription = rs.ArriveDescription ?? "",
+                    TableDescription = rs.TableDescription ?? "",
+                    SeatImage = rs.SeatImage != null ? Convert.ToBase64String(rs.SeatImage) : null,
                     TimeSpanItems = GetTimeSpanFromHead<Resver_Site>(rs.Resver_Head, rs.RSID),
                     ThrowItems = GetAllInfoByIdPopulateThrowItems(rs),
                     DeviceItems = GetAllInfoByIdPopulateDeviceItems(rs)
@@ -437,7 +445,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     BP_List = Task.Run(() => DC.B_Partner.GetPartnerSelectable(rtf.BPID)).Result,
                     Ct = rtf.Ct,
                     UnitPrice = rtf.UnitPrice,
-                    Price = rtf.Price
+                    Price = rtf.Price,
+                    ArriveTime = rtf.ArriveTime.ToFormattedStringTime()
                 })
                 .ToList();
         }

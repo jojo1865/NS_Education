@@ -64,6 +64,10 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public int? ContactType2 { get; set; }
         public string ContactData2 { get; set; }
 
+        public string MKT { get; set; }
+        public string Owner { get; set; }
+        public string ParkingNote { get; set; }
+
         public string Note { get; set; }
         public int FixedPrice { get; set; }
         public int QuotedPrice { get; set; }

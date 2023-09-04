@@ -34,6 +34,12 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public int BSCID { get; set; }
         public string BSC_Title { get; set; }
 
+        public string ArriveTimeStart { get; set; }
+        public string ArriveTimeEnd { get; set; }
+        public string ArriveDescription { get; set; }
+        public string TableDescription { get; set; }
+        public string SeatImage { get; set; }
+
         public ICollection<CommonResponseRowForSelectable> BSC_List { get; set; } =
             new List<CommonResponseRowForSelectable>();
     }

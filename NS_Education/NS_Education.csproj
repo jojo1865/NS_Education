@@ -804,6 +804,7 @@
         <Compile Include="Tools\Extensions\SpecificTableExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\StringExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\TimeSpanExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\TypeExtensionMethods.cs"/>
         <Compile Include="Tools\Filters\ExceptionHandlerFilter\ExceptionHandlerFilter.cs"/>
         <Compile Include="Tools\Filters\FilterStaticTools.cs"/>

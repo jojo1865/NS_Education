@@ -69,14 +69,12 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     () => AddError(NotFound("客戶", nameof(input.CID))))
                 .Validate(i => i.CustomerTitle.HasContent(),
                     () => AddError(EmptyNotAllowed("客戶名稱", nameof(input.CustomerTitle))))
-                .Validate(i => i.ContactName.HasContent(),
-                    () => AddError(EmptyNotAllowed("聯絡人名稱", nameof(input.ContactName))))
                 .Validate(i => i.Title.HasLengthBetween(1, 100),
                     () => AddError(LengthOutOfRange("預約單名稱", nameof(input.Title), 1, 100)))
                 .Validate(i => i.CustomerTitle.HasLengthBetween(1, 100),
                     () => AddError(LengthOutOfRange("客戶名稱", nameof(input.CustomerTitle), 1, 100)))
-                .Validate(i => i.ContactName.HasLengthBetween(1, 50),
-                    () => AddError(LengthOutOfRange("聯絡人名稱", nameof(input.ContactName), 1, 50)))
+                .Validate(i => i.ContactName.HasLengthBetween(0, 50),
+                    () => AddError(LengthOutOfRange("聯絡人名稱", nameof(input.ContactName), 0, 50)))
                 .Validate(i => i.MK_Phone.HasLengthBetween(0, 50),
                     () => AddError(LengthOutOfRange("MK 業務電話", nameof(input.MK_Phone), 0, 50)))
                 .Validate(i => i.OP_Phone.HasLengthBetween(0, 50),

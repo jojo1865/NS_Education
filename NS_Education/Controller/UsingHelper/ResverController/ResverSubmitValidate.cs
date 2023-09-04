@@ -93,6 +93,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     () => AddError(NotFound($"聯絡方式2", nameof(input.ContactType2))))
                 .Validate(i => i.ContactData2.HasLengthBetween(0, 30),
                     () => AddError(LengthOutOfRange("聯絡方式2", nameof(input.ContactData2), 0, 30)))
+                .Validate(i => i.MKT.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("MKT", nameof(input.MKT), 0, 30)))
+                .Validate(i => i.Owner.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("Owner", nameof(input.Owner), 0, 30)))
                 .IsValid();
 
             // short-circuit
@@ -126,6 +130,11 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         () => AddError(LengthOutOfRange("帳單列印名稱", nameof(item.PrintTitle), 0, 100)))
                     .Validate(si => si.PrintNote.HasLengthBetween(0, 100),
                         () => AddError(LengthOutOfRange("帳單列印說明", nameof(item.PrintNote), 0, 100)))
+                    .Validate(
+                        si => si.ArriveTimeStart.IsNullOrWhiteSpace() || si.ArriveTimeStart.TryParseTimeSpan(out _),
+                        () => AddError(WrongFormat("活動抵達最早時間", nameof(item.ArriveTimeStart))))
+                    .Validate(si => si.ArriveTimeEnd.IsNullOrWhiteSpace() || si.ArriveTimeEnd.TryParseTimeSpan(out _),
+                        () => AddError(WrongFormat("活動抵達最晚時間", nameof(item.ArriveTimeEnd))))
                     .IsValid());
 
             // 檢查場地的總可容納人數大於等於預約單要求人數
@@ -238,6 +247,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                         .Validate(fi => SubmitValidatePartner(fi.BPID),
                                                             fi => AddError(
                                                                 NotFound($"預約行程的廠商 ID（{fi.BPID}）", nameof(fi.BPID))))
+                                                        .Validate(
+                                                            fi => fi.ArriveTime.IsNullOrWhiteSpace() ||
+                                                                  fi.ArriveTime.TryParseTimeSpan(out _),
+                                                            fi => AddError(WrongFormat("送達時間", nameof(fi.ArriveTime))))
                                                         .IsValid()
                 ;
 

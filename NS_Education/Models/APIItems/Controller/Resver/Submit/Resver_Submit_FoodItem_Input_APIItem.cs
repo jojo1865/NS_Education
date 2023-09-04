@@ -9,5 +9,6 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
         public int Ct { get; set; }
         public int UnitPrice { get; set; }
         public int Price { get; set; }
+        public string ArriveTime { get; set; }
     }
 }

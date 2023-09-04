@@ -167,6 +167,12 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 site.SortNo = item.SortNo;
                 site.Note = item.Note;
                 site.BSCID = item.BSCID;
+                site.ArriveTimeStart =
+                    item.ArriveTimeStart.TryParseTimeSpan(out TimeSpan start) ? start : (TimeSpan?)null;
+                site.ArriveTimeEnd = item.ArriveTimeEnd.TryParseTimeSpan(out TimeSpan end) ? end : (TimeSpan?)null;
+                site.ArriveDescription = item.ArriveDescription;
+                site.TableDescription = item.TableDescription;
+                site.SeatImage = item.SeatImage != null ? Convert.FromBase64String(item.SeatImage) : null;
 
                 // 先儲存至 DB, 才有 RSID...
                 if (site.RSID == 0)
@@ -299,6 +305,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 throwFood.Ct = foodItem.Ct;
                 throwFood.UnitPrice = foodItem.UnitPrice;
                 throwFood.Price = foodItem.Price;
+                throwFood.ArriveTime =
+                    foodItem.ArriveTime.TryParseTimeSpan(out TimeSpan arrive) ? arrive : (TimeSpan?)null;
             }
         }
 
@@ -407,6 +415,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             head.Note = input.Note;
             head.FixedPrice = input.FixedPrice;
             head.QuotedPrice = input.QuotedPrice;
+            head.MKT = input.MKT;
+            head.Owner = input.Owner;
+            head.ParkingNote = input.ParkingNote;
 
             if (input.FinishDeal)
                 WriteResverHeadLog(head.RHID, (int)ReserveHeadGetListState.FullyPaid,

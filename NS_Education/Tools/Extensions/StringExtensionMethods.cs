@@ -64,5 +64,29 @@ namespace NS_Education.Tools.Extensions
 
             return s;
         }
+
+        /// <summary>
+        /// 把格式 HH24:mm 的字串轉換成 TimeSpan。
+        /// </summary>
+        /// <param name="s">HH24:mm</param>
+        /// <param name="ts">
+        /// 轉換成功時：時間<br/>
+        /// 失敗時：預設值
+        /// </param>
+        /// <returns>轉換成功或失敗</returns>
+        public static bool TryParseTimeSpan(this string s, out TimeSpan ts)
+        {
+            ts = default;
+            if (!s.HasLengthBetween(5, 5))
+                return false;
+
+            string[] splits = s.Split(':');
+
+            if (splits.Length != 2)
+                return false;
+
+            ts = new TimeSpan(Convert.ToInt32(splits[0]), Convert.ToInt32(splits[1]), 0);
+            return true;
+        }
     }
 }

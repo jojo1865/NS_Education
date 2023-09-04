@@ -28,6 +28,10 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
         public int FixedPrice { get; set; }
         public int QuotedPrice { get; set; }
 
+        public string MKT { get; set; }
+        public string Owner { get; set; }
+        public string ParkingNote { get; set; }
+
         public ICollection<Resver_Submit_SiteItem_Input_APIItem> SiteItems { get; set; } =
             new List<Resver_Submit_SiteItem_Input_APIItem>();
 

@@ -16,6 +16,11 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
         public int SortNo { get; set; }
         public string Note { get; set; }
         public int BSCID { get; set; }
+        public string ArriveTimeStart { get; set; }
+        public string ArriveTimeEnd { get; set; }
+        public string ArriveDescription { get; set; }
+        public string TableDescription { get; set; }
+        public string SeatImage { get; set; }
 
         public ICollection<int> TimeSpanItems { get; set; } =
             new List<int>();

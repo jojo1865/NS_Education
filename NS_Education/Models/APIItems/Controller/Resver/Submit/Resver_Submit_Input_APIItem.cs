@@ -19,12 +19,14 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
         public string MK_Phone { get; set; }
         public int OP_BUID { get; set; }
         public string OP_Phone { get; set; }
+
+        public int? ContactType1 { get; set; }
+        public string ContactData1 { get; set; }
+        public int? ContactType2 { get; set; }
+        public string ContactData2 { get; set; }
         public string Note { get; set; }
         public int FixedPrice { get; set; }
         public int QuotedPrice { get; set; }
-
-        public ICollection<Resver_Submit_ContactItem_Input_APIItem> ContactItems { get; set; } =
-            new List<Resver_Submit_ContactItem_Input_APIItem>();
 
         public ICollection<Resver_Submit_SiteItem_Input_APIItem> SiteItems { get; set; } =
             new List<Resver_Submit_SiteItem_Input_APIItem>();

@@ -85,29 +85,19 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     () => AddError(NotFound("MK 業務", nameof(input.MK_BUID))))
                 .ValidateAsync(async i => await SubmitValidateOPBusinessUser(i.OP_BUID),
                     () => AddError(NotFound("OP 業務", nameof(input.OP_BUID))))
+                .Validate(i => i.ContactType1 == null || SubmitValidateContactType(i.ContactType1.Value),
+                    () => AddError(NotFound($"聯絡方式1", nameof(input.ContactType1))))
+                .Validate(i => i.ContactData1.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("聯絡方式1", nameof(input.ContactData1), 0, 30)))
+                .Validate(i => i.ContactType2 == null || SubmitValidateContactType(i.ContactType2.Value),
+                    () => AddError(NotFound($"聯絡方式2", nameof(input.ContactType2))))
+                .Validate(i => i.ContactData2.HasLengthBetween(0, 30),
+                    () => AddError(LengthOutOfRange("聯絡方式2", nameof(input.ContactData2), 0, 30)))
                 .IsValid();
 
             // short-circuit
             if (!isHeadValid)
                 return false;
-
-            // 主預約單 -> 聯絡方式
-            string headTableName = DC.GetTableName<Resver_Head>();
-            bool isContactItemValid = input.ContactItems.All(item =>
-                item.StartValidate()
-                    .Validate(ci => isAdd ? ci.MID == 0 : ci.MID.IsZeroOrAbove(),
-                        () => AddError(WrongFormat($"聯絡方式對應 ID（{item.MID}）", nameof(item.MID))))
-                    .Validate(
-                        ci => ci.MID == 0 || DC.M_Contect.Any(mc =>
-                            mc.MID == ci.MID && mc.TargetTable == headTableName && mc.TargetID == input.RHID),
-                        () => AddError(NotFound($"聯絡方式對應 ID（{item.MID}）", nameof(item.MID))))
-                    .Validate(ci => SubmitValidateContactType(ci.ContactType),
-                        () => AddError(NotFound($"聯絡方式編號（{item.ContactType}）", nameof(item.ContactType))))
-                    .Validate(ci => ci.ContactData.HasContent(),
-                        () => AddError(EmptyNotAllowed($"聯絡方式內容", nameof(item.ContactData))))
-                    .Validate(ci => ci.ContactData.HasLengthBetween(1, 30),
-                        () => AddError(LengthOutOfRange("聯絡方式內容", nameof(item.ContactData), 1, 30)))
-                    .IsValid());
 
             // 主預約單 -> 場地列表
             bool isSiteItemsValid = input.SiteItems.All(item =>
@@ -390,8 +380,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     .IsValid();
 
             // 輸入都正確後，才計算各項目價格
-            bool isEverythingValid = isContactItemValid
-                                     && isSiteItemsValid
+            bool isEverythingValid = isSiteItemsValid
                                      && isSiteItemTimeSpanItemValid
                                      && isSiteItemThrowItemValid
                                      && isSiteItemThrowItemTimeSpanItemValid

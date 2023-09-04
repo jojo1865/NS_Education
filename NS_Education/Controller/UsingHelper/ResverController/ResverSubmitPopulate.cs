@@ -347,29 +347,35 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             ICollection<object> entitiesToAdd, bool isAdd)
         {
             string tableName = DC.GetTableName<Resver_Head>();
+
             if (!isAdd)
             {
-                IEnumerable<int> inputIds = input.ContactItems.Select(ci => ci.MID);
-
-                // 先清除所有原本有，但不存在於本次輸入的 M_Contect
+                // 先清除所有原本有的 M_Contect
                 var originalContacts = DC.M_Contect
                     .Where(c => c.TargetTable == tableName && c.TargetID == input.RHID)
-                    .Where(c => !inputIds.Contains(c.MID))
                     .AsEnumerable();
 
                 DC.M_Contect.RemoveRange(originalContacts);
             }
 
-            int sortNo = 0;
-            foreach (var contactItem in input.ContactItems)
+            if (input.ContactType1 != null)
             {
-                M_Contect contact = SubmitFindOrCreateNew<M_Contect>(contactItem.MID, entitiesToAdd);
-                contact.MID = contactItem.MID;
-                contact.ContectType = contactItem.ContactType;
+                M_Contect contact = SubmitFindOrCreateNew<M_Contect>(0, entitiesToAdd);
+                contact.ContectType = input.ContactType1.Value;
                 contact.TargetTable = tableName;
                 contact.TargetID = head.RHID;
-                contact.ContectData = contactItem.ContactData;
-                contact.SortNo = ++sortNo;
+                contact.ContectData = input.ContactData1;
+                contact.SortNo = 1;
+            }
+
+            if (input.ContactType2 != null)
+            {
+                M_Contect contact = SubmitFindOrCreateNew<M_Contect>(0, entitiesToAdd);
+                contact.ContectType = input.ContactType2.Value;
+                contact.TargetTable = tableName;
+                contact.TargetID = head.RHID;
+                contact.ContectData = input.ContactData2;
+                contact.SortNo = 2;
             }
         }
 

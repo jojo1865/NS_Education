@@ -80,7 +80,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         public async Task<bool> GetListPagedValidateInput(Resver_GetHeadList_Input_APIItem input)
         {
             bool isValid = input.StartValidate()
-                .Validate(i => i.CID.IsZeroOrAbove(), () => AddError(WrongFormat("欲篩選之客戶 ID", nameof(input.CID))))
                 .Validate(i => i.State.IsZeroOrAbove(),
                     () => AddError(WrongFormat("欲篩選之預約狀態 ID", nameof(input.State))))
                 .IsValid();
@@ -101,8 +100,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             if (input.TargetDate.TryParseDateTime(out DateTime targetDate))
                 query = query.Where(rh => DbFunctions.TruncateTime(rh.SDate) == targetDate.Date);
 
-            if (input.CID.IsAboveZero())
-                query = query.Where(rh => rh.CID == input.CID);
+            if (input.CustomerName.HasContent())
+                query = query.Where(rh => rh.CustomerTitle.Contains(input.CustomerName));
 
             if (input.State.IsAboveZero())
                 query = query.Where(rh => rh.State == input.State);

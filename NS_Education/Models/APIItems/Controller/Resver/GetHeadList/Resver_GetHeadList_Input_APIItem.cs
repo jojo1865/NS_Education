@@ -4,7 +4,7 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetHeadList
     {
         public string Keyword { get; set; }
         public string TargetDate { get; set; }
-        public int CID { get; set; }
+        public string CustomerName { get; set; }
         public int State { get; set; }
     }
 }

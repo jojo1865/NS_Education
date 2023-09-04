@@ -140,7 +140,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
             // 檢查場地的總可容納人數大於等於預約單要求人數
             IEnumerable<int> siteItemIds = input.SiteItems.Select(si => si.BSID);
-            int totalSize = await DC.B_SiteData.Where(sd => siteItemIds.Contains(sd.BSID)).SumAsync(sd => sd.MaxSize);
+            int totalSize =
+                await DC.B_SiteData.Where(sd => siteItemIds.Contains(sd.BSID)).SumAsync(sd => (int?)sd.MaxSize) ?? 0;
 
             isSiteItemsValid = isSiteItemsValid &&
                                input.SiteItems.StartValidate()

@@ -6,7 +6,7 @@ namespace NS_Education.Tools.Extensions
     {
         public static string ToFormattedStringTime(this TimeSpan? timeSpan)
         {
-            return timeSpan?.ToString("HH24:mm");
+            return timeSpan?.ToString(@"hh\:mm");
         }
     }
 }

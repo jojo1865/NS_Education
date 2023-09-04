@@ -763,6 +763,9 @@
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
           <Property Name="State" Type="int" Nullable="false" />
+          <Property Name="MKT" Type="nvarchar" MaxLength="30" />
+          <Property Name="Owner" Type="nvarchar" MaxLength="30" />
+          <Property Name="ParkingNote" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="Resver_Head_Log">
           <Key>
@@ -820,6 +823,11 @@
           <Property Name="CreUID" Type="int" Nullable="false" />
           <Property Name="UpdDate" Type="datetime" Nullable="false" />
           <Property Name="UpdUID" Type="int" Nullable="false" />
+          <Property Name="ArriveTimeStart" Type="time" Precision="7" />
+          <Property Name="ArriveTimeEnd" Type="time" Precision="7" />
+          <Property Name="ArriveDescription" Type="nvarchar(max)" />
+          <Property Name="TableDescription" Type="nvarchar(max)" />
+          <Property Name="SeatImage" Type="varbinary(max)" />
         </EntityType>
         <EntityType Name="Resver_Throw">
           <Key>
@@ -856,6 +864,7 @@
           <Property Name="Ct" Type="int" Nullable="false" />
           <Property Name="UnitPrice" Type="int" Nullable="false" />
           <Property Name="Price" Type="int" Nullable="false" />
+          <Property Name="ArriveTime" Type="time" Precision="7" />
         </EntityType>
         <EntityType Name="UserData">
           <Key>
@@ -3217,6 +3226,9 @@
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
           <Property Name="State" Type="Int32" Nullable="false" />
+          <Property Name="MKT" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="Owner" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="ParkingNote" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_Resver_Head_B_StaticCode11" FromRole="Resver_Head" ToRole="B_StaticCode" />
           <NavigationProperty Name="BusinessUser" Relationship="Self.Resver_Head_BusinessUser_BUID_fk" FromRole="Resver_Head" ToRole="BusinessUser" />
           <NavigationProperty Name="BusinessUser1" Relationship="Self.Resver_Head_BusinessUser_BUID_fk_2" FromRole="Resver_Head" ToRole="BusinessUser" />
@@ -3290,6 +3302,11 @@
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <Property Name="ArriveTimeStart" Type="Time" Precision="7" />
+          <Property Name="ArriveTimeEnd" Type="Time" Precision="7" />
+          <Property Name="ArriveDescription" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="TableDescription" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="SeatImage" Type="Binary" MaxLength="Max" FixedLength="false" />
           <NavigationProperty Name="B_OrderCode" Relationship="Self.FK_Resver_Site_B_OrderCode" FromRole="Resver_Site" ToRole="B_OrderCode" />
           <NavigationProperty Name="B_SiteData" Relationship="Self.FK_Resver_Site_B_SiteData" FromRole="Resver_Site" ToRole="B_SiteData" />
           <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_Resver_Site_B_StaticCode" FromRole="Resver_Site" ToRole="B_StaticCode" />
@@ -3336,6 +3353,7 @@
           <Property Name="Ct" Type="Int32" Nullable="false" />
           <Property Name="UnitPrice" Type="Int32" Nullable="false" />
           <Property Name="Price" Type="Int32" Nullable="false" />
+          <Property Name="ArriveTime" Type="Time" Precision="7" />
           <NavigationProperty Name="B_Partner" Relationship="Self.FK_Resver_Throw_D_B_Partner" FromRole="Resver_Throw_Food" ToRole="B_Partner" />
           <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_Resver_Throw_D_B_StaticCode" FromRole="Resver_Throw_Food" ToRole="B_StaticCode" />
           <NavigationProperty Name="D_FoodCategory" Relationship="Self.FK_Resver_Throw_D_D_FoodCategory" FromRole="Resver_Throw_Food" ToRole="D_FoodCategory" />
@@ -5633,6 +5651,9 @@
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
                 <ScalarProperty Name="State" ColumnName="State" />
+                <ScalarProperty Name="MKT" ColumnName="MKT" />
+                <ScalarProperty Name="Owner" ColumnName="Owner" />
+                <ScalarProperty Name="ParkingNote" ColumnName="ParkingNote" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -5693,6 +5714,11 @@
                 <ScalarProperty Name="CreUID" ColumnName="CreUID" />
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+                <ScalarProperty Name="ArriveTimeStart" ColumnName="ArriveTimeStart" />
+                <ScalarProperty Name="ArriveTimeEnd" ColumnName="ArriveTimeEnd" />
+                <ScalarProperty Name="ArriveDescription" ColumnName="ArriveDescription" />
+                <ScalarProperty Name="TableDescription" ColumnName="TableDescription" />
+                <ScalarProperty Name="SeatImage" ColumnName="SeatImage" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -5731,6 +5757,7 @@
                 <ScalarProperty Name="Ct" ColumnName="Ct" />
                 <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="ArriveTime" ColumnName="ArriveTime" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

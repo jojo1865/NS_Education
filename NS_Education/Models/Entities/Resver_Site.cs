@@ -39,6 +39,11 @@ namespace NS_Education.Models.Entities
         public int CreUID { get; set; }
         public System.DateTime UpdDate { get; set; }
         public int UpdUID { get; set; }
+        public Nullable<System.TimeSpan> ArriveTimeStart { get; set; }
+        public Nullable<System.TimeSpan> ArriveTimeEnd { get; set; }
+        public string ArriveDescription { get; set; }
+        public string TableDescription { get; set; }
+        public byte[] SeatImage { get; set; }
     
         public virtual B_OrderCode B_OrderCode { get; set; }
         public virtual B_SiteData B_SiteData { get; set; }

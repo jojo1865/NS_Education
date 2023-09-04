@@ -22,6 +22,7 @@ namespace NS_Education.Models.Entities
         public int Ct { get; set; }
         public int UnitPrice { get; set; }
         public int Price { get; set; }
+        public Nullable<System.TimeSpan> ArriveTime { get; set; }
     
         public virtual B_Partner B_Partner { get; set; }
         public virtual B_StaticCode B_StaticCode { get; set; }

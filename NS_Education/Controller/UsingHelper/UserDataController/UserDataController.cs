@@ -15,6 +15,7 @@ using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitDepar
 using NS_Education.Models.APIItems.Controller.UserData.UserData.BatchSubmitGroup;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetInfoById;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.GetList;
+using NS_Education.Models.APIItems.Controller.UserData.UserData.IsAdministrator;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.Login;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.Submit;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.UpdatePW;
@@ -102,6 +103,22 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
             return GetResponseJson();
+        }
+
+        #endregion
+
+        #region IsAdministrator
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
+        public string IsAdministrator()
+        {
+            UserData_IsAdministrator_Output_APIItem result = new UserData_IsAdministrator_Output_APIItem
+            {
+                IsAdministrator = FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin)
+            };
+
+            return GetResponseJson(result);
         }
 
         #endregion

@@ -486,6 +486,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
+            // 非管理員只允許刪除
+
+            bool isValid = input.Items.StartValidateElements()
+                .Validate(i => i.DeleteFlag == true || FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin),
+                    () => AddError(NoPrivilege()))
+                .IsValid();
+
+            if (!isValid)
+                return GetResponseJson();
+
             return await _deleteItemHelper.DeleteItem(input);
         }
 

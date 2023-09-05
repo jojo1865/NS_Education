@@ -16,6 +16,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper.Interface;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
+using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
@@ -82,6 +83,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             bool isValid = input.StartValidate()
                 .Validate(i => i.State.IsZeroOrAbove(),
                     () => AddError(WrongFormat("欲篩選之預約狀態 ID", nameof(input.State))))
+
+                // 僅管理員可查詢已刪除資料
+                .Validate(i => i.DeleteFlag == 0 || FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin),
+                    () => AddError(NoPrivilege()))
                 .IsValid();
 
             return await Task.FromResult(isValid);

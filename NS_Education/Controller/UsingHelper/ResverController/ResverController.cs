@@ -75,6 +75,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(Resver_GetHeadList_Input_APIItem input)
         {
+            if (!FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin))
+                input.DeleteFlag = 0;
+
             return await _getListPagedHelper.GetPagedList(input);
         }
 
@@ -83,10 +86,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             bool isValid = input.StartValidate()
                 .Validate(i => i.State.IsZeroOrAbove(),
                     () => AddError(WrongFormat("欲篩選之預約狀態 ID", nameof(input.State))))
-
-                // 僅管理員可查詢已刪除資料
-                .Validate(i => i.DeleteFlag == 0 || FilterStaticTools.HasRoleInRequest(Request, AuthorizeBy.Admin),
-                    () => AddError(NoPrivilege()))
                 .IsValid();
 
             return await Task.FromResult(isValid);

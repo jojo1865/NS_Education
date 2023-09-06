@@ -292,7 +292,11 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             bool isUpdateSuccessful = await LoginUpdateDb(queried, result.jwt);
 
-            return isUpdateSuccessful ? GetResponseJson(output) : GetResponseJson();
+            if (!isUpdateSuccessful)
+                return GetResponseJson();
+
+            JwtAuthFilter.ResetUidIdle(output.UID);
+            return GetResponseJson(output);
         }
 
         private async Task<DateTime> GetUserLastPasswordChangeDate(UserData userData)
@@ -1168,6 +1172,9 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             }
 
             await LogoutUpdateUserDataAndSaveToDb(user);
+
+            if (!HasError())
+                JwtAuthFilter.ResetUidIdle(user.UID);
 
             return GetResponseJson();
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -92,6 +93,9 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             _addOrEditKeyFieldName = addOrEditKeyFieldName;
         }
 
+        private static ConcurrentDictionary<int, DateTime> UidToLastRequestTime { get; set; } =
+            new ConcurrentDictionary<int, DateTime>();
+
         public override void OnActionExecuting(ActionExecutingContext actionContext)
         {
             JwtAuth(actionContext);
@@ -113,13 +117,16 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             }
 
             // 1. 驗證有 Token 且解析正常無誤。
-            // 2. 當設定檔要求時，驗證 Token 符合對應 UserData 的最新 Token。
-            // 3. 驗證 Token 中 Claim 包含指定的 Role。
-            // 4. 驗證 Privilege，所有 Flag 在任一所屬 Group 均有允許。
+            // 2. 當設定檔要求時，驗證上次看到此 JWT 的時間是否已超過閒置秒數。
+            // 3. 當設定檔要求時，驗證 Token 符合對應 UserData 的最新 Token。
+            // 4. 驗證 Token 中 Claim 包含指定的 Role。
+            // 5. 驗證 Privilege，所有 Flag 在任一所屬 Group 均有允許。
 
             bool isValid = actionContext.StartValidate()
                 .SkipIfAlreadyInvalid()
                 .Validate(c => ValidateTokenDecryptable(c, JwtConstants.Secret, out claims),
+                    (_, e) => errorMessage = HasValidTokenFailed(e))
+                .Validate(c => ValidateIdleSeconds(claims, safetyConfiguration),
                     (_, e) => errorMessage = HasValidTokenFailed(e))
                 .Validate(c => ValidateTokenIsLatest(c, claims, safetyConfiguration),
                     (_, e) => errorMessage = e.Message)
@@ -134,6 +141,29 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
 
             throw new HttpException((int)HttpStatusCode.Unauthorized,
                 $"JWT 驗證失敗。{errorMessage}".SanitizeForResponseStatusMessage());
+        }
+
+        private void ValidateIdleSeconds(ClaimsPrincipal claims, ICollection<B_StaticCode> safetyConfiguration)
+        {
+            // 先檢查設定檔，如果閒置秒數小於等於 0，不做任何驗證。
+            int idleSeconds = GetSafetyConfigValue(safetyConfiguration,
+                StaticCodeSafetyControlCode.IdleSecondsBeforeScreenSaver);
+            if (idleSeconds <= 0) return;
+
+            int uid = FilterStaticTools.GetUidInClaimInt(claims);
+            bool hasRecord = UidToLastRequestTime.TryGetValue(uid, out DateTime lastTime);
+
+            // 沒有紀錄時，新增一筆，返回
+            // 有紀錄時，檢查是否超出限定秒數，沒有就更新然後返回，超過就拋出錯誤
+
+            if (hasRecord && (DateTime.Now - lastTime).Seconds > idleSeconds) throw new Exception(TokenExpired);
+
+            UidToLastRequestTime[uid] = DateTime.Now;
+        }
+
+        public static void ResetUidIdle(int uid)
+        {
+            UidToLastRequestTime.TryRemove(uid, out _);
         }
 
         private void ValidateLastPasswordChange(ClaimsPrincipal claims, ICollection<B_StaticCode> safetyConfig)

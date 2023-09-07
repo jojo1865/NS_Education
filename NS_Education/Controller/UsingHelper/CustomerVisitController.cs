@@ -285,9 +285,7 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("客戶拜訪方式 ID", nameof(input.BSCID))))
                 .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)),
                     () => AddError(NotFound("拜訪業務 ID", nameof(input.BUID))))
-                .Validate(i => i.TargetTitle.HasContent(),
-                    () => AddError(EmptyNotAllowed("拜訪對象", nameof(input.TargetTitle))))
-                .Validate(i => i.TargetTitle.HasLengthBetween(1, 100),
+                .Validate(i => i.TargetTitle.HasLengthBetween(0, 100),
                     () => AddError(LengthOutOfRange("拜訪對象", nameof(input.TargetTitle), 1, 100)))
                 .Validate(i => i.Title.HasLengthBetween(0, 100),
                     () => AddError(LengthOutOfRange("主旨", nameof(input.Title), 0, 100)))
@@ -403,10 +401,8 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(NotFound("客戶拜訪方式 ID", nameof(input.BSCID))))
                 .ValidateAsync(async i => await DC.BusinessUser.ValidateIdExists(i.BUID, nameof(BusinessUser.BUID)),
                     () => AddError(NotFound("拜訪業務 ID", nameof(input.BUID))))
-                .Validate(i => i.TargetTitle.HasContent(),
-                    () => AddError(EmptyNotAllowed("拜訪對象", nameof(input.TargetTitle))))
-                .Validate(i => i.TargetTitle.HasLengthBetween(1, 100),
-                    () => AddError(LengthOutOfRange("拜訪對象", nameof(input.TargetTitle), 1, 100)))
+                .Validate(i => i.TargetTitle.HasLengthBetween(0, 100),
+                    () => AddError(LengthOutOfRange("拜訪對象", nameof(input.TargetTitle), 0, 100)))
                 .Validate(i => i.Title.HasLengthBetween(0, 100),
                     () => AddError(LengthOutOfRange("主旨", nameof(input.Title), 0, 100)))
                 .Validate(i => i.VisitDate.TryParseDateTime(out _),

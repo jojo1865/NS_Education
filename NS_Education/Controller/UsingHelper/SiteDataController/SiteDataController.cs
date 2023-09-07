@@ -604,9 +604,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.Title.HasLengthBetween(1, 60),
                     () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 0, 60)))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數", nameof(input.BasicSize))))
-                .Validate(i => i.MaxSize > 0 && i.MaxSize >= i.BasicSize,
-                    () => AddError(MinLargerThanMax("一般容納人數", nameof(input.BasicSize), "最大容納人數",
-                        nameof(input.MaxSize))))
                 .Validate(i => i.AreaSize.IsAboveZero(),
                     () => AddError(OutOfRange("面積坪數", nameof(input.AreaSize), 1)))
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用", nameof(input.UnitPrice))))
@@ -786,9 +783,6 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 .Validate(i => i.Title.HasLengthBetween(1, 60),
                     () => AddError(LengthOutOfRange("中文名稱", nameof(input.Title), 0, 60)))
                 .Validate(i => i.BasicSize >= 0, () => AddError(WrongFormat("一般容納人數", nameof(input.BasicSize))))
-                .Validate(i => i.MaxSize > 0 && i.MaxSize >= i.BasicSize,
-                    () => AddError(MinLargerThanMax("一般容納人數", nameof(input.BasicSize), "最大容納人數",
-                        nameof(input.MaxSize))))
                 .Validate(i => i.AreaSize.IsAboveZero(),
                     () => AddError(OutOfRange("面積坪數", nameof(input.AreaSize), 1)))
                 .Validate(i => i.UnitPrice >= 0, () => AddError(WrongFormat("成本費用", nameof(input.UnitPrice))))

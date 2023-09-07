@@ -181,7 +181,16 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
-            return await _deleteItemHelper.DeleteItem(input);
+            HashSet<int> deleteIds = input.GetUniqueDeleteId();
+
+            var data = await DC.M_Customer_Gift
+                               .Where(mcg => mcg.ids.Contains(mcg.MID))
+                               .ToArrayAsync();
+
+            DC.M_Customer_Gift.RemoveRange(data);
+            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
+            
+            return GetResponseJson();
         }
 
         public IQueryable<M_Customer_Gift> DeleteItemsQuery(IEnumerable<int> ids)

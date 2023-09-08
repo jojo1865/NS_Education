@@ -37,11 +37,13 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             .Select((s, i) => new UserLog_GetTypeList_Output_APIItem
             {
                 Title = s,
-                UserLogType = i
+                UserLogType = i,
+                UserPasswordLogType = -i
             })
             .Concat(UserPasswordLogTypes.Select((s, i) => new UserLog_GetTypeList_Output_APIItem
             {
                 Title = s,
+                UserLogType = -i,
                 UserPasswordLogType = i
             })).ToSafeReadOnlyCollection();
 

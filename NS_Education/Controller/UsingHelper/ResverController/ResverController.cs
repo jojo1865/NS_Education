@@ -517,15 +517,17 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             }
 
             ReserveHeadGetListState? state = (ReserveHeadGetListState?)entity.State;
-            if (state == ReserveHeadGetListState.Terminated ||
+            if (state == ReserveHeadGetListState.CheckedIn ||
+                state == ReserveHeadGetListState.Terminated ||
                 state == ReserveHeadGetListState.FullyPaid)
             {
-                AddError(1, "已結帳或已中止的預約單無法修改確認狀態！");
+                AddError(1, "已報到、已結帳或已中止的預約單無法修改確認狀態！");
                 return GetResponseJson();
             }
 
             // 3. 修改 DB
             WriteResverHeadLog(entity.RHID, ReserveHeadGetListState.Checked);
+            entity.State = (int)ReserveHeadGetListState.Checked;
             entity.CheckFlag = checkFlag ?? throw new ArgumentNullException(nameof(checkFlag));
             await ChangeCheckUpdateDb();
 
@@ -601,6 +603,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             // 3. 修改 DB
             WriteResverHeadLog(entity.RHID, ReserveHeadGetListState.CheckedIn);
             entity.CheckInFlag = checkInFlag ?? throw new ArgumentNullException(nameof(checkInFlag));
+            entity.State = (int)ReserveHeadGetListState.CheckedIn;
             await ChangeCheckInUpdateDb();
 
             // 4. 回傳

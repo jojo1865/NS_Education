@@ -116,6 +116,9 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
                     .Where(md => md.MenuAPI.All(api => api.APIURL != PrivilegeConstants.RootAccessUrl))
                     .AsEnumerable()
                     .Where(md => md.URL.HasContent())
+                    // 確保預約管理總是在第一行
+                    .OrderBy(md => md.URL == "/appointment-management" ? 1 : 2)
+                    .ThenBy(md => md.MDID)
                     .Select(md =>
                     {
                         return new

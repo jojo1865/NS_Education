@@ -133,15 +133,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         private static ReserveHeadGetListState GetState(Resver_Head entity)
         {
-            return entity.DeleteFlag ? ReserveHeadGetListState.Deleted :
-                entity.CheckInFlag ? ReserveHeadGetListState.CheckedIn :
-                entity.CheckFlag ? ReserveHeadGetListState.Checked :
-                entity.Resver_Bill
-                    .Where(b => !b.DeleteFlag)
-                    .Where(b => b.PayFlag)
-                    .Sum(b => (int?)b.Price)
-                >= entity.QuotedPrice ? ReserveHeadGetListState.FullyPaid :
-                ReserveHeadGetListState.Draft;
+            return (ReserveHeadGetListState)(ReserveHeadGetListState?)entity.State;
         }
 
         #endregion

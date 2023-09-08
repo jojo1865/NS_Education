@@ -184,12 +184,12 @@ namespace NS_Education.Controller.UsingHelper
             HashSet<int> deleteIds = input.GetUniqueDeleteId();
 
             var data = await DC.M_Customer_Gift
-                               .Where(mcg => mcg.ids.Contains(mcg.MID))
-                               .ToArrayAsync();
+                .Where(mcg => deleteIds.Contains(mcg.MID))
+                .ToArrayAsync();
 
             DC.M_Customer_Gift.RemoveRange(data);
             await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
-            
+
             return GetResponseJson();
         }
 

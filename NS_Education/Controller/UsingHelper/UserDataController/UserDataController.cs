@@ -295,7 +295,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             if (!isUpdateSuccessful)
                 return GetResponseJson();
 
-            JwtAuthFilter.ResetUidIdle(output.UID);
+            JwtAuthFilter.StartIdleTimer(output.UID);
             return GetResponseJson(output);
         }
 

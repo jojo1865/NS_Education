@@ -156,7 +156,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             // 沒有紀錄時，新增一筆，返回
             // 有紀錄時，檢查是否超出限定秒數，沒有就更新然後返回，超過就拋出錯誤
 
-            if (hasRecord && (DateTime.Now - lastTime).Seconds > idleSeconds) throw new Exception(TokenExpired);
+            if (hasRecord && lastTime.AddSeconds(idleSeconds) < DateTime.Now) throw new Exception(TokenExpired);
 
             UidToLastRequestTime[uid] = DateTime.Now;
         }
@@ -399,6 +399,11 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
         private static string GetToken(ControllerContext actionContext)
         {
             return FilterStaticTools.GetJwtToken(actionContext.HttpContext.Request);
+        }
+
+        public static void StartIdleTimer(int uid)
+        {
+            UidToLastRequestTime[uid] = DateTime.Now;
         }
 
         #region 錯誤訊息

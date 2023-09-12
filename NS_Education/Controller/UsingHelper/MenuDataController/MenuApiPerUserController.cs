@@ -79,6 +79,15 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 .OrderBy(item => item.SortNo)
                 .ToList();
 
+            // 特殊處理：如果 URL 是 null 且 IsShownOnLeft == true，表示是純顯示的，通常是選單的種類名稱
+            // 這個時候，假如其底下 items 為空，表示當前使用者實際上沒辦法存取該類，所以排除這類選單
+            response.Items = response.Items
+                .Where(i =>
+                    i.URL.HasContent()
+                    || !i.IsShownOnLeft
+                    || i.Items.Any())
+                .ToList();
+
             return GetResponseJson(response);
         }
 

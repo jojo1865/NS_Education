@@ -194,7 +194,7 @@ namespace NS_Education.Controller.UsingHelper
             else
             {
                 var entity = await DC.B_OrderCode
-                    .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
+                    .Where(sc => !sc.DeleteFlag)
                     .Where(sc => sc.BOCID == id)
                     .FirstOrDefaultAsync();
 

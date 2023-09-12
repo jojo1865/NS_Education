@@ -171,7 +171,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             else
             {
                 var entity = await DC.B_StaticCode
-                    .Where(sc => sc.ActiveFlag && !sc.DeleteFlag)
+                    .Where(sc => !sc.DeleteFlag)
                     .Where(sc => sc.BSCID == id)
                     .FirstOrDefaultAsync();
 

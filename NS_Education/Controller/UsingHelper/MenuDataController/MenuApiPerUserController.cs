@@ -193,13 +193,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                 MDID = thisNodeId,
                 Title = thisNodeOrNull?.Title ?? "",
                 IsShownOnLeft = thisNodeOrNull?.IsVisibleOnLeft ?? false,
-                URL = thisNodeOrNull?.URL.HasContent() ?? false
-                    ? thisNodeOrNull.URL
-                    : children?
-                          .OrderBy(child => child.SortNo)
-                          .Select(child => child.URL)
-                          .FirstOrDefault() ??
-                      "",
+                URL = thisNodeOrNull?.URL ?? "",
                 SortNo = thisNodeOrNull?.SortNo ?? 0,
                 // 這裡在做遞迴
                 Items = children?.Select(child =>

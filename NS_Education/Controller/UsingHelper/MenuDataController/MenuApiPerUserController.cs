@@ -192,7 +192,8 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             {
                 MDID = thisNodeId,
                 Title = thisNodeOrNull?.Title ?? "",
-                IsShownOnLeft = thisNodeOrNull?.IsVisibleOnLeft ?? false,
+                IsShownOnLeft = (thisNodeOrNull?.IsVisibleOnLeft ?? false) &&
+                                (usableApis?.Any(a => a.APIType == (int)MenuApiType.Show) ?? false),
                 URL = thisNodeOrNull?.URL ?? "",
                 SortNo = thisNodeOrNull?.SortNo ?? 0,
                 // 這裡在做遞迴

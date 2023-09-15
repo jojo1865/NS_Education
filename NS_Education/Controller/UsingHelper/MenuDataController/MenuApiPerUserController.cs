@@ -29,7 +29,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
-        public async Task<string> GetList()
+        public async Task<string> GetList([FromUri] string route)
         {
             // 1. 取得所有權限
             IOrderedQueryable<MenuData> query = GetListAllOrderedQuery();
@@ -49,6 +49,13 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             {
                 menuDataDict[specialMenu.MDID] = specialMenu;
             }
+
+            // 如果有給 route，只留下完全符合的一筆
+            if (route.HasContent())
+                menuDataDict = menuDataDict
+                    .Where(kvp => kvp.Value.URL == route)
+                    .Take(1)
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             // ParentID : MenuData
             ILookup<int, MenuData> parentToChildrenLookUp =
@@ -87,6 +94,10 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                     || !i.IsShownOnLeft
                     || i.Items.Any())
                 .ToList();
+
+            // 如果有給 route 卻什麼都沒有，至少回傳一個空務建
+            if (route.HasContent() && !response.Items.Any())
+                response.Items.Add(new MenuData_GetListByUid_Output_Node_APIItem());
 
             return GetResponseJson(response);
         }

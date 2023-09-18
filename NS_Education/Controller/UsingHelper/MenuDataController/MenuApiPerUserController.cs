@@ -95,7 +95,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
                     || i.Items.Any())
                 .ToList();
 
-            // 如果有給 route 卻什麼都沒有，至少回傳一個空務建
+            // 如果有給 route 卻什麼都沒有，至少回傳一個空物件
             if (route.HasContent() && !response.Items.Any())
                 response.Items.Add(new MenuData_GetListByUid_Output_Node_APIItem());
 

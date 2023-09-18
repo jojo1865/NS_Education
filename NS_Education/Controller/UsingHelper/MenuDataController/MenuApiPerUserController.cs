@@ -82,9 +82,11 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // createdNodes 的 key 是所有人的 parentId
             // 所以 0 會有一筆空資料 (MDID = 0, 其他欄位為預設)
             // 而 createdNodes[0].Items 就是實際的樹
-            response.Items = createdNodes[0].Items
-                .OrderBy(item => item.SortNo)
-                .ToList();
+            response.Items = createdNodes.Any()
+                ? createdNodes[0].Items
+                    .OrderBy(item => item.SortNo)
+                    .ToList()
+                : new List<MenuData_GetListByUid_Output_Node_APIItem>();
 
             // 特殊處理：如果 URL 是 null 且 IsShownOnLeft == true，表示是純顯示的，通常是選單的種類名稱
             // 這個時候，假如其底下 items 為空，表示當前使用者實際上沒辦法存取該類，所以排除這類選單

@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Antlr.Runtime.Misc;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.MenuData.MenuApi.GetListByUid;
 using NS_Education.Models.Entities;
@@ -31,6 +32,16 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.None)]
         public async Task<string> GetList([FromUri] string route)
         {
+            // 0. 嘗試調整輸入值
+            if (route.HasContent())
+            {
+                route = route.Trim();
+                if (!route.StartsWith("/"))
+                    route = "/" + route;
+                if (route.EndsWith("/"))
+                    route = route.Substring(0, route.Length - 1);
+            }
+
             // 1. 取得所有權限
             IOrderedQueryable<MenuData> query = GetListAllOrderedQuery();
 
@@ -82,11 +93,17 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             // createdNodes 的 key 是所有人的 parentId
             // 所以 0 會有一筆空資料 (MDID = 0, 其他欄位為預設)
             // 而 createdNodes[0].Items 就是實際的樹
-            response.Items = createdNodes.Any()
-                ? createdNodes[0].Items
-                    .OrderBy(item => item.SortNo)
-                    .ToList()
-                : new List<MenuData_GetListByUid_Output_Node_APIItem>();
+            response.Items =
+                !createdNodes.Any()
+                    ? new ListStack<MenuData_GetListByUid_Output_Node_APIItem>()
+                    : route.HasContent()
+                        ? createdNodes.Where(n => n.Value.URL == route)
+                            .Take(1)
+                            .Select(n => n.Value)
+                            .ToList()
+                        : createdNodes[0].Items
+                            .OrderBy(item => item.SortNo)
+                            .ToList();
 
             // 特殊處理：如果 URL 是 null 且 IsShownOnLeft == true，表示是純顯示的，通常是選單的種類名稱
             // 這個時候，假如其底下 items 為空，表示當前使用者實際上沒辦法存取該類，所以排除這類選單

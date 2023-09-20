@@ -220,7 +220,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
                 .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID,
                     () => AddError(UnsupportedValue("上層 ID", nameof(input.ParentID), "不允許將自己設為上層！")))
                 .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
-                        await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)),
+                        await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.BCID)),
                     () => AddError(NotFound("上層 ID", nameof(input.ParentID))))
                 .Validate(i => i.CategoryType.IsInBetween(0, 9),
                     () => AddError(OutOfRange("分類所屬類別", nameof(Category_Submit_Input_APIItem.CategoryType), 0, 9)))
@@ -262,7 +262,7 @@ namespace NS_Education.Controller.UsingHelper.CategoryController
                 .Validate(i => i.ParentID == 0 || i.ParentID != i.BCID,
                     () => AddError(UnsupportedValue("上層 ID", nameof(input.ParentID), "不允許將自己設為上層！")))
                 .ValidateAsync(async i => i.ParentID == 0 || i.ParentID > 0 &&
-                        await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.ParentID)),
+                        await DC.B_Category.ValidateIdExists(i.ParentID, nameof(B_Category.BCID)),
                     () => AddError(NotFound("上層 ID", nameof(input.ParentID))))
                 .Validate(i => i.CategoryType.IsInBetween(0, 9),
                     () => AddError(OutOfRange("分類所屬類別", nameof(Category_Submit_Input_APIItem.CategoryType), 0, 9)))

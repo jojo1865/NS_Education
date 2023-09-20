@@ -38,13 +38,15 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             {
                 Title = s,
                 UserLogType = i,
-                UserPasswordLogType = -i - 1
+                UserPasswordLogType = -i - 1,
+                Type = (UserLogType)(0 + i)
             })
             .Concat(UserPasswordLogTypes.Select((s, i) => new UserLog_GetTypeList_Output_APIItem
             {
                 Title = s,
                 UserLogType = -i - 1,
-                UserPasswordLogType = i
+                UserPasswordLogType = i,
+                Type = (UserLogType)(4 + i)
             })).ToSafeReadOnlyCollection();
 
         private readonly IGetListLocalHelper _getListLocalHelper;
@@ -129,6 +131,9 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetUserLogList(UserLog_GetList_Input_APIItem input)
         {
+            // 0. 如果有輸入 Type，覆寫篩選
+            GetUserLogListSanitizeInput(input);
+
             // 這個功能同時需要使用 UserLog 和 UserPasswordLog，所以無法使用 Helper。
             // 1. 驗證輸入
             if (!await GetListPagedValidateInput(input))
@@ -146,6 +151,49 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             response.Items = result.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToArray();
 
             return GetResponseJson(response);
+        }
+
+        private void GetUserLogListSanitizeInput(UserLog_GetList_Input_APIItem input)
+        {
+            UserLogType? type = (UserLogType?)input.Type;
+
+            if (type == null)
+                return;
+
+            switch (type)
+            {
+                case UserLogType.Show:
+                    input.UserLogType = 0;
+                    input.UserPasswordLogType = -1;
+                    break;
+                case UserLogType.Add:
+                    input.UserLogType = 1;
+                    input.UserPasswordLogType = -1;
+                    break;
+                case UserLogType.Edit:
+                    input.UserLogType = 2;
+                    input.UserPasswordLogType = -1;
+                    break;
+                case UserLogType.Delete:
+                    input.UserLogType = 3;
+                    input.UserPasswordLogType = -1;
+                    break;
+                case UserLogType.Login:
+                    input.UserLogType = -1;
+                    input.UserPasswordLogType = 0;
+                    break;
+                case UserLogType.Logout:
+                    input.UserLogType = -1;
+                    input.UserPasswordLogType = 1;
+                    break;
+                case UserLogType.ChangePassword:
+                    input.UserLogType = -1;
+                    input.UserPasswordLogType = 2;
+                    break;
+                default:
+                    AddError(NotSupportedValue("查詢種類", nameof(input.Type), "未知的 Log 種類！"));
+                    break;
+            }
         }
 
         public async Task<bool> GetListPagedValidateInput(UserLog_GetList_Input_APIItem input)

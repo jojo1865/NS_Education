@@ -843,6 +843,7 @@
         <Compile Include="Variables\StaticCodeType.cs"/>
         <Compile Include="Variables\TableCommentDictionary.cs"/>
         <Compile Include="Variables\UserLogControlType.cs"/>
+        <Compile Include="Variables\UserLogType.cs"/>
         <Compile Include="Variables\UserPasswordLogType.cs"/>
     </ItemGroup>
     <ItemGroup>

@@ -908,6 +908,20 @@
           <Property Name="NewPassword" Type="nvarchar" MaxLength="100" />
           <Property Name="CreDate" Type="datetime" Nullable="false" />
         </EntityType>
+        <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'db_NS_Education.dbo.UserLogView' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+        <EntityType Name="UserLogView">
+          <Key>
+            <PropertyRef Name="CreDate" />
+            <PropertyRef Name="Type" />
+          </Key>
+          <Property Name="CreDate" Type="datetime" Nullable="false" />
+          <Property Name="UserName" Type="nvarchar" MaxLength="50" />
+          <Property Name="Type" Type="varchar" MaxLength="12" Nullable="false" />
+          <Property Name="TypeNo" Type="int" />
+          <Property Name="TableName" Type="nvarchar(max)" />
+          <Property Name="RequestUrl" Type="nvarchar(max)" />
+        </EntityType>
         <Association Name="CustomerGift_B_StaticCode_BSCID_fk">
           <End Role="B_StaticCode" Type="Self.B_StaticCode" Multiplicity="1" />
           <End Role="GiftSending" Type="Self.GiftSending" Multiplicity="*" />
@@ -2030,6 +2044,16 @@
     [Lookup].[IdPropertyName] AS [IdPropertyName], 
     [Lookup].[EditPageRoute] AS [EditPageRoute]
     FROM [dbo].[Lookup] AS [Lookup]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="UserLogView" EntityType="Self.UserLogView" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [UserLogView].[CreDate] AS [CreDate], 
+    [UserLogView].[UserName] AS [UserName], 
+    [UserLogView].[Type] AS [Type], 
+    [UserLogView].[TypeNo] AS [TypeNo], 
+    [UserLogView].[TableName] AS [TableName], 
+    [UserLogView].[RequestUrl] AS [RequestUrl]
+    FROM [dbo].[UserLogView] AS [UserLogView]</DefiningQuery>
           </EntitySet>
           <AssociationSet Name="CustomerGift_B_StaticCode_BSCID_fk" Association="Self.CustomerGift_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
@@ -3448,6 +3472,18 @@
           <Property Name="IdPropertyName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="EditPageRoute" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
         </EntityType>
+        <EntityType Name="UserLogView">
+          <Key>
+            <PropertyRef Name="CreDate" />
+            <PropertyRef Name="Type" />
+          </Key>
+          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UserName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Type" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TypeNo" Type="Int32" />
+          <Property Name="TableName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="RequestUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
         <Association Name="FK_B_Device_B_Category">
           <End Role="B_Category" Type="Self.B_Category" Multiplicity="1" />
           <End Role="B_Device" Type="Self.B_Device" Multiplicity="*" />
@@ -4550,6 +4586,7 @@
           <EntitySet Name="UserLog" EntityType="Self.UserLog" />
           <EntitySet Name="UserPasswordLog" EntityType="Self.UserPasswordLog" />
           <EntitySet Name="Lookup" EntityType="Self.Lookup" />
+          <EntitySet Name="UserLogView" EntityType="Self.UserLogView" />
           <AssociationSet Name="FK_B_Device_B_Category" Association="Self.FK_B_Device_B_Category">
             <End Role="B_Category" EntitySet="B_Category" />
             <End Role="B_Device" EntitySet="B_Device" />
@@ -5827,6 +5864,18 @@
                 <ScalarProperty Name="Field5PropertyName" ColumnName="Field5PropertyName" />
                 <ScalarProperty Name="IdPropertyName" ColumnName="IdPropertyName" />
                 <ScalarProperty Name="EditPageRoute" ColumnName="EditPageRoute" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserLogView">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.UserLogView">
+              <MappingFragment StoreEntitySet="UserLogView">
+                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="TypeNo" ColumnName="TypeNo" />
+                <ScalarProperty Name="TableName" ColumnName="TableName" />
+                <ScalarProperty Name="RequestUrl" ColumnName="RequestUrl" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

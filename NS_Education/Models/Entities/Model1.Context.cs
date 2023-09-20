@@ -74,5 +74,6 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<UserLog> UserLog { get; set; }
         public virtual DbSet<UserPasswordLog> UserPasswordLog { get; set; }
         public virtual DbSet<Lookup> Lookup { get; set; }
+        public virtual DbSet<UserLogView> UserLogView { get; set; }
     }
 }

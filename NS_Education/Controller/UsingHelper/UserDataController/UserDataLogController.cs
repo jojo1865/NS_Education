@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BeingValidated;
-using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetList;
 using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetLogKeepDays;
 using NS_Education.Models.APIItems.Controller.UserData.UserLog.GetTypeList;
@@ -28,7 +28,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
     /// 處理的是 UserLog，但因為目前開的 Route 為 UserData，因此還是歸類在 UserDataController，
     /// </summary>
     public class UserDataLogController : PublicClass,
-        IGetListLocal<UserLog_GetTypeList_Output_APIItem>
+        IGetListLocal<UserLog_GetTypeList_Output_APIItem>,
+        IGetListPaged<UserLogView, UserLog_GetList_Input_APIItem, UserLog_GetList_Output_Row_APIItem>
     {
         private static readonly string[] UserLogTypes = { "瀏覽", "新增", "修改", "刪除" };
         private static readonly string[] UserPasswordLogTypes = { "成功登入系統", "從系統登出", "更改密碼" };
@@ -50,6 +51,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             })).ToSafeReadOnlyCollection();
 
         private readonly IGetListLocalHelper _getListLocalHelper;
+        private readonly IGetListPagedHelper<UserLog_GetList_Input_APIItem> _getListPagedHelper;
 
         #region Initialization
 
@@ -57,6 +59,9 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             _getListLocalHelper =
                 new GetListLocalHelper<UserDataLogController, UserLog_GetTypeList_Output_APIItem>(this);
+            _getListPagedHelper =
+                new GetListPagedHelper<UserDataLogController, UserLogView, UserLog_GetList_Input_APIItem,
+                    UserLog_GetList_Output_Row_APIItem>(this);
         }
 
         #endregion
@@ -127,30 +132,19 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         #region GetList
 
+        [NonAction]
+        public Task<string> GetList(UserLog_GetList_Input_APIItem input)
+        {
+            throw new NotImplementedException("Use GetUserLogList instead.");
+        }
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetUserLogList(UserLog_GetList_Input_APIItem input)
         {
-            // 0. 如果有輸入 Type，覆寫篩選
+            // 如果有輸入 Type，覆寫篩選
             GetUserLogListSanitizeInput(input);
-
-            // 這個功能同時需要使用 UserLog 和 UserPasswordLog，所以無法使用 Helper。
-            // 1. 驗證輸入
-            if (!await GetListPagedValidateInput(input))
-                return GetResponseJson();
-
-            // 2. 查詢資料並轉成回覆物件
-            var result = (await GetListPagedResult(input)).ToArray();
-
-            // 3. 回傳
-            CommonResponseForPagedList<UserLog_GetList_Output_Row_APIItem> response =
-                new CommonResponseForPagedList<UserLog_GetList_Output_Row_APIItem>();
-
-            response.SetByInput(input);
-            response.AllItemCt = result.Length;
-            response.Items = result.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToArray();
-
-            return GetResponseJson(response);
+            return await _getListPagedHelper.GetPagedList(input);
         }
 
         private void GetUserLogListSanitizeInput(UserLog_GetList_Input_APIItem input)
@@ -206,90 +200,48 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             return await Task.FromResult(isValid);
         }
 
-        public async Task<IEnumerable<UserLog_GetList_Output_Row_APIItem>> GetListPagedResult(
-            UserLog_GetList_Input_APIItem input)
+        public IOrderedQueryable<UserLogView> GetListPagedOrderedQuery(UserLog_GetList_Input_APIItem input)
         {
-            DateTime threeMonthsAgo = DateTime.Now.AddMonths(-3);
-
-            // 有以下幾種情況：
-            // |- a. UserLogType 不合法，UserPasswordLogType 不合法：不篩選，全查
-            // |- b. UserLogType 合法，UserPasswordLogType 不合法：只查 UserLog 並套用篩選
-            // |- c. UserLogType 不合法，UserPasswordLogType 合法：只查 UserPasswordLog 並套用篩選
-            // +- d. UserLogType 合法，UserPasswordLogType 合法：兩個都查並套用篩選
-
-            var userLogQuery = DC.UserLog
-                .Include(ul => ul.UserData)
-                .Where(ul => ul.CreDate >= threeMonthsAgo);
-
-            bool isUserLogTypeValid = input.UserLogType.IsInBetween(0, 3);
-            bool isUserPasswordLogTypeValid = input.UserPasswordLogType.IsInBetween(0, 2);
-
-            if (isUserLogTypeValid)
-                userLogQuery = userLogQuery.Where(ul => ul.ControlType == input.UserLogType);
-            else if (isUserPasswordLogTypeValid)
-                userLogQuery = userLogQuery.Take(0);
-
-            var userPasswordLogQuery = DC.UserPasswordLog
-                .Include(upl => upl.UserData)
-                .Where(upl => upl.CreDate >= threeMonthsAgo);
-
-            if (isUserPasswordLogTypeValid)
-                userPasswordLogQuery = userPasswordLogQuery.Where(upl => upl.Type == input.UserPasswordLogType);
-            else if (isUserLogTypeValid)
-                userPasswordLogQuery = userPasswordLogQuery.Take(0);
-
-            var userLogs = (await userLogQuery
-                        .ToArrayAsync())
-                    .Select(ul => new UserLog_GetList_Output_Row_APIItem
-                    {
-                        Time = ul.CreDate.ToFormattedStringDateTime(),
-                        Actor = ul.UserData?.UserName ?? "",
-                        EventType = UserLogTypes.Length > ul.ControlType
-                            ? UserLogTypes[ul.ControlType]
-                            : "",
-                        Description = "使用者" +
-                                      (UserLogTypes.Length > ul.ControlType
-                                          ? UserLogTypes[ul.ControlType]
-                                          : "操作") +
-                                      TableCommentDictionary.GetCommentByTableName(ul.TargetTable),
-                        CreDate = ul.CreDate
-                    })
-                ;
-
-            var userPasswordLogs = (await userPasswordLogQuery
-                        .ToArrayAsync())
-                    .Select(upl => new UserLog_GetList_Output_Row_APIItem
-                    {
-                        Time = upl.CreDate.ToFormattedStringDateTime(),
-                        Actor = upl.UserData?.UserName ?? "",
-                        EventType = UserPasswordLogTypes.Length > upl.Type
-                            ? UserPasswordLogTypes[upl.Type]
-                            : "",
-                        Description = "使用者" +
-                                      (UserPasswordLogTypes.Length > upl.Type
-                                          ? UserPasswordLogTypes[upl.Type]
-                                          : $"操作 PasswordLog, type: {upl.Type}"),
-                        CreDate = upl.CreDate
-                    })
-                ;
-
-            var result = userLogs
-                .Concat(userPasswordLogs);
+            var query = DC.UserLogView
+                .AsNoTracking()
+                .AsQueryable();
 
             if (input.Keyword.HasContent())
-                result = result.Where(i =>
-                    i.EventType.Contains(input.Keyword) || i.Description.Contains(input.Keyword));
+                query = query.Where(ulv =>
+                    ulv.TableName.Contains(input.Keyword) || ulv.RequestUrl.Contains(input.Keyword));
 
-            result = result.OrderByDescending(i => i.CreDate);
+            if (input.Type.HasValue)
+                query = query.Where(ulv => ulv.TypeNo == input.Type);
+            else if (input.UserLogType > -1)
+                query = query.Where(ulv => ulv.TypeNo == input.UserLogType);
+            else if (input.UserPasswordLogType > -1)
+                query = query.Where(ulv => ulv.TypeNo == input.UserPasswordLogType + 4);
 
-            int index = 0;
-            var resultItems = result.ToArray();
-            foreach (UserLog_GetList_Output_Row_APIItem item in resultItems)
+            return query.OrderByDescending(ulv => ulv.CreDate);
+        }
+
+        public async Task<UserLog_GetList_Output_Row_APIItem> GetListPagedEntityToRow(UserLogView entity)
+        {
+            return await Task.FromResult(new UserLog_GetList_Output_Row_APIItem
             {
-                item.SetIndex(index++);
-            }
+                Time = entity.CreDate.ToFormattedStringDateTime(),
+                Actor = entity.UserName,
+                EventType = entity.Type,
+                Description = GetDescription(entity),
+                CreDate = entity.CreDate
+            });
+        }
 
-            return input.ReverseOrder ? resultItems.Reverse() : resultItems;
+        private static string GetDescription(UserLogView entity)
+        {
+            StringBuilder sb = new StringBuilder("使用者");
+
+            sb.Append(entity.Type);
+
+            if (entity.TableName.HasContent())
+                sb.Append(entity.TableName + (entity.TableName.EndsWith("檔") ? "" : "檔"));
+
+            return sb.ToString();
         }
 
         #endregion

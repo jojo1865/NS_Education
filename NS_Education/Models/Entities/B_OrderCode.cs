@@ -22,7 +22,6 @@ namespace NS_Education.Models.Entities
             this.D_Throw = new HashSet<D_Throw>();
             this.B_PartnerItem = new HashSet<B_PartnerItem>();
             this.B_SiteData = new HashSet<B_SiteData>();
-            this.D_FoodCategory = new HashSet<D_FoodCategory>();
             this.Resver_Device = new HashSet<Resver_Device>();
             this.Resver_Other = new HashSet<Resver_Other>();
             this.Resver_Site = new HashSet<Resver_Site>();
@@ -53,8 +52,6 @@ namespace NS_Education.Models.Entities
         public virtual ICollection<B_PartnerItem> B_PartnerItem { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<B_SiteData> B_SiteData { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<D_FoodCategory> D_FoodCategory { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Device> Resver_Device { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

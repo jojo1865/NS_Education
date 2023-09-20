@@ -286,7 +286,6 @@
           <Property Name="Title" Type="nvarchar" MaxLength="60" />
           <Property Name="UnitPrice" Type="int" Nullable="false" />
           <Property Name="Price" Type="int" Nullable="false" />
-          <Property Name="BOCID" Type="int" Nullable="false" />
           <Property Name="ActiveFlag" Type="bit" Nullable="false" />
           <Property Name="DeleteFlag" Type="bit" Nullable="false" />
           <Property Name="CreDate" Type="datetime" Nullable="false" />
@@ -1270,18 +1269,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_D_FoodCategory_B_OrderCode">
-          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
-          <End Role="D_FoodCategory" Type="Self.D_FoodCategory" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="B_OrderCode">
-              <PropertyRef Name="BOCID" />
-            </Principal>
-            <Dependent Role="D_FoodCategory">
-              <PropertyRef Name="BOCID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_D_Hall_D_Department">
           <End Role="D_Department" Type="Self.D_Department" Multiplicity="1" />
           <End Role="D_Hall" Type="Self.D_Hall" Multiplicity="*" />
@@ -2171,10 +2158,6 @@
             <End Role="D_Company" EntitySet="D_Company" />
             <End Role="D_Department" EntitySet="D_Department" />
           </AssociationSet>
-          <AssociationSet Name="FK_D_FoodCategory_B_OrderCode" Association="Self.FK_D_FoodCategory_B_OrderCode">
-            <End Role="B_OrderCode" EntitySet="B_OrderCode" />
-            <End Role="D_FoodCategory" EntitySet="D_FoodCategory" />
-          </AssociationSet>
           <AssociationSet Name="FK_D_Hall_D_Department" Association="Self.FK_D_Hall_D_Department">
             <End Role="D_Department" EntitySet="D_Department" />
             <End Role="D_Hall" EntitySet="D_Hall" />
@@ -2481,7 +2464,6 @@
           <NavigationProperty Name="D_Throw" Relationship="Self.D_Throw_B_OrderCode_BOCID_fk" FromRole="B_OrderCode" ToRole="D_Throw" />
           <NavigationProperty Name="B_PartnerItem" Relationship="Self.FK_B_PartnerItem_B_OrderCode" FromRole="B_OrderCode" ToRole="B_PartnerItem" />
           <NavigationProperty Name="B_SiteData" Relationship="Self.FK_B_SiteData_B_OrderCode" FromRole="B_OrderCode" ToRole="B_SiteData" />
-          <NavigationProperty Name="D_FoodCategory" Relationship="Self.FK_D_FoodCategory_B_OrderCode" FromRole="B_OrderCode" ToRole="D_FoodCategory" />
           <NavigationProperty Name="Resver_Device" Relationship="Self.FK_Resver_Device_B_OrderCode" FromRole="B_OrderCode" ToRole="Resver_Device" />
           <NavigationProperty Name="Resver_Other" Relationship="Self.FK_Resver_Other_B_OrderCode" FromRole="B_OrderCode" ToRole="Resver_Other" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_B_OrderCode" FromRole="B_OrderCode" ToRole="Resver_Site" />
@@ -2765,14 +2747,12 @@
           <Property Name="Title" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
           <Property Name="UnitPrice" Type="Int32" Nullable="false" />
           <Property Name="Price" Type="Int32" Nullable="false" />
-          <Property Name="BOCID" Type="Int32" Nullable="false" />
           <Property Name="ActiveFlag" Type="Boolean" Nullable="false" />
           <Property Name="DeleteFlag" Type="Boolean" Nullable="false" />
           <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="CreUID" Type="Int32" Nullable="false" />
           <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UpdUID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="B_OrderCode" Relationship="Self.FK_D_FoodCategory_B_OrderCode" FromRole="D_FoodCategory" ToRole="B_OrderCode" />
           <NavigationProperty Name="Resver_Throw_Food" Relationship="Self.FK_Resver_Throw_D_D_FoodCategory" FromRole="D_FoodCategory" ToRole="Resver_Throw_Food" />
         </EntityType>
         <EntityType Name="D_Hall">
@@ -3686,18 +3666,6 @@
               <PropertyRef Name="BOCID" />
             </Principal>
             <Dependent Role="B_SiteData">
-              <PropertyRef Name="BOCID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_D_FoodCategory_B_OrderCode">
-          <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
-          <End Role="D_FoodCategory" Type="Self.D_FoodCategory" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="B_OrderCode">
-              <PropertyRef Name="BOCID" />
-            </Principal>
-            <Dependent Role="D_FoodCategory">
               <PropertyRef Name="BOCID" />
             </Dependent>
           </ReferentialConstraint>
@@ -4655,10 +4623,6 @@
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
             <End Role="B_SiteData" EntitySet="B_SiteData" />
           </AssociationSet>
-          <AssociationSet Name="FK_D_FoodCategory_B_OrderCode" Association="Self.FK_D_FoodCategory_B_OrderCode">
-            <End Role="B_OrderCode" EntitySet="B_OrderCode" />
-            <End Role="D_FoodCategory" EntitySet="D_FoodCategory" />
-          </AssociationSet>
           <AssociationSet Name="FK_Resver_Device_B_OrderCode" Association="Self.FK_Resver_Device_B_OrderCode">
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
             <End Role="Resver_Device" EntitySet="Resver_Device" />
@@ -5227,7 +5191,6 @@
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
-                <ScalarProperty Name="BOCID" ColumnName="BOCID" />
                 <ScalarProperty Name="ActiveFlag" ColumnName="ActiveFlag" />
                 <ScalarProperty Name="DeleteFlag" ColumnName="DeleteFlag" />
                 <ScalarProperty Name="CreDate" ColumnName="CreDate" />

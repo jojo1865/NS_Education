@@ -31,7 +31,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         IGetListLocal<UserLog_GetTypeList_Output_APIItem>
     {
         private static readonly string[] UserLogTypes = { "瀏覽", "新增", "修改", "刪除" };
-        private static readonly string[] UserPasswordLogTypes = { "登入", "登出", "更改密碼" };
+        private static readonly string[] UserPasswordLogTypes = { "成功登入系統", "從系統登出", "更改密碼" };
 
         private static readonly IList<UserLog_GetTypeList_Output_APIItem> typeList = UserLogTypes
             .Select((s, i) => new UserLog_GetTypeList_Output_APIItem

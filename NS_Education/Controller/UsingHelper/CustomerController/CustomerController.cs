@@ -752,6 +752,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             // 驗證業務如果有輸入聯絡方式種類時，輸入欄位格式正確
             bool isBusinessUserContactValid = input.Items.StartValidateElements()
+                .ForceSkipIf(i => i.Phone.IsNullOrWhiteSpace())
                 .Validate(i => i.Phone.HasLengthBetween(0, 50),
                     i => AddError(LengthOutOfRange($"業務負責人（ID {i.BUID}）的聯絡電話", nameof(i.Phone), 0, 50)))
                 .Validate(i => i.Phone.All(Char.IsDigit),

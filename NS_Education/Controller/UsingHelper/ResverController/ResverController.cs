@@ -107,7 +107,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             if (input.CustomerName.HasContent())
                 query = query.Where(rh => rh.CustomerTitle.Contains(input.CustomerName));
 
-            if (input.State.IsAboveZero())
+            // 刪除的資料 State 不會變，所以要做特別處理
+            if (input.State == (int)ReserveHeadGetListState.Deleted)
+                query = query.Where(rh => rh.DeleteFlag);
+            else if (input.State.IsAboveZero())
                 query = query.Where(rh => rh.State == input.State);
 
             return query.OrderByDescending(rh => rh.SDate)
@@ -133,6 +136,9 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         private static ReserveHeadGetListState GetState(Resver_Head entity)
         {
+            if (entity.DeleteFlag)
+                return ReserveHeadGetListState.Deleted;
+
             return (ReserveHeadGetListState)(ReserveHeadGetListState?)entity.State;
         }
 

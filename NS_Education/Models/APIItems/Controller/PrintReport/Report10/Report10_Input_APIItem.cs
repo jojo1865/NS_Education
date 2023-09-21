@@ -8,6 +8,5 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report10
     public class Report10_Input_APIItem : BaseRequestForPagedList
     {
         public IEnumerable<int> CVID { get; set; }
-        public string TargetDate { get; set; }
     }
 }

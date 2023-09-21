@@ -1,4 +1,3 @@
-using System;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +6,6 @@ using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report10;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
-using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
@@ -24,16 +22,12 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         {
             using (NsDbContext dbContext = new NsDbContext())
             {
-                DateTime targetDate = input.TargetDate?.ParseDateTime() ?? DateTime.Today;
-                targetDate = targetDate.Date;
-
                 var query = dbContext.CustomerVisit
                     .Include(cv => cv.Customer)
                     .Include(cv => cv.B_StaticCode)
                     .Include(cv => cv.B_StaticCode1)
                     .Include(cv => cv.BusinessUser)
                     .Where(cv => !cv.DeleteFlag)
-                    .Where(cv => DbFunctions.TruncateTime(cv.VisitDate) == targetDate)
                     .Where(cv => cv.BSCID15 != null)
                     .AsQueryable();
 

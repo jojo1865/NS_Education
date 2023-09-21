@@ -300,6 +300,8 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = input.StartValidate()
                 .Validate(i => i.BOCID == 0,
                     () => AddError(WrongFormat("入帳代號 ID", nameof(input.BOCID))))
+                .Validate(i => i.CodeType.HasContent(),
+                    () => AddError(EmptyNotAllowed("類別", nameof(input.CodeType))))
                 .Validate(i => i.Title.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號名稱", nameof(input.Title))))
                 .Validate(i => i.PrintTitle.HasContent(),
@@ -343,6 +345,8 @@ namespace NS_Education.Controller.UsingHelper
             bool isValid = input.StartValidate()
                 .Validate(i => i.BOCID.IsAboveZero(),
                     () => AddError(WrongFormat("入帳代號 ID", nameof(input.BOCID))))
+                .Validate(i => i.CodeType.HasContent(),
+                    () => AddError(EmptyNotAllowed("類別", nameof(input.CodeType))))
                 .Validate(i => i.Title.HasContent(),
                     () => AddError(EmptyNotAllowed("入帳代號名稱", nameof(input.Title))))
                 .Validate(i => i.PrintTitle.HasContent(),

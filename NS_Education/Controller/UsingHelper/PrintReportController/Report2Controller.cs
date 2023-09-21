@@ -73,15 +73,12 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     PayStatus = GetBills(rh),
                     Sites = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)
-                        .Select((rs, index) =>
+                        .Select((rs, index) => new Report2_Output_Row_Site_APIItem
                         {
-                            return new Report2_Output_Row_Site_APIItem
-                            {
-                                Title = $"場地 {index + 1}：{rs.B_SiteData?.Title ?? ""}",
-                                Date = rs.TargetDate.FormatAsRocYyyMmDd(),
-                                Lines = GetLines(rs),
-                                SeatImage = rs.SeatImage != null ? Convert.ToBase64String(rs.SeatImage) : null
-                            };
+                            Title = $"場地 {index + 1}：{rs.B_SiteData?.Title ?? ""}",
+                            Date = rs.TargetDate.FormatAsRocYyyMmDd(),
+                            Lines = GetLines(rs),
+                            SeatImage = rs.SeatImage != null ? Convert.ToBase64String(rs.SeatImage) : null
                         }),
                     Foods = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)

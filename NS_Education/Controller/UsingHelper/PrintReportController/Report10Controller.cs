@@ -6,6 +6,7 @@ using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report10;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 
@@ -28,7 +29,6 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Include(cv => cv.B_StaticCode1)
                     .Include(cv => cv.BusinessUser)
                     .Where(cv => !cv.DeleteFlag)
-                    .Where(cv => cv.BSCID15 != null)
                     .AsQueryable();
 
                 if (input.CVID != null)
@@ -46,13 +46,13 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         CustomerCode = cv.Customer.Code,
                         CustomerName = cv.Customer.TitleC,
                         TargetTitle = cv.TargetTitle,
-                        VisitMethod = cv.B_StaticCode1.Title,
-                        VisitDate = cv.VisitDate.ToString("yyyy/MM/dd"),
-                        Agent = cv.BusinessUser.Name,
+                        VisitMethod = cv.B_StaticCode1?.Title ?? "",
+                        VisitDate = cv.VisitDate.ToFormattedStringDate(),
+                        Agent = cv.BusinessUser?.Name ?? "",
                         Title = cv.Title,
                         Description = cv.Description,
-                        AfterNote = cv.AfterNote,
-                        NoDealReason = cv.B_StaticCode.Title
+                        AfterNote = cv.AfterNote ?? "",
+                        NoDealReason = cv.B_StaticCode?.Title ?? "未設定"
                     })
                     .Skip(input.GetStartIndex())
                     .Take(input.GetTakeRowCount())

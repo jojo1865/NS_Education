@@ -184,10 +184,25 @@ namespace NS_Education.Controller.UsingHelper
             HashSet<int> deleteIds = input.GetUniqueDeleteId();
 
             var data = await DC.M_Customer_Gift
+                .Include(mcg => mcg.GiftSending)
+                .Include(mcg => mcg.GiftSending.M_Customer_Gift)
                 .Where(mcg => deleteIds.Contains(mcg.MID))
                 .ToArrayAsync();
 
+            // 從刪除的資料中回頭確認，如果造成任何的 GiftSending 再也沒有 M_Customer_Gift，也把該筆 GiftSending 刪除。
+
+            GiftSending[] giftSendingsToDelete = data
+                .Select(d => d.GiftSending)
+                .Where(gs => gs.M_Customer_Gift.All(mcg => deleteIds.Contains(mcg.MID)))
+                .ToArray();
+
+            foreach (GiftSending giftSending in giftSendingsToDelete)
+            {
+                giftSending.DeleteFlag = true;
+            }
+
             DC.M_Customer_Gift.RemoveRange(data);
+
             await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
             return GetResponseJson();

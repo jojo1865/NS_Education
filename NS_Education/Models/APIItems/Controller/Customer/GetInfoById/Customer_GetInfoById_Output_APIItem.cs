@@ -46,6 +46,9 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetInfoById
         public int QuestionCt { get; set; }
         public int GiftCt { get; set; }
 
+        public ICollection<CommonResponseRowForSelectable> BU_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
+
         public ICollection<Customer_GetList_BusinessUser_APIItem> Items { get; set; } =
             new List<Customer_GetList_BusinessUser_APIItem>();
     }

@@ -258,7 +258,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
             // M_Contect 有可能會有 0, 1, 2 筆或以上, 最多只處理兩筆
 
-            return await Task.FromResult(new Customer_GetInfoById_Output_APIItem
+            var result = await Task.FromResult(new Customer_GetInfoById_Output_APIItem
             {
                 CID = entity.CID,
                 BSCID6 = entity.BSCID6,
@@ -296,6 +296,11 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 GiftCt = entity.M_Customer_Gift.Count(cg => !cg.GiftSending.DeleteFlag),
                 Items = GetBusinessUserListFromEntity(entity)
             });
+
+            result.BU_List =
+                await DC.BusinessUser.GetBusinessUserSelectable(result.Items.Select(i => i.BUID).FirstOrDefault());
+
+            return result;
         }
 
         private List<Customer_GetList_BusinessUser_APIItem> GetBusinessUserListFromEntity(Customer entity)

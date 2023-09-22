@@ -28,6 +28,10 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetInfoById
         public string Email { get; set; }
         public string InvoiceTitle { get; set; }
         public string ContactName { get; set; }
+
+        public ICollection<CommonResponseRowForSelectable> ContactType_List { get; set; } =
+            new List<CommonResponseRowForSelectable>();
+
         public int ContactType1 { get; set; }
         public string ContactData1 { get; set; }
         public int ContactType2 { get; set; }

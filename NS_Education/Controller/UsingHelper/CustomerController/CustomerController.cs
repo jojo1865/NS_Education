@@ -278,6 +278,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 Email = entity.Email ?? "",
                 InvoiceTitle = entity.InvoiceTitle ?? "",
                 ContactName = entity.ContectName ?? "",
+                ContactType_List = ContactTypeController.GetContactTypeSelectable(
+                    new[] { contact1?.ContectType ?? -1, contact2?.ContectType ?? -1 }
+                ),
                 ContactType1 = contact1?.ContectType ?? -1,
                 ContactData1 = contact1?.ContectData ?? "",
                 ContactType2 = contact2?.ContectType ?? -1,

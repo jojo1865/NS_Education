@@ -91,6 +91,20 @@ namespace NS_Education.Controller.UsingHelper
             }).ToList();
         }
 
+        public static ICollection<CommonResponseRowForSelectable> GetContactTypeSelectable(IEnumerable<int> selectIds)
+        {
+            selectIds = selectIds.ToArray();
+
+            var selectable = GetContactTypeSelectable(selectIds.FirstOrDefault()).ToList();
+
+            foreach (CommonResponseRowForSelectable s in selectable)
+            {
+                s.SelectFlag = selectIds.Contains(s.ID);
+            }
+
+            return selectable;
+        }
+
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList()

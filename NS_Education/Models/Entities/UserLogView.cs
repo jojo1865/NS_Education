@@ -16,9 +16,9 @@ namespace NS_Education.Models.Entities
     {
         public System.DateTime CreDate { get; set; }
         public string UserName { get; set; }
-        public string Type { get; set; }
         public Nullable<int> TypeNo { get; set; }
-        public string TableName { get; set; }
+        public string Type { get; set; }
+        public string Description { get; set; }
         public string RequestUrl { get; set; }
     }
 }

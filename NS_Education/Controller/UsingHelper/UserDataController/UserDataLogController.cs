@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BeingValidated;
@@ -207,8 +206,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .AsQueryable();
 
             if (input.Keyword.HasContent())
-                query = query.Where(ulv =>
-                    ulv.TableName.Contains(input.Keyword) || ulv.RequestUrl.Contains(input.Keyword));
+                query = query.Where(ulv => ulv.Description.Contains(input.Keyword));
 
             if (input.Type.HasValue)
                 query = query.Where(ulv => ulv.TypeNo == input.Type);
@@ -227,21 +225,9 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 Time = entity.CreDate.ToFormattedStringDateTime(),
                 Actor = entity.UserName,
                 EventType = entity.Type,
-                Description = GetDescription(entity),
+                Description = entity.Description,
                 CreDate = entity.CreDate
             });
-        }
-
-        private static string GetDescription(UserLogView entity)
-        {
-            StringBuilder sb = new StringBuilder("使用者");
-
-            sb.Append(entity.Type);
-
-            if (entity.TableName.HasContent())
-                sb.Append(entity.TableName + (entity.TableName.EndsWith("檔") ? "" : "檔"));
-
-            return sb.ToString();
         }
 
         #endregion

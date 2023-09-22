@@ -913,12 +913,13 @@
           <Key>
             <PropertyRef Name="CreDate" />
             <PropertyRef Name="Type" />
+            <PropertyRef Name="Description" />
           </Key>
           <Property Name="CreDate" Type="datetime" Nullable="false" />
           <Property Name="UserName" Type="nvarchar" MaxLength="50" />
-          <Property Name="Type" Type="varchar" MaxLength="12" Nullable="false" />
           <Property Name="TypeNo" Type="int" />
-          <Property Name="TableName" Type="nvarchar(max)" />
+          <Property Name="Type" Type="varchar" MaxLength="12" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
           <Property Name="RequestUrl" Type="nvarchar(max)" />
         </EntityType>
         <Association Name="CustomerGift_B_StaticCode_BSCID_fk">
@@ -2036,9 +2037,9 @@
             <DefiningQuery>SELECT 
     [UserLogView].[CreDate] AS [CreDate], 
     [UserLogView].[UserName] AS [UserName], 
-    [UserLogView].[Type] AS [Type], 
     [UserLogView].[TypeNo] AS [TypeNo], 
-    [UserLogView].[TableName] AS [TableName], 
+    [UserLogView].[Type] AS [Type], 
+    [UserLogView].[Description] AS [Description], 
     [UserLogView].[RequestUrl] AS [RequestUrl]
     FROM [dbo].[UserLogView] AS [UserLogView]</DefiningQuery>
           </EntitySet>
@@ -3456,12 +3457,13 @@
           <Key>
             <PropertyRef Name="CreDate" />
             <PropertyRef Name="Type" />
+            <PropertyRef Name="Description" />
           </Key>
           <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="UserName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="Type" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="TypeNo" Type="Int32" />
-          <Property Name="TableName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Type" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="RequestUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <Association Name="FK_B_Device_B_Category">
@@ -5835,9 +5837,9 @@
               <MappingFragment StoreEntitySet="UserLogView">
                 <ScalarProperty Name="CreDate" ColumnName="CreDate" />
                 <ScalarProperty Name="UserName" ColumnName="UserName" />
-                <ScalarProperty Name="Type" ColumnName="Type" />
                 <ScalarProperty Name="TypeNo" ColumnName="TypeNo" />
-                <ScalarProperty Name="TableName" ColumnName="TableName" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="RequestUrl" ColumnName="RequestUrl" />
               </MappingFragment>
             </EntityTypeMapping>

@@ -566,7 +566,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             int todayChangedTimes = logs.Count(log => log.CreDate.Date == DateTime.Now.Date);
 
             if (todayChangedTimes > dailyLimit)
-                throw new Exception(DailyChangePasswordLimitExceeded);
+                AddError(5, DailyChangePasswordLimitExceeded);
 
             int uniquePasswordCountLimit = GetUniquePasswordCountLimit();
 
@@ -581,9 +581,12 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             if (updatePasswordHistories.Any(log => log.NewPassword == newPassword)
                 || updatePasswordHistories.Length < uniquePasswordCountLimit
                 && updatePasswordHistories.LastOrDefault()?.OldPassword == newPassword)
-                throw new Exception($"不可重覆使用前 {uniquePasswordCountLimit} 組密碼！");
+                AddError(4, $"不可重覆使用前 {uniquePasswordCountLimit} 組密碼！");
 
             // 沒有才繼續下去
+            if (HasError())
+                return;
+
             UserPasswordLog newLog = new UserPasswordLog
             {
                 UID = uid,
@@ -781,8 +784,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             // 4. 更新 DB
             await input
                 .StartValidate(true)
-                .ValidateAsync(async i => await UpdatePasswordForUserData(userData, i.NewPassword),
-                    (_, e) => AddError(UpdateDbFailed(e)));
+                .ValidateAsync(async i => await UpdatePasswordForUserData(userData, i.NewPassword));
 
             // 5. 回傳通用訊息格式。
             return GetResponseJson();
@@ -817,6 +819,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             try
             {
                 WriteUserChangePasswordLog(userData.UID, userData.LoginPassword, newPassword);
+                if (HasError())
+                    return;
                 userData.LoginPassword = newPassword;
                 await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
             }

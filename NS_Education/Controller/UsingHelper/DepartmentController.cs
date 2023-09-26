@@ -234,6 +234,19 @@ namespace NS_Education.Controller.UsingHelper
                     () => AddError(LengthOutOfRange("英文名稱", nameof(input.TitleE), 0, 50)))
                 .IsValid();
 
+            // 驗證編制人數不能改過少
+            D_Department department = await DC.D_Department
+                .Include(dd => dd.UserData)
+                .FirstOrDefaultAsync(dd => dd.DDID == input.DDID);
+
+            int currentUserCount = department?.UserData.Count ?? 0;
+
+            if (currentUserCount > input.PeopleCt)
+            {
+                isValid = false;
+                AddError(1, $"新輸入的編制人數 {input.PeopleCt} 必須大於等於此部門現有使用者數（{currentUserCount}）！");
+            }
+
             return await Task.FromResult(isValid);
         }
 

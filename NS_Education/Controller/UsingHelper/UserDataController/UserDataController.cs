@@ -123,6 +123,28 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
         #endregion
 
+        #region Validate department user count
+
+        private async Task<bool> ValidateDepartmentCapacity(int departmentId, IEnumerable<int> userIds)
+        {
+            userIds = userIds.Distinct().ToHashSet();
+
+            D_Department department = await DC.D_Department.Include(dd => dd.UserData)
+                .Where(dd => !dd.DeleteFlag)
+                .Where(dd => dd.ActiveFlag)
+                .FirstOrDefaultAsync(dd => dd.DDID == departmentId);
+
+            if (department is null)
+                return false;
+
+            return department.UserData
+                       .Where(ud => !userIds.Contains(ud.UID))
+                       .Count(ud => ud.ActiveFlag && !ud.DeleteFlag) + userIds.Count()
+                   <= department.PeopleCt;
+        }
+
+        #endregion
+
         #region SignUp
 
         /// <summary>
@@ -191,6 +213,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .ValidateAsync(
                     async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
                     () => AddError(NotFound("部門 ID", nameof(input.DDID))))
+                .ValidateAsync(async i => await ValidateDepartmentCapacity(i.DDID, new[] { input.UID }),
+                    () => AddError(2, "指定的部門已達編制人數上限！"))
                 .Validate(i => i.Username.HasContent() && i.Username.Length.IsInBetween(1, 50),
                     () => AddError(LengthOutOfRange("使用者名稱", nameof(input.Username), 1, 50)))
                 .Validate(i => i.LoginAccount.HasContent() && i.LoginAccount.Length.IsInBetween(1, 100),
@@ -476,6 +500,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                     () => AddError(AlreadyExists("使用者帳號", nameof(input.LoginAccount))))
                 .ValidateAsync(async i => await DC.D_Department.ValidateIdExists(i.DDID, nameof(D_Department.DDID)),
                     () => AddError(NotFound("部門 ID", nameof(input.DDID))))
+                .ValidateAsync(async i => await ValidateDepartmentCapacity(i.DDID, new[] { input.UID }),
+                    () => AddError(2, "指定的部門已達編制人數上限！"))
                 .ValidateAsync(
                     async i => await DC.GroupData.ValidateIdExists(i.GID, nameof(GroupData.GID)),
                     () => AddError(NotFound("角色 ID", nameof(input.GID))))
@@ -689,6 +715,21 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 AddError(AlreadyExists("欲復活的使用者帳號", nameof(UserData.LoginAccount)));
             }
 
+            // 驗證要復活的帳號所屬部門沒滿
+            HashSet<int> toReviveIds = input.GetUniqueReviveId();
+            UserData[] userToRevive = await DC.UserData.Where(ud => toReviveIds.Contains(ud.UID)).ToArrayAsync();
+
+            foreach (IGrouping<int, UserData> group in userToRevive.GroupBy(u => u.DDID))
+            {
+                bool validation = await ValidateDepartmentCapacity(group.Key, group.Select(ud => ud.UID));
+
+                if (validation) continue;
+
+                string users = String.Join(",", group.Select(ud => ud.UID));
+                AddError(1, $"欲復活的使用者 {users} 所屬部門現已達編制人數上限，請調整編制人數，或是先變更現有使用者的部門！");
+            }
+
+
             if (HasError())
                 return GetResponseJson();
 
@@ -708,6 +749,13 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
+            int departmentId = await DC.UserData.Where(ud => ud.UID == id).Select(ud => ud.DDID).FirstOrDefaultAsync();
+            if (activeFlag == true && !await ValidateDepartmentCapacity(departmentId, new[] { id }))
+            {
+                AddError(1, "欲啟用的帳號所屬部門現在已達編制人數上限！");
+                return GetResponseJson();
+            }
+
             return await _changeActiveHelper.ChangeActive(id, activeFlag);
         }
 
@@ -971,6 +1019,18 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             if (!isElementValid)
                 return GetResponseJson();
+
+            // 驗證要變動到的帳號所屬部門沒滿
+            foreach (IGrouping<int, UserData_BatchSubmitDepartment_Input_Row_APIItem> group in itemsArray.GroupBy(i =>
+                         i.DDID))
+            {
+                bool validation = await ValidateDepartmentCapacity(group.Key, group.Select(ud => ud.UID));
+
+                if (validation) continue;
+
+                string users = String.Join(",", group.Select(ud => ud.UID));
+                AddError(1, $"欲復活的使用者 {users} 所屬部門現已達編制人數上限，請調整編制人數，或是先變更現有使用者的部門！");
+            }
 
             // 2. 更新資料
             BatchSubmitDepartmentUpdate(itemsArray, data);

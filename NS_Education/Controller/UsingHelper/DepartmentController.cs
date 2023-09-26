@@ -239,7 +239,8 @@ namespace NS_Education.Controller.UsingHelper
                 .Include(dd => dd.UserData)
                 .FirstOrDefaultAsync(dd => dd.DDID == input.DDID);
 
-            int currentUserCount = department?.UserData.Count ?? 0;
+            int currentUserCount = department?.UserData
+                .Count(ud => ud.ActiveFlag && !ud.DeleteFlag) ?? 0;
 
             if (currentUserCount > input.PeopleCt)
             {

@@ -477,9 +477,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 .Validate(i => i.Compilation.IsNullOrWhiteSpace() || i.Compilation.Length == 8,
                     () => AddError(WrongFormat("統一編號", nameof(Customer_Submit_Input_APIItem.Compilation))))
                 .Validate(i => i.TitleC.HasContent(),
-                    () => AddError(EmptyNotAllowed("客戶名稱（中文）", nameof(Customer_Submit_Input_APIItem.TitleC))))
+                    () => AddError(EmptyNotAllowed("客戶名稱", nameof(Customer_Submit_Input_APIItem.TitleC))))
                 .Validate(i => i.TitleC.HasLengthBetween(1, 50),
-                    () => AddError(LengthOutOfRange("客戶名稱（中文）", nameof(Customer_Submit_Input_APIItem.TitleC), 1, 50)))
+                    () => AddError(LengthOutOfRange("客戶名稱", nameof(Customer_Submit_Input_APIItem.TitleC), 1, 50)))
                 .Validate(i => i.TitleE.HasLengthBetween(0, 100),
                     () => AddError(LengthOutOfRange("客戶名稱（英文）", nameof(Customer_Submit_Input_APIItem.TitleE), 0, 100)))
                 .Validate(i => i.Address.HasLengthBetween(0, 200),
@@ -702,9 +702,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     () => AddError(AlreadyExists("客戶代號", nameof(input.Code))))
                 .Validate(i => i.Compilation.IsNullOrWhiteSpace() || i.Compilation.Length == 8,
                     () => AddError(WrongFormat("統一編號", nameof(input.Compilation))))
-                .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱（中文）", nameof(input.TitleC))))
+                .Validate(i => i.TitleC.HasContent(), () => AddError(EmptyNotAllowed("客戶名稱", nameof(input.TitleC))))
                 .Validate(i => i.TitleC.HasLengthBetween(1, 50),
-                    () => AddError(LengthOutOfRange("客戶名稱（中文）", nameof(input.TitleC), 1, 50)))
+                    () => AddError(LengthOutOfRange("客戶名稱", nameof(input.TitleC), 1, 50)))
                 .Validate(i => i.TitleE.HasLengthBetween(0, 100),
                     () => AddError(LengthOutOfRange("客戶名稱（英文）", nameof(input.TitleE), 0, 100)))
                 .Validate(i => i.Address.HasLengthBetween(0, 200),

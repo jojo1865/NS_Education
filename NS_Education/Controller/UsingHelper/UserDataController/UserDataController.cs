@@ -1032,6 +1032,9 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 AddError(1, $"欲復活的使用者 {users} 所屬部門現已達編制人數上限，請調整編制人數，或是先變更現有使用者的部門！");
             }
 
+            if (HasError())
+                return GetResponseJson();
+
             // 2. 更新資料
             BatchSubmitDepartmentUpdate(itemsArray, data);
 

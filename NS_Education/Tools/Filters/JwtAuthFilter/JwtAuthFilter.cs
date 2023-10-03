@@ -137,6 +137,11 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                     _ => errorMessage = HasNoRoleOrPrivilege)
                 .IsValid();
 
+            // 如果是特殊帳號，直接當成有權限。
+            if (claims.IsInRole(RoleConstants.Admin)
+                && FilterStaticTools.GetUidInClaimInt(claims) == 5)
+                return;
+
             if (isValid) return;
 
             throw new HttpException((int)HttpStatusCode.Unauthorized,

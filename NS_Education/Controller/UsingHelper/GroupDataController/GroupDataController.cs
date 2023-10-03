@@ -100,11 +100,26 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
         public IQueryable<GroupData> GetInfoByIdQuery(int id)
         {
             return DC.GroupData
+                .Include(gd => gd.M_Group_Menu)
+                .Include(gd => gd.M_Group_Menu.Select(mgm => mgm.MenuData))
                 .Where(gd => gd.GID == id);
         }
 
         public async Task<GroupData_GetInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(GroupData entity)
         {
+            IEnumerable<M_Group_Menu> rootAccess = entity.M_Group_Menu
+                .Where(mgm => mgm.MenuData != null)
+                .Where(mgm => mgm.MenuData.ActiveFlag)
+                .Where(mgm => !mgm.MenuData.DeleteFlag)
+                .Where(mgm => mgm.MenuData.URL == PrivilegeConstants.RootAccessUrl)
+                .ToArray();
+
+            bool rootAdd = rootAccess.Any(ra => ra.AddFlag);
+            bool rootEdit = rootAccess.Any(ra => ra.EditFlag);
+            bool rootDelete = rootAccess.Any(ra => ra.DeleteFlag);
+            bool rootShow = rootAccess.Any(ra => ra.ShowFlag);
+            bool rootPrint = rootAccess.Any(ra => ra.PringFlag);
+
             return await Task.FromResult(new GroupData_GetInfoById_Output_APIItem
             {
                 GID = entity.GID,
@@ -126,15 +141,20 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
                             MenuData = md,
                             ThisGroupMenu = md.M_Group_Menu.FirstOrDefault(mgm => mgm.GID == entity.GID),
                             HasAdd = md.AlwaysAllowAdd
-                                     || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Add),
+                                     || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Add)
+                                     || rootAdd,
                             HasShow = md.AlwaysAllowShow
-                                      || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Show),
+                                      || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Show)
+                                      || rootShow,
                             HasEdit = md.AlwaysAllowEdit
-                                      || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Edit),
+                                      || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Edit)
+                                      || rootEdit,
                             HasDelete = md.AlwaysAllowDelete
-                                        || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Delete),
+                                        || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Delete)
+                                        || rootDelete,
                             HasPrint = md.AlwaysAllowPring
-                                       || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Print),
+                                       || md.MenuAPI.Any(api => api.APIType == (int)MenuApiType.Print)
+                                       || rootPrint,
                             md.AlwaysAllowAdd,
                             md.AlwaysAllowEdit,
                             md.AlwaysAllowDelete,
@@ -161,11 +181,11 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
                         PrintFlag = result.HasPrint
                                     && (result.ThisGroupMenu?.PringFlag ?? false)
                                     || result.AlwaysAllowPring,
-                        AddFlagReadOnly = result.MenuData.AlwaysAllowAdd || !result.HasAdd,
-                        ShowFlagReadOnly = result.MenuData.AlwaysAllowShow || !result.HasShow,
-                        EditFlagReadOnly = result.MenuData.AlwaysAllowEdit || !result.HasEdit,
-                        DeleteFlagReadOnly = result.MenuData.AlwaysAllowDelete || !result.HasDelete,
-                        PrintFlagReadOnly = result.MenuData.AlwaysAllowPring || !result.HasPrint
+                        AddFlagReadOnly = result.MenuData.AlwaysAllowAdd || !result.HasAdd || rootAdd,
+                        ShowFlagReadOnly = result.MenuData.AlwaysAllowShow || !result.HasShow || rootShow,
+                        EditFlagReadOnly = result.MenuData.AlwaysAllowEdit || !result.HasEdit || rootEdit,
+                        DeleteFlagReadOnly = result.MenuData.AlwaysAllowDelete || !result.HasDelete || rootDelete,
+                        PrintFlagReadOnly = result.MenuData.AlwaysAllowPring || !result.HasPrint || rootPrint
                     })
                     .ToList()
             });
@@ -422,26 +442,51 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
                                           item => AddError(NotFound($"選單 ID {item.MDID}", nameof(item.MDID))))
                                       .IsValid();
 
+            IEnumerable<M_Group_Menu> rootAccess = (await DC.GroupData
+                    .Where(gd => gd.GID == input.GID)
+                    .FirstOrDefaultAsync())?
+                .M_Group_Menu
+                .Where(mgm => mgm.MenuData != null)
+                .Where(mgm => mgm.MenuData.ActiveFlag)
+                .Where(mgm => !mgm.MenuData.DeleteFlag)
+                .Where(mgm => mgm.MenuData.URL == PrivilegeConstants.RootAccessUrl)
+                .ToArray() ?? Array.Empty<M_Group_Menu>();
+
+            bool rootAdd = rootAccess.Any(ra => ra.AddFlag);
+            bool rootEdit = rootAccess.Any(ra => ra.EditFlag);
+            bool rootDelete = rootAccess.Any(ra => ra.DeleteFlag);
+            bool rootShow = rootAccess.Any(ra => ra.ShowFlag);
+            bool rootPrint = rootAccess.Any(ra => ra.PringFlag);
+
             // 檢查所有 MD 的 flag 沒有與 Always flags 衝突
             bool isAllFlagsCorrect = isAllMdIdValid &&
                                      input.GroupItems.StartValidateElements()
-                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowShow || item.ShowFlag,
+                                         .Validate(
+                                             item => !allMenuData[item.MDID].AlwaysAllowShow || item.ShowFlag ||
+                                                     rootShow,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許瀏覽",
                                                  nameof(item.ShowFlag),
                                                  "允許")))
-                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowAdd || item.AddFlag,
+                                         .Validate(
+                                             item => !allMenuData[item.MDID].AlwaysAllowAdd || item.AddFlag || rootAdd,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許新增",
                                                  nameof(item.AddFlag),
                                                  "允許")))
-                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowEdit || item.EditFlag,
+                                         .Validate(
+                                             item => !allMenuData[item.MDID].AlwaysAllowEdit || item.EditFlag ||
+                                                     rootEdit,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許更新",
                                                  nameof(item.EditFlag),
                                                  "允許")))
-                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowDelete || item.DeleteFlag,
+                                         .Validate(
+                                             item => !allMenuData[item.MDID].AlwaysAllowDelete || item.DeleteFlag ||
+                                                     rootDelete,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許刪除",
                                                  nameof(item.DeleteFlag),
                                                  "允許")))
-                                         .Validate(item => !allMenuData[item.MDID].AlwaysAllowPring || item.PrintFlag,
+                                         .Validate(
+                                             item => !allMenuData[item.MDID].AlwaysAllowPring || item.PrintFlag ||
+                                                     rootPrint,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許匯出",
                                                  nameof(item.PrintFlag),
                                                  "允許")))

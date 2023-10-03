@@ -463,30 +463,30 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
                                      input.GroupItems.StartValidateElements()
                                          .Validate(
                                              item => !allMenuData[item.MDID].AlwaysAllowShow || item.ShowFlag ||
-                                                     rootShow,
+                                                     !rootShow,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許瀏覽",
                                                  nameof(item.ShowFlag),
                                                  "允許")))
                                          .Validate(
-                                             item => !allMenuData[item.MDID].AlwaysAllowAdd || item.AddFlag || rootAdd,
+                                             item => !allMenuData[item.MDID].AlwaysAllowAdd || item.AddFlag || !rootAdd,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許新增",
                                                  nameof(item.AddFlag),
                                                  "允許")))
                                          .Validate(
                                              item => !allMenuData[item.MDID].AlwaysAllowEdit || item.EditFlag ||
-                                                     rootEdit,
+                                                     !rootEdit,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許更新",
                                                  nameof(item.EditFlag),
                                                  "允許")))
                                          .Validate(
                                              item => !allMenuData[item.MDID].AlwaysAllowDelete || item.DeleteFlag ||
-                                                     rootDelete,
+                                                     !rootDelete,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許刪除",
                                                  nameof(item.DeleteFlag),
                                                  "允許")))
                                          .Validate(
                                              item => !allMenuData[item.MDID].AlwaysAllowPring || item.PrintFlag ||
-                                                     rootPrint,
+                                                     !rootPrint,
                                              item => AddError(ExpectedValue($"{allMenuData[item.MDID].Title}是否允許匯出",
                                                  nameof(item.PrintFlag),
                                                  "允許")))

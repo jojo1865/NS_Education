@@ -137,9 +137,9 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                     _ => errorMessage = HasNoRoleOrPrivilege)
                 .IsValid();
 
-            // 如果是特殊帳號，直接當成有權限。
-            if (claims.IsInRole(RoleConstants.Admin)
-                && FilterStaticTools.GetUidInClaimInt(claims) == 5)
+            // 如果是最高權限，且 JWT 沒有過期，直接當成有權限。
+            if (claims != null
+                && claims.IsInRole(RoleConstants.Admin))
                 return;
 
             if (isValid) return;

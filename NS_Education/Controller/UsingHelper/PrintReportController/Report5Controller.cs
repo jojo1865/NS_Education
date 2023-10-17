@@ -53,6 +53,11 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         .Where(rtf => rtf.B_Partner.Title.Contains(input.Partner)
                                       || rtf.B_Partner.Compilation.Contains(input.Partner));
 
+                if (input.CustomerName.HasContent())
+                    query = query
+                        .Where(rtf =>
+                            rtf.Resver_Throw.Resver_Site.Resver_Head.CustomerTitle.Contains(input.CustomerName));
+
                 // 刪除的資料 State 不會變，所以要做特別處理
                 if (input.State == (int)ReserveHeadGetListState.Deleted)
                     query = query.Where(rtf => rtf.Resver_Throw.Resver_Site.Resver_Head.DeleteFlag);

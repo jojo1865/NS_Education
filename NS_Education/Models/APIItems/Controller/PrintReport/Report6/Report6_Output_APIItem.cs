@@ -21,6 +21,9 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string[] Opponents { get; set; }
+        public string CustomerName { get; set; }
+
+        public int? State { get; set; }
 
         public IEnumerable<int> RHID { get; set; }
 
@@ -41,6 +44,9 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
                 Opponents = opponents.ToArray();
 
                 RHID = r6.RHID;
+
+                CustomerName = r6.CustomerName;
+                State = r6.State;
             }
 
             base.SetByInput(input);

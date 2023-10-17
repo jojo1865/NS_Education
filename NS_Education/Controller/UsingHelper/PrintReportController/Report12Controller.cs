@@ -54,6 +54,21 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .SelectMany(e => e.rts.DefaultIfEmpty(), (e, rts) => new { e.rs, rts })
                     .AsQueryable();
 
+                if (input.SiteName.HasContent())
+                    query = query.Where(x => x.rs.B_SiteData.Title.Contains(input.SiteName));
+
+                if (input.BCID.IsAboveZero())
+                    query = query.Where(x => x.rs.B_SiteData.BCID == input.BCID);
+
+                if (input.IsActive.HasValue)
+                    query = query.Where(x => x.rs.B_SiteData.ActiveFlag == input.IsActive);
+
+                if (input.BSCID1.IsAboveZero())
+                    query = query.Where(x => x.rs.B_SiteData.BSCID1 == input.BSCID1);
+
+                if (input.BasicSize.IsAboveZero())
+                    query = query.Where(x => x.rs.B_SiteData.BasicSize >= input.BasicSize);
+
                 var resverSites = await query.ToArrayAsync();
 
                 var sites = await dbContext.B_SiteData

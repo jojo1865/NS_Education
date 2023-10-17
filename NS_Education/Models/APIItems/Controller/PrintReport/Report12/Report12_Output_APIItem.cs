@@ -21,6 +21,12 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report12
         public string TotalUsage { get; set; }
         public int TotalAreaSize { get; set; }
 
+        public string SiteName { get; set; }
+        public int? BCID { get; set; }
+        public bool? IsActive { get; set; }
+        public int? BSCID1 { get; set; }
+        public int? BasicSize { get; set; }
+
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report12_Input_APIItem r12)
@@ -28,6 +34,11 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report12
                 PeriodTotal = r12.PeriodTotal;
                 StartDate = r12.StartDate;
                 EndDate = r12.EndDate;
+                SiteName = r12.SiteName;
+                BCID = r12.BCID;
+                IsActive = r12.IsActive;
+                BSCID1 = r12.BSCID1;
+                BasicSize = r12.BasicSize;
             }
 
             base.SetByInput(input);

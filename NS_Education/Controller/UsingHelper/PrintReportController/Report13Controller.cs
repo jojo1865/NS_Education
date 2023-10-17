@@ -49,6 +49,19 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .SelectMany(e => e.rts.DefaultIfEmpty(), (e, rts) => new { e.rs, rts })
                     .AsQueryable();
 
+                if (input.TargetMonth.HasContent())
+                {
+                    // yyyy/MM
+                    string[] splits = input.TargetMonth.Split('/');
+                    int year = splits.Take(1).Select(s => (int?)Convert.ToInt32(s)).FirstOrDefault() ?? 0;
+                    int month = splits.Skip(1).Take(1).Select(s => (int?)Convert.ToInt32(s)).FirstOrDefault() ?? 0;
+
+                    DateTime start = new DateTime(year, month, 1);
+                    DateTime end = start.AddMonths(1);
+
+                    query = query.Where(x => start <= x.rs.TargetDate && x.rs.TargetDate < end);
+                }
+
                 if (input.SiteName.HasContent())
                     query = query.Where(x => x.rs.B_SiteData.Title.Contains(input.SiteName));
 

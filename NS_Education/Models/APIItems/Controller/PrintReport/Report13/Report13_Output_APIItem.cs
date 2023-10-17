@@ -15,6 +15,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
         /// </summary>
         public string Username { get; set; }
 
+        public string TargetMonth { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
 
@@ -28,6 +29,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
         {
             if (input is Report13_Input_APIItem r13)
             {
+                TargetMonth = r13.TargetMonth;
                 StartDate = r13.StartDate;
                 EndDate = r13.EndDate;
                 SiteName = r13.SiteName;

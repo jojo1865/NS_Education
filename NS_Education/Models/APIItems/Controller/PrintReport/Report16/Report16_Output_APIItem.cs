@@ -19,6 +19,11 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report16
 
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+        public string SiteName { get; set; }
+        public int? BCID { get; set; }
+        public bool? IsActive { get; set; }
+        public int? BSCID1 { get; set; }
+        public int? BasicSize { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
@@ -26,6 +31,11 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report16
             {
                 StartDate = r16.StartDate?.ParseDateTime().ToString("yyyy/MM/dd");
                 EndDate = r16.EndDate?.ParseDateTime().ToString("yyyy/MM/dd");
+                SiteName = r16.SiteName;
+                BCID = r16.BCID;
+                IsActive = r16.IsActive;
+                BSCID1 = r16.BSCID1;
+                BasicSize = r16.BasicSize;
             }
 
             base.SetByInput(input);

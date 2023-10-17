@@ -10,5 +10,8 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report7
         public IEnumerable<int> RHID { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+        public string CustomerName { get; set; }
+
+        public int? State { get; set; }
     }
 }

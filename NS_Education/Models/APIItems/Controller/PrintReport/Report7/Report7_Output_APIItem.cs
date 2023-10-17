@@ -19,6 +19,9 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report7
 
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+        public string CustomerName { get; set; }
+
+        public int? State { get; set; }
         public IEnumerable<int> RHID { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
@@ -28,6 +31,8 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report7
                 StartDate = r7.StartDate;
                 EndDate = r7.EndDate;
                 RHID = r7.RHID;
+                CustomerName = r7.CustomerName;
+                State = r7.State;
             }
 
             base.SetByInput(input);

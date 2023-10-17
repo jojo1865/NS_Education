@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.SqlTypes;
 using System.Linq;
@@ -29,6 +30,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 DateTime endTime = input.EndDate?.ParseDateTime() ?? SqlDateTime.MaxValue.Value;
 
                 IQueryable<Resver_Head> query = dbContext.Resver_Head
+                    .Include(rh => rh.Customer)
                     .Include(rh => rh.Resver_Site)
                     .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
                     .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Head))
@@ -46,9 +48,33 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 if (input.CID != null)
                     query = query.Where(rh => input.CID.Contains(rh.CID));
 
+                if (input.CustomerName != null)
+                    query = query.Where(rh => rh.ContactName.Contains(input.CustomerName));
+
+                if (input.BSCID6.IsAboveZero())
+                    query = query.Where(rh => rh.Customer.BSCID6 == input.BSCID6);
+
+                if (input.ContactName.HasContent())
+                    query = query.Where(rh => rh.Customer.ContectName.Contains(input.ContactName));
+
                 Resver_Head[] result = await query
                     .OrderBy(rh => rh.RHID)
                     .ToArrayAsync();
+
+                if (input.ContactData.HasContent())
+                {
+                    // 找出所有包含輸入內容的 M_Contect
+                    string customerTableName = DC.GetTableName<Customer>();
+
+                    HashSet<int> customerIds = DC.M_Contect
+                        .Where(mc => mc.TargetTable == customerTableName)
+                        .Where(mc => mc.ContectData.Contains(input.ContactData))
+                        .Select(mc => mc.TargetID)
+                        .Distinct()
+                        .ToHashSet();
+
+                    result = result.Where(r => customerIds.Contains(r.CID)).ToArray();
+                }
 
                 Report9_Output_APIItem response = new Report9_Output_APIItem();
                 response.SetByInput(input);

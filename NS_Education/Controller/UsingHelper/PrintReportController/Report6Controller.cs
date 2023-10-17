@@ -11,6 +11,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -41,6 +42,16 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 if (input.RHID != null)
                     query = query.Where(rh => input.RHID.Contains(rh.RHID));
+
+                if (input.CustomerName.HasContent())
+                    query = query
+                        .Where(rh => rh.CustomerTitle.Contains(input.CustomerName));
+
+                // 刪除的資料 State 不會變，所以要做特別處理
+                if (input.State == (int)ReserveHeadGetListState.Deleted)
+                    query = query.Where(rh => rh.DeleteFlag);
+                else if (input.State.IsAboveZero())
+                    query = query.Where(rh => rh.State == input.State);
 
                 var results = await query
                     .OrderBy(rh => rh.SDate)

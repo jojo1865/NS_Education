@@ -12,5 +12,9 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
         public bool External { get; set; } = true;
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+
+        public string CustomerName { get; set; }
+
+        public int? State { get; set; }
     }
 }

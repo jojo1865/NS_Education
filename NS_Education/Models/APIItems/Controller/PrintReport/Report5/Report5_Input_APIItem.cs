@@ -11,5 +11,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report5
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string Partner { get; set; }
+
+        public int? State { get; set; }
     }
 }

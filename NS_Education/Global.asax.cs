@@ -7,6 +7,7 @@ using System.Web.Routing;
 using Microsoft.IdentityModel.Logging;
 using NS_Education.Models.Errors;
 using NS_Education.Tools;
+using QuestPDF.Infrastructure;
 
 namespace NS_Education
 {
@@ -14,6 +15,8 @@ namespace NS_Education
     {
         protected void Application_Start()
         {
+            QuestPDF.Settings.License = LicenseType.Community;
+
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

@@ -22,6 +22,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report5
         public string EndDate { get; set; }
         public string Partner { get; set; }
         public IEnumerable<int> RHID { get; set; }
+        public int? State { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
@@ -31,6 +32,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report5
                 EndDate = r5.EndDate?.ParseDateTime().ToString("yyyy/MM/dd");
                 Partner = r5.Partner;
                 RHID = r5.RHID;
+                State = r5.State;
             }
 
             base.SetByInput(input);

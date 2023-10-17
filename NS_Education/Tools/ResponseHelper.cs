@@ -33,6 +33,11 @@ namespace NS_Education.Tools
         internal static ActionResult CreateWrappedResponse(ControllerContext filterContext,
             ActionResult originalActionResult)
         {
+            // 如果是 fileContentResult，不做任何事
+
+            if (originalActionResult is FileContentResult)
+                return originalActionResult;
+
             // 如果這是 ExceptionContext 來的，把錯誤訊息設到 Status 中
             Exception exception = null;
 

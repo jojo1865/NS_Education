@@ -18,12 +18,23 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
         public string StartDate { get; set; }
         public string EndDate { get; set; }
 
+        public string SiteName { get; set; }
+        public int? BCID { get; set; }
+        public bool? IsActive { get; set; }
+        public int? BSCID1 { get; set; }
+        public int? BasicSize { get; set; }
+
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report13_Input_APIItem r13)
             {
                 StartDate = r13.StartDate;
                 EndDate = r13.EndDate;
+                SiteName = r13.SiteName;
+                BCID = r13.BCID;
+                IsActive = r13.IsActive;
+                BSCID1 = r13.BSCID1;
+                BasicSize = r13.BasicSize;
             }
 
             base.SetByInput(input);

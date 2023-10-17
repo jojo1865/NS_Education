@@ -783,6 +783,7 @@
         <Compile Include="Models\IReturnMessageInfusable.cs"/>
         <Compile Include="Models\PublicModel.cs"/>
         <Compile Include="Models\Utilities\PrintReport\GetResverListByIDs2\PrintReport_GetResverListByIds2_PayItem.cs"/>
+        <Compile Include="Models\Utilities\PrintReport\PdfColumn.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="Tools\ControllerTools\BaseClass\IPrintReport.cs"/>
         <Compile Include="Tools\ControllerTools\BaseClass\PublicClass.cs"/>
@@ -816,6 +817,7 @@
         <Compile Include="Tools\ControllerTools\BasicFunctions\Interface\ISubmit.cs"/>
         <Compile Include="Tools\Encryption\JwtHelper.cs"/>
         <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\CommonResponseForPagedListExtension.cs"/>
         <Compile Include="Tools\Extensions\CustomerExtension.cs"/>
         <Compile Include="Tools\Extensions\DateTimeExtension.cs"/>
         <Compile Include="Tools\Extensions\DbContextExtensions.cs"/>

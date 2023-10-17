@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -8,10 +9,12 @@ using Microsoft.Ajax.Utilities;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report12;
 using NS_Education.Models.Entities;
+using NS_Education.Models.Utilities.PrintReport;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using QuestPDF.Helpers;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -74,7 +77,6 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .ToDictionary(g => g.Key, g => g);
 
                 response.Items = sites
-                    .OrderBy(sd => sd.BSID)
                     .Select(sd =>
                     {
                         var resver = groupedResverSites.GetValueOrDefault(sd.BSID)?.ToArray();
@@ -94,13 +96,14 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             ExternalUsage = GetUsage(rs.Where(r => !r.Resver_Head.Customer.InFlag), rts, input),
                         };
                     })
+                    .OrderByDescending(sd => Convert.ToInt32(sd.PeopleCt))
                     .Skip(input.GetStartIndex())
                     .Take(input.GetTakeRowCount())
                     .ToList();
 
                 // 每月總使用率 = Σ (每間教室使用時段數 * 每間教室坪數) / (每月可供租用時段數 * 教室總坪數)
                 int totalAreaSize = sites.Sum(s => (int?)s.AreaSize) ?? 0;
-
+                
                 // Total 行
                 var allRs = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rs).ToArray();
                 var allRts = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rts).ToArray();
@@ -127,25 +130,16 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         {
             resverSites = resverSites.ToArray();
             resverTimeSpans = resverTimeSpans.ToArray();
-
+            
             return new Report12_Output_Row_MonthlyUsage_APIItem
             {
-                Jan = GetUsageInMonth(resverSites, resverTimeSpans, 1, input),
-                Feb = GetUsageInMonth(resverSites, resverTimeSpans, 2, input),
-                Mar = GetUsageInMonth(resverSites, resverTimeSpans, 3, input),
-                Apr = GetUsageInMonth(resverSites, resverTimeSpans, 4, input),
-                May = GetUsageInMonth(resverSites, resverTimeSpans, 5, input),
-                Jun = GetUsageInMonth(resverSites, resverTimeSpans, 6, input),
-                Jul = GetUsageInMonth(resverSites, resverTimeSpans, 7, input),
-                Aug = GetUsageInMonth(resverSites, resverTimeSpans, 8, input),
-                Sep = GetUsageInMonth(resverSites, resverTimeSpans, 9, input),
-                Oct = GetUsageInMonth(resverSites, resverTimeSpans, 10, input),
-                Nov = GetUsageInMonth(resverSites, resverTimeSpans, 11, input),
-                Dec = GetUsageInMonth(resverSites, resverTimeSpans, 12, input)
+                MonthlyUsageDecimal = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }
+                    .Select(month => GetUsageInMonth(resverSites, resverTimeSpans, month, input))
+                    .ToArray()
             };
         }
 
-        private static string GetUsageInMonth(IEnumerable<Resver_Site> resverSites,
+        private static decimal? GetUsageInMonth(IEnumerable<Resver_Site> resverSites,
             IEnumerable<M_Resver_TimeSpan> resverTimeSpans, int month, Report12_Input_APIItem input)
         {
             int? hours = input.Hours[month - 1];
@@ -177,7 +171,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 return null;
 
             // 40: 來自報表樣張，預設的每個月可租用時段數
-            return Decimal.Divide(usedPeriods, divider).ToString("P");
+            return Decimal.Divide(usedPeriods, divider);
         }
 
         [HttpGet]
@@ -185,6 +179,85 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         public async Task<string> Get(Report12_Input_APIItem input)
         {
             return GetResponseJson(await GetResultAsync(input));
+        }
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<FileContentResult> GetPdf(Report12_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report12_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            Report12_Output_Row_APIItem totalRow = data.Items
+                .Last(i => i.PeopleCt == null);
+
+            data.Items = data.Items
+                .Where(i => i != totalRow)
+                .ToArray();
+
+            IEnumerable<PdfColumn<Report12_Output_Row_APIItem>> usageColumns = new[] { "全部", "內部", "外部" }
+                .SelectMany(i => new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }.Select(j =>
+                    new PdfColumn<Report12_Output_Row_APIItem>
+                    {
+                        Name = $"{j}月-{i} ({input.Hours[j - 1]})",
+                        LengthWeight = 4,
+                        Selector = row => GetUsageByType(i).Invoke(row).MonthlyUsageDecimal[j - 1],
+                        Formatter = usage => ((decimal?)usage)?.ToString("P") ?? "-",
+                        OutputTotal = true
+                    }));
+            byte[] pdf = data.MakePdf(input,
+                GetUid(),
+                await GetUserNameByID(GetUid()),
+                "場地使用率分析表",
+                new[]
+                    {
+                        new PdfColumn<Report12_Output_Row_APIItem>
+                        {
+                            Name = "人數",
+                            LengthWeight = 2,
+                            Formatter = o => o?.ToString() ?? "Total",
+                            Selector = r => r.PeopleCt
+                        },
+                        new PdfColumn<Report12_Output_Row_APIItem>
+                        {
+                            Name = "場地",
+                            LengthWeight = 5,
+                            Selector = r => r.SiteName
+                        },
+                        new PdfColumn<Report12_Output_Row_APIItem>
+                        {
+                            Name = "場地代號",
+                            LengthWeight = 4,
+                            Selector = r => r.SiteCode
+                        },
+                        new PdfColumn<Report12_Output_Row_APIItem>
+                        {
+                            Name = "面積(坪)",
+                            LengthWeight = 3,
+                            Selector = r => r.AreaSize,
+                            OutputTotal = true
+                        },
+                    }
+                    .Concat(usageColumns)
+                    .ToArray(),
+                $"年份 = {input.Year}",
+                new PageSize(PageSizes.A4.Width * 3.5f, PageSizes.A4.Height),
+                totalRow
+            );
+
+            return new FileContentResult(pdf, "application/pdf");
+        }
+
+        private static Func<Report12_Output_Row_APIItem, Report12_Output_Row_MonthlyUsage_APIItem> GetUsageByType(string type)
+        {
+            switch (type)
+            {
+                case "內部":
+                    return row => row.InternalUsage;
+                case "外部":
+                    return row => row.ExternalUsage;
+                default:
+                    return row => row.AllUsage;
+            }
         }
     }
 }

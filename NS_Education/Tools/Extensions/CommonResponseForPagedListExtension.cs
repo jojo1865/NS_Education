@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using NS_Education.Models.APIItems;
-using NS_Education.Models.APIItems.Controller.PrintReport.Report5;
 using NS_Education.Models.Utilities.PrintReport;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -18,20 +15,25 @@ namespace NS_Education.Tools.Extensions
             , int uid
             , string userName
             , string reportTitle
-            , PdfColumn<TOutput>[] columnDefinition)
+            , PdfColumn<TOutput>[] columnDefinition
+            , string queryConditions = null
+            , PageSize pageSize = null
+            , TOutput overrideTotalRow = default)
         {
+            pageSize = pageSize ?? PageSizes.A4.Landscape();
+
             Document document = Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     // basic
-                    page.Size(PageSizes.A4.Landscape());
+                    page.Size(pageSize);
                     page.Margin(0.5f, Unit.Centimetre);
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(ts =>
                         ts.FontFamily("Microsoft JhengHei UI")
                             .Black()
-                            .Bold()
+                            .ExtraBold()
                             .FontSize(10));
 
                     // header
@@ -42,15 +44,20 @@ namespace NS_Education.Tools.Extensions
                             {
                                 row.RelativeItem()
                                     .AlignLeft()
-                                    .Text(async t =>
+                                    .ScaleToFit()
+                                    .Text(t =>
                                     {
                                         t.AlignLeft();
-                                        t.Line($"製表者 ID: {uid}").FontSize(16).Bold()
+                                        t.Line($"製表者 ID: {uid}").FontSize(16).ExtraBold()
                                             .FontColor(Colors.Purple.Darken2);
                                         t.Line($"製表者: {userName}")
-                                            .FontSize(16).Bold().FontColor(Colors.Purple.Darken2);
-                                        t.Line($"查詢條件: bla bla bla").FontSize(16).Bold()
-                                            .FontColor(Colors.Grey.Medium);
+                                            .FontSize(16).ExtraBold().FontColor(Colors.Purple.Darken2);
+
+                                        if (queryConditions.HasContent())
+                                            t.Line($"查詢條件: {queryConditions}")
+                                                .FontSize(16)
+                                                .ExtraBold()
+                                                .FontColor(Colors.Grey.Medium);
                                     });
 
                                 row.RelativeItem()
@@ -59,9 +66,9 @@ namespace NS_Education.Tools.Extensions
                                     {
                                         ;
                                         t.AlignCenter();
-                                        t.Line("南山人壽教育訓練中心").FontSize(26).Bold().FontColor(Colors.Cyan.Darken2);
+                                        t.Line("南山人壽教育訓練中心").FontSize(26).ExtraBold().FontColor(Colors.Cyan.Darken2);
                                         t.EmptyLine();
-                                        t.Line(reportTitle).FontSize(26).Bold().Black();
+                                        t.Line(reportTitle).FontSize(26).ExtraBold().Black();
                                     });
 
                                 row.RelativeItem()
@@ -69,9 +76,9 @@ namespace NS_Education.Tools.Extensions
                                     .Text(t =>
                                     {
                                         t.AlignLeft();
-                                        t.Line($"製表日: {DateTime.Now.ToFormattedStringDate()}").FontSize(16).Bold()
+                                        t.Line($"製表日: {DateTime.Now.ToFormattedStringDate()}").FontSize(16).ExtraBold()
                                             .FontColor(Colors.Purple.Darken2);
-                                        t.CurrentPageNumber().Format(i => $"頁次: {i ?? 0}").FontSize(16).Bold()
+                                        t.CurrentPageNumber().Format(i => $"頁次: {i ?? 0}").FontSize(16).ExtraBold()
                                             .FontColor(Colors.Purple.Darken2);
                                     });
                             });
@@ -95,25 +102,25 @@ namespace NS_Education.Tools.Extensions
                                 foreach (PdfColumn<TOutput> column in columnDefinition)
                                 {
                                     header.Cell()
-                                        .Column(c =>
-                                        {
-                                            c.Item().Text(column.Name);
-                                            c.Item().LineHorizontal(1).LineColor(Colors.Black);
-                                        });
+                                        .Column(c => { c.Item().Text(column.Name); });
                                 }
                             });
+
+                            foreach (var _ in columnDefinition)
+                            {
+                                table.Cell().LineHorizontal(1).LineColor(Colors.Black);
+                            }
 
                             foreach (TOutput row in data.Items)
                             {
                                 foreach (PdfColumn<TOutput> column in columnDefinition)
                                 {
                                     table.Cell()
-                                        .Column(c =>
-                                        {
-                                            c.Item().Text(column.Formatter.Invoke(column.Selector.Invoke(row)));
-                                        });
+                                        .Column(c => { c.Item().Text(column.Formatter.Invoke(column.Selector(row))); });
                                 }
                             }
+
+                            if (!columnDefinition.Any(c => c.OutputTotal)) return;
 
                             table.Footer(f =>
                             {
@@ -137,7 +144,11 @@ namespace NS_Education.Tools.Extensions
                                     f.Cell().Column(c =>
                                     {
                                         c.Item().LineHorizontal(1).LineColor(Colors.Black);
-                                        c.Item().Text(data.Items.Sum(item => Convert.ToDecimal(column.Selector.Invoke(item))).ToString("N0"));
+                                        decimal sum = overrideTotalRow == null
+                                            ? data.Items.Sum(item => Convert.ToDecimal(column.Selector(item)))
+                                            : Convert.ToDecimal(column.Selector(overrideTotalRow));
+
+                                        c.Item().Text(column.Formatter(sum));
                                     });
                                 }
                             });

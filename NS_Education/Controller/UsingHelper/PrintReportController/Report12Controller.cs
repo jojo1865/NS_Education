@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -101,9 +100,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Take(input.GetTakeRowCount())
                     .ToList();
 
-                // 每月總使用率 = Σ (每間教室使用時段數 * 每間教室坪數) / (每月可供租用時段數 * 教室總坪數)
                 int totalAreaSize = sites.Sum(s => (int?)s.AreaSize) ?? 0;
-                
+                HashSet<B_SiteData> uniqueSites = sites.DistinctBy(s => s.BSID).ToHashSet();
+
                 // Total 行
                 var allRs = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rs).ToArray();
                 var allRts = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rts).ToArray();
@@ -113,9 +112,11 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     SiteName = null,
                     SiteCode = null,
                     AreaSize = totalAreaSize,
-                    AllUsage = GetUsage(allRs, allRts, input),
-                    InternalUsage = GetUsage(allRs.Where(rs => rs.Resver_Head.Customer.InFlag), allRts, input),
-                    ExternalUsage = GetUsage(allRs.Where(rs => !rs.Resver_Head.Customer.InFlag), allRts, input)
+                    AllUsage = GetUsage(allRs, allRts, input, uniqueSites),
+                    InternalUsage = GetUsage(allRs.Where(rs => rs.Resver_Head.Customer.InFlag), allRts, input,
+                        uniqueSites),
+                    ExternalUsage = GetUsage(allRs.Where(rs => !rs.Resver_Head.Customer.InFlag), allRts, input,
+                        uniqueSites)
                 });
 
                 response.UID = GetUid();
@@ -126,23 +127,25 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         }
 
         private static Report12_Output_Row_MonthlyUsage_APIItem GetUsage(IEnumerable<Resver_Site> resverSites,
-            IEnumerable<M_Resver_TimeSpan> resverTimeSpans, Report12_Input_APIItem input)
+            IEnumerable<M_Resver_TimeSpan> resverTimeSpans, Report12_Input_APIItem input,
+            ISet<B_SiteData> allUniqueSites = null)
         {
             resverSites = resverSites.ToArray();
             resverTimeSpans = resverTimeSpans.ToArray();
-            
+
             return new Report12_Output_Row_MonthlyUsage_APIItem
             {
                 MonthlyUsageDecimal = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }
-                    .Select(month => GetUsageInMonth(resverSites, resverTimeSpans, month, input))
+                    .Select(month => GetUsageInMonth(resverSites, resverTimeSpans, month, input, allUniqueSites))
                     .ToArray()
             };
         }
 
         private static decimal? GetUsageInMonth(IEnumerable<Resver_Site> resverSites,
-            IEnumerable<M_Resver_TimeSpan> resverTimeSpans, int month, Report12_Input_APIItem input)
+            IEnumerable<M_Resver_TimeSpan> resverTimeSpans, int month, Report12_Input_APIItem input,
+            ISet<B_SiteData> allUniqueSites = null)
         {
-            int? hours = input.Hours[month - 1];
+            int hours = input.Hours[month - 1] ?? 0;
 
             if (!hours.IsAboveZero())
                 return null;
@@ -151,27 +154,45 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             //
             // 總使用率時，resverSites 可能包含多種 B_SiteDate
             // 每月總使用率 = (每間教室使用時段數 * 每間教室坪數) / (每月可供租用時段數 * 教室總坪數)
-
+            //
+            // ( Σ (各教室的租用小時數 * 各教室坪數) ) / ( hour * Σ 所有獨特場地的坪數 )
             resverSites = resverSites.Where(rs => rs.TargetDate.Month == month).ToArray();
             HashSet<int> ids = resverSites.Select(rs => rs.RSID).Distinct().ToHashSet();
-
             resverTimeSpans = resverTimeSpans.Where(rts => ids.Contains(rts.TargetID));
 
-            // 時段數在這邊就考慮坪數加權
-            int usedPeriods = resverTimeSpans
-                .Select(rts => resverSites.First(rs => rs.RSID == rts.TargetID).B_SiteData.AreaSize).Sum();
+            int totalRentedMinutesPerArea = resverTimeSpans
+                .Sum(rts =>
+                {
+                    D_TimeSpan dts = rts.D_TimeSpan;
+                    int minutes = (dts.HourS, dts.MinuteS).GetMinutesUntil((dts.HourE, dts.MinuteE));
+                    int area = resverSites.First(rs => rs.RSID == rts.TargetID)
+                        .B_SiteData
+                        .AreaSize;
 
-            int totalAreaSize = resverSites.Select(rs => rs.B_SiteData)
-                .DistinctBy(bs => bs.BSID)
-                .Sum(bs => (int?)bs.AreaSize) ?? 0;
+                    return (int?)minutes * area;
+                }) ?? 0;
+            int totalRentedHoursPerArea = totalRentedMinutesPerArea / 60;
 
-            int divider = (hours ?? 40) * totalAreaSize;
-
-            if (!divider.IsAboveZero())
+            // 如果沒有任何租用，回傳 null
+            if (!totalRentedHoursPerArea.IsAboveZero())
                 return null;
 
-            // 40: 來自報表樣張，預設的每個月可租用時段數
-            return Decimal.Divide(usedPeriods, divider);
+            // 如果有提供 allUniqueSites（如 total 行），用 allUniqueSites 的場地坪數為分母元素
+            // 因為 resverSites 不一定包含所有場地
+
+            ISet<B_SiteData> uniqueSites = allUniqueSites ??
+                                           resverSites.Select(rs => rs.B_SiteData).DistinctBy(bs => bs.BSID)
+                                               .ToHashSet();
+
+            int totalAreaSize = uniqueSites.Sum(sd => (int?)sd.AreaSize) ?? 0;
+
+            totalAreaSize *= hours;
+
+            // 分母不正確時，回傳 null
+            if (!totalAreaSize.IsAboveZero())
+                return null;
+
+            return Decimal.Divide(totalRentedHoursPerArea, totalAreaSize);
         }
 
         [HttpGet]
@@ -247,7 +268,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             return new FileContentResult(pdf, "application/pdf");
         }
 
-        private static Func<Report12_Output_Row_APIItem, Report12_Output_Row_MonthlyUsage_APIItem> GetUsageByType(string type)
+        private static Func<Report12_Output_Row_APIItem, Report12_Output_Row_MonthlyUsage_APIItem> GetUsageByType(
+            string type)
         {
             switch (type)
             {

@@ -31,9 +31,9 @@ namespace NS_Education.Tools.Extensions
                     page.Margin(0.5f, Unit.Centimetre);
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(ts =>
-                        ts.FontFamily("Microsoft JhengHei UI")
+                        ts.FontFamily("Noto Sans TC")
                             .Black()
-                            .ExtraBold()
+                            .SemiBold()
                             .FontSize(10));
 
                     // header

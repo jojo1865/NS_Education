@@ -305,6 +305,7 @@
         <Compile Include="Controller\UsingHelper\PrintReportController\Report14Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report15Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report16Controller.cs"/>
+        <Compile Include="Controller\UsingHelper\PrintReportController\Report17Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report2Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report3Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report5Controller.cs"/>
@@ -485,6 +486,7 @@
         <Compile Include="Models\APIItems\Controller\PrintReport\Report16\Report16_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report16\Report16_Output_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report16\Report16_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\Report1\Report17_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report2\Report2_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report2\Report2_Output_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report2\Report2_Output_Row_APIItem.cs"/>
@@ -785,6 +787,7 @@
         <Compile Include="Models\FinalizedResponse.cs"/>
         <Compile Include="Models\IReturnMessageInfusable.cs"/>
         <Compile Include="Models\PublicModel.cs"/>
+        <Compile Include="Models\Utilities\PrintReportExtensions.cs"/>
         <Compile Include="Models\Utilities\PrintReport\GetResverListByIDs2\PrintReport_GetResverListByIds2_PayItem.cs"/>
         <Compile Include="Models\Utilities\PrintReport\PdfColumn.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
@@ -902,6 +905,9 @@
             <DependentUpon>Model1.edmx</DependentUpon>
             <LastGenOutput>Model1.cs</LastGenOutput>
         </Content>
+        <EmbeddedResource Include="notosans.ttf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
         <Content Include="Scripts\bootstrap.bundle.js"/>
         <Content Include="Scripts\bootstrap.bundle.min.js"/>
         <Content Include="Scripts\bootstrap.esm.js"/>

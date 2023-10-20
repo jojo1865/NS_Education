@@ -800,6 +800,20 @@
           <Property Name="UpdUID" Type="int" Nullable="false" />
           <Property Name="BSCID" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="Resver_Questionnaire">
+          <Key>
+            <PropertyRef Name="RQID" />
+          </Key>
+          <Property Name="RQID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="QuestionKey" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="NumberContent" Type="int" />
+          <Property Name="TextContent" Type="nvarchar(max)" />
+          <Property Name="RHID" Type="int" Nullable="false" />
+          <Property Name="CreDate" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="CreUID" Type="int" Nullable="false" />
+          <Property Name="UpdDate" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="UpdUID" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Resver_Site">
           <Key>
             <PropertyRef Name="RSID" />
@@ -1938,6 +1952,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_Questionnaire_Resver_Head_RHID_fk">
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
+          <End Role="Resver_Questionnaire" Type="Self.Resver_Questionnaire" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resver_Head">
+              <PropertyRef Name="RHID" />
+            </Principal>
+            <Dependent Role="Resver_Questionnaire">
+              <PropertyRef Name="RHID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="Resver_Throw_B_OrderCode_BOCID_fk">
           <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="Resver_Throw" Type="Self.Resver_Throw" Multiplicity="*" />
@@ -2005,6 +2031,7 @@
           <EntitySet Name="Resver_Head" EntityType="Self.Resver_Head" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Head_Log" EntityType="Self.Resver_Head_Log" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Other" EntityType="Self.Resver_Other" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Resver_Questionnaire" EntityType="Self.Resver_Questionnaire" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Site" EntityType="Self.Resver_Site" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Throw" EntityType="Self.Resver_Throw" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Throw_Food" EntityType="Self.Resver_Throw_Food" Schema="dbo" store:Type="Tables" />
@@ -2370,6 +2397,10 @@
           <AssociationSet Name="Resver_Other_B_StaticCode_BSCID_fk" Association="Self.Resver_Other_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Resver_Other" EntitySet="Resver_Other" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Questionnaire_Resver_Head_RHID_fk" Association="Self.Resver_Questionnaire_Resver_Head_RHID_fk">
+            <End Role="Resver_Head" EntitySet="Resver_Head" />
+            <End Role="Resver_Questionnaire" EntitySet="Resver_Questionnaire" />
           </AssociationSet>
           <AssociationSet Name="Resver_Throw_B_OrderCode_BOCID_fk" Association="Self.Resver_Throw_B_OrderCode_BOCID_fk">
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
@@ -3244,6 +3275,7 @@
           <NavigationProperty Name="Resver_Other" Relationship="Self.FK_Resver_Other_Resver_Head" FromRole="Resver_Head" ToRole="Resver_Other" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_Resver_Head" FromRole="Resver_Head" ToRole="Resver_Site" />
           <NavigationProperty Name="Resver_Head_Log" Relationship="Self.Resver_Head_Log_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Head_Log" />
+          <NavigationProperty Name="Resver_Questionnaire" Relationship="Self.Resver_Questionnaire_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Questionnaire" />
         </EntityType>
         <EntityType Name="Resver_Head_Log">
           <Key>
@@ -3284,6 +3316,21 @@
           <NavigationProperty Name="B_StaticCode" Relationship="Self.Resver_Other_B_StaticCode_BSCID_fk" FromRole="Resver_Other" ToRole="B_StaticCode" />
           <NavigationProperty Name="D_OtherPayItem" Relationship="Self.FK_Resver_Other_D_OtherPayItem" FromRole="Resver_Other" ToRole="D_OtherPayItem" />
           <NavigationProperty Name="Resver_Head" Relationship="Self.FK_Resver_Other_Resver_Head" FromRole="Resver_Other" ToRole="Resver_Head" />
+        </EntityType>
+        <EntityType Name="Resver_Questionnaire">
+          <Key>
+            <PropertyRef Name="RQID" />
+          </Key>
+          <Property Name="RQID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="QuestionKey" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NumberContent" Type="Int32" />
+          <Property Name="TextContent" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="RHID" Type="Int32" Nullable="false" />
+          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="CreUID" Type="Int32" Nullable="false" />
+          <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="UpdUID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Resver_Head" Relationship="Self.Resver_Questionnaire_Resver_Head_RHID_fk" FromRole="Resver_Questionnaire" ToRole="Resver_Head" />
         </EntityType>
         <EntityType Name="Resver_Site">
           <Key>
@@ -4442,6 +4489,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_Questionnaire_Resver_Head_RHID_fk">
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
+          <End Role="Resver_Questionnaire" Type="Self.Resver_Questionnaire" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resver_Head">
+              <PropertyRef Name="RHID" />
+            </Principal>
+            <Dependent Role="Resver_Questionnaire">
+              <PropertyRef Name="RHID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="Resver_Head_Log_UserData_UID_fk">
           <End Role="UserData" Type="Self.UserData" Multiplicity="1" />
           <End Role="Resver_Head_Log" Type="Self.Resver_Head_Log" Multiplicity="*" />
@@ -4549,6 +4608,7 @@
           <EntitySet Name="Resver_Head" EntityType="Self.Resver_Head" />
           <EntitySet Name="Resver_Head_Log" EntityType="Self.Resver_Head_Log" />
           <EntitySet Name="Resver_Other" EntityType="Self.Resver_Other" />
+          <EntitySet Name="Resver_Questionnaire" EntityType="Self.Resver_Questionnaire" />
           <EntitySet Name="Resver_Site" EntityType="Self.Resver_Site" />
           <EntitySet Name="Resver_Throw" EntityType="Self.Resver_Throw" />
           <EntitySet Name="Resver_Throw_Food" EntityType="Self.Resver_Throw_Food" />
@@ -4872,6 +4932,10 @@
           <AssociationSet Name="Resver_Head_Log_Resver_Head_RHID_fk" Association="Self.Resver_Head_Log_Resver_Head_RHID_fk">
             <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_Head_Log" EntitySet="Resver_Head_Log" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Questionnaire_Resver_Head_RHID_fk" Association="Self.Resver_Questionnaire_Resver_Head_RHID_fk">
+            <End Role="Resver_Head" EntitySet="Resver_Head" />
+            <End Role="Resver_Questionnaire" EntitySet="Resver_Questionnaire" />
           </AssociationSet>
           <AssociationSet Name="Resver_Head_Log_UserData_UID_fk" Association="Self.Resver_Head_Log_UserData_UID_fk">
             <End Role="UserData" EntitySet="UserData" />
@@ -5692,6 +5756,21 @@
                 <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
                 <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
                 <ScalarProperty Name="BSCID" ColumnName="BSCID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Resver_Questionnaire">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Questionnaire">
+              <MappingFragment StoreEntitySet="Resver_Questionnaire">
+                <ScalarProperty Name="RQID" ColumnName="RQID" />
+                <ScalarProperty Name="QuestionKey" ColumnName="QuestionKey" />
+                <ScalarProperty Name="NumberContent" ColumnName="NumberContent" />
+                <ScalarProperty Name="TextContent" ColumnName="TextContent" />
+                <ScalarProperty Name="RHID" ColumnName="RHID" />
+                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
+                <ScalarProperty Name="CreUID" ColumnName="CreUID" />
+                <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
+                <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -43,5 +43,7 @@ namespace NS_Education.Models.APIItems.Controller.Resver.Submit
 
         public ICollection<Resver_Submit_GiveBackItem_Input_APIItem> GiveBackItems { get; set; } =
             new List<Resver_Submit_GiveBackItem_Input_APIItem>();
+
+        public IDictionary<string, dynamic> QuestionnaireItems { get; set; } = new Dictionary<string, dynamic>();
     }
 }

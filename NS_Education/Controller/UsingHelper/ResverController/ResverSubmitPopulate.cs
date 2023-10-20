@@ -47,6 +47,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             }
 
             SubmitPopulateHeadGiveBackItems(input, head, entitiesToAdd);
+            SubmitPopulateQuestionnaireItems(input, head, entitiesToAdd);
 
             if (needsNewHead)
                 WriteResverHeadLog(head.RHID, ReserveHeadGetListState.Draft);
@@ -59,6 +60,32 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
             return head;
+        }
+
+        private void SubmitPopulateQuestionnaireItems(Resver_Submit_Input_APIItem input, Resver_Head head,
+            ICollection<object> entitiesToAdd)
+        {
+            if (input.QuestionnaireItems is null)
+                return;
+
+            DC.Resver_Questionnaire.RemoveRange(head.Resver_Questionnaire);
+            head.Resver_Questionnaire.Clear();
+
+            foreach (var kvp in input.QuestionnaireItems)
+            {
+                bool tryParseNumber = int.TryParse(kvp.Value.ToString(), out int number);
+
+                Resver_Questionnaire questionnaire = new Resver_Questionnaire
+                {
+                    QuestionKey = kvp.Key,
+                    NumberContent = tryParseNumber ? number : (int?)null,
+                    TextContent = kvp.Value.ToString(),
+                    RHID = head.RHID
+                };
+
+                entitiesToAdd.Add(questionnaire);
+                head.Resver_Questionnaire.Add(questionnaire);
+            }
         }
 
         private void SubmitPopulateHeadGiveBackItems(Resver_Submit_Input_APIItem input, Resver_Head head,

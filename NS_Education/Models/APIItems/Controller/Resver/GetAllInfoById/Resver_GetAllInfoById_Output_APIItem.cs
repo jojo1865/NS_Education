@@ -15,6 +15,8 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public ICollection<Resver_GetAllInfoById_Output_OtherItem_APIItem> OtherItems =
             new List<Resver_GetAllInfoById_Output_OtherItem_APIItem>();
 
+        public IDictionary<string, dynamic> QuestionnaireItems = new Dictionary<string, dynamic>();
+
         public ICollection<Resver_GetAllInfoById_Output_SiteItem_APIItem> SiteItems =
             new List<Resver_GetAllInfoById_Output_SiteItem_APIItem>();
 

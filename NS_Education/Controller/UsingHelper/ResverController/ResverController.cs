@@ -198,6 +198,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 // GiveBack
                 .Include(rb => rb.Resver_GiveBack)
                 .Include(rb => rb.Resver_GiveBack.Select(rg => rg.B_StaticCode))
+                // Questionnaire
+                .Include(rh => rh.Resver_Questionnaire)
                 .Where(rh => rh.RHID == id);
         }
 
@@ -245,10 +247,22 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 SiteItems = GetAllInfoByIdPopulateSiteItems(entity),
                 OtherItems = GetAllInfoByIdPopulateOtherItems(entity),
                 BillItems = GetAllInfoByIdPopulateBillItems(entity),
-                GiveBackItems = GetAllInfoByIdPopulateGiveBackItems(entity)
+                GiveBackItems = GetAllInfoByIdPopulateGiveBackItems(entity),
+                QuestionnaireItems = GetAllInfoByIdPopulateQuestionnaireItems(entity)
             };
 
             return await Task.FromResult(result);
+        }
+
+        private static IDictionary<string, object> GetAllInfoByIdPopulateQuestionnaireItems(Resver_Head entity)
+        {
+            return entity.Resver_Questionnaire
+                .GroupBy(q => q.QuestionKey)
+                .ToDictionary(grouping => grouping.Key, grouping =>
+                {
+                    Resver_Questionnaire item = grouping.First();
+                    return (object)item.NumberContent ?? item.TextContent;
+                });
         }
 
         private async Task<(M_Contect contact1, M_Contect contact2)> GetInfoByIdGetContacts(Resver_Head entity)

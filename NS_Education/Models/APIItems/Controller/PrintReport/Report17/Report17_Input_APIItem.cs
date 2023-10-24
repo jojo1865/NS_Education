@@ -1,4 +1,4 @@
-namespace NS_Education.Models.APIItems.Controller.PrintReport.Report1
+namespace NS_Education.Models.APIItems.Controller.PrintReport.Report17
 {
     /// <summary>
     /// 產製對帳單的輸入物件。

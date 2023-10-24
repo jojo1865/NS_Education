@@ -21,7 +21,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
     [FinalizeResponseFilter(Order = Int32.MaxValue)]
     public class PublicClass : System.Web.Mvc.Controller
     {
-        private readonly ICollection<BaseError> _errors = new List<BaseError>();
+        protected readonly ICollection<BaseError> _errors = new List<BaseError>();
         protected readonly string[] CategoryTypes = { "通用", "公司", "部門", "場地", "備忘", "服務", "設備", "客戶", "付款類", "合作廠商" };
 
         /// <summary>

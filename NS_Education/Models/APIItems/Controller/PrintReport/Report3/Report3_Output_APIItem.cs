@@ -18,12 +18,14 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report3
         public string Username { get; set; }
 
         public IEnumerable<int> RHID { get; set; }
+        public string Description { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report3_Input_APIItem r3)
             {
                 RHID = r3.RHID;
+                Description = r3.Description;
             }
 
             base.SetByInput(input);

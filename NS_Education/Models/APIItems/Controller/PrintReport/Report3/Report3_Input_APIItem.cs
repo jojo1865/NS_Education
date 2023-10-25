@@ -8,5 +8,6 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report3
     public class Report3_Input_APIItem : BaseRequestForPagedList
     {
         public IEnumerable<int> RHID { get; set; }
+        public string Description { get; set; }
     }
 }

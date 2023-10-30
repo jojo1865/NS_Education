@@ -100,10 +100,12 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         .Sum(ro => (int?)ro.QuotedPrice) ?? 0,
                     InsurancePrice = rh.Resver_Other
                         .Where(ro => !ro.DeleteFlag)
+                        .Where(ro => ro.PrintTitle != null)
                         .Where(ro => ro.PrintTitle.Contains("保險"))
                         .Sum(ro => (int?)ro.QuotedPrice) ?? 0,
                     TransportationPrice = rh.Resver_Other
                         .Where(ro => !ro.DeleteFlag)
+                        .Where(ro => ro.PrintTitle != null)
                         .Where(ro => ro.PrintTitle.Contains("交通費"))
                         .Sum(ro => (int?)ro.QuotedPrice) ?? 0,
                     OtherPrice = rh.Resver_Other

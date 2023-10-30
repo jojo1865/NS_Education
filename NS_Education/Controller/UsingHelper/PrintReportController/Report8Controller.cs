@@ -9,10 +9,12 @@ using Microsoft.Ajax.Utilities;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report8;
 using NS_Education.Models.Entities;
+using NS_Education.Models.Utilities.PrintReport;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using QuestPDF.Helpers;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -140,6 +142,122 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         public async Task<string> Get(Report8_Input_APIItem input)
         {
             return GetResponseJson(await GetResultAsync(input));
+        }
+
+        [HttpGet]
+        // [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetPdf(Report8_Input_APIItem input)
+        {
+            // CommonResponseForPagedList<Report8_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            Random random = new Random();
+            CommonResponseForPagedList<Report8_Output_Row_APIItem> data = new Report8_Output_APIItem
+            {
+                Items = new List<Report8_Output_Row_APIItem>
+                {
+                    new Report8_Output_Row_APIItem
+                    {
+                        SiteName = "假場地",
+                        SiteCode = "test",
+                        RentCt = 5,
+                        SiteSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
+                        DeviceSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
+                        CleanSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
+                        NegotiatorSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
+                        ServiceSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
+                        MealSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
+                        DessertSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
+                        WillUseAgainPercentage = "12.34%"
+                    }
+                },
+                UID = 5,
+                Username = "Kevin",
+                StartDate = "2023/01/01",
+                EndDate = "2023/12/31"
+            };
+
+            ICollection<KeyValuePair<string, ICollection<PdfColumn<Report8_Output_Row_APIItem>>>> tableDefinitions =
+                new List<KeyValuePair<string, ICollection<PdfColumn<Report8_Output_Row_APIItem>>>>();
+
+            AddColumnDefinition(tableDefinitions, "場地空間", r => r.SiteSatisfied);
+            AddColumnDefinition(tableDefinitions, "視聽設備", r => r.DeviceSatisfied);
+            AddColumnDefinition(tableDefinitions, "環境清潔", r => r.CleanSatisfied);
+            AddColumnDefinition(tableDefinitions, "洽談人員", r => r.NegotiatorSatisfied);
+            AddColumnDefinition(tableDefinitions, "服務人員", r => r.ServiceSatisfied);
+            AddColumnDefinition(tableDefinitions, "午、晚餐", r => r.SiteSatisfied);
+            AddColumnDefinition(tableDefinitions, "茶點", r => r.DessertSatisfied);
+
+            // byte[] pdf = data.MakePdf(input,
+            //     GetUid(),
+            //     await GetUserNameByID(GetUid()),
+            //     "滿意度調查表場地彙整報表",
+            //     columnDefinitions.ToArray(),
+            //     pageSize: new PageSize(PageSizes.A4.Width * 3, PageSizes.A4.Height));
+
+            byte[] pdf = data.MakeMultiTablePdf(5,
+                "Dummy",
+                tableDefinitions,
+                $"\n日期區間={input.StartDate} - {input.EndDate}",
+                PageSizes.A4.Landscape());
+
+            return new FileContentResult(pdf, "application/pdf");
+        }
+
+        private static void AddColumnDefinition(
+            ICollection<KeyValuePair<string, ICollection<PdfColumn<Report8_Output_Row_APIItem>>>> tables,
+            string fieldName, Func<Report8_Output_Row_APIItem, IDictionary<int, int>> scoreSelector)
+        {
+            // 一個 fieldName 一個 table
+            ICollection<PdfColumn<Report8_Output_Row_APIItem>>
+                table = new List<PdfColumn<Report8_Output_Row_APIItem>>();
+
+            KeyValuePair<string, ICollection<PdfColumn<Report8_Output_Row_APIItem>>> tableDefinition =
+                new KeyValuePair<string, ICollection<PdfColumn<Report8_Output_Row_APIItem>>>($"場地滿意調查表\n（{fieldName}）",
+                    table);
+
+            table.Add(new PdfColumn<Report8_Output_Row_APIItem>
+            {
+                Name = "場地",
+                LengthWeight = 6,
+                Selector = r => r.SiteName,
+                OutputTotal = false
+            });
+            table.Add(new PdfColumn<Report8_Output_Row_APIItem>
+            {
+                Name = "編號",
+                LengthWeight = 3,
+                Selector = r => r.SiteCode,
+                OutputTotal = false
+            });
+            table.Add(new PdfColumn<Report8_Output_Row_APIItem>
+            {
+                Name = "總次數",
+                LengthWeight = 3,
+                Selector = r => r.RentCt,
+                OutputTotal = true
+            });
+
+            string[] scoreNames = { "很滿意", "滿意", "可", "不滿意", "很不滿意" };
+            for (int i = 1; i <= 5; i++)
+            {
+                table.Add(new PdfColumn<Report8_Output_Row_APIItem>
+                {
+                    Name = scoreNames[5 - i],
+                    LengthWeight = 3,
+                    Selector = r => scoreSelector(r)[i - 1],
+                    OutputTotal = true
+                });
+            }
+
+            table.Add(new PdfColumn<Report8_Output_Row_APIItem>
+            {
+                Name = "願意再度預約",
+                LengthWeight = 4,
+                Selector = r => r.WillUseAgainPercentage,
+                OutputTotal = false
+            });
+
+            tables.Add(tableDefinition);
         }
     }
 }

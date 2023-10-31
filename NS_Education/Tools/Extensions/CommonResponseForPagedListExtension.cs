@@ -28,62 +28,10 @@ namespace NS_Education.Tools.Extensions
                 container.Page(page =>
                 {
                     // basic
-                    page.Size(pageSize);
-                    page.Margin(0.5f, Unit.Centimetre);
-                    page.PageColor(Colors.White);
-                    page.DefaultTextStyle(ts =>
-                        ts.FontFamily("Noto Sans TC")
-                            .Black()
-                            .SemiBold()
-                            .FontSize(10));
+                    page.BasicSetting(pageSize);
 
                     // header
-                    page.Header()
-                        .Column(c =>
-                        {
-                            c.Item().Row(row =>
-                            {
-                                row.RelativeItem()
-                                    .AlignLeft()
-                                    .ScaleToFit()
-                                    .Text(t =>
-                                    {
-                                        t.AlignLeft();
-                                        t.Line($"製表者 ID: {uid}").FontSize(16).ExtraBold()
-                                            .FontColor(Colors.Purple.Darken2);
-                                        t.Line($"製表者: {userName}")
-                                            .FontSize(16).ExtraBold().FontColor(Colors.Purple.Darken2);
-
-                                        if (queryConditions.HasContent())
-                                            t.Line($"查詢條件: {queryConditions}")
-                                                .FontSize(16)
-                                                .ExtraBold()
-                                                .FontColor(Colors.Grey.Medium);
-                                    });
-
-                                row.RelativeItem()
-                                    .AlignCenter()
-                                    .Text(t =>
-                                    {
-                                        ;
-                                        t.AlignCenter();
-                                        t.Line("南山人壽教育訓練中心").FontSize(26).ExtraBold().FontColor(Colors.Cyan.Darken2);
-                                        t.EmptyLine();
-                                        t.Line(reportTitle).FontSize(26).ExtraBold().Black();
-                                    });
-
-                                row.RelativeItem()
-                                    .AlignRight()
-                                    .Text(t =>
-                                    {
-                                        t.AlignLeft();
-                                        t.Line($"製表日: {DateTime.Now.ToFormattedStringDate()}").FontSize(16).ExtraBold()
-                                            .FontColor(Colors.Purple.Darken2);
-                                        t.CurrentPageNumber().Format(i => $"頁次: {i ?? 0}").FontSize(16).ExtraBold()
-                                            .FontColor(Colors.Purple.Darken2);
-                                    });
-                            });
-                        });
+                    page.BasicHeader(uid, userName, reportTitle, queryConditions);
 
                     page.Content()
                         .PaddingTop(0)
@@ -160,6 +108,72 @@ namespace NS_Education.Tools.Extensions
             return document.GeneratePdf();
         }
 
+        public static void BasicHeader(this PageDescriptor page, int uid, string userName, string reportTitle,
+            string queryConditions = "", int titleSize = 26)
+        {
+            int subTitleSize = (int)(titleSize * 0.66f);
+
+            page.Header()
+                .Column(c =>
+                {
+                    c.Item().Row(row =>
+                    {
+                        row.RelativeItem()
+                            .AlignLeft()
+                            .ScaleToFit()
+                            .Text(t =>
+                            {
+                                t.AlignLeft();
+                                t.Line($"製表者 ID: {uid}").FontSize(subTitleSize).ExtraBold()
+                                    .FontColor(Colors.Purple.Darken2);
+                                t.Line($"製表者: {userName}")
+                                    .FontSize(subTitleSize).ExtraBold().FontColor(Colors.Purple.Darken2);
+
+                                if (queryConditions.HasContent())
+                                    t.Line($"查詢條件: {queryConditions}")
+                                        .FontSize(subTitleSize)
+                                        .ExtraBold()
+                                        .FontColor(Colors.Grey.Medium);
+                            });
+
+                        row.RelativeItem()
+                            .AlignCenter()
+                            .Text(t =>
+                            {
+                                ;
+                                t.AlignCenter();
+                                t.Line("南山人壽教育訓練中心").FontSize(titleSize).ExtraBold().FontColor(Colors.Cyan.Darken2);
+                                t.EmptyLine();
+                                t.Line(reportTitle).FontSize(titleSize).ExtraBold().Black();
+                            });
+
+                        row.RelativeItem()
+                            .AlignRight()
+                            .Text(t =>
+                            {
+                                t.AlignLeft();
+                                t.Line($"製表日: {DateTime.Now.ToFormattedStringDate()}").FontSize(subTitleSize)
+                                    .ExtraBold()
+                                    .FontColor(Colors.Purple.Darken2);
+                                t.CurrentPageNumber().Format(i => $"頁次: {i ?? 0}").FontSize(subTitleSize).ExtraBold()
+                                    .FontColor(Colors.Purple.Darken2);
+                            });
+                    });
+                });
+        }
+
+        public static void BasicSetting(this PageDescriptor page, PageSize pageSize)
+        {
+            page.Size(pageSize);
+            page.Margin(0.5f, Unit.Centimetre);
+            page.PageColor(Colors.White);
+            page.DefaultTextStyle(ts =>
+                ts.FontFamily("Noto Sans TC")
+                    .Black()
+                    .SemiBold()
+                    .FontSize(10));
+        }
+
         public static byte[] MakeMultiTablePdf<TOutput>(this CommonResponseForList<TOutput> data
             , int uid
             , string userName
@@ -177,64 +191,10 @@ namespace NS_Education.Tools.Extensions
                     container.Page(page =>
                     {
                         // basic
-                        page.Size(pageSize);
-                        page.Margin(0.5f, Unit.Centimetre);
-                        page.PageColor(Colors.White);
-                        page.DefaultTextStyle(ts =>
-                            ts.FontFamily("Noto Sans TC")
-                                .Black()
-                                .SemiBold()
-                                .FontSize(10));
+                        page.BasicSetting(pageSize);
 
                         // header
-                        page.Header()
-                            .Column(c =>
-                            {
-                                c.Item().Row(row =>
-                                {
-                                    row.RelativeItem()
-                                        .AlignLeft()
-                                        .ScaleToFit()
-                                        .Text(t =>
-                                        {
-                                            t.AlignLeft();
-                                            t.Line($"製表者 ID: {uid}").FontSize(16).ExtraBold()
-                                                .FontColor(Colors.Purple.Darken2);
-                                            t.Line($"製表者: {userName}")
-                                                .FontSize(16).ExtraBold().FontColor(Colors.Purple.Darken2);
-
-                                            if (queryConditions.HasContent())
-                                                t.Line($"查詢條件: {queryConditions}")
-                                                    .FontSize(16)
-                                                    .ExtraBold()
-                                                    .FontColor(Colors.Grey.Medium);
-                                        });
-
-                                    row.RelativeItem()
-                                        .AlignCenter()
-                                        .Text(t =>
-                                        {
-                                            ;
-                                            t.AlignCenter();
-                                            t.Line("南山人壽教育訓練中心").FontSize(26).ExtraBold()
-                                                .FontColor(Colors.Cyan.Darken2);
-                                            t.EmptyLine();
-                                            t.Line(kvp.Key).FontSize(26).ExtraBold().Black();
-                                        });
-
-                                    row.RelativeItem()
-                                        .AlignRight()
-                                        .Text(t =>
-                                        {
-                                            t.AlignLeft();
-                                            t.Line($"製表日: {DateTime.Now.ToFormattedStringDate()}").FontSize(16)
-                                                .ExtraBold()
-                                                .FontColor(Colors.Purple.Darken2);
-                                            t.CurrentPageNumber().Format(i => $"頁次: {i ?? 0}").FontSize(16).ExtraBold()
-                                                .FontColor(Colors.Purple.Darken2);
-                                        });
-                                });
-                            });
+                        page.BasicHeader(uid, userName, kvp.Key, queryConditions);
 
                         PdfColumn<TOutput>[] columnDefinition = kvp.Value.ToArray();
 

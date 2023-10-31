@@ -12,6 +12,9 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -63,8 +66,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     HostName = rh.CustomerTitle,
                     EventTitle = rh.Title,
                     RHID = rh.RHID,
-                    StartDate = rh.SDate.FormatAsRocYyyMmDd(),
-                    EndDate = rh.EDate.FormatAsRocYyyMmDd(),
+                    StartDate = rh.SDate.FormatAsRocYyyMmDdWeekDay(),
+                    EndDate = rh.EDate.FormatAsRocYyyMmDdWeekDay(),
                     SiteNames = rh.Resver_Site.Select(rs => rs.B_SiteData.Title).Distinct(),
                     MKT = rh.MKT,
                     Owner = rh.Owner,
@@ -203,6 +206,199 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         public async Task<string> Get(Report2_Input_APIItem input)
         {
             return GetResponseJson(await GetResultAsync(input));
+        }
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetPdf(Report2_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report2_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            if (!data.Items.Any())
+                throw new Exception("查無可匯出資料！");
+
+            PageSize pageSize = PageSizes.A4.Portrait();
+            string userName = await GetUserNameByID(GetUid());
+            Document document = Document.Create(d =>
+            {
+                foreach (Report2_Output_Row_APIItem item in data.Items)
+                {
+                    d.Page(p =>
+                    {
+                        p.BasicSetting(pageSize);
+                        p.BasicHeader(GetUid(),
+                            userName,
+                            "Function Order",
+                            titleSize: 18);
+
+                        string startDateFormat = item.StartDate;
+                        string endDateFormat = item.EndDate;
+                        string eventDateString = startDateFormat == endDateFormat
+                            ? startDateFormat
+                            : $"{startDateFormat} ~ {endDateFormat}";
+                        p.Content()
+                            .Column(c =>
+                            {
+                                // 上部基本資訊
+                                c.Item().Text($"主辦單位：{item.HostName}");
+                                c.Item().Text($"活動名稱：{item.EventTitle}");
+                                c.Item().Text($"預約單號：{item.RHID}");
+                                c.Item().Text($"活動日期：{eventDateString}");
+                                c.Item().Text($"使用場地：{String.Join("、", item.SiteNames)}");
+                                c.Item().Text($"MKT：{item.MKT ?? "無"}／Owner：{item.Owner ?? "無"}");
+
+                                c.Item().PaddingVertical(0.2f, Unit.Centimetre);
+
+                                // 粗線細線
+                                c.Item().LineHorizontal(5);
+                                c.Item().LineHorizontal(2);
+
+                                // 每個場地一個表格
+                                foreach (Report2_Output_Row_Site_APIItem site in item.Sites)
+                                {
+                                    // 場地 Title 以：分隔，前段為場地編號，後段為場地名稱（紅字）
+                                    string[] siteSplit = site.Title.Split('：');
+
+                                    c.Item().Text(t =>
+                                    {
+                                        t.Span($"【{siteSplit[0]}】");
+                                        t.Span($"{siteSplit[1]}").FontColor(Colors.Red.Accent1);
+                                        t.Span($"（{site.Date}）");
+                                    });
+
+                                    // 場地內容表格
+                                    c.Item()
+                                        .Border(1)
+                                        .Table(t =>
+                                        {
+                                            t.ColumnsDefinition(cd =>
+                                            {
+                                                cd.RelativeColumn(2);
+                                                cd.RelativeColumn();
+                                            });
+                                            t.Header(h =>
+                                            {
+                                                h.Cell()
+                                                    .Border(1)
+                                                    .AlignCenter()
+                                                    .Text("項目");
+
+                                                h.Cell()
+                                                    .Border(1)
+                                                    .AlignCenter()
+                                                    .Text("備註");
+                                            });
+
+                                            foreach (string line in site.Lines)
+                                            {
+                                                t.Cell()
+                                                    .Border(1)
+                                                    .AlignLeft()
+                                                    .PaddingLeft(0.1f, Unit.Centimetre)
+                                                    .Text(line);
+
+                                                t.Cell();
+                                            }
+                                        });
+                                    c.Item().PaddingVertical(0.2f, Unit.Centimetre);
+                                }
+
+                                // 餐飲表格
+                                ISet<string> allUniqueDescriptions = item.Foods
+                                    .Select(f => f.Note.EndsWith("。") ? f.Note.Substring(0, f.Note.Length - 1) : f.Note)
+                                    .Where(f => f.HasContent())
+                                    .Distinct()
+                                    .ToHashSet();
+
+                                string joinedDescriptions = String.Join("。", allUniqueDescriptions);
+
+                                c.Item().Text($"【餐飲】{joinedDescriptions}")
+                                    .Bold();
+
+                                c.Item()
+                                    .Border(1)
+                                    .Table(t =>
+                                    {
+                                        t.ColumnsDefinition(cd =>
+                                        {
+                                            cd.RelativeColumn();
+                                            cd.RelativeColumn(3);
+                                            cd.RelativeColumn(2);
+                                            cd.RelativeColumn(6);
+                                            cd.RelativeColumn(4);
+                                            cd.RelativeColumn(3);
+                                            cd.RelativeColumn(2);
+                                        });
+
+                                        // 表格 header
+                                        t.Cell().Border(1).AlignCenter().Text("日期");
+                                        t.Cell().Border(1).AlignCenter().Text("餐別");
+                                        t.Cell().Border(1).AlignCenter().Text("送達時間");
+                                        t.Cell().Border(1).AlignCenter().Text("形式");
+                                        t.Cell().Border(1).AlignCenter().Text("數量/金額");
+                                        t.Cell().Border(1).AlignCenter().Text("廠商");
+                                        t.Cell().Border(1).AlignLeft().PaddingLeft(0.1f, Unit.Centimetre).Text("備註");
+
+                                        foreach (Report2_Output_Row_Food_APIItem food in item.Foods)
+                                        {
+                                            t.Cell().Border(1).AlignCenter().Text(food.Date);
+                                            t.Cell().Border(1).AlignCenter().Text(food.FoodType);
+                                            t.Cell().Border(1).AlignCenter().Text(food.ArriveTime);
+                                            t.Cell().Border(1).AlignCenter().Text(food.Form);
+
+                                            // 只有 1 份就顯示總價，否則顯示每人價
+                                            string singlePrice = "$" + food.QuotedPrice.ToString("N0");
+                                            string personPrice =
+                                                "$" + (food.QuotedPrice / Math.Min(food.Ct, 1)).ToString("N0") +
+                                                "*" + food.Ct + "人份";
+
+                                            t.Cell().Border(1).AlignCenter()
+                                                .Text(food.Ct <= 1 ? singlePrice : personPrice);
+                                            t.Cell().Border(1).AlignCenter().Text(food.Partner);
+                                            t.Cell();
+                                        }
+                                    });
+
+                                // 設備
+                                c.Item().PaddingVertical(0.2f, Unit.Centimetre);
+                                c.Item().Text("【設備】")
+                                    .Bold();
+
+                                c.Item().Text("1、各教室標準設備");
+
+                                // 交通
+                                if (item.ParkingNote.HasContent())
+                                {
+                                    c.Item().PaddingVertical(0.2f, Unit.Centimetre);
+                                    c.Item().Text("【交通】")
+                                        .Bold();
+                                    c.Item().Text(item.ParkingNote);
+                                }
+
+                                // 結帳
+                                c.Item().PaddingVertical(0.2f, Unit.Centimetre);
+                                c.Item().Text("【結帳】")
+                                    .Bold();
+                                c.Item().Text($"1、聯絡人：{item.Contact ?? "無資料"}");
+                                c.Item().Text(t =>
+                                {
+                                    t.Span("2、付款方式：");
+                                    foreach (string pay in item.PayStatus)
+                                    {
+                                        t.Span($"\n 　{pay}");
+                                    }
+                                });
+
+                                c.Item().PaddingVertical(0.2f, Unit.Centimetre).Text("　　　　　　　□ 抬頭：");
+                                c.Item().Text("　　　　　　　□ 統編：");
+                            });
+                    });
+                }
+            });
+
+            byte[] pdf = document.GeneratePdf();
+
+            return new FileContentResult(pdf, "application/pdf");
         }
     }
 }

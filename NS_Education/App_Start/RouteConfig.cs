@@ -38,6 +38,13 @@ namespace NS_Education
             );
 
             routes.MapRoute(
+                name: "PrintReport2Pdf",
+                url: "PrintReport/Pdf/2",
+                defaults: new
+                    { controller = "Report2", action = "GetPdf" }
+            );
+
+            routes.MapRoute(
                 name: "PrintReport2",
                 url: "PrintReport/2",
                 defaults: new

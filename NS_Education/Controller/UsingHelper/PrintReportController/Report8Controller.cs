@@ -148,33 +148,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         // [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<ActionResult> GetPdf(Report8_Input_APIItem input)
         {
-            // CommonResponseForPagedList<Report8_Output_Row_APIItem> data = await GetResultAsync(input);
-
-            Random random = new Random();
-            CommonResponseForPagedList<Report8_Output_Row_APIItem> data = new Report8_Output_APIItem
-            {
-                Items = new List<Report8_Output_Row_APIItem>
-                {
-                    new Report8_Output_Row_APIItem
-                    {
-                        SiteName = "假場地",
-                        SiteCode = "test",
-                        RentCt = 5,
-                        SiteSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
-                        DeviceSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
-                        CleanSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
-                        NegotiatorSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
-                        ServiceSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
-                        MealSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
-                        DessertSatisfied = new[] { 1, 2, 3, 4, 5 }.ToDictionary(i => i, i => random.Next(10)),
-                        WillUseAgainPercentage = "12.34%"
-                    }
-                },
-                UID = 5,
-                Username = "Kevin",
-                StartDate = "2023/01/01",
-                EndDate = "2023/12/31"
-            };
+            CommonResponseForPagedList<Report8_Output_Row_APIItem> data = await GetResultAsync(input);
 
             ICollection<KeyValuePair<string, ICollection<PdfColumn<Report8_Output_Row_APIItem>>>> tableDefinitions =
                 new List<KeyValuePair<string, ICollection<PdfColumn<Report8_Output_Row_APIItem>>>>();
@@ -184,18 +158,11 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             AddColumnDefinition(tableDefinitions, "環境清潔", r => r.CleanSatisfied);
             AddColumnDefinition(tableDefinitions, "洽談人員", r => r.NegotiatorSatisfied);
             AddColumnDefinition(tableDefinitions, "服務人員", r => r.ServiceSatisfied);
-            AddColumnDefinition(tableDefinitions, "午、晚餐", r => r.SiteSatisfied);
+            AddColumnDefinition(tableDefinitions, "午、晚餐", r => r.MealSatisfied);
             AddColumnDefinition(tableDefinitions, "茶點", r => r.DessertSatisfied);
 
-            // byte[] pdf = data.MakePdf(input,
-            //     GetUid(),
-            //     await GetUserNameByID(GetUid()),
-            //     "滿意度調查表場地彙整報表",
-            //     columnDefinitions.ToArray(),
-            //     pageSize: new PageSize(PageSizes.A4.Width * 3, PageSizes.A4.Height));
-
-            byte[] pdf = data.MakeMultiTablePdf(5,
-                "Dummy",
+            byte[] pdf = data.MakeMultiTablePdf(GetUid(),
+                await GetUserNameByID(GetUid()),
                 tableDefinitions,
                 $"\n日期區間={input.StartDate} - {input.EndDate}",
                 PageSizes.A4.Landscape());
@@ -238,13 +205,15 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             });
 
             string[] scoreNames = { "很滿意", "滿意", "可", "不滿意", "很不滿意" };
-            for (int i = 1; i <= 5; i++)
+            for (int i = 0; i <= 4; i++)
             {
+                int j = 5 - i;
                 table.Add(new PdfColumn<Report8_Output_Row_APIItem>
                 {
-                    Name = scoreNames[5 - i],
+                    Name = scoreNames[i],
                     LengthWeight = 3,
-                    Selector = r => scoreSelector(r)[i - 1],
+                    // 這是 delegate, 所以不能直接寫 5-i 在這裡
+                    Selector = r => scoreSelector(r)[j],
                     OutputTotal = true
                 });
             }

@@ -54,7 +54,7 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
         #region GetList
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(GroupData_GetList_Input_APIItem input)
         {
             return await _getListPagedHelper.GetPagedList(input);
@@ -91,7 +91,7 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
         #region GetInfoById
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
         {
             return await _getInfoByIdHelper.GetInfoById(id);
@@ -196,7 +196,7 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
         #region DeleteItem
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
             if (!await DeleteItemValidateReviveNoSameNameData(input))
@@ -255,7 +255,7 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, null, nameof(GroupData_Submit_Input_APIItem.GID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(GroupData_Submit_Input_APIItem.GID))]
         public async Task<string> Submit(GroupData_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);
@@ -335,7 +335,7 @@ namespace NS_Education.Controller.UsingHelper.GroupDataController
         /// <param name="input">輸入值。參照 <see cref="GroupData_SubmitMenuData_Input_APIItem"/>。</param>
         /// <returns>通用回傳訊息格式</returns>
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin,
+        [JwtAuthFilter(AuthorizeBy.Any,
             RequirePrivilege.AddFlag | RequirePrivilege.EditFlag | RequirePrivilege.DeleteFlag)]
         public async Task<string> SubmitMenuData(GroupData_SubmitMenuData_Input_APIItem input)
         {

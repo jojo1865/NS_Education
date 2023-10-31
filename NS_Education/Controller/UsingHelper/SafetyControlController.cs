@@ -24,7 +24,7 @@ namespace NS_Education.Controller.UsingHelper
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> Submit(SafetyControl_Submit_Input_APIItem input)
         {
             // 這個 API 需要一次更新所有安全控管設定，因此不使用 Helper

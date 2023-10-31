@@ -81,7 +81,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         #region AdminChangeUserPassword
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> AdminChangeUserPassword(UserData_AdminChangeUserPassword_Input_APIItem input)
         {
             bool isValid = await input.StartValidate()
@@ -153,7 +153,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         /// </summary>
         /// <param name="input">輸入資料</param>
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddFlag)]
         public async Task<string> SignUp(UserData_Submit_Input_APIItem input)
         {
             bool isValid = await SignUpValidateInput(input);
@@ -453,7 +453,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         /// </summary>
         /// <param name="input">輸入資料</param>
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.EditFlag,
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag,
             nameof(UserData_Submit_Input_APIItem.UID), null)]
         public async Task<string> Submit(UserData_Submit_Input_APIItem input)
         {
@@ -689,7 +689,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         #region DeleteItem
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
             // 若 deleteFlag 為 false 時，驗證是否有其他不同 UID、相同 LoginAccount、非刪除狀態的資料，如果有，打回。
@@ -746,7 +746,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         #region ChangeActive
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
             int departmentId = await DC.UserData.Where(ud => ud.UID == id).Select(ud => ud.DDID).FirstOrDefaultAsync();
@@ -888,7 +888,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         /// <param name="input">輸入資料。請參照 <see cref="UserData_GetList_Input_APIItem" />。</param>
         /// <returns>回傳結果。請參照 <see cref="UserData_GetList_Output_APIItem" />，以及 <see cref="UserData_GetList_Output_Row_APIItem" />。</returns>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(UserData_GetList_Input_APIItem input)
         {
             return await _getListPagedHelper.GetPagedList(input);
@@ -955,7 +955,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         ///     <see cref="UserData_GetInfoById_Output_APIItem" />
         /// </returns>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin | AuthorizeBy.UserSelf, RequirePrivilege.ShowFlag, "ID", null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, "ID", null)]
         public async Task<string> GetInfoById(int id)
         {
             return await _getInfoByIdHelper.GetInfoById(id);

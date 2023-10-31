@@ -68,7 +68,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         #region SubmitLogKeepDays
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> SubmitLogKeepDays(UserLog_SubmitLogKeepDays_Input_APIItem input)
         {
             // 這支輸入沒有 ActiveFlag，所以不使用 Helper
@@ -138,7 +138,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         }
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag, null, null)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag, null, null)]
         public async Task<string> GetUserLogList(UserLog_GetList_Input_APIItem input)
         {
             // 如果有輸入 Type，覆寫篩選
@@ -238,7 +238,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         /// 提供「事件類型」的端點，確切 Route 請參考 RouteConfig。
         /// </summary>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList()
         {
             return await _getListLocalHelper.GetListLocal();

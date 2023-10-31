@@ -49,7 +49,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #region GetList
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> GetList(MenuApi_GetList_Input_APIItem input)
         {
             return await _getListAllHelper.GetAllList(input);
@@ -93,7 +93,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, null, nameof(MenuApi_Submit_Input_APIItem.SeqNo))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(MenuApi_Submit_Input_APIItem.SeqNo))]
         public async Task<string> Submit(MenuApi_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);

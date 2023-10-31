@@ -47,7 +47,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #region GetList
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(MenuData_GetList_Input_APIItem input)
         {
             // 特殊邏輯：
@@ -146,7 +146,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #region GetInfoById
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.ShowFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
         {
             return await _getInfoByIdHelper.GetInfoById(id);
@@ -187,7 +187,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         /// </param>
         /// <returns>通用回傳格式訊息</returns>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeActive(int id, bool? activeFlag)
         {
             // 有特殊邏輯：關閉時，需要同步關閉下層所有選單，所以這裡不用 helper。
@@ -253,7 +253,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         /// <param name="input">輸入資料。參照 <see cref="DeleteItem_Input_APIItem"/></param>
         /// <returns>通用回傳格式訊息</returns>
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.DeleteFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.DeleteFlag)]
         public async Task<string> DeleteItem(DeleteItem_Input_APIItem input)
         {
             // 有特殊邏輯：刪除時，需要連同子選單一同刪除，所以這裡不使用 Helper。
@@ -327,7 +327,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #region Submit
 
         [HttpPost]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.AddOrEdit, null, nameof(MenuData_Submit_Input_APIItem.MDID))]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(MenuData_Submit_Input_APIItem.MDID))]
         public async Task<string> Submit(MenuData_Submit_Input_APIItem input)
         {
             return await _submitHelper.Submit(input);
@@ -430,7 +430,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
         #region ChangeSortNo
 
         [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Admin, RequirePrivilege.EditFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.EditFlag)]
         public async Task<string> ChangeSortNo(int id, int sortNo)
         {
             await _changeSortNo(id, sortNo);

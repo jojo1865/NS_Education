@@ -145,7 +145,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         }
 
         [HttpGet]
-        // [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<ActionResult> GetPdf(Report8_Input_APIItem input)
         {
             CommonResponseForPagedList<Report8_Output_Row_APIItem> data = await GetResultAsync(input);

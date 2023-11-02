@@ -1,4 +1,6 @@
+using System;
 using System.Data.Entity;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -31,11 +33,21 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(cv => !cv.DeleteFlag)
                     .AsQueryable();
 
-                if (input.CVID != null)
-                    query = query.Where(cv => input.CVID.Contains(cv.CVID));
+                DateTime startTime = input.StartDate?.ParseDateTime().Date ?? SqlDateTime.MinValue.Value;
+                DateTime endTime = input.EndDate?.ParseDateTime().Date ?? SqlDateTime.MaxValue.Value;
+
+                query = query.Where(cv => startTime <= cv.VisitDate)
+                    .Where(cv => cv.VisitDate <= endTime);
+
+                if (input.CID.HasValue)
+                    query = query.Where(cv => cv.CID == input.CID);
+
+                if (input.BSCID.HasValue)
+                    query = query.Where(cv => cv.BSCID == input.BSCID);
 
                 var results = await query
-                    .OrderBy(cv => cv.CVID)
+                    .OrderByDescending(cv => cv.VisitDate)
+                    .ThenBy(cv => cv.CVID)
                     .ToArrayAsync();
 
                 Report10_Output_APIItem response = new Report10_Output_APIItem();

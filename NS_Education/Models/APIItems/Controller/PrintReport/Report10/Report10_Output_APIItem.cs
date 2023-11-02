@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report10
 {
     /// <summary>
@@ -17,13 +15,19 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report10
         /// </summary>
         public string Username { get; set; }
 
-        public IEnumerable<int> CVID { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public int? CID { get; set; }
+        public int? BSCID { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report10_Input_APIItem r10)
             {
-                CVID = r10.CVID;
+                StartDate = r10.StartDate;
+                EndDate = r10.EndDate;
+                CID = r10.CID;
+                BSCID = r10.BSCID;
             }
 
             base.SetByInput(input);

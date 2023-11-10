@@ -30,9 +30,20 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 // 基於 Resver_Site，查詢範圍內的場地預約資料
 
                 string tableName = dbContext.GetTableName<Resver_Site>();
+                
+                // startDate 跟 endDate 不得差距超過 31 天
                 DateTime startTime = input.StartDate?.ParseDateTime().Date ?? SqlDateTime.MinValue.Value;
-                DateTime endTime = input.EndDate?.ParseDateTime().Date ?? SqlDateTime.MaxValue.Value;
 
+                // endDate 未輸入時，自動帶入今天
+                DateTime endTime = input.EndDate?.ParseDateTime().Date ?? DateTime.Now.AddDays(1).Date;
+                DateTime earliestTimeAllowed = endTime.AddDays(-31);
+                
+                if (startTime < earliestTimeAllowed)
+                    startTime = earliestTimeAllowed;
+
+                input.StartDate = startTime.ToFormattedStringDate();
+                input.EndDate = endTime.ToFormattedStringDate();
+                
                 var query = dbContext.Resver_Site
                     .AsNoTracking()
                     .Include(rs => rs.B_SiteData)

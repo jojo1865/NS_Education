@@ -177,11 +177,26 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                         t.DrawLine(1, 4);
                                         t.Cell();
 
+                                        // 如果這個 subTable 有 quotedPrice，要顯示總定價和總報價
+                                        // 否則，只顯示總定價
+
+                                        bool hasQuotedPrice = subTable.QuotedPrice.HasValue;
+
                                         t.Cell().Text("");
                                         t.Cell().Text("");
                                         t.Cell().Text("");
-                                        t.Cell().Text("");
+                                        t.Cell().Text(hasQuotedPrice ? "定價" : "");
                                         t.Cell().AlignRight().Text(subTable.Sum.ToString("N0"));
+                                        t.Cell().Text("");
+
+                                        if (!hasQuotedPrice)
+                                            continue;
+
+                                        t.Cell().Text("");
+                                        t.Cell().Text("");
+                                        t.Cell().Text("");
+                                        t.Cell().Text("報價");
+                                        t.Cell().AlignRight().Text(subTable.QuotedPrice.Value.ToString("N0"));
                                         t.Cell().Text("");
                                     }
 
@@ -370,6 +385,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             Report17_Output_SubTable_APIItem resverFoods = new Report17_Output_SubTable_APIItem
             {
                 Name = "餐飲費",
+                QuotedPrice = entity.Resver_Site
+                    .SelectMany(rs => rs.Resver_Throw)
+                    .Where(rt => rt.Resver_Throw_Food.Any())
+                    .Sum(rt => (int?)rt.QuotedPrice),
                 Rows = entity.Resver_Site
                     .SelectMany(rs => rs.Resver_Throw)
                     .OrderBy(rt => rt.TargetDate)
@@ -382,6 +401,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         PartnerName = rtf.B_Partner.Title
                     })
             };
+
 
             // 設備租金
             string resverDeviceTableName = DC.GetTableName<Resver_Device>();

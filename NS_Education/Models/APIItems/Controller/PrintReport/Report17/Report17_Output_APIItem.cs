@@ -53,7 +53,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report17
         /// <summary>
         /// 費用合計
         /// </summary>
-        public int TotalAmount => SubTables.Sum(st => (int?)st.Sum) ?? 0;
+        public int TotalAmount => SubTables.Sum(st => (int?)(st.QuotedPrice ?? st.Sum)) ?? 0;
 
         /// <summary>
         /// 預付金額

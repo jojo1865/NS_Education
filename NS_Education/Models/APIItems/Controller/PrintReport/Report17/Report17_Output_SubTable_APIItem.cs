@@ -17,6 +17,11 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report17
         public int Sum => Rows.Sum(r => (int?)r.Amount) ?? 0;
 
         /// <summary>
+        /// 區塊總報價
+        /// </summary>
+        public int? QuotedPrice { get; set; }
+
+        /// <summary>
         /// 明細行的集合
         /// </summary>
         public IEnumerable<Report17_Output_TableRow_APIItem> Rows { get; set; } =

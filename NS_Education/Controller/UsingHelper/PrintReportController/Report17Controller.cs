@@ -492,7 +492,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                         {
                                             Type = st.Name,
                                             Amount = st.QuotedPrice.Value,
-                                            PartnerName = st.Rows.FirstOrDefault()?.PartnerName ?? defaultPartnerName
+                                            PartnerName = String.Join(" / ", st.Rows
+                                                .Where(r => r.PartnerName.HasContent())
+                                                .Select(r => r.PartnerName)
+                                                .DefaultIfEmpty(defaultPartnerName))
                                         }
                                     }
                                     : st.Rows.Select(r => new Report17_Output_Payment_APIItem

@@ -185,7 +185,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                         t.Cell().Text("");
                                         t.Cell().Text("");
                                         t.Cell().Text("");
-                                        t.Cell().Text(hasQuotedPrice ? "定價" : "");
+                                        t.Cell().AlignRight().Text(hasQuotedPrice ? "定價" : "");
                                         t.Cell().AlignRight().Text(subTable.Sum.ToString("N0"));
                                         t.Cell().Text("");
 
@@ -195,7 +195,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                         t.Cell().Text("");
                                         t.Cell().Text("");
                                         t.Cell().Text("");
-                                        t.Cell().Text("報價");
+                                        t.Cell().AlignRight().Text("報價");
                                         t.Cell().AlignRight().Text(subTable.QuotedPrice.Value.ToString("N0"));
                                         t.Cell().Text("");
                                     }
@@ -479,12 +479,29 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         SitePayments = sitePayments,
                         Payments = new[] { resverThrows, resverFoods, resverDevices, resverOthers }
                             .Where(st => st.Rows.Any())
-                            .SelectMany(st => st.Rows.Select(r => new Report17_Output_Payment_APIItem
+                            .SelectMany(st =>
                             {
-                                Type = st.Name,
-                                Amount = r.Amount,
-                                PartnerName = r.PartnerName ?? "南山人壽教育訓練中心"
-                            }))
+                                // 如果有報價，直接寫一筆報價就好
+                                bool hasQuotedPrice = st.QuotedPrice.HasValue;
+                                const string defaultPartnerName = "南山人壽教育訓練中心";
+
+                                return hasQuotedPrice
+                                    ? new[]
+                                    {
+                                        new Report17_Output_Payment_APIItem
+                                        {
+                                            Type = st.Name,
+                                            Amount = st.QuotedPrice.Value,
+                                            PartnerName = st.Rows.FirstOrDefault()?.PartnerName ?? defaultPartnerName
+                                        }
+                                    }
+                                    : st.Rows.Select(r => new Report17_Output_Payment_APIItem
+                                    {
+                                        Type = st.Name,
+                                        Amount = r.Amount,
+                                        PartnerName = r.PartnerName ?? defaultPartnerName
+                                    });
+                            })
                     }
                 }
             };

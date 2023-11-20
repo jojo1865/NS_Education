@@ -98,6 +98,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         TotalPrice = (int)(e.Key.QuotedPrice * e.Count() *
                                            e.Max(grouping => grouping.rts.D_TimeSpan.PriceRatePercentage * 0.01m))
                     })
+                    .SortWithInput(input)
                     .ToList();
 
                 response.UID = GetUid();

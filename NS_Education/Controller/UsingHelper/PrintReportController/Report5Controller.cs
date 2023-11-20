@@ -13,9 +13,6 @@ using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -90,7 +87,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.Username = await GetUserNameByID(response.UID);
                 response.AllItemCt = response.Items.Count;
 
-                response.Items = response.Items.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToList();
+                response.Items = response.Items.SortWithInput(input).Skip(input.GetStartIndex())
+                    .Take(input.GetTakeRowCount()).ToList();
                 return response;
             }
         }
@@ -108,8 +106,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         {
             CommonResponseForPagedList<Report5_Output_Row_APIItem> data = await GetResultAsync(input);
 
-            byte[] pdf = data.MakePdf(input, 
-                GetUid(), 
+            byte[] pdf = data.MakePdf(input,
+                GetUid(),
                 await GetUserNameByID(GetUid()),
                 "餐飲明細表",
                 new[]
@@ -204,7 +202,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         OutputTotal = true
                     }
                 });
-            
+
             return new FileContentResult(pdf, "application/pdf");
         }
     }

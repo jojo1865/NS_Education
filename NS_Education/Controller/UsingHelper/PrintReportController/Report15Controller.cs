@@ -85,6 +85,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         AverageQuotedPrice = e.Sum(grouping => grouping.rs.QuotedPrice) / e.Count(),
                         FixedPrice = e.Max(grouping => grouping.rs.B_SiteData.UnitPrice)
                     })
+                    .SortWithInput(input)
                     .ToList();
 
                 response.UID = GetUid();

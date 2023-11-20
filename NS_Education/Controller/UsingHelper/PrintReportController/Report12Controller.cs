@@ -95,7 +95,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             ExternalUsage = GetUsage(rs.Where(r => !r.Resver_Head.Customer.InFlag), rts, input),
                         };
                     })
-                    .OrderByDescending(sd => Convert.ToInt32(sd.PeopleCt))
+                    .SortWithInput(input)
                     .Skip(input.GetStartIndex())
                     .Take(input.GetTakeRowCount())
                     .ToList();

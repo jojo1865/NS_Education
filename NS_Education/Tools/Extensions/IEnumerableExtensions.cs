@@ -38,6 +38,13 @@ namespace NS_Education.Tools.Extensions
             return enumeration.AsQueryable().OrderBy(sortString).ToArray();
         }
 
+        /// <inheritdoc cref="SortWithInput{T}(System.Collections.Generic.IEnumerable{T},System.Collections.Generic.IEnumerable{NS_Education.Models.APIItems.ListSorting})"/>
+        public static IEnumerable<T> SortWithInput<T>(this IEnumerable<T> enumeration,
+            BaseRequestForList request) where T : class
+        {
+            return enumeration.SortWithInput(request.Sorting);
+        }
+
         public static IOrderedEnumerable<T> AsOrderedEnumerable<T>(this IEnumerable<T> enumerable,
             bool ignoreOriginalOrder = false)
         {

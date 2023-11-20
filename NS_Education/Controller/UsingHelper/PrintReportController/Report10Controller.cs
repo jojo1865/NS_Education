@@ -66,6 +66,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         AfterNote = cv.AfterNote ?? "",
                         NoDealReason = cv.B_StaticCode?.Title ?? "未設定"
                     })
+                    .SortWithInput(input)
                     .Skip(input.GetStartIndex())
                     .Take(input.GetTakeRowCount())
                     .ToList();

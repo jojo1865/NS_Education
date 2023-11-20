@@ -92,6 +92,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         UnitPrice = e.Max(grouping => grouping.rs.B_SiteData.UnitPrice),
                         QuotedPrice = e.Max(grouping => grouping.rs.QuotedPrice)
                     })
+                    .SortWithInput(input)
                     .ToList();
 
                 response.UID = GetUid();

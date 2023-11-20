@@ -108,7 +108,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.Username = await GetUserNameByID(response.UID);
                 response.AllItemCt = response.Items.Count;
 
-                response.Items = response.Items.Skip(input.GetStartIndex()).Take(input.GetTakeRowCount()).ToList();
+                response.Items = response.Items.SortWithInput(input).Skip(input.GetStartIndex())
+                    .Take(input.GetTakeRowCount()).ToList();
                 return response;
             }
         }

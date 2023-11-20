@@ -85,6 +85,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         UseCount = e.Count(),
                         UseRate = (Decimal.Divide(e.Count(), total)).ToString("P")
                     })
+                    .SortWithInput(input)
                     .ToList();
 
                 response.UID = GetUid();

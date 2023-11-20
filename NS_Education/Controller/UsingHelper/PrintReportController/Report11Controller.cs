@@ -61,32 +61,51 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .SelectMany(e => e.rts.DefaultIfEmpty(), (e, rts) => new { e.rs, rts })
                     .AsQueryable();
 
+                // 這邊一起處理 siteDataQuery
+
+                var siteDataQuery = dbContext.B_SiteData
+                    .Include(sd => sd.B_Category)
+                    .Where(sd => !sd.DeleteFlag);
+
                 if (input.SiteName.HasContent())
+                {
                     query = query.Where(x => x.rs.B_SiteData.Title.Contains(input.SiteName));
+                    siteDataQuery = siteDataQuery.Where(x => x.Title.Contains(input.SiteName));
+                }
 
                 if (input.BCID.IsAboveZero())
+                {
                     query = query.Where(x => x.rs.B_SiteData.BCID == input.BCID);
+                    siteDataQuery = siteDataQuery.Where(x => x.BCID == input.BCID);
+                }
 
                 if (input.IsActive.HasValue)
+                {
                     query = query.Where(x => x.rs.B_SiteData.ActiveFlag == input.IsActive);
+                    siteDataQuery = siteDataQuery.Where(x => x.ActiveFlag == input.IsActive);
+                }
 
                 if (input.BSCID1.IsAboveZero())
+                {
                     query = query.Where(x => x.rs.B_SiteData.BSCID1 == input.BSCID1);
+                    siteDataQuery = siteDataQuery.Where(x => x.BSCID1 == input.BSCID1);
+                }
 
                 if (input.BasicSize.IsAboveZero())
+                {
                     query = query.Where(x => x.rs.B_SiteData.BasicSize >= input.BasicSize);
+                    siteDataQuery = siteDataQuery.Where(x => x.BasicSize >= input.BasicSize);
+                }
 
                 var results = await query
                     .OrderBy(e => e.rs.RSID)
                     .ToArrayAsync();
 
-                var siteData = await dbContext.B_SiteData
-                    .Include(sd => sd.B_Category)
-                    .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
+                B_SiteData[] siteData = await siteDataQuery
                     .OrderBy(sd => sd.BSID)
                     .ToArrayAsync();
 
-                var timeSpans = await dbContext.D_TimeSpan
+                D_TimeSpan[] timeSpans = await dbContext.D_TimeSpan
                     .Where(dts => dts.ActiveFlag && !dts.DeleteFlag)
                     .ToArrayAsync();
 

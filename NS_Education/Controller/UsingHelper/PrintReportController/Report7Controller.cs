@@ -47,7 +47,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 if (input.CustomerName.HasContent())
                     query = query
-                        .Where(rh => rh.CustomerTitle.Contains(input.CustomerName));
+                        .Where(rh => rh.Customer.TitleC.Contains(input.CustomerName));
 
                 // 刪除的資料 State 不會變，所以要做特別處理
                 if (input.State == (int)ReserveHeadGetListState.Deleted)

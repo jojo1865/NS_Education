@@ -32,6 +32,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             using (NsDbContext dbContext = new NsDbContext())
             {
                 var query = dbContext.Resver_Head
+                    .Include(rh => rh.Customer)
                     .Include(rh => rh.Resver_Site)
                     .Include(rh => rh.Resver_Bill)
                     .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
@@ -63,7 +64,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 response.Items = results.Select(rh => new Report2_Output_Row_APIItem
                 {
-                    HostName = rh.CustomerTitle,
+                    HostName = rh.Customer.TitleC ?? rh.Customer.TitleE ?? rh.CustomerTitle,
                     EventTitle = rh.Title,
                     RHID = rh.RHID,
                     StartDate = rh.SDate.FormatAsRocYyyMmDdWeekDay(),

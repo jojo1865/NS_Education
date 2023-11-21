@@ -24,15 +24,11 @@ namespace NS_Education.Models.APIItems
 
         public IEnumerable<ListSorting> Sorting
         {
-            get => _Sorting;
-            set
-            {
-                // 消毒，前端丟的格式有可能造成誤認為只包含一個 null 元素的集合
-                value = value.Where(ls => ls != null);
-                _Sorting = value;
-            }
+            // 消毒，前端丟進來的格式有可能造成誤認為長度為 1 的集合，只包含一個 null
+            get => _Sorting.Where(s => s != null);
+            set => _Sorting = value;
         }
 
-        private IEnumerable<ListSorting> _Sorting { get; set; } = Array.Empty<ListSorting>();
+        public IEnumerable<ListSorting> _Sorting { get; set; } = Array.Empty<ListSorting>();
     }
 }

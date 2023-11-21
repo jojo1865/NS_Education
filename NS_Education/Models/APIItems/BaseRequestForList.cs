@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,13 +21,13 @@ namespace NS_Education.Models.APIItems
         /// </summary>
         public int DeleteFlag { get; set; } = 0;
 
-        public IEnumerable<ListSorting> Sorting
+        public ICollection<ListSorting> Sorting
         {
             // 消毒，前端丟進來的格式有可能造成誤認為長度為 1 的集合，只包含一個 null
-            get => _Sorting.Where(s => s != null);
-            set => _Sorting = value;
+            get => _Sorting ?? new List<ListSorting>();
+            set => _Sorting = value.Where(s => s != null).ToList();
         }
 
-        public IEnumerable<ListSorting> _Sorting { get; set; } = Array.Empty<ListSorting>();
+        public ICollection<ListSorting> _Sorting { get; set; }
     }
 }

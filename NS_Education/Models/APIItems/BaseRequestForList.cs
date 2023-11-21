@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NS_Education.Models.APIItems
 {
@@ -20,6 +22,17 @@ namespace NS_Education.Models.APIItems
         /// </summary>
         public int DeleteFlag { get; set; } = 0;
 
-        public IEnumerable<ListSorting> Sorting { get; set; } = new List<ListSorting>();
+        public IEnumerable<ListSorting> Sorting
+        {
+            get => _Sorting;
+            set
+            {
+                // 消毒，前端丟的格式有可能造成誤認為只包含一個 null 元素的集合
+                value = value.Where(ls => ls != null);
+                _Sorting = value;
+            }
+        }
+
+        private IEnumerable<ListSorting> _Sorting { get; set; } = Array.Empty<ListSorting>();
     }
 }

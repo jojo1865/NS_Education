@@ -147,8 +147,29 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.Username = await GetUserNameByID(response.UID);
                 response.AllItemCt = response.Items.Count;
 
-                response.Items = response.Items.SortWithInput(input).Skip(input.GetStartIndex())
-                    .Take(input.GetTakeRowCount()).ToList();
+                // 這個端點的回傳物件是用 dictionary 實作的類似 dynamic 的東西
+                // 所以用 sortWithInput 會需要特殊處理
+
+                if (input.Sorting != null)
+                {
+                    IOrderedEnumerable<IDictionary<string, string>> orderedEnumerable =
+                        response.Items.AsOrderedEnumerable();
+
+                    foreach (ListSorting sorting in input.Sorting)
+                    {
+                        orderedEnumerable = sorting.IsAscending
+                            ? orderedEnumerable.ThenBy(e => e.GetValueOrDefault(sorting.PropertyName))
+                            : orderedEnumerable.ThenByDescending(e => e.GetValueOrDefault(sorting.PropertyName));
+                    }
+
+                    response.Items = orderedEnumerable.ToList();
+                }
+
+
+                response.Items = response.Items
+                    .Skip(input.GetStartIndex())
+                    .Take(input.GetTakeRowCount())
+                    .ToList();
 
                 return response;
             }

@@ -64,7 +64,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 if (input.BasicSize.IsAboveZero())
                     query = query.Where(x => x.rs.B_SiteData.BasicSize >= input.BasicSize);
 
-                query = query.OrderBy(e => e.rs.RSID);
+                query = query.OrderBy(e => e.rs.B_SiteData.Code)
+                    .ThenBy(e => e.rs.BSID)
+                    .ThenBy(e => e.rts.D_TimeSpan.HourS)
+                    .ThenBy(e => e.rts.D_TimeSpan.MinuteS);
 
                 var results = await query.ToArrayAsync();
 

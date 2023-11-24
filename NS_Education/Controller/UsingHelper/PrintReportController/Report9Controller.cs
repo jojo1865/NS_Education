@@ -49,7 +49,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     query = query.Where(rh => input.CID.Contains(rh.CID));
 
                 if (input.CustomerName != null)
-                    query = query.Where(rh => rh.ContactName.Contains(input.CustomerName));
+                    query = query.Where(rh => rh.CustomerTitle.Contains(input.CustomerName));
 
                 if (input.BSCID6.IsAboveZero())
                     query = query.Where(rh => rh.Customer.BSCID6 == input.BSCID6);

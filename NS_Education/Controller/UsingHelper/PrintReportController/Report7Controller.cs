@@ -46,8 +46,16 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     query = query.Where(rh => input.RHID.Contains(rh.RHID));
 
                 if (input.CustomerName.HasContent())
+                {
+                    // 如果可以拆成兩段，額外增加對照 Code
+                    string[] split = input.CustomerName.Split(' ');
+                    bool hasMultipleParts = split.Length >= 2;
+                    string firstPart = split.FirstOrDefault() ?? "";
+
                     query = query
-                        .Where(rh => rh.Customer.TitleC.Contains(input.CustomerName));
+                        .Where(rh => rh.Customer.TitleC.Contains(input.CustomerName)
+                                     || hasMultipleParts && rh.Customer.Code.Contains(firstPart));
+                }
 
                 // 刪除的資料 State 不會變，所以要做特別處理
                 if (input.State == (int)ReserveHeadGetListState.Deleted)

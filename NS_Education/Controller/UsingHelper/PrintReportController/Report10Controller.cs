@@ -11,6 +11,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -27,6 +28,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             {
                 var query = dbContext.CustomerVisit
                     .Include(cv => cv.Customer)
+                    .Include(cv => cv.Customer.Resver_Head)
                     .Include(cv => cv.B_StaticCode)
                     .Include(cv => cv.B_StaticCode1)
                     .Include(cv => cv.BusinessUser)
@@ -35,6 +37,12 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 DateTime startTime = input.StartDate?.ParseDateTime().Date ?? SqlDateTime.MinValue.Value;
                 DateTime endTime = input.EndDate?.ParseDateTime().Date ?? SqlDateTime.MaxValue.Value;
+
+                // 篩選未成交的客戶
+                query = query.Where(cv => cv.Customer.Resver_Head
+                    .AsQueryable()
+                    .Where(ResverHeadExpression.IsDealtExpression)
+                    .Any() == false);
 
                 query = query.Where(cv => startTime <= cv.VisitDate)
                     .Where(cv => cv.VisitDate <= endTime);

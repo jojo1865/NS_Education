@@ -142,7 +142,27 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<string> Get(Report8_Input_APIItem input)
         {
-            return GetResponseJson(await GetResultAsync(input));
+            // 前端的滿意~不滿意是相反的, 所以在這裡做調整
+            CommonResponseForPagedList<Report8_Output_Row_APIItem> result = await GetResultAsync(input);
+
+            foreach (Report8_Output_Row_APIItem item in result.Items)
+            {
+                Invert(item.SiteSatisfied);
+                Invert(item.ServiceSatisfied);
+                Invert(item.CleanSatisfied);
+                Invert(item.DessertSatisfied);
+                Invert(item.DeviceSatisfied);
+                Invert(item.MealSatisfied);
+                Invert(item.NegotiatorSatisfied);
+            }
+
+            return GetResponseJson(result);
+        }
+
+        private void Invert(IDictionary<int, int> satisfied)
+        {
+            (satisfied[1], satisfied[5]) = (satisfied[5], satisfied[1]);
+            (satisfied[2], satisfied[4]) = (satisfied[4], satisfied[2]);
         }
 
         [HttpGet]

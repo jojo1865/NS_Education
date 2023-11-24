@@ -125,7 +125,6 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         IDictionary<string, string> newRow = new Dictionary<string, string>();
                         response.Items.Add(newRow);
 
-                        newRow.Add("BCID", sd.BCID.ToString("D10"));
                         newRow.Add("Type", sd.B_Category.TitleC);
                         newRow.Add("SiteName", sd.Title);
                         newRow.Add("Time", dts.Title);

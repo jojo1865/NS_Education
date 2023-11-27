@@ -40,7 +40,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                  || (input.External && rh.Customer.InFlag == false))
                     .AsQueryable();
 
-                if (input.RHID != null)
+                // 特殊情況：如果 RHID 只有「0」，視為沒有篩選。
+                if (input.RHID != null && input.RHID.Any(id => id.IsAboveZero()))
                     query = query.Where(rh => input.RHID.Contains(rh.RHID));
 
                 if (input.CustomerName.HasContent())

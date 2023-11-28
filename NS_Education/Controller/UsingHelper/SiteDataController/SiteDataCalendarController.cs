@@ -206,9 +206,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
 
             // 客戶名稱
             if (input.CustomerTitleC.HasContent())
-                query = query.Where(rs =>
-                    rs.Resver_Head.CustomerTitle.Contains(input.CustomerTitleC) ||
-                    rs.Resver_Head.Customer.TitleC.Contains(input.CustomerTitleC));
+                query = query.Where(rs => rs.Resver_Head.Customer.TitleC.Contains(input.CustomerTitleC));
 
             if (input.SiteTitle.HasContent())
                 query = query.Where(rs => rs.B_SiteData.Title.Contains(input.SiteTitle));

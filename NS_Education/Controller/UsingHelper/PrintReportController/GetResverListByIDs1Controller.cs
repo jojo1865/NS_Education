@@ -112,7 +112,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             {
                 RHID = entity.RHID,
                 Code = entity.Code ?? entity.RHID.ToString(),
-                CustomerTitle = entity.CustomerTitle ?? "",
+                CustomerTitle = entity.Customer?.TitleC ?? "",
                 ContactTitle1 = contacts.Count >= 1
                     ? ContactTypeController.GetContactTypeTitle(contacts[0].ContectType) ?? ""
                     : "",

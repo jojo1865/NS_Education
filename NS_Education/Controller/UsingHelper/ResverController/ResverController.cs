@@ -95,6 +95,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             var query = DC.Resver_Head
                 .Include(rh => rh.Resver_Bill)
+                .Include(rh => rh.Customer)
                 .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
@@ -105,7 +106,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 query = query.Where(rh => DbFunctions.TruncateTime(rh.SDate) == targetDate.Date);
 
             if (input.CustomerName.HasContent())
-                query = query.Where(rh => rh.CustomerTitle.Contains(input.CustomerName));
+                query = query.Where(rh => rh.Customer.TitleC.Contains(input.CustomerName));
 
             // 刪除的資料 State 不會變，所以要做特別處理
             if (input.State == (int)ReserveHeadGetListState.Deleted)
@@ -127,8 +128,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 Title = entity.Title ?? "",
                 SDate = entity.SDate.ToFormattedStringDate(),
                 EDate = entity.EDate.ToFormattedStringDate(),
-                CustomerTitle = entity.CustomerTitle ?? "",
-                CustomerCode = entity.CustomerTitle ?? "",
+                CustomerTitle = entity.Customer?.TitleC ?? "",
+                CustomerCode = entity.Customer?.Code ?? "",
                 PeopleCt = entity.PeopleCt,
                 State = GetState(entity)
             });
@@ -157,6 +158,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         public IQueryable<Resver_Head> GetInfoByIdQuery(int id)
         {
             return DC.Resver_Head
+                .Include(rh => rh.Customer)
                 .Include(rh => rh.B_StaticCode)
                 .Include(rh => rh.BusinessUser)
                 .Include(rh => rh.BusinessUser1)
@@ -222,7 +224,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 EDate = entity.EDate.ToFormattedStringDate(),
                 PeopleCt = entity.PeopleCt,
                 CID = entity.CID,
-                CustomerTitle = entity.CustomerTitle ?? "",
+                CustomerTitle = entity.Customer.TitleC ?? "",
                 C_List = await DC.Customer.GetCustomerSelectable(entity.CID),
                 ContactName = entity.ContactName ?? "",
                 ContactTypeList = ContactTypeController.GetContactTypeList(),

@@ -49,7 +49,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     query = query.Where(rh => input.CID.Contains(rh.CID));
 
                 if (input.CustomerName != null)
-                    query = query.Where(rh => rh.CustomerTitle.Contains(input.CustomerName));
+                    query = query.Where(rh => rh.Customer.TitleC.Contains(input.CustomerName));
 
                 if (input.BSCID6.IsAboveZero())
                     query = query.Where(rh => rh.Customer.BSCID6 == input.BSCID6);
@@ -87,7 +87,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Select(grouping => new Report9_Output_Row_APIItem
                     {
                         RHID = grouping.Max(rs => rs.RHID),
-                        HostName = grouping.Max(rs => rs.Resver_Head.CustomerTitle),
+                        HostName = grouping.Max(rs => rs.Resver_Head.Customer.TitleC),
                         EventName = grouping.Max(rs => rs.Resver_Head.Title),
                         TotalIncome = grouping.Max(rs => rs.Resver_Head.QuotedPrice),
                         Date = grouping.Max(rs => rs.TargetDate).ToFormattedStringDate(),

@@ -459,8 +459,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             .Select(rhl => rhl.CreDate)
                             .FirstOrDefault()
                             .ToFormattedStringDate(),
-                        ContactName = entity.Customer.ContectName ?? "",
-                        CustomerName = entity.CustomerTitle ?? "",
+                        ContactName = entity.Customer?.ContectName ?? "",
+                        CustomerName = entity.Customer?.TitleC ?? "",
                         EventName = entity.Title ?? "",
                         SubTables = new[]
                         {
@@ -474,8 +474,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             .Where(rb => !rb.DeleteFlag)
                             .Where(rb => rb.PayFlag)
                             .Sum(rb => (int?)rb.Price) ?? 0,
-                        Compilation = entity.Customer.Compilation ?? "",
-                        PrintTitle = entity.Customer.InvoiceTitle ?? "",
+                        Compilation = entity.Customer?.Compilation ?? "",
+                        PrintTitle = entity.Customer?.InvoiceTitle ?? "",
                         SitePayments = sitePayments,
                         Payments = new[] { resverThrows, resverFoods, resverDevices, resverOthers }
                             .Where(st => st.Rows.Any())

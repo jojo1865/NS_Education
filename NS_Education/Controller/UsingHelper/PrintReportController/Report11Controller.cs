@@ -48,6 +48,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .AsNoTracking()
                     .Include(rs => rs.B_SiteData)
                     .Include(rs => rs.Resver_Head)
+                    .Include(rs => rs.Resver_Head.Customer)
                     .Where(rs => !rs.DeleteFlag)
                     .Where(rs => !rs.Resver_Head.DeleteFlag)
                     .Where(rs => startTime <= rs.TargetDate && rs.TargetDate <= endTime)
@@ -136,7 +137,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                     .Where(g => g.rs.BSID == sd.BSID)
                                     .Where(g => g.rts.DTSID == dts.DTSID)
                                     .Where(g => g.rs.TargetDate.Date == dt.Date)
-                                    .Select(g => g.rs.Resver_Head.CustomerTitle)
+                                    .Select(g => g.rs.Resver_Head.Customer?.TitleC ?? "")
                                     .FirstOrDefault());
                         }
                     }

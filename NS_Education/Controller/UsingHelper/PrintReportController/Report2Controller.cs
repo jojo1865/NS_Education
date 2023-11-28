@@ -64,7 +64,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 response.Items = results.Select(rh => new Report2_Output_Row_APIItem
                 {
-                    HostName = rh.Customer.TitleC ?? rh.Customer.TitleE ?? rh.CustomerTitle,
+                    HostName = rh.Customer.TitleC ?? rh.Customer.TitleE ?? "",
                     EventTitle = rh.Title,
                     RHID = rh.RHID,
                     StartDate = rh.SDate.FormatAsRocYyyMmDdWeekDay(),

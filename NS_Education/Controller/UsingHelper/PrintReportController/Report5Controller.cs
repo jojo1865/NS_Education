@@ -34,6 +34,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Include(rtf => rtf.Resver_Throw)
                     .Include(rtf => rtf.Resver_Throw.Resver_Site)
                     .Include(rtf => rtf.Resver_Throw.Resver_Site.Resver_Head)
+                    .Include(rtf => rtf.Resver_Throw.Resver_Site.Resver_Head.Customer)
                     .Include(rtf => rtf.B_Partner)
                     .Include(rtf => rtf.B_StaticCode)
                     .Include(rtf => rtf.D_FoodCategory)
@@ -54,7 +55,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 if (input.CustomerName.HasContent())
                     query = query
                         .Where(rtf =>
-                            rtf.Resver_Throw.Resver_Site.Resver_Head.CustomerTitle.Contains(input.CustomerName));
+                            rtf.Resver_Throw.Resver_Site.Resver_Head.Customer.TitleC.Contains(input.CustomerName));
 
                 // 刪除的資料 State 不會變，所以要做特別處理
                 if (input.State == (int)ReserveHeadGetListState.Deleted)
@@ -77,7 +78,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     PartnerName = rtf.B_Partner.Title,
                     CuisineType = rtf.B_StaticCode.Title,
                     CuisineName = rtf.D_FoodCategory.Title,
-                    HostName = rtf.Resver_Throw.Resver_Site.Resver_Head.CustomerTitle,
+                    HostName = rtf.Resver_Throw.Resver_Site.Resver_Head.Customer.TitleC,
                     ReservedQuantity = rtf.Ct,
                     UnitPrice = rtf.UnitPrice,
                     QuotedPrice = rtf.Price

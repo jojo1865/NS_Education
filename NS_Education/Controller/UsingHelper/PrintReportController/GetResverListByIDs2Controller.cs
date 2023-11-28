@@ -101,7 +101,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 RHID = entity.RHID,
                 PrintDate = DateTime.Now.ToFormattedStringDateTime(),
                 Code = entity.Code ?? entity.RHID.ToString(),
-                CustomerTitle = entity.CustomerTitle ?? "",
+                CustomerTitle = entity.Customer?.TitleC ?? "",
                 ContactName = entity.ContactName ?? "",
                 Title = entity.Title ?? "",
                 TotalPrice = payItems.Sum(pi => pi.Price),

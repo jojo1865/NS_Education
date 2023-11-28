@@ -56,6 +56,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         private static async Task<IEnumerable<Resver_Head>> GetHead(Report3_Input_APIItem input, NsDbContext dbContext)
         {
             var query = dbContext.Resver_Head.AsQueryable()
+                .Include(rh => rh.Customer)
                 .Include(rh => rh.Resver_Site)
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData).Select(bs => bs.B_StaticCode1))
@@ -83,7 +84,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             response.StartDate = head.SDate.ToFormattedStringDate();
             response.EndDate = head.EDate.ToFormattedStringDate();
             response.PeopleCt = head.PeopleCt;
-            response.HostName = head.CustomerTitle;
+            response.HostName = head.Customer?.TitleC ?? "";
             response.EventName = head.Title;
         }
 

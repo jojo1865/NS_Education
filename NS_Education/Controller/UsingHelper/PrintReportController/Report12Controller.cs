@@ -199,7 +199,11 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<string> Get(Report12_Input_APIItem input)
         {
-            return GetResponseJson(await GetResultAsync(input));
+            // 報表分析不需要合計行
+            var details = await GetResultAsync(input);
+            details.Items = details.Items.Take(details.Items.Count - 1).ToList();
+
+            return GetResponseJson(details);
         }
 
         [HttpGet]

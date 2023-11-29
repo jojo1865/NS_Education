@@ -144,7 +144,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             result = result.Append($"活動時間：{FormatTwoTimes(earliestTimeSpan, latestTimeSpan)}。");
 
-            result = result.Append($"{rs.B_SiteData?.B_StaticCode1?.Title ?? "無資料"}：{rs.B_SiteData?.MaxSize ?? 0} 人" +
+            result = result.Append($"{rs.B_StaticCode?.Title ?? "無資料"}：{rs.B_SiteData?.MaxSize ?? 0} 人" +
                                    (rs.TableDescription != null ? $"（{rs.TableDescription}）" : ""));
 
             var devices = rs.Resver_Device
@@ -356,7 +356,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                             t.Cell().Border(1).AlignCenter()
                                                 .Text(food.Ct <= 1 ? singlePrice : personPrice);
                                             t.Cell().Border(1).AlignCenter().Text(food.Partner);
-                                            t.Cell();
+                                            t.Cell().Border(1).AlignLeft().Text(food.Note);
                                         }
                                     });
 

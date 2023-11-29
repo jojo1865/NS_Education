@@ -304,7 +304,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                                 if (isFirst)
                                                 {
                                                     t.Cell()
-                                                        .Border(1)
+                                                        .BorderTop(1)
+                                                        .BorderLeft(1)
+                                                        .BorderRight(1)
                                                         .AlignCenter()
                                                         .Text(site.Note);
 

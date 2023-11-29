@@ -301,14 +301,19 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                                     .PaddingLeft(0.1f, Unit.Centimetre)
                                                     .Text(line);
 
-                                                if (!isFirst) continue;
+                                                if (isFirst)
+                                                {
+                                                    t.Cell()
+                                                        .Border(1)
+                                                        .AlignCenter()
+                                                        .Text(site.Note);
 
-                                                t.Cell()
-                                                    .Border(1)
-                                                    .AlignCenter()
-                                                    .Text(site.Note);
-
-                                                isFirst = false;
+                                                    isFirst = false;
+                                                }
+                                                else
+                                                {
+                                                    t.Cell();
+                                                }
                                             }
                                         });
                                     c.Item().PaddingVertical(0.2f, Unit.Centimetre);

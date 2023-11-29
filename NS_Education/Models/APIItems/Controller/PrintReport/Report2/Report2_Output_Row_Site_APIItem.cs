@@ -9,5 +9,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report2
         public string Date { get; set; }
         public IEnumerable<string> Lines { get; set; } = Array.Empty<string>();
         public string SeatImage { get; set; }
+
+        public string Note { get; set; }
     }
 }

@@ -83,7 +83,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             Title = $"場地 {index + 1}：{rs.B_SiteData?.Title ?? ""}",
                             Date = rs.TargetDate.FormatAsRocYyyMmDd(),
                             Lines = GetLines(rs),
-                            SeatImage = rs.SeatImage != null ? Convert.ToBase64String(rs.SeatImage) : null
+                            SeatImage = rs.SeatImage != null ? Convert.ToBase64String(rs.SeatImage) : null,
+                            Note = rs.Note
                         }),
                     Foods = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)
@@ -291,6 +292,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                                     .Text("備註");
                                             });
 
+                                            bool isFirst = true;
                                             foreach (string line in site.Lines)
                                             {
                                                 t.Cell()
@@ -299,7 +301,14 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                                     .PaddingLeft(0.1f, Unit.Centimetre)
                                                     .Text(line);
 
-                                                t.Cell();
+                                                if (!isFirst) continue;
+
+                                                t.Cell()
+                                                    .Border(1)
+                                                    .AlignCenter()
+                                                    .Text(site.Note);
+
+                                                isFirst = false;
                                             }
                                         });
                                     c.Item().PaddingVertical(0.2f, Unit.Centimetre);

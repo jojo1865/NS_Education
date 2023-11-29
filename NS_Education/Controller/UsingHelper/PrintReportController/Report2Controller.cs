@@ -351,7 +351,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                             // 只有 1 份就顯示總價，否則顯示每人價
                                             string singlePrice = "$" + food.QuotedPrice.ToString("N0");
                                             string personPrice =
-                                                "$" + (food.QuotedPrice / Math.Min(food.Ct, 1)).ToString("N0") +
+                                                "$" + (food.QuotedPrice / Math.Max(food.Ct, 1)).ToString("N0") +
                                                 "*" + food.Ct + "人份";
 
                                             t.Cell().Border(1).AlignCenter()

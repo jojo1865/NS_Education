@@ -366,7 +366,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                             t.Cell().Border(1).AlignCenter()
                                                 .Text(food.Ct <= 1 ? singlePrice : personPrice);
                                             t.Cell().Border(1).AlignCenter().Text(food.Partner);
-                                            t.Cell().Border(1).AlignLeft().Text(food.Note);
+                                            t.Cell().Border(1).AlignLeft().PaddingLeft(0.1f, Unit.Centimetre).Text(food.Note);
                                         }
                                     });
 

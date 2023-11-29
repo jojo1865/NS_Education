@@ -36,6 +36,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Include(rh => rh.Resver_Site)
                     .Include(rh => rh.Resver_Bill)
                     .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
+                    .Include(rh => rh.Resver_Site.Select(rs => rs.B_StaticCode))
                     .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData).Select(rs => rs.B_StaticCode1))
                     .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
                     .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_Device)))

@@ -7,10 +7,14 @@ using System.Web.Mvc;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report3;
 using NS_Education.Models.Entities;
+using NS_Education.Models.Utilities;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -19,6 +23,245 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
     /// </summary>
     public class Report3Controller : PublicClass, IPrintReport<Report3_Input_APIItem, Report3_Output_Row_APIItem>
     {
+        #region 報表分析 Get
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<string> Get(Report3_Input_APIItem input)
+        {
+            return GetResponseJson(await GetResultAsync(input));
+        }
+
+        #endregion
+
+        #region 報表PDF GetPdf
+
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetPdf(Report3_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report3_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            if (!data.Items.Any())
+                throw new Exception("查無可匯出資料！");
+
+            PageSize pageSize = PageSizes.A4.Portrait();
+            string userName = await GetUserNameByID(GetUid());
+            Document document = Document.Create(d =>
+            {
+                // 一個 RHID 一份主表
+                foreach (Report3_Output_Row_APIItem item in data.Items)
+                {
+                    d.Page(p =>
+                    {
+                        p.BasicSetting(pageSize);
+                        p.BasicHeader(GetUid(),
+                            userName,
+                            "授權簽核表",
+                            $"預約單號 {item.RHID}",
+                            18);
+
+                        p.Content()
+                            .PaddingLeft(0.5f, Unit.Centimetre)
+                            .PaddingRight(0.5f, Unit.Centimetre)
+                            .Column(c =>
+                            {
+                                c.Spacing(0f);
+
+                                // 上部 - 基本資訊
+                                c.Item()
+                                    .Table(t =>
+                                    {
+                                        t.ColumnsDefinition(cd =>
+                                        {
+                                            cd.RelativeColumn(1);
+                                            cd.RelativeColumn(9);
+                                        });
+
+                                        t.Cell().Text("預約單號");
+                                        t.Cell().Text(item.RHID.ToString());
+
+                                        t.Cell().Text("主辦單位");
+                                        t.Cell().Text(item.HostName);
+
+                                        t.Cell().Text("活動名稱");
+                                        t.Cell().Text(item.EventName);
+
+                                        t.Cell().Text("活動日期");
+                                        t.Cell().Text(item.StartDate != item.EndDate
+                                            ? $"{item.StartDate} ~ {item.EndDate}"
+                                            : $"{item.StartDate}");
+
+                                        t.Cell().Text("人　　數");
+                                        t.Cell().Text($"{item.PeopleCt} 人");
+                                    });
+
+                                // 中部 - 收入分析
+
+                                c.Item().Text("");
+
+                                c.Item()
+                                    .Text("一、收入分析");
+
+                                c.Item()
+                                    .Table(t =>
+                                    {
+                                        t.ColumnsDefinition(cd =>
+                                        {
+                                            cd.RelativeColumn(4);
+                                            cd.RelativeColumn(2);
+                                            cd.RelativeColumn(2);
+                                            cd.RelativeColumn(2);
+                                            cd.RelativeColumn(2);
+                                            cd.RelativeColumn(4);
+                                        });
+
+                                        t.Cell();
+                                        t.Cell().AlignRight().Text("定價");
+                                        t.Cell().AlignRight().Text("報價");
+                                        t.Cell().AlignRight().Text("成本");
+                                        t.Cell().AlignRight().Text("價差");
+                                        t.Cell().AlignRight().Text("備　　　　註");
+
+                                        t.DrawLine(1, 6);
+
+                                        foreach (Report3_Output_Row_Income_APIItem income in item.Incomes)
+                                        {
+                                            // 每個 title 中間加入空白
+                                            t.Cell().AlignCenter()
+                                                .Text(String.Join("　　　　", income.Title.ToCharArray()));
+                                            t.Cell().AlignRight().Text($"{income.FixedPrice:N0}");
+                                            t.Cell().AlignRight().Text($"{income.QuotedPrice:N0}");
+                                            t.Cell().AlignRight().Text($"{income.UnitPrice:N0}");
+                                            t.Cell().AlignRight().Text($"{income.Difference:N0}");
+                                            t.Cell().AlignRight().Text(income.Note.Trim());
+                                        }
+
+                                        t.DrawLine(1, 6);
+
+                                        t.Cell().AlignCenter().Text("合　　　　計");
+                                        t.Cell().AlignRight()
+                                            .Text($"{item.Incomes.Sum(i => (int?)i.FixedPrice) ?? 0:N0}");
+                                        t.Cell().AlignRight()
+                                            .Text($"{item.Incomes.Sum(i => (int?)i.QuotedPrice) ?? 0:N0}");
+                                        t.Cell().AlignRight()
+                                            .Text($"{item.Incomes.Sum(i => (int?)i.UnitPrice) ?? 0:N0}");
+                                        t.Cell().AlignRight()
+                                            .Text($"{item.Incomes.Sum(i => (int?)i.Difference) ?? 0:N0}");
+                                        t.Cell();
+                                    });
+
+                                // 中部 - 細項說明
+
+                                c.Item().Text("");
+
+                                c.Item()
+                                    .Text("二、細項說明");
+
+                                foreach (IGrouping<string, Report3_Output_Row_Detail_APIItem> detailGroup in item
+                                             .Details.GroupBy(detail => detail.TypeName))
+                                {
+                                    c.Item().Text("");
+
+                                    c.Item()
+                                        .Text($"§ {detailGroup.Key}費用");
+
+                                    c.Item()
+                                        .Table(t =>
+                                        {
+                                            t.ColumnsDefinition(cd =>
+                                            {
+                                                cd.RelativeColumn(2);
+                                                cd.RelativeColumn(3);
+                                                cd.RelativeColumn(5);
+                                                cd.RelativeColumn(3);
+                                                cd.RelativeColumn(3);
+                                                cd.RelativeColumn(3);
+                                            });
+
+                                            t.Cell().AlignLeft().Text("日期");
+                                            t.Cell().AlignLeft().Text("時段");
+                                            t.Cell().AlignLeft().Text(detailGroup.FirstOrDefault()?.TypeName);
+                                            t.Cell().AlignLeft().Text(detailGroup.FirstOrDefault()?.SubTypeName);
+                                            t.Cell().AlignRight().Text("定價");
+                                            t.Cell().AlignRight().Text("報價");
+
+                                            t.DrawLine(1, 6);
+
+                                            foreach (Report3_Output_Row_Detail_APIItem detailItem in detailGroup)
+                                            {
+                                                t.Cell().AlignLeft().Text(detailItem.Date);
+                                                t.Cell().AlignLeft().Text(String.Join("、", detailItem.TimeSpans));
+                                                t.Cell().AlignLeft().Text(detailItem.Title);
+                                                t.Cell().AlignLeft().Text(detailItem.SubType);
+                                                t.Cell().AlignRight().Text($"{detailItem.FixedPrice:N0}");
+                                                t.Cell().AlignRight().Text($"{detailItem.QuotedPrice:N0}");
+                                            }
+
+                                            t.DrawLine(1, 6);
+
+                                            t.Cell().AlignCenter().Text("合計：");
+                                            t.Cell();
+                                            t.Cell();
+                                            t.Cell();
+                                            t.Cell().AlignRight()
+                                                .Text($"{detailGroup.Sum(dg => (int?)dg.FixedPrice) ?? 0:N0}");
+                                            t.Cell().AlignRight()
+                                                .Text($"{detailGroup.Sum(dg => (int?)dg.QuotedPrice) ?? 0:N0}");
+                                        });
+                                }
+
+                                // 下部 - 備註
+
+                                c.Item().Text("");
+
+                                c.Item().Text("◎");
+
+                                c.Item().PaddingLeft(1.5f, Unit.Centimetre).Text(input.Description);
+
+                                c.Item().Text("◎");
+
+                                c.Item().Text("");
+
+                                c.Item()
+                                    .EnsureSpace()
+                                    .Table(t =>
+                                    {
+                                        t.ColumnsDefinition(cd =>
+                                        {
+                                            cd.RelativeColumn(3);
+                                            cd.RelativeColumn(6);
+                                            cd.RelativeColumn(9);
+                                        });
+
+                                        t.Cell().AlignCenter().Text("製表者");
+                                        t.Cell().AlignCenter().Text("業務服務組長");
+                                        t.Cell().AlignCenter().Text("教育訓練中心業務主管");
+
+                                        t.Cell().Text("");
+                                        t.Cell().Text("");
+                                        t.Cell().Text("");
+
+                                        t.Cell().Text("");
+                                        t.Cell().Text("");
+                                        t.Cell().Text("");
+
+                                        t.DrawLine(1, 3);
+                                    });
+                            });
+                    });
+                }
+            });
+
+            byte[] pdf = document.GeneratePdf();
+
+            return new FileContentResult(pdf, "application/pdf");
+        }
+
+        #endregion
+
+        #region query
+
         /// <inheritdoc />
         public async Task<CommonResponseForPagedList<Report3_Output_Row_APIItem>> GetResultAsync(
             Report3_Input_APIItem input)
@@ -126,7 +369,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Where(rs => !rs.DeleteFlag)
                 .SelectMany(rs => rs.Resver_Throw)
                 .Where(rt => !rt.DeleteFlag)
-                .GroupBy(rt => new { rt.TargetDate, rt.BSCID, rt.QuotedPrice })
+                .GroupBy(rt => new { rt.TargetDate, rt.BSCID, rt.QuotedPrice, IsFood = rt.Resver_Throw_Food.Any() })
                 .Select(grouping => new Report3_Output_Row_Detail_APIItem
                 {
                     TypeName = "行程",
@@ -134,7 +377,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     TimeSpans = GetResverTimeSpans(head, typeof(Resver_Throw), grouping.Select(rt => rt.RTID)),
                     Title = grouping.Max(rt => rt.Title),
                     SubTypeName = "類型",
-                    SubType = grouping.Max(rt => rt.B_StaticCode.Title),
+                    SubType = grouping.Key.IsFood ? "餐飲" : "訓練",
                     FixedPrice = grouping.Max(rt => rt.FixedPrice),
                     QuotedPrice = grouping.Max(rt => rt.QuotedPrice)
                 });
@@ -184,7 +427,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     Title = "場地",
                     FixedPrice = grouping.Sum(rs => (int?)rs.FixedPrice) ?? 0,
                     QuotedPrice = grouping.Sum(rs => (int?)rs.QuotedPrice) ?? 0,
-                    UnitPrice = grouping.Sum(rs => (int?)rs.UnitPrice) ?? 0
+                    UnitPrice = grouping.Sum(rs => (int?)rs.UnitPrice) ?? 0,
+                    Note = String.Join("\n", grouping.Select(rs => rs.Note))
                 });
 
             var deviceIncomes = head.Resver_Site
@@ -196,9 +440,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     new Report3_Output_Row_Income_APIItem
                     {
                         Title = "設備",
-                        FixedPrice = grouping.Sum(rs => (int?)rs.FixedPrice) ?? 0,
-                        QuotedPrice = grouping.Sum(rs => (int?)rs.QuotedPrice) ?? 0,
-                        UnitPrice = grouping.Sum(rs => (int?)rs.UnitPrice) ?? 0
+                        FixedPrice = grouping.Sum(rd => (int?)rd.FixedPrice) ?? 0,
+                        QuotedPrice = grouping.Sum(rd => (int?)rd.QuotedPrice) ?? 0,
+                        UnitPrice = grouping.Sum(rd => (int?)rd.UnitPrice) ?? 0,
+                        Note = String.Join("\n", grouping.Select(rd => rd.Note))
                     });
 
             var throwIncomes = head.Resver_Site
@@ -210,9 +455,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     new Report3_Output_Row_Income_APIItem
                     {
                         Title = "行程",
-                        FixedPrice = grouping.Sum(rs => (int?)rs.FixedPrice) ?? 0,
-                        QuotedPrice = grouping.Sum(rs => (int?)rs.QuotedPrice) ?? 0,
-                        UnitPrice = grouping.Sum(rs => (int?)rs.UnitPrice) ?? 0
+                        FixedPrice = grouping.Sum(rt => (int?)rt.FixedPrice) ?? 0,
+                        QuotedPrice = grouping.Sum(rt => (int?)rt.QuotedPrice) ?? 0,
+                        UnitPrice = grouping.Sum(rt => (int?)rt.UnitPrice) ?? 0,
+                        Note = String.Join("\n", grouping.Select(rt => rt.Note))
                     });
 
             var otherIncomes = head.Resver_Other
@@ -221,9 +467,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Select(grouping => new Report3_Output_Row_Income_APIItem
                 {
                     Title = "其他",
-                    FixedPrice = grouping.Sum(rs => (int?)rs.FixedPrice) ?? 0,
-                    QuotedPrice = grouping.Sum(rs => (int?)rs.QuotedPrice) ?? 0,
-                    UnitPrice = grouping.Sum(rs => (int?)rs.UnitPrice) ?? 0
+                    FixedPrice = grouping.Sum(ro => (int?)ro.FixedPrice) ?? 0,
+                    QuotedPrice = grouping.Sum(ro => (int?)ro.QuotedPrice) ?? 0,
+                    UnitPrice = grouping.Sum(ro => (int?)ro.UnitPrice) ?? 0,
+                    Note = String.Join("\n", grouping.Select(ro => ro.Note))
                 });
 
             response.Incomes = siteIncomes
@@ -232,11 +479,6 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Concat(otherIncomes);
         }
 
-        [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
-        public async Task<string> Get(Report3_Input_APIItem input)
-        {
-            return GetResponseJson(await GetResultAsync(input));
-        }
+        #endregion
     }
 }

@@ -140,10 +140,8 @@ namespace NS_Education.Tools.Extensions
                             .AlignCenter()
                             .Text(t =>
                             {
-                                ;
                                 t.AlignCenter();
                                 t.Line("南山人壽教育訓練中心").FontSize(titleSize).ExtraBold().FontColor(Colors.Cyan.Darken2);
-                                t.EmptyLine();
                                 t.Line(reportTitle).FontSize(titleSize).ExtraBold().Black();
                             });
 

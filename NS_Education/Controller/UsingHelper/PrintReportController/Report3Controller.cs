@@ -45,6 +45,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             if (!data.Items.Any())
                 throw new Exception("查無可匯出資料！");
 
+            string queryConditionString = String.Join(", ", input.RHID ?? Array.Empty<int>());
+
             PageSize pageSize = PageSizes.A4.Portrait();
             string userName = await GetUserNameByID(GetUid());
             Document document = Document.Create(d =>
@@ -58,7 +60,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         p.BasicHeader(GetUid(),
                             userName,
                             "授權簽核表",
-                            $"預約單號 {item.RHID}",
+                            queryConditionString.HasContent() ? $"預約單號 {queryConditionString}" : null,
                             18);
 
                         p.Content()

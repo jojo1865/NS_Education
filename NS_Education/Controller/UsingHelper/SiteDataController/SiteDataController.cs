@@ -582,6 +582,9 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.AddOrEdit, null, nameof(SiteData_Submit_Input_APIItem.BSID))]
         public async Task<string> Submit(SiteData_Submit_Input_APIItem input)
         {
+            // 篩掉子場地的輸入，避免誤傳誤改
+            input.Devices = input.Devices.Where(d => d.IsImplicit != true).ToList();
+
             return await _submitHelper.Submit(input);
         }
 

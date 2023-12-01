@@ -51,7 +51,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             string userName = await GetUserNameByID(GetUid());
             Document document = Document.Create(d =>
             {
-                // 一個 RHID 一份主表
+                // 一個預約單號一份主表
                 foreach (Report3_Output_Row_APIItem item in data.Items)
                 {
                     d.Page(p =>
@@ -76,7 +76,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                     {
                                         t.ColumnsDefinition(cd =>
                                         {
-                                            cd.RelativeColumn(1);
+                                            cd.RelativeColumn();
                                             cd.RelativeColumn(9);
                                         });
 
@@ -182,7 +182,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                             });
 
                                             t.Cell().AlignLeft().Text("日期");
-                                            t.Cell().AlignLeft().Text("時段");
+                                            
+                                            // 有些資料如「其他收費項目」沒有時段，這邊判定沒有任何時段資料，就直接不顯示欄位名稱
+                                            t.Cell().AlignLeft().Text(detailGroup.Any(i => i.TimeSpans.Any())  ? "時段" : "");
                                             t.Cell().AlignLeft().Text(detailGroup.FirstOrDefault()?.TypeName);
                                             t.Cell().AlignLeft().Text(detailGroup.FirstOrDefault()?.SubTypeName);
                                             t.Cell().AlignRight().Text("定價");
@@ -313,6 +315,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.B_StaticCode)))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food)))
                 .Include(rh => rh.Resver_Other)
+                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem))
                 .Include(rh => rh.M_Resver_TimeSpan)
                 .Include(rh => rh.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
                 .Where(rh => !rh.DeleteFlag);
@@ -389,10 +392,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .GroupBy(ro => new { ro.TargetDate, ro.PrintTitle, ro.QuotedPrice })
                 .Select(grouping => new Report3_Output_Row_Detail_APIItem
                 {
-                    TypeName = "其他",
+                    TypeName = "其他收費項目",
                     Date = grouping.Max(ro => ro.TargetDate).ToFormattedStringDate(),
                     TimeSpans = GetResverTimeSpans(head, typeof(Resver_Other), grouping.Select(ro => ro.ROID)),
-                    Title = grouping.Max(ro => ro.PrintTitle),
+                    Title = grouping.Max(ro => ro.D_OtherPayItem.Title),
                     SubTypeName = "帳單列印說明",
                     SubType = grouping.Max(ro => ro.PrintNote),
                     FixedPrice = grouping.Max(ro => ro.FixedPrice),

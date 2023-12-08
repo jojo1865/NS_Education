@@ -182,10 +182,12 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                             });
 
                                             t.Cell().AlignLeft().Text("日期");
-                                            
+
                                             // 有些資料如「其他收費項目」沒有時段，這邊判定沒有任何時段資料，就直接不顯示欄位名稱
-                                            t.Cell().AlignLeft().Text(detailGroup.Any(i => i.TimeSpans.Any())  ? "時段" : "");
-                                            t.Cell().AlignLeft().Text(detailGroup.FirstOrDefault()?.TypeName);
+                                            t.Cell().AlignLeft()
+                                                .Text(detailGroup.Any(i => i.TimeSpans.Any()) ? "時段" : "");
+                                            t.Cell().AlignLeft()
+                                                .Text(detailGroup.FirstOrDefault()?.OverrideColumnTypeName);
                                             t.Cell().AlignLeft().Text(detailGroup.FirstOrDefault()?.SubTypeName);
                                             t.Cell().AlignRight().Text("定價");
                                             t.Cell().AlignRight().Text("報價");
@@ -399,7 +401,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     SubTypeName = "帳單列印說明",
                     SubType = grouping.Max(ro => ro.PrintNote),
                     FixedPrice = grouping.Max(ro => ro.FixedPrice),
-                    QuotedPrice = grouping.Max(ro => ro.QuotedPrice)
+                    QuotedPrice = grouping.Max(ro => ro.QuotedPrice),
+                    OverrideColumnTypeName = "收費項目"
                 });
 
             response.Details = siteDetails

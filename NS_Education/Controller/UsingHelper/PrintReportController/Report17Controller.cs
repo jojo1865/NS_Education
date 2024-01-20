@@ -121,7 +121,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                         cd.RelativeColumn(3);
                                     });
 
-                                    t.Cell().Text($"結帳日期： {data.AccountDate}");
+                                    t.Cell().Text($"出單日期： {DateTime.Now.Date}");
                                     t.Cell().Text($"結帳客戶名稱　： {data.CustomerName}");
 
                                     t.Cell().Text($"預約單號： {data.RHID}");
@@ -317,6 +317,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Include(rh => rh.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
                 .Include(rh => rh.Resver_Other)
                 .Include(rh => rh.Resver_Other.Select(ro => ro.B_StaticCode))
+                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem))
                 .FirstOrDefaultAsync(rh => rh.RHID == input.RHID);
 
             if (entity is null)
@@ -437,9 +438,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Select(ro => new Report17_Output_TableRow_APIItem
                     {
                         Date = ro.TargetDate.ToFormattedStringDate(),
-                        Description =
-                            String.Join(" ", new[] { ro.PrintTitle ?? "其他項目", ro.PrintNote }.Where(s => s != null)) +
-                            $" {ro.Ct}{ro.B_StaticCode.Title ?? "個"}",
+                        Description = $"{ro.D_OtherPayItem.Title} {ro.Ct}{ro.B_StaticCode.Title ?? "個"}",
                         Amount = ro.QuotedPrice
                     })
             };

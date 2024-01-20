@@ -383,6 +383,7 @@
         <Compile Include="Models\APIItems\Controller\CustomerVisit\Submit\CustomerVisit_Submit_GiftSendings_Row_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\CustomerVisit\Submit\CustomerVisit_Submit_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Customer\GetInfoById\Customer_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\Customer\GetInfoById\Customer_IsOccupied_Output_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_BusinessUser_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_Contact_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\Customer\GetList\Customer_GetList_Input_APIItem.cs"/>
@@ -972,6 +973,7 @@
     </ItemGroup>
     <ItemGroup>
         <Folder Include="App_Data\"/>
+        <Folder Include="Models\APIItems\Controller\Customer\IsOccupied"/>
         <Folder Include="Views\Category\"/>
         <Folder Include="Views\GetInfo\"/>
         <Folder Include="Views\Hall\"/>

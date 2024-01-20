@@ -45,6 +45,28 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
 
         #endregion
 
+        #region IsOccupied
+
+        /// <summary>
+        /// 傳入客戶代號，檢查系統中是否已有相同代號的資料。
+        /// </summary>
+        /// <param name="customerId">客戶代號（統編）</param>
+        [HttpGet]
+        public async Task<string> IsOccupied(int customerId)
+        {
+            bool isOccupied = await DC.Customer
+                .AnyAsync(c => c.CID == customerId);
+
+            Customer_IsOccupied_Output_APIItem result = new Customer_IsOccupied_Output_APIItem
+            {
+                IsOccupied = isOccupied
+            };
+
+            return GetResponseJson(result);
+        }
+
+        #endregion
+
         #region Initialization
 
         private readonly IGetInfoByIdHelper _getInfoByIdHelper;

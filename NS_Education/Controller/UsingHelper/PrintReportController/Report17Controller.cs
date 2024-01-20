@@ -121,7 +121,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                         cd.RelativeColumn(3);
                                     });
 
-                                    t.Cell().Text($"出單日期： {DateTime.Now.Date}");
+                                    t.Cell().Text($"出單日期： {DateTime.Now.Date.ToFormattedStringDate()}");
                                     t.Cell().Text($"結帳客戶名稱　： {data.CustomerName}");
 
                                     t.Cell().Text($"預約單號： {data.RHID}");

@@ -12,6 +12,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -41,8 +42,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(rh => !rh.DeleteFlag)
                     .Where(rh => startTime <= rh.SDate && rh.EDate <= endTime)
                     .Where(rh => (input.Internal && input.External)
-                                 || (input.Internal && rh.Customer.InFlag == true)
-                                 || (input.External && rh.Customer.InFlag == false))
+                                 || (input.Internal && rh.Customer.TypeFlag == (int)CustomerType.Internal)
+                                 || (input.External && rh.Customer.TypeFlag == (int)CustomerType.External))
                     .AsQueryable();
 
                 if (input.CID != null)

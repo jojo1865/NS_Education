@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -13,6 +14,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 using QuestPDF.Helpers;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
@@ -37,19 +39,31 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             using (NsDbContext dbContext = new NsDbContext())
             {
-                DateTime startTime = new DateTime(input.Year, 1, 1).Date;
-                DateTime endTime = startTime.AddYears(1).AddDays(-1).Date;
+                bool hasStart = DateTime.TryParseExact(input.StartYearMonth, "yyyy/MM", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out DateTime startYearMonth);
+                bool hasEnd = DateTime.TryParseExact(input.StartYearMonth, "yyyy/MM", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out DateTime endYearMonth);
+
+                DateTime startTime = hasStart ? startYearMonth : new DateTime(input.Year, 1, 1).Date;
+                DateTime endTime =
+                    hasEnd ? endYearMonth.AddMonths(1).AddSeconds(-1) : startTime.AddYears(1).AddDays(-1).Date;
 
                 string tableName = dbContext.GetTableName<Resver_Site>();
 
                 var query = dbContext.Resver_Site
                     .AsNoTracking()
                     .Include(rs => rs.B_SiteData)
+                    .Include(rs => rs.B_SiteData.B_Category)
                     .Include(rs => rs.Resver_Head)
                     .Include(rs => rs.Resver_Head.Customer)
                     .Where(rs => !rs.DeleteFlag)
                     .Where(rs => !rs.Resver_Head.DeleteFlag)
                     .Where(rs => startTime <= rs.TargetDate && rs.TargetDate <= endTime)
+                    .Where(rs => input.BC_Title == null || rs.B_SiteData.B_Category.TitleC == input.BC_Title)
+                    .Where(rs => input.SiteName == null || rs.B_SiteData.Title.Contains(input.SiteName))
+                    .Where(rs => input.ShowInternal || rs.Resver_Head.Customer.TypeFlag != (int)CustomerType.Internal)
+                    .Where(rs => input.ShowExternal || rs.Resver_Head.Customer.TypeFlag != (int)CustomerType.External)
+                    .Where(rs => input.ShowCommDept || rs.Resver_Head.Customer.TypeFlag != (int)CustomerType.CommDept)
                     .GroupJoin(dbContext.M_Resver_TimeSpan
                             .Include(rts => rts.D_TimeSpan)
                             .Where(rts => rts.TargetTable == tableName),
@@ -91,8 +105,15 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             PeopleCt = sd.MaxSize.ToString(),
                             AreaSize = sd.AreaSize,
                             AllUsage = GetUsage(rs, rts, input),
-                            InternalUsage = GetUsage(rs.Where(r => r.Resver_Head.Customer.InFlag), rts, input),
-                            ExternalUsage = GetUsage(rs.Where(r => !r.Resver_Head.Customer.InFlag), rts, input),
+                            InternalUsage =
+                                GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal),
+                                    rts, input),
+                            ExternalUsage =
+                                GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.External),
+                                    rts, input),
+                            CommDeptUsage =
+                                GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept),
+                                    rts, input)
                         };
                     })
                     .SortWithInput(input)
@@ -113,9 +134,17 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     SiteCode = null,
                     AreaSize = totalAreaSize,
                     AllUsage = GetUsage(allRs, allRts, input, uniqueSites),
-                    InternalUsage = GetUsage(allRs.Where(rs => rs.Resver_Head.Customer.InFlag), allRts, input,
+                    InternalUsage = GetUsage(
+                        allRs.Where(rs => rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal), allRts,
+                        input,
                         uniqueSites),
-                    ExternalUsage = GetUsage(allRs.Where(rs => !rs.Resver_Head.Customer.InFlag), allRts, input,
+                    ExternalUsage = GetUsage(
+                        allRs.Where(rs => rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.External), allRts,
+                        input,
+                        uniqueSites),
+                    CommDeptUsage = GetUsage(
+                        allRs.Where(rs => rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept), allRts,
+                        input,
                         uniqueSites)
                 });
 
@@ -219,7 +248,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Where(i => i != totalRow)
                 .ToArray();
 
-            IEnumerable<PdfColumn<Report12_Output_Row_APIItem>> usageColumns = new[] { "全部", "內部", "外部" }
+            IEnumerable<PdfColumn<Report12_Output_Row_APIItem>> usageColumns = new[] { "全部", "內部", "外部", "通訊處" }
                 .SelectMany(i => new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }.Select(j =>
                     new PdfColumn<Report12_Output_Row_APIItem>
                     {
@@ -281,6 +310,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     return row => row.InternalUsage;
                 case "外部":
                     return row => row.ExternalUsage;
+                case "通訊處":
+                    return row => row.CommDeptUsage;
                 default:
                     return row => row.AllUsage;
             }

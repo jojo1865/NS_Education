@@ -228,7 +228,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 Website = entity.Website ?? "",
                 Note = entity.Note ?? "",
                 BillFlag = entity.BillFlag,
-                InFlag = entity.InFlag,
+                InFlag = entity.TypeFlag == (int)CustomerType.Internal,
+                TypeFlag = entity.TypeFlag,
                 PotentialFlag = entity.PotentialFlag,
                 ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
@@ -310,7 +311,8 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 Website = entity.Website ?? "",
                 Note = entity.Note ?? "",
                 BillFlag = entity.BillFlag,
-                InFlag = entity.InFlag,
+                InFlag = entity.TypeFlag == (int)CustomerType.Internal,
+                TypeFlag = entity.TypeFlag,
                 PotentialFlag = entity.PotentialFlag,
                 ResverCt = entity.GetDealtReservationCount(),
                 VisitCt = entity.CustomerVisit.Count(cv => !cv.DeleteFlag),
@@ -586,7 +588,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 Website = input.Website,
                 Note = input.Note,
                 BillFlag = input.BillFlag,
-                InFlag = input.InFlag,
+                TypeFlag = input.TypeFlag,
                 PotentialFlag = input.PotentialFlag,
                 M_Customer_BusinessUser = input.Items.Select(
                     (item, index) => new M_Customer_BusinessUser
@@ -833,7 +835,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             data.Website = input.Website ?? data.Website;
             data.Note = input.Note ?? data.Note;
             data.BillFlag = input.BillFlag;
-            data.InFlag = input.InFlag;
+            data.TypeFlag = input.TypeFlag;
             data.PotentialFlag = input.PotentialFlag;
 
             // 修改舊資料

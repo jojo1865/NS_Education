@@ -29,5 +29,7 @@ namespace NS_Education.Models.APIItems.Controller.Customer.Submit
 
         public ICollection<Customer_Submit_BUID_APIItem> Items { get; set; } =
             new List<Customer_Submit_BUID_APIItem>();
+
+        public int TypeFlag { get; set; }
     }
 }

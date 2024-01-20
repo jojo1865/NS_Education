@@ -834,6 +834,7 @@
         <Compile Include="Tools\Extensions\CommonQueriesExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\CommonResponseForPagedListExtension.cs"/>
         <Compile Include="Tools\Extensions\CustomerExtension.cs"/>
+        <Compile Include="Tools\Extensions\CustomerTypeFlagExtension.cs"/>
         <Compile Include="Tools\Extensions\DateTimeExtension.cs"/>
         <Compile Include="Tools\Extensions\DbContextExtensions.cs"/>
         <Compile Include="Tools\Extensions\DecimalExtensionMethods.cs"/>
@@ -867,6 +868,7 @@
         <Compile Include="Tools\ResponseHelper.cs"/>
         <Compile Include="Variables\CategoryType.cs"/>
         <Compile Include="Variables\ContactType.cs"/>
+        <Compile Include="Variables\CustomerType.cs"/>
         <Compile Include="Variables\CustomHttpCode.cs"/>
         <Compile Include="Variables\DbConstants.cs"/>
         <Compile Include="Variables\IOConstants.cs"/>

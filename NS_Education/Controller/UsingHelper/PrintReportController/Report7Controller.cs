@@ -88,9 +88,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     CustomerCode = rh.Customer.Code,
                     HostName = rh.Customer.TitleC,
                     FirstTradeDate = firstTrades.GetValueOrDefault(rh.CID)?.CreDate.ToFormattedStringDate() ?? "無資料",
-                    CustomerType = rh.Customer.InFlag
-                        ? "內部單位"
-                        : "外部單位",
+                    CustomerType = ((CustomerType)rh.Customer.TypeFlag).GetTypeFlagName(),
                     MkSales = rh.BusinessUser.Name,
                     OpSales = rh.BusinessUser1.Name,
                     EventName = rh.Title,

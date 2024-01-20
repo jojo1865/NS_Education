@@ -11,6 +11,7 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -85,7 +86,12 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         RHID = e.Max(grouping => grouping.rs.RHID),
                         CustomerCode = e.Max(grouping => grouping.rs.Resver_Head.Customer?.Code ?? ""),
                         Host = e.Max(grouping => grouping.rs.Resver_Head.Customer?.TitleC ?? ""),
-                        HostType = e.Max(grouping => grouping.rs.Resver_Head.Customer.InFlag ? "內部單位" : "外部單位"),
+                        HostType = e.Max(grouping
+                            => grouping.rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal
+                                ? "內部單位"
+                                : grouping.rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept
+                                    ? "通訊處"
+                                    : "外部單位"),
                         MKSales = e.Max(grouping => grouping.rs.Resver_Head.BusinessUser.Name),
                         OPSales = e.Max(grouping => grouping.rs.Resver_Head.BusinessUser1.Name),
                         EventName = e.Max(grouping => grouping.rs.Resver_Head.Title),

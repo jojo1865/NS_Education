@@ -39,7 +39,7 @@ namespace NS_Education.Models.Entities
         public string Website { get; set; }
         public string Note { get; set; }
         public bool BillFlag { get; set; }
-        public bool InFlag { get; set; }
+        public int TypeFlag { get; set; }
         public bool PotentialFlag { get; set; }
         public bool ActiveFlag { get; set; }
         public bool DeleteFlag { get; set; }

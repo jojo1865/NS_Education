@@ -40,6 +40,7 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetInfoById
         public string Note { get; set; }
         public bool BillFlag { get; set; }
         public bool InFlag { get; set; }
+        public int TypeFlag { get; set; }
         public bool PotentialFlag { get; set; }
         public int ResverCt { get; set; }
         public int VisitCt { get; set; }

@@ -12,5 +12,6 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report12
         public Report12_Output_Row_MonthlyUsage_APIItem AllUsage { get; set; }
         public Report12_Output_Row_MonthlyUsage_APIItem InternalUsage { get; set; }
         public Report12_Output_Row_MonthlyUsage_APIItem ExternalUsage { get; set; }
+        public Report12_Output_Row_MonthlyUsage_APIItem CommDeptUsage { get; set; }
     }
 }

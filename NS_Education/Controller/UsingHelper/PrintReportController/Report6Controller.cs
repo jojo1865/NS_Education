@@ -36,8 +36,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(rh => !rh.DeleteFlag)
                     .Where(rh => startDate <= rh.SDate && rh.EDate <= endDate)
                     .Where(rh => (input.Internal && input.External)
-                                 || (input.Internal && rh.Customer.InFlag == true)
-                                 || (input.External && rh.Customer.InFlag == false))
+                                 || (input.Internal && rh.Customer.TypeFlag == (int)CustomerType.Internal)
+                                 || (input.External && rh.Customer.TypeFlag == (int)CustomerType.External))
                     .AsQueryable();
 
                 // 特殊情況：如果 RHID 只有「0」，視為沒有篩選。
@@ -69,7 +69,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     RHID = rh.RHID,
                     CustomerCode = rh.Customer.Code,
                     HostName = rh.Customer.TitleC,
-                    CustomerType = rh.Customer.InFlag ? "內部單位" : "外部單位",
+                    CustomerType = ((CustomerType)rh.Customer.TypeFlag).GetTypeFlagName(),
                     MkSales = rh.BusinessUser.Name,
                     OpSales = rh.BusinessUser1.Name,
                     EventName = rh.Title,

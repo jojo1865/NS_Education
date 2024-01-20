@@ -1,7 +1,10 @@
+using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BeingValidated;
+using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.StaticCode.GetTypeList;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
@@ -11,6 +14,7 @@ using NS_Education.Tools.ControllerTools.BasicFunctions.Interface;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper.StaticCodeController
 {
@@ -41,7 +45,42 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(StaticCode_GetTypeList_Input_APIItem input)
         {
+            // 如果是樓層別，需要依據代號來排序
+            // 排序方式比較特別，無法用 EF LINQ 表示
+
+            if (input.Id == (int)StaticCodeType.Floor)
+            {
+                CommonResponseForList<StaticCode_GetTypeList_Output_Row_APIItem>
+                    results = await GetFloorResponse(input);
+                return GetResponseJson(results);
+            }
+
+            // 其他情況，用 helper
             return await _getListAllHelper.GetAllList(input);
+        }
+
+        private async Task<CommonResponseForList<StaticCode_GetTypeList_Output_Row_APIItem>> GetFloorResponse(
+            StaticCode_GetTypeList_Input_APIItem input)
+        {
+            // 查回來並變形
+
+            StaticCode_GetTypeList_Output_Row_APIItem[] results = (await GetListAllOrderedQuery(input).ToArrayAsync())
+                .Select(Transform)
+
+                // 1. 開頭為數字升序
+                // 2. 開頭不為數字時降序
+                // 3. 開頭為數字的資料優先顯示
+                .OrderByDescending(r => Convert.ToDecimal(new string(r.Title
+                    .Replace('B', '-')
+                    .Where(c => Char.IsDigit(c) || c == '-')
+                    .DefaultIfEmpty('0')
+                    .ToArray())))
+                .ToArray();
+
+            return new CommonResponseForList<StaticCode_GetTypeList_Output_Row_APIItem>
+            {
+                Items = results
+            };
         }
 
         public async Task<bool> GetListAllValidateInput(StaticCode_GetTypeList_Input_APIItem input)
@@ -68,14 +107,19 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
 
         public async Task<StaticCode_GetTypeList_Output_Row_APIItem> GetListAllEntityToRow(B_StaticCode entity)
         {
-            return await Task.FromResult(new StaticCode_GetTypeList_Output_Row_APIItem
+            return await Task.FromResult(Transform(entity));
+        }
+
+        private static StaticCode_GetTypeList_Output_Row_APIItem Transform(B_StaticCode entity)
+        {
+            return new StaticCode_GetTypeList_Output_Row_APIItem
             {
                 BSCID = entity.BSCID,
                 CodeType = entity.CodeType,
                 Code = entity.Code ?? "",
                 Title = entity.Title,
                 SortNo = entity.SortNo
-            });
+            };
         }
 
         #endregion

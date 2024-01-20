@@ -146,7 +146,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                input.SiteItems.StartValidate()
                                    .Validate(si => totalSize >= input.PeopleCt,
                                        () => AddError(TooLarge($"預約人數（{input.PeopleCt}）", nameof(input.PeopleCt),
-                                           totalSize)))
+                                           $"場地可容納人數（{totalSize}）")))
                                    .IsValid();
 
             // 主預約單 -> 場地列表 -> 時段列表

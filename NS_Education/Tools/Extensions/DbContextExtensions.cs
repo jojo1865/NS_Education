@@ -221,15 +221,7 @@ namespace NS_Education.Tools.Extensions
         private static void WriteUserLog(this NsDbContext context, string targetTable, int targetId,
             UserLogControlType controlType, int uid, HttpRequestBase httpRequestBase)
         {
-            context.UserLog.Add(new UserLog
-            {
-                UID = uid,
-                TargetTable = targetTable ?? "",
-                TargetID = targetId,
-                ControlType = (int)controlType,
-                CreDate = DateTime.Now,
-                RequestUrl = httpRequestBase.Url?.PathAndQuery ?? "",
-            });
+            // 根據客戶要求，只寫入登入、登出的紀錄。
         }
 
         private static void WriteUserLog(this NsDbContext context, UserLogControlType controlType, int uid,

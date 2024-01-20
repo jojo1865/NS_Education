@@ -294,6 +294,7 @@ namespace NS_Education.Controller.UsingHelper
                 .IsValid();
 
             bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
+                .ForceSkipIf(_ => !input.GiftSendings.Any()) // 如果沒有輸入任何贈品紀錄，不做驗證
                 .Validate(i => i.SendDate.TryParseDateTime(out _),
                     i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）", nameof(i.SendDate))))
                 .Validate(i => i.Year.IsInBetween(1911, 9999),
@@ -410,6 +411,7 @@ namespace NS_Education.Controller.UsingHelper
                 .IsValid();
 
             bool isGiftSendingsValid = isValid && await input.GiftSendings.StartValidateElements()
+                .ForceSkipIf(_ => !input.GiftSendings.Any()) // 如果沒有輸入任何贈品紀錄，不做驗證
                 .Validate(i => i.SendDate.TryParseDateTime(out _),
                     i => AddError(WrongFormat($"贈送日期（禮品 ID {i.BSCID}）", nameof(i.SendDate))))
                 .Validate(i => i.Year.IsInBetween(1911, 9999),

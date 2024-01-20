@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BeingValidated;
+using Microsoft.IdentityModel.Tokens;
 using NS_Education.Models.APIItems.Common.DeleteItem;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.AdminAuthorize;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.AdminChangeUserPassword;
@@ -20,6 +21,7 @@ using NS_Education.Models.APIItems.Controller.UserData.UserData.Login;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.Submit;
 using NS_Education.Models.APIItems.Controller.UserData.UserData.UpdatePW;
 using NS_Education.Models.Entities;
+using NS_Education.Models.Errors;
 using NS_Education.Models.Errors.AuthorizationErrors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.ControllerTools.BasicFunctions.Helper;
@@ -292,7 +294,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             // 驗證
             UserData queried = await LoginGetUserData(input);
 
-            bool isValidated = LoginValidateCredential(input, queried);
+            bool isValidated = LoginValidateCredential(input, queried)
+                               && await LoginValidateJwtExpired(input, queried);
 
             if (!isValidated)
                 return GetResponseJson();
@@ -321,6 +324,50 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             JwtAuthFilter.StartIdleTimer(output.UID);
             return GetResponseJson(output);
+        }
+
+        private async Task<bool> LoginValidateJwtExpired(UserData_Login_Input_APIItem input, UserData queried)
+        {
+            // 如果設定檔有打開同一使用者只能登入一次，且沒有打開可強制中斷連線
+            // 則檢查目前登記中的 JWT
+            // 若 JWT 尚未過期，不允許新的登入
+
+            string enforceOneSessionPerUserCode =
+                ((int)StaticCodeSafetyControlCode.EnforceOneSessionPerUser).ToString();
+            string newCanKickOldCode = ((int)StaticCodeSafetyControlCode.NewSessionTerminatesOld).ToString();
+
+            Dictionary<string, bool> data = await DC.B_StaticCode
+                .Where(bsc => bsc.CodeType == (int)StaticCodeType.SafetyControl)
+                .Where(bsc => bsc.Code == enforceOneSessionPerUserCode
+                              || bsc.Code == newCanKickOldCode)
+                .ToDictionaryAsync(bsc => bsc.Code, bsc => bsc.SortNo == 1);
+
+            bool enforceOneSessionPerUser = data.GetValueOrDefault(enforceOneSessionPerUserCode);
+            bool newCanKickOld = data.GetValueOrDefault(newCanKickOldCode);
+
+            bool needsChecking = enforceOneSessionPerUser && !newCanKickOld;
+
+            if (!needsChecking)
+                return true;
+
+            try
+            {
+                DateTime expireTime = queried.LoginDate.AddMinutes(JwtConstants.ExpireMinutes);
+                bool notExpiredYet = expireTime >= DateTime.Now;
+
+                if (notExpiredYet)
+                {
+                    AddError(new BusinessError(1,
+                        $"同一使用者，同一時間只能登入一次。請於 {expireTime.ToFormattedStringDateTime()} 之後再嘗試登入。"));
+                }
+
+                return !notExpiredYet;
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                // 過期表示可以登了，給過
+                return true;
+            }
         }
 
         private async Task<DateTime> GetUserLastPasswordChangeDate(UserData userData)

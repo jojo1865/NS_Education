@@ -13,6 +13,7 @@ using NS_Education.Models.Errors;
 using NS_Education.Models.Errors.AuthorizationErrors;
 using NS_Education.Models.Errors.DataValidationErrors;
 using NS_Education.Models.Errors.InputValidationErrors;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Filters;
 using NS_Education.Tools.Filters.FinalizeResponseFilter;
 
@@ -302,6 +303,15 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
         public string ChangeJson(object O)
         {
             return JsonConvert.SerializeObject(O);
+        }
+
+        internal async Task<ExcelBuilderInfo> GetExcelBuilderInfo()
+        {
+            return new ExcelBuilderInfo
+            {
+                CreatorId = GetUid().ToString(),
+                CreatorName = await GetUserNameByID(GetUid())
+            };
         }
 
         #region 加解密工具

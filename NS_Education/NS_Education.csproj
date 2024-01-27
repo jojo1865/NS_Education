@@ -117,8 +117,28 @@
             <Private>True</Private>
         </Reference>
         <Reference Include="mscorlib"/>
+        <Reference Include="NPOI.Core, Version=2.6.2.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1">
+            <HintPath>..\packages\NPOI.2.6.2\lib\net472\NPOI.Core.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="NPOI.OOXML, Version=2.6.2.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1">
+            <HintPath>..\packages\NPOI.2.6.2\lib\net472\NPOI.OOXML.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="NPOI.OpenXml4Net, Version=2.6.2.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1">
+            <HintPath>..\packages\NPOI.2.6.2\lib\net472\NPOI.OpenXml4Net.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="NPOI.OpenXmlFormats, Version=2.6.2.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1">
+            <HintPath>..\packages\NPOI.2.6.2\lib\net472\NPOI.OpenXmlFormats.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
         <Reference Include="QuestPDF, Version=2023.10.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>..\packages\QuestPDF.2023.10.0-alpha0\lib\net462\QuestPDF.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="SixLabors.Fonts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d998eea7b14cab13">
+            <HintPath>..\packages\SixLabors.Fonts.1.0.0\lib\netstandard2.0\SixLabors.Fonts.dll</HintPath>
             <Private>True</Private>
         </Reference>
         <Reference Include="SkiaSharp, Version=2.88.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">

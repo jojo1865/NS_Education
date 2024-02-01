@@ -120,7 +120,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 {
                     input.RHID?.Any() ?? false ? $"預約單號={String.Join(",", input.RHID)}" : null,
                     String.Join("~", new[] { input.StartDate, input.EndDate }.Where(d => d.HasContent()).Distinct()),
-                    input.CustomerName.HasContent() ? $"主辦單位={input.CustomerName}" : null
+                    input.CustomerName.HasContent() ? $"主辦單位={input.CustomerName}" : null,
+                    input.State.HasValue ? $"預約狀態={((ReserveHeadGetListState?)input.State).GetChineseName()}" : null
                 }.Where(s => s.HasContent())
                 .ToArray();
 

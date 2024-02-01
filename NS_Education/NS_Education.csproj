@@ -886,6 +886,7 @@
         <Compile Include="Tools\Extensions\ListSortingExtension.cs"/>
         <Compile Include="Tools\Extensions\LookupExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\ObjectExtensionMethods.cs"/>
+        <Compile Include="Tools\Extensions\ResverHeadGetListStateExtensions.cs"/>
         <Compile Include="Tools\Extensions\SpecificTableExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\StandardColumnExtensionMethods.cs"/>
         <Compile Include="Tools\Extensions\StringExtensionMethods.cs"/>

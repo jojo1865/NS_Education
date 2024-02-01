@@ -4,17 +4,20 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NPOI.SS.UserModel;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report3;
 using NS_Education.Models.Entities;
 using NS_Education.Models.Utilities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -23,6 +26,150 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
     /// </summary>
     public class Report3Controller : PublicClass, IPrintReport<Report3_Input_APIItem, Report3_Output_Row_APIItem>
     {
+        #region Excel
+        
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report3_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report3_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            if (data is null)
+                return GetContentResult();
+            
+            ExcelBuilderInfo info = await GetExcelBuilderInfo(data.Items.Count);
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "授權簽核表",
+                Columns = 9
+            };
+            
+            foreach (Report3_Output_Row_APIItem item in data.Items)
+            {
+                GetExcel_MakePage(excelBuilder, item, info);
+                info.NowPage++;
+                excelBuilder.CreateRow();
+            }
+
+            return excelBuilder.GetFile();
+        }
+
+        private void GetExcel_MakePage(ExcelBuilder e, Report3_Output_Row_APIItem item, ExcelBuilderInfo info)
+        {
+            e.CreateHeader(info);
+
+            e.CreateRow()
+                .Align(0, HorizontalAlignment.Left)
+                .SetValue(0, "預約單號:")
+                .SetValue(1, item.RHID);
+
+            e.CreateRow()
+                .CombineCells(1, 3)
+                .SetValue(0, "主辦單位:")
+                .SetValue(1, item.HostName);
+
+            e.CreateRow()
+                .CombineCells(1, 3)
+                .SetValue(0, "活動名稱:")
+                .SetValue(1, item.EventName);
+
+            string datesJoined = String.Join("~",
+                new[] { item.StartDate, item.EndDate }.Where(s => s.HasContent()).Distinct());
+            
+            e.CreateRow()
+                .CombineCells(1, 2)
+                .SetValue(0, "活動日期:")
+                .SetValue(1, datesJoined);
+
+            e.CreateRow()
+                .SetValue(0, "人數: ")
+                .SetValue(1, item.PeopleCt, CellType.Numeric)
+                .SetValue(2, "人");
+
+            e.CreateRow();
+
+            e.CreateRow()
+                .SetValue(0, "一、收入分析");
+
+            e.StartDefineTable<Report3_Output_Row_Income_APIItem>()
+                .StringColumn(0, "", i => i.Title)
+                .NumberColumn(1, "場地定價", i => i.FixedPrice, true)
+                .NumberColumn(3, "場地報價", i => i.QuotedPrice, true)
+                .NumberColumn(6, "成本", i => i.UnitPrice, true)
+                .NumberColumn(7, "價差", i => i.Difference, true)
+                .StringColumn(8, "備註", i => "")
+                .SetDataRows(item.Incomes)
+                .AddToBuilder(e);
+
+            e.CreateRow();
+
+            e.CreateRow()
+                .SetValue(0, "二、細項說明");
+            
+            ILookup<string, Report3_Output_Row_Detail_APIItem> detailGroups = item.Details.ToLookup(d => d.TypeName, d => d);
+            
+            foreach (IGrouping<string, Report3_Output_Row_Detail_APIItem> g in detailGroups)
+            {
+                Report3_Output_Row_Detail_APIItem firstRow = g.First();
+                string typeName = firstRow.TypeName;
+                string typeFieldName = firstRow.OverrideColumnTypeName;
+                string subTypeFieldName = firstRow.SubTypeName;
+                
+                e.CreateRow()
+                    .SetValue(0, $"#{typeName}費用");
+
+                e.StartDefineTable<Report3_Output_Row_Detail_APIItem>()
+                    .SetDataRows(g)
+                    .StringColumn(0, "日期", i => i.Date)
+                    .StringColumn(1, "時段", i => String.Join("~",
+                        new[] { i.TimeSpans.FirstOrDefault(), i.TimeSpans.LastOrDefault() }
+                            .Where(s => s.HasContent())
+                            .Distinct()))
+                    .StringColumn(3, typeFieldName, i => i.Title)
+                    .StringColumn(5, subTypeFieldName, i => i.SubType)
+                    .NumberColumn(7, "定價", i => i.FixedPrice, true)
+                    .NumberColumn(8, "報價", i => i.QuotedPrice, true)
+                    .AddToBuilder(e);
+                
+                e.CreateRow();
+                
+                // 如果是場地，特殊輸出固定的文字
+
+                if (g.Key != "場地") continue;
+                
+                e.CreateRow()
+                    .SetValue(0, "◎");
+
+                e.CreateRow()
+                    .CombineCells(0, 1)
+                    .SetValue(0, "場地租金優惠折扣      折");
+
+                e.CreateRow()
+                    .CombineCells(0, 2)
+                    .SetValue(0, "特惠專案客戶場地優惠扣折     折");
+
+                e.CreateRow();
+            }
+
+            e.CreateRow()
+                .SetValue(0, "◎");
+
+            e.CreateRow()
+                .SetValue(0, "製表者")
+                .SetValue(3, "業務服務組長")
+                .CombineCells(6, 7)
+                .SetValue(6, "教育訓練中心主管");
+
+            e.CreateRow();
+
+            e.CreateRow()
+                .DrawBorder(BorderDirection.Bottom, 0, 0)
+                .DrawBorder(BorderDirection.Bottom, 3, 3)
+                .DrawBorder(BorderDirection.Bottom, 6, 7);
+        }
+
+        #endregion
+        
         #region 報表分析 Get
 
         [HttpGet]

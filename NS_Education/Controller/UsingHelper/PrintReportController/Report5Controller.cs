@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.SqlTypes;
 using System.Linq;
@@ -9,6 +10,7 @@ using NS_Education.Models.APIItems.Controller.PrintReport.Report5;
 using NS_Education.Models.Entities;
 using NS_Education.Models.Utilities.PrintReport;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -93,6 +95,70 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 return response;
             }
         }
+
+        #region Excel
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report5_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report5_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            if (data is null)
+                return GetContentResult();
+
+            ExcelBuilderInfo info = await GetExcelBuilderInfo(1);
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "餐飲明細表",
+                Columns = 10
+            };
+
+            excelBuilder.CreateHeader(info);
+
+            // 組合查詢條件的文字
+            IEnumerable<string> conditions = new[]
+                {
+                    input.RHID?.Any() ?? false ? $"預約單號={String.Join(",", input.RHID)}" : null,
+                    String.Join("~", new[] { input.StartDate, input.EndDate }.Where(d => d.HasContent()).Distinct()),
+                    input.CustomerName.HasContent() ? $"主辦單位={input.CustomerName}" : null,
+                    input.Partner.HasContent() ? $"廠商={input.Partner}" : null
+                }.Where(s => s.HasContent())
+                .ToArray();
+
+            if (conditions.Any())
+            {
+                excelBuilder.CreateRow()
+                    .SetValue(0, "查詢條件:");
+
+                foreach (string condition in conditions)
+                {
+                    excelBuilder.NowRow()
+                        .CombineCells(1, 9)
+                        .SetValue(1, condition);
+
+                    excelBuilder.CreateRow();
+                }
+            }
+
+            excelBuilder.StartDefineTable<Report5_Output_Row_APIItem>()
+                .SetDataRows(data.Items)
+                .StringColumn(0, "活動日期", i => i.ReserveDate)
+                .StringColumn(1, "預約單號", i => i.RHID.ToString())
+                .StringColumn(2, "活動名稱", i => i.EventName)
+                .StringColumn(3, "廠商名稱", i => i.PartnerName)
+                .StringColumn(4, "餐別", i => i.CuisineType)
+                .StringColumn(5, "餐種", i => i.CuisineName)
+                .StringColumn(6, "主辦單位", i => i.HostName)
+                .NumberColumn(7, "數量", i => i.ReservedQuantity)
+                .NumberColumn(8, "單價", i => i.QuotedPrice)
+                .NumberColumn(9, "總價", i => i.QuotedPriceSum, true)
+                .AddToBuilder(excelBuilder);
+
+            return excelBuilder.GetFile();
+        }
+
+        #endregion
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]

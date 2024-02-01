@@ -84,8 +84,6 @@ namespace NS_Education.Tools.ExcelBuild
                 .SetValueFromRight(2, "頁次：")
                 .SetValueFromRight(1, $"第 {info.NowPage} / {info.TotalPage} 頁");
 
-            CreateRow();
-
             return this;
         }
 

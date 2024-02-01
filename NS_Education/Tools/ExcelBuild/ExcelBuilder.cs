@@ -63,17 +63,17 @@ namespace NS_Education.Tools.ExcelBuild
             CreateRow()
                 .CombineCells()
                 .SetValueFromLeft(0, "南山人壽教育訓練中心")
-                .SetAlignment(0, HorizontalAlignment.Center);
+                .Align(0, HorizontalAlignment.Center);
 
             CreateRow()
                 .CombineCells()
                 .SetValueFromLeft(0, ReportTitle)
-                .SetAlignment(0, HorizontalAlignment.Center);
+                .Align(0, HorizontalAlignment.Center);
 
             CreateRow()
                 .SetValueFromLeft(0, "製表ID：")
                 .SetValueFromLeft(1, info.CreatorId)
-                .SetAlignment(1, HorizontalAlignment.Left)
+                .Align(1, HorizontalAlignment.Left)
                 .SetValueFromRight(2, "製表日：")
                 .SetValueFromRight(1, info.CreatedOn.ToFormattedStringDate())
                 .SetValueFromRight(0, info.CreatedOn.ToString("HH:mm"));
@@ -165,12 +165,14 @@ namespace NS_Education.Tools.ExcelBuild
         /// <param name="cellNoStart">最左的儲存格的編號（column）。0-Indexed。</param>
         /// <param name="cellNoEnd">最右的儲存格的編號（column）。0-Indexed。</param>
         /// <param name="verticalBordersOuterOnly">（可選）左右側的邊框是否只在範圍的最左或最右才畫</param>
+        /// <param name="borderStyle">（可選）邊框樣式</param>
         /// <returns>this</returns>
         public ExcelBuilder DrawBorder(BorderDirection directions, int cellNoStart, int cellNoEnd,
-            bool? verticalBordersOuterOnly = null)
+            bool? verticalBordersOuterOnly = null, BorderStyle? borderStyle = null)
         {
             IExcelBuilderAction action = new DrawBorderLine
             {
+                BorderStyle = borderStyle ?? BorderStyle.Medium,
                 CellNoStart = cellNoStart,
                 CellNoEnd = cellNoEnd,
                 Top = directions.HasFlag(BorderDirection.Top),
@@ -189,11 +191,13 @@ namespace NS_Education.Tools.ExcelBuild
         /// <param name="directions">方向的列舉，可以用 | 來多選。</param>
         /// <param name="cellNoStart">最左的儲存格的編號（column）。0-Indexed。</param>
         /// <param name="verticalBordersOuterOnly">（可選）左右側的邊框是否只在範圍的最左或最右才畫</param>
+        /// <param name="borderStyle">（可選）邊框樣式</param>
         /// <returns>this</returns>
         public ExcelBuilder DrawBorder(BorderDirection directions, int cellNoStart,
-            bool? verticalBordersOuterOnly = null)
+            bool? verticalBordersOuterOnly = null,
+            BorderStyle? borderStyle = null)
         {
-            return DrawBorder(directions, cellNoStart, Columns - 1, verticalBordersOuterOnly);
+            return DrawBorder(directions, cellNoStart, Columns - 1, verticalBordersOuterOnly, borderStyle);
         }
 
         /// <summary>
@@ -201,10 +205,12 @@ namespace NS_Education.Tools.ExcelBuild
         /// </summary>
         /// <param name="directions">方向的列舉，可以用 | 來多選。</param>
         /// <param name="verticalBordersOuterOnly">（可選）左右側的邊框是否只在範圍的最左或最右才畫</param>
+        /// <param name="borderStyle">邊框樣式</param>
         /// <returns>this</returns>
-        public ExcelBuilder DrawBorder(BorderDirection directions, bool? verticalBordersOuterOnly = null)
+        public ExcelBuilder DrawBorder(BorderDirection directions, bool? verticalBordersOuterOnly = null,
+            BorderStyle? borderStyle = null)
         {
-            return DrawBorder(directions, 0, Columns - 1, verticalBordersOuterOnly);
+            return DrawBorder(directions, 0, Columns - 1, verticalBordersOuterOnly, borderStyle);
         }
 
         /// <summary>
@@ -217,6 +223,11 @@ namespace NS_Education.Tools.ExcelBuild
         /// <returns>this</returns>
         public ExcelBuilder SetValueFromLeft<TValue>(int cellNoFromLeft, TValue content, CellType? cellType = null)
         {
+            if (content == null)
+            {
+                cellType = CellType.Blank;
+            }
+
             IExcelBuilderAction action = new SetValue<TValue>
             {
                 CellNo = cellNoFromLeft,
@@ -248,7 +259,7 @@ namespace NS_Education.Tools.ExcelBuild
         /// <param name="cellNoFromLeft">儲存個編號（column）。0-Indexed。</param>
         /// <param name="alignment">對齊</param>
         /// <returns>this</returns>
-        public ExcelBuilder SetAlignment(int cellNoFromLeft, HorizontalAlignment alignment)
+        public ExcelBuilder Align(int cellNoFromLeft, HorizontalAlignment alignment)
         {
             IExcelBuilderAction action = new SetAlignment
             {

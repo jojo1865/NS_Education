@@ -91,9 +91,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .CombineCells(5, 6)
                 .SetValue(7, "統一編號：")
                 .SetValue(8, data.Compilation)
-                .SetAlignment(1, HorizontalAlignment.Left)
-                .SetAlignment(5, HorizontalAlignment.Left)
-                .SetAlignment(8, HorizontalAlignment.Right);
+                .Align(1, HorizontalAlignment.Left)
+                .Align(5, HorizontalAlignment.Left)
+                .Align(8, HorizontalAlignment.Right);
 
             if (data.ContactValue1.HasContent())
             {

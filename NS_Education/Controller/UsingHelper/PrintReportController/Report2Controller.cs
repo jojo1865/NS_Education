@@ -5,16 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NPOI.SS.UserModel;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report2;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -373,7 +376,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                             t.Cell().Border(1).AlignCenter()
                                                 .Text(food.Ct <= 1 ? singlePrice : personPrice);
                                             t.Cell().Border(1).AlignCenter().Text(food.Partner);
-                                            t.Cell().Border(1).AlignLeft().PaddingLeft(0.1f, Unit.Centimetre).Text(food.Note);
+                                            t.Cell().Border(1).AlignLeft().PaddingLeft(0.1f, Unit.Centimetre)
+                                                .Text(food.Note);
                                         }
                                     });
 
@@ -418,5 +422,164 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             return new FileContentResult(pdf, "application/pdf");
         }
+
+        #region Excel
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report2_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report2_Output_Row_APIItem> results = await GetResultAsync(input);
+
+            if (results is null)
+                return GetContentResult();
+
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "Function Order",
+                Columns = 6
+            };
+
+            foreach (Report2_Output_Row_APIItem data in results.Items)
+            {
+                GetExcel_MakePage(excelBuilder, data);
+
+                excelBuilder.CreateRow();
+            }
+
+            return excelBuilder.GetFile();
+        }
+
+        private void GetExcel_MakePage(ExcelBuilder e, Report2_Output_Row_APIItem data)
+        {
+            e.CreateRow()
+                .SetValue(0, "Function Order");
+
+            e.CreateRow()
+                .SetValue(0, "主辦單位：")
+                .CombineCells(1, 3)
+                .SetValue(1, data.HostName);
+
+            e.CreateRow()
+                .SetValue(0, "活動名稱：")
+                .CombineCells(1, 3)
+                .SetValue(1, data.EventTitle);
+
+            e.CreateRow()
+                .SetValue(0, "預約單號：")
+                .CombineCells(1, 2)
+                .SetValue(1, data.RHID)
+                .Align(1, HorizontalAlignment.Left);
+
+            string dateRange = String.Join("~",
+                new[] { data.StartDate, data.EndDate }.Where(d => d.HasContent()).Distinct());
+            e.CreateRow()
+                .SetValue(0, "活動日期：")
+                .CombineCells(1, 2)
+                .SetValue(1, dateRange);
+
+            e.CreateRow()
+                .SetValue(0, "使用場地：")
+                .CombineCells(1, 5)
+                .SetValue(1, String.Join("、", data.SiteNames));
+
+            e.CreateRow()
+                .SetValue(0, "MKT：")
+                .SetValue(1, data.MKT);
+
+            e.CreateRow()
+                .SetValue(0, "Owner：")
+                .SetValue(1, data.Owner);
+
+            foreach (Report2_Output_Row_Site_APIItem site in data.Sites)
+            {
+                // 場地 Title 以：分隔，前段為場地編號，後段為場地名稱（紅字）
+                string[] siteSplit = site.Title.Split('：');
+
+                e.CreateRow()
+                    .SetValue(0, $"【{siteSplit.ElementAtOrDefault(0)}】")
+                    .SetValue(1, $"{siteSplit.ElementAtOrDefault(1)}（{site.Date}）");
+
+                foreach (string siteLine in site.Lines)
+                {
+                    string[] siteLineSplit = siteLine.Split('：');
+
+                    e.CreateRow()
+                        .SetValue(0, $"{siteLineSplit.ElementAtOrDefault(0)}：")
+                        .SetValue(1, siteLineSplit.ElementAtOrDefault(1));
+                }
+            }
+
+            e.CreateRow()
+                .SetValue(0, "【餐飲】");
+
+            e.CreateRow()
+                .DrawBorder(BorderDirection.Top | BorderDirection.Bottom | BorderDirection.Left | BorderDirection.Right,
+                    false, BorderStyle.Thin)
+                .SetValue(0, "日期")
+                .SetValue(1, "餐別")
+                .SetValue(2, "送達時間")
+                .SetValue(3, "形式")
+                .SetValue(4, "數量/金額")
+                .SetValue(5, "廠商");
+
+            foreach (Report2_Output_Row_Food_APIItem food in data.Foods)
+            {
+                e.CreateRow()
+                    .DrawBorder(
+                        BorderDirection.Top | BorderDirection.Bottom | BorderDirection.Left | BorderDirection.Right,
+                        false, BorderStyle.Thin)
+                    .SetValue(0, food.Date)
+                    .SetValue(1, food.FoodType)
+                    .SetValue(2, food.ArriveTime)
+                    .SetValue(3, food.Form)
+                    .SetValue(4,
+                        food.Ct > 1 ? $"${food.QuotedPrice / food.Ct:N0}*{food.Ct}人份" : $"${food.QuotedPrice:N0}")
+                    .SetValue(5, food.Partner);
+            }
+
+            e.CreateRow()
+                .SetValue(0, "【設備】");
+
+            e.CreateRow()
+                .CombineCells()
+                .SetValue(0, "1.各教室標準設備。");
+
+            e.CreateRow()
+                .SetValue(0, "【交通】");
+
+            foreach (string s in data.ParkingNote?.Split('\n') ?? Array.Empty<string>())
+            {
+                e.CreateRow()
+                    .CombineCells()
+                    .SetValue(0, s);
+            }
+
+            e.CreateRow()
+                .SetValue(0, "【結帳】");
+
+            e.CreateRow()
+                .CombineCells(0, 1)
+                .SetValue(0, $"1.連絡人：{data.Contact}");
+
+            e.CreateRow()
+                .CombineCells(0, 1)
+                .SetValue(0, "2.付款方式：");
+
+            foreach (string pay in data.PayStatus ?? Array.Empty<string>())
+            {
+                e.CreateRow()
+                    .CombineCells(1, 5)
+                    .SetValue(1, pay);
+            }
+
+            e.CreateRow()
+                .SetValue(0, "抬頭：");
+
+            e.CreateRow()
+                .SetValue(0, "統編：");
+        }
+
+        #endregion
     }
 }

@@ -48,7 +48,7 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
                     builder.SetValue(c.CellNo, c.FormatValue(value), c.DataCellType);
 
                     if (c.DataAlignment != null)
-                        builder.SetAlignment(c.CellNo, c.DataAlignment.Value);
+                        builder.Align(c.CellNo, c.DataAlignment.Value);
                 }
             }
 
@@ -72,7 +72,7 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
                     c.DataCellType);
 
                 if (c.DataAlignment != null)
-                    builder.SetAlignment(c.CellNo, c.DataAlignment.Value);
+                    builder.Align(c.CellNo, c.DataAlignment.Value);
             }
 
             return;

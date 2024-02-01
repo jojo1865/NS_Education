@@ -18,7 +18,7 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
         /// <summary>
         /// 資料列。
         /// </summary>
-        private IEnumerable<TDataRow> DataRows { get; set; }
+        private IEnumerable<TDataRow> DataRows { get; set; } = Array.Empty<TDataRow>();
 
         private bool HasTotal => Columns.Any(c => c.HasTotal);
 
@@ -97,7 +97,7 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
             return this;
         }
 
-        public TableDefinition<TDataRow> PriceColumn(int cellNo, string name,
+        public TableDefinition<TDataRow> NumberColumn(int cellNo, string name,
             Func<TDataRow, decimal> valueSelector, bool? hasTotal = false)
         {
             ColumnDefinition<TDataRow> column = new ColumnDefinition<TDataRow>

@@ -18,9 +18,9 @@ namespace NS_Education.Tools.ExcelBuild
     {
         #region Private Functions
 
-        private ExcelBuilder AddActionToCurrentRow(IExcelBuilderAction action)
+        private ExcelBuilder ExecuteActionAtCurrentRow(IExcelBuilderAction action)
         {
-            CurrentRow.AddAction(action);
+            CurrentRow.ExecuteAction(Sheet, action);
 
             return this;
         }
@@ -106,6 +106,15 @@ namespace NS_Education.Tools.ExcelBuild
         }
 
         /// <summary>
+        /// 取得目前工作區域所在的資料列。
+        /// </summary>
+        /// <returns>this</returns>
+        public ExcelBuilder NowRow()
+        {
+            return this;
+        }
+
+        /// <summary>
         /// 開始建立表格。
         /// </summary>
         /// <returns>this</returns>
@@ -131,7 +140,7 @@ namespace NS_Education.Tools.ExcelBuild
                 CellNoEnd = end
             };
 
-            return AddActionToCurrentRow(action);
+            return ExecuteActionAtCurrentRow(action);
         }
 
         /// <summary>
@@ -171,7 +180,7 @@ namespace NS_Education.Tools.ExcelBuild
                 VerticalBordersOuterOnly = verticalBordersOuterOnly ?? false
             };
 
-            return AddActionToCurrentRow(action);
+            return ExecuteActionAtCurrentRow(action);
         }
 
         /// <summary>
@@ -216,7 +225,7 @@ namespace NS_Education.Tools.ExcelBuild
                 Value = content
             };
 
-            return AddActionToCurrentRow(action);
+            return ExecuteActionAtCurrentRow(action);
         }
 
         /// <summary>
@@ -247,7 +256,7 @@ namespace NS_Education.Tools.ExcelBuild
                 Alignment = alignment
             };
 
-            return AddActionToCurrentRow(action);
+            return ExecuteActionAtCurrentRow(action);
         }
 
         /// <summary>
@@ -258,13 +267,12 @@ namespace NS_Education.Tools.ExcelBuild
         {
             foreach (ExcelBuilderRow excelBuilderRow in Rows)
             {
-                excelBuilderRow.ExecuteActions(Sheet);
                 excelBuilderRow.SetHeightRatio(Sheet, 1.25f);
             }
 
             for (int i = 0; i < Columns; i++)
             {
-                Sheet.AutoSizeColumn(i, true);
+                Sheet.AutoSizeColumn(i);
             }
 
             using (MemoryStream ms = new MemoryStream())

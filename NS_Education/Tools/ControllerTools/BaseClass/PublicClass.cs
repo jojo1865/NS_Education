@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Mvc;
 using Newtonsoft.Json;
 using NS_Education.Models;
 using NS_Education.Models.Entities;
@@ -48,6 +49,11 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
             response.SuccessFlag = false;
             response.Errors = _errors;
             return response;
+        }
+
+        public ContentResult GetContentResult()
+        {
+            return Content(GetResponseJson(), "application/json");
         }
 
         public string GetResponseJson()
@@ -305,12 +311,13 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
             return JsonConvert.SerializeObject(O);
         }
 
-        internal async Task<ExcelBuilderInfo> GetExcelBuilderInfo()
+        internal async Task<ExcelBuilderInfo> GetExcelBuilderInfo(int totalPage)
         {
             return new ExcelBuilderInfo
             {
                 CreatorId = GetUid().ToString(),
-                CreatorName = await GetUserNameByID(GetUid())
+                CreatorName = await GetUserNameByID(GetUid()),
+                TotalPage = totalPage
             };
         }
 

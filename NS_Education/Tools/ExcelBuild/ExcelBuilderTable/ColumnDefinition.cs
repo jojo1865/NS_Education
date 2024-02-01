@@ -50,6 +50,7 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
         /// <returns>格式化的字串</returns>
         public string FormatValue(object value)
         {
+            value = value ?? "";
             return Formatter == null ? value.ToString() : String.Format("{0:" + Formatter + "}", value);
         }
     }

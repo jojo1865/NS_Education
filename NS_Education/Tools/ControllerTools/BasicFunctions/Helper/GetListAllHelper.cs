@@ -39,6 +39,24 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
         public async Task<string> GetAllList(TGetListRequest input)
         {
+            ICollection<TGetListRow> rows = await GetRows(input);
+
+            CommonResponseForList<TGetListRow> response = new CommonResponseForList<TGetListRow>
+            {
+                Items = rows ?? new List<TGetListRow>()
+            };
+
+            return _controller.GetResponseJson(response);
+        }
+
+        /// <inheritdoc />
+        public async Task<ICollection<TRow>> GetRows<TRow>(TGetListRequest input)
+        {
+            return (ICollection<TRow>)await GetRows(input);
+        }
+
+        private async Task<ICollection<TGetListRow>> GetRows(TGetListRequest input)
+        {
             // 1. 驗證輸入
             bool inputValidated = await _controller.GetListAllValidateInput(input);
 
@@ -46,14 +64,14 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
                 _controller.AddError(new WrongFormatError());
 
             if (_controller.HasError())
-                return _controller.GetResponseJson();
+                return null;
 
             // 2. 執行查詢
             var queryResult = await _GetListQueryResult(input);
 
             // 3. 有錯誤時提早返回
             if (_controller.HasError())
-                return _controller.GetResponseJson();
+                return null;
 
             // 4. 寫一筆 UserLog
             await _controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, _controller.GetUid(),
@@ -78,12 +96,7 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
 
             rows = rows.SortWithInput(input.Sorting).ToList();
 
-            CommonResponseForList<TGetListRow> response = new CommonResponseForList<TGetListRow>
-            {
-                Items = rows
-            };
-
-            return _controller.GetResponseJson(response);
+            return rows;
         }
 
         private async Task<IList<TEntity>> _GetListQueryResult(TGetListRequest input)

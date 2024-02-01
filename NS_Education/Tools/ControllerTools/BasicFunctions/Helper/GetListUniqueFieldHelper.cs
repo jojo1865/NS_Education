@@ -31,24 +31,38 @@ namespace NS_Education.Tools.ControllerTools.BasicFunctions.Helper
         /// <inheritdoc />
         public async Task<string> GetAllList(CommonRequestForUniqueField input)
         {
+            // 1. 查詢資料
+            ICollection<TResult> fields = await GetRows(input);
+
+            // 2. 寫一筆 UserLog
+            await Controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, Controller.GetUid(),
+                HttpContext.Current.Request);
+
+            // 3. 回傳資料
+            CommonResponseForList<TResult> response = new CommonResponseForList<TResult>
+            {
+                Items = fields ?? new List<TResult>()
+            };
+
+            return Controller.GetResponseJson(response);
+        }
+
+        /// <inheritdoc />
+        public async Task<ICollection<TRow>> GetRows<TRow>(CommonRequestForUniqueField input)
+        {
+            return (ICollection<TRow>)await GetRows(input);
+        }
+
+        private async Task<ICollection<TResult>> GetRows(CommonRequestForUniqueField input)
+        {
             // 1. 驗證輸入
             if (!ValidateInput(input))
-                return Controller.GetResponseJson();
+                return null;
 
             // 2. 查詢資料
             ICollection<TResult> fields = await QueryUniqueFields(input);
 
-            // 3. 寫一筆 UserLog
-            await Controller.DC.WriteUserLogAndSaveAsync(UserLogControlType.Show, Controller.GetUid(),
-                HttpContext.Current.Request);
-
-            // 4. 回傳資料
-            CommonResponseForList<TResult> response = new CommonResponseForList<TResult>
-            {
-                Items = fields
-            };
-
-            return Controller.GetResponseJson(response);
+            return fields;
         }
 
         private async Task<ICollection<TResult>> QueryUniqueFields(CommonRequestForUniqueField input)

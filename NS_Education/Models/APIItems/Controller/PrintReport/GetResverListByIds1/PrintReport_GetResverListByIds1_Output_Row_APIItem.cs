@@ -35,6 +35,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.GetResverListByIds
         public int PeopleCt { get; set; }
         public int QuotedPrice { get; set; }
         public int Index { get; private set; }
+        public IEnumerable<PrintReport_GetResverListByIds1_FoodItem_APIItem> FoodItems { get; set; }
 
         public async Task SetInfoFromEntity<T>(T entity, PublicClass controller) where T : class
         {

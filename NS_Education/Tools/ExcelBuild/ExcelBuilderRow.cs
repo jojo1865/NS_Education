@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NS_Education.Tools.ExcelBuild.ExcelBuilderAction;
@@ -20,12 +19,6 @@ namespace NS_Education.Tools.ExcelBuild
 
         #endregion
 
-        #region Private Variables
-
-        private ICollection<IExcelBuilderAction> Actions { get; } = new List<IExcelBuilderAction>();
-
-        #endregion
-
         #region Private Functions
 
         private IRow GetRow(ISheet sheet)
@@ -37,19 +30,11 @@ namespace NS_Education.Tools.ExcelBuild
 
         #region Internal Functions
 
-        internal void ExecuteActions(ISheet sheet)
+        internal void ExecuteAction(ISheet sheet, IExcelBuilderAction action)
         {
             IRow row = GetRow(sheet);
 
-            foreach (IExcelBuilderAction action in Actions)
-            {
-                action.Execute(row);
-            }
-        }
-
-        internal void AddAction(IExcelBuilderAction action)
-        {
-            Actions.Add(action);
+            action.Execute(row);
         }
 
         internal void SetHeightRatio(ISheet sheet, float ratio)

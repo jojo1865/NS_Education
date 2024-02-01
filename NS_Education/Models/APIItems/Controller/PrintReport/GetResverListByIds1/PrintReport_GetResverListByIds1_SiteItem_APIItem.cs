@@ -7,9 +7,6 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.GetResverListByIds
         public ICollection<PrintReport_GetResverListByIds1_DeviceItem_APIItem> DeviceItems =
             new List<PrintReport_GetResverListByIds1_DeviceItem_APIItem>();
 
-        public ICollection<PrintReport_GetResverListByIds1_TimeSpanItem_APIItem> TimeSpanItems =
-            new List<PrintReport_GetResverListByIds1_TimeSpanItem_APIItem>();
-
         public int RSID { get; set; }
         public string Date { get; set; }
 

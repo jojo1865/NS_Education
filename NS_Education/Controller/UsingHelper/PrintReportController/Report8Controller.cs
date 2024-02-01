@@ -6,11 +6,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
+using NPOI.SS.UserModel;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report8;
 using NS_Education.Models.Entities;
 using NS_Education.Models.Utilities.PrintReport;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -249,5 +251,119 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             tables.Add(tableDefinition);
         }
+
+        #region Excel
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report8_Input_APIItem input)
+        {
+            IEnumerable<Report8_Output_Excel_Row_APIItem> data = await GetExcelRows(input);
+
+            data = data?.ToArray();
+
+            if (data == null)
+                return GetContentResult();
+
+            ExcelBuilderInfo info = await GetExcelBuilderInfo();
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "滿意度調查表",
+                Columns = 13
+            };
+
+            excelBuilder.CreateHeader(info);
+
+            string dateRange = String.Join("~", new[] { input.StartDate, input.EndDate }
+                .Where(d => d.HasContent())
+                .Distinct());
+
+            if (dateRange.HasContent())
+            {
+                excelBuilder.CreateRow()
+                    .SetValue(0, "查詢條件:")
+                    .SetValue(1, dateRange);
+            }
+
+            excelBuilder.CreateRow();
+
+            excelBuilder.StartDefineTable<Report8_Output_Excel_Row_APIItem>()
+                .SetDataRows(data)
+                .StringColumn(0, "活動日期", i => i.EventDate)
+                .StringColumn(1, "客戶名稱", i => i.CustomerTitle)
+                .NumberColumn(2, "一-1", i => i.A1)
+                .NumberColumn(3, "一-2", i => i.A2)
+                .NumberColumn(4, "一-3", i => i.A3)
+                .NumberColumn(5, "二-1", i => i.B1)
+                .NumberColumn(6, "二-2", i => i.B2)
+                .NumberColumn(7, "三-1", i => i.C1)
+                .NumberColumn(8, "三-2", i => i.C2)
+                .NumberColumn(9, "四-1", i => i.D1 ? 1 : 0)
+                .StringColumn(10, "MK", i => i.MK)
+                .StringColumn(11, "OP", i => i.OP)
+                .NumberColumn(12, "月份", i => i.Month)
+                .AddToBuilder(excelBuilder);
+
+            excelBuilder.CreateRow()
+                .DrawBorder(BorderDirection.Top)
+                .SetValue(0, "合計:")
+                .SetValue(1, data.Count())
+                .Align(0, HorizontalAlignment.Right)
+                .Align(1, HorizontalAlignment.Left);
+
+            return excelBuilder.GetFile();
+        }
+
+        private async Task<IEnumerable<Report8_Output_Excel_Row_APIItem>> GetExcelRows(Report8_Input_APIItem input)
+        {
+            DateTime startDate = input.StartDate?.ParseDateTime() ?? SqlDateTime.MinValue.Value;
+            DateTime endDate = input.EndDate?.ParseDateTime() ?? SqlDateTime.MaxValue.Value;
+
+            startDate = startDate.Date;
+            endDate = endDate.Date;
+
+            ILookup<int, Resver_Questionnaire> results = (await DC.Resver_Questionnaire
+                    .Include(rq => rq.Resver_Head)
+                    .Include(rq => rq.Resver_Head.BusinessUser)
+                    .Include(rq => rq.Resver_Head.BusinessUser1)
+                    .Include(rq => rq.Resver_Head.Customer)
+                    .Where(rq => !rq.Resver_Head.DeleteFlag)
+                    .Where(rq => startDate <= rq.CreDate)
+                    .Where(rq => rq.CreDate <= endDate)
+                    .ToArrayAsync())
+                .ToLookup(r => r.RHID, r => r);
+
+
+            return results
+                .Select(g => new Report8_Output_Excel_Row_APIItem
+                {
+                    EventDate = g.Max(rq => rq.Resver_Head.SDate).ToFormattedStringDate(),
+                    CustomerTitle = g.Max(rq => rq.Resver_Head.Customer.TitleC),
+                    A1 = GetScores(g, "SiteSatisfied"),
+                    A2 = GetScores(g, "DeviceSatisfied"),
+                    A3 = GetScores(g, "CleanSatisfied"),
+                    B1 = GetScores(g, "NegotiatorSatisfied"),
+                    B2 = GetScores(g, "ServiceSatisfied"),
+                    C1 = GetScores(g, "MealSatisfied"),
+                    C2 = GetScores(g, "DessertSatisfied"),
+                    D1 = g.FirstOrDefault(rq => rq.QuestionKey == "WillUseAgain")?.TextContent == "Y",
+                    MK = g.Max(rq => rq.Resver_Head.BusinessUser.Name),
+                    OP = g.Max(rq => rq.Resver_Head.BusinessUser1.Name),
+                    Month = g.Max(rq => rq.Resver_Head.SDate.Month)
+                });
+        }
+
+        private static int GetScores(IGrouping<int, Resver_Questionnaire> g, string questionKey)
+        {
+            int score = g.Where(rq => rq.QuestionKey == questionKey)
+                .Select(rq => rq.NumberContent)
+                .Where(i => i.HasValue)
+                .Max() ?? 3;
+
+            // 前端的滿意~不滿意是相反的, 所以在這裡做調整
+            return score * -1 + 6;
+        }
+
+        #endregion
     }
 }

@@ -311,7 +311,7 @@ namespace NS_Education.Tools.ControllerTools.BaseClass
             return JsonConvert.SerializeObject(O);
         }
 
-        internal async Task<ExcelBuilderInfo> GetExcelBuilderInfo(int totalPage)
+        internal async Task<ExcelBuilderInfo> GetExcelBuilderInfo(int totalPage = 1)
         {
             return new ExcelBuilderInfo
             {

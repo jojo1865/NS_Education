@@ -10,6 +10,8 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
         public IEnumerable<int> RHID { get; set; }
         public bool Internal { get; set; } = true;
         public bool External { get; set; } = true;
+
+        public bool CommDept { get; set; } = true;
         public string StartDate { get; set; }
         public string EndDate { get; set; }
 

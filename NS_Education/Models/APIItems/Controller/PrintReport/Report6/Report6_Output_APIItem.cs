@@ -27,6 +27,11 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
 
         public IEnumerable<int> RHID { get; set; }
 
+        public bool Internal { get; set; } = true;
+        public bool External { get; set; } = true;
+
+        public bool CommDept { get; set; } = true;
+
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report6_Input_APIItem r6)
@@ -47,6 +52,10 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
 
                 CustomerName = r6.CustomerName;
                 State = r6.State;
+
+                Internal = r6.Internal;
+                External = r6.External;
+                CommDept = r6.CommDept;
             }
 
             base.SetByInput(input);

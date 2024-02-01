@@ -16,5 +16,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
         public string EventName { get; set; }
         public int PeopleCt { get; set; }
         public int PersonTime { get; set; }
+
+        public int SiteCapacityTotal { get; set; }
     }
 }

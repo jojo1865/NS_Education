@@ -90,7 +90,8 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
             {
                 CellNo = cellNo,
                 ColumnName = name,
-                ValueSelector = valueSelector
+                ValueSelector = valueSelector,
+                DataCellType = CellType.String
             };
 
             Columns.Add(column);

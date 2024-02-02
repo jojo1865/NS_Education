@@ -37,6 +37,8 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
 
             // 資料列
 
+            TDataRow lastRow = default;
+
             foreach (TDataRow data in DataRows)
             {
                 builder.CreateRow();
@@ -45,11 +47,19 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
                 {
                     object value = c.ValueSelector(data);
 
+                    if (c.BlankIfSameCondition != null && lastRow != null)
+                    {
+                        if (c.BlankIfSameCondition(lastRow, data))
+                            continue;
+                    }
+
                     builder.SetValue(c.CellNo, c.FormatValue(value), c.DataCellType);
 
                     if (c.DataAlignment != null)
                         builder.Align(c.CellNo, c.DataAlignment.Value);
                 }
+
+                lastRow = data;
             }
 
             // 有任何欄位有合計時，輸出合計
@@ -74,8 +84,6 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
                 if (c.DataAlignment != null)
                     builder.Align(c.CellNo, c.DataAlignment.Value);
             }
-
-            return;
         }
 
         public TableDefinition<TDataRow> SetDataRows(IEnumerable<TDataRow> rows)
@@ -84,14 +92,16 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
             return this;
         }
 
-        public TableDefinition<TDataRow> StringColumn(int cellNo, string name, Func<TDataRow, string> valueSelector)
+        public TableDefinition<TDataRow> StringColumn(int cellNo, string name, Func<TDataRow, string> valueSelector,
+            Func<TDataRow, TDataRow, bool> blankIfSameCondition = null)
         {
             ColumnDefinition<TDataRow> column = new ColumnDefinition<TDataRow>
             {
                 CellNo = cellNo,
                 ColumnName = name,
                 ValueSelector = valueSelector,
-                DataCellType = CellType.String
+                DataCellType = CellType.String,
+                BlankIfSameCondition = blankIfSameCondition
             };
 
             Columns.Add(column);
@@ -99,7 +109,8 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
         }
 
         public TableDefinition<TDataRow> NumberColumn(int cellNo, string name,
-            Func<TDataRow, decimal> valueSelector, bool? hasTotal = false)
+            Func<TDataRow, decimal> valueSelector, bool hasTotal = false,
+            Func<TDataRow, TDataRow, bool> blankIfSameCondition = null)
         {
             ColumnDefinition<TDataRow> column = new ColumnDefinition<TDataRow>
             {
@@ -109,7 +120,8 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
                 DataCellType = CellType.String,
                 DataAlignment = HorizontalAlignment.Right,
                 Formatter = "#,##0",
-                HasTotal = hasTotal ?? false
+                BlankIfSameCondition = blankIfSameCondition,
+                HasTotal = hasTotal
             };
 
             Columns.Add(column);

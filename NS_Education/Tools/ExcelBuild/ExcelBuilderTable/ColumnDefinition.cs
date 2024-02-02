@@ -44,6 +44,13 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
         public bool HasTotal { get; set; }
 
         /// <summary>
+        /// 如果這行資料的這個欄位跟上一行資料比較，符合這個條件時，忽略輸出。<br/>
+        /// 第一個輸入為上一行資料列<br/>
+        /// 第二個輸入為這一行資料列
+        /// </summary>
+        public Func<TDataRow, TDataRow, bool> BlankIfSameCondition { get; set; }
+
+        /// <summary>
         /// 將值格式化為最後在表中顯示的格式。
         /// </summary>
         /// <param name="value">值</param>

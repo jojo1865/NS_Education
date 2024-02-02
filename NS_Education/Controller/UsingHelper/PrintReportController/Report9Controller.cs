@@ -5,10 +5,12 @@ using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NPOI.SS.UserModel;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report9;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -37,13 +39,19 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Head))
                     .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Head).Select(rh2 => rh2.M_Resver_TimeSpan))
                     .Include(rh =>
-                        rh.Resver_Site.Select(rs => rs.Resver_Head)
+                        rh.Resver_Site
+                            .Select(rs => rs.Resver_Head)
                             .Select(rh2 => rh2.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan)))
+                    .Include(rh =>
+                        rh.Resver_Site
+                            .Select(rs => rs.Resver_Head)
+                            .Select(rh2 => rh2.Customer))
                     .Where(rh => !rh.DeleteFlag)
                     .Where(rh => startTime <= rh.SDate && rh.EDate <= endTime)
-                    .Where(rh => (input.Internal && input.External)
-                                 || (input.Internal && rh.Customer.TypeFlag == (int)CustomerType.Internal)
-                                 || (input.External && rh.Customer.TypeFlag == (int)CustomerType.External))
+                    .Where(rh => (input.Internal && rh.Customer.TypeFlag == (int)CustomerType.Internal)
+                                 || (input.External && rh.Customer.TypeFlag == (int)CustomerType.External)
+                                 || (input.CommDept && rh.Customer.TypeFlag == (int)CustomerType.CommDept)
+                    )
                     .AsQueryable();
 
                 if (input.CID != null)
@@ -80,34 +88,59 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 Report9_Output_APIItem response = new Report9_Output_APIItem();
                 response.SetByInput(input);
 
-                string tableName = dbContext.GetTableName<Resver_Site>();
+                string resverSiteTableName = dbContext.GetTableName<Resver_Site>();
+
+                // 取得聯絡方式資料
+
+                string resverHeadTableName = dbContext.GetTableName<Resver_Head>();
+                IEnumerable<int> resverHeadIds = result.Select(r => r.RHID);
+
+                ILookup<int, M_Contect> rhIdToContacts = (await DC.M_Contect
+                        .Where(mc => mc.TargetTable == resverHeadTableName)
+                        .Where(mc => resverHeadIds.Contains(mc.TargetID))
+                        .ToArrayAsync())
+                    .ToLookup(mc => mc.TargetID, mc => mc);
+
 
                 response.Items = result
                     .SelectMany(rh => rh.Resver_Site)
                     .GroupBy(rs => new { rs.RHID, rs.BSID, rs.QuotedPrice })
-                    .Select(grouping => new Report9_Output_Row_APIItem
+                    .Select(grouping =>
                     {
-                        RHID = grouping.Max(rs => rs.RHID),
-                        HostName = grouping.Max(rs => rs.Resver_Head.Customer.TitleC),
-                        EventName = grouping.Max(rs => rs.Resver_Head.Title),
-                        TotalIncome = grouping.Max(rs => rs.Resver_Head.QuotedPrice),
-                        Date = grouping.Max(rs => rs.TargetDate).ToFormattedStringDate(),
-                        SiteName = grouping.Max(rs => rs.B_SiteData.Title),
-                        EarliestTimeSpan = grouping.Max(rs => rs.Resver_Head.M_Resver_TimeSpan
-                            .Where(rts => rts.TargetTable == tableName)
-                            .Where(rts => rts.TargetID == rs.RSID)
-                            .OrderBy(rts => rts.D_TimeSpan.HourS)
-                            .ThenBy(rts => rts.D_TimeSpan.MinuteS)
-                            .Select(rts => rts.D_TimeSpan.Title)
-                            .FirstOrDefault()) ?? "無",
-                        LatestTimeSpan = grouping.Max(rs => rs.Resver_Head.M_Resver_TimeSpan
-                            .Where(rts => rts.TargetTable == tableName)
-                            .Where(rts => rts.TargetID == rs.RSID)
-                            .OrderByDescending(rts => rts.D_TimeSpan.HourE)
-                            .ThenByDescending(rts => rts.D_TimeSpan.MinuteE)
-                            .Select(rts => rts.D_TimeSpan.Title)
-                            .FirstOrDefault()) ?? "無",
-                        SitePrice = grouping.Max(rs => rs.QuotedPrice)
+                        string[] contactData = rhIdToContacts
+                            .GetValueOrEmpty(grouping.Max(rs => rs.RHID))
+                            .Select(mc => mc.ContectData)
+                            .Where(s => s.HasContent())
+                            .ToArray();
+
+                        return new Report9_Output_Row_APIItem
+                        {
+                            RHID = grouping.Max(rs => rs.RHID),
+                            HostName = grouping.Max(rs => rs.Resver_Head.Customer.TitleC),
+                            EventName = grouping.Max(rs => rs.Resver_Head.Title),
+                            TotalIncome = grouping.Max(rs => rs.Resver_Head.QuotedPrice),
+                            Date = grouping.Max(rs => rs.TargetDate).ToFormattedStringDate(),
+                            SiteName = grouping.Max(rs => rs.B_SiteData.Title),
+                            EarliestTimeSpan = grouping.Max(rs => rs.Resver_Head.M_Resver_TimeSpan
+                                .Where(rts => rts.TargetTable == resverSiteTableName)
+                                .Where(rts => rts.TargetID == rs.RSID)
+                                .OrderBy(rts => rts.D_TimeSpan.HourS)
+                                .ThenBy(rts => rts.D_TimeSpan.MinuteS)
+                                .Select(rts => rts.D_TimeSpan.Title)
+                                .FirstOrDefault()) ?? "無",
+                            LatestTimeSpan = grouping.Max(rs => rs.Resver_Head.M_Resver_TimeSpan
+                                .Where(rts => rts.TargetTable == resverSiteTableName)
+                                .Where(rts => rts.TargetID == rs.RSID)
+                                .OrderByDescending(rts => rts.D_TimeSpan.HourE)
+                                .ThenByDescending(rts => rts.D_TimeSpan.MinuteE)
+                                .Select(rts => rts.D_TimeSpan.Title)
+                                .FirstOrDefault()) ?? "無",
+                            SitePrice = grouping.Max(rs => rs.QuotedPrice),
+                            ContactName = grouping.Max(rs => rs.Resver_Head.ContactName),
+                            ContactContent1 = contactData.ElementAtOrDefault(0),
+                            ContactContent2 = contactData.ElementAtOrDefault(1),
+                            Email = grouping.Max(rs => rs.Resver_Head.Customer.Email)
+                        };
                     })
                     .OrderBy(row => row.RHID)
                     .ToList();
@@ -122,6 +155,87 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 return response;
             }
         }
+
+        #region Excel
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report9_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report9_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            if (data == null)
+                return GetContentResult();
+
+            ExcelBuilderInfo info = await GetExcelBuilderInfo();
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "客戶歷史資料報表",
+                Columns = 13
+            };
+
+            excelBuilder.CreateHeader(info);
+
+            excelBuilder.CreateRow()
+                .SetValue(0, "查詢條件:")
+                .SetValue(1, "查詢日期:")
+                .Align(1, HorizontalAlignment.Right)
+                .SetValue(2, new[]
+                    {
+                        input.StartDate,
+                        input.EndDate
+                    }.Distinct()
+                    .Where(s => s.HasContent())
+                    .StringJoin("~"));
+
+            excelBuilder.CreateRow()
+                .SetValue(1, "客戶名稱:")
+                .Align(1, HorizontalAlignment.Right)
+                .SetValue(2, input.CustomerName);
+
+            excelBuilder.CreateRow()
+                .SetValue(1, "客戶代號:")
+                .Align(1, HorizontalAlignment.Right)
+                .SetValue(2, input.CustomerCode);
+
+            excelBuilder.CreateRow()
+                .SetValue(1, "類別:")
+                .Align(1, HorizontalAlignment.Right)
+                .SetValue(2, new[]
+                    {
+                        input.Internal ? CustomerType.Internal.GetTypeFlagName() : null,
+                        input.External ? CustomerType.External.GetTypeFlagName() : null,
+                        input.CommDept ? CustomerType.CommDept.GetTypeFlagName() : null
+                    }
+                    .Where(s => s.HasContent())
+                    .StringJoin(","));
+
+            excelBuilder.CreateRow();
+
+            bool IsSameHead(Report9_Output_Row_APIItem l, Report9_Output_Row_APIItem t) => l.RHID == t.RHID;
+
+            excelBuilder.StartDefineTable<Report9_Output_Row_APIItem>()
+                .SetDataRows(data.Items)
+                .StringColumn(0, "預約單號", i => i.RHID.ToString(), IsSameHead)
+                .StringColumn(1, "主辦單位", i => i.HostName, IsSameHead)
+                .StringColumn(2, "活動名稱", i => i.EventName, IsSameHead)
+                .NumberColumn(3, "總營收", i => i.TotalIncome, true, IsSameHead)
+                .StringColumn(4, "日期", i => i.Date)
+                .StringColumn(5, "場地", i => i.SiteName)
+                .StringColumn(6, "開始時段", i => i.EarliestTimeSpan)
+                .StringColumn(7, "結束時段", i => i.LatestTimeSpan)
+                .NumberColumn(8, "場地報價", i => i.SitePrice, true)
+                .StringColumn(9, "聯絡人", i => i.ContactName, IsSameHead)
+                .StringColumn(10, "聯絡方式", i => i.ContactContent1, IsSameHead)
+                .StringColumn(11, "聯絡方式", i => i.ContactContent2, IsSameHead)
+                .StringColumn(12, "E-mail", i => i.Email, IsSameHead)
+                .AddToBuilder(excelBuilder);
+
+
+            return excelBuilder.GetFile();
+        }
+
+        #endregion
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]

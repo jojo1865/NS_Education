@@ -14,5 +14,12 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
         public string EarliestTimeSpan { get; set; }
         public string LatestTimeSpan { get; set; }
         public int SitePrice { get; set; }
+
+        public string ContactName { get; set; }
+
+        public string ContactContent1 { get; set; }
+        public string ContactContent2 { get; set; }
+
+        public string Email { get; set; }
     }
 }

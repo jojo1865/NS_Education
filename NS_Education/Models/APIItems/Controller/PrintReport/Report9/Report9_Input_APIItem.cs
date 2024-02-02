@@ -10,10 +10,13 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
         public IEnumerable<int> CID { get; set; }
         public bool Internal { get; set; } = true;
         public bool External { get; set; } = true;
+        public bool CommDept { get; set; } = true;
         public string StartDate { get; set; }
         public string EndDate { get; set; }
 
         public string CustomerName { get; set; }
+
+        public string CustomerCode { get; set; }
         public int? BSCID6 { get; set; }
 
         public string ContactName { get; set; }

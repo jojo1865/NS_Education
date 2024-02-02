@@ -22,7 +22,9 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
         public string EndDate { get; set; }
         public bool Internal { get; set; }
         public bool External { get; set; }
+        public bool CommDept { get; set; }
         public string CustomerName { get; set; }
+        public string CustomerCode { get; set; }
         public int? BSCID6 { get; set; }
 
         public string ContactName { get; set; }
@@ -37,8 +39,10 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
                 EndDate = r9.EndDate?.ParseDateTime().ToString("yyyy/MM/dd");
                 External = r9.External;
                 Internal = r9.Internal;
+                CommDept = r9.CommDept;
                 CID = r9.CID;
                 CustomerName = r9.CustomerName;
+                CustomerCode = r9.CustomerCode;
                 BSCID6 = r9.BSCID6;
                 ContactName = r9.ContactName;
                 ContactData = r9.ContactData;

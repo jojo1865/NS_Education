@@ -58,5 +58,10 @@ namespace NS_Education.Tools.Extensions
         {
             return isAscending ? ordering.ThenBy(func) : ordering.ThenByDescending(func);
         }
+
+        public static string StringJoin(this IEnumerable<string> enumerable, string separator)
+        {
+            return String.Join(separator, enumerable);
+        }
     }
 }

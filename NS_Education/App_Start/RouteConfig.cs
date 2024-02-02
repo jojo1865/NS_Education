@@ -10,6 +10,13 @@ namespace NS_Education
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
+                name: "PrintReport11Excel",
+                url: "PrintReport/Excel/11",
+                defaults: new
+                    { controller = "Report11", action = "GetExcel" }
+            );
+
+            routes.MapRoute(
                 name: "PrintReport10Excel",
                 url: "PrintReport/Excel/10",
                 defaults: new

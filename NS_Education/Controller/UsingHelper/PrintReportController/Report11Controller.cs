@@ -9,6 +9,8 @@ using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report11;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
+using NS_Education.Tools.ExcelBuild.ExcelBuilderTable;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -21,6 +23,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
     public class Report11Controller : PublicClass,
         IPrintReport<Report11_Input_APIItem, IDictionary<string, string>>
     {
+        private const string Type = "Type";
+        private const string SiteName = "SiteName";
+        private const string Time = "Time";
+
         /// <inheritdoc />
         public async Task<CommonResponseForPagedList<IDictionary<string, string>>> GetResultAsync(
             Report11_Input_APIItem input)
@@ -126,9 +132,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         IDictionary<string, string> newRow = new Dictionary<string, string>();
                         response.Items.Add(newRow);
 
-                        newRow.Add("Type", sd.B_Category.TitleC);
-                        newRow.Add("SiteName", sd.Title);
-                        newRow.Add("Time", dts.Title);
+                        newRow.Add(Type, sd.B_Category.TitleC);
+                        newRow.Add(SiteName, sd.Title);
+                        newRow.Add(Time, dts.Title);
 
                         foreach (DateTime dt in startTime.Range(endTime))
                         {
@@ -174,6 +180,98 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 return response;
             }
         }
+
+        #region Excel
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report11_Input_APIItem input)
+        {
+            CommonResponseForPagedList<IDictionary<string, string>> data = await GetResultAsync(input);
+
+            // 轉換 items, 確保有正確排序
+            IEnumerable<KeyValuePair<string, string>>[] items = data.Items
+                .Select(dict => dict.Select(kvp => kvp))
+                .OrderBy(dict => dict.FirstOrDefault(kvp => kvp.Key == Type).Value)
+                .ThenBy(dict => dict.FirstOrDefault(kvp => kvp.Key == SiteName).Value)
+                .ThenBy(dict => dict.FirstOrDefault(kvp => kvp.Key == Time).Value)
+                .ToArray();
+
+            // 日期是動態長的
+            IEnumerable<string> dateKeys = items
+                                               .FirstOrDefault()?
+                                               .Select(kvp => kvp.Key)
+                                               .Where(k => k.All(c => Char.IsDigit(c) || c == '/'))
+                                               .ToArray()
+                                           ?? Array.Empty<string>();
+
+            ExcelBuilderInfo info = await GetExcelBuilderInfo();
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "場地庫存狀況表",
+                // 這個表會隨著天數動態長, 所以要特殊計算
+                Columns = Math.Max(3 + dateKeys.Count(), 6)
+            };
+
+            excelBuilder.CreateHeader(info);
+
+            string[] conditions = new[]
+                {
+                    new[] { input.StartDate, input.EndDate }
+                        .Distinct()
+                        .Where(s => s.HasContent())
+                        .StringJoin("~"),
+                    input.SiteName.HasContent() ? $"場地名稱={input.SiteName}" : null,
+                    input.IsActive.HasValue ? $"是否啟用={input.IsActive}" : null,
+                    input.BasicSize.HasValue ? $"容納人數>={input.BasicSize}" : null
+                }
+                .Where(s => s.HasContent())
+                .ToArray();
+
+            excelBuilder.CreateRow();
+
+            if (conditions.Any())
+            {
+                excelBuilder.NowRow()
+                    .SetValue(0, "查詢條件:");
+
+                foreach (string condition in conditions)
+                {
+                    excelBuilder.NowRow()
+                        .SetValue(1, condition);
+
+                    excelBuilder.CreateRow();
+                }
+            }
+
+            // Type: 場地類別
+            // SiteName: 場地名稱
+            // Time: 時段
+            // yyyy-MM-dd: 已預約客戶名稱
+
+            TableDefinition<IEnumerable<KeyValuePair<string, string>>> table =
+                excelBuilder.StartDefineTable<IEnumerable<KeyValuePair<string, string>>>();
+
+            table.SetDataRows(items)
+                .StringColumn(0, "場地類別", g => g.FirstOrDefault(kvp => kvp.Key == Type).Value)
+                .StringColumn(1, "場地名稱", g => g.FirstOrDefault(kvp => kvp.Key == SiteName).Value)
+                .StringColumn(2, "時段", g => g.FirstOrDefault(kvp => kvp.Key == Time).Value);
+
+            // 日期是動態長進 dictionary 的, 所以也要動態定義 column
+
+            int cellNo = 3;
+            foreach (string dateKey in dateKeys)
+            {
+                table.StringColumn(cellNo, dateKey, g => g.FirstOrDefault(kvp => kvp.Key == dateKey).Value);
+                cellNo++;
+            }
+
+            table.AddToBuilder(excelBuilder);
+
+            return excelBuilder.GetFile();
+        }
+
+        #endregion
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]

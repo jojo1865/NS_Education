@@ -7,6 +7,8 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report10
     {
         public string CustomerCode { get; set; }
         public string CustomerName { get; set; }
+
+        public string Contact { get; set; }
         public string TargetTitle { get; set; }
         public string VisitMethod { get; set; }
         public string VisitDate { get; set; }

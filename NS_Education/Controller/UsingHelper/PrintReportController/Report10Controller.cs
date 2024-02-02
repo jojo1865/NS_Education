@@ -4,10 +4,12 @@ using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NPOI.SS.UserModel;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report10;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -65,6 +67,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     {
                         CustomerCode = cv.Customer.Code,
                         CustomerName = cv.Customer.TitleC,
+                        Contact = cv.Customer.ContectName,
                         TargetTitle = cv.TargetTitle,
                         VisitMethod = cv.B_StaticCode1?.Title ?? "",
                         VisitDate = cv.VisitDate.ToFormattedStringDate(),
@@ -84,6 +87,67 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 return response;
             }
         }
+
+        #region Excel
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report10_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report10_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            if (data == null)
+                return GetContentResult();
+
+            ExcelBuilderInfo info = await GetExcelBuilderInfo();
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "未成交原因分析",
+                Columns = 9
+            };
+
+            excelBuilder.CreateHeader(info);
+
+            string dateRange = new[] { input.StartDate, input.EndDate }
+                .Distinct()
+                .Where(s => s.HasContent())
+                .StringJoin("~");
+
+            if (dateRange.HasContent())
+            {
+                excelBuilder.CreateRow()
+                    .SetValue(0, "查詢條件:")
+                    .SetValue(1, "查詢日期")
+                    .SetValue(2, dateRange);
+            }
+
+            excelBuilder.CreateRow();
+
+            excelBuilder.StartDefineTable<Report10_Output_Row_APIItem>()
+                .SetDataRows(data.Items)
+                .StringColumn(0, "客戶代號", i => i.CustomerCode)
+                .StringColumn(1, "聯絡人", i => i.Contact)
+                .StringColumn(2, "客戶名稱", i => i.CustomerName)
+                .StringColumn(3, "拜訪方式", i => i.VisitMethod)
+                .StringColumn(4, "拜訪日期", i => i.VisitDate)
+                .StringColumn(5, "MK", i => i.Agent)
+                .StringColumn(6, "主旨", i => i.Title)
+                .StringColumn(7, "內容(摘要)", i => i.Description)
+                .StringColumn(8, "後續追蹤", i => i.AfterNote)
+                .AddToBuilder(excelBuilder);
+
+            excelBuilder.CreateRow()
+                .DrawBorder(BorderDirection.Top)
+                .SetValue(0, "合計:")
+                .Align(0, HorizontalAlignment.Right)
+                .SetValue(1, data.Items.Count, CellType.Numeric)
+                .Align(1, HorizontalAlignment.Right)
+                .SetValue(2, "筆");
+
+            return excelBuilder.GetFile();
+        }
+
+        #endregion
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]

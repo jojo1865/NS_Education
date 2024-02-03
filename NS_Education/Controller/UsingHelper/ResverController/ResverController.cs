@@ -147,11 +147,22 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         #region GetInfoById
 
+        private bool CopyMode = false;
+
         // 確切 route 請參照 RouteConfig
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetInfoById(int id)
         {
+            return await _getInfoByIdHelper.GetInfoById(id);
+        }
+
+        // 確切 route 請參照 RouteConfig
+        [HttpGet]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
+        public async Task<string> Copy(int id)
+        {
+            CopyMode = true;
             return await _getInfoByIdHelper.GetInfoById(id);
         }
 
@@ -253,7 +264,36 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 QuestionnaireItems = GetAllInfoByIdPopulateQuestionnaireItems(entity)
             };
 
+            // 複製模式的處理：把 ID 都清成 0;
+
+            if (CopyMode)
+            {
+                GetInfoByIdClearIds(result);
+            }
+
             return await Task.FromResult(result);
+        }
+
+        private void GetInfoByIdClearIds(Resver_GetAllInfoById_Output_APIItem result)
+        {
+            result.RHID = 0;
+            result.State = ReserveHeadGetListState.Draft;
+            result.SiteItems
+                .ForEach(i => i.RSID = 0);
+            result.SiteItems
+                .SelectMany(si => si.DeviceItems)
+                .ForEach(i => i.RDID = 0);
+            result.SiteItems
+                .SelectMany(si => si.ThrowItems)
+                .ForEach(i => i.RTID = 0);
+            result.SiteItems
+                .SelectMany(si => si.ThrowItems)
+                .SelectMany(t => t.FoodItems)
+                .ForEach(i => i.RTFID = 0);
+            result.QuestionnaireItems.Clear();
+            result.BillItems.Clear();
+            result.OtherItems
+                .ForEach(oi => oi.ROID = 0);
         }
 
         private static IDictionary<string, object> GetAllInfoByIdPopulateQuestionnaireItems(Resver_Head entity)

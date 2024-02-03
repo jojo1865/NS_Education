@@ -372,6 +372,12 @@ namespace NS_Education
             );
 
             routes.MapRoute(
+                name: "ResverCopy",
+                url: "Resver/GetAllInfoById/Copy",
+                defaults: new { controller = "Resver", action = "Copy" }
+            );
+
+            routes.MapRoute(
                 name: "ResverGetHeadList",
                 url: "Resver/GetHeadList",
                 defaults: new { controller = "Resver", action = "GetList" }

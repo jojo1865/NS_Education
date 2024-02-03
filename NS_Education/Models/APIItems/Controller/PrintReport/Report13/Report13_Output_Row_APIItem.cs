@@ -26,6 +26,11 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
         public int SiteUnitPrice { get; set; }
 
         /// <summary>
+        /// 場地報價
+        /// </summary>
+        public int SiteQuotedPrice { get; set; }
+
+        /// <summary>
         /// 時段
         /// </summary>
         public string TimeSpan { get; set; }

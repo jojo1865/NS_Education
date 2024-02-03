@@ -11,7 +11,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report15
         public string TimeSpan { get; set; }
         public int UseCount { get; set; }
         public int TotalQuotedPrice { get; set; }
-        public int AverageQuotedPrice { get; set; }
+        public int QuotedPrice { get; set; }
         public int FixedPrice { get; set; }
     }
 }

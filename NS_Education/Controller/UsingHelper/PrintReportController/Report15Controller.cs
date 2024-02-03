@@ -1,13 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NPOI.SS.UserModel;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report15;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -73,7 +76,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 response.Items = results
                     .Where(e => e.rts != null)
-                    .GroupBy(e => new { e.rs.BSID, e.rts.DTSID })
+                    .GroupBy(e => new { e.rs.BSID, e.rs.QuotedPrice, e.rts.DTSID })
                     .Select(e => new Report15_Output_Row_APIItem
                     {
                         SiteType = e.Max(grouping => grouping.rs.B_SiteData.B_Category.TitleC),
@@ -82,8 +85,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         TimeSpan = e.Max(grouping => grouping.rts.D_TimeSpan.Title),
                         UseCount = e.Count(),
                         TotalQuotedPrice = e.Sum(grouping => grouping.rs.QuotedPrice),
-                        AverageQuotedPrice = e.Sum(grouping => grouping.rs.QuotedPrice) / e.Count(),
-                        FixedPrice = e.Max(grouping => grouping.rs.B_SiteData.UnitPrice)
+                        QuotedPrice = e.Key.QuotedPrice,
+                        FixedPrice = e.Max(grouping => grouping.rs.FixedPrice)
                     })
                     .SortWithInput(input)
                     .ToList();
@@ -97,6 +100,82 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 return response;
             }
         }
+
+        #region Excel
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report15_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report15_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            if (data == null)
+                return GetContentResult();
+
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "場地實際銷售統計表",
+                Columns = 8
+            };
+
+            ExcelBuilderInfo info = await GetExcelBuilderInfo();
+
+            excelBuilder.CreateHeader(info);
+
+            IDictionary<string, string> conditions = new (string name, string value)[]
+                {
+                    ("查詢日期",
+                        new[] { input.StartDate, input.EndDate }.Distinct().Where(s => s.HasContent()).StringJoin("~")),
+                    ("場地名稱", input.SiteName),
+                    ("啟用", input.IsActive.HasValue
+                        ? input.IsActive.Value ? "是" : "否"
+                        : null)
+                }
+                .Where(p => p.value.HasContent())
+                .ToDictionary(p => p.name, p => p.value);
+
+            excelBuilder.CreateRow();
+
+            if (conditions.Keys.Any())
+            {
+                excelBuilder.NowRow()
+                    .SetValue(0, "查詢條件:");
+
+                foreach (KeyValuePair<string, string> kvp in conditions)
+                {
+                    excelBuilder.NowRow()
+                        .SetValue(1, kvp.Key)
+                        .SetValue(2, kvp.Value);
+
+                    excelBuilder.CreateRow();
+                }
+            }
+
+            excelBuilder.NowRow()
+                .CombineCells(4, 6)
+                .SetValue(4, "*場地報價總計=場地報價*使用時段數");
+
+            excelBuilder.StartDefineTable<Report15_Output_Row_APIItem>()
+                .SetDataRows(data.Items)
+                .StringColumn(0, "場地類別", i => i.SiteType)
+                .StringColumn(1, "場地代號", i => i.SiteCode)
+                .StringColumn(2, "場地名稱", i => i.SiteName)
+                .StringColumn(3, "時段", i => i.TimeSpan)
+                .NumberColumn(4, "使用時段數", i => i.UseCount)
+                .NumberColumn(5, "場地報價總計", i => i.TotalQuotedPrice, true)
+                .NumberColumn(6, "場地報價", i => i.QuotedPrice, true)
+                .NumberColumn(7, "場地定價", i => i.FixedPrice, true)
+                .AddToBuilder(excelBuilder);
+
+            excelBuilder.NowRow()
+                .Align(1, HorizontalAlignment.Right)
+                .SetValue(1, data.Items.Count)
+                .SetValue(2, "筆");
+
+            return excelBuilder.GetFile();
+        }
+
+        #endregion
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]

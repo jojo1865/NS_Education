@@ -84,8 +84,54 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList(StaticCode_GetList_Input_APIItem input)
         {
+            // 如果是樓層別，需要依據代號來排序
+            // 排序方式比較特別，無法用 EF LINQ 表示
+
+            if (input.CodeType == (int)StaticCodeType.Floor)
+            {
+                CommonResponseForList<StaticCode_GetList_Output_Row_APIItem>
+                    results = await GetFloorResponse(input);
+                return GetResponseJson(results);
+            }
+
             return await _getListHelper.GetPagedList(input);
         }
+
+        private async Task<CommonResponseForList<StaticCode_GetList_Output_Row_APIItem>> GetFloorResponse(
+            StaticCode_GetList_Input_APIItem input)
+        {
+            // 查回來並變形
+
+            StaticCode_GetList_Output_Row_APIItem[] results = (await GetListPagedOrderedQuery(input).ToArrayAsync())
+                .Select(q => new StaticCode_GetList_Output_Row_APIItem
+                {
+                    BSCID = q.BSCID,
+                    iCodeType = q.CodeType,
+                    sCodeType = StaticCodeTypes.ContainsKey(q.CodeType.ToString())
+                        ? StaticCodeTypes[q.CodeType.ToString()]?.Title ?? ""
+                        : "",
+                    Code = q.Code,
+                    Title = q.Title,
+                    SortNo = q.SortNo,
+                    Note = q.Note
+                })
+
+                // 1. 開頭為數字升序
+                // 2. 開頭不為數字時降序
+                // 3. 開頭為數字的資料優先顯示
+                .OrderByDescending(r => Convert.ToDecimal(new string(r.Title
+                    .Replace('B', '-')
+                    .Where(c => Char.IsDigit(c) || c == '-')
+                    .DefaultIfEmpty('0')
+                    .ToArray())))
+                .ToArray();
+
+            return new CommonResponseForList<StaticCode_GetList_Output_Row_APIItem>
+            {
+                Items = results
+            };
+        }
+
 
         public async Task<bool> GetListPagedValidateInput(StaticCode_GetList_Input_APIItem input)
         {

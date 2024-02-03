@@ -38,13 +38,11 @@ namespace NS_Education.Models.APIItems
             => IsPagingEnabled ? (NowPage - 1) * CutPageOrDefault : 0;
 
         /// <summary>
-        /// 依據目前的 NowPage
-        /// 與 CutPage，回傳應取得多少筆資料。<br/>
-        /// 當不啟用分頁功能時，回傳一百筆資料。 
+        /// 依據目前的 NowPage 與 CutPage，回傳應取得多少筆資料。
         /// </summary>
         /// <returns>應取得多少筆資料</returns>
         public int GetTakeRowCount()
-            => IsPagingEnabled ? CutPageOrDefault : 100;
+            => IsPagingEnabled ? CutPageOrDefault : Int32.MaxValue;
 
         public (int skip, int take) CalculateSkipAndTake(int totalRows)
         {

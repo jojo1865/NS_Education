@@ -1,13 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NPOI.SS.UserModel;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report16;
 using NS_Education.Models.Entities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
@@ -111,6 +114,97 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 return response;
             }
         }
+
+        #region Excel
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report16_Input_APIItem input)
+        {
+            CommonResponseForPagedList<Report16_Output_Row_APIItem> data = await GetResultAsync(input);
+
+            if (data == null)
+                return GetContentResult();
+
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "場地使用一覽表",
+                Columns = 13
+            };
+
+            ExcelBuilderInfo info = await GetExcelBuilderInfo();
+
+            excelBuilder.CreateHeader(info);
+
+            IDictionary<string, string> conditions = new (string name, string value)[]
+                {
+                    ("使用日:",
+                        new[] { input.StartDate, input.EndDate }.Distinct().Where(s => s.HasContent()).StringJoin("~")),
+                    ("場地名稱:", input.SiteName),
+                    ("啟用:", input.IsActive.HasValue
+                        ? input.IsActive.Value ? "是" : "否"
+                        : null)
+                }
+                .Where(p => p.value.HasContent())
+                .ToDictionary(p => p.name, p => p.value);
+
+            excelBuilder.CreateRow();
+
+            if (conditions.Keys.Any())
+            {
+                excelBuilder.NowRow()
+                    .SetValue(0, "查詢條件:");
+
+                foreach (KeyValuePair<string, string> kvp in conditions)
+                {
+                    excelBuilder.NowRow()
+                        .SetValue(1, kvp.Key)
+                        .SetValue(2, kvp.Value);
+
+                    excelBuilder.CreateRow();
+                }
+            }
+
+            bool SameHead(Report16_Output_Row_APIItem last, Report16_Output_Row_APIItem current) =>
+                last.RHID == current.RHID;
+
+            bool SameSite(Report16_Output_Row_APIItem last, Report16_Output_Row_APIItem current) =>
+                last.Site == current.Site;
+
+            bool SameDate(Report16_Output_Row_APIItem last, Report16_Output_Row_APIItem current) =>
+                last.Date == current.Date;
+
+            bool SameDateRange(Report16_Output_Row_APIItem last, Report16_Output_Row_APIItem current) =>
+                last.StartDate == current.StartDate && last.EndDate == current.EndDate;
+
+            excelBuilder.StartDefineTable<Report16_Output_Row_APIItem>()
+                .SetDataRows(data.Items)
+                .StringColumn(0, "使用日", i => i.Date, (l, c) => SameHead(l, c) && SameDate(l, c))
+                .StringColumn(1, "起始日", i => i.StartDate, (l, c) => SameHead(l, c) && SameDateRange(l, c))
+                .StringColumn(2, "結束日", i => i.EndDate, (l, c) => SameHead(l, c) && SameDateRange(l, c))
+                .StringColumn(3, "場地", i => i.Site,
+                    (l, c) => SameHead(l, c) && SameSite(l, c))
+                .StringColumn(4, "使用時段", i => i.TimeSpan)
+                .StringColumn(5, "預約單號", i => i.RHID.ToString(), SameHead)
+                .StringColumn(6, "客戶代號", i => i.CustomerCode, SameHead)
+                .StringColumn(7, "客戶名稱", i => i.Host, SameHead)
+                .StringColumn(8, "活動名稱", i => i.EventName, SameHead)
+                .StringColumn(9, "類別", i => i.HostType, SameHead)
+                .StringColumn(10, "MK", i => i.MKSales, SameHead)
+                .StringColumn(11, "OP", i => i.OPSales, SameHead)
+                .NumberColumn(12, "場地報價", i => i.QuotedPrice, true,
+                    (l, c) => l.QuotedPrice == c.QuotedPrice && SameHead(l, c))
+                .AddToBuilder(excelBuilder);
+
+            excelBuilder.NowRow()
+                .Align(1, HorizontalAlignment.Right)
+                .SetValue(1, data.Items.Count)
+                .SetValue(2, "筆");
+
+            return excelBuilder.GetFile();
+        }
+
+        #endregion
 
         [HttpGet]
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]

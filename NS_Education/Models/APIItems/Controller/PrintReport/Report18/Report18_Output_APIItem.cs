@@ -33,7 +33,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report18
         /// <summary>
         /// 贈送年份
         /// </summary>
-        public int SendYear { get; set; }
+        public int? SendYear { get; set; }
 
         /// <summary>
         /// 禮品

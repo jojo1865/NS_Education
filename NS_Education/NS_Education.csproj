@@ -334,6 +334,7 @@
         <Compile Include="Controller\UsingHelper\PrintReportController\Report15Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report16Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report17Controller.cs"/>
+        <Compile Include="Controller\UsingHelper\PrintReportController\Report18Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report2Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report3Controller.cs"/>
         <Compile Include="Controller\UsingHelper\PrintReportController\Report5Controller.cs"/>
@@ -522,6 +523,9 @@
         <Compile Include="Models\APIItems\Controller\PrintReport\Report17\Report17_Output_Payment_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report17\Report17_Output_SubTable_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report17\Report17_Output_TableRow_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\Report18\Report18_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\Report18\Report18_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\PrintReport\Report18\Report18_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report2\Report2_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report2\Report2_Output_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\PrintReport\Report2\Report2_Output_Row_APIItem.cs"/>

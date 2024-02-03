@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace NS_Education.Tools.Extensions
         {
             int codeTypeInt = (int)codeType;
 
-            return await dbSet
+            List<CommonResponseRowForSelectable> results = await dbSet
                 .Where(sc => sc.ActiveFlag && !sc.DeleteFlag && sc.CodeType == codeTypeInt)
                 .Select(sc => new CommonResponseRowForSelectable
                 {
@@ -35,6 +36,27 @@ namespace NS_Education.Tools.Extensions
                     SelectFlag = sc.BSCID == bscIdToSelect
                 })
                 .ToListAsync();
+
+            if (codeType == StaticCodeType.Floor)
+            {
+                results = SortFloor(results);
+            }
+
+            return results;
+        }
+
+        private static List<CommonResponseRowForSelectable> SortFloor(List<CommonResponseRowForSelectable> results)
+        {
+            // 樓層排序
+            results = results
+                .OrderByDescending(r => Convert.ToDecimal(new string(r.Title
+                    .Replace('B', '-')
+                    .Where(c => Char.IsDigit(c) || c == '-')
+                    .DefaultIfEmpty('0')
+                    .ToArray())))
+                .ToList();
+
+            return results;
         }
 
         /// <summary>

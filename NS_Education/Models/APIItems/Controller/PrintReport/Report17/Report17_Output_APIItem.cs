@@ -66,6 +66,11 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report17
         public int UnpaidAmount => TotalAmount - PrepaidAmount;
 
         /// <summary>
+        /// 場租折扣
+        /// </summary>
+        public int SiteDiscount { get; set; }
+
+        /// <summary>
         /// 統一編號
         /// </summary>
         public string Compilation { get; set; }

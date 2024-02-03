@@ -20,6 +20,12 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
         /// </summary>
         private IEnumerable<TDataRow> DataRows { get; set; } = Array.Empty<TDataRow>();
 
+        private BorderStyle TopBorderStyle { get; set; } = BorderStyle.Medium;
+
+        private BorderStyle BottomBorderStyle { get; set; } = BorderStyle.Medium;
+
+        private string TotalText { get; set; } = "合計";
+
         private bool HasTotal => Columns.Any(c => c.HasTotal);
 
         private void WriteTable(ExcelBuilder builder)
@@ -33,7 +39,7 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
                 builder.SetValue(c.CellNo, c.ColumnName);
             }
 
-            builder.DrawBorder(BorderDirection.Bottom);
+            builder.DrawBorder(BorderDirection.Bottom, borderStyle: TopBorderStyle);
 
             // 資料列
 
@@ -66,10 +72,10 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
 
             if (!HasTotal) return;
 
-            builder.DrawBorder(BorderDirection.Bottom);
+            builder.DrawBorder(BorderDirection.Bottom, borderStyle: BottomBorderStyle);
 
             builder.CreateRow()
-                .SetValue(0, "合計");
+                .SetValue(0, TotalText);
 
             foreach (ColumnDefinition<TDataRow> c in Columns.Where(c => c.HasTotal))
             {
@@ -137,6 +143,27 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
         {
             WriteTable(builder);
             return builder;
+        }
+
+        public TableDefinition<TDataRow> SetTopBorder(BorderStyle borderStyle)
+        {
+            TopBorderStyle = borderStyle;
+            return this;
+        }
+
+        public TableDefinition<TDataRow> SetBottomBorder(BorderStyle borderStyle)
+        {
+            BottomBorderStyle = borderStyle;
+            return this;
+        }
+
+        /// <summary>
+        /// 覆寫「合計」的字樣。
+        /// </summary>
+        public TableDefinition<TDataRow> OverrideTotalText(string totalText)
+        {
+            TotalText = totalText;
+            return this;
         }
     }
 }

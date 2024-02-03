@@ -4,17 +4,20 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using NPOI.SS.UserModel;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report17;
 using NS_Education.Models.Entities;
 using NS_Education.Models.Utilities;
 using NS_Education.Tools.ControllerTools.BaseClass;
+using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -23,6 +26,176 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
     /// </summary>
     public class Report17Controller : PublicClass, IPrintReport<Report17_Input_APIItem, Report17_Output_APIItem>
     {
+        private const string SiteSubTableName = "場地租金";
+
+        #region Excel
+
+        [HttpPost]
+        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
+        public async Task<ActionResult> GetExcel(Report17_Input_APIItem input)
+        {
+            Report17_Output_APIItem data = await GetResult(input);
+
+            if (data == null)
+                return GetContentResult();
+
+            ExcelBuilder excelBuilder = new ExcelBuilder
+            {
+                ReportTitle = "對帳單",
+                Columns = 8
+            };
+
+            ExcelBuilderInfo info = await GetExcelBuilderInfo();
+            excelBuilder.CreateHeader(info);
+
+            excelBuilder.CreateRow();
+
+            excelBuilder.CreateRow()
+                .SetValue(0, "結帳日期:")
+                .SetValue(1, data.AccountDate);
+
+            excelBuilder.CreateRow()
+                .SetValue(0, "結帳代號:")
+                .SetValue(1, data.RHID)
+                .Align(1, HorizontalAlignment.Left)
+                .SetValue(4, "結帳客戶名稱:")
+                .CombineCells(5, 7)
+                .SetValue(5, data.CustomerName);
+
+            excelBuilder.CreateRow()
+                .SetValue(0, "預約單號:")
+                .SetValue(1, data.RHID)
+                .Align(1, HorizontalAlignment.Left)
+                .SetValue(4, "課程/活動名稱:")
+                .CombineCells(5, 7)
+                .SetValue(5, data.EventName);
+
+            excelBuilder.CreateRow()
+                .SetValue(0, "聯絡人:")
+                .SetValue(1, data.ContactName)
+                .SetValue(4, "主辦單位:")
+                .CombineCells(5, 7)
+                .SetValue(5, data.CustomerName);
+
+            excelBuilder.CreateRow();
+
+            excelBuilder.CreateRow()
+                .DrawBorder(BorderDirection.Bottom)
+                .SetValue(0, "項目")
+                .SetValueFromRight(0, "金額");
+
+            foreach (Report17_Output_SubTable_APIItem subTable in data.SubTables)
+            {
+                excelBuilder.StartDefineTable<Report17_Output_TableRow_APIItem>()
+                    .SetTopBorder(BorderStyle.None)
+                    .SetBottomBorder(BorderStyle.Thin)
+                    .SetDataRows(subTable.Rows)
+                    .StringColumn(0, subTable.Name, i => null)
+                    .StringColumn(1, "", i => i.Date)
+                    .StringColumn(2, "", i => i.Description.Split(' ').FirstOrDefault())
+                    .StringColumn(3, "", i => i.Description.Split(' ').Skip(1).FirstOrDefault())
+                    .StringColumn(4, "", i => i.Description.Split(' ').Skip(2).FirstOrDefault())
+                    .StringColumn(5, "", i => i.Description.Split(' ').Skip(3).FirstOrDefault())
+                    .StringColumn(6, "", i => i.Description.Split(' ').Skip(4).StringJoin(" "))
+                    .NumberColumn(7, "", i => i.Amount, true)
+                    .OverrideTotalText("")
+                    .AddToBuilder(excelBuilder);
+            }
+
+            excelBuilder.CreateRow()
+                .DrawBorder(BorderDirection.Top)
+                .SetValueFromRight(1, "合計")
+                .SetValueFromRight(0, $"{data.TotalAmount:N0}");
+
+            excelBuilder.CreateRow()
+                .DrawBorder(BorderDirection.Top | BorderDirection.Bottom)
+                .SetValue(1, "▉費用合計:")
+                .SetValue(2, $"{data.TotalAmount:N0}")
+                .SetValue(4, "▉預付金額:")
+                .SetValue(5, $"{data.PrepaidAmount:N0}")
+                .SetValue(6, "▉餘額:")
+                .SetValue(7, $"{data.UnpaidAmount:N0}");
+
+            excelBuilder.CreateRow();
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "統一編號:");
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "發票抬頭:");
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "◎備註");
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "如需更換發票請於5日內通知，謝謝");
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "發票號碼：");
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "文件號碼：");
+
+            excelBuilder.CreateRow();
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "本中心提供設備：有線MIC*1、無線MIC*1、簡報器*1、移動白板*1、簡報架*1");
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "1) 借用之設備僅限於本中心場地使用，限當日借用，當日歸還。");
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "2) 如有損毀之情事，請使用單位依原設備之價額或修復費用賠償。");
+
+            excelBuilder.CreateRow();
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "依ETC場地登記暨使用事項第六條(倘活動因故取消或變更場地，國際會議廳及階梯演講廳");
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "須於活動預定舉辦日至少三十個日曆天前，一般教室及其他空間至少十五個日曆天前通知");
+
+            excelBuilder.CreateRow()
+                .CombineCells()
+                .SetValue(0, "ETC，否則仍依原預約場地計算使用時數。)故請協助簽名。");
+
+            excelBuilder.CreateRow();
+
+            foreach (Report17_Output_Payment_APIItem payment in data.Payments)
+            {
+                excelBuilder.CreateRow()
+                    .CombineCells()
+                    .SetValue(0, $"{payment.Type} ${payment.Amount:N0} 支付 {payment.PartnerName}");
+            }
+
+            excelBuilder.CreateRow();
+
+            excelBuilder.CreateRow()
+                .SetValue(4, "客戶簽名:")
+                .DrawBorder(BorderDirection.Bottom, 5, 6);
+
+            excelBuilder.CreateRow()
+                .CombineCells(0, 2)
+                .SetValue(0, "謝謝您對教育訓練中心的關愛與支持，並期待您下次的光臨")
+                .CombineCells(3, 4)
+                .SetValue(3, "南山人壽教育訓練中心");
+
+            return excelBuilder.GetFile();
+        }
+
+        #endregion
+
         #region 報表
 
         public async Task<FileContentResult> GetPdf(Report17_Input_APIItem input)
@@ -337,7 +510,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             string resverSiteTableName = DC.GetTableName<Resver_Site>();
             Report17_Output_SubTable_APIItem resverSites = new Report17_Output_SubTable_APIItem
             {
-                Name = "場地租金",
+                Name = SiteSubTableName,
                 Rows = entity.Resver_Site
                     .OrderBy(rs => rs.TargetDate)
                     .Select(rs => new Report17_Output_TableRow_APIItem
@@ -352,6 +525,31 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         Amount = rs.QuotedPrice
                     })
             };
+
+            // 場租折扣：場地總報價 - 總定價
+
+            int totalFixedPrice = entity.Resver_Site.Sum(rs => (int?)rs.FixedPrice) ?? 0;
+            int totalQuotedPrice = resverSites.Sum;
+
+            int siteDiscount = Math.Min(0, totalQuotedPrice - totalFixedPrice);
+
+            Report17_Output_SubTable_APIItem siteDiscountSubTable = new Report17_Output_SubTable_APIItem
+            {
+                Name = "場租折扣",
+                QuotedPrice = siteDiscount,
+                Rows = new[]
+                {
+                    new Report17_Output_TableRow_APIItem
+                    {
+                        Date = "場租折扣",
+                        Description = "",
+                        Amount = siteDiscount,
+                        PartnerName = ""
+                    }
+                }
+            };
+
+
             // 場地這邊以總額來顯示，所以獨立一個參數
             Report17_Output_Payment_APIItem sitePayments = new Report17_Output_Payment_APIItem
             {
@@ -464,11 +662,13 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         SubTables = new[]
                         {
                             resverSites,
+                            siteDiscountSubTable,
                             resverThrows,
                             resverFoods,
                             resverDevices,
                             resverOthers
                         }.Where(st => st.Rows.Any()),
+                        SiteDiscount = siteDiscount,
                         PrepaidAmount = entity.Resver_Bill
                             .Where(rb => !rb.DeleteFlag)
                             .Where(rb => rb.PayFlag)

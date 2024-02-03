@@ -21,7 +21,7 @@ namespace NS_Education.Tools.Extensions
             return dt.FormatAsRocYyyMmDd() + $"(週{weekDay})";
         }
 
-        public static IEnumerable<DateTime> Range(this DateTime start, DateTime end)
+        public static IEnumerable<DateTime> DayRange(this DateTime start, DateTime end)
         {
             start = start.Date;
             end = end.Date;
@@ -32,6 +32,27 @@ namespace NS_Education.Tools.Extensions
             return Enumerable.Range(0, (end - start).Days + 1)
                 .Select(i => start.AddDays(i))
                 .ToArray();
+        }
+
+        public static IEnumerable<DateTime> MonthRange(this DateTime start, DateTime end)
+        {
+            start = start.Date;
+            end = end.Date;
+
+            if (end < start)
+                (start, end) = (end, start);
+
+            return Enumerable.Range(0, start.TotalMonths(end))
+                .Select(i => start.AddMonths(i))
+                .ToArray();
+        }
+
+        public static int TotalMonths(this DateTime start, DateTime end)
+        {
+            if (start > end)
+                (start, end) = (end, start);
+
+            return (end.Year * 12 + end.Month) - (start.Year * 12 + start.Month) + 1;
         }
     }
 }

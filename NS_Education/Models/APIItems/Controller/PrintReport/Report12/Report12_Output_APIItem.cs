@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report12
 {
     /// <summary>
@@ -15,20 +17,6 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report12
         /// </summary>
         public string Username { get; set; }
 
-        public int Year { get; set; }
-        public int? JanHours { get; set; }
-        public int? FebHours { get; set; }
-        public int? MarHours { get; set; }
-        public int? AprHours { get; set; }
-        public int? MayHours { get; set; }
-        public int? JunHours { get; set; }
-        public int? JulHours { get; set; }
-        public int? AugHours { get; set; }
-        public int? SepHours { get; set; }
-        public int? OctHours { get; set; }
-        public int? NovHours { get; set; }
-        public int? DecHours { get; set; }
-
         /// <summary>
         /// （可選）年月區間（起）。YYYY/MM
         /// </summary>
@@ -38,6 +26,11 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report12
         /// （可選）年月區間（迄）。YYYY/MM
         /// </summary>
         public string EndYearMonth { get; set; }
+        
+        /// <summary>
+        /// 每個月的時段數。
+        /// </summary>
+        public int[] MonthHours { get; set; }
 
         /// <summary>
         /// （可選）場地類別
@@ -64,26 +57,18 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report12
         /// </summary>
         public bool ShowCommDept { get; set; } = true;
 
+        /// <summary>
+        /// 資料行的集合
+        /// </summary>
+        public ICollection<Report12_Output_Row_APIItem> Rows => Items;
+        
         public override void SetByInput(BaseRequestForPagedList input)
         {
             if (input is Report12_Input_APIItem r12)
-            {
-                Year = r12.Year;
-                JanHours = r12.JanHours;
-                FebHours = r12.FebHours;
-                MarHours = r12.MarHours;
-                AprHours = r12.AprHours;
-                MayHours = r12.MayHours;
-                JunHours = r12.JunHours;
-                JulHours = r12.JulHours;
-                AugHours = r12.AugHours;
-                SepHours = r12.SepHours;
-                OctHours = r12.OctHours;
-                NovHours = r12.NovHours;
-                DecHours = r12.DecHours;
-
+            { 
                 StartYearMonth = r12.StartYearMonth;
                 EndYearMonth = r12.EndYearMonth;
+                MonthHours = r12.MonthHours;
                 BC_Title = r12.BC_Title;
                 SiteName = r12.SiteName;
                 ShowInternal = r12.ShowInternal;

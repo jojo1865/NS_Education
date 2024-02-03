@@ -1,21 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using BeingValidated;
 using Microsoft.Ajax.Utilities;
 using NS_Education.Models.APIItems;
 using NS_Education.Models.APIItems.Controller.PrintReport.Report12;
 using NS_Education.Models.Entities;
-using NS_Education.Models.Utilities.PrintReport;
+using NS_Education.Models.Errors;
 using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
 using NS_Education.Variables;
-using QuestPDF.Helpers;
 
 namespace NS_Education.Controller.UsingHelper.PrintReportController
 {
@@ -28,26 +27,30 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         public async Task<CommonResponseForPagedList<Report12_Output_Row_APIItem>> GetResultAsync(
             Report12_Input_APIItem input)
         {
-            if (!input.Year.IsAboveZero())
-                AddError(EmptyNotAllowed("西元年", nameof(input.Year)));
+            DateTime startYearMonth = default;
+            DateTime endYearMonth = default;
 
-            if (!input.Hours.Any(h => h.IsAboveZero()))
-                AddError(EmptyNotAllowed("每月可租用時段數（須至少一個月有輸入）", nameof(input.Hours)));
+            bool isValid = input.StartValidate()
+                .Validate(i => i.StartYearMonth.HasContent(),
+                    () => AddError(EmptyNotAllowed("年月區間起", nameof(input.StartYearMonth))))
+                .Validate(i => i.EndYearMonth.HasContent(),
+                    () => AddError(EmptyNotAllowed("年月區間迄", nameof(input.EndYearMonth))))
+                .Validate(i => i.StartYearMonth.TryParseDateTime(out startYearMonth, DateTimeParseType.YearMonth),
+                    () => AddError(WrongFormat("年月區間起", nameof(input.StartYearMonth))))
+                .Validate(i => i.EndYearMonth.TryParseDateTime(out endYearMonth, DateTimeParseType.YearMonth),
+                    () => AddError(WrongFormat("年月區間迄", nameof(input.EndYearMonth))))
+                .Validate(
+                    i => startYearMonth.TotalMonths(endYearMonth) == input.MonthHours.Length,
+                    () => AddError(new BusinessError(1, "時段數的值不符合輸入的年月區間！")))
+                .IsValid();
 
-            if (HasError())
+            if (!isValid)
                 return null;
 
             using (NsDbContext dbContext = new NsDbContext())
             {
-                bool hasStart = DateTime.TryParseExact(input.StartYearMonth, "yyyy/MM", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out DateTime startYearMonth);
-                bool hasEnd = DateTime.TryParseExact(input.StartYearMonth, "yyyy/MM", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out DateTime endYearMonth);
-
-                DateTime startTime = hasStart ? startYearMonth : new DateTime(input.Year, 1, 1).Date;
-                DateTime endTime =
-                    hasEnd ? endYearMonth.AddMonths(1).AddSeconds(-1) : startTime.AddYears(1).AddDays(-1).Date;
-
+                DateTime startTime = startYearMonth;
+                DateTime endTime = endYearMonth.AddMonths(1).AddSeconds(-1);
                 string tableName = dbContext.GetTableName<Resver_Site>();
 
                 var query = dbContext.Resver_Site
@@ -89,7 +92,41 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .GroupBy(g => g.rs.BSID)
                     .ToDictionary(g => g.Key, g => g);
 
-                response.Items = sites
+                // populate 表頭
+                // 第一行：人數、場地、編號、面積（坪）、全館使用率...、內部使用率...、外部使用率...、通訊處使用率...
+                // 第二行：時段數、　、　、　、小時...
+
+                IEnumerable<string> firstLine = new[]
+                {
+                    "人數", "場地", "編號", "面積（坪）"
+                };
+
+                IEnumerable<string> firstLineUsages = new[]
+                {
+                    startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM全館使用率")),
+                    input.ShowInternal ? startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM內部使用率")) : null,
+                    input.ShowExternal ? startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM外部使用率")) : null,
+                    input.ShowCommDept ? startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM通訊處使用率")) : null
+                }
+                    .Where(e => e != null)
+                    .SelectMany(s => s);
+
+                firstLine = firstLine.Concat(firstLineUsages);
+                
+                response.Items = new List<Report12_Output_Row_APIItem>()
+                {
+                    new Report12_Output_Row_APIItem
+                    {
+                        Cells = firstLine
+                    }, 
+                    new Report12_Output_Row_APIItem()
+                    {
+                        Cells = new[]{"時段數", "", "", ""}.Concat(input.MonthHours.Select(h => h.ToString()))
+                    }
+                };
+                
+                
+                List<Report12_Output_Row_APIItem> actualRows = sites
                     .Select(sd =>
                     {
                         var resver = groupedResverSites.GetValueOrDefault(sd.BSID)?.ToArray();
@@ -98,59 +135,90 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                                              Array.Empty<M_Resver_TimeSpan>();
                         rs = rs.ToArray();
 
-                        return new Report12_Output_Row_APIItem
+                        List<string> results = new List<string>
                         {
-                            SiteName = sd.Title,
-                            SiteCode = sd.Code,
-                            PeopleCt = sd.MaxSize.ToString(),
-                            AreaSize = sd.AreaSize,
-                            AllUsage = GetUsage(rs, rts, input),
-                            InternalUsage =
-                                GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal),
-                                    rts, input),
-                            ExternalUsage =
-                                GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.External),
-                                    rts, input),
-                            CommDeptUsage =
-                                GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept),
-                                    rts, input)
+                            sd.Title,
+                            sd.Code,
+                            sd.MaxSize.ToString(),
+                            sd.AreaSize.ToString(),
                         };
+
+                        Report12_Output_Row_MonthlyUsage_APIItem totalUsages = GetUsage(rs, rts, input);
+                        Report12_Output_Row_MonthlyUsage_APIItem internalUsages = GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal),
+                            rts, input);
+                        Report12_Output_Row_MonthlyUsage_APIItem externalUsages = GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.External),
+                            rts, input);
+                        Report12_Output_Row_MonthlyUsage_APIItem commDeptUsages = GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept),
+                            rts, input);
+
+                        IEnumerable<string> usages = new[]
+                            {
+                                totalUsages,
+                                input.ShowInternal ? internalUsages : null,
+                                input.ShowExternal ? externalUsages : null,
+                                input.ShowCommDept ? commDeptUsages : null
+                            }
+                            .Where(u => u != null)
+                            .SelectMany(u => u.MonthlyUsage);
+
+                        results.AddRange(usages);
+                        
+                        Report12_Output_Row_APIItem row = new Report12_Output_Row_APIItem
+                        {
+                            Cells = results
+                        };
+                        
+                        return row;
                     })
                     .SortWithInput(input)
                     .Skip(input.GetStartIndex())
                     .Take(input.GetTakeRowCount())
                     .ToList();
 
+                response.Items = response.Items
+                    .Concat(actualRows)
+                    .ToList();
+                
                 int totalAreaSize = sites.Sum(s => (int?)s.AreaSize) ?? 0;
                 HashSet<B_SiteData> uniqueSites = sites.DistinctBy(s => s.BSID).ToHashSet();
 
                 // Total 行
-                var allRs = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rs).ToArray();
-                var allRts = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rts).ToArray();
+                Resver_Site[] allRs = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rs).ToArray();
+                M_Resver_TimeSpan[] allRts = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rts).ToArray();
+                
+                Report12_Output_Row_MonthlyUsage_APIItem allTotalUsages = GetUsage(allRs, allRts, input, uniqueSites);
+                Report12_Output_Row_MonthlyUsage_APIItem allInternalUsages = GetUsage(allRs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal),
+                    allRts, input, uniqueSites);
+                Report12_Output_Row_MonthlyUsage_APIItem allExternalUsages = GetUsage(allRs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.External),
+                    allRts, input, uniqueSites);
+                Report12_Output_Row_MonthlyUsage_APIItem allCommDeptUsages = GetUsage(allRs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept),
+                    allRts, input, uniqueSites);
+
+                IEnumerable<string> allUsages = new[]
+                    {
+                        allTotalUsages,
+                        input.ShowInternal ? allInternalUsages : null,
+                        input.ShowExternal ? allExternalUsages : null,
+                        input.ShowCommDept ? allCommDeptUsages : null
+                    }
+                    .Where(u => u != null)
+                    .SelectMany(u => u.MonthlyUsage);
+
                 response.Items.Add(new Report12_Output_Row_APIItem
                 {
-                    PeopleCt = null,
-                    SiteName = null,
-                    SiteCode = null,
-                    AreaSize = totalAreaSize,
-                    AllUsage = GetUsage(allRs, allRts, input, uniqueSites),
-                    InternalUsage = GetUsage(
-                        allRs.Where(rs => rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal), allRts,
-                        input,
-                        uniqueSites),
-                    ExternalUsage = GetUsage(
-                        allRs.Where(rs => rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.External), allRts,
-                        input,
-                        uniqueSites),
-                    CommDeptUsage = GetUsage(
-                        allRs.Where(rs => rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept), allRts,
-                        input,
-                        uniqueSites)
+                    Cells = new[]
+                        {
+                            null,
+                            null,
+                            null,
+                            totalAreaSize.ToString()
+                        }
+                        .Concat(allUsages)
                 });
 
                 response.UID = GetUid();
                 response.Username = await GetUserNameByID(response.UID);
-                response.AllItemCt = sites.Count();
+                response.AllItemCt = sites.Length;
                 return response;
             }
         }
@@ -162,19 +230,25 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             resverSites = resverSites.ToArray();
             resverTimeSpans = resverTimeSpans.ToArray();
 
+            DateTime start = input.StartYearMonth.ParseDateTime(DateTimeParseType.YearMonth).Date;
+            DateTime end = input.EndYearMonth.ParseDateTime(DateTimeParseType.YearMonth).Date;
+            
             return new Report12_Output_Row_MonthlyUsage_APIItem
             {
-                MonthlyUsageDecimal = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }
+                MonthlyUsageDecimal = start.MonthRange(end)
                     .Select(month => GetUsageInMonth(resverSites, resverTimeSpans, month, input, allUniqueSites))
                     .ToArray()
             };
         }
 
         private static decimal? GetUsageInMonth(IEnumerable<Resver_Site> resverSites,
-            IEnumerable<M_Resver_TimeSpan> resverTimeSpans, int month, Report12_Input_APIItem input,
+            IEnumerable<M_Resver_TimeSpan> resverTimeSpans, DateTime yearMonth, Report12_Input_APIItem input,
             ISet<B_SiteData> allUniqueSites = null)
         {
-            int hours = input.Hours[month - 1] ?? 0;
+
+            DateTime start = input.StartYearMonth.ParseDateTime(DateTimeParseType.YearMonth);
+            
+            int hours = input.MonthHours[start.TotalMonths(yearMonth)-1];
 
             if (!hours.IsAboveZero())
                 return null;
@@ -185,7 +259,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             // 每月總使用率 = (每間教室使用時段數 * 每間教室坪數) / (每月可供租用時段數 * 教室總坪數)
             //
             // ( Σ (各教室的租用小時數 * 各教室坪數) ) / ( hour * Σ 所有獨特場地的坪數 )
-            resverSites = resverSites.Where(rs => rs.TargetDate.Month == month).ToArray();
+            resverSites = resverSites.Where(rs => rs.TargetDate.Year == yearMonth.Year && rs.TargetDate.Month == yearMonth.Month).ToArray();
             HashSet<int> ids = resverSites.Select(rs => rs.RSID).Distinct().ToHashSet();
             resverTimeSpans = resverTimeSpans.Where(rts => ids.Contains(rts.TargetID));
 
@@ -233,88 +307,6 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             details.Items = details.Items.Take(details.Items.Count - 1).ToList();
 
             return GetResponseJson(details);
-        }
-
-        [HttpGet]
-        [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
-        public async Task<FileContentResult> GetPdf(Report12_Input_APIItem input)
-        {
-            CommonResponseForPagedList<Report12_Output_Row_APIItem> data = await GetResultAsync(input);
-
-            Report12_Output_Row_APIItem totalRow = data.Items
-                .Last(i => i.PeopleCt == null);
-
-            data.Items = data.Items
-                .Where(i => i != totalRow)
-                .ToArray();
-
-            IEnumerable<PdfColumn<Report12_Output_Row_APIItem>> usageColumns = new[] { "全部", "內部", "外部", "通訊處" }
-                .SelectMany(i => new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }.Select(j =>
-                    new PdfColumn<Report12_Output_Row_APIItem>
-                    {
-                        Name = $"{j}月-{i} ({input.Hours[j - 1]})",
-                        LengthWeight = 4,
-                        Selector = row => GetUsageByType(i).Invoke(row).MonthlyUsageDecimal[j - 1],
-                        Formatter = usage => ((decimal?)usage)?.ToString("P") ?? "-",
-                        OutputTotal = true
-                    }));
-            byte[] pdf = data.MakePdf(input,
-                GetUid(),
-                await GetUserNameByID(GetUid()),
-                "場地使用率分析表",
-                new[]
-                    {
-                        new PdfColumn<Report12_Output_Row_APIItem>
-                        {
-                            Name = "人數",
-                            LengthWeight = 2,
-                            Formatter = o => o?.ToString() ?? "Total",
-                            Selector = r => r.PeopleCt
-                        },
-                        new PdfColumn<Report12_Output_Row_APIItem>
-                        {
-                            Name = "場地",
-                            LengthWeight = 5,
-                            Selector = r => r.SiteName
-                        },
-                        new PdfColumn<Report12_Output_Row_APIItem>
-                        {
-                            Name = "場地代號",
-                            LengthWeight = 4,
-                            Selector = r => r.SiteCode
-                        },
-                        new PdfColumn<Report12_Output_Row_APIItem>
-                        {
-                            Name = "面積(坪)",
-                            LengthWeight = 3,
-                            Selector = r => r.AreaSize,
-                            OutputTotal = true
-                        },
-                    }
-                    .Concat(usageColumns)
-                    .ToArray(),
-                $"年份 = {input.Year}",
-                new PageSize(PageSizes.A4.Width * 3.5f, PageSizes.A4.Height),
-                totalRow
-            );
-
-            return new FileContentResult(pdf, "application/pdf");
-        }
-
-        private static Func<Report12_Output_Row_APIItem, Report12_Output_Row_MonthlyUsage_APIItem> GetUsageByType(
-            string type)
-        {
-            switch (type)
-            {
-                case "內部":
-                    return row => row.InternalUsage;
-                case "外部":
-                    return row => row.ExternalUsage;
-                case "通訊處":
-                    return row => row.CommDeptUsage;
-                default:
-                    return row => row.AllUsage;
-            }
         }
     }
 }

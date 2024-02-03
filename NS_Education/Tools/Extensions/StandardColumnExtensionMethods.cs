@@ -83,7 +83,7 @@ namespace NS_Education.Tools.Extensions
         /// 轉換失敗時：DateTime 的預設值
         /// </returns>
         public static DateTime ParseDateTime(this string s,
-            DateTimeParseType type = DateTimeParseType.Date | DateTimeParseType.DateTime)
+            DateTimeParseType type = DateTimeParseType.Date | DateTimeParseType.DateTime | DateTimeParseType.YearMonth)
         {
             DateTime result = default;
 
@@ -97,6 +97,9 @@ namespace NS_Education.Tools.Extensions
                     DateTimeStyles.AssumeLocal, out result);
             if (type.HasFlag(DateTimeParseType.Date) && s.Length == IoConstants.DateFormat.Length)
                 DateTime.TryParseExact(s, IoConstants.DateFormat, CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeLocal, out result);
+            if (type.HasFlag(DateTimeParseType.YearMonth) && s.Length == IoConstants.YearMonthFormat.Length)
+                DateTime.TryParseExact(s, IoConstants.YearMonthFormat, CultureInfo.InvariantCulture,
                     DateTimeStyles.AssumeLocal, out result);
 
             return result;
@@ -190,6 +193,7 @@ namespace NS_Education.Tools.Extensions
     public enum DateTimeParseType
     {
         Date = 1,
-        DateTime = 2
+        DateTime = 2,
+        YearMonth = 4
     }
 }

@@ -136,7 +136,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         newRow.Add(SiteName, sd.Title);
                         newRow.Add(Time, dts.Title);
 
-                        foreach (DateTime dt in startTime.Range(endTime))
+                        foreach (DateTime dt in startTime.DayRange(endTime))
                         {
                             newRow.Add(dt.ToFormattedStringDate(),
                                 results

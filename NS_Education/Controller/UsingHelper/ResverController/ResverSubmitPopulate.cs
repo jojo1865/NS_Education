@@ -45,7 +45,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                         .CountAsync()
                                     + 1; // count 是 0-based.
 
-                        string newCode = $"{DateTime.Now:yy}{DateTime.Now:MM}{count:0000}";
+                        string newCode = $"{DateTime.Now.Year % 100:00}{DateTime.Now.Month:00}{count:0000}";
 
                         head.RHID = Convert.ToInt32(newCode);
                     }

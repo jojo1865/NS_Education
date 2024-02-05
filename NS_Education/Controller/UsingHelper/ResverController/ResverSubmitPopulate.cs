@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlTypes;
@@ -24,6 +25,24 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             bool needsNewHead = data is null;
             Resver_Head head = needsNewHead ? SubmitFindOrCreateNew<Resver_Head>(input.RHID) : data;
             int originalHeadState = head.State;
+
+            // 新增時，給代號
+            if (isAdd)
+            {
+                DateTime monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                DateTime monthEnd = monthStart.AddMonths(1);
+
+                int count = await DC.Resver_Head
+                                .Where(rh => monthStart <= rh.CreDate)
+                                .Where(rh => rh.CreDate < monthEnd)
+                                .CountAsync()
+                            + 1; // count 是 0-based.
+
+                string newCode = $"{DateTime.Now:yy}{DateTime.Now:MM}{count:0000}";
+
+                head.Code = newCode;
+            }
+
 
             // 已結帳時，只允許處理預約回饋紀錄的值
             if (isAdd || head.State != (int)ReserveHeadGetListState.FullyPaid)

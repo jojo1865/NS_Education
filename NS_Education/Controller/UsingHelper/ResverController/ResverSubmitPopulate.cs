@@ -26,24 +26,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             Resver_Head head = needsNewHead ? SubmitFindOrCreateNew<Resver_Head>(input.RHID) : data;
             int originalHeadState = head.State;
 
-            // 新增時，給 RHID
-            if (isAdd)
-            {
-                DateTime monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-                DateTime monthEnd = monthStart.AddMonths(1);
-
-                int count = await DC.Resver_Head
-                                .Where(rh => monthStart <= rh.CreDate)
-                                .Where(rh => rh.CreDate < monthEnd)
-                                .CountAsync()
-                            + 1; // count 是 0-based.
-
-                string newCode = $"{DateTime.Now:yy}{DateTime.Now:MM}{count:0000}";
-
-                head.RHID = Convert.ToInt32(newCode);
-            }
-
-
             // 已結帳時，只允許處理預約回饋紀錄的值
             if (isAdd || head.State != (int)ReserveHeadGetListState.FullyPaid)
             {
@@ -51,6 +33,23 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 // 為新資料時, 先寫入 DB, 這樣才有 RHID 可以提供給後面的功能用
                 if (head.RHID == 0)
                 {
+                    // 新增時，給 RHID
+                    if (isAdd)
+                    {
+                        DateTime monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                        DateTime monthEnd = monthStart.AddMonths(1);
+
+                        int count = await DC.Resver_Head
+                                        .Where(rh => monthStart <= rh.CreDate)
+                                        .Where(rh => rh.CreDate < monthEnd)
+                                        .CountAsync()
+                                    + 1; // count 是 0-based.
+
+                        string newCode = $"{DateTime.Now:yy}{DateTime.Now:MM}{count:0000}";
+
+                        head.RHID = Convert.ToInt32(newCode);
+                    }
+
                     await DC.AddAsync(head);
                     await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
                 }

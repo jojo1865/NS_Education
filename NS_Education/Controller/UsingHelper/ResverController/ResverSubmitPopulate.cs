@@ -26,7 +26,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
             Resver_Head head = needsNewHead ? SubmitFindOrCreateNew<Resver_Head>(input.RHID) : data;
             int originalHeadState = head.State;
 
-            // 新增時，給代號
+            // 新增時，給 RHID
             if (isAdd)
             {
                 DateTime monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
@@ -40,7 +40,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
                 string newCode = $"{DateTime.Now:yy}{DateTime.Now:MM}{count:0000}";
 
-                head.Code = newCode;
+                head.RHID = Convert.ToInt32(newCode);
             }
 
 

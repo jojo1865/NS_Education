@@ -737,7 +737,7 @@
           <Key>
             <PropertyRef Name="RHID" />
           </Key>
-          <Property Name="RHID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RHID" Type="int" Nullable="false" />
           <Property Name="Code" Type="varchar" MaxLength="10" />
           <Property Name="SDate" Type="datetime" Nullable="false" />
           <Property Name="EDate" Type="datetime" Nullable="false" />

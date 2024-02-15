@@ -70,11 +70,16 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                 // 1. 開頭為數字升序
                 // 2. 開頭不為數字時降序
                 // 3. 開頭為數字的資料優先顯示
-                .OrderByDescending(r => Convert.ToDecimal(new string(r.Title
-                    .Replace('B', '-')
-                    .Where(c => Char.IsDigit(c) || c == '-')
-                    .DefaultIfEmpty('0')
-                    .ToArray())))
+                .OrderByDescending(r =>
+                {
+                    Decimal.TryParse(new string(r.Title
+                        .Replace('B', '-')
+                        .Where(c => Char.IsDigit(c) || c == '-')
+                        .ToArray()), out decimal parsed);
+
+                    return parsed;
+                })
+                .ThenBy(r => r.Title)
                 .ToArray();
 
             return new CommonResponseForList<StaticCode_GetTypeList_Output_Row_APIItem>

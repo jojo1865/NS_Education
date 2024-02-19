@@ -750,7 +750,7 @@
           <Key>
             <PropertyRef Name="RHID" />
           </Key>
-          <Property Name="RHID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RHID" Type="int" Nullable="false" />
           <Property Name="Code" Type="varchar" MaxLength="10" />
           <Property Name="SDate" Type="datetime" Nullable="false" />
           <Property Name="EDate" Type="datetime" Nullable="false" />
@@ -1581,18 +1581,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Resver_Other_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
-          <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Resver_Head">
-              <PropertyRef Name="RHID" />
-            </Principal>
-            <Dependent Role="Resver_Other">
-              <PropertyRef Name="RHID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Resver_Site_B_OrderCode">
           <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="Resver_Site" Type="Self.Resver_Site" Multiplicity="*" />
@@ -1943,6 +1931,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_Other_Resver_Head_RHID_fk">
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
+          <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resver_Head">
+              <PropertyRef Name="RHID" />
+            </Principal>
+            <Dependent Role="Resver_Other">
+              <PropertyRef Name="RHID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="Resver_Questionnaire_Resver_Head_RHID_fk">
           <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="Resver_Questionnaire" Type="Self.Resver_Questionnaire" Multiplicity="*" />
@@ -1991,12 +1991,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Function Name="sp_BackUpDB" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
-        <Function Name="sp_DeleteOldErrorLog" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
-        <Function Name="sp_DeleteOldUserLog" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
-        <Function Name="sp_GiftSendingHouseKeeping" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
-        <Function Name="sp_RenewData" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
-        <Function Name="sp_ReseedPrimaryKeys" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <EntityContainer Name="db_NS_EducationModelStoreContainer">
           <EntitySet Name="B_Category" EntityType="Self.B_Category" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="B_Device" EntityType="Self.B_Device" Schema="dbo" store:Type="Tables" />
@@ -2288,10 +2282,6 @@
             <End Role="D_OtherPayItem" EntitySet="D_OtherPayItem" />
             <End Role="Resver_Other" EntitySet="Resver_Other" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resver_Other_Resver_Head" Association="Self.FK_Resver_Other_Resver_Head">
-            <End Role="Resver_Head" EntitySet="Resver_Head" />
-            <End Role="Resver_Other" EntitySet="Resver_Other" />
-          </AssociationSet>
           <AssociationSet Name="FK_Resver_Site_B_OrderCode" Association="Self.FK_Resver_Site_B_OrderCode">
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
             <End Role="Resver_Site" EntitySet="Resver_Site" />
@@ -2402,6 +2392,10 @@
           </AssociationSet>
           <AssociationSet Name="Resver_Other_B_StaticCode_BSCID_fk" Association="Self.Resver_Other_B_StaticCode_BSCID_fk">
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
+            <End Role="Resver_Other" EntitySet="Resver_Other" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Other_Resver_Head_RHID_fk" Association="Self.Resver_Other_Resver_Head_RHID_fk">
+            <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_Other" EntitySet="Resver_Other" />
           </AssociationSet>
           <AssociationSet Name="Resver_Questionnaire_Resver_Head_RHID_fk" Association="Self.Resver_Questionnaire_Resver_Head_RHID_fk">
@@ -3260,7 +3254,7 @@
           <Key>
             <PropertyRef Name="RHID" />
           </Key>
-          <Property Name="RHID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RHID" Type="Int32" Nullable="false" />
           <Property Name="Code" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="SDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="EDate" Type="DateTime" Nullable="false" Precision="3" />
@@ -3295,8 +3289,8 @@
           <NavigationProperty Name="M_Resver_TimeSpan" Relationship="Self.FK_M_Resver_TimeSpan_Resver_Head" FromRole="Resver_Head" ToRole="M_Resver_TimeSpan" />
           <NavigationProperty Name="Resver_Bill" Relationship="Self.FK_Resver_Bill_Header_Resver_Head" FromRole="Resver_Head" ToRole="Resver_Bill" />
           <NavigationProperty Name="Resver_GiveBack" Relationship="Self.FK_Resver_GiveBack_Resver_Head" FromRole="Resver_Head" ToRole="Resver_GiveBack" />
-          <NavigationProperty Name="Resver_Other" Relationship="Self.FK_Resver_Other_Resver_Head" FromRole="Resver_Head" ToRole="Resver_Other" />
           <NavigationProperty Name="Resver_Head_Log" Relationship="Self.Resver_Head_Log_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Head_Log" />
+          <NavigationProperty Name="Resver_Other" Relationship="Self.Resver_Other_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Other" />
           <NavigationProperty Name="Resver_Questionnaire" Relationship="Self.Resver_Questionnaire_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Questionnaire" />
           <NavigationProperty Name="Resver_Site" Relationship="Self.Resver_Site_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Site" />
         </EntityType>
@@ -3338,7 +3332,7 @@
           <NavigationProperty Name="B_OrderCode" Relationship="Self.FK_Resver_Other_B_OrderCode" FromRole="Resver_Other" ToRole="B_OrderCode" />
           <NavigationProperty Name="B_StaticCode" Relationship="Self.Resver_Other_B_StaticCode_BSCID_fk" FromRole="Resver_Other" ToRole="B_StaticCode" />
           <NavigationProperty Name="D_OtherPayItem" Relationship="Self.FK_Resver_Other_D_OtherPayItem" FromRole="Resver_Other" ToRole="D_OtherPayItem" />
-          <NavigationProperty Name="Resver_Head" Relationship="Self.FK_Resver_Other_Resver_Head" FromRole="Resver_Other" ToRole="Resver_Head" />
+          <NavigationProperty Name="Resver_Head" Relationship="Self.Resver_Other_Resver_Head_RHID_fk" FromRole="Resver_Other" ToRole="Resver_Head" />
         </EntityType>
         <EntityType Name="Resver_Questionnaire">
           <Key>
@@ -4466,18 +4460,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Resver_Other_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
-          <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Resver_Head">
-              <PropertyRef Name="RHID" />
-            </Principal>
-            <Dependent Role="Resver_Other">
-              <PropertyRef Name="RHID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="Resver_Head_Log_Resver_Head_RHID_fk">
           <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="Resver_Head_Log" Type="Self.Resver_Head_Log" Multiplicity="*" />
@@ -4486,6 +4468,18 @@
               <PropertyRef Name="RHID" />
             </Principal>
             <Dependent Role="Resver_Head_Log">
+              <PropertyRef Name="RHID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="Resver_Other_Resver_Head_RHID_fk">
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
+          <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resver_Head">
+              <PropertyRef Name="RHID" />
+            </Principal>
+            <Dependent Role="Resver_Other">
               <PropertyRef Name="RHID" />
             </Dependent>
           </ReferentialConstraint>
@@ -4935,13 +4929,13 @@
             <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_GiveBack" EntitySet="Resver_GiveBack" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resver_Other_Resver_Head" Association="Self.FK_Resver_Other_Resver_Head">
-            <End Role="Resver_Head" EntitySet="Resver_Head" />
-            <End Role="Resver_Other" EntitySet="Resver_Other" />
-          </AssociationSet>
           <AssociationSet Name="Resver_Head_Log_Resver_Head_RHID_fk" Association="Self.Resver_Head_Log_Resver_Head_RHID_fk">
             <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_Head_Log" EntitySet="Resver_Head_Log" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Other_Resver_Head_RHID_fk" Association="Self.Resver_Other_Resver_Head_RHID_fk">
+            <End Role="Resver_Head" EntitySet="Resver_Head" />
+            <End Role="Resver_Other" EntitySet="Resver_Other" />
           </AssociationSet>
           <AssociationSet Name="Resver_Questionnaire_Resver_Head_RHID_fk" Association="Self.Resver_Questionnaire_Resver_Head_RHID_fk">
             <End Role="Resver_Head" EntitySet="Resver_Head" />
@@ -4971,12 +4965,6 @@
             <End Role="UserData" EntitySet="UserData" />
             <End Role="UserPasswordLog" EntitySet="UserPasswordLog" />
           </AssociationSet>
-          <FunctionImport Name="sp_BackUpDB" />
-          <FunctionImport Name="sp_DeleteOldErrorLog" />
-          <FunctionImport Name="sp_DeleteOldUserLog" />
-          <FunctionImport Name="sp_GiftSendingHouseKeeping" />
-          <FunctionImport Name="sp_RenewData" />
-          <FunctionImport Name="sp_ReseedPrimaryKeys" />
         </EntityContainer>
       </Schema>
     </edmx:ConceptualModels>
@@ -5956,12 +5944,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <FunctionImportMapping FunctionImportName="sp_BackUpDB" FunctionName="db_NS_EducationModel.Store.sp_BackUpDB" />
-          <FunctionImportMapping FunctionImportName="sp_DeleteOldErrorLog" FunctionName="db_NS_EducationModel.Store.sp_DeleteOldErrorLog" />
-          <FunctionImportMapping FunctionImportName="sp_DeleteOldUserLog" FunctionName="db_NS_EducationModel.Store.sp_DeleteOldUserLog" />
-          <FunctionImportMapping FunctionImportName="sp_GiftSendingHouseKeeping" FunctionName="db_NS_EducationModel.Store.sp_GiftSendingHouseKeeping" />
-          <FunctionImportMapping FunctionImportName="sp_RenewData" FunctionName="db_NS_EducationModel.Store.sp_RenewData" />
-          <FunctionImportMapping FunctionImportName="sp_ReseedPrimaryKeys" FunctionName="db_NS_EducationModel.Store.sp_ReseedPrimaryKeys" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

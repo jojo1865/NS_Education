@@ -20,8 +20,8 @@ namespace NS_Education.Models.Entities
             this.M_Resver_TimeSpan = new HashSet<M_Resver_TimeSpan>();
             this.Resver_Bill = new HashSet<Resver_Bill>();
             this.Resver_GiveBack = new HashSet<Resver_GiveBack>();
-            this.Resver_Other = new HashSet<Resver_Other>();
             this.Resver_Head_Log = new HashSet<Resver_Head_Log>();
+            this.Resver_Other = new HashSet<Resver_Other>();
             this.Resver_Questionnaire = new HashSet<Resver_Questionnaire>();
             this.Resver_Site = new HashSet<Resver_Site>();
         }
@@ -66,9 +66,9 @@ namespace NS_Education.Models.Entities
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_GiveBack> Resver_GiveBack { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Resver_Other> Resver_Other { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Head_Log> Resver_Head_Log { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Resver_Other> Resver_Other { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Resver_Questionnaire> Resver_Questionnaire { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

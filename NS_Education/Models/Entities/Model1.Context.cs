@@ -12,8 +12,6 @@ namespace NS_Education.Models.Entities
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
-    using System.Data.Entity.Core.Objects;
-    using System.Linq;
     
     public partial class NsDbContext : DbContext
     {
@@ -79,35 +77,5 @@ namespace NS_Education.Models.Entities
         public virtual DbSet<UserPasswordLog> UserPasswordLog { get; set; }
         public virtual DbSet<Lookup> Lookup { get; set; }
         public virtual DbSet<UserLogView> UserLogView { get; set; }
-    
-        public virtual int sp_BackUpDB()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_BackUpDB");
-        }
-    
-        public virtual int sp_DeleteOldErrorLog()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_DeleteOldErrorLog");
-        }
-    
-        public virtual int sp_DeleteOldUserLog()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_DeleteOldUserLog");
-        }
-    
-        public virtual int sp_GiftSendingHouseKeeping()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_GiftSendingHouseKeeping");
-        }
-    
-        public virtual int sp_RenewData()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_RenewData");
-        }
-    
-        public virtual int sp_ReseedPrimaryKeys()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_ReseedPrimaryKeys");
-        }
     }
 }

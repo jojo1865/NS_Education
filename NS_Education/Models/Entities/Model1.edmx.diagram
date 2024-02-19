@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="21804a01403a49b3a7c9bfb9c2de1d7e" Name="Diagram1">
+      <Diagram DiagramId="eb20ab479d8f4b83bf52aaa66ada1a18" Name="Diagram1">
         <EntityTypeShape EntityType="db_NS_EducationModel.B_Category" Width="1.5" PointX="0.75" PointY="30.25" IsExpanded="true" />
         <EntityTypeShape EntityType="db_NS_EducationModel.B_Device" Width="1.5" PointX="3" PointY="42.5" IsExpanded="true" />
         <EntityTypeShape EntityType="db_NS_EducationModel.B_OrderCode" Width="1.5" PointX="0.75" PointY="36" IsExpanded="true" />
@@ -133,8 +133,8 @@
         <AssociationConnector Association="db_NS_EducationModel.FK_Resver_Bill_Header_Resver_Head" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.FK_Resver_Device_Resver_Site" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.FK_Resver_GiveBack_Resver_Head" ManuallyRouted="false" />
-        <AssociationConnector Association="db_NS_EducationModel.FK_Resver_Other_Resver_Head" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.Resver_Head_Log_Resver_Head_RHID_fk" ManuallyRouted="false" />
+        <AssociationConnector Association="db_NS_EducationModel.Resver_Other_Resver_Head_RHID_fk" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.Resver_Questionnaire_Resver_Head_RHID_fk" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.Resver_Site_Resver_Head_RHID_fk" ManuallyRouted="false" />
         <AssociationConnector Association="db_NS_EducationModel.Resver_Head_Log_UserData_UID_fk" ManuallyRouted="false" />

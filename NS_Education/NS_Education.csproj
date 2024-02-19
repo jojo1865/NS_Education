@@ -323,6 +323,7 @@
         <Compile Include="Controller\UsingHelper\MenuDataController\MenuApiController.cs"/>
         <Compile Include="Controller\UsingHelper\MenuDataController\MenuApiPerUserController.cs"/>
         <Compile Include="Controller\UsingHelper\MenuDataController\MenuDataController.cs"/>
+        <Compile Include="Controller\UsingHelper\MonthlyTimeSpansController.cs"/>
         <Compile Include="Controller\UsingHelper\OrderCodeController.cs"/>
         <Compile Include="Controller\UsingHelper\OtherPayItemController.cs"/>
         <Compile Include="Controller\UsingHelper\PartnerController.cs"/>
@@ -468,6 +469,9 @@
         <Compile Include="Models\APIItems\Controller\MenuData\MenuData\GetList\MenuData_GetList_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\MenuData\MenuData\GetList\MenuData_GetList_Output_Row_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\MenuData\MenuData\Submit\MenuData_Submit_Input_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MonthlyTimeSpans\GetInfoById\MonthlyTimeSpans_GetInfoById_Output_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MonthlyTimeSpans\GetList\MonthlyTimeSpans_GetList_Output_Row_APIItem.cs"/>
+        <Compile Include="Models\APIItems\Controller\MonthlyTimeSpans\Submit\MonthlyTimeSpans_Submit_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\OrderCode\GetInfoById\OrderCode_GetInfoById_Output_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\OrderCode\GetList\OrderCode_GetList_Input_APIItem.cs"/>
         <Compile Include="Models\APIItems\Controller\OrderCode\GetList\OrderCode_GetList_Output_Row_APIItem.cs"/>

@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="NsDbContext.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="db_NS_EducationModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="B_Category">
           <Key>
             <PropertyRef Name="BCID" />
@@ -676,6 +676,19 @@
           <Property Name="AlwaysAllowPring" Type="bit" Nullable="false" />
           <Property Name="IsVisibleOnLeft" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="Monthly_TimeSpans">
+          <Key>
+            <PropertyRef Name="Year" />
+            <PropertyRef Name="Month" />
+          </Key>
+          <Property Name="Year" Type="int" Nullable="false" />
+          <Property Name="Month" Type="int" Nullable="false" />
+          <Property Name="TimeSpanCt" Type="int" Nullable="false" />
+          <Property Name="CreDate" Type="datetime" Nullable="false" />
+          <Property Name="CreUID" Type="int" Nullable="false" />
+          <Property Name="UpdDate" Type="datetime" Nullable="false" />
+          <Property Name="UpdUID" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Resver_Bill">
           <Key>
             <PropertyRef Name="RBID" />
@@ -737,7 +750,7 @@
           <Key>
             <PropertyRef Name="RHID" />
           </Key>
-          <Property Name="RHID" Type="int" Nullable="false" />
+          <Property Name="RHID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Code" Type="varchar" MaxLength="10" />
           <Property Name="SDate" Type="datetime" Nullable="false" />
           <Property Name="EDate" Type="datetime" Nullable="false" />
@@ -1409,9 +1422,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_M_Resver_TimeSpan_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="M_Resver_TimeSpan" Type="Self.M_Resver_TimeSpan" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Resver_Head">
@@ -1473,9 +1484,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Bill_Header_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="Resver_Bill" Type="Self.Resver_Bill" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Resver_Head">
@@ -1525,9 +1534,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_GiveBack_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="Resver_GiveBack" Type="Self.Resver_GiveBack" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Resver_Head">
@@ -1575,9 +1582,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Other_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Resver_Head">
@@ -1621,20 +1626,6 @@
             </Principal>
             <Dependent Role="Resver_Site">
               <PropertyRef Name="BSCID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Resver_Site_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Role="Resver_Site" Type="Self.Resver_Site" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Resver_Head">
-              <PropertyRef Name="RHID" />
-            </Principal>
-            <Dependent Role="Resver_Site">
-              <PropertyRef Name="RHID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1964,6 +1955,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Resver_Site_Resver_Head_RHID_fk">
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
+          <End Role="Resver_Site" Type="Self.Resver_Site" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resver_Head">
+              <PropertyRef Name="RHID" />
+            </Principal>
+            <Dependent Role="Resver_Site">
+              <PropertyRef Name="RHID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="Resver_Throw_B_OrderCode_BOCID_fk">
           <End Role="B_OrderCode" Type="Self.B_OrderCode" Multiplicity="1" />
           <End Role="Resver_Throw" Type="Self.Resver_Throw" Multiplicity="*" />
@@ -1988,7 +1991,13 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="NsDbContextStoreContainer">
+        <Function Name="sp_BackUpDB" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="sp_DeleteOldErrorLog" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="sp_DeleteOldUserLog" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="sp_GiftSendingHouseKeeping" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="sp_RenewData" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="sp_ReseedPrimaryKeys" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <EntityContainer Name="db_NS_EducationModelStoreContainer">
           <EntitySet Name="B_Category" EntityType="Self.B_Category" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="B_Device" EntityType="Self.B_Device" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="B_OrderCode" EntityType="Self.B_OrderCode" Schema="dbo" store:Type="Tables" />
@@ -2025,6 +2034,7 @@
           <EntitySet Name="M_SiteGroup" EntityType="Self.M_SiteGroup" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MenuAPI" EntityType="Self.MenuAPI" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MenuData" EntityType="Self.MenuData" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Monthly_TimeSpans" EntityType="Self.Monthly_TimeSpans" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Bill" EntityType="Self.Resver_Bill" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_Device" EntityType="Self.Resver_Device" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Resver_GiveBack" EntityType="Self.Resver_GiveBack" Schema="dbo" store:Type="Tables" />
@@ -2294,10 +2304,6 @@
             <End Role="B_StaticCode" EntitySet="B_StaticCode" />
             <End Role="Resver_Site" EntitySet="Resver_Site" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resver_Site_Resver_Head" Association="Self.FK_Resver_Site_Resver_Head">
-            <End Role="Resver_Head" EntitySet="Resver_Head" />
-            <End Role="Resver_Site" EntitySet="Resver_Site" />
-          </AssociationSet>
           <AssociationSet Name="FK_Resver_Throw_D_B_Partner" Association="Self.FK_Resver_Throw_D_B_Partner">
             <End Role="B_Partner" EntitySet="B_Partner" />
             <End Role="Resver_Throw_Food" EntitySet="Resver_Throw_Food" />
@@ -2402,6 +2408,10 @@
             <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_Questionnaire" EntitySet="Resver_Questionnaire" />
           </AssociationSet>
+          <AssociationSet Name="Resver_Site_Resver_Head_RHID_fk" Association="Self.Resver_Site_Resver_Head_RHID_fk">
+            <End Role="Resver_Head" EntitySet="Resver_Head" />
+            <End Role="Resver_Site" EntitySet="Resver_Site" />
+          </AssociationSet>
           <AssociationSet Name="Resver_Throw_B_OrderCode_BOCID_fk" Association="Self.Resver_Throw_B_OrderCode_BOCID_fk">
             <End Role="B_OrderCode" EntitySet="B_OrderCode" />
             <End Role="Resver_Throw" EntitySet="Resver_Throw" />
@@ -2415,7 +2425,7 @@
     </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
-      <Schema Namespace="NsDbContext" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <Schema Namespace="db_NS_EducationModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityType Name="B_Category">
           <Key>
             <PropertyRef Name="BCID" />
@@ -3168,6 +3178,19 @@
           <NavigationProperty Name="M_Group_Menu" Relationship="Self.FK_M_Group_Menu_MenuData" FromRole="MenuData" ToRole="M_Group_Menu" />
           <NavigationProperty Name="MenuAPI" Relationship="Self.FK_MenuAPI_MenuData" FromRole="MenuData" ToRole="MenuAPI" />
         </EntityType>
+        <EntityType Name="Monthly_TimeSpans">
+          <Key>
+            <PropertyRef Name="Year" />
+            <PropertyRef Name="Month" />
+          </Key>
+          <Property Name="Year" Type="Int32" Nullable="false" />
+          <Property Name="Month" Type="Int32" Nullable="false" />
+          <Property Name="TimeSpanCt" Type="Int32" Nullable="false" />
+          <Property Name="CreDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreUID" Type="Int32" Nullable="false" />
+          <Property Name="UpdDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdUID" Type="Int32" Nullable="false" />
+        </EntityType>
         <EntityType Name="Resver_Bill">
           <Key>
             <PropertyRef Name="RBID" />
@@ -3273,9 +3296,9 @@
           <NavigationProperty Name="Resver_Bill" Relationship="Self.FK_Resver_Bill_Header_Resver_Head" FromRole="Resver_Head" ToRole="Resver_Bill" />
           <NavigationProperty Name="Resver_GiveBack" Relationship="Self.FK_Resver_GiveBack_Resver_Head" FromRole="Resver_Head" ToRole="Resver_GiveBack" />
           <NavigationProperty Name="Resver_Other" Relationship="Self.FK_Resver_Other_Resver_Head" FromRole="Resver_Head" ToRole="Resver_Other" />
-          <NavigationProperty Name="Resver_Site" Relationship="Self.FK_Resver_Site_Resver_Head" FromRole="Resver_Head" ToRole="Resver_Site" />
           <NavigationProperty Name="Resver_Head_Log" Relationship="Self.Resver_Head_Log_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Head_Log" />
           <NavigationProperty Name="Resver_Questionnaire" Relationship="Self.Resver_Questionnaire_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Questionnaire" />
+          <NavigationProperty Name="Resver_Site" Relationship="Self.Resver_Site_Resver_Head_RHID_fk" FromRole="Resver_Head" ToRole="Resver_Site" />
         </EntityType>
         <EntityType Name="Resver_Head_Log">
           <Key>
@@ -3363,7 +3386,7 @@
           <NavigationProperty Name="B_SiteData" Relationship="Self.FK_Resver_Site_B_SiteData" FromRole="Resver_Site" ToRole="B_SiteData" />
           <NavigationProperty Name="B_StaticCode" Relationship="Self.FK_Resver_Site_B_StaticCode" FromRole="Resver_Site" ToRole="B_StaticCode" />
           <NavigationProperty Name="Resver_Device" Relationship="Self.FK_Resver_Device_Resver_Site" FromRole="Resver_Site" ToRole="Resver_Device" />
-          <NavigationProperty Name="Resver_Head" Relationship="Self.FK_Resver_Site_Resver_Head" FromRole="Resver_Site" ToRole="Resver_Head" />
+          <NavigationProperty Name="Resver_Head" Relationship="Self.Resver_Site_Resver_Head_RHID_fk" FromRole="Resver_Site" ToRole="Resver_Head" />
           <NavigationProperty Name="Resver_Throw" Relationship="Self.FK_Resver_Throw_Resver_Site" FromRole="Resver_Site" ToRole="Resver_Throw" />
         </EntityType>
         <EntityType Name="Resver_Throw">
@@ -4382,9 +4405,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_M_Resver_TimeSpan_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="M_Resver_TimeSpan" Type="Self.M_Resver_TimeSpan" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Resver_Head">
@@ -4408,9 +4429,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Bill_Header_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="Resver_Bill" Type="Self.Resver_Bill" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Resver_Head">
@@ -4436,9 +4455,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_GiveBack_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="Resver_GiveBack" Type="Self.Resver_GiveBack" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Resver_Head">
@@ -4450,29 +4467,13 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Resver_Other_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
           <End Role="Resver_Other" Type="Self.Resver_Other" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Resver_Head">
               <PropertyRef Name="RHID" />
             </Principal>
             <Dependent Role="Resver_Other">
-              <PropertyRef Name="RHID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Resver_Site_Resver_Head">
-          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Role="Resver_Site" Type="Self.Resver_Site" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Resver_Head">
-              <PropertyRef Name="RHID" />
-            </Principal>
-            <Dependent Role="Resver_Site">
               <PropertyRef Name="RHID" />
             </Dependent>
           </ReferentialConstraint>
@@ -4497,6 +4498,18 @@
               <PropertyRef Name="RHID" />
             </Principal>
             <Dependent Role="Resver_Questionnaire">
+              <PropertyRef Name="RHID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="Resver_Site_Resver_Head_RHID_fk">
+          <End Role="Resver_Head" Type="Self.Resver_Head" Multiplicity="1" />
+          <End Role="Resver_Site" Type="Self.Resver_Site" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Resver_Head">
+              <PropertyRef Name="RHID" />
+            </Principal>
+            <Dependent Role="Resver_Site">
               <PropertyRef Name="RHID" />
             </Dependent>
           </ReferentialConstraint>
@@ -4602,6 +4615,7 @@
           <EntitySet Name="M_SiteGroup" EntityType="Self.M_SiteGroup" />
           <EntitySet Name="MenuAPI" EntityType="Self.MenuAPI" />
           <EntitySet Name="MenuData" EntityType="Self.MenuData" />
+          <EntitySet Name="Monthly_TimeSpans" EntityType="Self.Monthly_TimeSpans" />
           <EntitySet Name="Resver_Bill" EntityType="Self.Resver_Bill" />
           <EntitySet Name="Resver_Device" EntityType="Self.Resver_Device" />
           <EntitySet Name="Resver_GiveBack" EntityType="Self.Resver_GiveBack" />
@@ -4925,10 +4939,6 @@
             <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_Other" EntitySet="Resver_Other" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resver_Site_Resver_Head" Association="Self.FK_Resver_Site_Resver_Head">
-            <End Role="Resver_Head" EntitySet="Resver_Head" />
-            <End Role="Resver_Site" EntitySet="Resver_Site" />
-          </AssociationSet>
           <AssociationSet Name="Resver_Head_Log_Resver_Head_RHID_fk" Association="Self.Resver_Head_Log_Resver_Head_RHID_fk">
             <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_Head_Log" EntitySet="Resver_Head_Log" />
@@ -4936,6 +4946,10 @@
           <AssociationSet Name="Resver_Questionnaire_Resver_Head_RHID_fk" Association="Self.Resver_Questionnaire_Resver_Head_RHID_fk">
             <End Role="Resver_Head" EntitySet="Resver_Head" />
             <End Role="Resver_Questionnaire" EntitySet="Resver_Questionnaire" />
+          </AssociationSet>
+          <AssociationSet Name="Resver_Site_Resver_Head_RHID_fk" Association="Self.Resver_Site_Resver_Head_RHID_fk">
+            <End Role="Resver_Head" EntitySet="Resver_Head" />
+            <End Role="Resver_Site" EntitySet="Resver_Site" />
           </AssociationSet>
           <AssociationSet Name="Resver_Head_Log_UserData_UID_fk" Association="Self.Resver_Head_Log_UserData_UID_fk">
             <End Role="UserData" EntitySet="UserData" />
@@ -4957,15 +4971,21 @@
             <End Role="UserData" EntitySet="UserData" />
             <End Role="UserPasswordLog" EntitySet="UserPasswordLog" />
           </AssociationSet>
+          <FunctionImport Name="sp_BackUpDB" />
+          <FunctionImport Name="sp_DeleteOldErrorLog" />
+          <FunctionImport Name="sp_DeleteOldUserLog" />
+          <FunctionImport Name="sp_GiftSendingHouseKeeping" />
+          <FunctionImport Name="sp_RenewData" />
+          <FunctionImport Name="sp_ReseedPrimaryKeys" />
         </EntityContainer>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="NsDbContextStoreContainer" CdmEntityContainer="Entities">
+        <EntityContainerMapping StorageEntityContainer="db_NS_EducationModelStoreContainer" CdmEntityContainer="Entities">
           <EntitySetMapping Name="B_Category">
-            <EntityTypeMapping TypeName="NsDbContext.B_Category">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.B_Category">
               <MappingFragment StoreEntitySet="B_Category">
                 <ScalarProperty Name="BCID" ColumnName="BCID" />
                 <ScalarProperty Name="CategoryType" ColumnName="CategoryType" />
@@ -4984,7 +5004,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="B_Device">
-            <EntityTypeMapping TypeName="NsDbContext.B_Device">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.B_Device">
               <MappingFragment StoreEntitySet="B_Device">
                 <ScalarProperty Name="BDID" ColumnName="BDID" />
                 <ScalarProperty Name="BCID" ColumnName="BCID" />
@@ -5011,7 +5031,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="B_OrderCode">
-            <EntityTypeMapping TypeName="NsDbContext.B_OrderCode">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.B_OrderCode">
               <MappingFragment StoreEntitySet="B_OrderCode">
                 <ScalarProperty Name="BOCID" ColumnName="BOCID" />
                 <ScalarProperty Name="CodeType" ColumnName="CodeType" />
@@ -5030,7 +5050,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="B_Partner">
-            <EntityTypeMapping TypeName="NsDbContext.B_Partner">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.B_Partner">
               <MappingFragment StoreEntitySet="B_Partner">
                 <ScalarProperty Name="BPID" ColumnName="BPID" />
                 <ScalarProperty Name="BCID" ColumnName="BCID" />
@@ -5054,7 +5074,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="B_PartnerItem">
-            <EntityTypeMapping TypeName="NsDbContext.B_PartnerItem">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.B_PartnerItem">
               <MappingFragment StoreEntitySet="B_PartnerItem">
                 <ScalarProperty Name="BPIID" ColumnName="BPIID" />
                 <ScalarProperty Name="BPID" ColumnName="BPID" />
@@ -5078,7 +5098,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="B_SiteData">
-            <EntityTypeMapping TypeName="NsDbContext.B_SiteData">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.B_SiteData">
               <MappingFragment StoreEntitySet="B_SiteData">
                 <ScalarProperty Name="BSID" ColumnName="BSID" />
                 <ScalarProperty Name="BCID" ColumnName="BCID" />
@@ -5109,7 +5129,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="B_StaticCode">
-            <EntityTypeMapping TypeName="NsDbContext.B_StaticCode">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.B_StaticCode">
               <MappingFragment StoreEntitySet="B_StaticCode">
                 <ScalarProperty Name="BSCID" ColumnName="BSCID" />
                 <ScalarProperty Name="CodeType" ColumnName="CodeType" />
@@ -5127,7 +5147,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="BusinessUser">
-            <EntityTypeMapping TypeName="NsDbContext.BusinessUser">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.BusinessUser">
               <MappingFragment StoreEntitySet="BusinessUser">
                 <ScalarProperty Name="BUID" ColumnName="BUID" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
@@ -5145,7 +5165,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Customer">
-            <EntityTypeMapping TypeName="NsDbContext.Customer">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Customer">
               <MappingFragment StoreEntitySet="Customer">
                 <ScalarProperty Name="CID" ColumnName="CID" />
                 <ScalarProperty Name="BSCID6" ColumnName="BSCID6" />
@@ -5173,7 +5193,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="CustomerQuestion">
-            <EntityTypeMapping TypeName="NsDbContext.CustomerQuestion">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.CustomerQuestion">
               <MappingFragment StoreEntitySet="CustomerQuestion">
                 <ScalarProperty Name="CQID" ColumnName="CQID" />
                 <ScalarProperty Name="CID" ColumnName="CID" />
@@ -5194,7 +5214,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="CustomerVisit">
-            <EntityTypeMapping TypeName="NsDbContext.CustomerVisit">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.CustomerVisit">
               <MappingFragment StoreEntitySet="CustomerVisit">
                 <ScalarProperty Name="CVID" ColumnName="CVID" />
                 <ScalarProperty Name="CID" ColumnName="CID" />
@@ -5215,7 +5235,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="D_Company">
-            <EntityTypeMapping TypeName="NsDbContext.D_Company">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.D_Company">
               <MappingFragment StoreEntitySet="D_Company">
                 <ScalarProperty Name="DCID" ColumnName="DCID" />
                 <ScalarProperty Name="BCID" ColumnName="BCID" />
@@ -5232,7 +5252,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="D_Department">
-            <EntityTypeMapping TypeName="NsDbContext.D_Department">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.D_Department">
               <MappingFragment StoreEntitySet="D_Department">
                 <ScalarProperty Name="DDID" ColumnName="DDID" />
                 <ScalarProperty Name="DCID" ColumnName="DCID" />
@@ -5250,7 +5270,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="D_FoodCategory">
-            <EntityTypeMapping TypeName="NsDbContext.D_FoodCategory">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.D_FoodCategory">
               <MappingFragment StoreEntitySet="D_FoodCategory">
                 <ScalarProperty Name="DFCID" ColumnName="DFCID" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
@@ -5267,7 +5287,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="D_Hall">
-            <EntityTypeMapping TypeName="NsDbContext.D_Hall">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.D_Hall">
               <MappingFragment StoreEntitySet="D_Hall">
                 <ScalarProperty Name="DHID" ColumnName="DHID" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
@@ -5290,7 +5310,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="D_OtherPayItem">
-            <EntityTypeMapping TypeName="NsDbContext.D_OtherPayItem">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.D_OtherPayItem">
               <MappingFragment StoreEntitySet="D_OtherPayItem">
                 <ScalarProperty Name="DOPIID" ColumnName="DOPIID" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
@@ -5312,7 +5332,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="D_PayType">
-            <EntityTypeMapping TypeName="NsDbContext.D_PayType">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.D_PayType">
               <MappingFragment StoreEntitySet="D_PayType">
                 <ScalarProperty Name="DPTID" ColumnName="DPTID" />
                 <ScalarProperty Name="BCID" ColumnName="BCID" />
@@ -5335,7 +5355,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="D_Throw">
-            <EntityTypeMapping TypeName="NsDbContext.D_Throw">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.D_Throw">
               <MappingFragment StoreEntitySet="D_Throw">
                 <ScalarProperty Name="DTID" ColumnName="DTID" />
                 <ScalarProperty Name="BOCID" ColumnName="BOCID" />
@@ -5354,7 +5374,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="D_TimeSpan">
-            <EntityTypeMapping TypeName="NsDbContext.D_TimeSpan">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.D_TimeSpan">
               <MappingFragment StoreEntitySet="D_TimeSpan">
                 <ScalarProperty Name="DTSID" ColumnName="DTSID" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
@@ -5374,7 +5394,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="D_Zip">
-            <EntityTypeMapping TypeName="NsDbContext.D_Zip">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.D_Zip">
               <MappingFragment StoreEntitySet="D_Zip">
                 <ScalarProperty Name="DZID" ColumnName="DZID" />
                 <ScalarProperty Name="ParentID" ColumnName="ParentID" />
@@ -5392,7 +5412,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="ErrorLog">
-            <EntityTypeMapping TypeName="NsDbContext.ErrorLog">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.ErrorLog">
               <MappingFragment StoreEntitySet="ErrorLog">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="JWT" ColumnName="JWT" />
@@ -5405,7 +5425,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="GiftSending">
-            <EntityTypeMapping TypeName="NsDbContext.GiftSending">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.GiftSending">
               <MappingFragment StoreEntitySet="GiftSending">
                 <ScalarProperty Name="GSID" ColumnName="GSID" />
                 <ScalarProperty Name="Year" ColumnName="Year" />
@@ -5422,7 +5442,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="GroupData">
-            <EntityTypeMapping TypeName="NsDbContext.GroupData">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.GroupData">
               <MappingFragment StoreEntitySet="GroupData">
                 <ScalarProperty Name="GID" ColumnName="GID" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
@@ -5437,7 +5457,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Address">
-            <EntityTypeMapping TypeName="NsDbContext.M_Address">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Address">
               <MappingFragment StoreEntitySet="M_Address">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
@@ -5451,7 +5471,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Contect">
-            <EntityTypeMapping TypeName="NsDbContext.M_Contect">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Contect">
               <MappingFragment StoreEntitySet="M_Contect">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="ContectType" ColumnName="ContectType" />
@@ -5463,7 +5483,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Customer_BusinessUser">
-            <EntityTypeMapping TypeName="NsDbContext.M_Customer_BusinessUser">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Customer_BusinessUser">
               <MappingFragment StoreEntitySet="M_Customer_BusinessUser">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="CID" ColumnName="CID" />
@@ -5480,7 +5500,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Customer_Category">
-            <EntityTypeMapping TypeName="NsDbContext.M_Customer_Category">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Customer_Category">
               <MappingFragment StoreEntitySet="M_Customer_Category">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="CID" ColumnName="CID" />
@@ -5493,7 +5513,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Customer_Gift">
-            <EntityTypeMapping TypeName="NsDbContext.M_Customer_Gift">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Customer_Gift">
               <MappingFragment StoreEntitySet="M_Customer_Gift">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="CID" ColumnName="CID" />
@@ -5509,7 +5529,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Department_Category">
-            <EntityTypeMapping TypeName="NsDbContext.M_Department_Category">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Department_Category">
               <MappingFragment StoreEntitySet="M_Department_Category">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="DDID" ColumnName="DDID" />
@@ -5522,7 +5542,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Group_Menu">
-            <EntityTypeMapping TypeName="NsDbContext.M_Group_Menu">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Group_Menu">
               <MappingFragment StoreEntitySet="M_Group_Menu">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="GID" ColumnName="GID" />
@@ -5536,7 +5556,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Group_User">
-            <EntityTypeMapping TypeName="NsDbContext.M_Group_User">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Group_User">
               <MappingFragment StoreEntitySet="M_Group_User">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="GID" ColumnName="GID" />
@@ -5549,7 +5569,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Resver_TimeSpan">
-            <EntityTypeMapping TypeName="NsDbContext.M_Resver_TimeSpan">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Resver_TimeSpan">
               <MappingFragment StoreEntitySet="M_Resver_TimeSpan">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="RHID" ColumnName="RHID" />
@@ -5565,7 +5585,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_Site_Device">
-            <EntityTypeMapping TypeName="NsDbContext.M_Site_Device">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_Site_Device">
               <MappingFragment StoreEntitySet="M_Site_Device">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="BSID" ColumnName="BSID" />
@@ -5579,7 +5599,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="M_SiteGroup">
-            <EntityTypeMapping TypeName="NsDbContext.M_SiteGroup">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.M_SiteGroup">
               <MappingFragment StoreEntitySet="M_SiteGroup">
                 <ScalarProperty Name="MID" ColumnName="MID" />
                 <ScalarProperty Name="MasterID" ColumnName="MasterID" />
@@ -5595,7 +5615,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="MenuAPI">
-            <EntityTypeMapping TypeName="NsDbContext.MenuAPI">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.MenuAPI">
               <MappingFragment StoreEntitySet="MenuAPI">
                 <ScalarProperty Name="SeqNo" ColumnName="SeqNo" />
                 <ScalarProperty Name="MDID" ColumnName="MDID" />
@@ -5607,7 +5627,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="MenuData">
-            <EntityTypeMapping TypeName="NsDbContext.MenuData">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.MenuData">
               <MappingFragment StoreEntitySet="MenuData">
                 <ScalarProperty Name="MDID" ColumnName="MDID" />
                 <ScalarProperty Name="ParentID" ColumnName="ParentID" />
@@ -5629,8 +5649,21 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="Monthly_TimeSpans">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Monthly_TimeSpans">
+              <MappingFragment StoreEntitySet="Monthly_TimeSpans">
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="Month" ColumnName="Month" />
+                <ScalarProperty Name="TimeSpanCt" ColumnName="TimeSpanCt" />
+                <ScalarProperty Name="CreDate" ColumnName="CreDate" />
+                <ScalarProperty Name="CreUID" ColumnName="CreUID" />
+                <ScalarProperty Name="UpdDate" ColumnName="UpdDate" />
+                <ScalarProperty Name="UpdUID" ColumnName="UpdUID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Resver_Bill">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_Bill">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Bill">
               <MappingFragment StoreEntitySet="Resver_Bill">
                 <ScalarProperty Name="RBID" ColumnName="RBID" />
                 <ScalarProperty Name="RHID" ColumnName="RHID" />
@@ -5650,7 +5683,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Resver_Device">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_Device">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Device">
               <MappingFragment StoreEntitySet="Resver_Device">
                 <ScalarProperty Name="RDID" ColumnName="RDID" />
                 <ScalarProperty Name="RSID" ColumnName="RSID" />
@@ -5674,7 +5707,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Resver_GiveBack">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_GiveBack">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_GiveBack">
               <MappingFragment StoreEntitySet="Resver_GiveBack">
                 <ScalarProperty Name="RGBID" ColumnName="RGBID" />
                 <ScalarProperty Name="RHID" ColumnName="RHID" />
@@ -5690,7 +5723,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Resver_Head">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_Head">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Head">
               <MappingFragment StoreEntitySet="Resver_Head">
                 <ScalarProperty Name="RHID" ColumnName="RHID" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
@@ -5724,7 +5757,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Resver_Head_Log">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_Head_Log">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Head_Log">
               <MappingFragment StoreEntitySet="Resver_Head_Log">
                 <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="RHID" ColumnName="RHID" />
@@ -5735,7 +5768,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Resver_Other">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_Other">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Other">
               <MappingFragment StoreEntitySet="Resver_Other">
                 <ScalarProperty Name="ROID" ColumnName="ROID" />
                 <ScalarProperty Name="RHID" ColumnName="RHID" />
@@ -5760,7 +5793,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Resver_Questionnaire">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_Questionnaire">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Questionnaire">
               <MappingFragment StoreEntitySet="Resver_Questionnaire">
                 <ScalarProperty Name="RQID" ColumnName="RQID" />
                 <ScalarProperty Name="QuestionKey" ColumnName="QuestionKey" />
@@ -5775,7 +5808,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Resver_Site">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_Site">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Site">
               <MappingFragment StoreEntitySet="Resver_Site">
                 <ScalarProperty Name="RSID" ColumnName="RSID" />
                 <ScalarProperty Name="RHID" ColumnName="RHID" />
@@ -5804,7 +5837,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Resver_Throw">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_Throw">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Throw">
               <MappingFragment StoreEntitySet="Resver_Throw">
                 <ScalarProperty Name="RTID" ColumnName="RTID" />
                 <ScalarProperty Name="RSID" ColumnName="RSID" />
@@ -5828,7 +5861,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Resver_Throw_Food">
-            <EntityTypeMapping TypeName="NsDbContext.Resver_Throw_Food">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Resver_Throw_Food">
               <MappingFragment StoreEntitySet="Resver_Throw_Food">
                 <ScalarProperty Name="RTFID" ColumnName="RTFID" />
                 <ScalarProperty Name="RTID" ColumnName="RTID" />
@@ -5843,7 +5876,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UserData">
-            <EntityTypeMapping TypeName="NsDbContext.UserData">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.UserData">
               <MappingFragment StoreEntitySet="UserData">
                 <ScalarProperty Name="UID" ColumnName="UID" />
                 <ScalarProperty Name="UserName" ColumnName="UserName" />
@@ -5863,7 +5896,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UserLog">
-            <EntityTypeMapping TypeName="NsDbContext.UserLog">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.UserLog">
               <MappingFragment StoreEntitySet="UserLog">
                 <ScalarProperty Name="ULID" ColumnName="ULID" />
                 <ScalarProperty Name="UID" ColumnName="UID" />
@@ -5876,7 +5909,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UserPasswordLog">
-            <EntityTypeMapping TypeName="NsDbContext.UserPasswordLog">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.UserPasswordLog">
               <MappingFragment StoreEntitySet="UserPasswordLog">
                 <ScalarProperty Name="UPLID" ColumnName="UPLID" />
                 <ScalarProperty Name="UID" ColumnName="UID" />
@@ -5888,7 +5921,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Lookup">
-            <EntityTypeMapping TypeName="NsDbContext.Lookup">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.Lookup">
               <MappingFragment StoreEntitySet="Lookup">
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="Category" ColumnName="Category" />
@@ -5912,7 +5945,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UserLogView">
-            <EntityTypeMapping TypeName="NsDbContext.UserLogView">
+            <EntityTypeMapping TypeName="db_NS_EducationModel.UserLogView">
               <MappingFragment StoreEntitySet="UserLogView">
                 <ScalarProperty Name="CreDate" ColumnName="CreDate" />
                 <ScalarProperty Name="UserName" ColumnName="UserName" />
@@ -5923,6 +5956,12 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="sp_BackUpDB" FunctionName="db_NS_EducationModel.Store.sp_BackUpDB" />
+          <FunctionImportMapping FunctionImportName="sp_DeleteOldErrorLog" FunctionName="db_NS_EducationModel.Store.sp_DeleteOldErrorLog" />
+          <FunctionImportMapping FunctionImportName="sp_DeleteOldUserLog" FunctionName="db_NS_EducationModel.Store.sp_DeleteOldUserLog" />
+          <FunctionImportMapping FunctionImportName="sp_GiftSendingHouseKeeping" FunctionName="db_NS_EducationModel.Store.sp_GiftSendingHouseKeeping" />
+          <FunctionImportMapping FunctionImportName="sp_RenewData" FunctionName="db_NS_EducationModel.Store.sp_RenewData" />
+          <FunctionImportMapping FunctionImportName="sp_ReseedPrimaryKeys" FunctionName="db_NS_EducationModel.Store.sp_ReseedPrimaryKeys" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

@@ -50,12 +50,14 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
         /// <summary>
         /// 傳入客戶代號，檢查系統中是否已有相同代號的資料。
         /// </summary>
-        /// <param name="customerId">客戶代號（統編）</param>
+        /// <param name="currentId">（可選）當前正在編輯的資料 ID</param>
+        /// <param name="code">要檢查的客戶代號</param>
         [HttpGet]
-        public async Task<string> IsOccupied(int customerId)
+        public async Task<string> IsOccupied(int? currentId, string code)
         {
             bool isOccupied = await DC.Customer
-                .AnyAsync(c => c.CID == customerId);
+                .Where(c => currentId == null || c.CID != currentId)
+                .AnyAsync(c => c.Code == code);
 
             Customer_IsOccupied_Output_APIItem result = new Customer_IsOccupied_Output_APIItem
             {

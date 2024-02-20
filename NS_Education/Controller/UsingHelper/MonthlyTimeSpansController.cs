@@ -14,7 +14,6 @@ using NS_Education.Tools.ControllerTools.BaseClass;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
-using NS_Education.Variables;
 
 namespace NS_Education.Controller.UsingHelper
 {
@@ -45,12 +44,19 @@ namespace NS_Education.Controller.UsingHelper
             IEnumerable<MonthlyTimeSpans_GetList_Output_Row_APIItem> transformed = Enumerable
                 .Range(startYear, endYear - startYear + 1)
                 .Reverse()
-                .Select(y => new MonthlyTimeSpans_GetList_Output_Row_APIItem
+                .Select((y, idx) =>
                 {
-                    Year = y,
-                    SetMonths = data.GetValueOrEmpty(y)
-                        .GroupBy(mts => mts.Month)
-                        .Count()
+                    MonthlyTimeSpans_GetList_Output_Row_APIItem item = new MonthlyTimeSpans_GetList_Output_Row_APIItem
+                    {
+                        Year = y,
+                        SetMonths = data.GetValueOrEmpty(y)
+                            .GroupBy(mts => mts.Month)
+                            .Count()
+                    };
+
+                    item.SetIndex(idx + 1);
+
+                    return item;
                 });
 
             CommonResponseForList<MonthlyTimeSpans_GetList_Output_Row_APIItem> result =
@@ -139,7 +145,7 @@ namespace NS_Education.Controller.UsingHelper
                 data.TimeSpanCt = input.MonthlyCt[i - 1];
             }
 
-            await DC.WriteUserLogAndSaveAsync(UserLogControlType.Add, GetUid(), Request);
+            await DC.SaveChangesStandardProcedureAsync(GetUid(), Request);
 
             return GetResponseJson(new SubmitHelperIdResponse
             {

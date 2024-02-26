@@ -113,7 +113,8 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                     Code = q.Code,
                     Title = q.Title,
                     SortNo = q.SortNo,
-                    Note = q.Note
+                    Note = q.Note,
+                    ActiveFlag = q.ActiveFlag
                 })
 
                 // 1. 開頭為數字升序
@@ -180,6 +181,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
                     Title = entity.Title,
                     SortNo = entity.SortNo,
                     Note = entity.Note ?? "",
+                    ActiveFlag = entity.ActiveFlag
                 });
         }
 

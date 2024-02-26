@@ -9,5 +9,6 @@ namespace NS_Education.Models.APIItems.Controller.StaticCode.GetList
         public string Title { get; set; }
         public int SortNo { get; set; }
         public string Note { get; set; }
+        public bool ActiveFlag { get; set; }
     }
 }

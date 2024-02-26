@@ -11,6 +11,14 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
         public bool Internal { get; set; } = true;
         public bool External { get; set; } = true;
         public bool CommDept { get; set; } = true;
+
+        // 相容前端錯字欄位
+        public bool CommmDept
+        {
+            set => CommDept = value;
+            get => CommDept;
+        }
+
         public string StartDate { get; set; }
         public string EndDate { get; set; }
 

@@ -60,6 +60,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 if (input.CustomerName != null)
                     query = query.Where(rh => rh.Customer.TitleC.Contains(input.CustomerName));
 
+                if (input.CustomerCode.HasContent())
+                    query = query.Where(rh => rh.Customer.Code.Contains(input.CustomerCode));
+
                 if (input.BSCID6.IsAboveZero())
                     query = query.Where(rh => rh.Customer.BSCID6 == input.BSCID6);
 

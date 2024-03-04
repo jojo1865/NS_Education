@@ -173,51 +173,70 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Include(rh => rh.B_StaticCode)
                 .Include(rh => rh.BusinessUser)
                 .Include(rh => rh.BusinessUser1)
-                // site
-                .Include(rh => rh.Resver_Site)
-                .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.B_OrderCode))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.B_StaticCode))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Head))
-                // resver_timespan
-                .Include(rh => rh.M_Resver_TimeSpan)
-                .Include(rh => rh.M_Resver_TimeSpan.Select(rts => rts.D_TimeSpan))
-                // site -> throw
-                .Include(rh => rh.Resver_Site)
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.B_StaticCode)))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.B_OrderCode)))
-                // site -> throw -> throw_food
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food)))
-                .Include(rh => rh.Resver_Site.Select(rs =>
-                    rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.D_FoodCategory))))
-                .Include(rh => rh.Resver_Site.Select(rs =>
-                    rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_StaticCode))))
-                .Include(rh => rh.Resver_Site.Select(rs =>
-                    rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_Partner))))
-                // site -> device
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_Device)))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_OrderCode)))
-                // otherItem
-                .Include(rh => rh.Resver_Other)
-                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem))
-                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem.B_StaticCode))
-                .Include(rh => rh.Resver_Other.Select(ro => ro.D_OtherPayItem.B_OrderCode))
-                // bill
-                .Include(rs => rs.Resver_Bill)
-                .Include(rs => rs.Resver_Bill.Select(rb => rb.B_Category))
-                .Include(rs => rs.Resver_Bill.Select(rb => rb.D_PayType))
-                // GiveBack
-                .Include(rb => rb.Resver_GiveBack)
-                .Include(rb => rb.Resver_GiveBack.Select(rg => rg.B_StaticCode))
-                // Questionnaire
-                .Include(rh => rh.Resver_Questionnaire)
                 .Where(rh => rh.RHID == id);
         }
 
         public async Task<Resver_GetAllInfoById_Output_APIItem> GetInfoByIdConvertEntityToResponse(Resver_Head entity)
         {
+            // 關聯表在這裡分次查詢, 減少 DB 壓力...
+
+            // site
+            entity.Resver_Site = await DC.Resver_Site
+                .Where(rs => rs.RHID == entity.RHID)
+                .Include(rs => rs.B_SiteData)
+                .Include(rs => rs.B_OrderCode)
+                .Include(rs => rs.B_StaticCode)
+                .Include(rs => rs.Resver_Head)
+                // site -> throw
+                .Include(rs => rs.Resver_Throw)
+                .Include(rs => rs.Resver_Throw.Select(rt => rt.B_StaticCode))
+                .Include(rs => rs.Resver_Throw.Select(rt => rt.B_OrderCode))
+                // site -> throw -> throw_food
+                .Include(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food))
+                .Include(rs =>
+                    rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.D_FoodCategory)))
+                .Include(rs =>
+                    rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_StaticCode)))
+                .Include(rs =>
+                    rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_Partner)))
+                // site -> device
+                .Include(rs => rs.Resver_Device)
+                .Include(rs => rs.Resver_Device.Select(rd => rd.B_Device))
+                .Include(rs => rs.Resver_Device.Select(rd => rd.B_OrderCode))
+                .ToArrayAsync();
+
+            // resver_timespan
+            entity.M_Resver_TimeSpan = await DC.M_Resver_TimeSpan
+                .Where(rts => rts.RHID == entity.RHID)
+                .Include(rts => rts.D_TimeSpan)
+                .ToArrayAsync();
+
+            // otherItem
+            entity.Resver_Other = await DC.Resver_Other
+                .Where(ro => ro.RHID == entity.RHID)
+                .Include(ro => ro.D_OtherPayItem)
+                .Include(ro => ro.D_OtherPayItem.B_StaticCode)
+                .Include(ro => ro.D_OtherPayItem.B_OrderCode)
+                .ToArrayAsync();
+
+            // bill
+            entity.Resver_Bill = await DC.Resver_Bill
+                .Where(rb => rb.RHID == entity.RHID)
+                .Include(rb => rb.B_Category)
+                .Include(rb => rb.D_PayType)
+                .ToArrayAsync();
+
+            // GiveBack
+            entity.Resver_GiveBack = await DC.Resver_GiveBack
+                .Where(rgb => rgb.RHID == entity.RHID)
+                .Include(rgb => rgb.B_StaticCode)
+                .ToArrayAsync();
+
+            // Questionnaire
+            entity.Resver_Questionnaire = await DC.Resver_Questionnaire
+                .Where(rq => rq.RHID == entity.RHID)
+                .ToArrayAsync();
+
             (M_Contect contact1, M_Contect contact2) = await GetInfoByIdGetContacts(entity);
 
             var result = new Resver_GetAllInfoById_Output_APIItem

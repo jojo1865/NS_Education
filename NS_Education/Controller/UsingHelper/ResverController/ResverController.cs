@@ -295,9 +295,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 BillItems = GetAllInfoByIdPopulateBillItems(entity),
                 GiveBackItems = GetAllInfoByIdPopulateGiveBackItems(entity),
                 QuestionnaireItems = GetAllInfoByIdPopulateQuestionnaireItems(entity),
-                QueryMilliseconds = new[]
-                        { StartTime, SiteTime, TimeSpanTime, OtherTime, BillTime, GiveBackTime, QuestionnaireTime }
-                    .ToDictionary(dt => nameof(dt), dt => (dt - StartTime).Milliseconds)
+                QueryMilliseconds = new Dictionary<string, int>
+                {
+                    { nameof(StartTime), (StartTime - StartTime).Milliseconds },
+                    { nameof(SiteTime), (SiteTime - StartTime).Milliseconds },
+                    { nameof(TimeSpanTime), (TimeSpanTime - StartTime).Milliseconds },
+                    { nameof(OtherTime), (OtherTime - StartTime).Milliseconds },
+                    { nameof(BillTime), (BillTime - StartTime).Milliseconds },
+                    { nameof(GiveBackTime), (GiveBackTime - StartTime).Milliseconds },
+                    { nameof(QuestionnaireTime), (QuestionnaireTime - StartTime).Milliseconds }
+                }
             };
 
             // 複製模式的處理：把 ID 都清成 0;

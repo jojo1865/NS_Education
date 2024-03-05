@@ -295,15 +295,16 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 BillItems = GetAllInfoByIdPopulateBillItems(entity),
                 GiveBackItems = GetAllInfoByIdPopulateGiveBackItems(entity),
                 QuestionnaireItems = GetAllInfoByIdPopulateQuestionnaireItems(entity),
-                QueryMilliseconds = new Dictionary<string, int>
+                QueryMilliseconds = new Dictionary<string, double>
                 {
-                    { nameof(StartTime), (StartTime - StartTime).Milliseconds },
-                    { nameof(SiteTime), (SiteTime - StartTime).Milliseconds },
-                    { nameof(TimeSpanTime), (TimeSpanTime - StartTime).Milliseconds },
-                    { nameof(OtherTime), (OtherTime - StartTime).Milliseconds },
-                    { nameof(BillTime), (BillTime - StartTime).Milliseconds },
-                    { nameof(GiveBackTime), (GiveBackTime - StartTime).Milliseconds },
-                    { nameof(QuestionnaireTime), (QuestionnaireTime - StartTime).Milliseconds }
+                    { nameof(StartTime), (StartTime - StartTime).TotalMilliseconds },
+                    { nameof(SiteTime), (SiteTime - StartTime).TotalMilliseconds },
+                    { nameof(TimeSpanTime), (TimeSpanTime - StartTime).TotalMilliseconds },
+                    { nameof(OtherTime), (OtherTime - StartTime).TotalMilliseconds },
+                    { nameof(BillTime), (BillTime - StartTime).TotalMilliseconds },
+                    { nameof(GiveBackTime), (GiveBackTime - StartTime).TotalMilliseconds },
+                    { nameof(QuestionnaireTime), (QuestionnaireTime - StartTime).TotalMilliseconds },
+                    { "Transformed", (DateTime.Now - StartTime).TotalMilliseconds }
                 }
             };
 

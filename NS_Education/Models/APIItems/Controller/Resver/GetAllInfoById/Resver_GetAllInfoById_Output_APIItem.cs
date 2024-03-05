@@ -74,6 +74,6 @@ namespace NS_Education.Models.APIItems.Controller.Resver.GetAllInfoById
         public int FixedPrice { get; set; }
         public int QuotedPrice { get; set; }
 
-        public IDictionary<string, int> QueryMilliseconds { get; set; }
+        public IDictionary<string, double> QueryMilliseconds { get; set; }
     }
 }

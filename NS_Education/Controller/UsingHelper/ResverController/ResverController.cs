@@ -147,7 +147,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
 
         #region GetInfoById
 
-        private bool CopyMode = false;
+        private bool CopyMode;
 
         // 確切 route 請參照 RouteConfig
         [HttpGet]
@@ -189,23 +189,31 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Include(rs => rs.B_OrderCode)
                 .Include(rs => rs.B_StaticCode)
                 .Include(rs => rs.Resver_Head)
-                // site -> throw
-                .Include(rs => rs.Resver_Throw)
-                .Include(rs => rs.Resver_Throw.Select(rt => rt.B_StaticCode))
-                .Include(rs => rs.Resver_Throw.Select(rt => rt.B_OrderCode))
-                // site -> throw -> throw_food
-                .Include(rs => rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food))
-                .Include(rs =>
-                    rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.D_FoodCategory)))
-                .Include(rs =>
-                    rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_StaticCode)))
-                .Include(rs =>
-                    rs.Resver_Throw.Select(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_Partner)))
                 // site -> device
                 .Include(rs => rs.Resver_Device)
                 .Include(rs => rs.Resver_Device.Select(rd => rd.B_Device))
                 .Include(rs => rs.Resver_Device.Select(rd => rd.B_OrderCode))
                 .ToArrayAsync();
+
+            // site -> throw
+            int[] allRsIds = entity.Resver_Site.Select(rs => rs.RSID).Distinct().ToArray();
+
+            ILookup<int, Resver_Throw> throws = (await DC.Resver_Throw
+                    .Where(rt => allRsIds.Contains(rt.RSID))
+                    .Include(rt => rt.B_StaticCode)
+                    .Include(rt => rt.B_OrderCode)
+                    // site -> throw -> throw_food
+                    .Include(rt => rt.Resver_Throw_Food)
+                    .Include(rt => rt.Resver_Throw_Food.Select(rtf => rtf.D_FoodCategory))
+                    .Include(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_StaticCode))
+                    .Include(rt => rt.Resver_Throw_Food.Select(rtf => rtf.B_Partner))
+                    .ToArrayAsync())
+                .ToLookup(rt => rt.RSID, rt => rt);
+
+            foreach (Resver_Site resverSite in entity.Resver_Site)
+            {
+                resverSite.Resver_Throw = throws.GetValueOrEmpty(resverSite.RSID).ToList();
+            }
 
             DateTime SiteTime = DateTime.Now;
 

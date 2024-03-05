@@ -180,6 +180,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
         {
             // 關聯表在這裡分次查詢, 減少 DB 壓力...
 
+            DateTime StartTime = DateTime.Now;
+
             // site
             entity.Resver_Site = await DC.Resver_Site
                 .Where(rs => rs.RHID == entity.RHID)
@@ -205,11 +207,15 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Include(rs => rs.Resver_Device.Select(rd => rd.B_OrderCode))
                 .ToArrayAsync();
 
+            DateTime SiteTime = DateTime.Now;
+
             // resver_timespan
             entity.M_Resver_TimeSpan = await DC.M_Resver_TimeSpan
                 .Where(rts => rts.RHID == entity.RHID)
                 .Include(rts => rts.D_TimeSpan)
                 .ToArrayAsync();
+
+            DateTime TimeSpanTime = DateTime.Now;
 
             // otherItem
             entity.Resver_Other = await DC.Resver_Other
@@ -219,6 +225,8 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Include(ro => ro.D_OtherPayItem.B_OrderCode)
                 .ToArrayAsync();
 
+            DateTime OtherTime = DateTime.Now;
+
             // bill
             entity.Resver_Bill = await DC.Resver_Bill
                 .Where(rb => rb.RHID == entity.RHID)
@@ -226,16 +234,22 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 .Include(rb => rb.D_PayType)
                 .ToArrayAsync();
 
+            DateTime BillTime = DateTime.Now;
+
             // GiveBack
             entity.Resver_GiveBack = await DC.Resver_GiveBack
                 .Where(rgb => rgb.RHID == entity.RHID)
                 .Include(rgb => rgb.B_StaticCode)
                 .ToArrayAsync();
 
+            DateTime GiveBackTime = DateTime.Now;
+
             // Questionnaire
             entity.Resver_Questionnaire = await DC.Resver_Questionnaire
                 .Where(rq => rq.RHID == entity.RHID)
                 .ToArrayAsync();
+
+            DateTime QuestionnaireTime = DateTime.Now;
 
             (M_Contect contact1, M_Contect contact2) = await GetInfoByIdGetContacts(entity);
 
@@ -280,7 +294,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 OtherItems = GetAllInfoByIdPopulateOtherItems(entity),
                 BillItems = GetAllInfoByIdPopulateBillItems(entity),
                 GiveBackItems = GetAllInfoByIdPopulateGiveBackItems(entity),
-                QuestionnaireItems = GetAllInfoByIdPopulateQuestionnaireItems(entity)
+                QuestionnaireItems = GetAllInfoByIdPopulateQuestionnaireItems(entity),
+                QueryMilliseconds = new[]
+                        { StartTime, SiteTime, TimeSpanTime, OtherTime, BillTime, GiveBackTime, QuestionnaireTime }
+                    .ToDictionary(dt => nameof(dt), dt => (dt - StartTime).Milliseconds)
             };
 
             // 複製模式的處理：把 ID 都清成 0;

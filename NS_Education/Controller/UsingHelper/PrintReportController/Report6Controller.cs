@@ -26,6 +26,22 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         public async Task<CommonResponseForPagedList<Report6_Output_Row_APIItem>> GetResultAsync(
             Report6_Input_APIItem input)
         {
+            // 如果 CommDept, Internal, External 有任何一者為 true 時
+            // null 視為 false
+
+            if (input.CommDept is true || input.External is true || input.Internal is true)
+            {
+                input.CommDept = input.CommDept ?? false;
+                input.External = input.External ?? false;
+                input.Internal = input.Internal ?? false;
+            }
+            else
+            {
+                input.CommDept = input.CommDept ?? true;
+                input.External = input.External ?? true;
+                input.Internal = input.Internal ?? true;
+            }
+
             using (NsDbContext dbContext = new NsDbContext())
             {
                 DateTime startDate = input.StartDate?.ParseDateTime() ?? SqlDateTime.MinValue.Value;
@@ -39,9 +55,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
                     .Where(rh => !rh.DeleteFlag)
                     .Where(rh => startDate <= rh.SDate && rh.EDate <= endDate)
-                    .Where(rh => (input.Internal && rh.Customer.TypeFlag == (int)CustomerType.Internal)
-                                 || (input.External && rh.Customer.TypeFlag == (int)CustomerType.External)
-                                 || (input.CommDept && rh.Customer.TypeFlag == (int)CustomerType.CommDept))
+                    .Where(rh => (input.Internal.Value && rh.Customer.TypeFlag == (int)CustomerType.Internal)
+                                 || (input.External.Value && rh.Customer.TypeFlag == (int)CustomerType.External)
+                                 || (input.CommDept.Value && rh.Customer.TypeFlag == (int)CustomerType.CommDept))
                     .AsQueryable();
 
                 // 特殊情況：如果 RHID 只有「0」，視為沒有篩選。
@@ -127,9 +143,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             excelBuilder.CreateRow()
                 .SetValue(4, "課程對象:")
-                .SetValue(5, input.Internal ? "內部單位" : "")
-                .SetValue(6, input.External ? "外部單位" : "")
-                .SetValue(7, input.CommDept ? "通訊處" : "");
+                .SetValue(5, input.Internal != null && input.Internal.Value ? "內部單位" : "")
+                .SetValue(6, input.External != null && input.External.Value ? "外部單位" : "")
+                .SetValue(7, input.CommDept != null && input.CommDept.Value ? "通訊處" : "");
 
             if (conditions.Any())
             {

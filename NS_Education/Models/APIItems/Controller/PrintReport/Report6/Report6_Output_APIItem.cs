@@ -27,10 +27,10 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
 
         public IEnumerable<int> RHID { get; set; }
 
-        public bool Internal { get; set; } = true;
-        public bool External { get; set; } = true;
+        public bool? Internal { get; set; }
+        public bool? External { get; set; }
 
-        public bool CommDept { get; set; } = true;
+        public bool? CommDept { get; set; }
 
         public override void SetByInput(BaseRequestForPagedList input)
         {
@@ -40,10 +40,10 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report6
                 EndDate = r6.EndDate?.ParseDateTime().ToString("yyyy/MM/dd");
                 List<string> opponents = new List<string>();
 
-                if (r6.Internal)
+                if (r6.Internal != null && r6.Internal.Value)
                     opponents.Add("INTERNAL");
 
-                if (r6.External)
+                if (r6.External != null && r6.External.Value)
                     opponents.Add("EXTERNAL");
 
                 Opponents = opponents.ToArray();

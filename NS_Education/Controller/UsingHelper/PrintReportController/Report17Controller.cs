@@ -591,13 +591,17 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 Rows = entity.Resver_Site
                     .SelectMany(rs => rs.Resver_Throw)
                     .OrderBy(rt => rt.TargetDate)
-                    .SelectMany(rt => rt.Resver_Throw_Food)
-                    .Select(rtf => new Report17_Output_TableRow_APIItem
+                    .Select(rt => new Report17_Output_TableRow_APIItem
                     {
-                        Date = rtf.Resver_Throw.TargetDate.ToFormattedStringDate(),
-                        Description = $"{rtf.D_FoodCategory.Title} {rtf.Ct}份 {rtf.B_Partner.Title}",
-                        Amount = rtf.Price,
-                        PartnerName = rtf.B_Partner.Title
+                        Date = rt.TargetDate.ToFormattedStringDate(),
+                        Description = rt.Resver_Throw_Food
+                            .Select(rtf => $"{rtf.D_FoodCategory.Title}*{rtf.Ct}份（{rtf.B_Partner.Title}）")
+                            .StringJoin("\n"),
+                        Amount = rt.QuotedPrice,
+                        PartnerName = rt.Resver_Throw_Food
+                            .Select(rtf => rtf.B_Partner?.Title)
+                            .Where(s => s.HasContent())
+                            .StringJoin("、")
                     })
             };
 

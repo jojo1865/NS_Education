@@ -343,25 +343,43 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .ToDictionaryAsync(bsc => bsc.Code, bsc => bsc.SortNo == 1);
 
             bool enforceOneSessionPerUser = data.GetValueOrDefault(enforceOneSessionPerUserCode);
-            bool newCanKickOld = data.GetValueOrDefault(newCanKickOldCode);
 
-            bool needsChecking = enforceOneSessionPerUser && !newCanKickOld;
-
-            if (!needsChecking)
+            // 沒限制同時登入，不再檢查
+            if (!enforceOneSessionPerUser)
                 return true;
 
             try
             {
                 DateTime expireTime = queried.LoginDate.AddMinutes(JwtConstants.ExpireMinutes);
-                bool notExpiredYet = expireTime >= DateTime.Now;
+                bool hasExpired = expireTime >= DateTime.Now;
 
-                if (notExpiredYet)
+                // 上一組登入過期了，開放登入
+
+                if (hasExpired) return true;
+
+                // 上一組登入還沒過期
+
+                // 特殊情況：同一裝置可以踢掉舊的登入
+                // 每個 uid 發行 JWT 時紀錄 IP，如果這組 IP 不符合當前要求的 IP 
+
+                bool newCanKickOld = data.GetValueOrDefault(newCanKickOldCode);
+
+                if (newCanKickOld)
                 {
-                    AddError(new BusinessError(1,
-                        $"同一使用者，同一時間只能登入一次。請於 {expireTime.ToFormattedStringDateTime()} 之後再嘗試登入。"));
+                    // 檢查這個 uid 最後登入時登記的 IP，如果符合現在的 IP 就開放再度登入
+                    // 如果還沒有登記，視為通過
+
+                    userIdToLastLoginIpAddress.TryGetValue(queried.UID, out string lastIpAddress);
+
+                    if (lastIpAddress.IsNullOrWhiteSpace()) return true;
+
+                    if (lastIpAddress == Request.UserHostAddress) return true;
                 }
 
-                return !notExpiredYet;
+                AddError(new BusinessError(1,
+                    $"同一使用者，同一時間只能登入一次。請於 {expireTime.ToFormattedStringDateTime()} 之後再嘗試登入。"));
+
+                return false;
             }
             catch (SecurityTokenExpiredException)
             {
@@ -390,12 +408,16 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 .FirstOrDefaultAsync();
         }
 
-        private static (string, bool) LoginCreateJwt(UserData queried)
+        private static IDictionary<int, string> userIdToLastLoginIpAddress = new Dictionary<int, string>();
+
+        private (string, bool) LoginCreateJwt(UserData queried)
         {
             (List<Claim> claims, bool isAdmin) claimAndIsAdmin = LoginCreateClaims(queried);
 
             string jwt =
                 JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claimAndIsAdmin.claims);
+
+            userIdToLastLoginIpAddress[queried.UID] = Request.UserHostAddress;
             return (jwt, claimAndIsAdmin.isAdmin);
         }
 

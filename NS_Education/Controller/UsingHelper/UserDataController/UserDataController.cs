@@ -352,7 +352,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             try
             {
                 DateTime expireTime = queried.LoginDate.AddMinutes(JwtConstants.ExpireMinutes);
-                bool hasExpired = expireTime >= DateTime.Now;
+                bool hasExpired = expireTime < DateTime.Now;
 
                 // 上一組登入過期了，開放登入
 

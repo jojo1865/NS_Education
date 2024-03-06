@@ -27,6 +27,22 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         public async Task<CommonResponseForPagedList<Report9_Output_Row_APIItem>> GetResultAsync(
             Report9_Input_APIItem input)
         {
+            // 如果 CommDept, Internal, External 有任何一者為 true 時
+            // null 視為 false
+
+            if (input.CommDept is true || input.External is true || input.Internal is true)
+            {
+                input.CommDept = input.CommDept ?? false;
+                input.External = input.External ?? false;
+                input.Internal = input.Internal ?? false;
+            }
+            else
+            {
+                input.CommDept = input.CommDept ?? true;
+                input.External = input.External ?? true;
+                input.Internal = input.Internal ?? true;
+            }
+
             using (NsDbContext dbContext = new NsDbContext())
             {
                 DateTime startTime = input.StartDate?.ParseDateTime() ?? SqlDateTime.MinValue.Value;

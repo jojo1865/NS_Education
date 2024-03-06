@@ -47,6 +47,22 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             if (!isValid)
                 return null;
 
+            // 如果 CommDept, Internal, External 有任何一者為 true 時
+            // null 視為 false
+
+            if (input.ShowCommDept is true || input.ShowExternal is true || input.ShowInternal is true)
+            {
+                input.ShowCommDept = input.ShowCommDept ?? false;
+                input.ShowExternal = input.ShowExternal ?? false;
+                input.ShowInternal = input.ShowInternal ?? false;
+            }
+            else
+            {
+                input.ShowCommDept = input.ShowCommDept ?? true;
+                input.ShowExternal = input.ShowExternal ?? true;
+                input.ShowInternal = input.ShowInternal ?? true;
+            }
+
             using (NsDbContext dbContext = new NsDbContext())
             {
                 DateTime startTime = startYearMonth;
@@ -64,9 +80,12 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(rs => startTime <= rs.TargetDate && rs.TargetDate <= endTime)
                     .Where(rs => input.BC_Title == null || rs.B_SiteData.B_Category.TitleC == input.BC_Title)
                     .Where(rs => input.SiteName == null || rs.B_SiteData.Title.Contains(input.SiteName))
-                    .Where(rs => input.ShowInternal || rs.Resver_Head.Customer.TypeFlag != (int)CustomerType.Internal)
-                    .Where(rs => input.ShowExternal || rs.Resver_Head.Customer.TypeFlag != (int)CustomerType.External)
-                    .Where(rs => input.ShowCommDept || rs.Resver_Head.Customer.TypeFlag != (int)CustomerType.CommDept)
+                    .Where(rs =>
+                        input.ShowInternal.Value || rs.Resver_Head.Customer.TypeFlag != (int)CustomerType.Internal)
+                    .Where(rs =>
+                        input.ShowExternal.Value || rs.Resver_Head.Customer.TypeFlag != (int)CustomerType.External)
+                    .Where(rs =>
+                        input.ShowCommDept.Value || rs.Resver_Head.Customer.TypeFlag != (int)CustomerType.CommDept)
                     .GroupJoin(dbContext.M_Resver_TimeSpan
                             .Include(rts => rts.D_TimeSpan)
                             .Where(rts => rts.TargetTable == tableName),
@@ -102,30 +121,36 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 };
 
                 IEnumerable<string> firstLineUsages = new[]
-                {
-                    startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM全館使用率")),
-                    input.ShowInternal ? startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM內部使用率")) : null,
-                    input.ShowExternal ? startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM外部使用率")) : null,
-                    input.ShowCommDept ? startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM通訊處使用率")) : null
-                }
+                    {
+                        startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM全館使用率")),
+                        input.ShowInternal != null && input.ShowInternal.Value
+                            ? startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM內部使用率"))
+                            : null,
+                        input.ShowExternal != null && input.ShowExternal.Value
+                            ? startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM外部使用率"))
+                            : null,
+                        input.ShowCommDept != null && input.ShowCommDept.Value
+                            ? startTime.MonthRange(endYearMonth).Select(d => d.ToString("yyyy/MM通訊處使用率"))
+                            : null
+                    }
                     .Where(e => e != null)
                     .SelectMany(s => s);
 
                 firstLine = firstLine.Concat(firstLineUsages);
-                
+
                 response.Items = new List<Report12_Output_Row_APIItem>()
                 {
                     new Report12_Output_Row_APIItem
                     {
                         Cells = firstLine
-                    }, 
+                    },
                     new Report12_Output_Row_APIItem()
                     {
-                        Cells = new[]{"時段數", "", "", ""}.Concat(input.MonthHours.Select(h => h.ToString()))
+                        Cells = new[] { "時段數", "", "", "" }.Concat(input.MonthHours.Select(h => h.ToString()))
                     }
                 };
-                
-                
+
+
                 List<Report12_Output_Row_APIItem> actualRows = sites
                     .Select(sd =>
                     {
@@ -144,30 +169,33 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         };
 
                         Report12_Output_Row_MonthlyUsage_APIItem totalUsages = GetUsage(rs, rts, input);
-                        Report12_Output_Row_MonthlyUsage_APIItem internalUsages = GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal),
+                        Report12_Output_Row_MonthlyUsage_APIItem internalUsages = GetUsage(
+                            rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal),
                             rts, input);
-                        Report12_Output_Row_MonthlyUsage_APIItem externalUsages = GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.External),
+                        Report12_Output_Row_MonthlyUsage_APIItem externalUsages = GetUsage(
+                            rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.External),
                             rts, input);
-                        Report12_Output_Row_MonthlyUsage_APIItem commDeptUsages = GetUsage(rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept),
+                        Report12_Output_Row_MonthlyUsage_APIItem commDeptUsages = GetUsage(
+                            rs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept),
                             rts, input);
 
                         IEnumerable<string> usages = new[]
                             {
                                 totalUsages,
-                                input.ShowInternal ? internalUsages : null,
-                                input.ShowExternal ? externalUsages : null,
-                                input.ShowCommDept ? commDeptUsages : null
+                                input.ShowInternal != null && input.ShowInternal.Value ? internalUsages : null,
+                                input.ShowExternal != null && input.ShowExternal.Value ? externalUsages : null,
+                                input.ShowCommDept != null && input.ShowCommDept.Value ? commDeptUsages : null
                             }
                             .Where(u => u != null)
                             .SelectMany(u => u.MonthlyUsage);
 
                         results.AddRange(usages);
-                        
+
                         Report12_Output_Row_APIItem row = new Report12_Output_Row_APIItem
                         {
                             Cells = results
                         };
-                        
+
                         return row;
                     })
                     .SortWithInput(input)
@@ -178,28 +206,31 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.Items = response.Items
                     .Concat(actualRows)
                     .ToList();
-                
+
                 int totalAreaSize = sites.Sum(s => (int?)s.AreaSize) ?? 0;
                 HashSet<B_SiteData> uniqueSites = sites.DistinctBy(s => s.BSID).ToHashSet();
 
                 // Total 行
                 Resver_Site[] allRs = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rs).ToArray();
                 M_Resver_TimeSpan[] allRts = groupedResverSites.Values.SelectMany(v => v).Select(v => v.rts).ToArray();
-                
+
                 Report12_Output_Row_MonthlyUsage_APIItem allTotalUsages = GetUsage(allRs, allRts, input, uniqueSites);
-                Report12_Output_Row_MonthlyUsage_APIItem allInternalUsages = GetUsage(allRs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal),
+                Report12_Output_Row_MonthlyUsage_APIItem allInternalUsages = GetUsage(
+                    allRs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal),
                     allRts, input, uniqueSites);
-                Report12_Output_Row_MonthlyUsage_APIItem allExternalUsages = GetUsage(allRs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.External),
+                Report12_Output_Row_MonthlyUsage_APIItem allExternalUsages = GetUsage(
+                    allRs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.External),
                     allRts, input, uniqueSites);
-                Report12_Output_Row_MonthlyUsage_APIItem allCommDeptUsages = GetUsage(allRs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept),
+                Report12_Output_Row_MonthlyUsage_APIItem allCommDeptUsages = GetUsage(
+                    allRs.Where(r => r.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept),
                     allRts, input, uniqueSites);
 
                 IEnumerable<string> allUsages = new[]
                     {
                         allTotalUsages,
-                        input.ShowInternal ? allInternalUsages : null,
-                        input.ShowExternal ? allExternalUsages : null,
-                        input.ShowCommDept ? allCommDeptUsages : null
+                        input.ShowInternal != null && input.ShowInternal.Value ? allInternalUsages : null,
+                        input.ShowExternal != null && input.ShowExternal.Value ? allExternalUsages : null,
+                        input.ShowCommDept != null && input.ShowCommDept.Value ? allCommDeptUsages : null
                     }
                     .Where(u => u != null)
                     .SelectMany(u => u.MonthlyUsage);
@@ -232,7 +263,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             DateTime start = input.StartYearMonth.ParseDateTime(DateTimeParseType.YearMonth).Date;
             DateTime end = input.EndYearMonth.ParseDateTime(DateTimeParseType.YearMonth).Date;
-            
+
             return new Report12_Output_Row_MonthlyUsage_APIItem
             {
                 MonthlyUsageDecimal = start.MonthRange(end)
@@ -245,10 +276,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             IEnumerable<M_Resver_TimeSpan> resverTimeSpans, DateTime yearMonth, Report12_Input_APIItem input,
             ISet<B_SiteData> allUniqueSites = null)
         {
-
             DateTime start = input.StartYearMonth.ParseDateTime(DateTimeParseType.YearMonth);
-            
-            int hours = input.MonthHours[start.TotalMonths(yearMonth)-1];
+
+            int hours = input.MonthHours[start.TotalMonths(yearMonth) - 1];
 
             if (!hours.IsAboveZero())
                 return null;
@@ -259,7 +289,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             // 每月總使用率 = (每間教室使用時段數 * 每間教室坪數) / (每月可供租用時段數 * 教室總坪數)
             //
             // ( Σ (各教室的租用小時數 * 各教室坪數) ) / ( hour * Σ 所有獨特場地的坪數 )
-            resverSites = resverSites.Where(rs => rs.TargetDate.Year == yearMonth.Year && rs.TargetDate.Month == yearMonth.Month).ToArray();
+            resverSites = resverSites
+                .Where(rs => rs.TargetDate.Year == yearMonth.Year && rs.TargetDate.Month == yearMonth.Month).ToArray();
             HashSet<int> ids = resverSites.Select(rs => rs.RSID).Distinct().ToHashSet();
             resverTimeSpans = resverTimeSpans.Where(rts => ids.Contains(rts.TargetID));
 

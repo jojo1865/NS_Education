@@ -129,18 +129,13 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 .Validate(c => ValidateIdleSeconds(claims, safetyConfiguration),
                     (_, e) => errorMessage = HasValidTokenFailed(e))
                 .Validate(c => ValidateTokenIsLatest(c, claims, safetyConfiguration),
-                    (_, e) => errorMessage = e.Message)
+                    _ => errorMessage = TokenExpired)
                 .Validate(c => ValidateLastPasswordChange(claims, safetyConfiguration)) // 只有這裡要回傳 901，所以不做 catch
                 .Validate(c => ValidateClaimRole(c, claims),
                     _ => errorMessage = HasNoRoleOrPrivilege)
                 .Validate(c => ValidatePrivileges(c, claims),
                     _ => errorMessage = HasNoRoleOrPrivilege)
                 .IsValid();
-
-            // 如果是最高權限，且 JWT 沒有過期，直接當成有權限。
-            if (claims != null
-                && claims.IsInRole(RoleConstants.Admin))
-                return;
 
             if (isValid) return;
 
@@ -215,7 +210,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
             }
         }
 
-        private void ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims,
+        private bool ValidateTokenIsLatest(ActionExecutingContext actionExecutingContext, ClaimsPrincipal claims,
             IEnumerable<B_StaticCode> safetyConfig)
         {
             // 先檢查設定檔，如果此功能關閉，就不做任何驗證。
@@ -223,7 +218,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 GetSafetyConfigValue(safetyConfig, StaticCodeSafetyControlCode.EnforceOneSessionPerUser) == 1;
 
             if (!isEnabled)
-                return;
+                return true;
 
             // 驗證 Token 符合 UserData 中紀錄的 JWT
             int uid = FilterStaticTools.GetUidInClaimInt(claims);
@@ -233,11 +228,7 @@ namespace NS_Education.Tools.Filters.JwtAuthFilter
                 UserData user =
                     nsDbContext.UserData.FirstOrDefault(ud => ud.UID == uid && ud.ActiveFlag && !ud.DeleteFlag);
 
-                if (user is null)
-                    throw new Exception(UserDataNotFound);
-
-                if (user.JWT != GetToken(actionExecutingContext))
-                    throw new Exception(TokenExpired);
+                return user?.JWT == GetToken(actionExecutingContext);
             }
         }
 

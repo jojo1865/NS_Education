@@ -314,7 +314,8 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
                 JwtToken = result.jwt,
                 IsAdministrator = result.isAdmin,
                 DaysUntilPasswordExpires =
-                    (userLastPasswordChangeDate.AddDays(currentMaxPasswordDays).Date - DateTime.Now.Date).Days
+                    (userLastPasswordChangeDate.AddDays(currentMaxPasswordDays).Date - DateTime.Now.Date).Days,
+                IpAddress = Request.UserHostAddress
             };
 
             bool isUpdateSuccessful = await LoginUpdateDb(queried, result.jwt);

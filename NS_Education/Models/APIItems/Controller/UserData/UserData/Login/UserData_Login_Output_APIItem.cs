@@ -12,5 +12,7 @@ namespace NS_Education.Models.APIItems.Controller.UserData.UserData.Login
         public int DaysUntilPasswordExpires { get; set; }
 
         public bool IsAdministrator { get; set; }
+
+        public string IpAddress { get; set; }
     }
 }

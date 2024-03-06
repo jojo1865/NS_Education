@@ -1,6 +1,4 @@
-using System;
 using NPOI.SS.UserModel;
-using NPOI.SS.Util;
 using NS_Education.Tools.ExcelBuild.ExcelBuilderAction;
 
 namespace NS_Education.Tools.ExcelBuild
@@ -37,18 +35,11 @@ namespace NS_Education.Tools.ExcelBuild
             action.Execute(row);
         }
 
-        internal void SetHeightRatio(ISheet sheet, float ratio)
-        {
-            IRow row = GetRow(sheet);
-
-            row.Height = Convert.ToInt16(sheet.DefaultRowHeight * ratio);
-
-            foreach (ICell cell in row.Cells)
-            {
-                CellUtil.SetVerticalAlignment(cell, VerticalAlignment.Center);
-            }
-        }
-
         #endregion
+
+        public void AutoHeight(ISheet sheet)
+        {
+            GetRow(sheet).Height = -1;
+        }
     }
 }

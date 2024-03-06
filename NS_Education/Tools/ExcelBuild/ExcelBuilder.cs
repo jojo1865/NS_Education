@@ -276,7 +276,7 @@ namespace NS_Education.Tools.ExcelBuild
         {
             foreach (ExcelBuilderRow excelBuilderRow in Rows)
             {
-                excelBuilderRow.SetHeightRatio(Sheet, 1.25f);
+                excelBuilderRow.AutoHeight(Sheet);
             }
 
             for (int i = 0; i < Columns; i++)

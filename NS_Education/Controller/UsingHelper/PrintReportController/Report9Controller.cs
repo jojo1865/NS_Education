@@ -48,9 +48,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             .Select(rh2 => rh2.Customer))
                     .Where(rh => !rh.DeleteFlag)
                     .Where(rh => startTime <= rh.SDate && rh.EDate <= endTime)
-                    .Where(rh => (input.Internal && rh.Customer.TypeFlag == (int)CustomerType.Internal)
-                                 || (input.External && rh.Customer.TypeFlag == (int)CustomerType.External)
-                                 || (input.CommDept && rh.Customer.TypeFlag == (int)CustomerType.CommDept)
+                    .Where(rh => (input.Internal.Value && rh.Customer.TypeFlag == (int)CustomerType.Internal)
+                                 || (input.External.Value && rh.Customer.TypeFlag == (int)CustomerType.External)
+                                 || (input.CommDept.Value && rh.Customer.TypeFlag == (int)CustomerType.CommDept)
                     )
                     .AsQueryable();
 
@@ -206,9 +206,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Align(1, HorizontalAlignment.Right)
                 .SetValue(2, new[]
                     {
-                        input.Internal ? CustomerType.Internal.GetTypeFlagName() : null,
-                        input.External ? CustomerType.External.GetTypeFlagName() : null,
-                        input.CommDept ? CustomerType.CommDept.GetTypeFlagName() : null
+                        input.Internal != null && input.Internal.Value ? CustomerType.Internal.GetTypeFlagName() : null,
+                        input.External != null && input.External.Value ? CustomerType.External.GetTypeFlagName() : null,
+                        input.CommDept != null && input.CommDept.Value ? CustomerType.CommDept.GetTypeFlagName() : null
                     }
                     .Where(s => s.HasContent())
                     .StringJoin(","));

@@ -20,9 +20,10 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
 
         public string StartDate { get; set; }
         public string EndDate { get; set; }
-        public bool Internal { get; set; }
-        public bool External { get; set; }
-        public bool CommDept { get; set; }
+        public bool? Internal { get; set; }
+        public bool? External { get; set; }
+
+        public bool? CommDept { get; set; }
         public string CustomerName { get; set; }
         public string CustomerCode { get; set; }
         public int? BSCID6 { get; set; }

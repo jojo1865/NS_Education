@@ -8,12 +8,13 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report9
     public class Report9_Input_APIItem : BaseRequestForPagedList
     {
         public IEnumerable<int> CID { get; set; }
-        public bool Internal { get; set; } = true;
-        public bool External { get; set; } = true;
-        public bool CommDept { get; set; } = true;
+        public bool? Internal { get; set; }
+        public bool? External { get; set; }
+
+        public bool? CommDept { get; set; }
 
         // 相容前端錯字欄位
-        public bool CommmDept
+        public bool? CommmDept
         {
             set => CommDept = value;
             get => CommDept;

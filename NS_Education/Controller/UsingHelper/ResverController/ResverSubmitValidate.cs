@@ -170,16 +170,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                                     nameof(Resver_Throw.RTID))).Result,
                                                             () => AddError(NotFound($"行程預約單 ID（{item.RTID}）",
                                                                 nameof(item.RTID))))
-                                                        // 檢查所有行程的日期都等於場地的日期
-                                                        .Validate(ti =>
-                                                                ti.TargetDate.TryParseDateTime(
-                                                                    out DateTime throwTargetDate)
-                                                                && si.TargetDate.TryParseDateTime(
-                                                                    out DateTime siteTargetDate)
-                                                                && throwTargetDate.Date == siteTargetDate.Date,
-                                                            () => AddError(OutOfRange($"預約行程的預計使用日期（{item.TargetDate}）",
-                                                                nameof(item.TargetDate),
-                                                                si.TargetDate, si.TargetDate)))
                                                         .Validate(
                                                             ti => Task.Run(() =>
                                                                 SubmitValidateStaticCode(ti.BSCID,
@@ -265,16 +255,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                              DC.Resver_Device.ValidateIdExists(item.RDID,
                                                                  nameof(Resver_Device.RDID))).Result
                                                          , () => AddError(NotFound($"設備預約單 ID（{item.RDID}）", nameof(item.RDID))))
-                                                     // 檢查所有設備的預約日期都與場地日期相符
-                                                     .Validate(di =>
-                                                             di.TargetDate.TryParseDateTime(
-                                                                 out DateTime deviceTargetDate)
-                                                             && si.TargetDate.TryParseDateTime(
-                                                                 out DateTime siteTargetDate)
-                                                             && deviceTargetDate.Date == siteTargetDate.Date,
-                                                         () => AddError(OutOfRange($"預約設備的預計使用日期（{item.TargetDate}）",
-                                                             nameof(item.TargetDate),
-                                                             si.TargetDate, si.TargetDate)))
                                                      .Validate(di => SubmitValidateDevice(di.BDID),
                                                          () => AddError(NotFound($"預約設備 ID（{item.BDID}）",
                                                              nameof(item.BDID))))
@@ -450,7 +430,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                         .Where(dts => allInputDtsIds.Any(id => id == dts.DTSID))
                         .ToArrayAsync();
 
-                    DateTime targetDate = deviceItem.TargetDate.ParseDateTime();
+                    DateTime targetDate = siteItem.TargetDate.ParseDateTime();
 
                     // 每個時段
                     foreach (D_TimeSpan timeSpan in wantedTimeSpans)

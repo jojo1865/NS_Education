@@ -250,7 +250,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     continue;
                 }
 
-                device.TargetDate = deviceItem.TargetDate.ParseDateTime().Date;
+                device.TargetDate = site.TargetDate;
                 device.RSID = site.RSID;
                 device.BDID = deviceItem.BDID;
                 device.Ct = deviceItem.Ct;
@@ -304,7 +304,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                     continue;
                 }
 
-                throwData.TargetDate = throwItem.TargetDate.ParseDateTime().Date;
+                throwData.TargetDate = site.TargetDate;
                 throwData.RSID = site.RSID;
                 throwData.BSCID = throwItem.BSCID;
                 throwData.Title = throwItem.Title;

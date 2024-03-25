@@ -632,11 +632,11 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         RHID = entity.RHID,
                         PayMethod = input.PayMethod ?? "",
                         PayDescription = input.PayDescription ?? "",
-                        AccountDate = entity.Resver_Head_Log
-                            .Where(rhl => rhl.Type == 4) // 已結帳
-                            .OrderByDescending(rhl => rhl.CreDate)
-                            .Select(rhl => rhl.CreDate)
-                            .FirstOrDefault()
+                        AccountDate = (entity.Resver_Head_Log
+                                .Where(rhl => rhl.Type == 4) // 已結帳
+                                .OrderByDescending(rhl => rhl.CreDate)
+                                .FirstOrDefault()?
+                                .CreDate ?? DateTime.Today) // 尚未結帳時，出產表當日的日期
                             .ToFormattedStringDate(),
                         ContactName = entity.Customer?.ContectName ?? "",
                         CustomerName = entity.Customer?.TitleC ?? "",

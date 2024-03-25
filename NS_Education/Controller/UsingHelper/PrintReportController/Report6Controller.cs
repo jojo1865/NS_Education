@@ -94,7 +94,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     OpSales = rh.BusinessUser1.Name,
                     EventName = rh.Title,
                     PeopleCt = rh.PeopleCt,
-                    PersonTime = rh.PeopleCt * ((rh.EDate.Date - rh.SDate.Date).Days + 1),
+                    // 人次經與客戶確認，調整為 預約單人數 * (該課程期間實際有租用場地的天數)
+                    PersonTime = rh.PeopleCt * rh.Resver_Site.Select(rs => rs.TargetDate).Distinct().Count(),
                     SiteCapacityTotal = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)
                         .Select(rs => rs.B_SiteData)

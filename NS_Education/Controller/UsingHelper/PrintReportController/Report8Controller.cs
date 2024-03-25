@@ -144,7 +144,20 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<string> Get(Report8_Input_APIItem input)
         {
+            // 以場地為 group key 的端點 (報表分系, 舊 PDF)
+            // 前端的滿意~不滿意是相反的, 所以這裡需要做調整
             CommonResponseForPagedList<Report8_Output_Row_APIItem> result = await GetResultAsync(input);
+
+            foreach (Report8_Output_Row_APIItem item in result.Items)
+            {
+                Invert(item.SiteSatisfied);
+                Invert(item.ServiceSatisfied);
+                Invert(item.CleanSatisfied);
+                Invert(item.DessertSatisfied);
+                Invert(item.DeviceSatisfied);
+                Invert(item.MealSatisfied);
+                Invert(item.NegotiatorSatisfied);
+            }
 
             return GetResponseJson(result);
         }

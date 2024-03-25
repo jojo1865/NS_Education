@@ -144,19 +144,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<string> Get(Report8_Input_APIItem input)
         {
-            // 前端的滿意~不滿意是相反的, 所以在這裡做調整
             CommonResponseForPagedList<Report8_Output_Row_APIItem> result = await GetResultAsync(input);
-
-            foreach (Report8_Output_Row_APIItem item in result.Items)
-            {
-                Invert(item.SiteSatisfied);
-                Invert(item.ServiceSatisfied);
-                Invert(item.CleanSatisfied);
-                Invert(item.DessertSatisfied);
-                Invert(item.DeviceSatisfied);
-                Invert(item.MealSatisfied);
-                Invert(item.NegotiatorSatisfied);
-            }
 
             return GetResponseJson(result);
         }
@@ -335,21 +323,27 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
 
             return results
-                .Select(g => new Report8_Output_Excel_Row_APIItem
+                .Select(g =>
                 {
-                    EventDate = g.Max(rq => rq.Resver_Head.SDate).ToFormattedStringDate(),
-                    CustomerTitle = g.Max(rq => rq.Resver_Head.Customer.TitleC),
-                    A1 = GetScores(g, "SiteSatisfied"),
-                    A2 = GetScores(g, "DeviceSatisfied"),
-                    A3 = GetScores(g, "CleanSatisfied"),
-                    B1 = GetScores(g, "NegotiatorSatisfied"),
-                    B2 = GetScores(g, "ServiceSatisfied"),
-                    C1 = GetScores(g, "MealSatisfied"),
-                    C2 = GetScores(g, "DessertSatisfied"),
-                    D1 = g.FirstOrDefault(rq => rq.QuestionKey == "WillUseAgain")?.TextContent == "Y",
-                    MK = g.Max(rq => rq.Resver_Head.BusinessUser.Name),
-                    OP = g.Max(rq => rq.Resver_Head.BusinessUser1.Name),
-                    Month = g.Max(rq => rq.Resver_Head.SDate.Month)
+                    string willUseAgain = g.FirstOrDefault(rq => rq.QuestionKey == "WillUseAgain")?.TextContent;
+
+                    return new Report8_Output_Excel_Row_APIItem
+                    {
+                        EventDate = g.Max(rq => rq.Resver_Head.SDate).ToFormattedStringDate(),
+                        CustomerTitle = g.Max(rq => rq.Resver_Head.Customer.TitleC),
+                        A1 = GetScores(g, "SiteSatisfied"),
+                        A2 = GetScores(g, "DeviceSatisfied"),
+                        A3 = GetScores(g, "CleanSatisfied"),
+                        B1 = GetScores(g, "NegotiatorSatisfied"),
+                        B2 = GetScores(g, "ServiceSatisfied"),
+                        C1 = GetScores(g, "MealSatisfied"),
+                        C2 = GetScores(g, "DessertSatisfied"),
+                        D1 = "Y".Equals(willUseAgain, StringComparison.InvariantCultureIgnoreCase)
+                             || "True".Equals(willUseAgain, StringComparison.InvariantCultureIgnoreCase),
+                        MK = g.Max(rq => rq.Resver_Head.BusinessUser.Name),
+                        OP = g.Max(rq => rq.Resver_Head.BusinessUser1.Name),
+                        Month = g.Max(rq => rq.Resver_Head.SDate.Month)
+                    };
                 });
         }
 

@@ -354,8 +354,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Where(i => i.HasValue)
                 .Max() ?? 3;
 
-            // 前端的滿意~不滿意是相反的, 所以在這裡做調整
-            return score * -1 + 6;
+            return score;
         }
 
         #endregion

@@ -558,28 +558,6 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 PartnerName = "南山人壽教育訓練中心"
             };
 
-            // 課程費
-            string resverThrowTableName = DC.GetTableName<Resver_Throw>();
-            Report17_Output_SubTable_APIItem resverThrows = new Report17_Output_SubTable_APIItem
-            {
-                Name = "課程費",
-                Rows = entity.Resver_Site
-                    .SelectMany(rs => rs.Resver_Throw)
-                    .Where(rt => !rt.Resver_Throw_Food.Any())
-                    .OrderBy(rt => rt.TargetDate)
-                    .Select(rt => new Report17_Output_TableRow_APIItem
-                    {
-                        Date = rt.TargetDate.ToFormattedStringDate(),
-                        Description = (rt.Title ?? "")
-                                      + " "
-                                      + String.Join(" ", resverTimeSpans
-                                          .Where(rts => rts.TargetTable == resverThrowTableName)
-                                          .Where(rts => rts.TargetID == rt.RTID)
-                                          .Select(rts => rts.D_TimeSpan.Title)),
-                        Amount = rt.QuotedPrice
-                    })
-            };
-
             // 餐飲費
             Report17_Output_SubTable_APIItem resverFoods = new Report17_Output_SubTable_APIItem
             {
@@ -667,7 +645,6 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         {
                             resverSites,
                             siteDiscountSubTable,
-                            resverThrows,
                             resverFoods,
                             resverDevices,
                             resverOthers
@@ -680,7 +657,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         Compilation = entity.Customer?.Compilation ?? "",
                         PrintTitle = entity.Customer?.InvoiceTitle ?? "",
                         SitePayments = sitePayments,
-                        Payments = new[] { resverThrows, resverFoods, resverDevices, resverOthers }
+                        Payments = new[] { resverFoods, resverDevices, resverOthers }
                             .Where(st => st.Rows.Any())
                             .SelectMany(st =>
                             {

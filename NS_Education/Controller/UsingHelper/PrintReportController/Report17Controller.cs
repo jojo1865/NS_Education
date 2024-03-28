@@ -522,7 +522,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                           .Where(rts => rts.TargetTable == resverSiteTableName)
                                           .Where(rts => rts.TargetID == rs.RSID)
                                           .Select(rts => rts.D_TimeSpan.Title)),
-                        Amount = rs.QuotedPrice
+                        Amount = rs.FixedPrice
                     })
             };
 

@@ -332,8 +332,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Include(rq => rq.Resver_Head.BusinessUser1)
                     .Include(rq => rq.Resver_Head.Customer)
                     .Where(rq => !rq.Resver_Head.DeleteFlag)
-                    .Where(rq => startDate <= rq.CreDate)
-                    .Where(rq => rq.CreDate <= endDate)
+                    .Where(rq => startDate <= rq.Resver_Head.SDate)
+                    .Where(rq => rq.Resver_Head.EDate <= endDate)
                     .ToArrayAsync())
                 .ToLookup(r => r.RHID, r => r);
 

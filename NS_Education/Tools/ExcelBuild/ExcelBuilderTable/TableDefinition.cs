@@ -56,7 +56,9 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
                     if (c.BlankIfSameCondition != null && lastRow != null)
                     {
                         if (c.BlankIfSameCondition(lastRow, data))
+                        {
                             continue;
+                        }
                     }
 
                     builder.SetValue(c.CellNo, c.FormatValue(value), c.DataCellType);
@@ -79,9 +81,18 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
 
             foreach (ColumnDefinition<TDataRow> c in Columns.Where(c => c.HasTotal))
             {
-                decimal sum = DataRows
-                    .Select(d => (decimal?)Convert.ToDecimal(c.ValueSelector(d)))
-                    .Sum() ?? 0;
+                decimal sum = 0;
+
+                TDataRow last = default;
+                foreach (TDataRow curr in DataRows)
+                {
+                    if (last != null && c.NotCountAsTotalIfBlank && c.BlankIfSameCondition(last, curr))
+                        continue;
+
+                    sum += Convert.ToDecimal(c.ValueSelector(curr));
+
+                    last = curr;
+                }
 
                 builder.SetValue(c.CellNo,
                     c.FormatValue(sum),
@@ -116,7 +127,8 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
 
         public TableDefinition<TDataRow> NumberColumn(int cellNo, string name,
             Func<TDataRow, decimal> valueSelector, bool hasTotal = false,
-            Func<TDataRow, TDataRow, bool> blankIfSameCondition = null)
+            Func<TDataRow, TDataRow, bool> blankIfSameCondition = null,
+            bool notCountAsTotalIfBlank = false)
         {
             ColumnDefinition<TDataRow> column = new ColumnDefinition<TDataRow>
             {
@@ -127,7 +139,8 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
                 DataAlignment = HorizontalAlignment.Right,
                 Formatter = "#,##0",
                 BlankIfSameCondition = blankIfSameCondition,
-                HasTotal = hasTotal
+                HasTotal = hasTotal,
+                NotCountAsTotalIfBlank = notCountAsTotalIfBlank
             };
 
             Columns.Add(column);

@@ -51,6 +51,11 @@ namespace NS_Education.Tools.ExcelBuild.ExcelBuilderTable
         public Func<TDataRow, TDataRow, bool> BlankIfSameCondition { get; set; }
 
         /// <summary>
+        /// 是否在忽略輸出時不計入合計。
+        /// </summary>
+        public bool NotCountAsTotalIfBlank { get; set; }
+
+        /// <summary>
         /// 將值格式化為最後在表中顯示的格式。
         /// </summary>
         /// <param name="value">值</param>

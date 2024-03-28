@@ -281,7 +281,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                                 .Text(String.Join("　　　　", income.Title.ToCharArray()));
                                             t.Cell().AlignRight().Text($"{income.FixedPrice:N0}");
                                             t.Cell().AlignRight().Text($"{income.QuotedPrice:N0}");
-                                            t.Cell().AlignRight().Text($"{income.UnitPrice:N0}");
+                                            t.Cell().AlignRight().Text($"{income.FixedPrice:N0}");
                                             t.Cell().AlignRight().Text($"{income.Difference:N0}");
                                             t.Cell().AlignRight().Text(income.Note.Trim());
                                         }

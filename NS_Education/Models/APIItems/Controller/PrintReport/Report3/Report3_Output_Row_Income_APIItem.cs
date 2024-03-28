@@ -23,6 +23,6 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report3
         /// <summary>
         /// 價差
         /// </summary>
-        public int Difference => QuotedPrice - UnitPrice;
+        public int Difference => QuotedPrice - FixedPrice;
     }
 }

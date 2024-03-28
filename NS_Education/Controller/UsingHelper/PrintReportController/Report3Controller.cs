@@ -95,7 +95,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .StringColumn(0, "", i => i.Title)
                 .NumberColumn(1, "場地定價", i => i.FixedPrice, true)
                 .NumberColumn(3, "場地報價", i => i.QuotedPrice, true)
-                .NumberColumn(6, "成本", i => i.UnitPrice, true)
+                .NumberColumn(6, "成本", i => i.FixedPrice, true)
                 .NumberColumn(7, "價差", i => i.Difference, true)
                 .StringColumn(8, "備註", i => "")
                 .SetDataRows(item.Incomes)

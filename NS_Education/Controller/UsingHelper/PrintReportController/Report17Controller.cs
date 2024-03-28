@@ -568,6 +568,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Sum(rt => (int?)rt.QuotedPrice),
                 Rows = entity.Resver_Site
                     .SelectMany(rs => rs.Resver_Throw)
+                    .Where(rt => rt.Resver_Throw_Food.Any())
                     .OrderBy(rt => rt.TargetDate)
                     .Select(rt => new Report17_Output_TableRow_APIItem
                     {

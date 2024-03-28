@@ -619,7 +619,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             Content = rt.Title,
                             FoodType = rtf.D_FoodCategory.Title,
                             Count = rtf.Ct,
-                            SinglePrice = rtf.Price
+                            SinglePrice = rtf.UnitPrice
                         }))
             };
             return row;

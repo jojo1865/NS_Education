@@ -79,7 +79,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.Items = results
                     .Where(e => e.rts != null)
                     .GroupBy(e => new { e.rs.TargetDate, e.rs.BSID, e.rts.DTSID, e.rs.RHID, e.rs.QuotedPrice })
-                    .Select(e => new Report16_Output_Row_APIItem
+                    .Select((e, idx) => new Report16_Output_Row_APIItem
                     {
                         Date = e.Max(grouping => grouping.rs.TargetDate).ToString("yy/MM/dd"),
                         Site = e.Max(grouping => grouping.rs.B_SiteData.Title),
@@ -99,7 +99,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         OPSales = e.Max(grouping => grouping.rs.Resver_Head.BusinessUser1.Name),
                         EventName = e.Max(grouping => grouping.rs.Resver_Head.Title),
                         UnitPrice = e.Max(grouping => grouping.rs.B_SiteData.UnitPrice),
-                        QuotedPrice = e.Max(grouping => grouping.rs.QuotedPrice)
+                        QuotedPrice = idx == 0 // 每一組只有第一筆賦予報價，其他都視為 0
+                            ? e.Max(grouping => grouping.rs.QuotedPrice)
+                            : 0
                     })
                     .SortWithInput(input)
                     .ToList();
@@ -192,8 +194,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .StringColumn(9, "類別", i => i.HostType, SameHead)
                 .StringColumn(10, "MK", i => i.MKSales, SameHead)
                 .StringColumn(11, "OP", i => i.OPSales, SameHead)
-                .NumberColumn(12, "場地報價", i => i.QuotedPrice, true,
-                    (l, c) => l.QuotedPrice == c.QuotedPrice && SameHead(l, c))
+                .NumberColumn(12, "場地報價", i => i.QuotedPrice, true, (l, c) =>
+                    SameHead(l, c) && SameDateRange(l, c))
                 .AddToBuilder(excelBuilder);
 
             excelBuilder.NowRow()

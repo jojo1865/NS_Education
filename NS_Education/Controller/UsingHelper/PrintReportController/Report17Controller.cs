@@ -529,7 +529,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             // 場租折扣：場地總報價 - 總定價
 
             int totalFixedPrice = entity.Resver_Site.Sum(rs => (int?)rs.FixedPrice) ?? 0;
-            int totalQuotedPrice = resverSites.Sum;
+            int totalQuotedPrice = entity.Resver_Site.Sum(rs => (int?)rs.QuotedPrice) ?? 0;
 
             int siteDiscount = Math.Min(0, totalQuotedPrice - totalFixedPrice);
 

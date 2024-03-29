@@ -110,7 +110,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             if (data is null)
                 return GetContentResult();
 
-            ExcelBuilderInfo info = await GetExcelBuilderInfo(1);
+            ExcelBuilderInfo info = await GetExcelBuilderInfo();
             ExcelBuilder excelBuilder = new ExcelBuilder
             {
                 ReportTitle = "餐飲明細表",
@@ -154,8 +154,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .StringColumn(5, "餐種", i => i.CuisineName)
                 .StringColumn(6, "主辦單位", i => i.HostName)
                 .NumberColumn(7, "數量", i => i.ReservedQuantity)
-                .NumberColumn(8, "單價", i => i.QuotedPrice)
-                .NumberColumn(9, "總價", i => i.QuotedPriceSum, true)
+                .NumberColumn(8, "單價", i => i.UnitPrice)
+                .NumberColumn(9, "總價", i => i.UnitPriceSum, true)
                 .AddToBuilder(excelBuilder);
 
             return excelBuilder.GetFile();

@@ -7,9 +7,10 @@ namespace NS_Education.Variables
         Department = 2,
         Site = 3,
         Memo = 4,
-        Partner = 5,
+        Service = 5,
         Device = 6,
         Customer = 7,
-        PayType = 8
+        PayType = 8,
+        Partner = 9
     }
 }

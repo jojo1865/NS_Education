@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NS_Education.Models.Entities;
 
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report17
 {
@@ -90,5 +91,10 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report17
         /// 底部支付資訊：場地支付資訊
         /// </summary>
         public Report17_Output_Payment_APIItem SitePayments { get; set; }
+
+        /// <summary>
+        /// 每個獨特場地的固定設備的集合
+        /// </summary>
+        public IEnumerable<SiteDevicesDto> SiteDevices { get; set; }
     }
 }

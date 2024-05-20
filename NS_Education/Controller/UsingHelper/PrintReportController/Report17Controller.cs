@@ -144,9 +144,17 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             excelBuilder.CreateRow();
 
+            // 把場地設備資訊組合成 xxx*N、xxx*N 的格式
+
+            IEnumerable<string> allDeviceStrings = data.SiteDevices
+                .SelectMany(sd => sd.Devices)
+                .Select(d => $"{d.DeviceName}*{d.Count ?? 0}");
+
+            string joinedDeviceString = String.Join("、", allDeviceStrings);
+
             excelBuilder.CreateRow()
                 .CombineCells()
-                .SetValue(0, "本中心提供設備：有線MIC*1、無線MIC*1、簡報器*1、移動白板*1、簡報架*1");
+                .SetValue(0, $"本中心提供設備：{joinedDeviceString}");
 
             excelBuilder.CreateRow()
                 .CombineCells()
@@ -624,6 +632,13 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     })
             };
 
+            // 每個獨特場地的設備的集合
+            IEnumerable<SiteDevicesDto> siteDevices = entity.Resver_Site
+                .Select(rs => rs.B_SiteData)
+                .GroupBy(bs => bs.BSID)
+                .Select(g => g.First())
+                .Select(bs => bs.GetDevicesFromSiteNotes());
+
             return new CommonResponseForPagedList<Report17_Output_APIItem>
             {
                 Items = new List<Report17_Output_APIItem>()
@@ -685,7 +700,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                         Amount = r.Amount,
                                         PartnerName = r.PartnerName ?? defaultPartnerName
                                     });
-                            })
+                            }),
+                        SiteDevices = siteDevices
                     }
                 }
             };

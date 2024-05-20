@@ -1,11 +1,16 @@
+using System;
+
 namespace NS_Education.Models.APIItems.Controller.SiteData.Submit
 {
     public class SiteData_Submit_Input_Devices_Row_APIItem
     {
-        public int BSID { get; set; }
-        public int BDID { get; set; }
-        public int Ct { get; set; }
+        [Obsolete] public int BDID { get; set; }
 
-        public bool? IsImplicit { get; set; }
+        [Obsolete] public bool? IsImplicit { get; set; }
+
+
+        public int BSID { get; set; }
+        public int Ct { get; set; }
+        public string DeviceName { get; set; }
     }
 }

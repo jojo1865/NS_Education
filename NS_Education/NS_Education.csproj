@@ -643,6 +643,7 @@
         <Compile Include="Models\APIItems\ListSorting.cs"/>
         <Compile Include="Models\APIItems\SubmitHelperIdResponse.cs"/>
         <Compile Include="Models\CommonApiResponse.cs"/>
+        <Compile Include="Models\Entities\BSiteDataExtension.cs"/>
         <Compile Include="Models\Entities\BusinessUser.cs">
             <DependentUpon>Model1.tt</DependentUpon>
         </Compile>

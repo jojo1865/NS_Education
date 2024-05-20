@@ -556,11 +556,6 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.Resver_Device.Select(rd => rd.B_Device)))
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData))
-                .Include(rh => rh.Resver_Site.Select(rs => rs.B_SiteData).Select(sd => sd.M_Site_Device))
-                .Include(rh => rh.Resver_Site
-                    .Select(rs => rs.B_SiteData)
-                    .Select(sd => sd.M_Site_Device.Select(msd => msd.B_Device))
-                )
                 .Include(rh => rh.Resver_Site.Select(rs => rs.B_StaticCode))
                 .AsQueryable();
 
@@ -664,22 +659,16 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         TableTitle = rs.B_StaticCode?.Title ?? "",
                         FixedPrice = rs.FixedPrice,
                         QuotedPrice = rs.QuotedPrice,
-                        DeviceItems = GetListAllPopulateRowSiteItemDeviceItems(rs.B_SiteData?.M_Site_Device)
+                        DeviceItems = rs.B_SiteData?.GetDevicesFromSiteNotes()
+                            .Devices
+                            .Select(d => new PrintReport_GetResverListByIds1_DeviceItem_APIItem
+                            {
+                                Title = d.DeviceName,
+                                Ct = d.Count ?? 0
+                            })
+                            .ToArray() ?? Array.Empty<PrintReport_GetResverListByIds1_DeviceItem_APIItem>()
                     };
                 }).ToList();
-        }
-
-        private static List<PrintReport_GetResverListByIds1_DeviceItem_APIItem>
-            GetListAllPopulateRowSiteItemDeviceItems(ICollection<M_Site_Device> msd)
-        {
-            return msd?
-                .Where(rd => rd.B_Device.ActiveFlag)
-                .Where(rd => !rd.B_Device.DeleteFlag)
-                .Select(rd => new PrintReport_GetResverListByIds1_DeviceItem_APIItem
-                {
-                    Title = rd.B_Device.Title,
-                    Ct = rd.Ct
-                }).ToList() ?? new List<PrintReport_GetResverListByIds1_DeviceItem_APIItem>();
         }
 
         #endregion

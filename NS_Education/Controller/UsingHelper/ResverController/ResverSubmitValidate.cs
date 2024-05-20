@@ -286,10 +286,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                                              )
                                                              .IsValid();
 
-            // 確認設備預約時段的數量足不足夠
-            isSiteItemDeviceItemTimeSpanItemValid = isSiteItemDeviceItemTimeSpanItemValid &&
-                                                    await SubmitValidateSiteItemDeviceItemsAllTimeSpanEnough(input);
-
             // 主預約單 -> 其他收費項目列表
             bool isOtherItemValid = await
                 input.OtherItems.StartValidateElements()
@@ -385,122 +381,6 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                                      && isGiveBackItemValid;
 
             return await Task.FromResult(isEverythingValid);
-        }
-
-        private async Task<bool> SubmitValidateSiteItemDeviceItemsAllTimeSpanEnough(Resver_Submit_Input_APIItem input)
-        {
-            bool result = true;
-            string resverDeviceTableName = DC.GetTableName<Resver_Device>();
-
-            // 先一次查完所有 BDID
-            IEnumerable<Resver_Submit_DeviceItem_Input_APIItem> allDeviceItems =
-                input.SiteItems.SelectMany(si => si.DeviceItems).ToArray();
-            IEnumerable<int> inputDeviceIds = allDeviceItems
-                .Select(di => di.BDID)
-                .AsEnumerable();
-
-            Dictionary<int, B_Device> devices = await DC.B_Device
-                .Include(bd => bd.Resver_Device)
-                .Include(bd => bd.Resver_Device.Select(rd => rd.Resver_Site))
-                .Include(bd => bd.M_Site_Device)
-                .Where(bd =>
-                    bd.ActiveFlag && !bd.DeleteFlag &&
-                    inputDeviceIds.Any(id => id == bd.BDID))
-                .ToDictionaryAsync(bd => bd.BDID, bd => bd);
-
-            // 每個場地
-            foreach (Resver_Submit_SiteItem_Input_APIItem siteItem in input.SiteItems)
-            {
-                B_SiteData siteData = await DC.B_SiteData.FirstOrDefaultAsync(sd => sd.BSID == siteItem.BSID);
-                // 每個設備
-                foreach (Resver_Submit_DeviceItem_Input_APIItem deviceItem in siteItem.DeviceItems)
-                {
-                    if (!devices.ContainsKey(deviceItem.BDID))
-                    {
-                        AddError(NotFound($"欲預約的設備 ID {deviceItem.BDID}", nameof(deviceItem.BDID)));
-                        result = false;
-                        continue;
-                    }
-
-                    // 查出所有對應 deviceItem.DTSID 的 DTS
-                    var allInputDtsIds = deviceItem.TimeSpanItems;
-                    D_TimeSpan[] wantedTimeSpans = await DC.D_TimeSpan
-                        .Where(dts => dts.ActiveFlag)
-                        .Where(dts => !dts.DeleteFlag)
-                        .Where(dts => allInputDtsIds.Any(id => id == dts.DTSID))
-                        .ToArrayAsync();
-
-                    DateTime targetDate = siteItem.TargetDate.ParseDateTime();
-
-                    // 每個時段
-                    foreach (D_TimeSpan timeSpan in wantedTimeSpans)
-                    {
-                        // 計算此設備預約單以外的預約單中，在同一場地預約了同一設備的總數量
-                        Resver_Device[] otherResverDevices = await DC.Resver_Device
-                            .Include(rs => rs.Resver_Site)
-                            .Include(rs => rs.Resver_Site.B_SiteData)
-                            .Include(rs => rs.Resver_Site.B_SiteData.M_SiteGroup1)
-                            // 選出所有不是這張設備預約單的設備預約單，同場地或者其子場地，並且是同一天、未刪除
-                            .Where(rd => !rd.DeleteFlag)
-                            .Where(rd => DbFunctions.TruncateTime(rd.TargetDate) == targetDate.Date)
-                            .Where(rd => rd.RDID != deviceItem.RDID)
-                            .Where(rd => rd.Resver_Site.BSID == siteItem.BSID
-                                         || rd.Resver_Site.B_SiteData.M_SiteGroup1.Any(child =>
-                                             child.MasterID == siteItem.BSID))
-                            .Where(rd => rd.Resver_Site.B_SiteData.ActiveFlag && !rd.Resver_Site.B_SiteData.DeleteFlag)
-                            // 存到記憶體，因為接下來又要查 DB 了
-                            .ToArrayAsync();
-
-                        IEnumerable<int> otherResverDeviceIds = otherResverDevices
-                            .Select(ord => ord.RDID)
-                            .AsEnumerable();
-
-                        // 選出它們的 RTS，當發現重疊時段時，計入 reservedCount
-                        IEnumerable<int> crossingResverDeviceIds = DC.M_Resver_TimeSpan
-                            .Include(rts => rts.D_TimeSpan)
-                            .Where(rts => rts.TargetTable == resverDeviceTableName)
-                            .Where(rts => otherResverDeviceIds.Contains(rts.TargetID))
-                            .AsEnumerable()
-                            .Where(rts => rts.D_TimeSpan.IsCrossingWith(timeSpan))
-                            .Select(rts => rts.TargetID);
-
-                        int reservedCount = DC.Resver_Device
-                            .Where(rd => crossingResverDeviceIds.Contains(rd.RDID))
-                            .Sum(rd => (int?)rd.Ct) ?? 0;
-
-                        // 總可用數量，取用
-                        // 1. 該設備在此場地的數量
-                        // 2. 該設備在此場地之子場地的數量
-                        // 之總和
-
-                        int totalCt = devices[deviceItem.BDID].M_Site_Device
-                            .Where(msd => msd.BSID == siteItem.BSID)
-                            .Sum(msd => (int?)msd.Ct) ?? 0;
-
-                        // 所有子場地此設備的庫存
-                        int implicitCt = await DC.M_SiteGroup
-                            .Include(msg => msg.B_SiteData1)
-                            .Include(msg => msg.B_SiteData1.M_Site_Device)
-                            .Where(msg => msg.MasterID == siteItem.BSID)
-                            .Where(msg => msg.ActiveFlag && !msg.DeleteFlag)
-                            .Select(msg => msg.B_SiteData1)
-                            .Where(sd => sd.ActiveFlag && !sd.DeleteFlag)
-                            .SelectMany(sd => sd.M_Site_Device)
-                            .Where(msd => msd.BDID == deviceItem.BDID)
-                            .SumAsync(msd => (int?)msd.Ct) ?? 0;
-
-                        totalCt += implicitCt;
-
-                        if (totalCt - reservedCount >= deviceItem.Ct) continue;
-
-                        AddError(21,
-                            $"{siteData?.Title ?? $"場地 ID {siteItem.BSID}"} 欲預約的設備 {devices[deviceItem.BDID].Title} 在 {timeSpan.GetTimeRangeFormattedString()} 的可用數量不足（總數：{totalCt}，欲預約數量：{deviceItem.Ct}，已預約數量：{reservedCount}）！");
-                        result = false;
-                    }
-                }
-            }
-
-            return result;
         }
 
         private async Task<bool> SubmitValidateSiteItemsAllTimeSpanFree(Resver_Submit_Input_APIItem input)

@@ -14,6 +14,7 @@ using NS_Education.Tools.ExcelBuild;
 using NS_Education.Tools.Extensions;
 using NS_Education.Tools.Filters.JwtAuthFilter;
 using NS_Education.Tools.Filters.JwtAuthFilter.PrivilegeType;
+using NS_Education.Variables;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -530,22 +531,25 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                           .Where(rts => rts.TargetTable == resverSiteTableName)
                                           .Where(rts => rts.TargetID == rs.RSID)
                                           .Select(rts => rts.D_TimeSpan.Title)),
-                        Amount = rs.FixedPrice
+                        Amount = rs.QuotedPrice
                     })
             };
 
-            // 場租折扣：場地總報價 - 總定價
+            // 場租折扣：當客戶是內部或通訊處時，要產生場租折扣行，直接把報價乘 -1 扣掉
+            // 外部客戶不產生，就讓 Rows 保持為預設（空陣列），最後定義 SubTables 時，會把 Rows 為空的 SubTable 去除掉
 
-            int totalFixedPrice = entity.Resver_Site.Sum(rs => (int?)rs.FixedPrice) ?? 0;
             int totalQuotedPrice = entity.Resver_Site.Sum(rs => (int?)rs.QuotedPrice) ?? 0;
 
-            int siteDiscount = Math.Min(0, totalQuotedPrice - totalFixedPrice);
+            int siteDiscount = Math.Min(0, -totalQuotedPrice);
 
-            Report17_Output_SubTable_APIItem siteDiscountSubTable = new Report17_Output_SubTable_APIItem
+            Report17_Output_SubTable_APIItem siteDiscountSubTable = new Report17_Output_SubTable_APIItem();
+            CustomerType? customerType = (CustomerType?)entity.Customer.TypeFlag;
+
+            if (customerType == CustomerType.Internal || customerType == CustomerType.CommDept)
             {
-                Name = "場租折扣",
-                QuotedPrice = siteDiscount,
-                Rows = new[]
+                siteDiscountSubTable.Name = "場租折扣";
+                siteDiscountSubTable.QuotedPrice = siteDiscount;
+                siteDiscountSubTable.Rows = new[]
                 {
                     new Report17_Output_TableRow_APIItem
                     {
@@ -554,9 +558,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         Amount = siteDiscount,
                         PartnerName = ""
                     }
-                }
-            };
-
+                };
+            }
 
             // 場地這邊以總額來顯示，所以獨立一個參數
             Report17_Output_Payment_APIItem sitePayments = new Report17_Output_Payment_APIItem
@@ -658,13 +661,14 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         CustomerName = entity.Customer?.TitleC ?? "",
                         EventName = entity.Title ?? "",
                         SubTables = new[]
-                        {
-                            resverSites,
-                            siteDiscountSubTable,
-                            resverFoods,
-                            resverDevices,
-                            resverOthers
-                        }.Where(st => st.Rows.Any()),
+                            {
+                                resverSites,
+                                siteDiscountSubTable,
+                                resverFoods,
+                                resverDevices,
+                                resverOthers
+                            }
+                            .Where(st => st.Rows.Any()),
                         SiteDiscount = siteDiscount,
                         PrepaidAmount = entity.Resver_Bill
                             .Where(rb => !rb.DeleteFlag)

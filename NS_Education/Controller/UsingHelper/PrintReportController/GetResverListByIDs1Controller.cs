@@ -78,6 +78,20 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             e.CreateRow();
 
             e.CreateRow()
+                .CombineCells(0, 2) // 主辦單位簽名：
+                .CombineCells(3, 4) // 底線
+                .CombineCells(5, 6) // 日期：
+                .CombineCells(7, 8) // 底線
+                .Align(0, HorizontalAlignment.Right)
+                .Align(5, HorizontalAlignment.Right)
+                .SetValue(0, "主辦單位簽名：")
+                .SetValue(5, "日期：")
+                .DrawBorder(BorderDirection.Bottom, 3, 4)
+                .DrawBorder(BorderDirection.Bottom, 7, 8);
+
+            e.CreateRow();
+
+            e.CreateRow()
                 .DrawBorder(BorderDirection.Top | BorderDirection.Left | BorderDirection.Right, true)
                 .CombineCells(1, 2)
                 .SetValue(0, "主辦單位：")

@@ -108,7 +108,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         .SelectMany(rs => rs.Resver_Throw)
                         .Where(rt => !rt.DeleteFlag)
                         .SelectMany(rt => rt.Resver_Throw_Food)
-                        .Sum(rtf => (int?)rtf.Price * rtf.Ct) ?? 0,
+                        .Sum(rtf => (int?)rtf.Price) ?? 0,
                     ResidencePrice = rh.Resver_Other
                         .Where(ro => !ro.DeleteFlag)
                         .Where(ro => ro.B_OrderCode.ActiveFlag && !ro.B_OrderCode.DeleteFlag)

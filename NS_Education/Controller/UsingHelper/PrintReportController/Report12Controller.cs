@@ -164,7 +164,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         {
                             sd.Title,
                             sd.Code,
-                            sd.MaxSize.ToString(),
+                            sd.BasicSize.ToString(),
                             sd.AreaSize.ToString(),
                         };
 

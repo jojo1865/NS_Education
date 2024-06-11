@@ -136,7 +136,7 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 query = query.Where(sd => sd.BSCID1 == input.BSCID1);
 
             if (input.PeopleCt.IsAboveZero())
-                query = query.Where(sd => sd.MaxSize >= input.PeopleCt);
+                query = query.Where(sd => sd.BasicSize >= input.PeopleCt);
 
             if (input.ActiveFlag.IsInBetween(0, 1))
                 query = query.Where(sd => sd.ActiveFlag == (input.ActiveFlag == 1));

@@ -149,7 +149,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             result = result.Append($"活動時間：{FormatTwoTimes(earliestTimeSpan, latestTimeSpan)}。");
 
-            result = result.Append($"{rs.B_StaticCode?.Title ?? "無資料"}：{rs.B_SiteData?.MaxSize ?? 0} 人" +
+            result = result.Append($"{rs.B_StaticCode?.Title ?? "無資料"}：{rs.B_SiteData?.BasicSize ?? 0} 人" +
                                    (rs.TableDescription != null ? $"（{rs.TableDescription}）" : ""));
 
             var devices = rs.Resver_Device

@@ -204,7 +204,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 query = query.Where(sd => sd.BasicSize >= input.BasicCapacity);
 
             if (input.MaxCapacity.IsAboveZero())
-                query = query.Where(sd => sd.MaxSize >= input.MaxCapacity);
+                query = query.Where(sd => sd.BasicSize >= input.MaxCapacity);
 
             if (input.IsCombinedSiteMaster.HasValue)
                 query = query.Where(sd =>
@@ -711,7 +711,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                 Code = input.Code,
                 Title = input.Title,
                 BasicSize = input.BasicSize,
-                MaxSize = input.MaxSize <= 0 ? input.BasicSize : input.MaxSize,
+                MaxSize = input.BasicSize, // 最大可容納人數已取消，保留純為向後相容用
                 AreaSize = input.AreaSize,
                 UnitPrice = input.UnitPrice,
                 InPrice = input.InPrice,
@@ -867,7 +867,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             data.Code = input.Code;
             data.Title = input.Title;
             data.BasicSize = input.BasicSize;
-            data.MaxSize = input.MaxSize <= 0 ? input.BasicSize : input.MaxSize;
+            data.MaxSize = input.BasicSize; // 最大可容納人數已取消，保留純為向後相容用
             data.AreaSize = input.AreaSize;
             data.UnitPrice = input.UnitPrice;
             data.InPrice = input.InPrice;

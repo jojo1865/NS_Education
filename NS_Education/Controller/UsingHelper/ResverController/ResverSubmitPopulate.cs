@@ -307,10 +307,10 @@ namespace NS_Education.Controller.UsingHelper.ResverController
                 throwData.TargetDate = site.TargetDate;
                 throwData.RSID = site.RSID;
                 throwData.BSCID = throwItem.BSCID;
-                throwData.Title = throwItem.Title;
+                throwData.Title = throwItem.Title ?? "";
                 throwData.BOCID = throwItem.BOCID;
-                throwData.PrintTitle = throwItem.PrintTitle;
-                throwData.PrintNote = throwItem.PrintNote;
+                throwData.PrintTitle = throwItem.PrintTitle ?? "";
+                throwData.PrintNote = throwItem.PrintNote ?? "";
                 throwData.UnitPrice = throwItem.UnitPrice;
                 throwData.FixedPrice = throwItem.FixedPrice;
                 throwData.QuotedPrice = throwItem.QuotedPrice;

@@ -1,4 +1,4 @@
-using System;
+using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Models.APIItems.Controller.PrintReport.Report7
 {
@@ -24,7 +24,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report7
         public int InsurancePrice { get; set; }
         public int TransportationPrice { get; set; }
         public int OtherPrice { get; set; }
-        public int TotalPrice => (int)Math.Round(TotalPriceWithoutTax * 1.05m);
+        public int TotalPrice => TotalPriceWithoutTax.ToTaxIncluded();
         public int Deposit { get; set; }
         public int Discount { get; set; }
         public int TotalPriceWithoutTax { get; set; }

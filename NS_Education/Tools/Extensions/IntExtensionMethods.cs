@@ -1,3 +1,5 @@
+using System;
+
 namespace NS_Education.Tools.Extensions
 {
     public static class IntExtensionMethods
@@ -83,13 +85,13 @@ namespace NS_Education.Tools.Extensions
             // 確定 start, end 大小值都符合預期，沒有就進行調換
             if (rangeA.start > rangeA.end)
                 (rangeA.start, rangeA.end) = (rangeA.end, rangeA.start);
-            
+
             if (rangeB.start > rangeB.end)
                 (rangeB.start, rangeB.end) = (rangeB.end, rangeB.start);
 
             return rangeA.end > rangeB.start && rangeB.end > rangeA.start;
         }
-        
+
         /// <summary>
         /// 檢查兩個範圍（各有 2 個整數代表開頭與結尾）中，A 是否包含了 B。完全相等時亦回傳 true。
         /// </summary>
@@ -104,11 +106,19 @@ namespace NS_Education.Tools.Extensions
             // 確定 start, end 大小值都符合預期，沒有就進行調換
             if (rangeA.start > rangeA.end)
                 (rangeA.start, rangeA.end) = (rangeA.end, rangeA.start);
-            
+
             if (rangeB.start > rangeB.end)
                 (rangeB.start, rangeB.end) = (rangeB.end, rangeB.start);
 
             return rangeA.start <= rangeB.start && rangeB.end <= rangeA.end;
+        }
+
+        /// <summary>
+        /// 將數字加上營業稅額。
+        /// </summary>
+        public static int ToTaxIncluded(this int num)
+        {
+            return (int)Math.Round(num * 1.05m);
         }
     }
 }

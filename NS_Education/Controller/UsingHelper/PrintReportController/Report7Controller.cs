@@ -135,7 +135,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         .Sum(GetDiscount) ?? 0,
                     TotalPriceWithoutTax = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)
-                        .Sum(rs => rs.FixedPrice - GetDiscount(rs)) ?? 0
+                        .Sum(GetSiteTotalPrice) ?? 0
                 }).ToList();
 
                 foreach (Report7_Output_Row_APIItem item in response.Items)
@@ -156,9 +156,23 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         private int? GetDiscount(Resver_Site rs)
         {
             // 內部/通訊處，全折
-            if (rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal
-                || rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept)
+            if (isInternal(rs))
                 return rs.QuotedPrice;
+
+            return rs.FixedPrice - rs.QuotedPrice;
+        }
+
+        private static bool isInternal(Resver_Site rs)
+        {
+            return rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal
+                   || rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept;
+        }
+
+        private int? GetSiteTotalPrice(Resver_Site rs)
+        {
+            // 內部/通訊處，全折
+            if (isInternal(rs))
+                return 0;
 
             return rs.FixedPrice - rs.QuotedPrice;
         }

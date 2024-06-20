@@ -130,7 +130,9 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         .Where(rb => !rb.DeleteFlag)
                         .Where(rb => rb.PayFlag)
                         .Sum(rb => (int?)rb.Price) ?? 0,
-                    Discount = Math.Max(0, rh.FixedPrice - rh.QuotedPrice),
+                    Discount = rh.Resver_Site
+                        .Where(rs => !rs.DeleteFlag)
+                        .Sum(rs => (int?)(rs.FixedPrice - rs.QuotedPrice)) ?? 0,
                     TotalPriceWithoutTax = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)
                         .Sum(rs => (int?)rs.QuotedPrice) ?? 0

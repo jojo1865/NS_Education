@@ -18,7 +18,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report7
         public string OpSales { get; set; }
         public string EventName { get; set; }
         public int PersonTime { get; set; }
-        public int TotalProfit => FoodPrice + OtherPrice + TotalPrice;
+        public int TotalProfit => (FoodPrice.ToTaxIncluded()) + (OtherPrice.ToTaxIncluded()) + TotalPrice;
         public int FoodPrice { get; set; }
         public int ResidencePrice { get; set; }
         public int InsurancePrice { get; set; }

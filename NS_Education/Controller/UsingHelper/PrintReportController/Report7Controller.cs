@@ -132,10 +132,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         .Sum(rb => (int?)rb.Price) ?? 0,
                     Discount = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)
-                        .Sum(rs => (int?)(rs.FixedPrice - rs.QuotedPrice)) ?? 0,
+                        .Sum(GetDiscount) ?? 0,
                     TotalPriceWithoutTax = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)
-                        .Sum(rs => (int?)rs.QuotedPrice) ?? 0
+                        .Sum(rs => rs.FixedPrice - GetDiscount(rs)) ?? 0
                 }).ToList();
 
                 foreach (Report7_Output_Row_APIItem item in response.Items)
@@ -151,6 +151,16 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Take(input.GetTakeRowCount()).ToList();
                 return response;
             }
+        }
+
+        private int? GetDiscount(Resver_Site rs)
+        {
+            // 內部/通訊處，全折
+            if (rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal
+                || rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept)
+                return rs.QuotedPrice;
+
+            return rs.FixedPrice - rs.QuotedPrice;
         }
 
         #region Excel

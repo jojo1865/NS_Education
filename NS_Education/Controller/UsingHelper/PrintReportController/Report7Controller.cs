@@ -174,7 +174,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             if (isInternal(rs))
                 return 0;
 
-            return rs.FixedPrice - rs.QuotedPrice;
+            return rs.QuotedPrice;
         }
 
         #region Excel

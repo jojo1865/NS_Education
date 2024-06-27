@@ -123,7 +123,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 response.Items = result
                     .SelectMany(rh => rh.Resver_Site)
-                    .GroupBy(rs => new { rs.RHID, rs.BSID, rs.QuotedPrice })
+                    .GroupBy(rs => new { rs.RHID, rs.BSID, rs.TargetDate, rs.QuotedPrice })
                     .Select(grouping =>
                     {
                         string[] contactData = rhIdToContacts
@@ -183,7 +183,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         {
             // 匯出時忽略頁數篩選
             input.NowPage = 0;
-            
+
             CommonResponseForPagedList<Report9_Output_Row_APIItem> data = await GetResultAsync(input);
 
             if (data == null)

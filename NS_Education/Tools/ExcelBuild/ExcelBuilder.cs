@@ -230,11 +230,22 @@ namespace NS_Education.Tools.ExcelBuild
             {
                 CellNo = cellNoFromLeft,
                 CellType = cellType
-                           ?? (Double.TryParse(content.ToString(), out _) ? CellType.Numeric : CellType.String),
+                           ?? (IsNumericCell(content) ? CellType.Numeric : CellType.String),
                 Value = content
             };
 
             return ExecuteActionAtCurrentRow(action);
+        }
+
+        private bool IsNumericCell<TValue>(TValue o)
+        {
+            string s = o.ToString();
+
+            // 開頭為 0 的字串就不自動轉成數字格，避免吃掉如統編或電話的開頭的 0 
+            if (s.StartsWith("0"))
+                return false;
+
+            return Double.TryParse(s, out _);
         }
 
         /// <summary>

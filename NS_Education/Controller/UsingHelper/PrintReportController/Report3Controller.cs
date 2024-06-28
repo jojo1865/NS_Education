@@ -618,11 +618,11 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .Where(rs => !rs.DeleteFlag)
                 .SelectMany(rs => rs.Resver_Throw)
                 .Where(rt => !rt.DeleteFlag)
-                .GroupBy(rt => rt.RSID)
+                .GroupBy(rt => new {rt.RSID, isFood = rt.Resver_Throw_Food.Any()})
                 .Select(grouping =>
                     new Report3_Output_Row_Income_APIItem
                     {
-                        Title = "行程",
+                        Title = grouping.Key.isFood ? "餐飲" : "訓練",
                         FixedPrice = grouping.Sum(rt => (int?)rt.FixedPrice) ?? 0,
                         QuotedPrice = grouping.Sum(rt => (int?)rt.QuotedPrice) ?? 0,
                         UnitPrice = grouping.Sum(rt => (int?)rt.UnitPrice) ?? 0,

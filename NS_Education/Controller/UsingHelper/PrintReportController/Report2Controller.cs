@@ -150,12 +150,13 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             result = result.Append($"活動時間：{FormatTwoTimes(earliestTimeSpan, latestTimeSpan)}。");
 
             result = result.Append($"{rs.B_StaticCode?.Title ?? "無資料"}：{rs.B_SiteData?.BasicSize ?? 0} 人" +
-                                   (rs.TableDescription != null ? $"（{rs.TableDescription}）" : ""));
+                                   (rs.TableDescription.HasContent() ? $"（{rs.TableDescription}）" : ""));
 
             var devices = rs.Resver_Device
                 .Where(rd => !rd.DeleteFlag)
                 .Select(rd =>
-                    $"{rd.B_Device?.Title} * {rd.Ct} {rd.B_Device?.B_StaticCode?.Title ?? ""}（{rd.Note}）");
+                    $"{rd.B_Device?.Title} * {rd.Ct} {rd.B_Device?.B_StaticCode?.Title ?? ""}"
+                    + (rd.Note.HasContent() ? $"（{rd.Note}）" : ""));
 
             result = result.Concat(devices);
 

@@ -46,30 +46,30 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .Where(rs => startTime <= rs.TargetDate && rs.TargetDate <= endTime)
                     .GroupJoin(dbContext.M_Resver_TimeSpan
                             .Include(rts => rts.D_TimeSpan)
-                            .Where(rts => rts.TargetTable == tableName),
+                            .Where(rts => rts.TargetTable == tableName)
+                            .OrderBy(rts => rts.DTSID), // 依據 DTSID 排序，這樣在稍後特殊計算每個時段價格時，才會有穩定的結果
                         rs => rs.RSID,
                         rts => rts.TargetID,
-                        (rs, rts) => new { rs, rts }
+                        (rs, rts) => new { resverSite = rs, timeSpans = rts }
                     )
-                    .SelectMany(e => e.rts.DefaultIfEmpty(), (e, rts) => new { e.rs, rts })
                     .AsQueryable();
 
                 if (input.SiteName.HasContent())
-                    query = query.Where(x => x.rs.B_SiteData.Title.Contains(input.SiteName));
+                    query = query.Where(x => x.resverSite.B_SiteData.Title.Contains(input.SiteName));
 
                 if (input.BCID.IsAboveZero())
-                    query = query.Where(x => x.rs.B_SiteData.BCID == input.BCID);
+                    query = query.Where(x => x.resverSite.B_SiteData.BCID == input.BCID);
 
                 if (input.IsActive.HasValue)
-                    query = query.Where(x => x.rs.B_SiteData.ActiveFlag == input.IsActive);
+                    query = query.Where(x => x.resverSite.B_SiteData.ActiveFlag == input.IsActive);
 
                 if (input.BSCID1.IsAboveZero())
-                    query = query.Where(x => x.rs.B_SiteData.BSCID1 == input.BSCID1);
+                    query = query.Where(x => x.resverSite.B_SiteData.BSCID1 == input.BSCID1);
 
                 if (input.BasicSize.IsAboveZero())
-                    query = query.Where(x => x.rs.B_SiteData.BasicSize >= input.BasicSize);
+                    query = query.Where(x => x.resverSite.B_SiteData.BasicSize >= input.BasicSize);
 
-                query = query.OrderBy(e => e.rs.RSID);
+                query = query.OrderBy(e => e.resverSite.RSID);
 
                 var results = await query.ToArrayAsync();
 
@@ -77,29 +77,63 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.SetByInput(input);
 
                 response.Items = results
-                    .Where(e => e.rts != null)
-                    .GroupBy(e => new { e.rs.TargetDate, e.rs.BSID, e.rts.DTSID, e.rs.RHID, e.rs.QuotedPrice })
-                    .Select(e => new Report16_Output_Row_APIItem
+                    .Where(x => x.timeSpans.Any())
+                    // 每個 x 先計算並變形成單行
+                    .SelectMany(x =>
                     {
-                        Date = e.Max(grouping => grouping.rs.TargetDate).ToString("yy/MM/dd"),
-                        Site = e.Max(grouping => grouping.rs.B_SiteData.Title),
-                        TimeSpan = e.Max(grouping => grouping.rts.D_TimeSpan.Title),
-                        StartDate = e.Max(grouping => grouping.rs.Resver_Head.SDate).ToString("yy/MM/dd"),
-                        EndDate = e.Max(grouping => grouping.rs.Resver_Head.EDate).ToString("yy/MM/dd"),
-                        RHID = e.Max(grouping => grouping.rs.RHID),
-                        CustomerCode = e.Max(grouping => grouping.rs.Resver_Head.Customer?.Code ?? ""),
-                        Host = e.Max(grouping => grouping.rs.Resver_Head.Customer?.TitleC ?? ""),
-                        HostType = e.Max(grouping
-                            => grouping.rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.Internal
-                                ? "內部單位"
-                                : grouping.rs.Resver_Head.Customer.TypeFlag == (int)CustomerType.CommDept
-                                    ? "通訊處"
-                                    : "外部單位"),
-                        MKSales = e.Max(grouping => grouping.rs.Resver_Head.BusinessUser.Name),
-                        OPSales = e.Max(grouping => grouping.rs.Resver_Head.BusinessUser1.Name),
-                        EventName = e.Max(grouping => grouping.rs.Resver_Head.Title),
-                        UnitPrice = e.Max(grouping => grouping.rs.B_SiteData.UnitPrice),
-                        QuotedPrice = e.Max(grouping => grouping.rs.QuotedPrice)
+                        // 這張報表要把報價依特殊計算方式拆回給每個時段
+                        // 特殊計算的原因與內容請參照下列方法
+                        decimal[] quotedPrices = x.resverSite
+                            .GetQuotedPriceByTimeSpan(x.timeSpans.Select(ts => ts.D_TimeSpan))
+                            .ToArray();
+
+                        return x.timeSpans
+                            .Select((ts, index) => new Report16_Output_Row_APIItem
+                            {
+                                Date = x.resverSite.TargetDate.ToString("yy/MM/dd"),
+                                Site = x.resverSite.B_SiteData.Title,
+                                TimeSpan = ts.D_TimeSpan.Title,
+                                StartDate = x.resverSite.Resver_Head.SDate.ToString("yy/MM/dd"),
+                                EndDate = x.resverSite.Resver_Head.EDate.ToString("yy/MM/dd"),
+                                RHID = x.resverSite.RHID,
+                                CustomerCode =
+                                    x.resverSite.Resver_Head.Customer?.Code ?? "",
+                                Host = x.resverSite.Resver_Head.Customer?.TitleC ?? "",
+                                HostType = ((CustomerType?)x.resverSite.Resver_Head.Customer?.TypeFlag ??
+                                            CustomerType.External)
+                                    .GetTypeFlagName(),
+                                MKSales = x.resverSite.Resver_Head.BusinessUser.Name,
+                                OPSales = x.resverSite.Resver_Head.BusinessUser1.Name,
+                                EventName = x.resverSite.Resver_Head.Title,
+                                UnitPrice = x.resverSite.B_SiteData.UnitPrice,
+
+                                QuotedPrice = Convert.ToInt32(quotedPrices.ElementAtOrDefault(index))
+                            });
+                    })
+                    // 然後再依據日期、場地、時段、預約單彙整
+                    .GroupBy(row => new { row.Date, row.Site, row.TimeSpan, row.RHID })
+                    .Select(grouping =>
+                    {
+                        // 因為這邊 Group by RHID, 有些欄位其實都會相同。
+                        // 這些欄位也可以放在 GroupBy 中，這裡找 first 來用純粹是為了讓 GroupBy 比較簡潔
+                        Report16_Output_Row_APIItem first = grouping.First();
+                        return new Report16_Output_Row_APIItem
+                        {
+                            Date = grouping.Key.Date,
+                            Site = grouping.Key.Site,
+                            TimeSpan = grouping.Key.TimeSpan,
+                            StartDate = first.StartDate,
+                            EndDate = first.EndDate,
+                            RHID = grouping.Key.RHID,
+                            CustomerCode = first.CustomerCode,
+                            Host = first.Host,
+                            HostType = first.HostType,
+                            MKSales = first.MKSales,
+                            OPSales = first.OPSales,
+                            EventName = first.EventName,
+                            UnitPrice = first.UnitPrice,
+                            QuotedPrice = grouping.Sum(g => g.QuotedPrice)
+                        };
                     })
                     .SortWithInput(input)
                     .ToList();

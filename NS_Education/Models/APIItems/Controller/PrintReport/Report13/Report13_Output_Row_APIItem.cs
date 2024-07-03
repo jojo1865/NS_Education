@@ -16,9 +16,10 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
         public string SiteName { get; set; }
 
         /// <summary>
-        /// 場地價格（單一時段單價）
+        /// 場地價格（單一時段單價）<br/>
+        /// 向後相容用，根據後期需求報表確認，場地報價只需要一個欄位就好
         /// </summary>
-        public int SiteTimeSpanUnitPrice { get; set; }
+        public int SiteTimeSpanUnitPrice => SiteQuotedPrice;
 
         /// <summary>
         /// 場地成本
@@ -43,6 +44,6 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report13
         /// <summary>
         /// 總金額（所有時段價格 * 數量總額）
         /// </summary>
-        public int TotalPrice { get; set; }
+        public int TotalPrice => SiteQuotedPrice * Quantity;
     }
 }

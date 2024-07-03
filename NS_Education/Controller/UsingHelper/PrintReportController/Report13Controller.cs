@@ -46,9 +46,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             .Where(rts => rts.TargetTable == tableName),
                         rs => rs.RSID,
                         rts => rts.TargetID,
-                        (rs, rts) => new { rs, rts }
+                        (rs, rts) => new { resverSite = rs, timeSpans = rts }
                     )
-                    .SelectMany(e => e.rts.DefaultIfEmpty(), (e, rts) => new { e.rs, rts })
                     .AsQueryable();
 
                 if (input.TargetMonth.HasContent())
@@ -61,25 +60,25 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     DateTime start = new DateTime(year, month, 1);
                     DateTime end = start.AddMonths(1);
 
-                    query = query.Where(x => start <= x.rs.TargetDate && x.rs.TargetDate < end);
+                    query = query.Where(x => start <= x.resverSite.TargetDate && x.resverSite.TargetDate < end);
                 }
 
                 if (input.SiteName.HasContent())
-                    query = query.Where(x => x.rs.B_SiteData.Title.Contains(input.SiteName));
+                    query = query.Where(x => x.resverSite.B_SiteData.Title.Contains(input.SiteName));
 
                 if (input.BCID.IsAboveZero())
-                    query = query.Where(x => x.rs.B_SiteData.BCID == input.BCID);
+                    query = query.Where(x => x.resverSite.B_SiteData.BCID == input.BCID);
 
                 if (input.IsActive.HasValue)
-                    query = query.Where(x => x.rs.B_SiteData.ActiveFlag == input.IsActive);
+                    query = query.Where(x => x.resverSite.B_SiteData.ActiveFlag == input.IsActive);
 
                 if (input.BSCID1.IsAboveZero())
-                    query = query.Where(x => x.rs.B_SiteData.BSCID1 == input.BSCID1);
+                    query = query.Where(x => x.resverSite.B_SiteData.BSCID1 == input.BSCID1);
 
                 if (input.BasicSize.IsAboveZero())
-                    query = query.Where(x => x.rs.B_SiteData.BasicSize >= input.BasicSize);
+                    query = query.Where(x => x.resverSite.B_SiteData.BasicSize >= input.BasicSize);
 
-                query = query.OrderBy(e => e.rs.RSID);
+                query = query.OrderBy(e => e.resverSite.RSID);
 
                 var results = await query.ToArrayAsync();
 
@@ -87,19 +86,38 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.SetByInput(input);
 
                 response.Items = results
-                    .Where(e => e.rts != null)
-                    .GroupBy(e => new { e.rs.BSID, e.rs.QuotedPrice, e.rts.DTSID })
-                    .Select(e => new Report13_Output_Row_APIItem
+                    .Where(e => e.timeSpans.Any())
+                    // 先 flatten by 預約時段後做成單筆單筆的 row
+                    .SelectMany(x =>
                     {
-                        SiteCode = e.Max(grouping => grouping.rs.B_SiteData.Code),
-                        SiteName = e.Max(grouping => grouping.rs.B_SiteData.Title),
-                        SiteTimeSpanUnitPrice = e.Key.QuotedPrice,
-                        SiteUnitPrice = e.Max(grouping => grouping.rs.FixedPrice),
-                        SiteQuotedPrice = e.Max(grouping => grouping.rs.QuotedPrice),
-                        TimeSpan = e.Max(grouping => grouping.rts.D_TimeSpan.Title),
-                        Quantity = e.Count(),
-                        TotalPrice = (int)(e.Key.QuotedPrice * e.Count() *
-                                           e.Max(grouping => grouping.rts.D_TimeSpan.PriceRatePercentage * 0.01m))
+                        IEnumerable<decimal> quotedPrices =
+                            x.resverSite.GetQuotedPriceByTimeSpan(x.timeSpans.Select(ts => ts.D_TimeSpan));
+
+                        return x.timeSpans.Select((ts, idx) => new Report13_Output_Row_APIItem
+                        {
+                            SiteCode = x.resverSite.B_SiteData.Code,
+                            SiteName = x.resverSite.B_SiteData.Title,
+                            SiteQuotedPrice = Convert.ToInt32(quotedPrices.ElementAtOrDefault(idx)),
+                            SiteUnitPrice = x.resverSite.FixedPrice,
+                            TimeSpan = ts.D_TimeSpan.Title,
+                            Quantity = 1
+                        });
+                    })
+                    // 然後再 group by 場地,報價,時段 達成最後要呈現的報表內容
+                    .GroupBy(row => new { row.SiteName, row.SiteQuotedPrice, row.TimeSpan })
+                    .Select(grouping =>
+                    {
+                        Report13_Output_Row_APIItem first = grouping.First();
+
+                        return new Report13_Output_Row_APIItem
+                        {
+                            SiteCode = first.SiteCode,
+                            SiteName = first.SiteName,
+                            SiteUnitPrice = first.SiteUnitPrice,
+                            SiteQuotedPrice = grouping.Key.SiteQuotedPrice,
+                            TimeSpan = grouping.Key.TimeSpan,
+                            Quantity = grouping.Sum(g => g.Quantity)
+                        };
                     })
                     .SortWithInput(input)
                     .ToList();
@@ -123,7 +141,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         {
             // 匯出時忽略頁數篩選
             input.NowPage = 0;
-            
+
             CommonResponseForPagedList<Report13_Output_Row_APIItem> data = await GetResultAsync(input);
 
             if (data == null)

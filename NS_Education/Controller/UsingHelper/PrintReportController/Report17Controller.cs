@@ -181,7 +181,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             excelBuilder.CreateRow();
 
-            foreach (Report17_Output_Payment_APIItem payment in data.Payments)
+            foreach (Report17_Output_Payment_APIItem payment in data.Payments.Prepend(data.SitePayments).Where(p => p.Amount > 0))
             {
                 excelBuilder.CreateRow()
                     .CombineCells()
@@ -543,9 +543,13 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
             int siteDiscount = Math.Min(0, -totalQuotedPrice);
 
             Report17_Output_SubTable_APIItem siteDiscountSubTable = new Report17_Output_SubTable_APIItem();
+            Report17_Output_Payment_APIItem sitePayments = new Report17_Output_Payment_APIItem();
+            
             CustomerType? customerType = (CustomerType?)entity.Customer.TypeFlag;
-
-            if (customerType == CustomerType.Internal || customerType == CustomerType.CommDept)
+            bool isFree = customerType != CustomerType.External;
+            
+            
+            if (isFree)
             {
                 siteDiscountSubTable.Name = "場租折扣";
                 siteDiscountSubTable.QuotedPrice = siteDiscount;
@@ -560,14 +564,18 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     }
                 };
             }
-
-            // 場地這邊以總額來顯示，所以獨立一個參數
-            Report17_Output_Payment_APIItem sitePayments = new Report17_Output_Payment_APIItem
+            else
             {
-                Type = resverSites.Name,
-                Amount = resverSites.Sum,
-                PartnerName = "南山人壽教育訓練中心"
-            };
+                // 底部支付紀錄
+                // 只有外部客戶需要產生
+                // 場地這邊以總額來顯示，所以獨立一個參數
+                sitePayments = new Report17_Output_Payment_APIItem
+                {
+                    Type = resverSites.Name,
+                    Amount = resverSites.Sum,
+                    PartnerName = "南山人壽教育訓練中心"
+                };
+            }
 
             // 餐飲費
             Report17_Output_SubTable_APIItem resverFoods = new Report17_Output_SubTable_APIItem

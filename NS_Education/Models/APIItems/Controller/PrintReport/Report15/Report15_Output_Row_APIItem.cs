@@ -10,7 +10,7 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report15
         public string SiteName { get; set; }
         public string TimeSpan { get; set; }
         public int UseCount { get; set; }
-        public int TotalQuotedPrice { get; set; }
+        public int TotalQuotedPrice => QuotedPrice * UseCount;
         public int QuotedPrice { get; set; }
         public int FixedPrice { get; set; }
     }

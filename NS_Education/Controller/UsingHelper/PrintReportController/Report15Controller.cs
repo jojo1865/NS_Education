@@ -47,27 +47,26 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             .Where(rts => rts.TargetTable == tableName),
                         rs => rs.RSID,
                         rts => rts.TargetID,
-                        (rs, rts) => new { rs, rts }
+                        (rs, rts) => new { resverSite = rs, timeSpans = rts }
                     )
-                    .SelectMany(e => e.rts.DefaultIfEmpty(), (e, rts) => new { e.rs, rts })
                     .AsQueryable();
 
                 if (input.SiteName.HasContent())
-                    query = query.Where(x => x.rs.B_SiteData.Title.Contains(input.SiteName));
+                    query = query.Where(x => x.resverSite.B_SiteData.Title.Contains(input.SiteName));
 
                 if (input.BCID.IsAboveZero())
-                    query = query.Where(x => x.rs.B_SiteData.BCID == input.BCID);
+                    query = query.Where(x => x.resverSite.B_SiteData.BCID == input.BCID);
 
                 if (input.IsActive.HasValue)
-                    query = query.Where(x => x.rs.B_SiteData.ActiveFlag == input.IsActive);
+                    query = query.Where(x => x.resverSite.B_SiteData.ActiveFlag == input.IsActive);
 
                 if (input.BSCID1.IsAboveZero())
-                    query = query.Where(x => x.rs.B_SiteData.BSCID1 == input.BSCID1);
+                    query = query.Where(x => x.resverSite.B_SiteData.BSCID1 == input.BSCID1);
 
                 if (input.BasicSize.IsAboveZero())
-                    query = query.Where(x => x.rs.B_SiteData.BasicSize >= input.BasicSize);
+                    query = query.Where(x => x.resverSite.B_SiteData.BasicSize >= input.BasicSize);
 
-                query = query.OrderBy(e => e.rs.RSID);
+                query = query.OrderBy(e => e.resverSite.RSID);
 
                 var results = await query.ToArrayAsync();
 
@@ -75,18 +74,40 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 response.SetByInput(input);
 
                 response.Items = results
-                    .Where(e => e.rts != null)
-                    .GroupBy(e => new { e.rs.BSID, e.rs.QuotedPrice, e.rts.DTSID })
-                    .Select(e => new Report15_Output_Row_APIItem
+                    .Where(x => x.timeSpans.Any())
+                    // 先 flatten by 預約時段 後做成 row
+                    .SelectMany(x =>
                     {
-                        SiteType = e.Max(grouping => grouping.rs.B_SiteData.B_Category.TitleC),
-                        SiteCode = e.Max(grouping => grouping.rs.B_SiteData.Code),
-                        SiteName = e.Max(grouping => grouping.rs.B_SiteData.Title),
-                        TimeSpan = e.Max(grouping => grouping.rts.D_TimeSpan.Title),
-                        UseCount = e.Count(),
-                        TotalQuotedPrice = e.Sum(grouping => grouping.rs.QuotedPrice),
-                        QuotedPrice = e.Key.QuotedPrice,
-                        FixedPrice = e.Max(grouping => grouping.rs.FixedPrice)
+                        // 先去算這個預約場地裡面每個預約時段的價格
+                        IEnumerable<decimal> prices =
+                            x.resverSite.GetQuotedPriceByTimeSpan(x.timeSpans.Select(ts => ts.D_TimeSpan));
+
+                        return x.timeSpans.Select((ts, index) => new Report15_Output_Row_APIItem
+                        {
+                            SiteType = x.resverSite.B_SiteData.B_Category.TitleC,
+                            SiteCode = x.resverSite.B_SiteData.Code,
+                            SiteName = x.resverSite.B_SiteData.Title,
+                            TimeSpan = ts.D_TimeSpan.Title,
+                            UseCount = 1,
+                            QuotedPrice = Convert.ToInt32(prices.ElementAtOrDefault(index)),
+                            FixedPrice = x.resverSite.FixedPrice
+                        });
+                    })
+                    // 然後再彙整成報表的呈現方式 (group by 場地名稱, 報價, 時段)
+                    .GroupBy(row => new { row.SiteName, row.QuotedPrice, row.TimeSpan })
+                    .Select(grouping =>
+                    {
+                        Report15_Output_Row_APIItem first = grouping.First();
+
+                        return new Report15_Output_Row_APIItem
+                        {
+                            SiteType = first.SiteType,
+                            SiteName = grouping.Key.SiteName,
+                            TimeSpan = grouping.Key.TimeSpan,
+                            UseCount = grouping.Sum(row => row.UseCount),
+                            QuotedPrice = grouping.Key.QuotedPrice,
+                            FixedPrice = first.FixedPrice
+                        };
                     })
                     .SortWithInput(input)
                     .ToList();

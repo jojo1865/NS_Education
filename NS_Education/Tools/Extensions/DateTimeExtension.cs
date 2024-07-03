@@ -54,5 +54,30 @@ namespace NS_Education.Tools.Extensions
 
             return (end.Year * 12 + end.Month) - (start.Year * 12 + start.Month) + 1;
         }
+
+        /// <summary>
+        /// 建立 JWT 時，從 start 起算，取得 JWT 的有效期限。
+        /// </summary>
+        /// <param name="start">計算的開始時間</param>
+        /// <returns>過期時間</returns>
+        public static DateTime GetNextJwtExpireDateTime(this DateTime start)
+        {
+            // 假設從 start 時發行 JWT，回傳此 JWT 的有效期限
+            // 目前系統的有效時間是 (登入瞬間, 登入當天晚上 23:59:59)
+            // 避免在白天時過期而導致操作中斷
+
+            return start.Date.AddDays(1).AddSeconds(-1);
+        }
+
+        /// <summary>
+        /// 傳入 end，計算從這個 DateTime 到 end 還有多少分鐘。
+        /// </summary>
+        /// <param name="start">開始時間</param>
+        /// <param name="end">結束時間</param>
+        /// <returns>剩餘分鐘數</returns>
+        public static int MinutesUntil(this DateTime start, DateTime end)
+        {
+            return Convert.ToInt32((end - start).TotalMinutes);
+        }
     }
 }

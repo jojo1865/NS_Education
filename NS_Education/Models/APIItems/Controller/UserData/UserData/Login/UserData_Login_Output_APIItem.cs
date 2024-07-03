@@ -1,4 +1,5 @@
-﻿using NS_Education.Variables;
+﻿using System;
+using NS_Education.Tools.Extensions;
 
 namespace NS_Education.Models.APIItems.Controller.UserData.UserData.Login
 {
@@ -7,7 +8,7 @@ namespace NS_Education.Models.APIItems.Controller.UserData.UserData.Login
         public int UID { get; set; }
         public string Username { get; set; }
         public string JwtToken { get; set; }
-        public int MaxAgeMinutes => JwtConstants.ExpireMinutes;
+        public int MaxAgeMinutes => DateTime.Now.MinutesUntil(DateTime.Now.GetNextJwtExpireDateTime());
 
         public int DaysUntilPasswordExpires { get; set; }
 

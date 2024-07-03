@@ -5,8 +5,6 @@ namespace NS_Education.Variables
 {
     public class JwtConstants
     {
-        public const int ExpireMinutes = 720;
-
         public static readonly string Secret = WebConfigurationManager.AppSettings["JwtSecret"];
 
         public static string UidClaimType => ClaimTypes.Actor;

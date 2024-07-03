@@ -295,7 +295,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             UserData queried = await LoginGetUserData(input);
 
             bool isValidated = LoginValidateCredential(input, queried)
-                               && await LoginValidateJwtExpired(input, queried);
+                               && await LoginValidateJwtExpired(queried);
 
             if (!isValidated)
                 return GetResponseJson();
@@ -327,7 +327,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
             return GetResponseJson(output);
         }
 
-        private async Task<bool> LoginValidateJwtExpired(UserData_Login_Input_APIItem input, UserData queried)
+        private async Task<bool> LoginValidateJwtExpired(UserData queried)
         {
             // 如果設定檔有打開同一使用者只能登入一次，且沒有打開可強制中斷連線
             // 則檢查目前登記中的 JWT
@@ -351,7 +351,7 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
 
             try
             {
-                DateTime expireTime = queried.LoginDate.AddMinutes(JwtConstants.ExpireMinutes);
+                DateTime expireTime = queried.LoginDate.GetNextJwtExpireDateTime();
                 bool hasExpired = expireTime < DateTime.Now;
 
                 // 上一組登入過期了，開放登入
@@ -415,8 +415,14 @@ namespace NS_Education.Controller.UsingHelper.UserDataController
         {
             (List<Claim> claims, bool isAdmin) claimAndIsAdmin = LoginCreateClaims(queried);
 
+            // 依據客戶需求，調整有效期間為登入當下到當天晚上 23:59:59
+            // 避免在白天過期導致操作中斷
+            DateTime start = DateTime.Now;
+            DateTime end = start.GetNextJwtExpireDateTime();
+            int minutes = start.MinutesUntil(end);
+
             string jwt =
-                JwtHelper.GenerateToken(JwtConstants.Secret, JwtConstants.ExpireMinutes, claimAndIsAdmin.claims);
+                JwtHelper.GenerateToken(JwtConstants.Secret, minutes, claimAndIsAdmin.claims);
 
             userIdToLastLoginIpAddress[queried.UID] = Request.UserHostAddress;
             return (jwt, claimAndIsAdmin.isAdmin);

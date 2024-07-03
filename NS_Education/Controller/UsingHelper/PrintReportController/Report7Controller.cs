@@ -123,9 +123,18 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                         .Where(ro => ro.PrintTitle != null)
                         .Where(ro => ro.PrintTitle.Contains("交通費"))
                         .Sum(ro => (int?)ro.QuotedPrice) ?? 0,
-                    OtherPrice = rh.Resver_Other
-                        .Where(ro => !ro.DeleteFlag)
-                        .Sum(ro => (int?)ro.QuotedPrice) ?? 0,
+                    // 其他收費包含：
+                    // 1. 其他收費項目
+                    // 2. 設備
+                    OtherPrice = (rh.Resver_Other
+                                     .Where(ro => !ro.DeleteFlag)
+                                     .Sum(ro => (int?)ro.QuotedPrice) ?? 0)
+                                 +
+                                 (rh.Resver_Site
+                                     .Where(rs => !rs.DeleteFlag)
+                                     .SelectMany(rs => rs.Resver_Device)
+                                     .Where(rd => !rd.DeleteFlag)
+                                     .Sum(rd => (int?)rd.QuotedPrice) ?? 0),
                     Deposit = rh.Resver_Bill
                         .Where(rb => !rb.DeleteFlag)
                         .Where(rb => rb.PayFlag)

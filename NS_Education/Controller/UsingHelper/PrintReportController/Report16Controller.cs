@@ -227,8 +227,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .StringColumn(10, "MK", i => i.MKSales, SameHead)
                 .StringColumn(11, "OP", i => i.OPSales, SameHead)
                 .NumberColumn(12, "場地報價", i => i.QuotedPrice, true,
-                    (l, c) => l.QuotedPrice == c.QuotedPrice && SameHead(l, c),
-                    notCountAsTotalIfBlank: true)
+                    (l, c) => l.QuotedPrice == c.QuotedPrice && SameHead(l, c))
                 .AddToBuilder(excelBuilder);
 
             excelBuilder.NowRow()

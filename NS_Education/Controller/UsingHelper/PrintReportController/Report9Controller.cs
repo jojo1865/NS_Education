@@ -241,7 +241,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .StringColumn(0, "預約單號", i => i.RHID.ToString(), IsSameHead)
                 .StringColumn(1, "主辦單位", i => i.HostName, IsSameHead)
                 .StringColumn(2, "活動名稱", i => i.EventName, IsSameHead)
-                .NumberColumn(3, "總營收", i => i.TotalIncome, true, IsSameHead)
+                .NumberColumn(3, "總營收", i => i.TotalIncome, true, IsSameHead, notCountAsTotalIfBlank: true)
                 .StringColumn(4, "日期", i => i.Date)
                 .StringColumn(5, "場地", i => i.SiteName)
                 .StringColumn(6, "開始時段", i => i.EarliestTimeSpan)

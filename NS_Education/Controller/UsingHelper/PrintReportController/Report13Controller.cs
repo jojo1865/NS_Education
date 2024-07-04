@@ -90,15 +90,19 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     // 先 flatten by 預約時段後做成單筆單筆的 row
                     .SelectMany(x =>
                     {
+                        D_TimeSpan[] timeSpans = x.timeSpans.Select(ts => ts.D_TimeSpan).ToArray();
+
+                        IEnumerable<decimal> fixedPrices =
+                            x.resverSite.GetFixedPriceByTimeSpan(timeSpans);
                         IEnumerable<decimal> quotedPrices =
-                            x.resverSite.GetQuotedPriceByTimeSpan(x.timeSpans.Select(ts => ts.D_TimeSpan));
+                            x.resverSite.GetQuotedPriceByTimeSpan(timeSpans);
 
                         return x.timeSpans.Select((ts, idx) => new Report13_Output_Row_APIItem
                         {
                             SiteCode = x.resverSite.B_SiteData.Code,
                             SiteName = x.resverSite.B_SiteData.Title,
                             SiteQuotedPrice = Convert.ToInt32(quotedPrices.ElementAtOrDefault(idx)),
-                            SiteUnitPrice = x.resverSite.FixedPrice,
+                            SiteUnitPrice = Convert.ToInt32(fixedPrices.ElementAtOrDefault(idx)),
                             TimeSpan = ts.D_TimeSpan.Title,
                             Quantity = 1
                         });

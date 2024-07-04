@@ -79,8 +79,10 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .SelectMany(x =>
                     {
                         // 先去算這個預約場地裡面每個預約時段的價格
-                        IEnumerable<decimal> prices =
-                            x.resverSite.GetQuotedPriceByTimeSpan(x.timeSpans.Select(ts => ts.D_TimeSpan));
+                        D_TimeSpan[] timeSpans = x.timeSpans.Select(rts => rts.D_TimeSpan).ToArray();
+
+                        IEnumerable<decimal> fixedPrices = x.resverSite.GetFixedPriceByTimeSpan(timeSpans);
+                        IEnumerable<decimal> quotedPrices = x.resverSite.GetQuotedPriceByTimeSpan(timeSpans);
 
                         return x.timeSpans.Select((ts, index) => new Report15_Output_Row_APIItem
                         {
@@ -89,8 +91,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                             SiteName = x.resverSite.B_SiteData.Title,
                             TimeSpan = ts.D_TimeSpan.Title,
                             UseCount = 1,
-                            QuotedPrice = Convert.ToInt32(prices.ElementAtOrDefault(index)),
-                            FixedPrice = x.resverSite.FixedPrice
+                            QuotedPrice = Convert.ToInt32(quotedPrices.ElementAtOrDefault(index)),
+                            FixedPrice = Convert.ToInt32(fixedPrices.ElementAtOrDefault(index))
                         });
                     })
                     // 然後再彙整成報表的呈現方式 (group by 場地名稱, 報價, 時段)

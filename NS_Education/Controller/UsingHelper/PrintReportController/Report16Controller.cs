@@ -83,8 +83,15 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     {
                         // 這張報表要把報價依特殊計算方式拆回給每個時段
                         // 特殊計算的原因與內容請參照下列方法
+
+                        D_TimeSpan[] timeSpans = x.timeSpans.Select(ts => ts.D_TimeSpan).ToArray();
+
+                        decimal[] fixedPrices = x.resverSite
+                            .GetFixedPriceByTimeSpan(timeSpans)
+                            .ToArray();
+
                         decimal[] quotedPrices = x.resverSite
-                            .GetQuotedPriceByTimeSpan(x.timeSpans.Select(ts => ts.D_TimeSpan))
+                            .GetQuotedPriceByTimeSpan(timeSpans)
                             .ToArray();
 
                         return x.timeSpans
@@ -105,8 +112,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                 MKSales = x.resverSite.Resver_Head.BusinessUser.Name,
                                 OPSales = x.resverSite.Resver_Head.BusinessUser1.Name,
                                 EventName = x.resverSite.Resver_Head.Title,
-                                UnitPrice = x.resverSite.B_SiteData.UnitPrice,
-
+                                UnitPrice = Convert.ToInt32(fixedPrices.ElementAtOrDefault(index)),
                                 QuotedPrice = Convert.ToInt32(quotedPrices.ElementAtOrDefault(index))
                             });
                     })

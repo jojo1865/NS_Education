@@ -79,17 +79,12 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
                 // 使用率：使用時段數 / 查詢期間所有時段數
 
-                int minYear = startTime.Year;
-                int maxYear = endTime.Year;
-                int minMonth = startTime.Month;
-                int maxMonth = endTime.Month;
+                int minMonth = startTime.Year * 12 + startTime.Month;
+                int maxMonth = endTime.Year * 12 + endTime.Month;
 
                 int total = await DC.Monthly_TimeSpans
-                    .Where(mts => minYear <= mts.Year)
-                    .Where(mts => mts.Year <= maxYear)
-                    .Where(mts => (mts.Year != minYear && mts.Year != maxYear)
-                                  || (mts.Year == minYear && mts.Month >= minMonth)
-                                  || (mts.Year == maxYear && mts.Month <= maxMonth))
+                    .Where(mts => minMonth <= mts.Year * 12 + mts.Month)
+                    .Where(mts => mts.Year * 12 + mts.Month <= maxMonth)
                     .Select(mts => (int?)mts.TimeSpanCt)
                     .SumAsync() ?? 0;
 

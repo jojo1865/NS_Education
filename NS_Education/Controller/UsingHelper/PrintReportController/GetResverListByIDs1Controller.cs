@@ -137,7 +137,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
 
             e.CreateRow()
                 .SetValue(0, "團體報價：")
-                .SetValue(1, $"{data.QuotedPrice.ToTaxIncluded():N0}元(含稅，不含旅行平安險)");
+                .SetValue(1, $"{data.QuotedPrice:N0}元(含稅，不含旅行平安險)");
 
             e.CreateRow();
 

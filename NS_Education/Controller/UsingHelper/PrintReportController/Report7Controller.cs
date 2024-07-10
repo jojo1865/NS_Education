@@ -142,7 +142,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     Discount = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)
                         .Sum(GetDiscount) ?? 0,
-                    TotalPriceWithoutTax = rh.Resver_Site
+                    TotalPrice = rh.Resver_Site
                         .Where(rs => !rs.DeleteFlag)
                         .Sum(GetSiteTotalPrice) ?? 0
                 }).ToList();
@@ -262,8 +262,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                 .NumberColumn(10, "人次", i => i.PersonTime, true)
                 .NumberColumn(11, "教室使用人次", i => i.SiteCapacityTotal, true)
                 .NumberColumn(12, "總營收", i => i.TotalProfit, true)
-                .NumberColumn(13, "餐飲費", i => i.FoodPrice.ToTaxIncluded(), true)
-                .NumberColumn(14, "其他收費", i => i.OtherPrice.ToTaxIncluded(), true)
+                .NumberColumn(13, "餐飲費", i => i.FoodPrice, true)
+                .NumberColumn(14, "其他收費", i => i.OtherPrice, true)
                 .NumberColumn(15, "總場租", i => i.TotalPrice, true)
                 .NumberColumn(16, "訂金", i => i.Deposit, true)
                 .NumberColumn(17, "場租折扣", i => i.Discount, true)

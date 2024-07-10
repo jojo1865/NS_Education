@@ -114,11 +114,11 @@ namespace NS_Education.Tools.Extensions
         }
 
         /// <summary>
-        /// 將數字加上營業稅額。
+        /// 將稅後價轉換為未稅價。
         /// </summary>
-        public static int ToTaxIncluded(this int num)
+        public static int ToTaxNotIncluded(this int num)
         {
-            return (int)Math.Round(num * 1.05m);
+            return (int)Math.Round(num / 1.05m, MidpointRounding.AwayFromZero);
         }
     }
 }

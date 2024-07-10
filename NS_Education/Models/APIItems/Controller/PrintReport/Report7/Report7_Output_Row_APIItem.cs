@@ -18,16 +18,16 @@ namespace NS_Education.Models.APIItems.Controller.PrintReport.Report7
         public string OpSales { get; set; }
         public string EventName { get; set; }
         public int PersonTime { get; set; }
-        public int TotalProfit => (FoodPrice.ToTaxIncluded()) + (OtherPrice.ToTaxIncluded()) + TotalPrice;
+        public int TotalProfit => FoodPrice + OtherPrice + TotalPrice;
         public int FoodPrice { get; set; }
         public int ResidencePrice { get; set; }
         public int InsurancePrice { get; set; }
         public int TransportationPrice { get; set; }
         public int OtherPrice { get; set; }
-        public int TotalPrice => TotalPriceWithoutTax.ToTaxIncluded();
+        public int TotalPrice { get; set; }
         public int Deposit { get; set; }
         public int Discount { get; set; }
-        public int TotalPriceWithoutTax { get; set; }
+        public int TotalPriceWithoutTax => TotalPrice.ToTaxNotIncluded();
         public int AccountPrice => TotalPriceWithoutTax + Discount;
         public int SiteCapacityTotal { get; set; }
 

@@ -507,7 +507,7 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
             data.CodeType = input.CodeType ?? data.CodeType;
             data.Code = input.Code ?? data.Code;
             data.Title = input.Title ?? data.Title;
-            data.Note = input.Note ?? data.Note;
+            data.Note = input.Note ?? "";
         }
 
         #endregion

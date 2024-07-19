@@ -163,7 +163,7 @@ namespace NS_Education.Controller.UsingHelper.MenuDataController
             data.MDID = input.MDID;
             data.APIURL = input.ApiUrl ?? data.APIURL;
             data.APIType = input.APIType;
-            data.Note = input.Note ?? data.Note;
+            data.Note = input.Note ?? "";
         }
 
         #endregion

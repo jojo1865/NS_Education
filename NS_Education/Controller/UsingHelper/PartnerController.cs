@@ -335,7 +335,7 @@ namespace NS_Education.Controller.UsingHelper
             data.CleanSDate = input.CleanSDate.ParseDateTime().Date;
             data.CleanEDate = input.CleanEDate.ParseDateTime().Date;
             data.ActiveFlag = input.ActiveFlag;
-            data.Note = input.Note ?? data.Note;
+            data.Note = input.Note ?? "";
         }
 
         #endregion

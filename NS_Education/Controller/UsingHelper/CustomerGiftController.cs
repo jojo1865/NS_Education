@@ -378,7 +378,7 @@ namespace NS_Education.Controller.UsingHelper
                 .FirstOrDefault() ?? "";
             data.SendDate = sendDate;
             data.BSCID = input.BSCID;
-            data.Note = input.Note ?? data.Note;
+            data.Note = input.Note ?? "";
 
             // 更新舊 M_Customer_Gift
             foreach (M_Customer_Gift mcg in toUpdate)

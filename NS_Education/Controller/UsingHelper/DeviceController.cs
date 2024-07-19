@@ -411,7 +411,7 @@ namespace NS_Education.Controller.UsingHelper
             data.SupplierName = input.SupplierName ?? data.SupplierName;
             data.SupplierPhone = input.SupplierPhone ?? data.SupplierPhone;
             data.Repair = input.Repair ?? data.Repair;
-            data.Note = input.Note ?? data.Note;
+            data.Note = input.Note ?? "";
         }
 
         #endregion

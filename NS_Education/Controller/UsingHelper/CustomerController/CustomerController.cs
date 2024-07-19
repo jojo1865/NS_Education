@@ -835,7 +835,7 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     ? input.ContactData2
                     : data.ContectPhone;
             data.Website = input.Website ?? data.Website;
-            data.Note = input.Note ?? data.Note;
+            data.Note = input.Note ?? "";
             data.BillFlag = input.BillFlag;
             data.TypeFlag = input.TypeFlag;
             data.PotentialFlag = input.PotentialFlag;

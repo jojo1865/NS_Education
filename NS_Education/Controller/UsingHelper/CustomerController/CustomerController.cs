@@ -823,18 +823,18 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             data.BSCID6 = input.BSCID6;
             data.BSCID4 = input.BSCID4;
             data.Code = input.Code ?? data.Code;
-            data.Compilation = input.Compilation ?? data.Compilation;
+            data.Compilation = input.Compilation ?? "";
             data.TitleC = input.TitleC ?? data.TitleC;
             data.TitleE = input.TitleE ?? data.TitleE;
-            data.Email = input.Email ?? data.Email;
-            data.InvoiceTitle = input.InvoiceTitle ?? data.InvoiceTitle;
-            data.ContectName = input.ContactName ?? data.ContectName;
+            data.Email = input.Email ?? "";
+            data.InvoiceTitle = input.InvoiceTitle ?? "";
+            data.ContectName = input.ContactName ?? "";
             data.ContectPhone = input.ContactType1 == (int)ContactType.Phone
                 ? input.ContactData1
                 : input.ContactType2 == (int)ContactType.Phone
                     ? input.ContactData2
                     : data.ContectPhone;
-            data.Website = input.Website ?? data.Website;
+            data.Website = input.Website ?? "";
             data.Note = input.Note ?? "";
             data.BillFlag = input.BillFlag;
             data.TypeFlag = input.TypeFlag;

@@ -327,9 +327,9 @@ namespace NS_Education.Controller.UsingHelper
             data.BCID = input.BCID;
             data.Code = input.Code ?? data.Code;
             data.Title = input.Title ?? data.Title;
-            data.Compilation = input.Compilation ?? data.Compilation;
+            data.Compilation = input.Compilation ?? "";
             data.BSCID = input.BSCID;
-            data.Email = input.Email ?? data.Email;
+            data.Email = input.Email ?? "";
             data.CleanFlag = input.CleanFlag;
             data.CleanPrice = input.CleanPrice;
             data.CleanSDate = input.CleanSDate.ParseDateTime().Date;

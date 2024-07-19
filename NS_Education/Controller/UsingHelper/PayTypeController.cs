@@ -262,8 +262,8 @@ namespace NS_Education.Controller.UsingHelper
             data.BCID = input.BCID;
             data.Code = input.Code ?? data.Code;
             data.Title = input.Title ?? data.Title;
-            data.AccountingNo = input.AccountingNo ?? data.AccountingNo;
-            data.CustormerNo = input.CustomerNo ?? data.CustormerNo;
+            data.AccountingNo = input.AccountingNo ?? "";
+            data.CustormerNo = input.CustomerNo ?? "";
             data.InvoiceFlag = input.InvoiceFlag;
             data.DepositFlag = input.DepositFlag;
             data.RestaurantFlag = input.RestaurantFlag;

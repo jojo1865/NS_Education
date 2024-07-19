@@ -407,10 +407,10 @@ namespace NS_Education.Controller.UsingHelper
             data.UnitPrice = input.UnitPrice;
             data.InPrice = input.InPrice;
             data.OutPrice = input.OutPrice;
-            data.SupplierTitle = input.SupplierTitle ?? data.SupplierTitle;
-            data.SupplierName = input.SupplierName ?? data.SupplierName;
-            data.SupplierPhone = input.SupplierPhone ?? data.SupplierPhone;
-            data.Repair = input.Repair ?? data.Repair;
+            data.SupplierTitle = input.SupplierTitle ?? "";
+            data.SupplierName = input.SupplierName ?? "";
+            data.SupplierPhone = input.SupplierPhone ?? "";
+            data.Repair = input.Repair ?? "";
             data.Note = input.Note ?? "";
         }
 

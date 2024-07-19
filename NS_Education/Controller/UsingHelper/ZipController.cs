@@ -263,7 +263,7 @@ namespace NS_Education.Controller.UsingHelper
             data.ParentID = input.ParentID;
             data.Code = input.Code ?? data.Code;
             data.Title = input.Title ?? data.Title;
-            data.GroupName = input.GroupName ?? data.GroupName;
+            data.GroupName = input.GroupName ?? "";
             data.Note = input.Note;
         }
 

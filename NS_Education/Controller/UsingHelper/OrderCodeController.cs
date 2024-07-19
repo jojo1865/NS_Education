@@ -375,7 +375,7 @@ namespace NS_Education.Controller.UsingHelper
             data.CodeType = input.CodeType;
             data.Code = input.Code ?? data.Code;
             data.Title = input.Title ?? data.Title;
-            data.PrintTitle = input.PrintTitle ?? data.PrintTitle;
+            data.PrintTitle = input.PrintTitle ?? "";
             data.PrintNote = input.PrintNote ?? "";
         }
 

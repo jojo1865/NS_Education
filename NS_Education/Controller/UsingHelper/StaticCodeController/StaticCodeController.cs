@@ -151,7 +151,9 @@ namespace NS_Education.Controller.UsingHelper.StaticCodeController
 
         public IOrderedQueryable<B_StaticCode> GetListPagedOrderedQuery(StaticCode_GetList_Input_APIItem input)
         {
-            var query = DC.B_StaticCode.AsQueryable();
+            var query = DC.B_StaticCode
+                .Where(bsc => bsc.DeleteFlag == false)
+                .AsQueryable();
 
             if (!input.Keyword.IsNullOrWhiteSpace())
                 query = query.Where(sc => sc.Title.Contains(input.Keyword) || sc.Code.Contains(input.Keyword));

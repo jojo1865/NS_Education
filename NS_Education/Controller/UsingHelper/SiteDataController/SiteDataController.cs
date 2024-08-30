@@ -155,7 +155,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
                     () => AddError(EmptyNotAllowed("分類 ID", nameof(input.BCID))))
                 .ForceSkipIf(i => i.BCID <= 0)
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
-                    () => AddError(NotFound("分類 ID", nameof(input.BCID))))
+                    () => AddError(NotFound("場地類別 ID", nameof(input.BCID))))
                 .StopForceSkipping()
                 .Validate(i => i.BSCID1.IsZeroOrAbove(),
                     () => AddError(WrongFormat("樓層別", nameof(input.BSCID1))))
@@ -589,7 +589,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSID == 0, () => AddError(WrongFormat("場地 ID", nameof(input.BSID))))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
-                    () => AddError(NotFound("所屬分類 ID", nameof(input.BCID))))
+                    () => AddError(NotFound("場地類別 ID", nameof(input.BCID))))
                 .Validate(i => i.Code.HasLengthBetween(0, 10),
                     () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))
@@ -763,7 +763,7 @@ namespace NS_Education.Controller.UsingHelper.SiteDataController
             bool isValid = await input.StartValidate()
                 .Validate(i => i.BSID.IsAboveZero(), () => AddError(EmptyNotAllowed("場地 ID", nameof(input.BSID))))
                 .ValidateAsync(async i => await DC.B_Category.ValidateCategoryExists(i.BCID, CategoryType.Site),
-                    () => AddError(NotFound("所屬分類 ID", nameof(input.BCID))))
+                    () => AddError(NotFound("場地類別 ID", nameof(input.BCID))))
                 .Validate(i => i.Code.HasLengthBetween(0, 10),
                     () => AddError(LengthOutOfRange("編碼", nameof(input.Code), 0, 10)))
                 .Validate(i => i.Title.HasContent(), () => AddError(EmptyNotAllowed("中文名稱", nameof(input.Title))))

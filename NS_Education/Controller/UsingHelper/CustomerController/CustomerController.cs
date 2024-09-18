@@ -306,9 +306,9 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                 ContactType_List = ContactTypeController.GetContactTypeSelectable(
                     new[] { contact1?.ContectType ?? -1, contact2?.ContectType ?? -1 }
                 ),
-                ContactType1 = contact1?.ContectType ?? -1,
+                ContactType1 = contact1?.ContectType,
                 ContactData1 = contact1?.ContectData ?? "",
-                ContactType2 = contact2?.ContectType ?? -1,
+                ContactType2 = contact2?.ContectType,
                 ContactData2 = contact2?.ContectData ?? "",
                 Website = entity.Website ?? "",
                 Note = entity.Note ?? "",
@@ -530,14 +530,14 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     () => AddError(NotFound("區域別 ID", nameof(input.BSCID4))))
                 .Validate(i => i.DZID.IsZeroOrAbove(),
                     () => AddError(WrongFormat("國籍與郵遞區號 ID", nameof(Customer_Submit_Input_APIItem.DZID))))
-                .ForceSkipIf(i => i.ContactType1 == -1)
-                .Validate(i => i.ContactType1.IsInBetween(0, 3),
+                .ForceSkipIf(i => i.ContactType1 == null || i.ContactType1 == -1)
+                .Validate(i => i.ContactType1.Value.IsInBetween(0, 3),
                     () => AddError(NotSupportedValue("聯絡方式 1 的類型", nameof(input.ContactType1), null)))
                 .Validate(i => i.ContactData1.HasContent(),
                     () => AddError(EmptyNotAllowed("聯絡方式 1 的內容", nameof(Customer_Submit_Input_APIItem.ContactData1))))
                 .StopForceSkipping()
-                .ForceSkipIf(i => i.ContactType2 == -1)
-                .Validate(i => i.ContactType2.IsInBetween(0, 3),
+                .ForceSkipIf(i => i.ContactType2 == null || i.ContactType2 == -1)
+                .Validate(i => i.ContactType2.Value.IsInBetween(0, 3),
                     () => AddError(NotSupportedValue("聯絡方式 2 的類型", nameof(input.ContactType2), null)))
                 .Validate(i => i.ContactData2.HasContent(),
                     () => AddError(EmptyNotAllowed("聯絡方式 2 的內容", nameof(Customer_Submit_Input_APIItem.ContactData2))))
@@ -633,9 +633,10 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
             return newData;
         }
 
-        private async Task EditContactAndAddIfNew(Customer customer, int contactType, string contactData, int sortNo)
+        private async Task EditContactAndAddIfNew(Customer customer, int? contactType, string contactData, int sortNo)
         {
-            await EditContactAndAddIfNew(DC.GetTableName<Customer>(), customer.CID, contactType, contactData, sortNo);
+            await EditContactAndAddIfNew(DC.GetTableName<Customer>(), customer.CID, contactType ?? -1, contactData,
+                sortNo);
         }
 
         private async Task EditContactAndAddIfNew(M_Customer_BusinessUser customerBusinessUser, int? contactType,
@@ -752,17 +753,17 @@ namespace NS_Education.Controller.UsingHelper.CustomerController
                     async i => await DC.B_StaticCode.ValidateStaticCodeExists(i.BSCID4, StaticCodeType.Region),
                     () => AddError(NotFound("區域別 ID", nameof(input.BSCID4))))
                 .Validate(i => i.DZID.IsZeroOrAbove(), () => AddError(WrongFormat("國籍與郵遞區號 ID", nameof(input.DZID))))
-                .ForceSkipIf(i => i.ContactType1 == -1)
-                .Validate(i => i.ContactType1.IsInBetween(0, 3),
+                .ForceSkipIf(i => i.ContactType1 == null || i.ContactType1 == -1)
+                .Validate(i => i.ContactType1.Value.IsInBetween(0, 3),
                     () => AddError(NotSupportedValue("聯絡方式 1 的類型", nameof(input.ContactType1), null)))
                 .Validate(i => i.ContactData1.HasContent(),
-                    () => AddError(EmptyNotAllowed("聯絡方式 1 的內容", nameof(input.ContactData1))))
+                    () => AddError(EmptyNotAllowed("聯絡方式 1 的內容", nameof(Customer_Submit_Input_APIItem.ContactData1))))
                 .StopForceSkipping()
-                .ForceSkipIf(i => i.ContactType2 == -1)
-                .Validate(i => i.ContactType2.IsInBetween(0, 3),
+                .ForceSkipIf(i => i.ContactType2 == null || i.ContactType2 == -1)
+                .Validate(i => i.ContactType2.Value.IsInBetween(0, 3),
                     () => AddError(NotSupportedValue("聯絡方式 2 的類型", nameof(input.ContactType2), null)))
                 .Validate(i => i.ContactData2.HasContent(),
-                    () => AddError(EmptyNotAllowed("聯絡方式 2 的內容", nameof(input.ContactData2))))
+                    () => AddError(EmptyNotAllowed("聯絡方式 2 的內容", nameof(Customer_Submit_Input_APIItem.ContactData2))))
                 .StopForceSkipping()
                 .ForceSkipIf(i => i.DZID <= 0)
                 .ValidateAsync(async i => await DC.D_Zip.ValidateIdExists(i.DZID, nameof(D_Zip.DZID)),

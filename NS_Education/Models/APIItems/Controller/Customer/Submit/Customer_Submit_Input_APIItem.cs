@@ -17,9 +17,9 @@ namespace NS_Education.Models.APIItems.Controller.Customer.Submit
         public string InvoiceTitle { get; set; }
         public string ContactName { get; set; }
 
-        public int ContactType1 { get; set; } = -1;
+        public int? ContactType1 { get; set; }
         public string ContactData1 { get; set; }
-        public int ContactType2 { get; set; } = -1;
+        public int? ContactType2 { get; set; }
         public string ContactData2 { get; set; }
         public string Website { get; set; }
         public string Note { get; set; }

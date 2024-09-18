@@ -32,9 +32,9 @@ namespace NS_Education.Models.APIItems.Controller.Customer.GetInfoById
         public ICollection<CommonResponseRowForSelectable> ContactType_List { get; set; } =
             new List<CommonResponseRowForSelectable>();
 
-        public int ContactType1 { get; set; }
+        public int? ContactType1 { get; set; }
         public string ContactData1 { get; set; }
-        public int ContactType2 { get; set; }
+        public int? ContactType2 { get; set; }
         public string ContactData2 { get; set; }
         public string Website { get; set; }
         public string Note { get; set; }

@@ -28,10 +28,10 @@ namespace NS_Education.Controller.UsingHelper
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.ShowFlag)]
         public async Task<string> GetList()
         {
-            // 以 2000 年起至今的所有年份為基準，查詢 DB
+            // 以 2000 年起至今 + 3年的所有年份為基準，查詢 DB
 
             const int startYear = 2000;
-            int endYear = DateTime.Now.Year;
+            int endYear = DateTime.Now.Year + 3;
 
             ILookup<int, Monthly_TimeSpans> data = (await DC.Monthly_TimeSpans
                     .Where(mts => startYear <= mts.Year)

@@ -50,6 +50,7 @@ namespace NS_Education.Controller.UsingHelper
                     {
                         Year = y,
                         SetMonths = data.GetValueOrEmpty(y)
+                            .Where(mts => mts.TimeSpanCt > 0)
                             .GroupBy(mts => mts.Month)
                             .Count()
                     };

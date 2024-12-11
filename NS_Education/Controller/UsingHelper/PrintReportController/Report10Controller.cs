@@ -94,6 +94,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<ActionResult> GetExcel(Report10_Input_APIItem input)
         {
+            input.NowPage = 0; // 報表時強制全查
+            
             CommonResponseForPagedList<Report10_Output_Row_APIItem> data = await GetResultAsync(input);
 
             if (data == null)

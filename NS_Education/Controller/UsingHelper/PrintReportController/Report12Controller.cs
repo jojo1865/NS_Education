@@ -333,7 +333,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<string> Get(Report12_Input_APIItem input)
         {
-            // 報表分析不需要合計行
+            input.NowPage = 0; // 報表時強制全查
+            
             var details = await GetResultAsync(input);
             details.Items = details.Items.Take(details.Items.Count - 1).ToList();
 

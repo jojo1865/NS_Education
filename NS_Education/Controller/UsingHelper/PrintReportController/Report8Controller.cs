@@ -259,6 +259,8 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
         [JwtAuthFilter(AuthorizeBy.Any, RequirePrivilege.PrintFlag)]
         public async Task<ActionResult> GetExcel(Report8_Input_APIItem input)
         {
+            input.NowPage = 0; // 報表時強制全查
+            
             // 這張報表的 PDF/報表分析 格式和後來取得的正式樣張不同
             // 而最後報表匯出定案統一都用 Excel
             // 所以舊的目前不動, 新的 Excel 需要獨立寫查詢

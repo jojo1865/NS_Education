@@ -665,7 +665,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                                 .FirstOrDefault()?
                                 .CreDate ?? DateTime.Today) // 尚未結帳時，出產表當日的日期
                             .ToFormattedStringDate(),
-                        ContactName = entity.Customer?.ContectName ?? "",
+                        ContactName = entity.ContactName ?? "",
                         CustomerName = entity.Customer?.TitleC ?? "",
                         EventName = entity.Title ?? "",
                         SubTables = new[]

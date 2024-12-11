@@ -98,7 +98,7 @@ namespace NS_Education.Controller.UsingHelper.PrintReportController
                     .StringColumn(4, "", i => i.Description.Split(' ').Skip(2).FirstOrDefault())
                     .StringColumn(5, "", i => i.Description.Split(' ').Skip(3).FirstOrDefault())
                     .StringColumn(6, "", i => i.Description.Split(' ').Skip(4).StringJoin(" "))
-                    .NumberColumn(7, "", i => i.Amount, true)
+                    .StringColumn(7, "", i => i.Amount.ToString("N0"))
                     .OverrideTotalText("")
                     .AddToBuilder(excelBuilder);
             }
